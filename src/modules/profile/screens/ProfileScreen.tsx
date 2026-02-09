@@ -4,7 +4,7 @@ export default function ProfileScreen() {
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative profile-gradient flex flex-col">
       {/* Profile header */}
-      <div className="text-center pt-[50px] px-5 pb-2.5">
+      <div className="text-center pt-safe px-5 pb-2.5">
         <div className="w-20 h-20 rounded-full avatar-ring mx-auto mb-3" style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
           <div className="w-full h-full rounded-full bg-game-green-mid flex items-center justify-center text-4xl">
             🧑‍🌾
