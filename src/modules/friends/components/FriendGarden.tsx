@@ -3,6 +3,13 @@ import { Friend } from '../data/friends';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
 
+const GIFT_OPTIONS = [
+  { emoji: '💧', name: 'Nước tưới', cost: 5 },
+  { emoji: '🌱', name: 'Phân bón', cost: 10 },
+  { emoji: '☀️', name: 'Ánh nắng', cost: 15 },
+  { emoji: '🎁', name: 'Hộp quà', cost: 30 },
+];
+
 interface FriendGardenProps {
   friend: Friend;
   onBack: () => void;
@@ -10,10 +17,19 @@ interface FriendGardenProps {
 
 export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
   const addOgn = useFarmStore((s) => s.addOgn);
+  const ogn = useFarmStore((s) => s.ogn);
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
   const [watered, setWatered] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showGifts, setShowGifts] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState<{ name: string; text: string; time: string }[]>([
+    { name: 'CryptoFarmer', text: 'Vườn đẹp quá! 🌿', time: '2 phút trước' },
+    { name: 'GreenHero92', text: 'Cây sắp thu hoạch rồi nè!', time: '10 phút trước' },
+  ]);
+  const [giftsSent, setGiftsSent] = useState<string[]>([]);
 
   const handleWater = () => {
     if (watered) return;
@@ -26,7 +42,28 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
   const handleLike = () => {
     if (liked) return;
     setLiked(true);
+    addOgn(2);
+    showFlyUp('+2 OGN ❤️');
     addToast(`Đã thích vườn của ${friend.name}! ❤️`, 'success');
+  };
+
+  const handleComment = () => {
+    if (!commentText.trim()) return;
+    setComments((prev) => [
+      { name: 'Bạn', text: commentText.trim(), time: 'Vừa xong' },
+      ...prev,
+    ]);
+    addOgn(1);
+    showFlyUp('+1 OGN 💬');
+    setCommentText('');
+  };
+
+  const handleGift = (gift: typeof GIFT_OPTIONS[0]) => {
+    if (ogn < gift.cost || giftsSent.includes(gift.name)) return;
+    addOgn(-gift.cost);
+    setGiftsSent((prev) => [...prev, gift.name]);
+    showFlyUp(`${gift.emoji} -${gift.cost} OGN`);
+    addToast(`Đã tặng ${gift.name} cho ${friend.name}! ${gift.emoji}`, 'success');
   };
 
   const moodEmoji = friend.plant.happiness >= 70 ? '😊' : friend.plant.happiness >= 40 ? '😐' : '😢';
@@ -156,18 +193,116 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
       </div>
 
       {/* Action buttons */}
-      <div className="relative z-10 px-5 pb-8 flex gap-3">
-        <button onClick={handleWater} disabled={watered}
-          className="flex-1 py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-all disabled:opacity-50"
-          style={{ background: watered ? '#95a5a6' : 'linear-gradient(135deg, #3498db, #74b9ff)', boxShadow: '0 4px 15px rgba(52,152,219,0.3)' }}>
-          {watered ? '✅ Đã tưới' : '💧 Tưới giúp (+5 OGN)'}
-        </button>
-        <button onClick={handleLike} disabled={liked}
-          className="flex-1 py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-all disabled:opacity-50"
-          style={{ background: liked ? '#95a5a6' : 'linear-gradient(135deg, #e74c3c, #ff6b6b)', boxShadow: '0 4px 15px rgba(231,76,60,0.3)' }}>
-          {liked ? '❤️ Đã thích' : '❤️ Thích vườn'}
-        </button>
+      <div className="relative z-10 px-5 pb-8 space-y-3">
+        <div className="flex gap-3">
+          <button onClick={handleWater} disabled={watered}
+            className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-all disabled:opacity-50"
+            style={{ background: watered ? '#95a5a6' : 'linear-gradient(135deg, #3498db, #74b9ff)', boxShadow: '0 4px 15px rgba(52,152,219,0.3)' }}>
+            {watered ? '✅ Đã tưới' : '💧 Tưới (+5)'}
+          </button>
+          <button onClick={handleLike} disabled={liked}
+            className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-all disabled:opacity-50"
+            style={{ background: liked ? '#95a5a6' : 'linear-gradient(135deg, #e74c3c, #ff6b6b)', boxShadow: '0 4px 15px rgba(231,76,60,0.3)' }}>
+            {liked ? '❤️ Đã thích' : '❤️ Thích (+2)'}
+          </button>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => setShowComments(true)}
+            className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-all"
+            style={{ background: 'linear-gradient(135deg, #9b59b6, #c39bd3)', boxShadow: '0 4px 15px rgba(155,89,182,0.3)' }}>
+            💬 Bình luận ({comments.length})
+          </button>
+          <button onClick={() => setShowGifts(true)}
+            className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-all"
+            style={{ background: 'linear-gradient(135deg, #f39c12, #f1c40f)', boxShadow: '0 4px 15px rgba(243,156,18,0.3)' }}>
+            🎁 Tặng quà
+          </button>
+        </div>
       </div>
+
+      {/* Comments modal */}
+      {showComments && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowComments(false)} />
+          <div className="relative w-full max-w-[430px] rounded-t-2xl bg-white overflow-hidden animate-slide-up" style={{ maxHeight: '60vh' }}>
+            <div className="px-5 py-3 flex justify-between items-center border-b"
+              style={{ background: 'linear-gradient(135deg, #9b59b6, #c39bd3)' }}>
+              <h3 className="font-heading text-base font-bold text-white">💬 Bình luận</h3>
+              <button onClick={() => setShowComments(false)} className="text-white/70 text-xl font-bold w-8 h-8 flex items-center justify-center">✕</button>
+            </div>
+            <div className="overflow-y-auto p-4 space-y-3" style={{ maxHeight: 'calc(60vh - 120px)' }}>
+              {comments.map((c, i) => (
+                <div key={i} className="flex gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    {c.name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading text-xs font-bold">{c.name}</span>
+                      <span className="text-[9px] text-muted-foreground">{c.time}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{c.text}</p>
+                  </div>
+                </div>
+              ))}
+              {comments.length === 0 && (
+                <p className="text-center text-xs text-muted-foreground py-6">Chưa có bình luận nào</p>
+              )}
+            </div>
+            <div className="p-3 border-t flex gap-2">
+              <input value={commentText} onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Viết bình luận... (+1 OGN)"
+                className="flex-1 px-3 py-2 rounded-xl text-xs border outline-none focus:ring-2 focus:ring-primary/30"
+                onKeyDown={(e) => e.key === 'Enter' && handleComment()} />
+              <button onClick={handleComment} disabled={!commentText.trim()}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg, #9b59b6, #c39bd3)' }}>
+                Gửi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gifts modal */}
+      {showGifts && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowGifts(false)} />
+          <div className="relative w-full max-w-[430px] rounded-t-2xl bg-white overflow-hidden animate-slide-up" style={{ maxHeight: '50vh' }}>
+            <div className="px-5 py-3 flex justify-between items-center border-b"
+              style={{ background: 'linear-gradient(135deg, #f39c12, #f1c40f)' }}>
+              <h3 className="font-heading text-base font-bold text-white">🎁 Tặng quà cho {friend.name}</h3>
+              <button onClick={() => setShowGifts(false)} className="text-white/70 text-xl font-bold w-8 h-8 flex items-center justify-center">✕</button>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-3">
+              {GIFT_OPTIONS.map((gift) => {
+                const sent = giftsSent.includes(gift.name);
+                const canAfford = ogn >= gift.cost;
+                return (
+                  <button key={gift.name} onClick={() => handleGift(gift)}
+                    disabled={sent || !canAfford}
+                    className="flex flex-col items-center gap-1.5 p-4 rounded-2xl border-2 transition-all active:scale-95 disabled:opacity-40"
+                    style={{
+                      borderColor: sent ? '#2ecc71' : '#f0ebe4',
+                      background: sent ? 'rgba(46,204,113,0.08)' : 'white',
+                    }}>
+                    <span className="text-3xl">{gift.emoji}</span>
+                    <span className="font-heading text-xs font-bold">{gift.name}</span>
+                    <span className="text-[10px] font-bold" style={{ color: sent ? '#27ae60' : '#d49a1a' }}>
+                      {sent ? '✅ Đã tặng' : `🪙 ${gift.cost} OGN`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="px-4 pb-4 text-center">
+              <p className="text-[10px] text-muted-foreground font-semibold">
+                Số dư: 🪙 {ogn.toLocaleString()} OGN
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
