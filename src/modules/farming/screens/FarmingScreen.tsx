@@ -1,88 +1,172 @@
+import { useEffect, useState, useCallback } from 'react';
 import ScreenShell from '@/shared/components/ScreenShell';
+import FarmScene from '../components/FarmScene';
+import { PlantSprite } from '../components/PlantSprite';
+import PlantPot from '../components/PlantPot';
+import GrowthBar from '../components/GrowthBar';
+import HappinessBar from '../components/HappinessBar';
+import PlantStatus from '../components/PlantStatus';
+import PlantSeedModal from '../components/PlantSeedModal';
+import useActionButtons from '../hooks/useActionButtons';
+import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
+import { useUIStore } from '@/shared/stores/uiStore';
+import EmptyState from '@/shared/components/EmptyState';
+import { PlantType } from '../types/farm.types';
 
 export default function FarmingScreen() {
+  const plots = useFarmStore((s) => s.plots);
+  const ogn = useFarmStore((s) => s.ogn);
+  const plantSeed = useFarmStore((s) => s.plantSeed);
+  const addToast = useUIStore((s) => s.addToast);
+
+  const [activePlotIndex, setActivePlotIndex] = useState(0);
+  const [showPlantModal, setShowPlantModal] = useState(false);
+  const [, forceUpdate] = useState(0);
+
+  // Tick growth bars every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => forceUpdate((n) => n + 1), 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Start happiness decay
+  useEffect(() => {
+    startHappinessDecay();
+  }, []);
+
+  const activePlot = plots[activePlotIndex] || null;
+
+  const handlePlantNew = useCallback(() => {
+    setShowPlantModal(true);
+  }, []);
+
+  const handleSelectPlant = useCallback((plantType: PlantType) => {
+    const nextSlot = plots.length;
+    plantSeed(plantType, nextSlot);
+    setShowPlantModal(false);
+    setActivePlotIndex(plots.length); // will be the new plot
+    addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
+  }, [plots.length, plantSeed, addToast]);
+
   return (
     <ScreenShell>
-      {/* Sky + Farm Scene */}
-      <div className="farm-sky-gradient min-h-[70vh] relative overflow-hidden">
-        {/* Clouds */}
-        <div className="absolute top-6 animate-cloud-drift opacity-40">
-          <span className="text-4xl">☁️</span>
-        </div>
-        <div className="absolute top-14 animate-cloud-drift opacity-30" style={{ animationDelay: '8s' }}>
-          <span className="text-3xl">☁️</span>
-        </div>
-
-        {/* Sun */}
-        <div className="absolute top-4 right-6">
-          <span className="text-4xl">☀️</span>
-        </div>
-
-        {/* Plant area */}
-        <div className="flex flex-col items-center justify-end min-h-[55vh] pb-4 pt-20">
-          {/* Plant */}
-          <div className="animate-plant-sway mb-2">
-            <span className="text-7xl block">🌿</span>
+      {activePlot ? (
+        <ActivePlotView
+          plot={activePlot}
+          plotCount={plots.length}
+          activePlotIndex={activePlotIndex}
+          onChangePlot={setActivePlotIndex}
+          onPlantNew={handlePlantNew}
+        />
+      ) : (
+        <div>
+          <FarmScene>
+            <EmptyState
+              emoji="🌱"
+              title="Chưa có cây nào"
+              description="Hãy trồng cây đầu tiên nhé!"
+            />
+          </FarmScene>
+          <div className="px-4 py-4">
+            <button
+              onClick={() => setShowPlantModal(true)}
+              className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-heading font-bold text-base active:scale-95 transition-transform shadow-lg green-glow"
+            >
+              🌱 Trồng cây mới
+            </button>
           </div>
+        </div>
+      )}
 
-          {/* Pot */}
-          <div className="w-28 h-14 rounded-b-3xl bg-gradient-to-b from-farm-brown to-farm-brown-dark flex items-center justify-center shadow-md">
-            <span className="text-xs font-heading font-semibold text-farm-gold-light">Cà Chua</span>
-          </div>
+      <PlantSeedModal
+        open={showPlantModal}
+        onClose={() => setShowPlantModal(false)}
+        onSelect={handleSelectPlant}
+      />
+    </ScreenShell>
+  );
+}
 
-          {/* Status */}
-          <div className="mt-3 flex gap-2">
-            <span className="bg-primary-pale text-primary text-xs font-bold px-3 py-1 rounded-full">Khỏe mạnh 💚</span>
-            <span className="bg-farm-sky text-farm-blue text-xs font-bold px-3 py-1 rounded-full">Đang lớn 📈</span>
-          </div>
+// Separated to use hooks conditionally
+function ActivePlotView({
+  plot,
+  plotCount,
+  activePlotIndex,
+  onChangePlot,
+  onPlantNew,
+}: {
+  plot: NonNullable<ReturnType<typeof useFarmStore.getState>['plots'][number]>;
+  plotCount: number;
+  activePlotIndex: number;
+  onChangePlot: (i: number) => void;
+  onPlantNew: () => void;
+}) {
+  const { buttons, showWater } = useActionButtons({ plot, onPlantNew });
 
-          {/* Growth bar */}
-          <div className="mt-3 w-56">
-            <div className="flex justify-between text-[10px] text-muted-foreground mb-1 font-semibold">
-              <span>Tiến trình</span>
-              <span>62%</span>
-            </div>
-            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full transition-all duration-1000"
-                style={{ width: '62%' }}
+  return (
+    <div>
+      <FarmScene>
+        {/* Plot dots if multiple */}
+        {plotCount > 1 && (
+          <div className="flex gap-2 mb-4">
+            {Array.from({ length: plotCount }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => onChangePlot(i)}
+                className={`w-3 h-3 rounded-full transition-all ${
+                  i === activePlotIndex
+                    ? 'bg-primary scale-125'
+                    : 'bg-muted-foreground/30'
+                }`}
               />
-            </div>
+            ))}
           </div>
+        )}
 
-          {/* Happiness bar */}
-          <div className="mt-2 w-56">
-            <div className="flex justify-between text-[10px] text-muted-foreground mb-1 font-semibold">
-              <span>Hạnh phúc 😊</span>
-              <span>85%</span>
-            </div>
-            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-secondary to-secondary-light rounded-full transition-all duration-1000"
-                style={{ width: '85%' }}
-              />
-            </div>
-          </div>
+        {/* Plant + Pot */}
+        <PlantSprite plot={plot} showWaterEffect={showWater} />
+        <div className="mt-2">
+          <PlantPot plot={plot} />
         </div>
-      </div>
+
+        {/* Status tags */}
+        <div className="mt-3">
+          <PlantStatus plot={plot} />
+        </div>
+
+        {/* Bars */}
+        <div className="mt-3 w-60 space-y-2">
+          <GrowthBar plot={plot} />
+          <HappinessBar plot={plot} />
+        </div>
+      </FarmScene>
 
       {/* Action buttons */}
       <div className="px-4 py-4 grid grid-cols-4 gap-2">
-        {[
-          { emoji: '💧', label: 'Tưới', color: 'bg-farm-blue/10 text-farm-blue border-farm-blue/20' },
-          { emoji: '🧴', label: 'Bón phân', color: 'bg-secondary/10 text-secondary-foreground border-secondary/20' },
-          { emoji: '🌾', label: 'Thu hoạch', color: 'bg-primary/10 text-primary border-primary/20' },
-          { emoji: '🎯', label: 'Quiz', color: 'bg-farm-red/10 text-farm-red border-farm-red/20' },
-        ].map((btn) => (
+        {buttons.map((btn) => (
           <button
             key={btn.label}
-            className={`flex flex-col items-center gap-1.5 py-3 rounded-2xl border font-semibold text-xs transition-all active:scale-95 ${btn.color}`}
+            onClick={btn.onClick}
+            disabled={btn.disabled}
+            className={`flex flex-col items-center gap-1.5 py-3 rounded-2xl border font-semibold text-xs transition-all active:scale-95 ${btn.color} ${
+              btn.disabled ? 'opacity-50' : ''
+            }`}
           >
             <span className="text-2xl">{btn.emoji}</span>
             {btn.label}
           </button>
         ))}
       </div>
-    </ScreenShell>
+
+      {/* Plant more button */}
+      <div className="px-4 pb-2">
+        <button
+          onClick={onPlantNew}
+          className="w-full py-3 rounded-2xl border-2 border-dashed border-primary/30 text-primary font-heading font-semibold text-sm active:scale-95 transition-all hover:bg-primary-pale"
+        >
+          + Trồng thêm cây mới
+        </button>
+      </div>
+    </div>
   );
 }
