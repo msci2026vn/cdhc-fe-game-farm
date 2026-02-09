@@ -2,13 +2,16 @@ import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRandomQuestions, QUIZ_SIZE } from '../data/questions';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
-import { usePlayerStore } from '@/shared/stores/playerStore';
+import { usePlayerStore, xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 
 type Phase = 'answering' | 'revealed' | 'finished';
 
 export default function QuizScreen() {
   const navigate = useNavigate();
   const addOgn = useFarmStore((s) => s.addOgn);
+  const { level, xp } = usePlayerStore();
+  const nextXp = xpForNextLevel(level);
+  const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
   const questions = useMemo(() => getRandomQuestions(QUIZ_SIZE), []);
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -80,13 +83,26 @@ export default function QuizScreen() {
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative quiz-gradient flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center px-5 pt-safe pb-4">
+      <div className="flex justify-between items-center px-5 pt-safe pb-2">
         <button onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full flex items-center justify-center text-xl header-btn-glass">
           ←
         </button>
         <h2 className="font-heading text-lg font-bold flex items-center gap-2">📖 Nhà Nông Thông Thái</h2>
         <span className="text-[13px] font-bold text-game-green-mid">{idx + 1}/{total}</span>
+      </div>
+
+      {/* XP bar */}
+      <div className="mx-5 mb-2 flex items-center gap-2">
+        <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold text-white"
+          style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)' }}>
+          ⭐ Lv.{level}
+        </span>
+        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+          <div className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${xpPct}%`, background: 'linear-gradient(90deg, #00b894, #55efc4)' }} />
+        </div>
+        <span className="text-[9px] font-bold text-muted-foreground">{xp}/{nextXp}</span>
       </div>
 
       {/* Progress dots */}
