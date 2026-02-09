@@ -1,11 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRandomQuestions, QUIZ_SIZE } from '../data/questions';
+import { useFarmStore } from '@/modules/farming/stores/farmStore';
 
 type Phase = 'answering' | 'revealed' | 'finished';
 
 export default function QuizScreen() {
   const navigate = useNavigate();
+  const addOgn = useFarmStore((s) => s.addOgn);
   const questions = useMemo(() => getRandomQuestions(QUIZ_SIZE), []);
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -19,9 +21,12 @@ export default function QuizScreen() {
   const handleSubmit = useCallback(() => {
     if (!selected || phase !== 'answering') return;
     const correct = selected === q.correct;
-    if (correct) setScore(s => s + 1);
+    if (correct) {
+      setScore(s => s + 1);
+      addOgn(1);
+    }
     setPhase('revealed');
-  }, [selected, phase, q]);
+  }, [selected, phase, q, addOgn]);
 
   const handleNext = useCallback(() => {
     if (idx >= total - 1) {

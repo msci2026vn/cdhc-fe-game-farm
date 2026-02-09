@@ -23,6 +23,7 @@ interface FarmState {
   plantSeed: (plantType: PlantType, slotIndex: number) => void;
   waterPlot: (plotId: string) => boolean;
   harvestPlot: (plotId: string) => number; // returns OGN earned
+  addOgn: (amount: number) => void;
   tickHappiness: () => void;
   getWaterCooldownRemaining: (plotId: string) => number;
 }
@@ -91,6 +92,8 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     }));
     return reward;
   },
+
+  addOgn: (amount) => set((s) => ({ ogn: s.ogn + amount })),
 
   tickHappiness: () => {
     set((s) => ({

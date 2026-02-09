@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
@@ -12,6 +13,7 @@ import { useCooldown } from '@/shared/hooks/useCooldown';
 import { PlantType } from '../types/farm.types';
 
 export default function FarmingScreen() {
+  const navigate = useNavigate();
   const plots = useFarmStore((s) => s.plots);
   const ogn = useFarmStore((s) => s.ogn);
   const plantSeed = useFarmStore((s) => s.plantSeed);
@@ -209,7 +211,7 @@ export default function FarmingScreen() {
             style={{ boxShadow: '0 2px 6px rgba(231,76,60,0.4)' }}>!</span>
         </button>
         <button className="action-btn-base py-3.5 border-2 border-transparent relative"
-          onClick={() => addToast('Quiz sắp có!', 'info')}>
+          onClick={() => navigate('/quiz')}>
           <span className="text-[28px] drop-shadow-sm relative z-10">📖</span>
           <span className="text-[11px] font-bold relative z-10">Quiz</span>
           <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-destructive rounded-full text-[10px] text-white font-extrabold flex items-center justify-center z-10"
