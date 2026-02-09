@@ -4,6 +4,7 @@ import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useActivityStore } from '@/shared/stores/activityStore';
 
 type ShopTab = 'seeds' | 'tools' | 'cards' | 'nft';
 
@@ -26,7 +27,6 @@ const SHOP_ITEMS: ShopItem[] = [
   { id: 's4', name: 'Cà Rốt Baby', emoji: '🥕', desc: 'Thu hoạch +6 OGN/giờ', price: 280, tab: 'seeds' },
   { id: 's5', name: 'Dưa Hấu Vàng', emoji: '🍉', desc: 'Thu hoạch +15 OGN/giờ', price: 800, tab: 'seeds', featured: true, rarity: 'rare' },
   { id: 's6', name: 'Nấm Truffle', emoji: '🍄', desc: 'Thu hoạch +20 OGN/giờ', price: 1200, tab: 'seeds', rarity: 'epic' },
-
   // Tools
   { id: 't1', name: 'Phân Bón Cao Cấp', emoji: '🧴', desc: 'Tăng tốc mọc +50%', price: 150, tab: 'tools' },
   { id: 't2', name: 'Bình Tưới Bạc', emoji: '💧', desc: 'Giảm CD tưới 50%', price: 300, tab: 'tools' },
@@ -34,13 +34,11 @@ const SHOP_ITEMS: ShopItem[] = [
   { id: 't4', name: 'Đèn UV', emoji: '💡', desc: 'Cây mọc ban đêm +30%', price: 400, tab: 'tools', featured: true },
   { id: 't5', name: 'Máy Bơm Nước', emoji: '⛽', desc: 'Auto tưới 4h', price: 600, tab: 'tools', rarity: 'rare' },
   { id: 't6', name: 'Vườn Rau VIP', emoji: '💎', desc: 'Mở rộng 4 ô trồng', price: 1000, tab: 'tools', featured: true, rarity: 'epic' },
-
   // Cards
   { id: 'c1', name: 'Thẻ Nông Dân', emoji: '🃏', desc: '+10% OGN mỗi thu hoạch', price: 500, tab: 'cards' },
   { id: 'c2', name: 'Thẻ Thời Tiết', emoji: '🌈', desc: 'Chọn thời tiết 1h', price: 800, tab: 'cards', featured: true },
   { id: 'c3', name: 'Thẻ Tăng Tốc', emoji: '⚡', desc: 'x2 tốc độ mọc 30ph', price: 350, tab: 'cards' },
   { id: 'c4', name: 'Thẻ Bảo Vệ', emoji: '🛡️', desc: 'Cây không chết 2h', price: 600, tab: 'cards', rarity: 'rare' },
-
   // NFT
   { id: 'n1', name: 'NFT Cây Vàng', emoji: '🌳', desc: 'Cây hiếm, +25% OGN', price: 2000, tab: 'nft', rarity: 'legendary', featured: true },
   { id: 'n2', name: 'NFT Đất Thần', emoji: '🏝️', desc: 'Đất đặc biệt +30% tốc độ', price: 3000, tab: 'nft', rarity: 'legendary' },
@@ -67,14 +65,17 @@ const RARITY_STYLES: Record<string, { border: string; badge: string; badgeText: 
 export default function ShopScreen() {
   const [activeTab, setActiveTab] = useState<ShopTab>('seeds');
   const [purchased, setPurchased] = useState<string[]>([]);
+  const [buyAnim, setBuyAnim] = useState<string | null>(null);
+  const [confirmItem, setConfirmItem] = useState<ShopItem | null>(null);
   const ogn = useFarmStore((s) => s.ogn);
   const addOgn = useFarmStore((s) => s.addOgn);
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
+  const addPurchase = useActivityStore((s) => s.addPurchase);
 
   const items = SHOP_ITEMS.filter((i) => i.tab === activeTab);
 
-  const handleBuy = (item: ShopItem) => {
+  const handleBuyClick = (item: ShopItem) => {
     if (purchased.includes(item.id)) {
       addToast('Bạn đã mua vật phẩm này rồi! 📦', 'info');
       return;
@@ -83,8 +84,22 @@ export default function ShopScreen() {
       addToast('Không đủ OGN! Hãy kiếm thêm 💰', 'error');
       return;
     }
+    setConfirmItem(item);
+  };
+
+  const confirmBuy = () => {
+    if (!confirmItem) return;
+    const item = confirmItem;
+    setConfirmItem(null);
+
     addOgn(-item.price);
     setPurchased((p) => [...p, item.id]);
+    addPurchase({ id: item.id, name: item.name, emoji: item.emoji, desc: item.desc, rarity: item.rarity });
+
+    // Trigger buy animation
+    setBuyAnim(item.id);
+    setTimeout(() => setBuyAnim(null), 800);
+
     showFlyUp(`-${item.price} OGN 🛒`);
     addToast(`Đã mua ${item.name} ${item.emoji} thành công!`, 'success');
   };
@@ -105,9 +120,7 @@ export default function ShopScreen() {
         {TABS.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={`flex-1 py-2 rounded-[20px] text-[13px] font-bold transition-all ${
-              tab.key === activeTab
-                ? 'bg-game-green-mid text-white'
-                : 'text-muted-foreground'
+              tab.key === activeTab ? 'bg-game-green-mid text-white' : 'text-muted-foreground'
             }`}
             style={tab.key !== activeTab ? { background: 'rgba(255,255,255,0.5)' } : { boxShadow: '0 4px 12px rgba(45,138,78,0.3)' }}>
             {tab.label}
@@ -123,22 +136,23 @@ export default function ShopScreen() {
           const canAfford = ogn >= item.price;
           const rarity = item.rarity || 'common';
           const rs = RARITY_STYLES[rarity];
+          const isAnimating = buyAnim === item.id;
 
           return (
             <div key={item.id}
-              className="bg-white rounded-xl p-4 flex flex-col items-center gap-2 relative overflow-hidden transition-all"
+              className={`bg-white rounded-xl p-4 flex flex-col items-center gap-2 relative overflow-hidden transition-all ${
+                isAnimating ? 'animate-scale-in' : ''
+              }`}
               style={{
                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                 borderWidth: 2,
-                borderColor: rs.border,
+                borderColor: bought ? '#2ecc71' : rs.border,
+                background: bought ? 'rgba(46,204,113,0.05)' : 'white',
               }}>
-              {/* Featured badge */}
               {item.featured && (
                 <span className="absolute top-2 -right-5 text-[9px] font-extrabold text-white px-6 py-0.5 rotate-[35deg]"
                   style={{ background: '#f0b429' }}>⭐ HOT</span>
               )}
-
-              {/* Rarity badge */}
               {rarity !== 'common' && (
                 <span className="absolute top-1.5 left-1.5 text-[8px] font-extrabold text-white px-2 py-0.5 rounded-full"
                   style={{ background: rs.badge }}>
@@ -146,28 +160,67 @@ export default function ShopScreen() {
                 </span>
               )}
 
-              <span className="text-[46px] my-1" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))' }}>{item.emoji}</span>
+              {/* Buy animation overlay */}
+              {isAnimating && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                  <span className="text-4xl animate-bounce">✅</span>
+                </div>
+              )}
+
+              <span className={`text-[46px] my-1 transition-all ${isAnimating ? 'scale-125' : ''}`}
+                style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))' }}>{item.emoji}</span>
               <span className="font-heading text-[13px] font-bold text-center leading-tight">{item.name}</span>
               <span className="text-[10px] text-muted-foreground text-center leading-tight">{item.desc}</span>
 
               <button
-                onClick={() => handleBuy(item)}
+                onClick={() => handleBuyClick(item)}
                 disabled={bought}
                 className="flex items-center gap-1 px-4 py-1.5 rounded-[20px] font-heading text-[13px] font-bold text-white mt-1 transition-all active:scale-95 disabled:opacity-60"
                 style={{
-                  background: bought
-                    ? '#95a5a6'
-                    : canAfford
-                      ? 'linear-gradient(135deg, hsl(42, 87%, 55%), hsl(38, 79%, 47%))'
-                      : 'linear-gradient(135deg, #bdc3c7, #95a5a6)',
+                  background: bought ? '#2ecc71'
+                    : canAfford ? 'linear-gradient(135deg, hsl(42, 87%, 55%), hsl(38, 79%, 47%))'
+                    : 'linear-gradient(135deg, #bdc3c7, #95a5a6)',
                   boxShadow: bought ? 'none' : '0 3px 10px rgba(240,180,41,0.3)',
                 }}>
-                {bought ? '✅ Đã mua' : `🪙 ${item.price}`}
+                {bought ? '✅ Đã mua' : canAfford ? `🪙 ${item.price}` : `🔒 ${item.price}`}
               </button>
             </div>
           );
         })}
       </div>
+
+      {/* Confirm modal */}
+      {confirmItem && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setConfirmItem(null)} />
+          <div className="relative bg-white rounded-2xl p-6 mx-8 max-w-[350px] w-full animate-scale-in text-center"
+            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <span className="text-6xl block mb-3">{confirmItem.emoji}</span>
+            <h3 className="font-heading text-lg font-bold">{confirmItem.name}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{confirmItem.desc}</p>
+
+            <div className="flex items-center justify-center gap-1.5 mt-3 mb-4">
+              <span className="font-heading text-xl font-bold" style={{ color: '#d49a1a' }}>🪙 {confirmItem.price} OGN</span>
+            </div>
+
+            <p className="text-[11px] text-muted-foreground mb-4">
+              Số dư sau mua: 🪙 {(ogn - confirmItem.price).toLocaleString()} OGN
+            </p>
+
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmItem(null)}
+                className="flex-1 py-2.5 rounded-xl font-heading text-sm font-bold bg-muted text-muted-foreground active:scale-95 transition-transform">
+                Hủy
+              </button>
+              <button onClick={confirmBuy}
+                className="flex-1 py-2.5 rounded-xl font-heading text-sm font-bold text-white active:scale-95 transition-transform"
+                style={{ background: 'linear-gradient(135deg, hsl(42, 87%, 55%), hsl(38, 79%, 47%))', boxShadow: '0 4px 15px rgba(240,180,41,0.3)' }}>
+                Xác nhận mua
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
       <Toast />
