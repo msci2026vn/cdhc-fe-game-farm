@@ -28,6 +28,17 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
 
   const medals = ['🥇', '🥈', '🥉'];
 
+  const WEEKLY_REWARDS = [
+    { rank: '🥇 Top 1', rewards: ['500 OGN', '1 Hạt giống Vàng', 'Khung avatar Huyền Thoại'], color: '#f0b429' },
+    { rank: '🥈 Top 2', rewards: ['300 OGN', '1 Phân bón Cao Cấp'], color: '#95a5a6' },
+    { rank: '🥉 Top 3', rewards: ['150 OGN', '1 Bình tưới Bạc'], color: '#cd7f32' },
+  ];
+
+  // Mock countdown to end of week (Sunday)
+  const now = new Date();
+  const daysLeft = 7 - now.getDay();
+  const hoursLeft = 23 - now.getHours();
+
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
@@ -93,8 +104,39 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
           })}
         </div>
 
+        {/* Weekly rewards section */}
+        <div className="mx-4 mt-1 mb-3 rounded-2xl overflow-hidden" style={{ border: '2px solid #f0e6d0' }}>
+          <div className="px-4 py-2.5 flex items-center justify-between"
+            style={{ background: 'linear-gradient(135deg, #fff8eb, #ffefd5)' }}>
+            <span className="font-heading text-xs font-bold" style={{ color: '#e67e22' }}>
+              🎁 Phần thưởng tuần này
+            </span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+              style={{ background: 'rgba(231,76,60,0.1)', color: '#e74c3c' }}>
+              ⏰ {daysLeft}d {hoursLeft}h
+            </span>
+          </div>
+          <div className="bg-white divide-y" style={{ borderColor: '#f5f0e8' }}>
+            {WEEKLY_REWARDS.map((r, i) => (
+              <div key={i} className="flex items-start gap-3 px-4 py-2.5">
+                <span className="font-heading text-xs font-bold whitespace-nowrap mt-0.5" style={{ color: r.color, minWidth: 52 }}>
+                  {r.rank}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {r.rewards.map((reward, j) => (
+                    <span key={j} className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                      style={{ background: '#f9f5ee', color: '#8b6914' }}>
+                      {reward}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Rest of list */}
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(85vh - 320px)' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(85vh - 480px)' }}>
           {sorted.slice(3).map((friend, i) => {
             const isMe = friend.id === 'me';
             return (
