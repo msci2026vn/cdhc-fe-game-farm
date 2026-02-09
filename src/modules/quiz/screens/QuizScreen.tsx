@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRandomQuestions, QUIZ_SIZE } from '../data/questions';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { usePlayerStore } from '@/shared/stores/playerStore';
 
 type Phase = 'answering' | 'revealed' | 'finished';
 
@@ -24,6 +25,7 @@ export default function QuizScreen() {
     if (correct) {
       setScore(s => s + 1);
       addOgn(1);
+      usePlayerStore.getState().addXp(8);
     }
     setPhase('revealed');
   }, [selected, phase, q, addOgn]);
