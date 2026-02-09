@@ -131,6 +131,9 @@ export function useMatch3() {
   const [selected, setSelected] = useState<number | null>(null);
   const [animating, setAnimating] = useState(false);
   const [matchedCells, setMatchedCells] = useState<Set<number>>(new Set());
+  const [combo, setCombo] = useState(0);
+  const [showCombo, setShowCombo] = useState(false);
+  const comboRef = useRef(0);
   const [boss, setBoss] = useState<BossState>({
     bossHp: 10000, bossMaxHp: 10000,
     playerHp: 1000, playerMaxHp: 1000,
@@ -141,18 +144,40 @@ export function useMatch3() {
 
   const addPopup = useCallback((text: string, color: string) => {
     const id = popupId.current++;
-    const x = 20 + Math.random() * 60; // % from left
-    const y = 15 + Math.random() * 40; // % from top
+    const x = 20 + Math.random() * 60;
+    const y = 15 + Math.random() * 40;
     setPopups(prev => [...prev, { id, text, color, x, y }]);
     setTimeout(() => setPopups(prev => prev.filter(p => p.id !== id)), 1400);
   }, []);
 
-  const processMatches = useCallback((currentGrid: Gem[]) => {
+  const getMultiplier = (comboCount: number) => {
+    if (comboCount <= 1) return 1;
+    if (comboCount === 2) return 1.5;
+    if (comboCount === 3) return 2;
+    if (comboCount === 4) return 2.5;
+    return 3;
+  };
+
+  const processMatches = useCallback((currentGrid: Gem[], currentCombo: number) => {
     const matched = findMatches(currentGrid);
     if (matched.size === 0) {
+      // End of chain - hide combo after delay
+      if (currentCombo > 1) {
+        setTimeout(() => setShowCombo(false), 1500);
+      } else {
+        setShowCombo(false);
+      }
+      comboRef.current = 0;
       setAnimating(false);
       return;
     }
+
+    const newCombo = currentCombo + 1;
+    comboRef.current = newCombo;
+    setCombo(newCombo);
+    if (newCombo >= 2) setShowCombo(true);
+
+    const multiplier = getMultiplier(newCombo);
 
     // Tally match results
     const tally: Partial<Record<GemType, number>> = {};
@@ -161,11 +186,9 @@ export function useMatch3() {
       tally[t] = (tally[t] || 0) + 1;
     });
 
-    // Show matched cells briefly
     setMatchedCells(new Set(matched));
 
     setTimeout(() => {
-      // Apply effects
       setBoss(prev => {
         let { bossHp, playerHp, shield, ultCharge } = prev;
         const atkCount = tally.atk || 0;
@@ -173,27 +196,30 @@ export function useMatch3() {
         const defCount = tally.def || 0;
         const starCount = tally.star || 0;
 
-        const totalDmg = atkCount * DMG_PER_GEM.atk + starCount * DMG_PER_GEM.star;
+        const baseDmg = atkCount * DMG_PER_GEM.atk + starCount * DMG_PER_GEM.star;
+        const totalDmg = Math.round(baseDmg * multiplier);
         bossHp = Math.max(0, bossHp - totalDmg);
-        playerHp = Math.min(prev.playerMaxHp, playerHp + hpCount * 30);
-        shield = shield + defCount * 25;
-        ultCharge = Math.min(100, ultCharge + starCount * 8 + atkCount * 3);
+        playerHp = Math.min(prev.playerMaxHp, playerHp + Math.round(hpCount * 30 * multiplier));
+        shield = shield + Math.round(defCount * 25 * multiplier);
+        ultCharge = Math.min(100, ultCharge + starCount * 8 + atkCount * 3 + (newCombo >= 2 ? 5 : 0));
 
-        if (totalDmg > 0) addPopup(`-${totalDmg}`, '#ffe066');
-        if (hpCount > 0) addPopup(`+${hpCount * 30} HP`, '#55efc4');
-        if (defCount > 0) addPopup(`+${defCount * 25} 🛡️`, '#74b9ff');
+        if (totalDmg > 0) {
+          const label = newCombo >= 2 ? `-${totalDmg} (x${multiplier})` : `-${totalDmg}`;
+          addPopup(label, newCombo >= 3 ? '#ff6b6b' : '#ffe066');
+        }
+        if (hpCount > 0) addPopup(`+${Math.round(hpCount * 30 * multiplier)} HP`, '#55efc4');
+        if (defCount > 0) addPopup(`+${Math.round(defCount * 25 * multiplier)} 🛡️`, '#74b9ff');
 
         return { ...prev, bossHp, playerHp, shield, ultCharge };
       });
 
-      // Remove matched, apply gravity
       const cleared = currentGrid.map((g, i) => matched.has(i) ? null : g) as (Gem | null)[];
       const fallen = applyGravity(cleared as Gem[]);
       setGrid(fallen);
       setMatchedCells(new Set());
 
       // Check for cascades
-      setTimeout(() => processMatches(fallen), 300);
+      setTimeout(() => processMatches(fallen, newCombo), 300);
     }, 350);
   }, [addPopup]);
 
@@ -236,8 +262,8 @@ export function useMatch3() {
     }
 
     setGrid(newGrid);
-    setTimeout(() => processMatches(newGrid), 200);
+    setTimeout(() => processMatches(newGrid, 0), 200);
   }, [grid, selected, animating, processMatches]);
 
-  return { grid, selected, animating, matchedCells, boss, popups, handleTap, GEM_META };
+  return { grid, selected, animating, matchedCells, combo, showCombo, boss, popups, handleTap, GEM_META };
 }
