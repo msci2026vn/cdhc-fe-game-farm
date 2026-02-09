@@ -7,6 +7,7 @@ import FarmHeader from '../components/FarmHeader';
 import PlantSeedModal from '../components/PlantSeedModal';
 import BugCatchGame from '../components/BugCatchGame';
 import FriendsList from '@/modules/friends/components/FriendsList';
+import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
@@ -33,6 +34,7 @@ export default function FarmingScreen() {
   const [showWaterEffect, setShowWaterEffect] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
   const [visitingFriend, setVisitingFriend] = useState<Friend | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
   const [, forceUpdate] = useState(0);
 
   const activePlot = plots[activePlotIndex] || null;
@@ -255,7 +257,9 @@ export default function FarmingScreen() {
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
       <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
-        onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }} />
+        onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }}
+        onInvite={() => { setShowFriends(false); setShowInvite(true); }} />
+      <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
       {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
     </div>
   );
