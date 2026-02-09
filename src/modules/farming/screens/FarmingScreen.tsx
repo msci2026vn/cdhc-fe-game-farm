@@ -5,6 +5,7 @@ import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import FarmHeader from '../components/FarmHeader';
 import PlantSeedModal from '../components/PlantSeedModal';
+import BugCatchGame from '../components/BugCatchGame';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji } from '../utils/growth';
@@ -25,6 +26,7 @@ export default function FarmingScreen() {
 
   const [activePlotIndex, setActivePlotIndex] = useState(0);
   const [showPlantModal, setShowPlantModal] = useState(false);
+  const [showBugGame, setShowBugGame] = useState(false);
   const [showWaterEffect, setShowWaterEffect] = useState(false);
   const [, forceUpdate] = useState(0);
 
@@ -204,7 +206,7 @@ export default function FarmingScreen() {
           <span className="text-[11px] font-bold relative z-10">{isActive ? formatTime(remaining) : 'Tưới nước'}</span>
         </button>
         <button className="action-btn-base py-3.5 border-2 border-transparent relative"
-          onClick={() => addToast('Tính năng sắp có!', 'info')}>
+          onClick={() => setShowBugGame(true)}>
           <span className="text-[28px] drop-shadow-sm relative z-10">🐛</span>
           <span className="text-[11px] font-bold relative z-10">Bắt sâu</span>
           <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-destructive rounded-full text-[10px] text-white font-extrabold flex items-center justify-center z-10"
@@ -246,6 +248,7 @@ export default function FarmingScreen() {
       <Toast />
       <PointsFlyUp />
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
+      <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
     </div>
   );
 }
