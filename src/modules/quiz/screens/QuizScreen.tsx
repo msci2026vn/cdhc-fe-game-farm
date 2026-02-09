@@ -28,7 +28,7 @@ export default function QuizScreen() {
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative quiz-gradient flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center px-5 pt-[50px] pb-4">
+      <div className="flex justify-between items-center px-5 pt-safe pb-4">
         <button onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full flex items-center justify-center text-xl header-btn-glass">
           ←

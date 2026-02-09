@@ -25,7 +25,7 @@ export default function SplashScreen() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] splash-gradient flex flex-col items-center justify-center cursor-pointer"
+      className="fixed inset-0 z-[200] splash-gradient flex flex-col items-center justify-center cursor-pointer safe-x"
       onClick={handleTap}
     >
       {/* Background radials */}

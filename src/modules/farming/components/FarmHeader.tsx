@@ -6,7 +6,7 @@ export default function FarmHeader() {
   const ogn = useFarmStore((s) => s.ogn);
 
   return (
-    <div className="px-5 pt-[50px] pb-3">
+    <div className="px-5 pb-3" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 50px)' }}>
       {/* Top row: avatar + buttons */}
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2.5">

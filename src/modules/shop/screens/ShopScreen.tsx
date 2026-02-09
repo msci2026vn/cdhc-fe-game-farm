@@ -20,7 +20,7 @@ export default function ShopScreen() {
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative shop-gradient flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center px-5 pt-[50px] pb-4">
+      <div className="flex justify-between items-center px-5 pt-safe pb-4">
         <h1 className="font-heading text-[22px] font-bold">🛒 Cửa hàng</h1>
         <div className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] glass-card">
           <span>🪙</span>

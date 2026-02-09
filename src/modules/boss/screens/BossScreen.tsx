@@ -16,7 +16,7 @@ export default function BossScreen() {
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative boss-gradient flex flex-col">
       {/* Top half: Boss arena */}
-      <div className="flex-[0_0_50%] pt-[50px] px-5 pb-2 flex flex-col relative overflow-hidden">
+      <div className="flex-[0_0_50%] pt-safe px-5 pb-2 flex flex-col relative overflow-hidden">
         {/* Radial effects */}
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
