@@ -6,62 +6,64 @@
 
 @layer base {
   :root {
-    --background: 120 20% 97%;
-    --foreground: 150 40% 12%;
+    --background: 120 20% 95%;
+    --foreground: 17 45% 12%;
 
-    --card: 120 25% 96%;
-    --card-foreground: 150 40% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 17 45% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 150 40% 12%;
+    --popover-foreground: 17 45% 12%;
 
-    --primary: 145 55% 32%;
-    --primary-foreground: 120 60% 96%;
-
+    --primary: 145 50% 36%;
+    --primary-foreground: 0 0% 100%;
     --primary-light: 145 60% 48%;
-    --primary-pale: 140 60% 85%;
+    --primary-dark: 145 55% 23%;
+    --primary-pale: 140 66% 83%;
 
-    --secondary: 42 90% 56%;
-    --secondary-foreground: 30 60% 15%;
-
+    --secondary: 42 87% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-dark: 38 79% 47%;
     --secondary-light: 48 100% 70%;
 
-    --muted: 120 15% 92%;
-    --muted-foreground: 150 10% 45%;
+    --muted: 30 20% 92%;
+    --muted-foreground: 20 22% 29%;
 
-    --accent: 42 90% 56%;
-    --accent-foreground: 30 60% 15%;
+    --accent: 42 87% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 6 78% 57%;
+    --destructive-dark: 6 67% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 120 15% 88%;
-    --input: 120 15% 88%;
-    --ring: 145 55% 32%;
+    --border: 30 30% 88%;
+    --input: 30 30% 88%;
+    --ring: 145 50% 36%;
+    --radius: 16px;
 
-    --radius: 1rem;
+    /* Game tokens */
+    --green-dark: 145 55% 23%;
+    --green-mid: 145 50% 36%;
+    --green-light: 145 60% 48%;
+    --green-pale: 140 66% 83%;
 
-    /* Game-specific tokens */
-    --farm-green-dark: 145 55% 23%;
-    --farm-green-mid: 145 55% 32%;
-    --farm-green-light: 145 60% 48%;
-    --farm-green-pale: 140 60% 85%;
+    --gold: 42 87% 55%;
+    --gold-dark: 38 79% 47%;
+    --gold-light: 48 100% 70%;
 
-    --farm-gold: 42 90% 56%;
-    --farm-gold-light: 48 100% 70%;
-
-    --farm-brown-dark: 25 50% 24%;
-    --farm-brown: 25 45% 37%;
-
-    --farm-sky-top: 207 100% 90%;
-    --farm-sky-mid: 120 40% 93%;
-    --farm-earth: 30 50% 90%;
+    --brown: 25 45% 37%;
+    --brown-dark: 25 50% 24%;
+    --brown-light: 25 40% 59%;
 
     --farm-red: 6 78% 57%;
     --farm-blue: 204 70% 53%;
+    --farm-sky: 197 71% 73%;
 
-    --boss-bg-dark: 270 50% 11%;
-    --boss-bg-light: 270 40% 21%;
+    --boss-dark: 270 50% 11%;
+    --boss-mid: 270 40% 21%;
+
+    --text-dark: 17 45% 12%;
+    --text-mid: 20 22% 29%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -77,10 +79,11 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
-    -webkit-tap-highlight-color: transparent;
+    @apply bg-background font-body antialiased;
+    color: hsl(var(--text-dark));
     overscroll-behavior: none;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -89,34 +92,148 @@
 }
 
 @layer components {
+  /* Splash */
+  .splash-gradient {
+    background: linear-gradient(160deg, #1a5c2a 0%, #2d8a4e 40%, #4eca6a 100%);
+  }
+
+  /* Farm sky */
   .farm-sky-gradient {
-    background: linear-gradient(
-      180deg,
-      hsl(var(--farm-sky-top)) 0%,
-      hsl(var(--farm-sky-mid)) 50%,
-      hsl(var(--farm-earth)) 100%
-    );
+    background: linear-gradient(180deg, #c8e6ff 0%, #e8f5e9 35%, #f5e6d3 100%);
   }
 
+  /* Boss */
   .boss-gradient {
-    background: linear-gradient(
-      180deg,
-      hsl(var(--boss-bg-dark)) 0%,
-      hsl(var(--boss-bg-light)) 100%
-    );
+    background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 30%, #1a2a1a 100%);
   }
 
-  .gold-glow {
-    box-shadow: 0 0 20px hsl(var(--farm-gold) / 0.4);
+  /* Quiz */
+  .quiz-gradient {
+    background: linear-gradient(160deg, #f8f3e8 0%, #e8f5e9 50%, #fff8e1 100%);
   }
 
-  .green-glow {
-    box-shadow: 0 0 15px hsl(var(--farm-green-light) / 0.3);
+  /* Shop */
+  .shop-gradient {
+    background: linear-gradient(160deg, #fff8e1 0%, #f5e6d3 50%, #e8f5e9 100%);
+  }
+
+  /* Profile */
+  .profile-gradient {
+    background: linear-gradient(160deg, #e8f5e9 0%, #f0f7f1 50%, #d4f1ff 100%);
+  }
+
+  /* Stat chip */
+  .stat-chip {
+    @apply flex items-center gap-2 rounded-2xl px-3 py-2.5;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Gem types */
+  .gem-atk {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    box-shadow: 0 3px 10px rgba(231,76,60,0.3);
+  }
+  .gem-hp {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 3px 10px rgba(46,204,113,0.3);
+  }
+  .gem-def {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 0 3px 10px rgba(52,152,219,0.3);
+  }
+  .gem-star {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    box-shadow: 0 3px 10px rgba(243,156,18,0.3);
+  }
+  .gem-shine::after {
+    content: '';
+    position: absolute; top: 2px; left: 2px; right: 2px;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+    border-radius: 8px 8px 50% 50%;
+  }
+
+  /* Gold button */
+  .btn-gold {
+    background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-dark)));
+    box-shadow: 0 3px 10px rgba(240,180,41,0.3);
+  }
+
+  /* Green button */
+  .btn-green {
+    background: linear-gradient(135deg, hsl(var(--green-mid)), hsl(var(--green-light)));
+    box-shadow: 0 6px 20px rgba(45,138,78,0.3);
+  }
+
+  /* Glass card */
+  .glass-card {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Action button */
+  .action-btn-base {
+    @apply flex flex-col items-center gap-1.5 rounded-2xl relative overflow-hidden;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+  }
+  .action-btn-base::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(78,202,106,0.08) 100%);
+  }
+  .action-btn-base:active {
+    transform: scale(0.94);
+    border-color: hsl(var(--green-light));
+    background: #e8f8ea;
+  }
+
+  /* Plant pot */
+  .plant-pot-gradient {
+    background: linear-gradient(180deg, #c49a6c 0%, #8b5e34 50%, #5c3d1f 100%);
+  }
+
+  /* Avatar ring */
+  .avatar-ring {
+    background: linear-gradient(135deg, hsl(var(--green-light)), hsl(var(--gold)));
+    padding: 3px;
+  }
+
+  /* Header button */
+  .header-btn-glass {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Boss HP bar glow */
+  .boss-hp-glow {
+    box-shadow: 0 0 15px rgba(231,76,60,0.4);
+  }
+
+  /* Ultimate gradient */
+  .ult-gradient {
+    background: linear-gradient(90deg, #a29bfe, #fd79a8, #fdcb6e);
+    box-shadow: 0 0 10px rgba(253,121,168,0.4);
+  }
+  .ult-btn-gradient {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    box-shadow: 0 4px 15px rgba(108,92,231,0.4);
   }
 }
 
 @layer utilities {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .text-shadow-sm {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .text-shadow-md {
+    text-shadow: 0 3px 10px rgba(0,0,0,0.3);
   }
 }
