@@ -2,6 +2,7 @@ import { useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useActivityStore, formatActivityTime } from '@/shared/stores/activityStore';
+import { usePlayerStore, xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 
 type Tab = 'stats' | 'activity' | 'inventory' | 'achievements';
 
@@ -25,6 +26,9 @@ export default function ProfileScreen() {
   const [activityFilter, setActivityFilter] = useState('all');
   const ogn = useFarmStore((s) => s.ogn);
   const { likes, comments, gifts, harvests, activities, inventory } = useActivityStore();
+  const { level, xp } = usePlayerStore();
+  const nextXp = xpForNextLevel(level);
+  const title = getLevelTitle(level);
 
   const filteredActivity = activityFilter === 'all'
     ? activities
@@ -50,7 +54,7 @@ export default function ProfileScreen() {
           <div className="flex-1 min-w-0">
             <h2 className="font-heading text-xl font-bold">Farmer Minh</h2>
             <span className="inline-flex items-center gap-1 bg-game-green-mid text-white px-3 py-0.5 rounded-xl text-[11px] font-bold mt-1">
-              ⭐ Lv.5 — Nông dân Bạc
+              ⭐ Lv.{level} — {title}
             </span>
             <p className="text-[11px] text-muted-foreground font-semibold mt-1">
               🪙 {ogn.toLocaleString()} OGN · 📅 14 ngày hoạt động

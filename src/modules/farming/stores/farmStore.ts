@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { FarmPlot, PlantType } from '../types/farm.types';
 import { useWeatherStore } from './weatherStore';
 import { getWeatherHappinessModifier } from '../utils/growth';
+import { usePlayerStore } from '@/shared/stores/playerStore';
 
 // Demo plant types
 export const PLANT_TYPES: PlantType[] = [
@@ -58,6 +59,7 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       mood: 'happy',
     };
     set((s) => ({ plots: [...s.plots, newPlot] }));
+    usePlayerStore.getState().addXp(10);
   },
 
   waterPlot: (plotId) => {
@@ -81,6 +83,7 @@ export const useFarmStore = create<FarmState>((set, get) => ({
         [plotId]: Date.now() + WATER_COOLDOWN_MS,
       },
     }));
+    usePlayerStore.getState().addXp(5);
     return true;
   },
 
@@ -92,6 +95,7 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       plots: s.plots.filter((p) => p.id !== plotId),
       ogn: s.ogn + reward,
     }));
+    usePlayerStore.getState().addXp(25);
     return reward;
   },
 

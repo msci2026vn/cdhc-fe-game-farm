@@ -1,12 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
-import { useWeatherStore, WEATHER_INFO } from '@/modules/farming/stores/weatherStore';
+import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
+import { usePlayerStore, xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 import WeatherControl from './WeatherControl';
 
 export default function FarmHeader() {
   const navigate = useNavigate();
   const ogn = useFarmStore((s) => s.ogn);
   const weather = useWeatherStore((s) => s.weather);
+  const { level, xp } = usePlayerStore();
+  const nextXp = xpForNextLevel(level);
+  const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
+  const title = getLevelTitle(level);
 
   return (
     <div className="px-5 pb-3" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 50px)' }}>
@@ -21,8 +26,8 @@ export default function FarmHeader() {
           <div className="flex flex-col">
             <span className="font-heading text-[15px] font-bold">Farmer Minh</span>
             <span className="text-[11px] font-bold text-game-green-mid flex items-center gap-1">
-              <span className="bg-game-green-mid text-white px-2 py-px rounded-[10px] text-[10px] font-bold">Lv.5</span>
-              Nông dân Bạc
+              <span className="bg-game-green-mid text-white px-2 py-px rounded-[10px] text-[10px] font-bold">Lv.{level}</span>
+              {title}
             </span>
           </div>
         </div>
@@ -35,6 +40,18 @@ export default function FarmHeader() {
           <button className="w-10 h-10 rounded-full header-btn-glass flex items-center justify-center text-lg transition-transform active:scale-90">
             ⚙️
           </button>
+        </div>
+      </div>
+
+      {/* XP progress bar */}
+      <div className="mb-3 px-1">
+        <div className="flex justify-between text-[10px] font-bold mb-1">
+          <span className="text-game-green-mid">⭐ XP: {xp}/{nextXp}</span>
+          <span className="text-muted-foreground">Lv.{level} → Lv.{level + 1}</span>
+        </div>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+          <div className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${xpPct}%`, background: 'linear-gradient(90deg, #00b894, #55efc4)' }} />
         </div>
       </div>
 

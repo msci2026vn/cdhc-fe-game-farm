@@ -4,6 +4,7 @@ import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useBossProgressStore } from '../stores/bossProgressStore';
+import { usePlayerStore } from '@/shared/stores/playerStore';
 
 interface Props {
   boss: BossInfo;
@@ -28,7 +29,8 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   } = useMatch3(bossInfo);
 
   const addOgn = useFarmStore(s => s.addOgn);
-  const { addKill, addDmg, addXp, level: prevLevel } = useBossProgressStore();
+  const { addKill, addDmg } = useBossProgressStore();
+  const addXp = usePlayerStore(s => s.addXp);
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
@@ -41,16 +43,11 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
       addOgn(bossInfo.reward);
       addKill(bossInfo.id);
       addDmg(totalDmgDealt);
-      const oldLevel = useBossProgressStore.getState().level;
-      addXp(bossInfo.xpReward);
-      // Check level up
-      setTimeout(() => {
-        const newLevel = useBossProgressStore.getState().level;
-        if (newLevel > oldLevel) {
-          setLevelUpShow(true);
-          setTimeout(() => setLevelUpShow(false), 3000);
-        }
-      }, 100);
+      const { leveledUp, newLevel } = addXp(bossInfo.xpReward);
+      if (leveledUp) {
+        setLevelUpShow(true);
+        setTimeout(() => setLevelUpShow(false), 3000);
+      }
     }
   }, [result, bossInfo, addOgn, addKill, addDmg, addXp, totalDmgDealt]);
 
@@ -85,7 +82,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   // Victory / Defeat overlay
   if (result !== 'fighting') {
     const won = result === 'victory';
-    const currentLevel = useBossProgressStore.getState().level;
+    const currentLevel = usePlayerStore.getState().level;
     return (
       <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-8">
         {/* Level up overlay */}
@@ -225,7 +222,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           <button onClick={onBack} className="text-white/50 text-sm font-bold active:scale-95">← Thoát</button>
           <div className="px-2.5 py-1 rounded-lg font-heading text-xs font-bold text-white"
             style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-            ⭐ Lv.{useBossProgressStore.getState().level}
+            ⭐ Lv.{usePlayerStore.getState().level}
           </div>
         </div>
 
