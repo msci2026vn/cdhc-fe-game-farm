@@ -24,6 +24,9 @@ import type {
   SyncResult,
   PingResult,
   AuthStatus,
+  PlantTypeId,
+  QuizAnswer,
+  InteractType,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -84,9 +87,13 @@ export const gameApi = {
 
   /**
    * Plant a seed in a slot
+   * BE Zod: { plantTypeId: enum['tomato','lettuce','cucumber','carrot','chili'], slotIndex: int 0-8 }
    * TODO: bước 13 chuyển sang API thật
    */
-  plantSeed: async (slotIndex: number, plantTypeId: string): Promise<FarmPlotData> => {
+  plantSeed: async (
+    slotIndex: number,
+    plantTypeId: PlantTypeId
+  ): Promise<FarmPlotData> => {
     // MOCK: Return dummy plot
     return {
       id: 'mock-plot',
@@ -110,6 +117,7 @@ export const gameApi = {
 
   /**
    * Water a plot
+   * BE Zod: { plotId: string uuid }
    * TODO: bước 14 chuyển sang API thật
    */
   waterPlot: async (plotId: string): Promise<WaterResult> => {
@@ -125,6 +133,7 @@ export const gameApi = {
 
   /**
    * Harvest a plot
+   * BE Zod: { plotId: string uuid }
    * TODO: bước 15 chuyển sang API thật
    */
   harvestPlot: async (plotId: string): Promise<HarvestResult> => {
@@ -141,6 +150,7 @@ export const gameApi = {
   // ═══ BOSS ═══
   /**
    * Complete boss fight
+   * BE Zod: { bossId: string, won: boolean, totalDamage: int 0-100000, durationSeconds: 0-3600 }
    * TODO: bước 17 chuyển sang API thật
    */
   completeBoss: async (data: BossFightInput): Promise<BossCompleteResult> => {
@@ -186,6 +196,7 @@ export const gameApi = {
 
   /**
    * Answer a quiz question
+   * BE Zod: { sessionId: string, questionId: string, answer: enum['A','B','C','D'] }
    * TODO: bước 18 chuyển sang API thật
    */
   answerQuiz: async (input: QuizAnswerInput): Promise<QuizAnswerResult> => {
@@ -214,20 +225,21 @@ export const gameApi = {
 
   /**
    * Buy an item from shop
+   * BE Zod: { itemId: string, quantity?: int 1-10, default 1 }
    * TODO: bước 19 chuyển sang API thật
    */
-  buyItem: async (itemId: string): Promise<BuyResult> => {
+  buyItem: async (itemId: string, quantity?: number): Promise<BuyResult> => {
     // MOCK: Return buy result
     return {
       item: {
         id: itemId,
         name: 'Mock Item',
         emoji: '🎁',
-        quantity: 1,
+        quantity: quantity ?? 1,
       },
       ognRemaining: 1000,
     };
-    // Real API (bước 19): return gameClient.post<BuyResult>('/game/shop/buy', { itemId });
+    // Real API (bước 19): return gameClient.post<BuyResult>('/game/shop/buy', { itemId, quantity: quantity ?? 1 });
   },
 
   // ═══ SOCIAL ═══
@@ -246,11 +258,13 @@ export const gameApi = {
 
   /**
    * Interact with friend's garden
+   * BE Zod: { friendId: string uuid, type: enum['water','like','comment','gift'], data?: { comment?, giftId? } }
    * TODO: bước 20 chuyển sang API thật
    */
   interactFriend: async (
     friendId: string,
-    type: 'water' | 'like' | 'comment' | 'gift'
+    type: InteractType,
+    data?: { comment?: string; giftId?: string }
   ): Promise<{ ognGained: number; xpGained: number; dailyLimitReached: boolean }> => {
     // MOCK: Return interaction result
     return {
@@ -258,7 +272,7 @@ export const gameApi = {
       xpGained: 2,
       dailyLimitReached: false,
     };
-    // Real API (bước 20): return gameClient.post('/game/social/interact', { friendId, type });
+    // Real API (bước 20): return gameClient.post('/game/social/interact', { friendId, type, data });
   },
 
   // ═══ LEADERBOARD ═══
@@ -327,4 +341,7 @@ export type {
   SyncResult,
   PingResult,
   AuthStatus,
+  PlantTypeId,
+  QuizAnswer,
+  InteractType,
 };

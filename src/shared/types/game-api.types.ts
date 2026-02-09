@@ -131,7 +131,7 @@ export interface QuizStartResult {
 export interface QuizAnswerInput {
   sessionId: string;
   questionId: string;
-  answer: string;
+  answer: QuizAnswer;
 }
 
 export interface QuizAnswerResult {
@@ -220,9 +220,17 @@ export interface LeaderboardResult {
 // ═══════════════════════════════════════════════════════════════
 
 export interface SyncAction {
-  type: 'water' | 'bug_catch' | 'social_interact';
+  type:
+    | 'water'
+    | 'bug_catch'
+    | 'social_interact'
+    | 'plant'
+    | 'harvest'
+    | 'boss_kill'
+    | 'quiz'
+    | 'shop_buy';
   timestamp: number;
-  data: Record<string, unknown>;
+  data?: Record<string, unknown>;
 }
 
 export interface SyncResult {
@@ -247,6 +255,45 @@ export interface AuthStatus {
     name: string;
     email: string;
   } | null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REQUEST TYPES (match BE Zod schemas)
+// ═══════════════════════════════════════════════════════════════
+
+export type PlantTypeId = 'tomato' | 'lettuce' | 'cucumber' | 'carrot' | 'chili';
+export type QuizAnswer = 'A' | 'B' | 'C' | 'D';
+export type InteractType = 'water' | 'like' | 'comment' | 'gift';
+
+export interface PlantRequest {
+  plantTypeId: PlantTypeId;
+  slotIndex: number;
+}
+
+export interface WaterRequest {
+  plotId: string;
+}
+
+export interface HarvestRequest {
+  plotId: string;
+}
+
+export interface BuyRequest {
+  itemId: string;
+  quantity?: number;
+}
+
+export interface InteractRequest {
+  friendId: string;
+  type: InteractType;
+  data?: {
+    comment?: string;
+    giftId?: string;
+  };
+}
+
+export interface SyncRequest {
+  actions: SyncAction[];
 }
 
 // ═══════════════════════════════════════════════════════════════
