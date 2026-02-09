@@ -1,12 +1,14 @@
 import { BOSSES, BossInfo, DIFFICULTY_STYLES } from '../data/bosses';
-import { useBossProgressStore, xpForNextLevel } from '../stores/bossProgressStore';
+import { useBossProgressStore } from '../stores/bossProgressStore';
+import { usePlayerStore, xpForNextLevel } from '@/shared/stores/playerStore';
 
 interface Props {
   onSelect: (boss: BossInfo) => void;
 }
 
 export default function BossList({ onSelect }: Props) {
-  const { killedBosses, totalDmgDealt, level, xp } = useBossProgressStore();
+  const { killedBosses, totalDmgDealt } = useBossProgressStore();
+  const { level, xp } = usePlayerStore();
   const nextXp = xpForNextLevel(level);
   const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
 
@@ -17,7 +19,6 @@ export default function BossList({ onSelect }: Props) {
           <h1 className="font-heading text-xl font-bold text-white flex items-center gap-2">
             ⚔️ Chọn Boss
           </h1>
-          {/* Player level badge */}
           <div className="flex items-center gap-2">
             <div className="px-3 py-1.5 rounded-xl font-heading text-sm font-bold text-white"
               style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 0 15px rgba(108,92,231,0.4)' }}>
