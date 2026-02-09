@@ -5,9 +5,10 @@ interface FriendsListProps {
   onClose: () => void;
   onVisit: (friend: Friend) => void;
   onInvite: () => void;
+  onLeaderboard?: () => void;
 }
 
-export default function FriendsList({ open, onClose, onVisit, onInvite }: FriendsListProps) {
+export default function FriendsList({ open, onClose, onVisit, onInvite, onLeaderboard }: FriendsListProps) {
   if (!open) return null;
 
   return (
@@ -68,14 +69,21 @@ export default function FriendsList({ open, onClose, onVisit, onInvite }: Friend
             </button>
           ))}
 
-          {/* Invite button */}
-          <div className="px-5 py-5 text-center">
+          {/* Action buttons */}
+          <div className="px-5 py-5 space-y-3 text-center">
+            {onLeaderboard && (
+              <button onClick={onLeaderboard}
+                className="w-full py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
+                style={{ background: 'linear-gradient(135deg, #f0b429, #e67e22)', boxShadow: '0 4px 15px rgba(240,180,41,0.3)' }}>
+                🏆 Bảng xếp hạng
+              </button>
+            )}
             <button onClick={onInvite}
               className="w-full py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
-              style={{ background: 'linear-gradient(135deg, #f0b429, #e67e22)', boxShadow: '0 4px 15px rgba(240,180,41,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #2d8a4e, #4eca6a)', boxShadow: '0 4px 15px rgba(45,138,78,0.3)' }}>
               🎁 Mời bạn bè nhận {50} OGN
             </button>
-            <p className="text-[10px] text-muted-foreground font-semibold mt-2">Mời càng nhiều, nhận càng lớn!</p>
+            <p className="text-[10px] text-muted-foreground font-semibold">Mời càng nhiều, nhận càng lớn!</p>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import BugCatchGame from '../components/BugCatchGame';
 import FriendsList from '@/modules/friends/components/FriendsList';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
+import Leaderboard from '@/modules/friends/components/Leaderboard';
 import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
@@ -35,6 +36,7 @@ export default function FarmingScreen() {
   const [showFriends, setShowFriends] = useState(false);
   const [visitingFriend, setVisitingFriend] = useState<Friend | null>(null);
   const [showInvite, setShowInvite] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [, forceUpdate] = useState(0);
 
   const activePlot = plots[activePlotIndex] || null;
@@ -258,8 +260,10 @@ export default function FarmingScreen() {
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
       <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
         onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }}
-        onInvite={() => { setShowFriends(false); setShowInvite(true); }} />
+        onInvite={() => { setShowFriends(false); setShowInvite(true); }}
+        onLeaderboard={() => { setShowFriends(false); setShowLeaderboard(true); }} />
       <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
+      <Leaderboard open={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
       {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
     </div>
   );
