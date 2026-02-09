@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { gameApi } from '@/shared/api/game-api';
 
 const LEAVES = [
   { emoji: '🍃', top: '10%', left: '10%', delay: '0s', size: 'text-4xl' },
@@ -9,18 +10,75 @@ const LEAVES = [
   { emoji: '☘️', top: '50%', left: '50%', delay: '2s', size: 'text-[35px]' },
 ];
 
+/**
+ * SplashScreen - Entry point với auth check
+ *
+ * Flow:
+ * 1. Show splash animation (2.8s)
+ * 2. Check auth status (call /api/game/ping)
+ * 3. If authenticated → redirect /farm
+ * 4. If not authenticated → redirect /login
+ * 5. User can tap to skip animation
+ */
 export default function SplashScreen() {
   const navigate = useNavigate();
   const [tapped, setTapped] = useState(false);
+  const [checkedAuth, setCheckedAuth] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setTapped(true), 2800);
-    return () => clearTimeout(timer);
-  }, []);
+    // Show splash animation for 2.8s
+    const animTimer = setTimeout(() => setTapped(true), 2800);
 
-  const handleTap = () => {
-    if (!tapped) setTapped(true);
-    navigate('/farm', { replace: true });
+    // Check auth after animation
+    const checkAuth = async () => {
+      try {
+        const result = await gameApi.ping();
+
+        if (result.success) {
+          console.log('[Splash] ✅ Authenticated → /farm');
+          navigate('/farm', { replace: true });
+        } else {
+          console.log('[Splash] ❌ Not authenticated → /login');
+          navigate('/login', { replace: true });
+        }
+      } catch (error) {
+        console.error('[Splash] ❌ Auth check failed:', error);
+        navigate('/login', { replace: true });
+      } finally {
+        setCheckedAuth(true);
+      }
+    };
+
+    // Schedule auth check
+    const authTimer = setTimeout(() => {
+      checkAuth();
+    }, 3000);
+
+    return () => {
+      clearTimeout(animTimer);
+      clearTimeout(authTimer);
+    };
+  }, [navigate]);
+
+  const handleTap = async () => {
+    if (!tapped) {
+      setTapped(true);
+      return; // Wait for auth check
+    }
+
+    if (checkedAuth) return; // Already redirected
+
+    // Manual tap → check auth immediately
+    try {
+      const result = await gameApi.ping();
+      if (result.success) {
+        navigate('/farm', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
+    } catch {
+      navigate('/login', { replace: true });
+    }
   };
 
   return (
@@ -73,7 +131,7 @@ export default function SplashScreen() {
       <p className="mt-14 text-white/60 text-[13px] font-semibold tracking-wider z-10"
         style={{ animation: 'fade-in-up 1s 2.5s both' }}
       >
-        Chạm để bắt đầu
+        {tapped ? 'Đang kiểm tra đăng nhập...' : 'Chạm để bắt đầu'}
       </p>
     </div>
   );

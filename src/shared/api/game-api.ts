@@ -339,16 +339,40 @@ export const gameApi = {
   },
 
   /**
-   * Get auth status
-   * TODO: bước 10 chuyển sang API thật
+   * Get auth status - Check if user is logged in
+   * Bước 10 — REAL API: Calls /api/auth/me
    */
   getAuthStatus: async (): Promise<AuthStatus> => {
-    // MOCK: Return logged out status
-    return {
-      isLoggedIn: false,
-      user: null,
-    };
-    // Real API (bước 10): return gameClient.get<AuthStatus>('/game/auth/status');
+    try {
+      const response = await fetch('https://sta.cdhc.vn/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.status === 401) {
+        return { isLoggedIn: false, user: null };
+      }
+
+      if (!response.ok) {
+        console.error('[GameAPI] getAuthStatus failed:', response.status);
+        return { isLoggedIn: false, user: null };
+      }
+
+      const json = await response.json();
+      if (!json.success) {
+        return { isLoggedIn: false, user: null };
+      }
+
+      // Return user data
+      return {
+        isLoggedIn: true,
+        user: json.data || json.user || null,
+      };
+    } catch (error) {
+      console.error('[GameAPI] getAuthStatus error:', error);
+      return { isLoggedIn: false, user: null };
+    }
   },
 };
 

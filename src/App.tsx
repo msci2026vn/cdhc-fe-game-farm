@@ -1,7 +1,9 @@
 import { Suspense, lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthGuard } from '@/shared/components/AuthGuard';
 
+// Lazy load screens
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
 const LoginScreen = lazy(() => import('@/modules/auth/screens/LoginScreen'));
 const FarmingScreen = lazy(() => import('@/modules/farming/screens/FarmingScreen'));
@@ -20,21 +22,41 @@ const Fallback = () => (
   </div>
 );
 
+/**
+ * App Router with AuthGuard
+ *
+ * Routes:
+ * - / → SplashScreen (auth check → redirect /farm hoặc /login)
+ * - /login → LoginScreen (Google OAuth)
+ * - /farm → FarmingScreen (protected by AuthGuard)
+ * - /boss → BossScreen (protected by AuthGuard)
+ * - /quiz → QuizScreen (protected by AuthGuard)
+ * - /shop → ShopScreen (protected by AuthGuard)
+ * - /profile → ProfileScreen (protected by AuthGuard)
+ * - * → Redirect to /
+ */
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Suspense fallback={<Fallback />}>
-          <Routes>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/login" element={<LoginScreen />} />
-            <Route path="/farm" element={<FarmingScreen />} />
-            <Route path="/boss" element={<BossScreen />} />
-            <Route path="/quiz" element={<QuizScreen />} />
-            <Route path="/shop" element={<ShopScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AuthGuard>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<SplashScreen />} />
+              <Route path="/login" element={<LoginScreen />} />
+
+              {/* Protected routes (require auth) */}
+              <Route path="/farm" element={<FarmingScreen />} />
+              <Route path="/boss" element={<BossScreen />} />
+              <Route path="/quiz" element={<QuizScreen />} />
+              <Route path="/shop" element={<ShopScreen />} />
+              <Route path="/profile" element={<ProfileScreen />} />
+
+              {/* Catch-all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AuthGuard>
         </Suspense>
       </BrowserRouter>
     </QueryClientProvider>
