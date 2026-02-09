@@ -173,6 +173,12 @@ export default {
           "50%": { transform: "scale(1.3)" },
           "100%": { transform: "scale(0)", opacity: "0" },
         },
+        "bug-wiggle": {
+          "0%, 100%": { transform: "rotate(-8deg) scale(1)" },
+          "25%": { transform: "rotate(8deg) scale(1.1)" },
+          "50%": { transform: "rotate(-5deg) scale(0.95)" },
+          "75%": { transform: "rotate(6deg) scale(1.05)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -193,6 +199,7 @@ export default {
         "sparkle-up": "sparkle-up 1s ease-out forwards",
         "ult-glow": "ult-glow 1.5s ease-in-out infinite",
         "gem-pop": "gem-pop 0.3s ease-out forwards",
+        "bug-wiggle": "bug-wiggle 0.5s ease-in-out infinite",
       },
     },
   },
