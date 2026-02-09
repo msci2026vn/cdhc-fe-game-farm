@@ -1,23 +1,18 @@
-import { useMemo } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
-
-const GEM_TYPES = [
-  { type: 'atk', emoji: '⚔️', css: 'gem-atk' },
-  { type: 'hp', emoji: '💚', css: 'gem-hp' },
-  { type: 'def', emoji: '🛡️', css: 'gem-def' },
-  { type: 'star', emoji: '⭐', css: 'gem-star' },
-] as const;
+import { useMatch3 } from '../hooks/useMatch3';
 
 export default function BossScreen() {
-  const gems = useMemo(() =>
-    Array.from({ length: 36 }, () => GEM_TYPES[Math.floor(Math.random() * GEM_TYPES.length)]),
-  []);
+  const { grid, selected, animating, matchedCells, boss, popups, handleTap, GEM_META } = useMatch3();
+
+  const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
+  const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
+  const shieldPct = Math.min(100, Math.round((boss.shield / 500) * 100));
+  const ultReady = boss.ultCharge >= 100;
 
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative boss-gradient flex flex-col">
       {/* Top half: Boss arena */}
       <div className="flex-[0_0_50%] pt-safe px-5 pb-2 flex flex-col relative overflow-hidden">
-        {/* Radial effects */}
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
         }} />
@@ -38,26 +33,29 @@ export default function BossScreen() {
           </h2>
           <div className="w-full h-5 rounded-xl overflow-hidden relative"
             style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div className="h-full rounded-xl relative boss-hp-glow" style={{ width: '63%', background: 'linear-gradient(90deg, #e74c3c, #ff6b6b)' }}>
+            <div className="h-full rounded-xl relative boss-hp-glow transition-all duration-500"
+              style={{ width: `${bossHpPct}%`, background: 'linear-gradient(90deg, #e74c3c, #ff6b6b)' }}>
               <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-xl" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3), transparent)' }} />
             </div>
             <span className="absolute inset-0 flex items-center justify-center font-heading text-[11px] font-bold text-white text-shadow-sm">
-              6,300 / 10,000 HP
+              {boss.bossHp.toLocaleString()} / {boss.bossMaxHp.toLocaleString()} HP
             </span>
           </div>
         </div>
 
-        {/* Boss sprite */}
+        {/* Boss sprite + damage popups */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className="text-[100px] animate-boss-idle" style={{ filter: 'drop-shadow(0 0 30px rgba(231,76,60,0.5))' }}>
+          <span className={`text-[100px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''}`}
+            style={{ filter: 'drop-shadow(0 0 30px rgba(231,76,60,0.5))' }}>
             🐲
           </span>
-          <span className="absolute top-[20%] right-[25%] font-heading text-2xl font-bold animate-damage-float text-shadow-sm"
-            style={{ color: '#ffe066' }}>-128</span>
-          <span className="absolute top-[30%] right-[20%] font-heading text-lg font-bold animate-damage-float text-shadow-sm"
-            style={{ color: '#ff6b6b', animationDelay: '0.5s' }}>-64</span>
-          <span className="absolute top-[50%] left-[15%] font-heading text-xl font-bold animate-damage-float text-shadow-sm"
-            style={{ color: '#74b9ff', animationDelay: '1s' }}>+32</span>
+          {popups.map(p => (
+            <span key={p.id}
+              className="absolute font-heading text-2xl font-bold animate-damage-float text-shadow-sm pointer-events-none"
+              style={{ color: p.color, left: `${p.x}%`, top: `${p.y}%` }}>
+              {p.text}
+            </span>
+          ))}
         </div>
 
         {/* Mini leaderboard */}
@@ -82,25 +80,24 @@ export default function BossScreen() {
       {/* Bottom half: Match-3 */}
       <div className="flex-[0_0_50%] rounded-t-2xl px-4 pt-4 pb-[80px] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
-        {/* Handle */}
         <div className="w-10 h-1 rounded-full mx-auto mb-3" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
         {/* Player stats */}
         <div className="flex gap-2 mb-2.5">
           <div className="flex-1">
             <div className="flex justify-between text-[10px] font-bold mb-1" style={{ color: '#55efc4' }}>
-              <span>❤️ HP</span><span>750/1000</span>
+              <span>❤️ HP</span><span>{boss.playerHp}/{boss.playerMaxHp}</span>
             </div>
             <div className="h-2.5 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <div className="h-full rounded-md" style={{ width: '75%', background: 'linear-gradient(90deg, #00b894, #55efc4)', boxShadow: '0 0 8px rgba(85,239,196,0.3)' }} />
+              <div className="h-full rounded-md transition-all duration-500" style={{ width: `${playerHpPct}%`, background: 'linear-gradient(90deg, #00b894, #55efc4)', boxShadow: '0 0 8px rgba(85,239,196,0.3)' }} />
             </div>
           </div>
           <div className="flex-1">
             <div className="flex justify-between text-[10px] font-bold mb-1" style={{ color: '#74b9ff' }}>
-              <span>🛡️ Shield</span><span>200</span>
+              <span>🛡️ Shield</span><span>{boss.shield}</span>
             </div>
             <div className="h-2.5 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <div className="h-full rounded-md" style={{ width: '40%', background: 'linear-gradient(90deg, #0984e3, #74b9ff)', boxShadow: '0 0 8px rgba(116,185,255,0.3)' }} />
+              <div className="h-full rounded-md transition-all duration-500" style={{ width: `${shieldPct}%`, background: 'linear-gradient(90deg, #0984e3, #74b9ff)', boxShadow: '0 0 8px rgba(116,185,255,0.3)' }} />
             </div>
           </div>
         </div>
@@ -108,20 +105,30 @@ export default function BossScreen() {
         {/* Gem grid */}
         <div className="grid grid-cols-6 gap-1.5 p-1.5 rounded-lg flex-1"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          {gems.map((gem, i) => (
-            <div key={i}
-              className={`aspect-square rounded-[10px] flex items-center justify-center text-[22px] cursor-pointer relative gem-shine transition-transform active:scale-[0.88] ${gem.css}`}>
-              {gem.emoji}
-            </div>
-          ))}
+          {grid.map((gem, i) => {
+            const meta = GEM_META[gem.type];
+            const isSelected = selected === i;
+            const isMatched = matchedCells.has(i);
+            return (
+              <div key={gem.id}
+                onClick={() => handleTap(i)}
+                className={`aspect-square rounded-[10px] flex items-center justify-center text-[22px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                  ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
+                  ${isMatched ? 'scale-0 opacity-0' : ''}
+                  ${animating && !isMatched ? 'pointer-events-none' : ''}
+                `}>
+                {meta.emoji}
+              </div>
+            );
+          })}
         </div>
 
         {/* Ultimate bar */}
         <div className="flex items-center gap-2.5 mt-2">
           <div className="flex-1 h-2 rounded overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-            <div className="h-full rounded ult-gradient" style={{ width: '72%' }} />
+            <div className="h-full rounded ult-gradient transition-all duration-500" style={{ width: `${boss.ultCharge}%` }} />
           </div>
-          <button className="px-4 py-2 rounded-[20px] text-white font-heading text-xs font-bold opacity-50 ult-btn-gradient">
+          <button className={`px-4 py-2 rounded-[20px] text-white font-heading text-xs font-bold ult-btn-gradient transition-opacity ${ultReady ? 'opacity-100 animate-ult-glow' : 'opacity-50'}`}>
             ⚡ ULTIMATE
           </button>
         </div>
