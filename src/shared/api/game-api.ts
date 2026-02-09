@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { gameClient } from './client';
+import type { ApiResponse } from '../types/common';
 import type {
   PlayerProfile,
   FarmPlotData,
@@ -295,16 +296,43 @@ export const gameApi = {
 
   // ═══ HEALTH CHECK ═══
   /**
-   * Health check - FIRST ENDPOINT TO TEST
-   * TODO: bước 8 chuyển sang API thật - ENDPOINT ĐẦU TIÊN TEST
+   * Health check - test auth chain (bước 8)
+   * Success = route + auth + CORS + cookie ALL work
    */
   ping: async (): Promise<PingResult> => {
-    // MOCK: Return mock mode indicator
-    return {
-      success: true,
-      message: 'mock mode',
-    };
-    // Real API (bước 8): return gameClient.get<PingResult>('/game/ping');
+    try {
+      const res = await fetch('https://sta.cdhc.vn/api/game/ping', {
+        method: 'GET',
+        credentials: 'include', // ← BẮT BUỘC — gửi cookie cross-subdomain
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (res.status === 401) {
+        return { success: false, message: 'Unauthorized — cần đăng nhập' };
+      }
+
+      if (res.status === 403) {
+        return { success: false, message: 'Forbidden — tài khoản chưa được duyệt' };
+      }
+
+      if (!res.ok) {
+        return { success: false, message: `HTTP ${res.status}` };
+      }
+
+      const result: ApiResponse<{ message: string; userId: string; email: string; timestamp: string }> = await res.json();
+      if (!result.success) {
+        return { success: false, message: result.message || 'API Error' };
+      }
+
+      return {
+        success: true,
+        message: result.data.message,
+        userId: result.data.userId,
+        email: result.data.email,
+      };
+    } catch (error) {
+      return { success: false, message: String(error) };
+    }
   },
 
   /**

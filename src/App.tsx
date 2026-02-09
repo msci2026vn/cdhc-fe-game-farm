@@ -1,6 +1,7 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { gameApi } from '@/shared/api/game-api';
 
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
 const LoginScreen = lazy(() => import('@/modules/auth/screens/LoginScreen'));
@@ -20,23 +21,36 @@ const Fallback = () => (
   </div>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <Suspense fallback={<Fallback />}>
-        <Routes>
-          <Route path="/" element={<SplashScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/farm" element={<FarmingScreen />} />
-          <Route path="/boss" element={<BossScreen />} />
-          <Route path="/quiz" element={<QuizScreen />} />
-          <Route path="/shop" element={<ShopScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+const App = () => {
+  // BƯỚC 8: Test ping auth chain — XÓA SAU KHI VERIFY
+  useEffect(() => {
+    gameApi.ping().then((result) => {
+      if (result.success) {
+        console.log('🎮 Game API connected!', result);
+      } else {
+        console.warn('⚠️ Game API:', result.message);
+      }
+    });
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Suspense fallback={<Fallback />}>
+          <Routes>
+            <Route path="/" element={<SplashScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/farm" element={<FarmingScreen />} />
+            <Route path="/boss" element={<BossScreen />} />
+            <Route path="/quiz" element={<QuizScreen />} />
+            <Route path="/shop" element={<ShopScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

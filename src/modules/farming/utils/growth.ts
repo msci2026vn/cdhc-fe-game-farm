@@ -38,14 +38,30 @@ export function getWeatherHappinessModifier(weather: WeatherType): number {
   }
 }
 
+/**
+ * Calculate BASE growth percent (without weather multiplier).
+ * This matches BE logic exactly — used for harvest readiness check.
+ * BE formula: (elapsed / growthDurationMs) * 100, cap at 100
+ */
+export function calculateBaseGrowthPercent(plot: FarmPlot): number {
+  if (plot.isDead) return 0;
+  const elapsed = Date.now() - plot.plantedAt;
+  const pct = Math.min(100, (elapsed / plot.plantType.growthDurationMs) * 100);
+  return Math.round(pct);
+}
+
+/**
+ * Calculate DISPLAY growth percent (WITH weather multiplier).
+ * Used for UI animation/visual only. Shows faster/slower growth based on weather.
+ * Formula: base_growth * weather_multiplier
+ */
 export function calculateGrowthPercent(plot: FarmPlot): number {
   if (plot.isDead) return 0;
   const weather = useWeatherStore.getState().weather;
   const multiplier = getWeatherGrowthMultiplier(weather);
-  const elapsed = Date.now() - plot.plantedAt;
-  const effectiveElapsed = elapsed * multiplier;
-  const pct = Math.min(100, (effectiveElapsed / plot.plantType.growthDurationMs) * 100);
-  return Math.round(pct);
+  const baseGrowth = calculateBaseGrowthPercent(plot);
+  const displayGrowth = Math.min(100, baseGrowth * multiplier);
+  return Math.round(displayGrowth);
 }
 
 export function calculateStage(plot: FarmPlot): PlantStage {
@@ -57,8 +73,13 @@ export function calculateStage(plot: FarmPlot): PlantStage {
   return 'mature';
 }
 
+/**
+ * Check if plot is ready for harvest.
+ * IMPORTANT: Uses BASE growth (no weather) to match BE logic.
+ * FE may show 100% early due to weather bonus, but harvest only works when base time is met.
+ */
 export function isHarvestReady(plot: FarmPlot): boolean {
-  return !plot.isDead && calculateGrowthPercent(plot) >= 100;
+  return !plot.isDead && calculateBaseGrowthPercent(plot) >= 100;
 }
 
 // Sprite mapping: stage → emoji
