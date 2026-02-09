@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Friend } from '../data/friends';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useActivityStore } from '@/shared/stores/activityStore';
 
 const GIFT_OPTIONS = [
   { emoji: '💧', name: 'Nước tưới', cost: 5 },
@@ -20,6 +21,10 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
   const ogn = useFarmStore((s) => s.ogn);
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
+  const actAddLike = useActivityStore((s) => s.addLike);
+  const actAddComment = useActivityStore((s) => s.addComment);
+  const actAddGift = useActivityStore((s) => s.addGift);
+  const actAddWater = useActivityStore((s) => s.addWater);
   const [watered, setWatered] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -37,6 +42,7 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
     addOgn(5);
     showFlyUp('+5 OGN 🪙');
     addToast(`Đã tưới giúp ${friend.name}! +5 OGN 💧`, 'success');
+    actAddWater(friend.name);
   };
 
   const handleLike = () => {
@@ -45,6 +51,7 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
     addOgn(2);
     showFlyUp('+2 OGN ❤️');
     addToast(`Đã thích vườn của ${friend.name}! ❤️`, 'success');
+    actAddLike(friend.name);
   };
 
   const handleComment = () => {
@@ -55,6 +62,7 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
     ]);
     addOgn(1);
     showFlyUp('+1 OGN 💬');
+    actAddComment(friend.name, commentText.trim());
     setCommentText('');
   };
 
@@ -64,6 +72,7 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
     setGiftsSent((prev) => [...prev, gift.name]);
     showFlyUp(`${gift.emoji} -${gift.cost} OGN`);
     addToast(`Đã tặng ${gift.name} cho ${friend.name}! ${gift.emoji}`, 'success');
+    actAddGift(friend.name, gift.name);
   };
 
   const moodEmoji = friend.plant.happiness >= 70 ? '😊' : friend.plant.happiness >= 40 ? '😐' : '😢';

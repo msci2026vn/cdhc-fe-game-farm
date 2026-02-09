@@ -16,6 +16,7 @@ import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useActivityStore } from '@/shared/stores/activityStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji, getWeatherGrowthMultiplier, getWeatherHappinessModifier } from '../utils/growth';
 import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
@@ -68,14 +69,16 @@ export default function FarmingScreen() {
       addToast('Đang hồi chiêu, chờ thêm nhé ⏳', 'info');
     }
   }, [activePlot, waterPlot, showFlyUp, addToast, start]);
+  const addHarvest = useActivityStore((s) => s.addHarvest);
 
   const handleHarvest = useCallback(() => {
     if (!activePlot || !isHarvestReady(activePlot)) return;
     const reward = harvestPlot(activePlot.id);
     showFlyUp(`+${reward} OGN 🪙`);
     addToast(`Thu hoạch thành công! +${reward} OGN 🎉`, 'success');
+    addHarvest(activePlot.plantType.name, reward);
     setTimeout(() => setShowPlantModal(true), 500);
-  }, [activePlot, harvestPlot, showFlyUp, addToast]);
+  }, [activePlot, harvestPlot, showFlyUp, addToast, addHarvest]);
 
   const handleSelectPlant = useCallback((plantType: PlantType) => {
     plantSeed(plantType, plots.length);
