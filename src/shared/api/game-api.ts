@@ -37,28 +37,31 @@ import type {
 export const gameApi = {
   // ═══ PLAYER ═══
   /**
-   * Get player profile
-   * TODO: bước 9 chuyển sang API thật
+   * Get player profile (bước 9 — real API)
    */
-  getProfile: async (): Promise<PlayerProfile> => {
-    // MOCK: Return dummy profile
-    return {
-      userId: 'mock',
-      xp: 0,
-      level: 1,
-      ogn: 1250,
-      totalHarvests: 0,
-      totalBossKills: 0,
-      totalDamage: 0,
-      likesCount: 0,
-      commentsCount: 0,
-      giftsCount: 0,
-      referralCode: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lastPlayedAt: null,
-    } as PlayerProfile;
-    // Real API (bước 9): return gameClient.get<PlayerProfile>('/game/player/profile');
+  getProfile: async (): Promise<PlayerProfile | null> => {
+    try {
+      const response = await fetch('https://sta.cdhc.vn/api/game/player/profile', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.status === 401) {
+        console.warn('[GameAPI] Chưa đăng nhập');
+        return null;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const json = await response.json();
+      return json.data; // { userId, xp, level, ogn, ... }
+    } catch (error) {
+      console.error('[GameAPI] getProfile failed:', error);
+      return null;
+    }
   },
 
   /**

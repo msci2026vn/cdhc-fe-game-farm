@@ -2,7 +2,8 @@ import { useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useActivityStore, formatActivityTime } from '@/shared/stores/activityStore';
-import { usePlayerStore, xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 
 type Tab = 'stats' | 'activity' | 'inventory' | 'achievements';
 
@@ -24,9 +25,37 @@ const RARITY_COLORS: Record<string, string> = {
 export default function ProfileScreen() {
   const [tab, setTab] = useState<Tab>('stats');
   const [activityFilter, setActivityFilter] = useState('all');
+  const { data: profile, isLoading, error } = usePlayerProfile();
   const ogn = useFarmStore((s) => s.ogn);
   const { likes, comments, gifts, harvests, activities, inventory } = useActivityStore();
-  const { level, xp } = usePlayerStore();
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen max-w-[430px] mx-auto relative profile-gradient flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white font-bold text-sm">⏳ Đang tải profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !profile) {
+    return (
+      <div className="min-h-screen max-w-[430px] mx-auto relative profile-gradient flex items-center justify-center">
+        <div className="text-center px-5">
+          <span className="text-5xl block mb-3">❌</span>
+          <p className="text-white font-bold text-sm mb-2">Không thể tải profile</p>
+          <p className="text-white/70 text-xs">Vui lòng đăng nhập để xem thông tin</p>
+        </div>
+      </div>
+    );
+  }
+
+  const level = profile.level;
+  const xp = profile.xp;
   const nextXp = xpForNextLevel(level);
   const title = getLevelTitle(level);
 
@@ -52,23 +81,23 @@ export default function ProfileScreen() {
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-heading text-xl font-bold">Farmer Minh</h2>
+            <h2 className="font-heading text-xl font-bold">{profile.name || 'Nông dân'}</h2>
             <span className="inline-flex items-center gap-1 bg-game-green-mid text-white px-3 py-0.5 rounded-xl text-[11px] font-bold mt-1">
               ⭐ Lv.{level} — {title}
             </span>
             <p className="text-[11px] text-muted-foreground font-semibold mt-1">
-              🪙 {ogn.toLocaleString()} OGN · 📅 14 ngày hoạt động
+              🪙 {profile.ogn.toLocaleString()} OGN · 📅 {profile.totalHarvests} lần thu hoạch
             </p>
           </div>
         </div>
 
-        {/* Quick stats row - REAL DATA */}
+        {/* Quick stats row - REAL DATA FROM API */}
         <div className="grid grid-cols-4 gap-2 mt-4">
           {[
-            { val: harvests.toString(), label: 'Thu hoạch', emoji: '🌾' },
-            { val: likes.toString(), label: 'Lượt thích', emoji: '❤️' },
-            { val: comments.toString(), label: 'Bình luận', emoji: '💬' },
-            { val: gifts.toString(), label: 'Quà tặng', emoji: '🎁' },
+            { val: profile.totalHarvests.toString(), label: 'Thu hoạch', emoji: '🌾' },
+            { val: profile.likesCount.toString(), label: 'Lượt thích', emoji: '❤️' },
+            { val: profile.commentsCount.toString(), label: 'Bình luận', emoji: '💬' },
+            { val: profile.giftsCount.toString(), label: 'Quà tặng', emoji: '🎁' },
           ].map((s) => (
             <div key={s.label} className="rounded-xl p-2.5 text-center glass-card">
               <span className="text-base block">{s.emoji}</span>
@@ -214,11 +243,11 @@ export default function ProfileScreen() {
           <div className="space-y-2.5 animate-fade-in">
             {[
               { emoji: '🎯', name: 'Quiz Master', desc: 'Trả lời đúng 50 câu hỏi', progress: 72, total: '36/50' },
-              { emoji: '🐲', name: 'Boss Slayer', desc: 'Tiêu diệt 10 Boss', progress: 30, total: '3/10' },
-              { emoji: '❤️', name: 'Người thân thiện', desc: 'Thích 50 vườn bạn bè', progress: Math.min(100, (likes / 50) * 100), total: `${likes}/50` },
-              { emoji: '💬', name: 'Người bình luận', desc: 'Bình luận 30 lần', progress: Math.min(100, (comments / 30) * 100), total: `${comments}/30` },
-              { emoji: '🎁', name: 'Nhà hảo tâm', desc: 'Tặng 20 món quà', progress: Math.min(100, (gifts / 20) * 100), total: `${gifts}/20` },
-              { emoji: '🌾', name: 'Nông dân chăm chỉ', desc: 'Thu hoạch 100 lần', progress: Math.min(100, (harvests / 100) * 100), total: `${harvests}/100` },
+              { emoji: '🐲', name: 'Boss Slayer', desc: 'Tiêu diệt 10 Boss', progress: Math.min(100, (profile.totalBossKills / 10) * 100), total: `${profile.totalBossKills}/10` },
+              { emoji: '❤️', name: 'Người thân thiện', desc: 'Thích 50 vườn bạn bè', progress: Math.min(100, (profile.likesCount / 50) * 100), total: `${profile.likesCount}/50` },
+              { emoji: '💬', name: 'Người bình luận', desc: 'Bình luận 30 lần', progress: Math.min(100, (profile.commentsCount / 30) * 100), total: `${profile.commentsCount}/30` },
+              { emoji: '🎁', name: 'Nhà hảo tâm', desc: 'Tặng 20 món quà', progress: Math.min(100, (profile.giftsCount / 20) * 100), total: `${profile.giftsCount}/20` },
+              { emoji: '🌾', name: 'Nông dân chăm chỉ', desc: 'Thu hoạch 100 lần', progress: Math.min(100, (profile.totalHarvests / 100) * 100), total: `${profile.totalHarvests}/100` },
             ].map((a) => (
               <div key={a.name} className="bg-white rounded-xl p-3 flex items-center gap-3"
                 style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>

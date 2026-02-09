@@ -1,7 +1,6 @@
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { gameApi } from '@/shared/api/game-api';
 
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
 const LoginScreen = lazy(() => import('@/modules/auth/screens/LoginScreen'));
@@ -22,17 +21,6 @@ const Fallback = () => (
 );
 
 const App = () => {
-  // BƯỚC 8: Test ping auth chain — XÓA SAU KHI VERIFY
-  useEffect(() => {
-    gameApi.ping().then((result) => {
-      if (result.success) {
-        console.log('🎮 Game API connected!', result);
-      } else {
-        console.warn('⚠️ Game API:', result.message);
-      }
-    });
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
