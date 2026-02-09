@@ -6,6 +6,9 @@ import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import FarmHeader from '../components/FarmHeader';
 import PlantSeedModal from '../components/PlantSeedModal';
 import BugCatchGame from '../components/BugCatchGame';
+import FriendsList from '@/modules/friends/components/FriendsList';
+import FriendGarden from '@/modules/friends/components/FriendGarden';
+import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji } from '../utils/growth';
@@ -28,6 +31,8 @@ export default function FarmingScreen() {
   const [showPlantModal, setShowPlantModal] = useState(false);
   const [showBugGame, setShowBugGame] = useState(false);
   const [showWaterEffect, setShowWaterEffect] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
+  const [visitingFriend, setVisitingFriend] = useState<Friend | null>(null);
   const [, forceUpdate] = useState(0);
 
   const activePlot = plots[activePlotIndex] || null;
@@ -220,7 +225,7 @@ export default function FarmingScreen() {
             style={{ boxShadow: '0 2px 6px rgba(231,76,60,0.4)' }}>5</span>
         </button>
         <button className="action-btn-base py-3.5 border-2 border-transparent"
-          onClick={() => addToast('Tính năng sắp có!', 'info')}>
+          onClick={() => setShowFriends(true)}>
           <span className="text-[28px] drop-shadow-sm relative z-10">🏡</span>
           <span className="text-[11px] font-bold relative z-10">Bạn bè</span>
         </button>
@@ -249,6 +254,9 @@ export default function FarmingScreen() {
       <PointsFlyUp />
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
+      <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
+        onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }} />
+      {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
     </div>
   );
 }
