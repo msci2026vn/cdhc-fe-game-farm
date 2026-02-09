@@ -6,12 +6,15 @@ import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import FarmHeader from '../components/FarmHeader';
 import PlantSeedModal from '../components/PlantSeedModal';
 import BugCatchGame from '../components/BugCatchGame';
+import WeatherOverlay from '../components/WeatherOverlay';
+import WeatherControl from '../components/WeatherControl';
 import FriendsList from '@/modules/friends/components/FriendsList';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
 import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
+import { useWeatherStore } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji } from '../utils/growth';
 import { formatTime } from '@/shared/utils/format';
@@ -89,15 +92,28 @@ export default function FarmingScreen() {
     seed: 'Giai đoạn 1/5', sprout: 'Giai đoạn 2/5', seedling: 'Giai đoạn 3/5', mature: 'Giai đoạn 4/5', dead: 'Đã chết',
   };
 
+  const timeOfDay = useWeatherStore((s) => s.timeOfDay);
+  const isNight = timeOfDay === 'night' || timeOfDay === 'dusk';
+
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto relative farm-sky-gradient">
+    <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
+      {/* Weather sky + effects */}
+      <WeatherOverlay />
+
+      {/* Content */}
+      <div className="relative z-10">
       <FarmHeader />
 
       {/* Farm Scene */}
       <div className="flex-1 relative flex flex-col items-center justify-center px-5 py-2" style={{ minHeight: '45vh' }}>
-        {/* Sun */}
-        <div className="absolute top-2 right-8 w-[60px] h-[60px] rounded-full animate-sun-pulse"
-          style={{ background: 'radial-gradient(circle, #ffe066 30%, #f0b429 60%, transparent 70%)' }} />
+        {/* Sun/Moon */}
+        {!isNight ? (
+          <div className="absolute top-2 right-8 w-[60px] h-[60px] rounded-full animate-sun-pulse"
+            style={{ background: 'radial-gradient(circle, #ffe066 30%, #f0b429 60%, transparent 70%)' }} />
+        ) : (
+          <div className="absolute top-2 right-8 w-[50px] h-[50px] rounded-full"
+            style={{ background: 'radial-gradient(circle, #f5f5dc 30%, #e8e4c9 60%, transparent 70%)', opacity: 0.8 }} />
+        )}
 
         {/* Clouds */}
         <span className="absolute top-1 left-[-30px] text-[30px] opacity-60 animate-cloud-drift" style={{ animationDuration: '25s' }}>☁️</span>
@@ -254,6 +270,8 @@ export default function FarmingScreen() {
       )}
 
       <BottomNav />
+      </div>{/* end z-10 wrapper */}
+
       <Toast />
       <PointsFlyUp />
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
