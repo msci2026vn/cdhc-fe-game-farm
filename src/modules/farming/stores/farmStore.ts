@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { FarmPlot, PlantType } from '../types/farm.types';
+import { useWeatherStore } from './weatherStore';
+import { getWeatherHappinessModifier } from '../utils/growth';
 
 // Demo plant types
 export const PLANT_TYPES: PlantType[] = [
@@ -96,12 +98,15 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   addOgn: (amount) => set((s) => ({ ogn: s.ogn + amount })),
 
   tickHappiness: () => {
+    const weather = useWeatherStore.getState().weather;
+    const modifier = getWeatherHappinessModifier(weather);
+    const decay = Math.round(2 * modifier);
     set((s) => ({
       plots: s.plots.map((p) => {
         if (p.isDead) return p;
-        const newHappiness = Math.max(0, p.happiness - 2);
+        const newHappiness = Math.max(0, p.happiness - decay);
         const isDead = newHappiness <= 0;
-        const mood = newHappiness >= 50 ? 'happy' : newHappiness >= 20 ? 'sad' : 'sad';
+        const mood = newHappiness >= 50 ? 'happy' : 'sad';
         return { ...p, happiness: newHappiness, isDead, mood: isDead ? 'sad' : mood } as FarmPlot;
       }),
     }));

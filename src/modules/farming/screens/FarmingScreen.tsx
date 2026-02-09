@@ -14,9 +14,9 @@ import FriendGarden from '@/modules/friends/components/FriendGarden';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
 import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
-import { useWeatherStore } from '../stores/weatherStore';
+import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji } from '../utils/growth';
+import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji, getWeatherGrowthMultiplier, getWeatherHappinessModifier } from '../utils/growth';
 import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
 import { PlantType } from '../types/farm.types';
@@ -93,7 +93,10 @@ export default function FarmingScreen() {
   };
 
   const timeOfDay = useWeatherStore((s) => s.timeOfDay);
+  const weather = useWeatherStore((s) => s.weather);
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk';
+  const growthMult = getWeatherGrowthMultiplier(weather);
+  const happyMod = getWeatherHappinessModifier(weather);
 
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
@@ -183,23 +186,42 @@ export default function FarmingScreen() {
             </div>
 
             {/* Status tags */}
-            <div className="flex gap-2 mt-2.5">
+            <div className="flex flex-wrap gap-1.5 mt-2.5 justify-center">
               {!activePlot.isDead && (
-                <span className="px-3.5 py-1 rounded-[20px] text-[11px] font-bold flex items-center gap-1"
+                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
                   style={{ background: '#d4f8dc', color: '#1a7a30' }}>
                   ✅ Khỏe mạnh
                 </span>
               )}
               {activePlot.isDead && (
-                <span className="px-3.5 py-1 rounded-[20px] text-[11px] font-bold"
+                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold"
                   style={{ background: '#ffe8e6', color: '#c0392b' }}>
                   💀 Đã chết
                 </span>
               )}
               {!activePlot.isDead && activePlot.happiness >= 50 && (
-                <span className="px-3.5 py-1 rounded-[20px] text-[11px] font-bold flex items-center gap-1"
+                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
                   style={{ background: '#d4eeff', color: '#1a6a9a' }}>
                   💧 Đã tưới
+                </span>
+              )}
+              {/* Weather effect tag */}
+              {growthMult !== 1.0 && (
+                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
+                  style={{
+                    background: growthMult > 1 ? '#d4f8dc' : '#fff3d4',
+                    color: growthMult > 1 ? '#1a7a30' : '#d49a1a',
+                  }}>
+                  {WEATHER_INFO[weather].emoji} {growthMult > 1 ? `+${Math.round((growthMult - 1) * 100)}% tốc độ` : `${Math.round((growthMult - 1) * 100)}% tốc độ`}
+                </span>
+              )}
+              {happyMod !== 1.0 && (
+                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
+                  style={{
+                    background: happyMod < 1 ? '#d4f8dc' : '#ffe8e6',
+                    color: happyMod < 1 ? '#1a7a30' : '#c0392b',
+                  }}>
+                  {happyMod < 1 ? '😊' : '😰'} {happyMod < 1 ? `−${Math.round((1 - happyMod) * 100)}% suy giảm` : `+${Math.round((happyMod - 1) * 100)}% suy giảm`}
                 </span>
               )}
             </div>
