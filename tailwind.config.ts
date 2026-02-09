@@ -179,6 +179,31 @@ export default {
           "50%": { transform: "rotate(-5deg) scale(0.95)" },
           "75%": { transform: "rotate(6deg) scale(1.05)" },
         },
+        "rain-drop": {
+          "0%": { transform: "translateY(-20px)", opacity: "0" },
+          "10%": { opacity: "1" },
+          "100%": { transform: "translateY(100vh)", opacity: "0.3" },
+        },
+        "snow-fall": {
+          "0%": { transform: "translateY(-10px) translateX(0) rotate(0deg)", opacity: "0" },
+          "10%": { opacity: "1" },
+          "100%": { transform: "translateY(100vh) translateX(30px) rotate(360deg)", opacity: "0.2" },
+        },
+        "storm-flash": {
+          "0%, 94%, 100%": { opacity: "0" },
+          "95%": { opacity: "0.6" },
+          "96%": { opacity: "0" },
+          "97%": { opacity: "0.3" },
+        },
+        "wind-blow": {
+          "0%": { transform: "translateX(-100px)", opacity: "0" },
+          "20%": { opacity: "1" },
+          "100%": { transform: "translateX(500px)", opacity: "0" },
+        },
+        "heat-shimmer": {
+          "0%, 100%": { opacity: "0.3" },
+          "50%": { opacity: "0.6" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -200,6 +225,11 @@ export default {
         "ult-glow": "ult-glow 1.5s ease-in-out infinite",
         "gem-pop": "gem-pop 0.3s ease-out forwards",
         "bug-wiggle": "bug-wiggle 0.5s ease-in-out infinite",
+        "rain-drop": "rain-drop 1s linear infinite",
+        "snow-fall": "snow-fall 5s linear infinite",
+        "storm-flash": "storm-flash 4s ease-in-out infinite",
+        "wind-blow": "wind-blow 2s linear infinite",
+        "heat-shimmer": "heat-shimmer 3s ease-in-out infinite",
       },
     },
   },

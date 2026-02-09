@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { useWeatherStore, WEATHER_INFO } from '@/modules/farming/stores/weatherStore';
+import WeatherControl from './WeatherControl';
 
 export default function FarmHeader() {
   const navigate = useNavigate();
   const ogn = useFarmStore((s) => s.ogn);
+  const weather = useWeatherStore((s) => s.weather);
 
   return (
     <div className="px-5 pb-3" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 50px)' }}>
@@ -24,6 +27,7 @@ export default function FarmHeader() {
           </div>
         </div>
         <div className="flex gap-2">
+          <WeatherControl />
           <button onClick={() => navigate('/points')}
             className="w-10 h-10 rounded-full header-btn-glass flex items-center justify-center text-lg transition-transform active:scale-90">
             🔔
