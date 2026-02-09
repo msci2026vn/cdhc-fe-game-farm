@@ -2,7 +2,7 @@ import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 
 export default function BossScreen() {
-  const { grid, selected, animating, matchedCells, boss, popups, handleTap, GEM_META } = useMatch3();
+  const { grid, selected, animating, matchedCells, combo, showCombo, boss, popups, handleTap, GEM_META } = useMatch3();
 
   const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
@@ -56,6 +56,21 @@ export default function BossScreen() {
               {p.text}
             </span>
           ))}
+          {/* Combo indicator */}
+          {showCombo && combo >= 2 && (
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 animate-scale-in pointer-events-none z-20">
+              <div className="px-4 py-1.5 rounded-full font-heading font-bold text-white text-center"
+                style={{
+                  background: combo >= 4 ? 'linear-gradient(135deg, #e74c3c, #fd79a8)' :
+                    combo >= 3 ? 'linear-gradient(135deg, #f39c12, #e74c3c)' :
+                    'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                  boxShadow: combo >= 3 ? '0 0 20px rgba(231,76,60,0.6)' : '0 0 15px rgba(108,92,231,0.5)',
+                }}>
+                <span className="text-lg">🔥 COMBO x{combo}</span>
+                <span className="block text-[10px] text-white/80">DMG ×{combo <= 1 ? 1 : combo === 2 ? 1.5 : combo === 3 ? 2 : combo === 4 ? 2.5 : 3}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Mini leaderboard */}
