@@ -17,6 +17,7 @@ import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { usePlayerStore } from '@/shared/stores/playerStore';
 import { useActivityStore } from '@/shared/stores/activityStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji, getWeatherGrowthMultiplier, getWeatherHappinessModifier } from '../utils/growth';
 import { formatTime } from '@/shared/utils/format';
@@ -64,12 +65,14 @@ export default function FarmingScreen() {
 
   // Sync OGN from profile to store
   const setOgn = useFarmStore((s) => s.setOgn);
+  const setPlayerOgn = usePlayerStore((s) => s.setOgn);
   useEffect(() => {
     if (profile?.ogn !== undefined) {
       console.log('[FARM-DEBUG] FarmingScreen: Syncing OGN from profile =', profile.ogn);
       setOgn(profile.ogn);
+      setPlayerOgn(profile.ogn);
     }
-  }, [profile?.ogn, setOgn]);
+  }, [profile?.ogn, setOgn, setPlayerOgn]);
 
   // ─── NEW: Online status detection (Step 16) ───
   const isOnline = useOnlineStatus();

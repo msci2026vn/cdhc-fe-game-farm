@@ -6,6 +6,7 @@ import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import { useShopItems } from '@/shared/hooks/useShopItems';
 import { useShopBuy } from '@/shared/hooks/useShopBuy';
 import { usePlayerStore } from '@/shared/stores/playerStore';
+import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 type ShopTab = 'seed' | 'tool' | 'card' | 'nft';
@@ -30,7 +31,8 @@ export default function ShopScreen() {
   const [confirmItem, setConfirmItem] = useState<any>(null);
   const [buyAnim, setBuyAnim] = useState<string | null>(null);
 
-  const { level, xp, ogn } = usePlayerStore();
+  const { level, xp } = usePlayerStore();
+  const ogn = useFarmStore((s) => s.ogn);
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
 
@@ -92,7 +94,7 @@ export default function ShopScreen() {
         <div className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] glass-card">
           <span>🪙</span>
           <span className="font-heading text-base font-bold" style={{ color: '#d49a1a' }}>
-            {ogn.toLocaleString('vi-VN')}
+            {(ogn || 0).toLocaleString('vi-VN')}
           </span>
         </div>
       </div>
@@ -103,9 +105,8 @@ export default function ShopScreen() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 py-2 rounded-[20px] text-[13px] font-bold transition-all ${
-              tab.key === activeTab ? 'bg-game-green-mid text-white' : 'text-muted-foreground'
-            }`}
+            className={`flex-1 py-2 rounded-[20px] text-[13px] font-bold transition-all ${tab.key === activeTab ? 'bg-game-green-mid text-white' : 'text-muted-foreground'
+              }`}
             style={
               tab.key !== activeTab
                 ? { background: 'rgba(255,255,255,0.5)' }
@@ -132,9 +133,8 @@ export default function ShopScreen() {
           return (
             <div
               key={item.id}
-              className={`bg-white rounded-xl p-4 flex flex-col items-center gap-2 relative overflow-hidden transition-all ${
-                isAnimating ? 'animate-scale-in' : ''
-              }`}
+              className={`bg-white rounded-xl p-4 flex flex-col items-center gap-2 relative overflow-hidden transition-all ${isAnimating ? 'animate-scale-in' : ''
+                }`}
               style={{
                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                 borderWidth: 2,
@@ -210,7 +210,9 @@ export default function ShopScreen() {
               </span>
             </div>
 
-            <p className="text-[11px] text-muted-foreground mb-4">Số dư sau mua: 🪙 {(ogn - confirmItem.price).toLocaleString()} OGN</p>
+            <p className="text-[11px] text-muted-foreground mb-4">
+              Số dư sau mua: 🪙 {((ogn || 0) - (confirmItem.price || 0)).toLocaleString('vi-VN')} OGN
+            </p>
 
             <div className="flex gap-3">
               <button

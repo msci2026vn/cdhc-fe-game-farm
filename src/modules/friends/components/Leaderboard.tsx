@@ -96,7 +96,7 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
                         : 'linear-gradient(180deg, #cd7f32, #a0522d)',
                   }}>
                   <span className="text-white font-heading text-sm font-bold pb-2">
-                    {tab === 'ogn' ? friend.stats.ogn.toLocaleString() : friend.stats.totalHarvest}
+                    {tab === 'ogn' ? (friend.stats.ogn || 0).toLocaleString('vi-VN') : friend.stats.totalHarvest}
                   </span>
                 </div>
               </div>
@@ -159,7 +159,7 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
                   </p>
                 </div>
                 <span className="font-heading text-sm font-bold" style={{ color: '#d49a1a' }}>
-                  {tab === 'ogn' ? `🪙 ${friend.stats.ogn.toLocaleString()}` : `🌾 ${friend.stats.totalHarvest}`}
+                  {tab === 'ogn' ? `🪙 ${(friend.stats.ogn || 0).toLocaleString('vi-VN')}` : `🌾 ${friend.stats.totalHarvest}`}
                 </span>
               </div>
             );

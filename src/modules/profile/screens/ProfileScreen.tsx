@@ -86,7 +86,7 @@ export default function ProfileScreen() {
               ⭐ Lv.{level} — {title}
             </span>
             <p className="text-[11px] text-muted-foreground font-semibold mt-1">
-              🪙 {profile.ogn.toLocaleString()} OGN · 📅 {profile.totalHarvests} lần thu hoạch
+              🪙 {(profile.ogn || 0).toLocaleString('vi-VN')} OGN · 📅 {profile.totalHarvests || 0} lần thu hoạch
             </p>
           </div>
         </div>
@@ -112,9 +112,8 @@ export default function ProfileScreen() {
       <div className="flex gap-1 px-5 mb-3">
         {TABS.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${
-              tab === t.key ? 'bg-primary text-white shadow-md' : 'bg-white/60 text-muted-foreground'
-            }`}>
+            className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${tab === t.key ? 'bg-primary text-white shadow-md' : 'bg-white/60 text-muted-foreground'
+              }`}>
             {t.label}
           </button>
         ))}
@@ -157,9 +156,8 @@ export default function ProfileScreen() {
             <div className="flex gap-1.5 mb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
               {ACTIVITY_FILTERS.map((f) => (
                 <button key={f.key} onClick={() => setActivityFilter(f.key)}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all ${
-                    activityFilter === f.key ? 'bg-primary text-white' : 'bg-white/70 text-muted-foreground'
-                  }`}>
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all ${activityFilter === f.key ? 'bg-primary text-white' : 'bg-white/70 text-muted-foreground'
+                    }`}>
                   {f.emoji} {f.label}
                 </button>
               ))}
@@ -180,10 +178,10 @@ export default function ProfileScreen() {
                     style={{
                       background: a.type === 'like' ? '#ffe0e0'
                         : a.type === 'comment' ? '#e8d4ff'
-                        : a.type === 'gift' ? '#fff3d4'
-                        : a.type === 'water' ? '#d4eeff'
-                        : a.type === 'buy' ? '#ffecd2'
-                        : '#d4f8dc',
+                          : a.type === 'gift' ? '#fff3d4'
+                            : a.type === 'water' ? '#d4eeff'
+                              : a.type === 'buy' ? '#ffecd2'
+                                : '#d4f8dc',
                     }}>
                     {a.emoji}
                   </div>

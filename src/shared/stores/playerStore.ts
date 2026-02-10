@@ -31,12 +31,16 @@ export const XP_REWARDS = {
 interface PlayerState {
   xp: number;
   level: number;
+  ogn: number;
   addXp: (amount: number) => { leveledUp: boolean; newLevel: number };
+  addOgn: (amount: number) => void;
+  setOgn: (amount: number) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   xp: 0,
   level: 1,
+  ogn: 0,
 
   addXp: (amount) => {
     const state = get();
@@ -49,4 +53,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set({ xp: newXp, level: newLevel });
     return { leveledUp, newLevel };
   },
+
+  addOgn: (amount) => set((s) => ({ ogn: s.ogn + amount })),
+  setOgn: (amount) => set({ ogn: amount }),
 }));
