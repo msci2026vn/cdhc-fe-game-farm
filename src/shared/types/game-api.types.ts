@@ -167,8 +167,11 @@ export interface BuyResult {
     id: string;
     name: string;
     emoji: string;
-    quantity: number;
+    price: number;
   };
+  quantityBought: number;
+  totalOwned: number;
+  ognSpent: number;
   ognRemaining: number;
 }
 

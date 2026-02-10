@@ -322,32 +322,59 @@ export const gameApi = {
 
   // ═══ SHOP ═══
   /**
-   * Get shop items and inventory
-   * TODO: bước 19 chuyển sang API thật
+   * Get shop items and inventory (bước 19 — real API)
    */
-  getShopItems: async (): Promise<ShopItemData[]> => {
-    // MOCK: Empty shop
-    return [];
-    // Real API (bước 19): return gameClient.get<ShopItemData[]>('/game/shop');
+  getShopItems: async (): Promise<{ items: ShopItemData[] }> => {
+    const url = 'https://sta.cdhc.vn/api/game/shop/items';
+    console.log('[FARM-DEBUG] gameApi.getShopItems():', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getShopItems() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getShopItems() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to fetch shop items: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getShopItems() SUCCESS:', json);
+    return json.data;
   },
 
   /**
-   * Buy an item from shop
-   * BE Zod: { itemId: string, quantity?: int 1-10, default 1 }
-   * TODO: bước 19 chuyển sang API thật
+   * Buy an item from shop (bước 19 — real API)
+   * BE Zod: { itemId: string, quantity?: int 1-99, default 1 }
    */
   buyItem: async (itemId: string, quantity?: number): Promise<BuyResult> => {
-    // MOCK: Return buy result
-    return {
-      item: {
-        id: itemId,
-        name: 'Mock Item',
-        emoji: '🎁',
-        quantity: quantity ?? 1,
-      },
-      ognRemaining: 1000,
-    };
-    // Real API (bước 19): return gameClient.post<BuyResult>('/game/shop/buy', { itemId, quantity: quantity ?? 1 });
+    const url = 'https://sta.cdhc.vn/api/game/shop/buy';
+    console.log('[FARM-DEBUG] gameApi.buyItem():', { url, itemId, quantity });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itemId, quantity: quantity || 1 }),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.buyItem() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.buyItem() ERROR:', error);
+      const err = new Error(error?.error?.message || `Failed to buy item: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.buyItem() SUCCESS:', json);
+    return json.data;
   },
 
   // ═══ SOCIAL ═══

@@ -1,8 +1,24 @@
+/**
+ * Quiz questions data (reference only)
+ *
+ * ⚠️ SECURITY NOTICE:
+ * This file is for REFERENCE ONLY. The actual questions and answers
+ * are stored on the SERVER (quiz-questions.ts in backend).
+ *
+ * The 'correct' field has been REMOVED to prevent cheating.
+ * Frontend should NEVER have access to correct answers.
+ *
+ * Quiz flow:
+ * 1. Frontend calls startQuiz() → Server returns 5 random questions WITHOUT answers
+ * 2. User selects answer → Frontend sends to server via answerQuiz()
+ * 3. Server validates and returns result with correctAnswer (shown AFTER submission)
+ */
+
 export interface QuizQuestion {
   question: string;
   image: string;
   options: { letter: string; text: string }[];
-  correct: string;
+  // ❌ NO 'correct' field - answers are server-only!
 }
 
 const QUESTIONS: QuizQuestion[] = [
@@ -15,7 +31,7 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Luân canh cây trồng' },
       { letter: 'D', text: 'Nuôi thiên địch' },
     ],
-    correct: 'B',
+    // ❌ 'correct' field removed - answers are server-only!
   },
   {
     question: 'Loại phân bón nào có nguồn gốc tự nhiên?',
@@ -26,7 +42,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Phân DAP' },
       { letter: 'D', text: 'Phân NPK' },
     ],
-    correct: 'B',
   },
   {
     question: 'Thiên địch của rệp cây là loài côn trùng nào?',
@@ -37,7 +52,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Châu chấu' },
       { letter: 'D', text: 'Dế mèn' },
     ],
-    correct: 'A',
   },
   {
     question: 'Luân canh cây trồng giúp ích gì cho đất?',
@@ -48,7 +62,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Làm đất khô hơn' },
       { letter: 'D', text: 'Tăng lượng thuốc cần dùng' },
     ],
-    correct: 'B',
   },
   {
     question: 'Cây nào thuộc họ đậu, giúp cố định đạm trong đất?',
@@ -59,7 +72,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Cây đậu tương' },
       { letter: 'D', text: 'Cây khoai' },
     ],
-    correct: 'C',
   },
   {
     question: 'Tưới nhỏ giọt có ưu điểm gì?',
@@ -70,7 +82,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Chỉ dùng cho cây ăn quả' },
       { letter: 'D', text: 'Gây xói mòn đất' },
     ],
-    correct: 'B',
   },
   {
     question: 'Chất nào gây ô nhiễm đất nghiêm trọng nhất?',
@@ -81,7 +92,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Nước mưa' },
       { letter: 'D', text: 'Lá cây mục' },
     ],
-    correct: 'B',
   },
   {
     question: 'Giun đất có vai trò gì trong nông nghiệp hữu cơ?',
@@ -92,7 +102,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Truyền bệnh cho cây' },
       { letter: 'D', text: 'Hút nước trong đất' },
     ],
-    correct: 'B',
   },
   {
     question: 'Nông sản hữu cơ cần đạt tiêu chuẩn gì?',
@@ -103,7 +112,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Sản xuất công nghiệp quy mô lớn' },
       { letter: 'D', text: 'Sử dụng giống biến đổi gen' },
     ],
-    correct: 'B',
   },
   {
     question: 'Ủ compost cần yếu tố nào sau đây?',
@@ -114,7 +122,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Thuốc tẩy và xà phòng' },
       { letter: 'D', text: 'Chỉ cần đất và nước' },
     ],
-    correct: 'B',
   },
   {
     question: 'Loại cây nào giúp xua đuổi côn trùng tự nhiên?',
@@ -125,7 +132,6 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: 'Cây mía' },
       { letter: 'D', text: 'Cây cao su' },
     ],
-    correct: 'A',
   },
   {
     question: 'Độ pH đất phù hợp cho hầu hết rau màu là?',
@@ -136,11 +142,10 @@ const QUESTIONS: QuizQuestion[] = [
       { letter: 'C', text: '9.0 - 10.0' },
       { letter: 'D', text: '12.0 - 14.0' },
     ],
-    correct: 'B',
   },
 ];
 
-/** Shuffle and pick `count` random questions */
+/** Shuffle and pick `count` random questions (for reference only) */
 export function getRandomQuestions(count: number): QuizQuestion[] {
   const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
