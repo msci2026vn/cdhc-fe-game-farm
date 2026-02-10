@@ -401,11 +401,13 @@ export default function FarmingScreen() {
       <Toast />
       <PointsFlyUp />
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
-      <PlantPickerModal
-        onSelect={handleSelectPlantFromPicker}
-        onClose={() => setShowPlantPicker(false)}
-        isPlanting={plantMutation.isPending}
-      />
+      {showPlantPicker && (
+        <PlantPickerModal
+          onSelect={handleSelectPlantFromPicker}
+          onClose={() => setShowPlantPicker(false)}
+          isPlanting={plantMutation.isPending}
+        />
+      )}
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
       <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
         onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }}
