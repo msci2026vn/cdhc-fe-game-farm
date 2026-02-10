@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useId } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gameApi } from '@/shared/api/game-api';
 
@@ -11,35 +11,46 @@ interface AuthGuardProps {
 /**
  * AuthGuard - Check authentication status
  *
- * Logic:
- * 1. Call /api/auth/me to check if user is logged in
- * 2. If authenticated → render children
- * 3. If unauthenticated AND not on /login → redirect to /login
- * 4. Show loading spinner while checking
+ * FIX Step 13: Prevent re-mount loop by:
+ * 1. Check auth ONLY ONCE per session using useRef
+ * 2. Do NOT re-check on route change
+ * 3. Do NOT use useMemo on children (causes re-mount)
+ * 4. Stable key using useId to prevent React from unmounting
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const [authState, setAuthState] = useState<AuthState>('loading');
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Use ref to track if we've already checked auth
+  const hasCheckedAuth = useRef(false);
+  const authResultRef = useRef<{ isAuthenticated: boolean; email?: string } | null>(null);
+
   useEffect(() => {
+    // Skip if we already checked auth - CRITICAL FIX
+    if (hasCheckedAuth.current) {
+      console.log('[FARM-DEBUG] AuthGuard: Already checked, skipping (hasCheckedAuth = true)');
+      return;
+    }
+
     const checkAuth = async () => {
-      console.log('[FARM-DEBUG] AuthGuard: Checking auth status');
+      console.log('[FARM-DEBUG] AuthGuard: 🔍 Checking auth (FIRST TIME ONLY)');
 
       try {
-        // Sử dụng ping() hoặc getProfile() để check auth
         const result = await gameApi.ping();
+        console.log('[FARM-DEBUG] AuthGuard: ping result =', result.success);
 
-        console.log('[FARM-DEBUG] AuthGuard: ping result =', result);
+        // Cache result
+        authResultRef.current = { isAuthenticated: result.success, email: result.email };
+        hasCheckedAuth.current = true;
 
         if (result.success) {
-          console.log('[FARM-DEBUG] AuthGuard: ✅ Authenticated -', result.email, '- currentPath =', location.pathname);
+          console.log('[FARM-DEBUG] AuthGuard: ✅ Authenticated -', result.email);
           setAuthState('authenticated');
         } else {
-          console.log('[FARM-DEBUG] AuthGuard: ❌ Unauthenticated -', result.message, '- currentPath =', location.pathname);
+          console.log('[FARM-DEBUG] AuthGuard: ❌ Unauthenticated');
           setAuthState('unauthenticated');
 
-          // Redirect to login nếu chưa ở trang login
           if (location.pathname !== '/login') {
             console.log('[FARM-DEBUG] AuthGuard: Redirecting to /login');
             navigate('/login', { replace: true });
@@ -47,17 +58,18 @@ export function AuthGuard({ children }: AuthGuardProps) {
         }
       } catch (error) {
         console.error('[FARM-DEBUG] AuthGuard: ❌ Auth check failed:', error);
+        authResultRef.current = { isAuthenticated: false };
+        hasCheckedAuth.current = true;
         setAuthState('unauthenticated');
 
         if (location.pathname !== '/login') {
-          console.log('[FARM-DEBUG] AuthGuard: Redirecting to /login (after error)');
           navigate('/login', { replace: true });
         }
       }
     };
 
     checkAuth();
-  }, [navigate, location.pathname]);
+  }, []); // Empty deps - ONLY run on mount, NOT on location change!
 
   // Show loading spinner while checking auth
   if (authState === 'loading') {
@@ -71,6 +83,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  // Nếu authenticated hoặc đang ở trang login, render children
+  // FIX: Remove useMemo - it causes re-mount when children reference changes
+  // Just render children directly - React will handle reconciliation efficiently
+  console.log('[FARM-DEBUG] AuthGuard: Rendering children (authState =', authState, ')');
   return <>{children}</>;
 }

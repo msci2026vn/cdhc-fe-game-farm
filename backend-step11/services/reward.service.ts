@@ -30,6 +30,8 @@ export const rewardService = {
    * @throws Error nếu không đủ OGN (khi amount < 0)
    */
   async addOGN(userId: string, amount: number, reason?: string): Promise<{ ogn: number }> {
+    console.log('[FARM-DEBUG] rewardService.addOGN() — START', JSON.stringify({ userId, amount, reason }));
+
     return await db.transaction(async (tx) => {
       // Row lock: SELECT ... FOR UPDATE
       const [player] = await tx
@@ -42,10 +44,13 @@ export const rewardService = {
         throw new Error(`Player not found: ${userId}`);
       }
 
+      console.log('[FARM-DEBUG] rewardService.addOGN() — current OGN:', player.ogn, 'adding:', amount);
+
       const newOGN = player.ogn + amount;
 
       // Validate: không cho âm
       if (newOGN < 0) {
+        console.log('[FARM-DEBUG] rewardService.addOGN() — INSUFFICIENT OGN');
         throw new Error(`Insufficient OGN: have ${player.ogn}, need ${Math.abs(amount)}`);
       }
 
@@ -61,6 +66,7 @@ export const rewardService = {
         })
         .where(eq(playerStats.userId, userId));
 
+      console.log('[FARM-DEBUG] rewardService.addOGN() — DONE, newBalance:', finalOGN);
       return { ogn: finalOGN };
     });
   },

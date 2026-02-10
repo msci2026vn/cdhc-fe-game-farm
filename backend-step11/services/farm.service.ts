@@ -110,10 +110,14 @@ export const farmService = {
    * @throws Error nếu invalid input / không đủ OGN / slot đã occupied
    */
   async plantSeed(userId: string, slotIndex: number, plantTypeId: string) {
+    console.log('[FARM-DEBUG] farmService.plantSeed() — START', JSON.stringify({ userId, slotIndex, plantTypeId }));
+
     // 1. Validate slot range
     if (slotIndex < 0 || slotIndex >= MAX_SLOTS) {
+      console.log('[FARM-DEBUG] farmService.plantSeed() — slot validation FAILED');
       throw new Error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SLOTS - 1}`);
     }
+    console.log('[FARM-DEBUG] farmService.plantSeed() — slot validation passed');
 
     // 2. Validate plant type exists
     const [plantType] = await db
@@ -122,8 +126,10 @@ export const farmService = {
       .where(eq(plantTypes.id, plantTypeId));
 
     if (!plantType) {
+      console.log('[FARM-DEBUG] farmService.plantSeed() — plantType NOT found:', plantTypeId);
       throw new Error(`Invalid plant type: ${plantTypeId}`);
     }
+    console.log('[FARM-DEBUG] farmService.plantSeed() — plantType found:', plantTypeId, 'price:', plantType.shopPrice);
 
     // 3. Check slot is empty (no active plant)
     const [existingPlot] = await db
@@ -136,15 +142,19 @@ export const farmService = {
       ));
 
     if (existingPlot) {
+      console.log('[FARM-DEBUG] farmService.plantSeed() — slot already occupied');
       throw new Error(`Slot ${slotIndex} already has a plant`);
     }
+    console.log('[FARM-DEBUG] farmService.plantSeed() — slot is empty');
 
     // 4. Check & deduct OGN
+    console.log('[FARM-DEBUG] farmService.plantSeed() — deducting OGN:', plantType.shopPrice);
     const { ogn: newOGN } = await rewardService.addOGN(
       userId,
       -plantType.shopPrice,
       `plant_${plantTypeId}_slot_${slotIndex}`
     );
+    console.log('[FARM-DEBUG] farmService.plantSeed() — OGN deducted, remaining:', newOGN);
 
     // 5. Insert farm_plots
     const now = Date.now();
@@ -159,6 +169,7 @@ export const farmService = {
         lastWateredAt: now,
       })
       .returning();
+    console.log('[FARM-DEBUG] farmService.plantSeed() — plot inserted, id:', newPlot.id);
 
     // 6. Log action
     await db.insert(gameActions).values({
@@ -172,7 +183,9 @@ export const farmService = {
         ognAfter: newOGN,
       },
     });
+    console.log('[FARM-DEBUG] farmService.plantSeed() — game_action logged');
 
+    console.log('[FARM-DEBUG] farmService.plantSeed() — COMPLETE');
     return {
       plot: newPlot,
       ognRemaining: newOGN,

@@ -106,33 +106,35 @@ export const gameApi = {
   },
 
   /**
-   * Plant a seed in a slot
-   * BE Zod: { plantTypeId: enum['tomato','lettuce','cucumber','carrot','chili'], slotIndex: int 0-8 }
-   * TODO: bước 13 chuyển sang API thật
+   * Plant a seed in a slot (bước 13 — real API)
+   * BE Zod: { plantTypeId: enum['tomato','lettuce','cucumber','carrot','chili'], slotIndex: int 0-5 }
    */
   plantSeed: async (
     slotIndex: number,
     plantTypeId: PlantTypeId
-  ): Promise<FarmPlotData> => {
-    // MOCK: Return dummy plot
-    return {
-      id: 'mock-plot',
-      slotIndex,
-      plantType: {
-        id: plantTypeId,
-        name: 'Mock Plant',
-        emoji: '🌱',
-        growthDurationMs: 120000,
-        rewardOGN: 100,
-        rewardXP: 25,
-        shopPrice: 200,
-      },
-      plantedAt: Date.now(),
-      happiness: 100,
-      lastWateredAt: Date.now(),
-      isDead: false,
-    } as FarmPlotData;
-    // Real API (bước 13): return gameClient.post<FarmPlotData>('/game/farm/plant', { slotIndex, plantTypeId });
+  ): Promise<{ plot: FarmPlotData; ognRemaining: number; plantType: { name: string; emoji: string; growthDurationMs: number } }> => {
+    const url = 'https://sta.cdhc.vn/api/game/farm/plant';
+    console.log('[FARM-DEBUG] gameApi.plantSeed:', { url, slotIndex, plantTypeId });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slotIndex, plantTypeId }),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.plantSeed status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.plantSeed ERROR:', error);
+      const message = error?.error?.message || `Failed to plant: ${response.status}`;
+      throw new Error(message);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.plantSeed data:', json);
+    return json.data;
   },
 
   /**

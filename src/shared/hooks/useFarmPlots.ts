@@ -90,13 +90,15 @@ export function useFarmPlots() {
   return useQuery<FarmPlotsResponse>({
     queryKey: ['game', 'farm', 'plots'],
     queryFn: async () => {
-      console.log('[FARM-DEBUG] useFarmPlots: Fetching plots from API...');
+      console.log('[FARM-DEBUG] useFarmPlots: 🔄 Fetching plots from API...');
       const data = await gameApi.getPlots();
-      console.log('[FARM-DEBUG] useFarmPlots: Received data =', data);
+      console.log('[FARM-DEBUG] useFarmPlots: ✅ Received data =', JSON.stringify(data));
       return data;
     },
-    staleTime: 60_000, // 60s — growth changes over time
-    refetchInterval: 60_000, // Auto-refresh every 60s for growth updates
+    staleTime: 0, // FIX: Set to 0 to always refetch when invalidated
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
     retry: 2,
   });
 }

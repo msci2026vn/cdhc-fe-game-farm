@@ -5,6 +5,7 @@ import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import FarmHeader from '../components/FarmHeader';
 import PlantSeedModal from '../components/PlantSeedModal';
+import PlantPickerModal from '../components/PlantPickerModal';
 import BugCatchGame from '../components/BugCatchGame';
 import WeatherOverlay from '../components/WeatherOverlay';
 import WeatherControl from '../components/WeatherControl';
@@ -20,26 +21,38 @@ import { useActivityStore } from '@/shared/stores/activityStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji, getWeatherGrowthMultiplier, getWeatherHappinessModifier } from '../utils/growth';
 import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
+import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 
 export default function FarmingScreen() {
-  console.log('[FARM-DEBUG] FarmingScreen: COMPONENT MOUNTED');
-
   const navigate = useNavigate();
   // API data (Step 12)
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
 
-  console.log('[FARM-DEBUG] FarmingScreen: State =', {
-    isLoading: plotsLoading,
-    hasError: !!plotsError,
-    errorMsg: plotsError?.message,
-    plotCount: plots?.length ?? 'N/A',
-  });
+  // Track mount count with useEffect (logs ONCE on mount)
+  useEffect(() => {
+    console.log('[FARM-DEBUG] FarmingScreen: ✅ MOUNTED (first time)');
+    return () => {
+      console.log('[FARM-DEBUG] FarmingScreen: ❌ UNMOUNTED');
+    };
+  }, []);
 
-  // Zustand for mutations (TODO: Step 13-15 will replace with API)
+  useEffect(() => {
+    console.log('[FARM-DEBUG] FarmingScreen: State =', {
+      isLoading: plotsLoading,
+      hasError: !!plotsError,
+      errorMsg: plotsError?.message,
+      plotCount: plots?.length ?? 'N/A',
+    });
+  }, [plotsLoading, plotsError, plots?.length]);
+
+  // ─── NEW: Plant mutation (Step 13) ───
+  const plantMutation = usePlantSeed();
+
+  // Zustand for mutations (water + harvest still use Zustand, plant will use API)
   const ogn = useFarmStore((s) => s.ogn);
-  const plantSeed = useFarmStore((s) => s.plantSeed);
+  const plantSeedZustand = useFarmStore((s) => s.plantSeed); // Keep for fallback
   const waterPlot = useFarmStore((s) => s.waterPlot);
   const harvestPlot = useFarmStore((s) => s.harvestPlot);
   const getCooldown = useFarmStore((s) => s.getWaterCooldownRemaining);
@@ -48,13 +61,15 @@ export default function FarmingScreen() {
 
   const [activePlotIndex, setActivePlotIndex] = useState(0);
   const [showPlantModal, setShowPlantModal] = useState(false);
+  const [showPlantPicker, setShowPlantPicker] = useState(false); // NEW: Plant picker modal
   const [showBugGame, setShowBugGame] = useState(false);
   const [showWaterEffect, setShowWaterEffect] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
   const [visitingFriend, setVisitingFriend] = useState<Friend | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [, forceUpdate] = useState(0);
+  // REMOVED: forceUpdate interval - not needed with TanStack Query
+  // Growth is calculated real-time using Date.now(), and plots update via API
 
   // Memoize activePlot to prevent infinite re-render loop
   const activePlot = useMemo(
@@ -70,12 +85,7 @@ export default function FarmingScreen() {
   const timeOfDay = useWeatherStore((s) => s.timeOfDay);
   const weather = useWeatherStore((s) => s.weather);
 
-  // Tick growth bars
-  useEffect(() => {
-    const interval = setInterval(() => forceUpdate((n) => n + 1), 2000);
-    return () => clearInterval(interval);
-  }, []);
-
+  // Start happiness decay (one-time initialization)
   useEffect(() => { startHappinessDecay(); }, []);
 
   // All useCallback hooks MUST be above early returns to avoid React #310
@@ -107,11 +117,47 @@ export default function FarmingScreen() {
 
   const handleSelectPlant = useCallback((plantType: PlantType) => {
     const currentLength = plots.length;
-    plantSeed(plantType, currentLength);
+    plantSeedZustand(plantType, currentLength); // Fallback to Zustand for now
     setShowPlantModal(false);
     setActivePlotIndex(currentLength);
     addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
-  }, [plantSeed, addToast]);
+  }, [plantSeedZustand, addToast, plots.length]);
+
+  // ─── NEW: Handle empty slot click (Step 13) ───
+  const handleEmptySlotClick = useCallback(() => {
+    const slotIndex = plots.length;
+    console.log('[FARM-DEBUG] FarmingScreen — EMPTY SLOT CLICKED:', slotIndex);
+    setShowPlantPicker(true);
+  }, [plots.length]);
+
+  // ─── NEW: Handle plant selection from picker (Step 13) ───
+  const handleSelectPlantFromPicker = useCallback((plantTypeId: string) => {
+    const slotIndex = plots.length;
+    console.log('[FARM-DEBUG] FarmingScreen — PLANT SELECTED:', { slot: slotIndex, type: plantTypeId });
+
+    plantMutation.mutate(
+      { slotIndex, plantTypeId },
+      {
+        onSuccess: (data) => {
+          console.log('[FARM-DEBUG] FarmingScreen — ✅ PLANT SUCCESS:', JSON.stringify(data));
+          setShowPlantPicker(false);
+          addToast(`Đã trồng cây! 🌱`, 'success');
+
+          // FIX: Set activePlotIndex to the newly planted plot slot
+          // This ensures the UI shows the newly planted tree
+          if (data.plot) {
+            console.log('[FARM-DEBUG] FarmingScreen — Setting activePlotIndex to slot:', data.plot.slotIndex);
+            setActivePlotIndex(data.plot.slotIndex);
+          }
+        },
+        onError: (error) => {
+          console.error('[FARM-DEBUG] FarmingScreen — ❌ PLANT ERROR:', error.message);
+          addToast(`Lỗi: ${error.message}`, 'error');
+          alert(error.message); // Fallback nếu chưa có toast error styling
+        },
+      }
+    );
+  }, [plantMutation, plots.length, addToast]);
 
   // Loading state
   if (plotsLoading) {
@@ -342,7 +388,7 @@ export default function FarmingScreen() {
       )}
       {!activePlot && (
         <div className="px-4 pb-2">
-          <button onClick={() => setShowPlantModal(true)}
+          <button onClick={handleEmptySlotClick}
             className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform">
             🌱 Trồng cây mới
           </button>
@@ -355,6 +401,11 @@ export default function FarmingScreen() {
       <Toast />
       <PointsFlyUp />
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
+      <PlantPickerModal
+        onSelect={handleSelectPlantFromPicker}
+        onClose={() => setShowPlantPicker(false)}
+        isPlanting={plantMutation.isPending}
+      />
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
       <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
         onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }}
