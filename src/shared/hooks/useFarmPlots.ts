@@ -10,6 +10,7 @@
  *
  * Transforms BE response to match FE FarmPlot format expected by components.
  */
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 
@@ -101,11 +102,17 @@ export function useFarmPlots() {
 export function useTransformedFarmPlots() {
   const { data, ...rest } = useFarmPlots();
 
-  const transformedPlots: FarmPlot[] = data?.plots.map(transformPlot) ?? [];
+  // Memoize to prevent new array reference every render → avoids infinite re-render loop
+  const transformedPlots: FarmPlot[] = useMemo(
+    () => data?.plots.map(transformPlot) ?? [],
+    [data?.plots]
+  );
+
+  const totalSlots = data?.totalSlots ?? 6;
 
   return {
     ...rest,
     data: transformedPlots,
-    totalSlots: data?.totalSlots ?? 6,
+    totalSlots,
   };
 }

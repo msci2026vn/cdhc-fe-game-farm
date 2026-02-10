@@ -53,6 +53,9 @@ export default function FarmingScreen() {
 
   const addHarvest = useActivityStore((s) => s.addHarvest);
 
+  const timeOfDay = useWeatherStore((s) => s.timeOfDay);
+  const weather = useWeatherStore((s) => s.weather);
+
   // Tick growth bars
   useEffect(() => {
     const interval = setInterval(() => forceUpdate((n) => n + 1), 2000);
@@ -131,8 +134,6 @@ export default function FarmingScreen() {
     seed: 'Giai đoạn 1/5', sprout: 'Giai đoạn 2/5', seedling: 'Giai đoạn 3/5', mature: 'Giai đoạn 4/5', dead: 'Đã chết',
   };
 
-  const timeOfDay = useWeatherStore((s) => s.timeOfDay);
-  const weather = useWeatherStore((s) => s.weather);
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk';
   const growthMult = getWeatherGrowthMultiplier(weather);
   const happyMod = getWeatherHappinessModifier(weather);
