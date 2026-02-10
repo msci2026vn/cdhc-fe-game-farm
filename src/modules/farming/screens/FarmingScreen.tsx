@@ -24,9 +24,18 @@ import { useCooldown } from '@/shared/hooks/useCooldown';
 import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
 import { useWaterPlot } from '@/shared/hooks/useWaterPlot';
 import { useHarvestPlot } from '@/shared/hooks/useHarvestPlot';
+import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import {
+  handleGameError,
+  showPlantSuccess,
+  showWaterSuccess,
+  showHarvestSuccess,
+  showLevelUp,
+  formatCooldown,
+} from '@/shared/utils/error-handler';
 
 export default function FarmingScreen() {
   const navigate = useNavigate();
@@ -61,6 +70,9 @@ export default function FarmingScreen() {
       setOgn(profile.ogn);
     }
   }, [profile?.ogn, setOgn]);
+
+  // ─── NEW: Online status detection (Step 16) ───
+  const isOnline = useOnlineStatus();
 
   // ─── NEW: Plant mutation (Step 13) ───
   const plantMutation = usePlantSeed();
@@ -142,7 +154,7 @@ export default function FarmingScreen() {
         console.log('[FARM-DEBUG] FarmingScreen — WATER SUCCESS:', JSON.stringify(data));
 
         // Set local cooldown timer
-        const endTime = Date.now() + (data.cooldownSeconds * 1000);
+        const endTime = Date.now() + ((data.cooldownSeconds || 3600) * 1000);
         setWaterCooldowns(prev => ({ ...prev, [currentPlot.id]: endTime }));
         console.log('[FARM-DEBUG] FarmingScreen — cooldown set until:', new Date(endTime).toISOString());
 
@@ -150,8 +162,8 @@ export default function FarmingScreen() {
         setShowWaterEffect(true);
         setTimeout(() => setShowWaterEffect(false), 1200);
         showFlyUp('+10 💚');
-        addToast(data.message || 'Tưới thành công! Cây vui hơn rồi 🌱', 'success');
-        start(data.cooldownSeconds);
+        showWaterSuccess(data.message || 'Cây vui hơn rồi! 💧');
+        start(data.cooldownSeconds || 3600);
       },
       onError: (error: any) => {
         console.error('[FARM-DEBUG] FarmingScreen — WATER ERROR:', error.message);
@@ -161,9 +173,9 @@ export default function FarmingScreen() {
           const endTime = Date.now() + (error.cooldownRemaining * 1000);
           setWaterCooldowns(prev => ({ ...prev, [currentPlot.id]: endTime }));
           console.log('[FARM-DEBUG] FarmingScreen — server cooldown:', error.cooldownRemaining, 's');
-          addToast(`Đang chờ tưới! Còn ${error.cooldownRemaining} giây ⏳`, 'info');
+          addToast(`⏳ Còn ${formatCooldown(error.cooldownRemaining)}`, 'info');
         } else {
-          addToast(error.message || 'Lỗi tưới nước', 'error');
+          handleGameError(error, 'water');
         }
       },
     });
@@ -204,20 +216,22 @@ export default function FarmingScreen() {
 
         // Show effects
         showFlyUp(`+${data.ognReward} OGN 🪙`);
-        addToast(data.message || `Thu hoạch thành công! +${data.ognReward} OGN 🎉`, 'success');
+        showHarvestSuccess(
+          data.plantName || '',
+          data.plantEmoji || '🌾',
+          data.ognReward || 0
+        );
         addHarvest(data.plantName, data.ognReward);
 
         // Level up toast/animation
         if (data.leveledUp) {
           console.log('[FARM-DEBUG] FarmingScreen — 🎉 LEVEL UP! Level:', data.newLevel);
-          setTimeout(() => {
-            addToast(`🎉 Level Up! Level ${data.newLevel}`, 'success');
-          }, 500);
+          showLevelUp(data.newLevel);
         }
       },
       onError: (error) => {
         console.error('[FARM-DEBUG] FarmingScreen — HARVEST ERROR:', error.message);
-        addToast(error.message || 'Lỗi thu hoạch', 'error');
+        handleGameError(error, 'harvest');
       },
     });
   }, [harvestMutation, showFlyUp, addToast, addHarvest, activePlotIndex, plots]);
@@ -248,7 +262,10 @@ export default function FarmingScreen() {
         onSuccess: (data) => {
           console.log('[FARM-DEBUG] FarmingScreen — ✅ PLANT SUCCESS:', JSON.stringify(data));
           setShowPlantPicker(false);
-          addToast(`Đã trồng cây! 🌱`, 'success');
+          showPlantSuccess(
+            data.plantType?.name || 'Cây',
+            data.plantType?.emoji || '🌱'
+          );
 
           // FIX: Set activePlotIndex to the newly planted plot slot
           // This ensures the UI shows the newly planted tree
@@ -259,8 +276,7 @@ export default function FarmingScreen() {
         },
         onError: (error) => {
           console.error('[FARM-DEBUG] FarmingScreen — ❌ PLANT ERROR:', error.message);
-          addToast(`Lỗi: ${error.message}`, 'error');
-          alert(error.message); // Fallback nếu chưa có toast error styling
+          handleGameError(error, 'plant');
         },
       }
     );
@@ -310,7 +326,15 @@ export default function FarmingScreen() {
   const happyMod = getWeatherHappinessModifier(weather);
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
+    <div className="min-h-screen max-w-[430px mx-auto relative overflow-hidden">
+      {/* Offline banner (Step 16) */}
+      {!isOnline && (
+        <div className="bg-amber-900/80 text-amber-200 text-center text-sm py-2 px-4 flex items-center justify-center gap-2 z-50">
+          <span>📡</span>
+          <span>Mất kết nối mạng — dữ liệu có thể không cập nhật</span>
+        </div>
+      )}
+
       {/* Weather sky + effects */}
       <WeatherOverlay />
 

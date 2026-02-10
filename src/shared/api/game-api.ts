@@ -31,6 +31,26 @@ import type {
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
+// ERROR HANDLER HELPER
+// ═══════════════════════════════════════════════════════════════
+async function handleApiError(response: Response): Promise<never> {
+  const errorData = await response.json().catch(() => ({}));
+  const err = new Error(errorData?.error?.message || `API Error: ${response.status}`);
+  (err as any).status = response.status;
+  (err as any).code = errorData?.error?.code || 'UNKNOWN';
+  (err as any).cooldownRemaining = errorData?.error?.cooldownRemaining;
+
+  console.log('[FARM-DEBUG] handleApiError()', JSON.stringify({
+    status: response.status,
+    code: (err as any).code,
+    message: err.message,
+    cooldownRemaining: (err as any).cooldownRemaining,
+  }));
+
+  throw err;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // API FUNCTIONS (16 total)
 // ═══════════════════════════════════════════════════════════════
 
@@ -126,10 +146,7 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.plantSeed status:', response.status);
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      console.error('[FARM-DEBUG] gameApi.plantSeed ERROR:', error);
-      const message = error?.error?.message || `Failed to plant: ${response.status}`;
-      throw new Error(message);
+      await handleApiError(response);
     }
 
     const json = await response.json();
@@ -157,14 +174,7 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.waterPlot() — STATUS:', response.status);
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      console.error('[FARM-DEBUG] gameApi.waterPlot() — ERROR:', JSON.stringify(error));
-
-      // Attach cooldown info to error for FE to display
-      const err = new Error(error?.error?.message || `Water failed: ${response.status}`);
-      (err as any).cooldownRemaining = error?.error?.cooldownRemaining;
-      (err as any).code = error?.error?.code;
-      throw err;
+      await handleApiError(response);
     }
 
     const json = await response.json();
@@ -192,11 +202,7 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.harvestPlot() — STATUS:', response.status);
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      console.error('[FARM-DEBUG] gameApi.harvestPlot() — ERROR:', JSON.stringify(error));
-      const err = new Error(error?.error?.message || `Harvest failed: ${response.status}`);
-      (err as any).code = error?.error?.code;
-      throw err;
+      await handleApiError(response);
     }
 
     const json = await response.json();

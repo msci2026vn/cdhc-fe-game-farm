@@ -1,7 +1,9 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthGuard } from '@/shared/components/AuthGuard';
+import { Toaster } from '@/components/ui/sonner';
+import { setNavigateToLogin } from '@/shared/utils/error-handler';
 
 // Lazy load screens
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
@@ -13,7 +15,19 @@ const ShopScreen = lazy(() => import('@/modules/shop/screens/ShopScreen'));
 const ProfileScreen = lazy(() => import('@/modules/profile/screens/ProfileScreen'));
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 2, refetchOnWindowFocus: false } },
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // Don't retry for 401, 403, 404
+        if ([401, 403, 404].includes(error?.status)) return false;
+        return failureCount < 2;
+      },
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
 });
 
 const Fallback = () => (
@@ -21,6 +35,21 @@ const Fallback = () => (
     <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
   </div>
 );
+
+/**
+ * NavigateSetup — Configure 401 auto-redirect
+ * Must be inside BrowserRouter to use useNavigate
+ */
+const NavigateSetup = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setNavigateToLogin(() => navigate('/login', { replace: true }));
+    console.log('[FARM-DEBUG] NavigateSetup: setNavigateToLogin configured');
+  }, [navigate]);
+
+  return null;
+};
 
 /**
  * App Router with AuthGuard
@@ -39,6 +68,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <NavigateSetup />
         <Suspense fallback={<Fallback />}>
           <AuthGuard>
             <Routes>
@@ -58,6 +88,7 @@ const App = () => {
             </Routes>
           </AuthGuard>
         </Suspense>
+        <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
   );
