@@ -212,22 +212,56 @@ export const gameApi = {
 
   // ═══ BOSS ═══
   /**
-   * Complete boss fight
+   * Complete boss fight (bước 17 — real API)
    * BE Zod: { bossId: string, won: boolean, totalDamage: int 0-100000, durationSeconds: 0-3600 }
-   * TODO: bước 17 chuyển sang API thật
    */
   completeBoss: async (data: BossFightInput): Promise<BossCompleteResult> => {
-    // MOCK: Return boss result
-    return {
-      won: data.won,
-      ognReward: data.won ? 5 : 0,
-      xpGained: data.won ? 15 : 5,
-      bossProgress: {
-        kills: data.won ? 1 : 0,
-        totalDamage: data.totalDamage,
-      },
-    };
-    // Real API (bước 17): return gameClient.post<BossCompleteResult>('/game/boss/complete', data);
+    const url = 'https://sta.cdhc.vn/api/game/boss/complete';
+    console.log('[FARM-DEBUG] gameApi.completeBoss():', { url, ...data });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.completeBoss() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.completeBoss() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to complete boss: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.completeBoss() SUCCESS:', json);
+    return json.data;
+  },
+
+  /**
+   * Get boss progress (bước 17 — real API)
+   */
+  getBossProgress: async () => {
+    const url = 'https://sta.cdhc.vn/api/game/boss/progress';
+    console.log('[FARM-DEBUG] gameApi.getBossProgress():', url);
+
+    const response = await fetch(url, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getBossProgress() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getBossProgress() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to get boss progress: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getBossProgress() SUCCESS:', json);
+    return json.data;
   },
 
   // ═══ QUIZ ═══

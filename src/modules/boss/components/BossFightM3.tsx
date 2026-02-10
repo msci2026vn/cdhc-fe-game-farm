@@ -5,6 +5,7 @@ import { BossInfo } from '../data/bosses';
 import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useBossProgressStore } from '../stores/bossProgressStore';
 import { usePlayerStore } from '@/shared/stores/playerStore';
+import { useBossComplete } from '@/shared/hooks/useBossComplete';
 
 interface Props {
   boss: BossInfo;
@@ -26,30 +27,32 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
     handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
+    durationSeconds, fightStartTime,
   } = useMatch3(bossInfo);
 
   const addOgn = useFarmStore(s => s.addOgn);
   const { addKill, addDmg } = useBossProgressStore();
   const addXp = usePlayerStore(s => s.addXp);
+  const bossComplete = useBossComplete();
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
   const particleId = useRef(0);
 
-  // Give reward on victory
+  // Call API on fight end (victory or defeat)
   useEffect(() => {
-    if (result === 'victory' && !rewardedRef.current) {
+    if (result !== 'fighting' && !rewardedRef.current) {
       rewardedRef.current = true;
-      addOgn(bossInfo.reward);
-      addKill(bossInfo.id);
-      addDmg(totalDmgDealt);
-      const { leveledUp, newLevel } = addXp(bossInfo.xpReward);
-      if (leveledUp) {
-        setLevelUpShow(true);
-        setTimeout(() => setLevelUpShow(false), 3000);
-      }
+
+      // Call boss complete API
+      bossComplete.mutate({
+        bossId: bossInfo.id,
+        won: result === 'victory',
+        totalDamage: totalDmgDealt,
+        durationSeconds,
+      });
     }
-  }, [result, bossInfo, addOgn, addKill, addDmg, addXp, totalDmgDealt]);
+  }, [result, bossInfo.id, totalDmgDealt, durationSeconds, bossComplete]);
 
   // Spawn combo particles
   useEffect(() => {
@@ -83,6 +86,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   if (result !== 'fighting') {
     const won = result === 'victory';
     const currentLevel = usePlayerStore.getState().level;
+    const serverData = bossComplete.data;
     return (
       <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-8">
         {/* Level up overlay */}
@@ -92,7 +96,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
               <div className="text-6xl mb-2">🎉</div>
               <div className="px-8 py-4 rounded-2xl font-heading text-xl font-bold text-white"
                 style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 0 60px rgba(108,92,231,0.8)' }}>
-                LEVEL UP! ⭐ Lv.{currentLevel}
+                LEVEL UP! ⭐ Lv.{serverData?.newLevel ?? currentLevel}
               </div>
             </div>
           </div>
@@ -108,20 +112,20 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           </p>
           <div className="flex items-center justify-center gap-4 my-4 text-sm font-bold">
             <span style={{ color: '#ff6b6b' }}>⚔️ {totalDmgDealt.toLocaleString()} DMG</span>
-            {won && <span style={{ color: '#fdcb6e' }}>🪙 +{bossInfo.reward} OGN</span>}
-            {won && <span style={{ color: '#a29bfe' }}>⭐ +{bossInfo.xpReward} XP</span>}
+            {serverData?.won && <span style={{ color: '#fdcb6e' }}>🪙 +{serverData.ognReward} OGN</span>}
+            {serverData?.won && <span style={{ color: '#a29bfe' }}>⭐ +{serverData.xpGained} XP</span>}
           </div>
-          {won && (
+          {serverData?.won && (
             <div className="flex gap-3 mb-6">
               <div className="flex-1 px-4 py-3 rounded-xl animate-fade-in"
                 style={{ background: 'rgba(240,180,41,0.15)', border: '1px solid rgba(240,180,41,0.3)' }}>
                 <span className="text-xl">🪙</span>
-                <span className="font-heading text-lg font-bold ml-1" style={{ color: '#d49a1a' }}>+{bossInfo.reward}</span>
+                <span className="font-heading text-lg font-bold ml-1" style={{ color: '#d49a1a' }}>+{serverData.ognReward}</span>
               </div>
               <div className="flex-1 px-4 py-3 rounded-xl animate-fade-in"
                 style={{ background: 'rgba(108,92,231,0.15)', border: '1px solid rgba(108,92,231,0.3)' }}>
                 <span className="text-xl">⭐</span>
-                <span className="font-heading text-lg font-bold ml-1" style={{ color: '#a29bfe' }}>+{bossInfo.xpReward} XP</span>
+                <span className="font-heading text-lg font-bold ml-1" style={{ color: '#a29bfe' }}>+{serverData.xpGained} XP</span>
               </div>
             </div>
           )}

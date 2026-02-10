@@ -1,5 +1,5 @@
 import { BOSSES, BossInfo, DIFFICULTY_STYLES } from '../data/bosses';
-import { useBossProgressStore } from '../stores/bossProgressStore';
+import { useBossProgress } from '@/shared/hooks/useBossProgress';
 import { usePlayerStore, xpForNextLevel } from '@/shared/stores/playerStore';
 
 interface Props {
@@ -7,10 +7,19 @@ interface Props {
 }
 
 export default function BossList({ onSelect }: Props) {
-  const { killedBosses, totalDmgDealt } = useBossProgressStore();
+  const { data: bossProgress } = useBossProgress();
   const { level, xp } = usePlayerStore();
   const nextXp = xpForNextLevel(level);
   const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
+
+  // Calculate totals from server data
+  const totalKills = bossProgress?.reduce((sum, p) => sum + p.kills, 0) ?? 0;
+  const totalDmgDealt = bossProgress?.reduce((sum, p) => sum + p.totalDamage, 0) ?? 0;
+
+  // Helper to get kills for a boss
+  const getKills = (bossId: string) => {
+    return bossProgress?.find(p => p.bossId === bossId)?.kills ?? 0;
+  };
 
   return (
     <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col pb-[90px]">
@@ -41,14 +50,14 @@ export default function BossList({ onSelect }: Props) {
 
         <div className="flex items-center gap-3 text-[11px] font-bold">
           <span style={{ color: '#ff6b6b' }}>⚔️ DMG: {totalDmgDealt.toLocaleString()}</span>
-          <span style={{ color: '#55efc4' }}>💀 Hạ: {Object.values(killedBosses).reduce((a, b) => a + b, 0)}</span>
+          <span style={{ color: '#55efc4' }}>💀 Hạ: {totalKills}</span>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 space-y-3">
         {BOSSES.map((boss) => {
           const style = DIFFICULTY_STYLES[boss.difficulty];
-          const kills = killedBosses[boss.id] || 0;
+          const kills = getKills(boss.id);
           const locked = level < boss.unlockLevel;
 
           return (

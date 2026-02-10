@@ -141,6 +141,9 @@ export function useMatch3(bossInfo: BossInfo) {
   const [result, setResult] = useState<FightResult>('fighting');
   const [totalDmgDealt, setTotalDmgDealt] = useState(0);
 
+  // Fight start time (for duration tracking / anti-cheat)
+  const fightStartTime = useRef(Date.now());
+
   // Dodge mechanic
   const [attackWarning, setAttackWarning] = useState<BossAttackWarning | null>(null);
   const dodgedRef = useRef(false);
@@ -322,9 +325,13 @@ export function useMatch3(bossInfo: BossInfo) {
     setTimeout(() => processMatches(newGrid, 0), 200);
   }, [grid, selected, animating, processMatches, result]);
 
+  // Calculate fight duration in seconds
+  const durationSeconds = Math.floor((Date.now() - fightStartTime.current) / 1000);
+
   return {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
     handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
+    durationSeconds, fightStartTime: fightStartTime.current,
   };
 }
