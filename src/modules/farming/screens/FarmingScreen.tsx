@@ -21,10 +21,13 @@ import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite,
 import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
 import { PlantType } from '../types/farm.types';
+import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 
 export default function FarmingScreen() {
   const navigate = useNavigate();
-  const plots = useFarmStore((s) => s.plots);
+  // API data (Step 12)
+  const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
+  // Zustand for mutations (TODO: Step 13-15 will replace with API)
   const ogn = useFarmStore((s) => s.ogn);
   const plantSeed = useFarmStore((s) => s.plantSeed);
   const waterPlot = useFarmStore((s) => s.waterPlot);
@@ -55,6 +58,37 @@ export default function FarmingScreen() {
   }, []);
 
   useEffect(() => { startHappinessDecay(); }, []);
+
+  // Loading state
+  if (plotsLoading) {
+    return (
+      <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse text-4xl mb-2">🌱</div>
+          <p className="text-sm text-white/70">Đang tải vườn...</p>
+          {/* Skeleton grid */}
+          <div className="grid grid-cols-3 gap-3 mt-4 px-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="aspect-square rounded-2xl bg-white/5 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (plotsError) {
+    return (
+      <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="text-4xl mb-2">😵</div>
+          <p className="text-red-400 text-sm mb-2">Lỗi tải vườn</p>
+          <p className="text-white/30 text-xs">{String(plotsError)}</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleWater = useCallback(() => {
     if (!activePlot || activePlot.isDead) return;

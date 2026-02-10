@@ -80,13 +80,22 @@ export const gameApi = {
 
   // ═══ FARM ═══
   /**
-   * Get all farm plots
-   * TODO: bước 12 chuyển sang API thật
+   * Get all farm plots (bước 12 — real API)
    */
-  getPlots: async (): Promise<FarmPlotData[]> => {
-    // MOCK: Empty garden
-    return [];
-    // Real API (bước 12): return gameClient.get<FarmPlotData[]>('/game/farm/plots');
+  getPlots: async () => {
+    const response = await fetch('https://sta.cdhc.vn/api/game/farm/plots', {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.error?.message || `Failed to fetch plots: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json.data; // { plots: [...], totalSlots: 6 }
   },
 
   /**
