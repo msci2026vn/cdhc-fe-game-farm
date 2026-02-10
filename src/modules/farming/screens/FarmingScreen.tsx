@@ -51,6 +51,8 @@ export default function FarmingScreen() {
   const cooldownSeconds = activePlot ? getCooldown(activePlot.id) : 0;
   const { remaining, isActive, start } = useCooldown(cooldownSeconds);
 
+  const addHarvest = useActivityStore((s) => s.addHarvest);
+
   // Tick growth bars
   useEffect(() => {
     const interval = setInterval(() => forceUpdate((n) => n + 1), 2000);
@@ -58,6 +60,37 @@ export default function FarmingScreen() {
   }, []);
 
   useEffect(() => { startHappinessDecay(); }, []);
+
+  // All useCallback hooks MUST be above early returns to avoid React #310
+  const handleWater = useCallback(() => {
+    if (!activePlot || activePlot.isDead) return;
+    const success = waterPlot(activePlot.id);
+    if (success) {
+      setShowWaterEffect(true);
+      setTimeout(() => setShowWaterEffect(false), 1200);
+      showFlyUp('+15 💚');
+      addToast('Tưới thành công! Cây vui hơn rồi 🌱', 'success');
+      start(15);
+    } else {
+      addToast('Đang hồi chiêu, chờ thêm nhé ⏳', 'info');
+    }
+  }, [activePlot, waterPlot, showFlyUp, addToast, start]);
+
+  const handleHarvest = useCallback(() => {
+    if (!activePlot || !isHarvestReady(activePlot)) return;
+    const reward = harvestPlot(activePlot.id);
+    showFlyUp(`+${reward} OGN 🪙`);
+    addToast(`Thu hoạch thành công! +${reward} OGN 🎉`, 'success');
+    addHarvest(activePlot.plantType.name, reward);
+    setTimeout(() => setShowPlantModal(true), 500);
+  }, [activePlot, harvestPlot, showFlyUp, addToast, addHarvest]);
+
+  const handleSelectPlant = useCallback((plantType: PlantType) => {
+    plantSeed(plantType, plots.length);
+    setShowPlantModal(false);
+    setActivePlotIndex(plots.length);
+    addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
+  }, [plots.length, plantSeed, addToast]);
 
   // Loading state
   if (plotsLoading) {
@@ -89,37 +122,6 @@ export default function FarmingScreen() {
       </div>
     );
   }
-
-  const handleWater = useCallback(() => {
-    if (!activePlot || activePlot.isDead) return;
-    const success = waterPlot(activePlot.id);
-    if (success) {
-      setShowWaterEffect(true);
-      setTimeout(() => setShowWaterEffect(false), 1200);
-      showFlyUp('+15 💚');
-      addToast('Tưới thành công! Cây vui hơn rồi 🌱', 'success');
-      start(15);
-    } else {
-      addToast('Đang hồi chiêu, chờ thêm nhé ⏳', 'info');
-    }
-  }, [activePlot, waterPlot, showFlyUp, addToast, start]);
-  const addHarvest = useActivityStore((s) => s.addHarvest);
-
-  const handleHarvest = useCallback(() => {
-    if (!activePlot || !isHarvestReady(activePlot)) return;
-    const reward = harvestPlot(activePlot.id);
-    showFlyUp(`+${reward} OGN 🪙`);
-    addToast(`Thu hoạch thành công! +${reward} OGN 🎉`, 'success');
-    addHarvest(activePlot.plantType.name, reward);
-    setTimeout(() => setShowPlantModal(true), 500);
-  }, [activePlot, harvestPlot, showFlyUp, addToast, addHarvest]);
-
-  const handleSelectPlant = useCallback((plantType: PlantType) => {
-    plantSeed(plantType, plots.length);
-    setShowPlantModal(false);
-    setActivePlotIndex(plots.length);
-    addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
-  }, [plots.length, plantSeed, addToast]);
 
   const growthPct = activePlot ? calculateGrowthPercent(activePlot) : 0;
   const stage = activePlot ? calculateStage(activePlot) : 'seed';
