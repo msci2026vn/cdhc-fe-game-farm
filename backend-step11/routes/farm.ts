@@ -25,6 +25,14 @@ const plantSchema = z.object({
   plantTypeId: z.enum(VALID_PLANT_TYPES),
 });
 
+const waterSchema = z.object({
+  plotId: z.string().uuid('Invalid plot ID format'),
+});
+
+const harvestSchema = z.object({
+  plotId: z.string().uuid('Invalid plot ID format'),
+});
+
 // ═══════════════════════════════════════════════════════════════
 // ROUTES
 // ═══════════════════════════════════════════════════════════════
@@ -144,6 +152,200 @@ farm.post('/plant',
       }
 
       console.error(`[FARM-DEBUG] POST /plant — returning ${status} ${code}`);
+
+      return c.json({
+        success: false,
+        error: { code, message: errorMsg },
+      }, status);
+    }
+  }
+);
+
+/**
+ * POST /water
+ * Tưới nước cho cây → tăng happiness + cooldown
+ */
+farm.post('/water',
+  // Zod validation middleware
+  zValidator('json', waterSchema, (result, c) => {
+    if (!result.success) {
+      console.error('[FARM-DEBUG] POST /water — Zod validation FAILED:', JSON.stringify(result.error.flatten()));
+      return c.json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Dữ liệu không hợp lệ',
+          details: result.error.flatten(),
+        },
+      }, 400);
+    }
+    console.log('[FARM-DEBUG] POST /water — Zod validation PASSED');
+  }),
+  // Handler
+  async (c) => {
+    const user = c.get('user');
+    const body = c.req.valid('json');
+
+    console.log('[FARM-DEBUG] POST /water — START', JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      plotId: body.plotId,
+      timestamp: new Date().toISOString(),
+    }));
+
+    try {
+      // Gọi service
+      console.log('[FARM-DEBUG] POST /water — calling farmService.waterPlot()');
+      const result = await farmService.waterPlot(user.id, body.plotId);
+
+      console.log('[FARM-DEBUG] POST /water — SUCCESS', JSON.stringify({
+        plotId: body.plotId,
+        happiness: result.happiness,
+        xpGained: result.xpGained,
+        xpTotal: result.xpTotal,
+        level: result.level,
+        leveledUp: result.leveledUp,
+        cooldownSeconds: result.cooldownSeconds,
+      }));
+
+      return c.json({ success: true, data: result });
+    } catch (error: any) {
+      // Map error → status code + error code
+      const errorMsg = error.message || 'Unknown error';
+
+      console.error('[FARM-DEBUG] POST /water — ERROR', JSON.stringify({
+        message: errorMsg,
+        userId: user.id,
+        plotId: body.plotId,
+        stack: error.stack?.split('\n').slice(0, 3).join(' | '),
+      }));
+
+      let status = 500;
+      let code = 'WATER_ERROR';
+      let cooldownRemaining: number | undefined;
+
+      if (errorMsg.includes('cooldown') || errorMsg.includes('Cooldown')) {
+        status = 429; code = 'COOLDOWN_ACTIVE';
+        // Extract cooldown remaining from error message if available
+        const ttlMatch = errorMsg.match(/(\d+)\s+seconds/);
+        if (ttlMatch) {
+          cooldownRemaining = parseInt(ttlMatch[1], 10);
+        }
+      } else if (errorMsg.includes('not found') || errorMsg.includes('Plot not found')) {
+        status = 404; code = 'PLOT_NOT_FOUND';
+      } else if (errorMsg.includes('dead') || errorMsg.includes('Cannot water')) {
+        status = 400; code = 'PLOT_DEAD';
+      }
+
+      console.error(`[FARM-DEBUG] POST /water — returning ${status} ${code}`);
+
+      return c.json({
+        success: false,
+        error: {
+          code,
+          message: errorMsg,
+          ...(cooldownRemaining !== undefined && { cooldownRemaining }),
+        },
+      }, status);
+    }
+  }
+);
+
+/**
+ * POST /harvest
+ *
+ * Thu hoạch cây đã growth 100%.
+ * Transaction: addOGN(reward) + addXP(25) + delete plot + log.
+ *
+ * Request: { plotId: "uuid" }
+ * Response: {
+ *   success: true,
+ *   data: {
+ *     ognReward: 100,
+ *     xpGained: 25,
+ *     newOgn: 1150,
+ *     newXp: 35,
+ *     newLevel: 1,
+ *     leveledUp: false,
+ *     plantName: "Cà Chua",
+ *     plantEmoji: "🍅",
+ *     message: "Thu hoạch thành công! +100 OGN 🍅"
+ *   }
+ * }
+ */
+farm.post('/harvest',
+  zValidator('json', harvestSchema, (result, c) => {
+    if (!result.success) {
+      console.error('[FARM-DEBUG] POST /harvest — Zod validation FAILED:', JSON.stringify(result.error.flatten()));
+      return c.json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'plotId không hợp lệ' },
+      }, 400);
+    }
+    console.log('[FARM-DEBUG] POST /harvest — Zod validation PASSED');
+  }),
+  async (c) => {
+    const user = c.get('user');
+    const { plotId } = c.req.valid('json');
+
+    console.log('[FARM-DEBUG] POST /harvest — START', JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      plotId,
+      timestamp: new Date().toISOString(),
+    }));
+
+    try {
+      console.log('[FARM-DEBUG] POST /harvest — calling farmService.harvestPlot()');
+      const result = await farmService.harvestPlot(user.id, plotId);
+
+      console.log('[FARM-DEBUG] POST /harvest — SUCCESS', JSON.stringify({
+        ognEarned: result.ognEarned,
+        xpEarned: result.xpEarned,
+        newOGN: result.newOGN,
+        newLevel: result.newLevel,
+        leveledUp: result.leveledUp,
+        plantName: result.plantType.name,
+      }));
+
+      // Map field names for FE consistency
+      return c.json({
+        success: true,
+        data: {
+          ognReward: result.ognEarned,
+          xpGained: result.xpEarned,
+          newOgn: result.newOGN,
+          newXp: result.newXP,
+          newLevel: result.newLevel,
+          leveledUp: result.leveledUp,
+          plantName: result.plantType.name,
+          plantEmoji: result.plantType.emoji,
+          message: `Thu hoạch thành công! +${result.ognEarned} OGN ${result.plantType.emoji}`,
+        },
+      });
+    } catch (error: any) {
+      const errorMsg = error.message || 'Unknown error';
+
+      console.error('[FARM-DEBUG] POST /harvest — ERROR', JSON.stringify({
+        message: errorMsg,
+        userId: user.id,
+        plotId,
+      }));
+
+      let status = 500;
+      let code = 'HARVEST_ERROR';
+
+      if (errorMsg.includes('not ready') || errorMsg.includes('chưa') || errorMsg.includes('growth') || errorMsg.includes('100%')) {
+        status = 400; code = 'NOT_READY';
+      } else if (errorMsg.includes('not found') || errorMsg.includes('không tìm')) {
+        status = 404; code = 'PLOT_NOT_FOUND';
+      } else if (errorMsg.includes('dead') || errorMsg.includes('chết')) {
+        status = 400; code = 'PLOT_DEAD';
+      } else if (errorMsg.includes('already') || errorMsg.includes('đã thu')) {
+        status = 409; code = 'ALREADY_HARVESTED';
+      }
+
+      console.error(`[FARM-DEBUG] POST /harvest — returning ${status} ${code}`);
 
       return c.json({
         success: false,

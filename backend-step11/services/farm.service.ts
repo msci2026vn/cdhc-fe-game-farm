@@ -12,7 +12,7 @@
 import { db } from '@/db/connection';
 import { redis } from '@/db/redis';
 import { farmPlots, plantTypes, playerStats, gameActions } from '../schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { rewardService } from './reward.service';
 
 // ============================================================
@@ -299,7 +299,10 @@ export const farmService = {
    * @throws Error nếu not ready / not found
    */
   async harvestPlot(userId: string, plotId: string) {
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — START', JSON.stringify({ userId, plotId }));
+
     // 1. Check plot
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — finding plot');
     const [plot] = await db
       .select()
       .from(farmPlots)
@@ -309,41 +312,84 @@ export const farmService = {
       ));
 
     if (!plot) {
+      console.log('[FARM-DEBUG] farmService.harvestPlot() — plot NOT found');
       throw new Error(`Plot not found: ${plotId}`);
     }
 
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — plot found', JSON.stringify({
+      plantTypeId: plot.plantTypeId,
+      plantedAt: plot.plantedAt,
+      happiness: plot.happiness,
+      isDead: plot.isDead,
+    }));
+
     if (plot.isDead) {
+      console.log('[FARM-DEBUG] farmService.harvestPlot() — plot is DEAD');
       throw new Error(`Cannot harvest a dead plant`);
     }
 
     // 2. Get plant type
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — getting plant type');
     const [plantType] = await db
       .select()
       .from(plantTypes)
       .where(eq(plantTypes.id, plot.plantTypeId));
 
     if (!plantType) {
+      console.log('[FARM-DEBUG] farmService.harvestPlot() — plant type NOT found');
       throw new Error(`Plant type not found: ${plot.plantTypeId}`);
     }
 
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — plantType:', JSON.stringify({
+      id: plantType.id,
+      name: plantType.name,
+      emoji: plantType.emoji,
+      rewardOgn: plantType.rewardOGN,
+      rewardXp: plantType.rewardXP,
+      growthDurationMs: plantType.growthDurationMs,
+    }));
+
     // 3. Check growth
+    const now = Date.now();
+    const growthMs = now - plot.plantedAt;
     const growth = calculateGrowth(plot.plantedAt, plantType.growthDurationMs);
+
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — growth check', JSON.stringify({
+      plantedAt: plot.plantedAt,
+      now,
+      growthMs,
+      growthDurationMs: plantType.growthDurationMs,
+      growthPercent: growth,
+      isReady: growth >= 100,
+    }));
+
     if (growth < 100) {
-      throw new Error(`Plant not ready: ${growth}% grown (need 100%). Wait ${Math.ceil((plantType.growthDurationMs - (Date.now() - plot.plantedAt)) / 60000)} more minutes`);
+      const waitMinutes = Math.ceil((plantType.growthDurationMs - (Date.now() - plot.plantedAt)) / 60000);
+      console.log('[FARM-DEBUG] farmService.harvestPlot() — NOT ready, wait:', waitMinutes, 'minutes');
+      throw new Error(`Plant not ready: ${growth}% grown (need 100%). Wait ${waitMinutes} more minutes`);
     }
 
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — ✅ READY to harvest');
+
     // 4. Add OGN reward
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — addOGN:', plantType.rewardOGN);
     const ognResult = await rewardService.addOGN(userId, plantType.rewardOGN, `harvest_${plot.plantTypeId}`);
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — OGN added, new total:', ognResult.ogn);
 
     // 5. Add XP reward
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — addXP:', plantType.rewardXP);
     const xpResult = await rewardService.addXP(userId, plantType.rewardXP);
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — XP added, new total:', xpResult.xp, 'level:', xpResult.level);
 
     // 6. Delete the plot (free the slot for replanting)
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — deleting plot');
     await db
       .delete(farmPlots)
       .where(eq(farmPlots.id, plotId));
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — plot deleted');
 
     // 7. Update totalHarvests
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — updating totalHarvests');
     await db
       .update(playerStats)
       .set({
@@ -351,12 +397,15 @@ export const farmService = {
         updatedAt: new Date(),
       })
       .where(eq(playerStats.userId, userId));
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — totalHarvests incremented');
 
     // 8. Clean Redis cooldown
     const cooldownKey = waterCooldownKey(userId, plotId);
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — cleaning Redis key:', cooldownKey);
     await redis.del(cooldownKey);
 
     // 9. Log action
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — logging game_action type=harvest');
     await db.insert(gameActions).values({
       userId,
       type: 'harvest',
@@ -369,6 +418,15 @@ export const farmService = {
         growthPercent: growth,
       },
     });
+
+    console.log('[FARM-DEBUG] farmService.harvestPlot() — COMPLETE', JSON.stringify({
+      ognEarned: plantType.rewardOGN,
+      xpEarned: plantType.rewardXP,
+      newOGN: ognResult.ogn,
+      newXP: xpResult.xp,
+      newLevel: xpResult.level,
+      leveledUp: xpResult.leveledUp,
+    }));
 
     return {
       plantType: {

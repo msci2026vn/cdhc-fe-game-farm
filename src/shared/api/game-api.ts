@@ -173,19 +173,35 @@ export const gameApi = {
   },
 
   /**
-   * Harvest a plot
+   * Harvest a plot (bước 15 — real API)
    * BE Zod: { plotId: string uuid }
-   * TODO: bước 15 chuyển sang API thật
    */
   harvestPlot: async (plotId: string): Promise<HarvestResult> => {
-    // MOCK: Return harvest result
-    return {
-      ognReward: 100,
-      xpGained: 25,
-      ognTotal: 1350,
-      leveledUp: false,
-    };
-    // Real API (bước 15): return gameClient.post<HarvestResult>('/game/farm/harvest', { plotId });
+    const url = 'https://sta.cdhc.vn/api/game/farm/harvest';
+    const body = { plotId };
+
+    console.log('[FARM-DEBUG] gameApi.harvestPlot() — REQUEST', JSON.stringify({ url, plotId }));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.harvestPlot() — STATUS:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.harvestPlot() — ERROR:', JSON.stringify(error));
+      const err = new Error(error?.error?.message || `Harvest failed: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.harvestPlot() — SUCCESS:', JSON.stringify(json.data));
+    return json.data;
   },
 
   // ═══ BOSS ═══

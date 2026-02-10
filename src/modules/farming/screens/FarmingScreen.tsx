@@ -23,6 +23,7 @@ import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
 import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
 import { useWaterPlot } from '@/shared/hooks/useWaterPlot';
+import { useHarvestPlot } from '@/shared/hooks/useHarvestPlot';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
@@ -67,9 +68,19 @@ export default function FarmingScreen() {
   // ─── NEW: Water mutation (Step 14) ───
   const waterMutation = useWaterPlot();
 
+  // ─── NEW: Harvest mutation (Step 15) ───
+  const harvestMutation = useHarvestPlot();
+
   // ─── NEW: Water cooldown state (Step 14) ───
   const [waterCooldowns, setWaterCooldowns] = useState<Record<string, number>>({});
   // key = plotId, value = cooldownEndTimestamp
+
+  // ─── NEW: Harvest result state (for animation) ───
+  const [harvestResult, setHarvestResult] = useState<{
+    ognReward: number;
+    plantEmoji: string;
+    leveledUp: boolean;
+  } | null>(null);
 
   // Zustand for mutations (harvest still use Zustand)
   const ogn = useFarmStore((s) => s.ogn);
@@ -174,12 +185,42 @@ export default function FarmingScreen() {
   const handleHarvest = useCallback(() => {
     const currentPlot = plots[activePlotIndex];
     if (!currentPlot || !isHarvestReady(currentPlot)) return;
-    const reward = harvestPlot(currentPlot.id);
-    showFlyUp(`+${reward} OGN 🪙`);
-    addToast(`Thu hoạch thành công! +${reward} OGN 🎉`, 'success');
-    addHarvest(currentPlot.plantType.name, reward);
-    setTimeout(() => setShowPlantModal(true), 500);
-  }, [harvestPlot, showFlyUp, addToast, addHarvest, activePlotIndex]);
+
+    console.log('[FARM-DEBUG] FarmingScreen — HARVEST CLICKED:', currentPlot.id);
+
+    harvestMutation.mutate(currentPlot.id, {
+      onSuccess: (data) => {
+        console.log('[FARM-DEBUG] FarmingScreen — HARVEST SUCCESS:', JSON.stringify(data));
+
+        // Show harvest animation
+        setHarvestResult({
+          ognReward: data.ognReward,
+          plantEmoji: data.plantEmoji,
+          leveledUp: data.leveledUp,
+        });
+
+        // Clear animation after 3s
+        setTimeout(() => setHarvestResult(null), 3000);
+
+        // Show effects
+        showFlyUp(`+${data.ognReward} OGN 🪙`);
+        addToast(data.message || `Thu hoạch thành công! +${data.ognReward} OGN 🎉`, 'success');
+        addHarvest(data.plantName, data.ognReward);
+
+        // Level up toast/animation
+        if (data.leveledUp) {
+          console.log('[FARM-DEBUG] FarmingScreen — 🎉 LEVEL UP! Level:', data.newLevel);
+          setTimeout(() => {
+            addToast(`🎉 Level Up! Level ${data.newLevel}`, 'success');
+          }, 500);
+        }
+      },
+      onError: (error) => {
+        console.error('[FARM-DEBUG] FarmingScreen — HARVEST ERROR:', error.message);
+        addToast(error.message || 'Lỗi thu hoạch', 'error');
+      },
+    });
+  }, [harvestMutation, showFlyUp, addToast, addHarvest, activePlotIndex, plots]);
 
   const handleSelectPlant = useCallback((plantType: PlantType) => {
     const currentLength = plots.length;
@@ -455,9 +496,12 @@ export default function FarmingScreen() {
         {/* Harvest / Plant button */}
         {activePlot && harvestReady && !activePlot.isDead && (
           <div className="px-4 pb-2">
-            <button onClick={handleHarvest}
-              className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform">
-              🌾 Thu hoạch (+{activePlot.plantType.rewardOGN} OGN)
+            <button
+              onClick={handleHarvest}
+              disabled={harvestMutation.isPending}
+              className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform disabled:opacity-50"
+            >
+              {harvestMutation.isPending ? '⏳ Đang thu hoạch...' : `🌾 Thu hoạch (+${activePlot.plantType.rewardOGN} OGN)`}
             </button>
           </div>
         )}
@@ -475,6 +519,24 @@ export default function FarmingScreen() {
 
       <Toast />
       <PointsFlyUp />
+
+      {/* ─── NEW: Harvest animation overlay (Step 15) ─── */}
+      {harvestResult && (
+        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-black/30">
+          <div className="animate-bounce text-center bg-white rounded-2xl p-6 shadow-2xl">
+            <div className="text-6xl mb-2">{harvestResult.plantEmoji}</div>
+            <div className="text-2xl font-bold text-amber-500 animate-pulse">
+              +{harvestResult.ognReward} OGN
+            </div>
+            {harvestResult.leveledUp && (
+              <div className="text-xl font-bold text-purple-500 mt-2">
+                🎉 LEVEL UP!
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
       {showPlantPicker && (
         <PlantPickerModal
