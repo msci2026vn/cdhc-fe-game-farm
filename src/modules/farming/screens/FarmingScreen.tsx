@@ -24,11 +24,13 @@ import { useCooldown } from '@/shared/hooks/useCooldown';
 import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
+import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 
 export default function FarmingScreen() {
   const navigate = useNavigate();
   // API data (Step 12)
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
+  const { data: profile } = usePlayerProfile();
 
   // Track mount count
   const mountCount = useRef(0);
@@ -48,6 +50,15 @@ export default function FarmingScreen() {
       plotCount: plots?.length ?? 'N/A',
     });
   }, [plotsLoading, plotsError, plots?.length]);
+
+  // Sync OGN from profile to store
+  const setOgn = useFarmStore((s) => s.setOgn);
+  useEffect(() => {
+    if (profile?.ogn !== undefined) {
+      console.log('[FARM-DEBUG] FarmingScreen: Syncing OGN from profile =', profile.ogn);
+      setOgn(profile.ogn);
+    }
+  }, [profile?.ogn, setOgn]);
 
   // ─── NEW: Plant mutation (Step 13) ───
   const plantMutation = usePlantSeed();

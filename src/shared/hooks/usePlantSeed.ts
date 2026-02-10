@@ -10,6 +10,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { useFarmStore } from '@/modules/farming/stores/farmStore';
 
 interface PlantSeedParams {
   slotIndex: number;
@@ -103,6 +104,9 @@ export function usePlantSeed() {
     // ─── Success: invalidate để lấy data thật từ server ───
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] usePlantSeed.onSuccess() — SERVER CONFIRMED', JSON.stringify(data));
+
+      // Update store immediately
+      useFarmStore.getState().setOgn(data.ognRemaining);
 
       // Invalidate to get real server data (replaces optimistic)
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });

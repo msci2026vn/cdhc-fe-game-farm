@@ -21,12 +21,13 @@ interface FarmState {
   plots: FarmPlot[];
   ogn: number;
   waterCooldowns: Record<string, number>; // plotId → cooldown end timestamp
-  
+
   // Actions
   plantSeed: (plantType: PlantType, slotIndex: number) => void;
   waterPlot: (plotId: string) => boolean;
   harvestPlot: (plotId: string) => number; // returns OGN earned
   addOgn: (amount: number) => void;
+  setOgn: (amount: number) => void;
   tickHappiness: () => void;
   getWaterCooldownRemaining: (plotId: string) => number;
 }
@@ -46,6 +47,8 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   ],
   ogn: 1250,
   waterCooldowns: {},
+
+  setOgn: (amount) => set({ ogn: amount }),
 
   plantSeed: (plantType, slotIndex) => {
     const newPlot: FarmPlot = {
@@ -71,11 +74,11 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       plots: s.plots.map((p) =>
         p.id === plotId
           ? {
-              ...p,
-              happiness: Math.min(100, p.happiness + HAPPINESS_GAIN),
-              lastWateredAt: Date.now(),
-              mood: 'happy' as const,
-            }
+            ...p,
+            happiness: Math.min(100, p.happiness + HAPPINESS_GAIN),
+            lastWateredAt: Date.now(),
+            mood: 'happy' as const,
+          }
           : p
       ),
       waterCooldowns: {
