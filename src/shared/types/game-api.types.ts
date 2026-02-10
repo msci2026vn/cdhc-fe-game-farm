@@ -130,17 +130,21 @@ export interface QuizStartResult {
 
 export interface QuizAnswerInput {
   sessionId: string;
-  questionId: string;
+  questionIndex: number;
   answer: QuizAnswer;
 }
 
 export interface QuizAnswerResult {
   correct: boolean;
   correctAnswer: string; // Server reveals after answering
-  ognGained: number;
-  xpGained: number;
-  currentScore: number;
-  questionIndex: number;
+  ognGain: number;
+  xpGain: number;
+  totalCorrect: number;
+  totalAnswered: number;
+  totalQuestions: number;
+  quizComplete: boolean;
+  totalOgnGained?: number;
+  totalXpGained?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════
