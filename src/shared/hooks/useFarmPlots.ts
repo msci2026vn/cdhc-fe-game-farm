@@ -89,7 +89,12 @@ function transformPlot(apiPlot: ApiFarmPlot): FarmPlot {
 export function useFarmPlots() {
   return useQuery<FarmPlotsResponse>({
     queryKey: ['game', 'farm', 'plots'],
-    queryFn: () => gameApi.getPlots(),
+    queryFn: async () => {
+      console.log('[FARM-DEBUG] useFarmPlots: Fetching plots from API...');
+      const data = await gameApi.getPlots();
+      console.log('[FARM-DEBUG] useFarmPlots: Received data =', data);
+      return data;
+    },
     staleTime: 60_000, // 60s — growth changes over time
     refetchInterval: 60_000, // Auto-refresh every 60s for growth updates
     retry: 2,

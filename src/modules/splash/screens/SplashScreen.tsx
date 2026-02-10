@@ -26,23 +26,28 @@ export default function SplashScreen() {
   const [checkedAuth, setCheckedAuth] = useState(false);
 
   useEffect(() => {
+    console.log('[FARM-DEBUG] SplashScreen: Starting auth check');
+
     // Show splash animation for 2.8s
     const animTimer = setTimeout(() => setTapped(true), 2800);
 
     // Check auth after animation
     const checkAuth = async () => {
       try {
+        console.log('[FARM-DEBUG] SplashScreen: Calling gameApi.ping()');
         const result = await gameApi.ping();
 
+        console.log('[FARM-DEBUG] SplashScreen: ping result =', result);
+
         if (result.success) {
-          console.log('[Splash] ✅ Authenticated → /farm');
+          console.log('[FARM-DEBUG] SplashScreen: ✅ Authenticated → navigating to /farm');
           navigate('/farm', { replace: true });
         } else {
-          console.log('[Splash] ❌ Not authenticated → /login');
+          console.log('[FARM-DEBUG] SplashScreen: ❌ Not authenticated → navigating to /login');
           navigate('/login', { replace: true });
         }
       } catch (error) {
-        console.error('[Splash] ❌ Auth check failed:', error);
+        console.error('[FARM-DEBUG] SplashScreen: ❌ Auth check failed:', error);
         navigate('/login', { replace: true });
       } finally {
         setCheckedAuth(true);

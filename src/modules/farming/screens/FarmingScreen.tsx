@@ -24,9 +24,19 @@ import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 
 export default function FarmingScreen() {
+  console.log('[FARM-DEBUG] FarmingScreen: COMPONENT MOUNTED');
+
   const navigate = useNavigate();
   // API data (Step 12)
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
+
+  console.log('[FARM-DEBUG] FarmingScreen: State =', {
+    isLoading: plotsLoading,
+    hasError: !!plotsError,
+    errorMsg: plotsError?.message,
+    plotCount: plots?.length ?? 'N/A',
+  });
+
   // Zustand for mutations (TODO: Step 13-15 will replace with API)
   const ogn = useFarmStore((s) => s.ogn);
   const plantSeed = useFarmStore((s) => s.plantSeed);

@@ -83,18 +83,25 @@ export const gameApi = {
    * Get all farm plots (bước 12 — real API)
    */
   getPlots: async () => {
-    const response = await fetch('https://sta.cdhc.vn/api/game/farm/plots', {
+    const url = 'https://sta.cdhc.vn/api/game/farm/plots';
+    console.log('[FARM-DEBUG] gameApi.getPlots: Calling', url);
+
+    const response = await fetch(url, {
       method: 'GET',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });
 
+    console.log('[FARM-DEBUG] gameApi.getPlots: Response status =', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getPlots: ERROR =', error);
       throw new Error(error?.error?.message || `Failed to fetch plots: ${response.status}`);
     }
 
     const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getPlots: Response data =', json);
     return json.data; // { plots: [...], totalSlots: 6 }
   },
 

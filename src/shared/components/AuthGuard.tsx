@@ -24,27 +24,33 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log('[FARM-DEBUG] AuthGuard: Checking auth status');
+
       try {
         // Sử dụng ping() hoặc getProfile() để check auth
         const result = await gameApi.ping();
 
+        console.log('[FARM-DEBUG] AuthGuard: ping result =', result);
+
         if (result.success) {
-          console.log('[AuthGuard] ✅ Authenticated:', result.email);
+          console.log('[FARM-DEBUG] AuthGuard: ✅ Authenticated -', result.email, '- currentPath =', location.pathname);
           setAuthState('authenticated');
         } else {
-          console.log('[AuthGuard] ❌ Unauthenticated:', result.message);
+          console.log('[FARM-DEBUG] AuthGuard: ❌ Unauthenticated -', result.message, '- currentPath =', location.pathname);
           setAuthState('unauthenticated');
 
           // Redirect to login nếu chưa ở trang login
           if (location.pathname !== '/login') {
+            console.log('[FARM-DEBUG] AuthGuard: Redirecting to /login');
             navigate('/login', { replace: true });
           }
         }
       } catch (error) {
-        console.error('[AuthGuard] ❌ Auth check failed:', error);
+        console.error('[FARM-DEBUG] AuthGuard: ❌ Auth check failed:', error);
         setAuthState('unauthenticated');
 
         if (location.pathname !== '/login') {
+          console.log('[FARM-DEBUG] AuthGuard: Redirecting to /login (after error)');
           navigate('/login', { replace: true });
         }
       }

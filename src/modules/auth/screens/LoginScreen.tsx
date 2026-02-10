@@ -15,6 +15,8 @@ function LoginScreenContent() {
     setError(null);
 
     try {
+      console.log('[FARM-DEBUG] LoginScreen: Sending Google ID token to BE');
+
       // Gửi Google ID token lên BE
       const res = await fetch('https://sta.cdhc.vn/api/auth/google', {
         method: 'POST',
@@ -27,19 +29,25 @@ function LoginScreenContent() {
 
       const data = await res.json();
 
+      console.log('[FARM-DEBUG] LoginScreen: Response status =', res.status);
+      console.log('[FARM-DEBUG] LoginScreen: Response data =', data);
+
       if (res.ok && data.success) {
-        console.log('[Login] ✅ Success:', data);
+        console.log('[FARM-DEBUG] LoginScreen: ✅ Login successful → navigating to /farm');
         // Login thành công → redirect /farm
         navigate('/farm', { replace: true });
       } else if (data.error?.code === 'NOT_APPROVED') {
+        console.log('[FARM-DEBUG] LoginScreen: ❌ Account NOT_APPROVED');
         setError('⏳ Tài khoản đang chờ duyệt. Vui lòng liên hệ admin.');
       } else if (data.error?.code === 'ALREADY_PENDING') {
+        console.log('[FARM-DEBUG] LoginScreen: ❌ Account ALREADY_PENDING');
         setError('⏳ Tài khoản đang chờ phê duyệt.');
       } else {
+        console.log('[FARM-DEBUG] LoginScreen: ❌ Login failed -', data.error?.message);
         setError(data.error?.message || '❌ Đăng nhập thất bại');
       }
     } catch (err) {
-      console.error('[Login] ❌ Error:', err);
+      console.error('[FARM-DEBUG] LoginScreen: ❌ Exception:', err);
       setError('❌ Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setLoading(false);
