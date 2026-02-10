@@ -138,19 +138,38 @@ export const gameApi = {
   },
 
   /**
-   * Water a plot
+   * Water a plot (bước 14 — real API)
    * BE Zod: { plotId: string uuid }
-   * TODO: bước 14 chuyển sang API thật
    */
   waterPlot: async (plotId: string): Promise<WaterResult> => {
-    // MOCK: Return water result
-    return {
-      cooldownRemaining: 3600,
-      happinessGain: 15,
-      xpGained: 5,
-      newHappiness: 100,
-    };
-    // Real API (bước 14): return gameClient.post<WaterResult>('/game/farm/water', { plotId });
+    const url = 'https://sta.cdhc.vn/api/game/farm/water';
+    const body = { plotId };
+
+    console.log('[FARM-DEBUG] gameApi.waterPlot() — REQUEST', JSON.stringify({ url, plotId }));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.waterPlot() — STATUS:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.waterPlot() — ERROR:', JSON.stringify(error));
+
+      // Attach cooldown info to error for FE to display
+      const err = new Error(error?.error?.message || `Water failed: ${response.status}`);
+      (err as any).cooldownRemaining = error?.error?.cooldownRemaining;
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.waterPlot() — SUCCESS:', JSON.stringify(json.data));
+    return json.data;
   },
 
   /**

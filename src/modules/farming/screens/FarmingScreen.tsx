@@ -22,6 +22,7 @@ import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite,
 import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
 import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
+import { useWaterPlot } from '@/shared/hooks/useWaterPlot';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
@@ -63,10 +64,17 @@ export default function FarmingScreen() {
   // ─── NEW: Plant mutation (Step 13) ───
   const plantMutation = usePlantSeed();
 
-  // Zustand for mutations (water + harvest still use Zustand, plant will use API)
+  // ─── NEW: Water mutation (Step 14) ───
+  const waterMutation = useWaterPlot();
+
+  // ─── NEW: Water cooldown state (Step 14) ───
+  const [waterCooldowns, setWaterCooldowns] = useState<Record<string, number>>({});
+  // key = plotId, value = cooldownEndTimestamp
+
+  // Zustand for mutations (harvest still use Zustand)
   const ogn = useFarmStore((s) => s.ogn);
   const plantSeedZustand = useFarmStore((s) => s.plantSeed); // Keep for fallback
-  const waterPlot = useFarmStore((s) => s.waterPlot);
+  const waterPlotZustand = useFarmStore((s) => s.waterPlot); // Keep for fallback
   const harvestPlot = useFarmStore((s) => s.harvestPlot);
   const getCooldown = useFarmStore((s) => s.getWaterCooldownRemaining);
   const addToast = useUIStore((s) => s.addToast);
@@ -106,17 +114,62 @@ export default function FarmingScreen() {
   const handleWater = useCallback(() => {
     const currentPlot = plots[activePlotIndex];
     if (!currentPlot || currentPlot.isDead) return;
-    const success = waterPlot(currentPlot.id);
-    if (success) {
-      setShowWaterEffect(true);
-      setTimeout(() => setShowWaterEffect(false), 1200);
-      showFlyUp('+15 💚');
-      addToast('Tưới thành công! Cây vui hơn rồi 🌱', 'success');
-      start(15);
-    } else {
-      addToast('Đang hồi chiêu, chờ thêm nhé ⏳', 'info');
+
+    console.log('[FARM-DEBUG] FarmingScreen — WATER CLICKED:', currentPlot.id);
+
+    // Check local cooldown first (instant feedback)
+    const cooldownEnd = waterCooldowns[currentPlot.id];
+    if (cooldownEnd && Date.now() < cooldownEnd) {
+      const remaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
+      console.log('[FARM-DEBUG] FarmingScreen — LOCAL COOLDOWN active:', remaining, 's');
+      addToast(`Đang chờ tưới! Còn ${remaining} giây ⏳`, 'info');
+      return;
     }
-  }, [waterPlot, showFlyUp, addToast, start, activePlotIndex]);
+
+    waterMutation.mutate(currentPlot.id, {
+      onSuccess: (data) => {
+        console.log('[FARM-DEBUG] FarmingScreen — WATER SUCCESS:', JSON.stringify(data));
+
+        // Set local cooldown timer
+        const endTime = Date.now() + (data.cooldownSeconds * 1000);
+        setWaterCooldowns(prev => ({ ...prev, [currentPlot.id]: endTime }));
+        console.log('[FARM-DEBUG] FarmingScreen — cooldown set until:', new Date(endTime).toISOString());
+
+        // Show effects
+        setShowWaterEffect(true);
+        setTimeout(() => setShowWaterEffect(false), 1200);
+        showFlyUp('+10 💚');
+        addToast(data.message || 'Tưới thành công! Cây vui hơn rồi 🌱', 'success');
+        start(data.cooldownSeconds);
+      },
+      onError: (error: any) => {
+        console.error('[FARM-DEBUG] FarmingScreen — WATER ERROR:', error.message);
+
+        // If cooldown error, set local cooldown from server response
+        if (error.cooldownRemaining) {
+          const endTime = Date.now() + (error.cooldownRemaining * 1000);
+          setWaterCooldowns(prev => ({ ...prev, [currentPlot.id]: endTime }));
+          console.log('[FARM-DEBUG] FarmingScreen — server cooldown:', error.cooldownRemaining, 's');
+          addToast(`Đang chờ tưới! Còn ${error.cooldownRemaining} giây ⏳`, 'info');
+        } else {
+          addToast(error.message || 'Lỗi tưới nước', 'error');
+        }
+      },
+    });
+  }, [waterCooldowns, waterMutation, showFlyUp, addToast, start, activePlotIndex, plots]);
+
+  // ─── NEW: Check if plot can be watered ───
+  const canWater = useCallback((plotId: string) => {
+    const cooldownEnd = waterCooldowns[plotId];
+    return !cooldownEnd || Date.now() >= cooldownEnd;
+  }, [waterCooldowns]);
+
+  // ─── NEW: Get cooldown remaining for display ───
+  const getCooldownRemaining = useCallback((plotId: string) => {
+    const cooldownEnd = waterCooldowns[plotId];
+    if (!cooldownEnd || Date.now() >= cooldownEnd) return 0;
+    return Math.ceil((cooldownEnd - Date.now()) / 1000);
+  }, [waterCooldowns]);
 
   const handleHarvest = useCallback(() => {
     const currentPlot = plots[activePlotIndex];
@@ -364,10 +417,19 @@ export default function FarmingScreen() {
 
         {/* Action buttons */}
         <div className="px-4 pb-2 grid grid-cols-4 gap-2.5">
-          <button onClick={handleWater} disabled={isActive || !activePlot || activePlot?.isDead}
-            className="action-btn-base py-3.5 border-2 border-transparent disabled:opacity-50">
+          <button
+            onClick={handleWater}
+            disabled={isActive || !activePlot || activePlot?.isDead || !canWater(activePlot?.id || '') || waterMutation.isPending}
+            className="action-btn-base py-3.5 border-2 border-transparent disabled:opacity-50"
+          >
             <span className="text-[28px] drop-shadow-sm relative z-10">💧</span>
-            <span className="text-[11px] font-bold relative z-10">{isActive ? formatTime(remaining) : 'Tưới nước'}</span>
+            <span className="text-[11px] font-bold relative z-10">
+              {isActive
+                ? formatTime(remaining)
+                : !canWater(activePlot?.id || '')
+                  ? `${getCooldownRemaining(activePlot?.id || '')}s`
+                  : 'Tưới nước'}
+            </span>
           </button>
           <button className="action-btn-base py-3.5 border-2 border-transparent relative"
             onClick={() => setShowBugGame(true)}>
