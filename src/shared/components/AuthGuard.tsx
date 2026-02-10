@@ -22,14 +22,14 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Use ref to track if we've already checked auth
+  // Use ref to track if we've already checked auth - CRITICAL FIX
   const hasCheckedAuth = useRef(false);
   const authResultRef = useRef<{ isAuthenticated: boolean; email?: string } | null>(null);
 
   useEffect(() => {
     // Skip if we already checked auth - CRITICAL FIX
     if (hasCheckedAuth.current) {
-      console.log('[FARM-DEBUG] AuthGuard: Already checked, skipping (hasCheckedAuth = true)');
+      // console.log('[FARM-DEBUG] AuthGuard: Already checked, skipping (hasCheckedAuth = true)');
       return;
     }
 
@@ -41,11 +41,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
         console.log('[FARM-DEBUG] AuthGuard: ping result =', result.success);
 
         // Cache result
-        authResultRef.current = { isAuthenticated: result.success, email: result.email };
+        authResultRef.current = { isAuthenticated: result.success };
         hasCheckedAuth.current = true;
 
         if (result.success) {
-          console.log('[FARM-DEBUG] AuthGuard: ✅ Authenticated -', result.email);
+          console.log('[FARM-DEBUG] AuthGuard: ✅ Authenticated');
           setAuthState('authenticated');
         } else {
           console.log('[FARM-DEBUG] AuthGuard: ❌ Unauthenticated');
@@ -85,6 +85,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // FIX: Remove useMemo - it causes re-mount when children reference changes
   // Just render children directly - React will handle reconciliation efficiently
-  console.log('[FARM-DEBUG] AuthGuard: Rendering children (authState =', authState, ')');
+  // console.log('[FARM-DEBUG] AuthGuard: Rendering children (authState =', authState, ')');
   return <>{children}</>;
 }

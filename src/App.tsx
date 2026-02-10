@@ -43,7 +43,7 @@ const App = () => {
           <AuthGuard>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<SplashScreen />} />
+              <Route path="/" element={<Navigate to="/farm" replace />} />
               <Route path="/login" element={<LoginScreen />} />
 
               {/* Protected routes (require auth) */}

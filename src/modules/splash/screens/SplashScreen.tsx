@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gameApi } from '@/shared/api/game-api';
 
@@ -24,8 +24,13 @@ export default function SplashScreen() {
   const navigate = useNavigate();
   const [tapped, setTapped] = useState(false);
   const [checkedAuth, setCheckedAuth] = useState(false);
+  const hasChecked = useRef(false);
 
   useEffect(() => {
+    // Prevent double check
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+
     console.log('[FARM-DEBUG] SplashScreen: Starting auth check');
 
     // Show splash animation for 2.8s

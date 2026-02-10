@@ -1,6 +1,6 @@
 export const PLANT_STAGES = ['seed', 'sprout', 'seedling', 'mature', 'dead'] as const;
 export type PlantStage = typeof PLANT_STAGES[number];
-export type PlantMood = 'happy' | 'sad' | 'unknown';
+export type PlantMood = 'happy' | 'sad' | 'neutral' | 'unknown';
 
 export interface PlantType {
   id: string;

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
@@ -30,11 +30,13 @@ export default function FarmingScreen() {
   // API data (Step 12)
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
 
-  // Track mount count with useEffect (logs ONCE on mount)
+  // Track mount count
+  const mountCount = useRef(0);
   useEffect(() => {
-    console.log('[FARM-DEBUG] FarmingScreen: ✅ MOUNTED (first time)');
+    mountCount.current++;
+    console.log(`[FARM-DEBUG] FarmingScreen: ✅ MOUNT #${mountCount.current}`);
     return () => {
-      console.log('[FARM-DEBUG] FarmingScreen: ❌ UNMOUNTED');
+      console.log(`[FARM-DEBUG] FarmingScreen: ❌ UNMOUNT #${mountCount.current}`);
     };
   }, []);
 
@@ -209,193 +211,193 @@ export default function FarmingScreen() {
 
       {/* Content */}
       <div className="relative z-10">
-      <FarmHeader />
+        <FarmHeader />
 
-      {/* Farm Scene */}
-      <div className="flex-1 relative flex flex-col items-center justify-center px-5 py-2" style={{ minHeight: '45vh' }}>
-        {/* Sun/Moon */}
-        {!isNight ? (
-          <div className="absolute top-2 right-8 w-[60px] h-[60px] rounded-full animate-sun-pulse"
-            style={{ background: 'radial-gradient(circle, #ffe066 30%, #f0b429 60%, transparent 70%)' }} />
-        ) : (
-          <div className="absolute top-2 right-8 w-[50px] h-[50px] rounded-full"
-            style={{ background: 'radial-gradient(circle, #f5f5dc 30%, #e8e4c9 60%, transparent 70%)', opacity: 0.8 }} />
-        )}
+        {/* Farm Scene */}
+        <div className="flex-1 relative flex flex-col items-center justify-center px-5 py-2" style={{ minHeight: '45vh' }}>
+          {/* Sun/Moon */}
+          {!isNight ? (
+            <div className="absolute top-2 right-8 w-[60px] h-[60px] rounded-full animate-sun-pulse"
+              style={{ background: 'radial-gradient(circle, #ffe066 30%, #f0b429 60%, transparent 70%)' }} />
+          ) : (
+            <div className="absolute top-2 right-8 w-[50px] h-[50px] rounded-full"
+              style={{ background: 'radial-gradient(circle, #f5f5dc 30%, #e8e4c9 60%, transparent 70%)', opacity: 0.8 }} />
+          )}
 
-        {/* Clouds */}
-        <span className="absolute top-1 left-[-30px] text-[30px] opacity-60 animate-cloud-drift" style={{ animationDuration: '25s' }}>☁️</span>
-        <span className="absolute top-8 left-[-60px] text-[22px] opacity-40 animate-cloud-drift" style={{ animationDuration: '35s', animationDelay: '8s' }}>☁️</span>
+          {/* Clouds */}
+          <span className="absolute top-1 left-[-30px] text-[30px] opacity-60 animate-cloud-drift" style={{ animationDuration: '25s' }}>☁️</span>
+          <span className="absolute top-8 left-[-60px] text-[22px] opacity-40 animate-cloud-drift" style={{ animationDuration: '35s', animationDelay: '8s' }}>☁️</span>
 
-        {activePlot ? (
-          <div className="flex flex-col items-center relative" style={{ width: 280 }}>
-            {/* Water splash */}
-            {showWaterEffect && (
-              <div className="absolute inset-0 pointer-events-none z-20">
-                {[...Array(8)].map((_, i) => (
-                  <span key={i} className="absolute animate-sparkle-up text-sm"
-                    style={{ left: `${20 + Math.random() * 60}%`, top: `${10 + Math.random() * 50}%`, animationDelay: `${i * 0.08}s` }}>
-                    💧
-                  </span>
-                ))}
-              </div>
-            )}
+          {activePlot ? (
+            <div className="flex flex-col items-center relative" style={{ width: 280 }}>
+              {/* Water splash */}
+              {showWaterEffect && (
+                <div className="absolute inset-0 pointer-events-none z-20">
+                  {[...Array(8)].map((_, i) => (
+                    <span key={i} className="absolute animate-sparkle-up text-sm"
+                      style={{ left: `${20 + Math.random() * 60}%`, top: `${10 + Math.random() * 50}%`, animationDelay: `${i * 0.08}s` }}>
+                      💧
+                    </span>
+                  ))}
+                </div>
+              )}
 
-            {/* Plant body */}
-            <div className="animate-plant-sway flex flex-col items-center">
-              <span className="text-7xl drop-shadow-md" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,100,0,0.2))' }}>
-                {getPlantSprite(activePlot)}
-              </span>
-              {/* Stem */}
-              <div className="w-2 h-16 rounded-full -mt-2"
-                style={{ background: 'linear-gradient(180deg, #4eca6a, #2d8a4e)' }} />
-            </div>
-
-            {/* Mood */}
-            <span className="absolute top-0 right-12 text-xl">
-              {getMoodEmoji(activePlot.mood)}
-            </span>
-
-            {/* Pot */}
-            <div className="relative -mt-1" style={{ width: 160 }}>
-              {/* Pot rim */}
-              <div className="h-5 rounded-lg -mb-px"
-                style={{ background: 'linear-gradient(180deg, #c49a6c, #8b5e34)', margin: '0 -10px' }} />
-              {/* Pot body */}
-              <div className="h-[70px] rounded-b-[30px] plant-pot-gradient relative"
-                style={{ boxShadow: '0 8px 25px rgba(92,61,31,0.3)' }}>
-                <span className="absolute bottom-4 left-0 right-0 text-center font-heading text-[11px] text-white/70 font-semibold tracking-wider">
-                  ORGANIC
+              {/* Plant body */}
+              <div className="animate-plant-sway flex flex-col items-center">
+                <span className="text-7xl drop-shadow-md" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,100,0,0.2))' }}>
+                  {getPlantSprite(activePlot)}
                 </span>
+                {/* Stem */}
+                <div className="w-2 h-16 rounded-full -mt-2"
+                  style={{ background: 'linear-gradient(180deg, #4eca6a, #2d8a4e)' }} />
               </div>
-            </div>
 
-            {/* Growth bar */}
-            <div className="w-[220px] mt-4">
-              <div className="rounded-[20px] p-1" style={{ background: 'rgba(255,255,255,0.6)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)' }}>
-                <div className="h-3.5 rounded-2xl relative transition-all duration-500"
-                  style={{
-                    width: `${Math.max(5, growthPct)}%`,
-                    background: 'linear-gradient(90deg, #4eca6a, #b8f0c5)',
-                    boxShadow: '0 2px 6px rgba(78,202,106,0.3)',
-                  }}>
-                  <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-game-green-dark whitespace-nowrap">
-                    🌱 {growthPct}%
+              {/* Mood */}
+              <span className="absolute top-0 right-12 text-xl">
+                {getMoodEmoji(activePlot.mood)}
+              </span>
+
+              {/* Pot */}
+              <div className="relative -mt-1" style={{ width: 160 }}>
+                {/* Pot rim */}
+                <div className="h-5 rounded-lg -mb-px"
+                  style={{ background: 'linear-gradient(180deg, #c49a6c, #8b5e34)', margin: '0 -10px' }} />
+                {/* Pot body */}
+                <div className="h-[70px] rounded-b-[30px] plant-pot-gradient relative"
+                  style={{ boxShadow: '0 8px 25px rgba(92,61,31,0.3)' }}>
+                  <span className="absolute bottom-4 left-0 right-0 text-center font-heading text-[11px] text-white/70 font-semibold tracking-wider">
+                    ORGANIC
                   </span>
                 </div>
               </div>
-              <div className="flex justify-between px-1 mt-1 text-[10px] font-bold text-muted-foreground">
-                <span>{STAGE_LABELS[stage]}</span>
-                <span>⏱ {activePlot.isDead ? 'Chết' : harvestReady ? 'Sẵn sàng!' : 'Đang lớn...'}</span>
-              </div>
-            </div>
 
-            {/* Status tags */}
-            <div className="flex flex-wrap gap-1.5 mt-2.5 justify-center">
-              {!activePlot.isDead && (
-                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
-                  style={{ background: '#d4f8dc', color: '#1a7a30' }}>
-                  ✅ Khỏe mạnh
-                </span>
-              )}
-              {activePlot.isDead && (
-                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold"
-                  style={{ background: '#ffe8e6', color: '#c0392b' }}>
-                  💀 Đã chết
-                </span>
-              )}
-              {!activePlot.isDead && activePlot.happiness >= 50 && (
-                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
-                  style={{ background: '#d4eeff', color: '#1a6a9a' }}>
-                  💧 Đã tưới
-                </span>
-              )}
-              {/* Weather effect tag */}
-              {growthMult !== 1.0 && (
-                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
-                  style={{
-                    background: growthMult > 1 ? '#d4f8dc' : '#fff3d4',
-                    color: growthMult > 1 ? '#1a7a30' : '#d49a1a',
-                  }}>
-                  {WEATHER_INFO[weather].emoji} {growthMult > 1 ? `+${Math.round((growthMult - 1) * 100)}% tốc độ` : `${Math.round((growthMult - 1) * 100)}% tốc độ`}
-                </span>
-              )}
-              {happyMod !== 1.0 && (
-                <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
-                  style={{
-                    background: happyMod < 1 ? '#d4f8dc' : '#ffe8e6',
-                    color: happyMod < 1 ? '#1a7a30' : '#c0392b',
-                  }}>
-                  {happyMod < 1 ? '😊' : '😰'} {happyMod < 1 ? `−${Math.round((1 - happyMod) * 100)}% suy giảm` : `+${Math.round((happyMod - 1) * 100)}% suy giảm`}
-                </span>
+              {/* Growth bar */}
+              <div className="w-[220px] mt-4">
+                <div className="rounded-[20px] p-1" style={{ background: 'rgba(255,255,255,0.6)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)' }}>
+                  <div className="h-3.5 rounded-2xl relative transition-all duration-500"
+                    style={{
+                      width: `${Math.max(5, growthPct)}%`,
+                      background: 'linear-gradient(90deg, #4eca6a, #b8f0c5)',
+                      boxShadow: '0 2px 6px rgba(78,202,106,0.3)',
+                    }}>
+                    <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-game-green-dark whitespace-nowrap">
+                      🌱 {growthPct}%
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between px-1 mt-1 text-[10px] font-bold text-muted-foreground">
+                  <span>{STAGE_LABELS[stage]}</span>
+                  <span>⏱ {activePlot.isDead ? 'Chết' : harvestReady ? 'Sẵn sàng!' : 'Đang lớn...'}</span>
+                </div>
+              </div>
+
+              {/* Status tags */}
+              <div className="flex flex-wrap gap-1.5 mt-2.5 justify-center">
+                {!activePlot.isDead && (
+                  <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
+                    style={{ background: '#d4f8dc', color: '#1a7a30' }}>
+                    ✅ Khỏe mạnh
+                  </span>
+                )}
+                {activePlot.isDead && (
+                  <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold"
+                    style={{ background: '#ffe8e6', color: '#c0392b' }}>
+                    💀 Đã chết
+                  </span>
+                )}
+                {!activePlot.isDead && activePlot.happiness >= 50 && (
+                  <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
+                    style={{ background: '#d4eeff', color: '#1a6a9a' }}>
+                    💧 Đã tưới
+                  </span>
+                )}
+                {/* Weather effect tag */}
+                {growthMult !== 1.0 && (
+                  <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
+                    style={{
+                      background: growthMult > 1 ? '#d4f8dc' : '#fff3d4',
+                      color: growthMult > 1 ? '#1a7a30' : '#d49a1a',
+                    }}>
+                    {WEATHER_INFO[weather].emoji} {growthMult > 1 ? `+${Math.round((growthMult - 1) * 100)}% tốc độ` : `${Math.round((growthMult - 1) * 100)}% tốc độ`}
+                  </span>
+                )}
+                {happyMod !== 1.0 && (
+                  <span className="px-3 py-1 rounded-[20px] text-[10px] font-bold flex items-center gap-1"
+                    style={{
+                      background: happyMod < 1 ? '#d4f8dc' : '#ffe8e6',
+                      color: happyMod < 1 ? '#1a7a30' : '#c0392b',
+                    }}>
+                    {happyMod < 1 ? '😊' : '😰'} {happyMod < 1 ? `−${Math.round((1 - happyMod) * 100)}% suy giảm` : `+${Math.round((happyMod - 1) * 100)}% suy giảm`}
+                  </span>
+                )}
+              </div>
+
+              {/* Plot dots */}
+              {plots.length > 1 && (
+                <div className="flex gap-2 mt-3">
+                  {plots.map((_, i) => (
+                    <button key={i} onClick={() => setActivePlotIndex(i)}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${i === activePlotIndex ? 'bg-primary scale-125' : 'bg-muted-foreground/30'}`} />
+                  ))}
+                </div>
               )}
             </div>
+          ) : (
+            <div className="text-center">
+              <span className="text-6xl block mb-4">🌱</span>
+              <p className="font-heading font-bold text-lg">Chưa có cây nào</p>
+              <p className="text-sm text-muted-foreground">Hãy trồng cây đầu tiên!</p>
+            </div>
+          )}
+        </div>
 
-            {/* Plot dots */}
-            {plots.length > 1 && (
-              <div className="flex gap-2 mt-3">
-                {plots.map((_, i) => (
-                  <button key={i} onClick={() => setActivePlotIndex(i)}
-                    className={`w-2.5 h-2.5 rounded-full transition-all ${i === activePlotIndex ? 'bg-primary scale-125' : 'bg-muted-foreground/30'}`} />
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center">
-            <span className="text-6xl block mb-4">🌱</span>
-            <p className="font-heading font-bold text-lg">Chưa có cây nào</p>
-            <p className="text-sm text-muted-foreground">Hãy trồng cây đầu tiên!</p>
+        {/* Action buttons */}
+        <div className="px-4 pb-2 grid grid-cols-4 gap-2.5">
+          <button onClick={handleWater} disabled={isActive || !activePlot || activePlot?.isDead}
+            className="action-btn-base py-3.5 border-2 border-transparent disabled:opacity-50">
+            <span className="text-[28px] drop-shadow-sm relative z-10">💧</span>
+            <span className="text-[11px] font-bold relative z-10">{isActive ? formatTime(remaining) : 'Tưới nước'}</span>
+          </button>
+          <button className="action-btn-base py-3.5 border-2 border-transparent relative"
+            onClick={() => setShowBugGame(true)}>
+            <span className="text-[28px] drop-shadow-sm relative z-10">🐛</span>
+            <span className="text-[11px] font-bold relative z-10">Bắt sâu</span>
+            <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-destructive rounded-full text-[10px] text-white font-extrabold flex items-center justify-center z-10"
+              style={{ boxShadow: '0 2px 6px rgba(231,76,60,0.4)' }}>!</span>
+          </button>
+          <button className="action-btn-base py-3.5 border-2 border-transparent relative"
+            onClick={() => navigate('/quiz')}>
+            <span className="text-[28px] drop-shadow-sm relative z-10">📖</span>
+            <span className="text-[11px] font-bold relative z-10">Quiz</span>
+            <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-destructive rounded-full text-[10px] text-white font-extrabold flex items-center justify-center z-10"
+              style={{ boxShadow: '0 2px 6px rgba(231,76,60,0.4)' }}>5</span>
+          </button>
+          <button className="action-btn-base py-3.5 border-2 border-transparent"
+            onClick={() => setShowFriends(true)}>
+            <span className="text-[28px] drop-shadow-sm relative z-10">🏡</span>
+            <span className="text-[11px] font-bold relative z-10">Bạn bè</span>
+          </button>
+        </div>
+
+        {/* Harvest / Plant button */}
+        {activePlot && harvestReady && !activePlot.isDead && (
+          <div className="px-4 pb-2">
+            <button onClick={handleHarvest}
+              className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform">
+              🌾 Thu hoạch (+{activePlot.plantType.rewardOGN} OGN)
+            </button>
           </div>
         )}
-      </div>
+        {!activePlot && (
+          <div className="px-4 pb-2">
+            <button onClick={handleEmptySlotClick}
+              className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform">
+              🌱 Trồng cây mới
+            </button>
+          </div>
+        )}
 
-      {/* Action buttons */}
-      <div className="px-4 pb-2 grid grid-cols-4 gap-2.5">
-        <button onClick={handleWater} disabled={isActive || !activePlot || activePlot?.isDead}
-          className="action-btn-base py-3.5 border-2 border-transparent disabled:opacity-50">
-          <span className="text-[28px] drop-shadow-sm relative z-10">💧</span>
-          <span className="text-[11px] font-bold relative z-10">{isActive ? formatTime(remaining) : 'Tưới nước'}</span>
-        </button>
-        <button className="action-btn-base py-3.5 border-2 border-transparent relative"
-          onClick={() => setShowBugGame(true)}>
-          <span className="text-[28px] drop-shadow-sm relative z-10">🐛</span>
-          <span className="text-[11px] font-bold relative z-10">Bắt sâu</span>
-          <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-destructive rounded-full text-[10px] text-white font-extrabold flex items-center justify-center z-10"
-            style={{ boxShadow: '0 2px 6px rgba(231,76,60,0.4)' }}>!</span>
-        </button>
-        <button className="action-btn-base py-3.5 border-2 border-transparent relative"
-          onClick={() => navigate('/quiz')}>
-          <span className="text-[28px] drop-shadow-sm relative z-10">📖</span>
-          <span className="text-[11px] font-bold relative z-10">Quiz</span>
-          <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-destructive rounded-full text-[10px] text-white font-extrabold flex items-center justify-center z-10"
-            style={{ boxShadow: '0 2px 6px rgba(231,76,60,0.4)' }}>5</span>
-        </button>
-        <button className="action-btn-base py-3.5 border-2 border-transparent"
-          onClick={() => setShowFriends(true)}>
-          <span className="text-[28px] drop-shadow-sm relative z-10">🏡</span>
-          <span className="text-[11px] font-bold relative z-10">Bạn bè</span>
-        </button>
-      </div>
-
-      {/* Harvest / Plant button */}
-      {activePlot && harvestReady && !activePlot.isDead && (
-        <div className="px-4 pb-2">
-          <button onClick={handleHarvest}
-            className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform">
-            🌾 Thu hoạch (+{activePlot.plantType.rewardOGN} OGN)
-          </button>
-        </div>
-      )}
-      {!activePlot && (
-        <div className="px-4 pb-2">
-          <button onClick={handleEmptySlotClick}
-            className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform">
-            🌱 Trồng cây mới
-          </button>
-        </div>
-      )}
-
-      <BottomNav />
+        <BottomNav />
       </div>{/* end z-10 wrapper */}
 
       <Toast />
