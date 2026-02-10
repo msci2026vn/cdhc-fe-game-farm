@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
@@ -46,7 +46,11 @@ export default function FarmingScreen() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [, forceUpdate] = useState(0);
 
-  const activePlot = plots[activePlotIndex] || null;
+  // Memoize activePlot to prevent infinite re-render loop
+  const activePlot = useMemo(
+    () => plots[activePlotIndex] || null,
+    [plots, activePlotIndex]
+  );
 
   const cooldownSeconds = activePlot ? getCooldown(activePlot.id) : 0;
   const { remaining, isActive, start } = useCooldown(cooldownSeconds);
@@ -65,9 +69,11 @@ export default function FarmingScreen() {
   useEffect(() => { startHappinessDecay(); }, []);
 
   // All useCallback hooks MUST be above early returns to avoid React #310
+  // Use ref to avoid dependency on activePlot changing every render
   const handleWater = useCallback(() => {
-    if (!activePlot || activePlot.isDead) return;
-    const success = waterPlot(activePlot.id);
+    const currentPlot = plots[activePlotIndex];
+    if (!currentPlot || currentPlot.isDead) return;
+    const success = waterPlot(currentPlot.id);
     if (success) {
       setShowWaterEffect(true);
       setTimeout(() => setShowWaterEffect(false), 1200);
@@ -77,23 +83,25 @@ export default function FarmingScreen() {
     } else {
       addToast('Đang hồi chiêu, chờ thêm nhé ⏳', 'info');
     }
-  }, [activePlot, waterPlot, showFlyUp, addToast, start]);
+  }, [waterPlot, showFlyUp, addToast, start, activePlotIndex]);
 
   const handleHarvest = useCallback(() => {
-    if (!activePlot || !isHarvestReady(activePlot)) return;
-    const reward = harvestPlot(activePlot.id);
+    const currentPlot = plots[activePlotIndex];
+    if (!currentPlot || !isHarvestReady(currentPlot)) return;
+    const reward = harvestPlot(currentPlot.id);
     showFlyUp(`+${reward} OGN 🪙`);
     addToast(`Thu hoạch thành công! +${reward} OGN 🎉`, 'success');
-    addHarvest(activePlot.plantType.name, reward);
+    addHarvest(currentPlot.plantType.name, reward);
     setTimeout(() => setShowPlantModal(true), 500);
-  }, [activePlot, harvestPlot, showFlyUp, addToast, addHarvest]);
+  }, [harvestPlot, showFlyUp, addToast, addHarvest, activePlotIndex]);
 
   const handleSelectPlant = useCallback((plantType: PlantType) => {
-    plantSeed(plantType, plots.length);
+    const currentLength = plots.length;
+    plantSeed(plantType, currentLength);
     setShowPlantModal(false);
-    setActivePlotIndex(plots.length);
+    setActivePlotIndex(currentLength);
     addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
-  }, [plots.length, plantSeed, addToast]);
+  }, [plantSeed, addToast]);
 
   // Loading state
   if (plotsLoading) {
