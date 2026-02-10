@@ -266,47 +266,58 @@ export const gameApi = {
 
   // ═══ QUIZ ═══
   /**
-   * Start a quiz session
-   * TODO: bước 18 chuyển sang API thật
+   * Start a quiz session (bước 18 — real API)
+   * Server returns 5 random questions WITHOUT correctAnswer
    */
   startQuiz: async (): Promise<QuizStartResult> => {
-    // MOCK: Return dummy quiz
-    return {
-      sessionId: 'mock-session',
-      questions: [
-        {
-          id: 'q1',
-          question: 'Câu hỏi mẫu',
-          image: '🌱',
-          options: [
-            { letter: 'A', text: 'Đáp án A' },
-            { letter: 'B', text: 'Đáp án B' },
-            { letter: 'C', text: 'Đáp án C' },
-            { letter: 'D', text: 'Đáp án D' },
-          ],
-        },
-      ],
-      totalQuestions: 1,
-    };
-    // Real API (bước 18): return gameClient.get<QuizStartResult>('/game/quiz/start');
+    const url = 'https://sta.cdhc.vn/api/game/quiz/start';
+    console.log('[FARM-DEBUG] gameApi.startQuiz():', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.startQuiz() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.startQuiz() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to start quiz: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.startQuiz() SUCCESS:', json);
+    return json.data;
   },
 
   /**
-   * Answer a quiz question
-   * BE Zod: { sessionId: string, questionId: string, answer: enum['A','B','C','D'] }
-   * TODO: bước 18 chuyển sang API thật
+   * Answer a quiz question (bước 18 — real API)
+   * Server validates answer and returns rewards
    */
   answerQuiz: async (input: QuizAnswerInput): Promise<QuizAnswerResult> => {
-    // MOCK: Return correct answer
-    return {
-      correct: true,
-      correctAnswer: 'A',
-      ognGained: 1,
-      xpGained: 8,
-      currentScore: 1,
-      questionIndex: 0,
-    };
-    // Real API (bước 18): return gameClient.post<QuizAnswerResult>('/game/quiz/answer', input);
+    const url = 'https://sta.cdhc.vn/api/game/quiz/answer';
+    console.log('[FARM-DEBUG] gameApi.answerQuiz():', { url, ...input });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.answerQuiz() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.answerQuiz() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to submit answer: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.answerQuiz() SUCCESS:', json);
+    return json.data;
   },
 
   // ═══ SHOP ═══
