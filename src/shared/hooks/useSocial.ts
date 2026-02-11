@@ -43,6 +43,8 @@ export function useAddFriend() {
     mutationFn: (data: { friendId?: string; referralCode?: string }) =>
       gameApi.addFriend(data),
 
+    retry: false, // Don't retry failed friend additions
+
     onSuccess: (data) => {
       console.log('[SOCIAL-DEBUG] useAddFriend.onSuccess:', data);
 
@@ -71,15 +73,24 @@ export function useInteractFriend() {
       console.log('[SOCIAL-DEBUG] useInteractFriend.onSuccess:', result);
 
       // Update OGN in Zustand stores immediately
-      if (result.ognGained) {
-        useFarmStore.getState().setOgn((prev) => prev + result.ognGained);
-        usePlayerStore.getState().setOgn((prev) => prev + result.ognGained);
+      if (result.ognGain) {
+        useFarmStore.getState().setOgn((prev) => prev + result.ognGain);
+        usePlayerStore.getState().setOgn((prev) => prev + result.ognGain);
       }
 
       // Invalidate profile for server truth
       queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
       // Invalidate friends list to update interaction status
       queryClient.invalidateQueries({ queryKey: ['game', 'social', 'friends'] });
+    },
+
+    onError: (error: any) => {
+      const code = error?.code || error?.message || '';
+      const msg = code === 'ALREADY_INTERACTED_TODAY' ? 'Đã tương tác hôm nay!'
+        : code === 'DAILY_LIMIT' ? 'Đã đạt giới hạn hôm nay!'
+        : code === 'NOT_FRIENDS' ? 'Chưa kết bạn!'
+        : 'Lỗi khi tương tác';
+      console.error('[FARM-DEBUG] interact error:', code, '-', msg);
     },
   });
 }

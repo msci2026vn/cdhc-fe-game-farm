@@ -192,9 +192,12 @@ export interface FriendData {
 }
 
 export interface InteractResult {
-  ognGained: number;
-  xpGained: number;
-  dailyLimitReached: boolean;
+  success: boolean;
+  ognGain: number;
+  xpGain: number;
+  friendOgnGain: number;
+  dailyCount: number;
+  dailyLimit: number;
 }
 
 export interface FriendsResult {
@@ -209,17 +212,15 @@ export interface AddFriendResult {
 
 export interface ReferralInfoResult {
   referralCode: string;
-  referredBy: {
-    userId: string;
-    name: string;
-  } | null;
-  referredUsers: Array<{
-    userId: string;
-    name: string;
-    joinedAt: string;
-  }>;
+  referredCount: number;
   totalCommissionEarned: number;
-  commissionCount: number;
+  commissionRate: number;
+  recentCommissions: Array<{
+    spenderName: string;
+    spendAmount: number;
+    commissionAmount: number;
+    createdAt: string;
+  }>;
 }
 
 // ═══════════════════════════════════════════════════════════════

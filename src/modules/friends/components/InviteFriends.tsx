@@ -17,9 +17,9 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
   const referralCode = referralData?.referralCode || 'LOADING...';
   const referralLink = `${window.location.origin}/?ref=${referralCode}`;
 
-  const referredUsers = referralData?.referredUsers || [];
-  const joinedCount = referredUsers.length;
+  const joinedCount = referralData?.referredCount || 0;
   const totalCommissionEarned = referralData?.totalCommissionEarned || 0;
+  const commissionCount = referralData?.recentCommissions?.length || 0;
 
   const handleCopy = useCallback(async () => {
     try {
@@ -80,7 +80,7 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
               <p className="text-[10px] font-bold text-muted-foreground">Hoa hồng đã nhận</p>
             </div>
             <div className="flex-1 text-center p-3 rounded-xl" style={{ background: '#f0f0ff' }}>
-              <p className="font-heading text-2xl font-bold" style={{ color: '#6c5ce7' }}>{referralData?.commissionCount || 0}</p>
+              <p className="font-heading text-2xl font-bold" style={{ color: '#6c5ce7' }}>{commissionCount}</p>
               <p className="text-[10px] font-bold text-muted-foreground">Giao dịch hoa hồng</p>
             </div>
           </div>
@@ -142,37 +142,24 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
 
           {/* Invited list */}
           <div className="px-5 pb-8">
-            <p className="text-xs font-bold text-muted-foreground mb-3">Danh sách người được giới thiệu ({referredUsers.length})</p>
+            <p className="text-xs font-bold text-muted-foreground mb-3">Người được giới thiệu</p>
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">
                 <div className="text-2xl mb-2 animate-bounce">🔄</div>
                 <p className="text-xs font-semibold">Đang tải...</p>
               </div>
-            ) : referredUsers.length === 0 ? (
+            ) : joinedCount === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <div className="text-3xl mb-2">👥</div>
                 <p className="text-xs font-semibold">Chưa có người nào được giới thiệu</p>
                 <p className="text-[10px] mt-1">Chia sẻ link để mời bạn bè tham gia!</p>
               </div>
             ) : (
-              referredUsers.map((user, idx) => {
-                const joinedDate = new Date(user.joinedAt);
-                const daysAgo = Math.floor((Date.now() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                return (
-                  <div key={idx} className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid #f0ebe4' }}>
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
-                      👤
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-heading text-sm font-bold truncate">{user.name}</p>
-                      <p className="text-[10px] font-semibold text-muted-foreground">
-                        ✅ Đã tham gia • {daysAgo === 0 ? 'Hôm nay' : daysAgo === 1 ? 'Hôm qua' : `${daysAgo} ngày trước`}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
+              <div className="text-center py-8">
+                <div className="text-4xl mb-2">🎉</div>
+                <p className="text-sm font-bold text-primary">{joinedCount} người đã tham gia</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Cảm ơn bạn đã giới thiệu Organic Kingdom!</p>
+              </div>
             )}
           </div>
         </div>

@@ -414,7 +414,7 @@ export const gameApi = {
     friendId: string,
     type: InteractType,
     data?: { comment?: string; giftId?: string }
-  ): Promise<{ ognGained: number; xpGained: number; dailyLimitReached: boolean }> => {
+  ): Promise<{ success: boolean; ognGain: number; xpGain: number; friendOgnGain: number; dailyCount: number; dailyLimit: number }> => {
     const url = 'https://sta.cdhc.vn/api/game/social/interact';
     console.log('[FARM-DEBUG] gameApi.interactFriend():', { url, friendId, type, data });
 
@@ -477,10 +477,15 @@ export const gameApi = {
    */
   getReferralInfo: async (): Promise<{
     referralCode: string;
-    referredBy: { userId: string; name: string } | null;
-    referredUsers: Array<{ userId: string; name: string; joinedAt: string }>;
+    referredCount: number;
     totalCommissionEarned: number;
-    commissionCount: number;
+    commissionRate: number;
+    recentCommissions: Array<{
+      spenderName: string;
+      spendAmount: number;
+      commissionAmount: number;
+      createdAt: string;
+    }>;
   }> => {
     const url = 'https://sta.cdhc.vn/api/game/social/referral';
     console.log('[FARM-DEBUG] gameApi.getReferralInfo():', url);
