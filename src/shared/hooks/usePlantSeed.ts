@@ -11,6 +11,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
+import { useUIStore } from '../stores/uiStore';
 
 interface PlantSeedParams {
   slotIndex: number;
@@ -105,6 +106,13 @@ export function usePlantSeed() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] usePlantSeed.onSuccess() — SERVER CONFIRMED', JSON.stringify(data));
 
+      // Toast notification
+      useUIStore.getState().addToast(
+        `Đã trồng ${data.plantType?.name || 'cây'}! -${data.plot?.plantType?.shopPrice || 0} OGN`,
+        'success',
+        '🌱'
+      );
+
       // Optimistic: update OGN immediately for realtime UI
       if (data.ognRemaining !== undefined) {
         queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => ({
@@ -122,6 +130,12 @@ export function usePlantSeed() {
     // ─── Error: rollback optimistic update ───
     onError: (error: Error, _variables, context) => {
       console.error('[FARM-DEBUG] usePlantSeed.onError() — ROLLING BACK', error.message);
+
+      // Toast notification
+      const msg = error.message?.includes('OGN') ? 'Không đủ OGN!' :
+                  error.message?.includes('SLOT') || error.message?.includes('FULL') ? 'Ô trồng đã đầy!' :
+                  'Không thể trồng cây.';
+      useUIStore.getState().addToast(msg, 'error');
 
       // Rollback
       if (context?.previousPlots) {

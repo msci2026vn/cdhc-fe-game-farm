@@ -8,6 +8,8 @@
  */
 import { useEffect, useRef } from 'react';
 import { useLevel } from './usePlayerProfile';
+import { useUIStore } from '../stores/uiStore';
+import { getLevelTitle } from '../stores/playerStore';
 
 export function useLevelUpDetector() {
   const level = useLevel();
@@ -24,6 +26,14 @@ export function useLevelUpDetector() {
 
     if (level > prevLevelRef.current) {
       console.log(`[FARM-DEBUG] 🎉 LEVEL UP! ${prevLevelRef.current} → ${level}`);
+
+      // Toast notification
+      useUIStore.getState().addToast(
+        `Level Up! ${getLevelTitle(level)} (Level ${level})`,
+        'success',
+        '🆙',
+        5000
+      );
 
       // Dispatch custom event for LevelUpOverlay
       window.dispatchEvent(new CustomEvent('farmverse:levelup', {

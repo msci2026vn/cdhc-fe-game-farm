@@ -19,6 +19,7 @@ import { QueryClient } from '@tanstack/react-query';
 import * as gameApi from '../api/game-api';
 import type { SyncAction, SyncActionType } from '../types/game-api.types';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
+import { useUIStore } from '../stores/uiStore';
 
 const SYNC_INTERVAL = 60_000; // 60 giây
 const OFFLINE_STORAGE_KEY = 'farmverse_sync_queue';
@@ -65,6 +66,15 @@ async function flushQueue() {
     const result = await gameApi.syncActions(actions);
     console.log(`[FARM-DEBUG] sync: ✅ processed=${result.processed} ogn=${result.ogn} xp=${result.xp}`);
 
+    // Toast notification on successful sync
+    if (result.processed > 0) {
+      useUIStore.getState().addToast(
+        `Đã đồng bộ dữ liệu! +${result.ogn} OGN +${result.xp} XP`,
+        'info',
+        '🔄'
+      );
+    }
+
     // Update TanStack Query cache with server canonical state
     if (queryClientRef) {
       queryClientRef.setQueryData(PLAYER_PROFILE_KEY, (old: any) => ({
@@ -81,6 +91,14 @@ async function flushQueue() {
     } catch {}
   } catch (e) {
     console.error('[FARM-DEBUG] sync: ❌ failed, saving to offline queue', e);
+
+    // Toast notification on offline
+    useUIStore.getState().addToast(
+      'Mất kết nối... Lưu offline, sẽ đồng bộ sau.',
+      'warning',
+      '📡'
+    );
+
     // Put actions back + save to localStorage for offline
     actions.forEach((a) => {
       const existing = actionQueue.get(a.type);
@@ -152,6 +170,11 @@ export function useGameSync() {
     };
     const handleOnline = () => {
       console.log('[FARM-DEBUG] sync: online — flushing queue');
+      useUIStore.getState().addToast(
+        'Đã kết nối lại! Đang đồng bộ...',
+        'info',
+        '🔄'
+      );
       flushQueue();
     };
 

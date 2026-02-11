@@ -10,6 +10,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { useUIStore } from '../stores/uiStore';
 
 interface WaterResult {
   happiness: number;
@@ -64,6 +65,13 @@ export function useWaterPlot() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] useWaterPlot.onSuccess() — SERVER CONFIRMED', JSON.stringify(data));
 
+      // Toast notification
+      useUIStore.getState().addToast(
+        `Tưới nước thành công! +${data.xpGained || 0} XP`,
+        'success',
+        '💧'
+      );
+
       // Invalidate to get real server data
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
       queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
@@ -77,6 +85,13 @@ export function useWaterPlot() {
         code: error.code,
         cooldownRemaining: error.cooldownRemaining,
       });
+
+      // Toast notification
+      const msg = error.message?.includes('COOLDOWN') || error.code === 'COOLDOWN'
+        ? `Đang cooldown, chờ ${error.cooldownRemaining || 5}s!`
+        : error.message?.includes('DEAD') ? 'Cây đã héo rồi!'
+        : 'Không thể tưới nước.';
+      useUIStore.getState().addToast(msg, 'warning', '⏳');
 
       // Rollback optimistic
       if (context?.previousPlots) {

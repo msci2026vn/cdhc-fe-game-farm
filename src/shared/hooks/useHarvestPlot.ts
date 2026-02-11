@@ -7,6 +7,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { useUIStore } from '../stores/uiStore';
 
 interface HarvestResult {
   ognReward: number;
@@ -57,6 +58,13 @@ export function useHarvestPlot() {
         leveledUp: data.leveledUp,
       }));
 
+      // Toast notification
+      useUIStore.getState().addToast(
+        `Thu hoạch ${data.plantName || 'cây'}! +${data.ognReward || 0} OGN +${data.xpGained || 0} XP`,
+        'success',
+        '🎉'
+      );
+
       // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
       queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
@@ -65,6 +73,12 @@ export function useHarvestPlot() {
 
     onError: (error, plotId, context) => {
       console.error('[FARM-DEBUG] useHarvestPlot.onError() — ROLLING BACK', error.message);
+
+      // Toast notification
+      const msg = error.message?.includes('NOT_READY') ? 'Cây chưa chín!'
+                  : error.message?.includes('DEAD') ? 'Cây đã héo, cần dọn vườn!'
+                  : 'Không thể thu hoạch.';
+      useUIStore.getState().addToast(msg, 'error');
 
       // Rollback: restore plot
       if (context?.previousPlots) {

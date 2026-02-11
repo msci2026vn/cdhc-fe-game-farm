@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
+import { useUIStore } from '../stores/uiStore';
 
 interface ClearResult {
   cleared: boolean;
@@ -49,6 +50,9 @@ export function useClearPlot() {
         plotId: data.plotId,
         slotIndex: data.slotIndex,
       }));
+
+      // Toast notification
+      useUIStore.getState().addToast('Đã dọn cây héo!', 'success', '🧹');
 
       // Invalidate farm plots query
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });

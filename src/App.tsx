@@ -7,6 +7,7 @@ import { setNavigateToLogin } from '@/shared/utils/error-handler';
 import { useGameSync } from '@/shared/hooks/useGameSync';
 import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
 import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
+import Toast from '@/shared/components/Toast';
 
 // Lazy load screens
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
@@ -96,6 +97,7 @@ const App = () => {
           </AuthGuard>
         </Suspense>
         <Toaster />
+        <Toast />
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
+import { useUIStore } from '../stores/uiStore';
 
 // ═══════════════════════════════════════════════════════════════
 // QUERIES
@@ -47,6 +48,9 @@ export function useAddFriend() {
     onSuccess: (data) => {
       console.log('[SOCIAL-DEBUG] useAddFriend.onSuccess:', data);
 
+      // Toast notification
+      useUIStore.getState().addToast('Đã kết bạn thành công!', 'success', '👋');
+
       // Invalidate friends list
       queryClient.invalidateQueries({ queryKey: ['game', 'social', 'friends'] });
       // Invalidate referral info
@@ -71,6 +75,13 @@ export function useInteractFriend() {
     onSuccess: (result, variables) => {
       console.log('[SOCIAL-DEBUG] useInteractFriend.onSuccess:', result);
 
+      // Toast notification
+      useUIStore.getState().addToast(
+        `Đã thăm vườn bạn! +${result.ognGain || 0} OGN`,
+        'success',
+        '👋'
+      );
+
       // Invalidate profile for server truth (OGN will update from query)
       queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       // Invalidate friends list to update interaction status
@@ -83,6 +94,10 @@ export function useInteractFriend() {
         : code === 'DAILY_LIMIT' ? 'Đã đạt giới hạn hôm nay!'
         : code === 'NOT_FRIENDS' ? 'Chưa kết bạn!'
         : 'Lỗi khi tương tác';
+
+      // Toast notification
+      useUIStore.getState().addToast(msg, 'warning', '⚠️');
+
       console.error('[FARM-DEBUG] interact error:', code, '-', msg);
     },
   });

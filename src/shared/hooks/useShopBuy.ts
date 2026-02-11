@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
+import { useUIStore } from '../stores/uiStore';
 
 export function useShopBuy() {
   const queryClient = useQueryClient();
@@ -33,6 +34,13 @@ export function useShopBuy() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] useShopBuy.onSuccess:', data);
 
+      // Toast notification
+      useUIStore.getState().addToast(
+        `Đã mua ${data.item?.name || 'vật phẩm'}! -${data.ognSpent || 0} OGN`,
+        'success',
+        '🛒'
+      );
+
       // Optimistic: update OGN immediately for realtime UI
       if (data.ognRemaining !== undefined) {
         queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => ({
@@ -49,6 +57,13 @@ export function useShopBuy() {
 
     onError: (error, variables, context) => {
       console.error('[FARM-DEBUG] useShopBuy.onError:', error.message);
+
+      // Toast notification
+      const msg = error.message?.includes('OGN') ? 'Không đủ OGN!'
+                  : error.message?.includes('STOCK') ? 'Hết hàng!'
+                  : 'Không thể mua.';
+      useUIStore.getState().addToast(msg, 'error');
+
       // Rollback optimistic
       if (context?.prev) {
         queryClient.setQueryData(['game', 'shop', 'items'], context.prev);
