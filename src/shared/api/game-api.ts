@@ -234,7 +234,16 @@ export const gameApi = {
    */
   completeBoss: async (data: BossFightInput): Promise<BossCompleteResult> => {
     const url = 'https://sta.cdhc.vn/api/game/boss/complete';
-    console.log('[FARM-DEBUG] gameApi.completeBoss():', { url, ...data });
+    const timestamp = new Date().toISOString();
+    console.log('[FARM-DEBUG] gameApi.completeBoss() — START', JSON.stringify({
+      url,
+      bossId: data.bossId,
+      won: data.won,
+      damage: data.totalDamage,
+      timestamp,
+      credentials: 'include',
+      documentCookie: document.cookie || '(empty - httpOnly)',
+    }));
 
     const response = await fetch(url, {
       method: 'POST',
@@ -244,11 +253,18 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.completeBoss() status:', response.status);
+    console.log('[FARM-DEBUG] gameApi.completeBoss() response headers:', {
+      'set-cookie': response.headers.get('set-cookie'),
+      'content-type': response.headers.get('content-type'),
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.completeBoss() ERROR:', error);
-      throw new Error(error?.error?.message || `Failed to complete boss: ${response.status}`);
+      const err = new Error(error?.error?.message || `Failed to complete boss: ${response.status}`);
+      (err as any).status = response.status;
+      (err as any).code = error?.error?.code;
+      throw err;
     }
 
     const json = await response.json();
