@@ -11,6 +11,7 @@ import type {
   FarmPlotData,
   WaterResult,
   HarvestResult,
+  ClearResult,
   BossFightInput,
   BossCompleteResult,
   QuizStartResult,
@@ -209,6 +210,34 @@ export const gameApi = {
 
     const json = await response.json();
     console.log('[FARM-DEBUG] gameApi.harvestPlot() — SUCCESS:', JSON.stringify(json.data));
+    return json.data;
+  },
+
+  /**
+   * Clear dead plot (bước 23 — real API)
+   * BE Zod: { plotId: string uuid }
+   */
+  clearPlot: async (plotId: string): Promise<{ cleared: boolean; plotId: string; slotIndex: number }> => {
+    const url = 'https://sta.cdhc.vn/api/game/farm/clear';
+    const body = { plotId };
+
+    console.log('[FARM-DEBUG] gameApi.clearPlot() — REQUEST', JSON.stringify({ url, plotId }));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.clearPlot() — STATUS:', response.status);
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.clearPlot() — SUCCESS:', JSON.stringify(json.data));
     return json.data;
   },
 
@@ -646,6 +675,7 @@ export type {
   FarmPlotData,
   WaterResult,
   HarvestResult,
+  ClearResult,
   BossFightInput,
   BossCompleteResult,
   QuizStartResult,

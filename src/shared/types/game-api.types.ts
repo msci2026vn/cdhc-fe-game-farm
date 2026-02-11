@@ -48,6 +48,7 @@ export interface FarmPlotData {
   happiness: number;
   lastWateredAt: number | null;
   isDead: boolean;
+  diedAt: string | null;
 }
 
 export interface PlantResult {
@@ -69,6 +70,12 @@ export interface HarvestResult {
   ognTotal: number;
   leveledUp: boolean;
   newLevel?: number;
+}
+
+export interface ClearResult {
+  cleared: boolean;
+  plotId: string;
+  slotIndex: number;
 }
 
 // ═══════════════════════════════════════════════════════════════

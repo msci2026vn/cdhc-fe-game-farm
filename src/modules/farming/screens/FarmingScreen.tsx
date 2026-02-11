@@ -25,6 +25,7 @@ import { useCooldown } from '@/shared/hooks/useCooldown';
 import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
 import { useWaterPlot } from '@/shared/hooks/useWaterPlot';
 import { useHarvestPlot } from '@/shared/hooks/useHarvestPlot';
+import { useClearPlot } from '@/shared/hooks/useClearPlot';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
@@ -85,6 +86,9 @@ export default function FarmingScreen() {
 
   // ─── NEW: Harvest mutation (Step 15) ───
   const harvestMutation = useHarvestPlot();
+
+  // ─── NEW: Clear dead plot mutation (Step 23) ───
+  const clearMutation = useClearPlot();
 
   // ─── NEW: Water cooldown state (Step 14) ───
   const [waterCooldowns, setWaterCooldowns] = useState<Record<string, number>>({});
@@ -239,6 +243,25 @@ export default function FarmingScreen() {
     });
   }, [harvestMutation, showFlyUp, addToast, addHarvest, activePlotIndex, plots]);
 
+  // ─── NEW: Clear dead plot handler (Step 23) ───
+  const handleClear = useCallback(() => {
+    const currentPlot = plots[activePlotIndex];
+    if (!currentPlot || !currentPlot.isDead) return;
+
+    console.log('[FARM-DEBUG] FarmingScreen — CLEAR DEAD PLOT:', currentPlot.id);
+
+    clearMutation.mutate(currentPlot.id, {
+      onSuccess: (data) => {
+        console.log('[FARM-DEBUG] FarmingScreen — CLEAR SUCCESS:', JSON.stringify(data));
+        addToast(`Đã dọn cây héo ở ô ${data.slotIndex + 1}! 🧹`, 'success');
+      },
+      onError: (error) => {
+        console.error('[FARM-DEBUG] FarmingScreen — CLEAR ERROR:', error.message);
+        handleGameError(error, 'clear');
+      },
+    });
+  }, [clearMutation, addToast, activePlotIndex, plots]);
+
   const handleSelectPlant = useCallback((plantType: PlantType) => {
     const currentLength = plots.length;
     plantSeedZustand(plantType, currentLength); // Fallback to Zustand for now
@@ -375,13 +398,13 @@ export default function FarmingScreen() {
               )}
 
               {/* Plant body */}
-              <div className="animate-plant-sway flex flex-col items-center">
+              <div className={`animate-plant-sway flex flex-col items-center ${activePlot.isDead ? 'grayscale opacity-60' : ''}`}>
                 <span className="text-7xl drop-shadow-md" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,100,0,0.2))' }}>
-                  {getPlantSprite(activePlot)}
+                  {activePlot.isDead ? '🥀' : getPlantSprite(activePlot)}
                 </span>
                 {/* Stem */}
                 <div className="w-2 h-16 rounded-full -mt-2"
-                  style={{ background: 'linear-gradient(180deg, #4eca6a, #2d8a4e)' }} />
+                  style={{ background: activePlot.isDead ? '#8b7355' : 'linear-gradient(180deg, #4eca6a, #2d8a4e)' }} />
               </div>
 
               {/* Mood */}
@@ -520,7 +543,7 @@ export default function FarmingScreen() {
           </button>
         </div>
 
-        {/* Harvest / Plant button */}
+        {/* Harvest / Clear / Plant button */}
         {activePlot && harvestReady && !activePlot.isDead && (
           <div className="px-4 pb-2">
             <button
@@ -529,6 +552,21 @@ export default function FarmingScreen() {
               className="w-full py-3.5 rounded-lg btn-green text-white font-heading font-bold text-base active:scale-[0.97] transition-transform disabled:opacity-50"
             >
               {harvestMutation.isPending ? '⏳ Đang thu hoạch...' : `🌾 Thu hoạch (+${activePlot.plantType.rewardOGN} OGN)`}
+            </button>
+          </div>
+        )}
+        {activePlot && activePlot.isDead && (
+          <div className="px-4 pb-2">
+            <button
+              onClick={() => {
+                if (confirm(`Dọn cây héo ở ô ${activePlot.slotIndex + 1}? 🧹`)) {
+                  handleClear();
+                }
+              }}
+              disabled={clearMutation.isPending}
+              className="w-full py-3.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-heading font-bold text-base active:scale-[0.97] transition-transform disabled:opacity-50"
+            >
+              {clearMutation.isPending ? '⏳ Đang dọn...' : '🧹 Dọn vườn'}
             </button>
           </div>
         )}
