@@ -13,6 +13,8 @@ export function useLeaderboard(
   return useQuery({
     queryKey: ['game', 'leaderboard', sort, page, limit],
     queryFn: () => gameApi.getLeaderboard(sort, page, limit),
-    staleTime: 30_000, // 30s — match BE cache TTL
+    staleTime: 300_000,              // 5 phút — match BE cron interval (Step 24)
+    refetchOnWindowFocus: true,      // auto refresh khi focus tab (Step 24)
+    refetchInterval: false,          // không auto poll (cron handles freshness)
   });
 }
