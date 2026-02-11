@@ -15,8 +15,8 @@
  * - Auto-resume on reconnect
  */
 import { useCallback, useEffect, useRef } from 'react';
-import { QueryClient } from '@tanstack/react-query';
-import * as gameApi from '../api/game-api';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { gameApi } from '../api/game-api';
 import type { SyncAction, SyncActionType } from '../types/game-api.types';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
@@ -34,7 +34,7 @@ interface QueuedAction {
   firstTimestamp: number;
 }
 
-const actionQueue = new Map<string, QueuedAction>();
+const actionQueue = new Map<SyncActionType, QueuedAction>();
 let syncTimer: ReturnType<typeof setTimeout> | null = null;
 let isSyncing = false;
 let queryClientRef: QueryClient | null = null;
@@ -88,7 +88,7 @@ async function flushQueue() {
     // Clear offline storage on success
     try {
       localStorage.removeItem(OFFLINE_STORAGE_KEY);
-    } catch {}
+    } catch { }
   } catch (e) {
     console.error('[FARM-DEBUG] sync: ❌ failed, saving to offline queue', e);
 
@@ -118,7 +118,7 @@ function saveOfflineQueue() {
       data.push({ type, count: val.count, timestamp: val.firstTimestamp });
     });
     localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(data));
-  } catch {}
+  } catch { }
 }
 
 function loadOfflineQueue() {
@@ -132,7 +132,7 @@ function loadOfflineQueue() {
       else actionQueue.set(a.type, { count: a.count, firstTimestamp: a.timestamp });
     });
     console.log(`[FARM-DEBUG] sync: loaded ${data.length} offline actions`);
-  } catch {}
+  } catch { }
 }
 
 // ═══════════════════════════════════════════════════════════════
