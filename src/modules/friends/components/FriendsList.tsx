@@ -1,14 +1,18 @@
-import { Friend, FRIENDS } from '../data/friends';
+import { useFriends } from '@/shared/hooks/useSocial';
+import type { FriendData } from '@/shared/types/game-api.types';
 
 interface FriendsListProps {
   open: boolean;
   onClose: () => void;
-  onVisit: (friend: Friend) => void;
+  onVisit: (friend: FriendData) => void;
   onInvite: () => void;
   onLeaderboard?: () => void;
 }
 
 export default function FriendsList({ open, onClose, onVisit, onInvite, onLeaderboard }: FriendsListProps) {
+  const { data: friendsData, isLoading } = useFriends();
+  const friends = friendsData?.friends || [];
+
   if (!open) return null;
 
   return (
@@ -21,53 +25,66 @@ export default function FriendsList({ open, onClose, onVisit, onInvite, onLeader
         <div className="px-5 py-4 flex justify-between items-center"
           style={{ background: 'linear-gradient(135deg, #2d8a4e, #4eca6a)' }}>
           <h3 className="font-heading text-lg font-bold text-white flex items-center gap-2">
-            🏡 Bạn bè ({FRIENDS.length})
+            🏡 Bạn bè {isLoading ? '...' : `(${friends.length})`}
           </h3>
           <button onClick={onClose} className="text-white/70 text-xl font-bold w-8 h-8 flex items-center justify-center">✕</button>
         </div>
 
         {/* Friends list */}
         <div className="bg-white overflow-y-auto" style={{ maxHeight: 'calc(80vh - 60px)' }}>
-          {FRIENDS.map((friend) => (
-            <button key={friend.id}
-              onClick={() => onVisit(friend)}
-              className="w-full flex items-center gap-3 px-5 py-3.5 transition-colors active:bg-green-50"
-              style={{ borderBottom: '1px solid #f0ebe4' }}>
-              {/* Avatar */}
-              <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl avatar-ring">
-                  <div className="w-full h-full rounded-full bg-primary flex items-center justify-center">
-                    {friend.avatar}
+          {isLoading ? (
+            <div className="px-5 py-10 text-center text-muted-foreground">
+              <div className="text-3xl mb-2 animate-bounce">🔄</div>
+              <p className="text-sm font-semibold">Đang tải danh sách bạn bè...</p>
+            </div>
+          ) : friends.length === 0 ? (
+            <div className="px-5 py-10 text-center text-muted-foreground">
+              <div className="text-4xl mb-2">👥</div>
+              <p className="text-sm font-semibold">Chưa có bạn bè</p>
+              <p className="text-[11px] mt-1">Mời bạn bè để nhận thưởng OGN!</p>
+            </div>
+          ) : (
+            friends.map((friend) => (
+              <button key={friend.id}
+                onClick={() => onVisit(friend)}
+                className="w-full flex items-center gap-3 px-5 py-3.5 transition-colors active:bg-green-50"
+                style={{ borderBottom: '1px solid #f0ebe4' }}>
+                {/* Avatar */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl avatar-ring">
+                    <div className="w-full h-full rounded-full bg-primary flex items-center justify-center">
+                      {friend.avatar || '👤'}
+                    </div>
+                  </div>
+                  {friend.online && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white"
+                      style={{ background: '#2ecc71' }} />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 text-left min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading text-sm font-bold truncate">{friend.name}</span>
+                    {friend.online && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Online</span>}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-primary text-white">Lv.{friend.level}</span>
+                    <span className="text-[11px] text-muted-foreground font-semibold">{friend.title}</span>
                   </div>
                 </div>
-                {friend.online && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white"
-                    style={{ background: '#2ecc71' }} />
-                )}
-              </div>
 
-              {/* Info */}
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-heading text-sm font-bold truncate">{friend.name}</span>
-                  {friend.online && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Online</span>}
+                {/* Stats */}
+                <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+                  <span className="text-lg">🪙</span>
+                  <span className="text-[9px] font-bold text-muted-foreground">{friend.ogn.toLocaleString('vi-VN')}</span>
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-primary text-white">Lv.{friend.level}</span>
-                  <span className="text-[11px] text-muted-foreground font-semibold">{friend.title}</span>
-                </div>
-              </div>
 
-              {/* Plant preview */}
-              <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                <span className="text-2xl">{friend.plant.emoji}</span>
-                <span className="text-[9px] font-bold text-muted-foreground">{friend.plant.growthPct}%</span>
-              </div>
-
-              {/* Arrow */}
-              <span className="text-muted-foreground/40 text-lg">›</span>
-            </button>
-          ))}
+                {/* Arrow */}
+                <span className="text-muted-foreground/40 text-lg">›</span>
+              </button>
+            ))
+          )}
 
           {/* Action buttons */}
           <div className="px-5 py-5 space-y-3 text-center">

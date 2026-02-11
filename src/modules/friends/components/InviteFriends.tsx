@@ -1,29 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { useReferralInfo } from '@/shared/hooks/useSocial';
 
 interface InviteFriendsProps {
   open: boolean;
   onClose: () => void;
 }
 
-const MOCK_INVITED = [
-  { name: 'Minh Anh', avatar: '👩', joinedAt: '2 ngày trước', bonus: 50, status: 'joined' as const },
-  { name: 'Tuấn Kiệt', avatar: '👦', joinedAt: '5 ngày trước', bonus: 50, status: 'joined' as const },
-  { name: 'Hồng Nhung', avatar: '👧', joinedAt: null, bonus: 0, status: 'pending' as const },
-];
-
-const REFERRAL_CODE = 'FARMER_MINH_2024';
 const BONUS_PER_FRIEND = 50;
 
 export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
   const addToast = useUIStore((s) => s.addToast);
-  const showFlyUp = useUIStore((s) => s.showFlyUp);
-  const addOgn = useFarmStore((s) => s.addOgn);
+  const { data: referralData, isLoading } = useReferralInfo();
   const [copied, setCopied] = useState(false);
-  const [claimed, setClaimed] = useState<Set<number>>(new Set());
 
-  const referralLink = `${window.location.origin}/?ref=${REFERRAL_CODE}`;
+  const referralCode = referralData?.referralCode || 'LOADING...';
+  const referralLink = `${window.location.origin}/?ref=${referralCode}`;
+
+  const referredUsers = referralData?.referredUsers || [];
+  const joinedCount = referredUsers.length;
+  const totalCommissionEarned = referralData?.totalCommissionEarned || 0;
 
   const handleCopy = useCallback(async () => {
     try {
@@ -49,17 +45,6 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
       handleCopy();
     }
   }, [referralLink, handleCopy]);
-
-  const handleClaim = (idx: number) => {
-    if (claimed.has(idx)) return;
-    setClaimed(prev => new Set(prev).add(idx));
-    addOgn(BONUS_PER_FRIEND);
-    showFlyUp(`+${BONUS_PER_FRIEND} OGN 🪙`);
-    addToast(`Nhận thưởng mời bạn thành công! 🎉`, 'success');
-  };
-
-  const joinedCount = MOCK_INVITED.filter(i => i.status === 'joined').length;
-  const totalEarned = joinedCount * BONUS_PER_FRIEND;
 
   if (!open) return null;
 
@@ -87,16 +72,16 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
           {/* Stats */}
           <div className="flex gap-3 px-5 py-4">
             <div className="flex-1 text-center p-3 rounded-xl" style={{ background: '#f0faf2' }}>
-              <p className="font-heading text-2xl font-bold text-primary">{joinedCount}</p>
+              <p className="font-heading text-2xl font-bold text-primary">{isLoading ? '...' : joinedCount}</p>
               <p className="text-[10px] font-bold text-muted-foreground">Đã tham gia</p>
             </div>
             <div className="flex-1 text-center p-3 rounded-xl" style={{ background: '#fff8e1' }}>
-              <p className="font-heading text-2xl font-bold" style={{ color: '#d49a1a' }}>{totalEarned}</p>
-              <p className="text-[10px] font-bold text-muted-foreground">OGN đã nhận</p>
+              <p className="font-heading text-2xl font-bold" style={{ color: '#d49a1a' }}>{isLoading ? '...' : totalCommissionEarned.toLocaleString('vi-VN')}</p>
+              <p className="text-[10px] font-bold text-muted-foreground">Hoa hồng đã nhận</p>
             </div>
             <div className="flex-1 text-center p-3 rounded-xl" style={{ background: '#f0f0ff' }}>
-              <p className="font-heading text-2xl font-bold" style={{ color: '#6c5ce7' }}>{MOCK_INVITED.length}</p>
-              <p className="text-[10px] font-bold text-muted-foreground">Đã mời</p>
+              <p className="font-heading text-2xl font-bold" style={{ color: '#6c5ce7' }}>{referralData?.commissionCount || 0}</p>
+              <p className="text-[10px] font-bold text-muted-foreground">Giao dịch hoa hồng</p>
             </div>
           </div>
 
@@ -142,43 +127,53 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
           {/* Rewards info */}
           <div className="mx-5 mb-4 p-3 rounded-xl"
             style={{ background: 'rgba(240,180,41,0.1)', border: '1px solid rgba(240,180,41,0.2)' }}>
-            <p className="text-xs font-bold mb-2" style={{ color: '#d49a1a' }}>🎁 Phần thưởng</p>
-            <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground">
-              <span>👤 Bạn nhận:</span>
-              <span className="font-bold" style={{ color: '#d49a1a' }}>{BONUS_PER_FRIEND} OGN</span>
-              <span className="mx-1">|</span>
-              <span>👥 Bạn bè nhận:</span>
-              <span className="font-bold" style={{ color: '#d49a1a' }}>{BONUS_PER_FRIEND} OGN</span>
+            <p className="text-xs font-bold mb-2" style={{ color: '#d49a1a' }}>🎁 Phần thưởng & Hoa hồng</p>
+            <div className="space-y-1 text-[11px] font-semibold text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>👤 Bạn nhận khi bạn bè đăng ký:</span>
+                <span className="font-bold" style={{ color: '#d49a1a' }}>{BONUS_PER_FRIEND} OGN</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>💰 Hoa hồng khi bạn bè mua item:</span>
+                <span className="font-bold" style={{ color: '#d49a1a' }}>5%</span>
+              </div>
             </div>
           </div>
 
           {/* Invited list */}
           <div className="px-5 pb-8">
-            <p className="text-xs font-bold text-muted-foreground mb-3">Danh sách đã mời ({MOCK_INVITED.length})</p>
-            {MOCK_INVITED.map((inv, idx) => (
-              <div key={idx} className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid #f0ebe4' }}>
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
-                  {inv.avatar}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-heading text-sm font-bold truncate">{inv.name}</p>
-                  <p className="text-[10px] font-semibold text-muted-foreground">
-                    {inv.status === 'joined' ? `✅ Đã tham gia • ${inv.joinedAt}` : '⏳ Chưa tham gia'}
-                  </p>
-                </div>
-                {inv.status === 'joined' && !claimed.has(idx) ? (
-                  <button onClick={() => handleClaim(idx)}
-                    className="px-3 py-1.5 rounded-lg font-heading text-[11px] font-bold text-white active:scale-95 transition-transform"
-                    style={{ background: 'linear-gradient(135deg, #f0b429, #e67e22)', boxShadow: '0 2px 8px rgba(240,180,41,0.3)' }}>
-                    🪙 Nhận {BONUS_PER_FRIEND}
-                  </button>
-                ) : inv.status === 'joined' && claimed.has(idx) ? (
-                  <span className="text-[11px] font-bold text-primary">✅ Đã nhận</span>
-                ) : (
-                  <span className="text-[11px] font-bold text-muted-foreground/50">Đang chờ...</span>
-                )}
+            <p className="text-xs font-bold text-muted-foreground mb-3">Danh sách người được giới thiệu ({referredUsers.length})</p>
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <div className="text-2xl mb-2 animate-bounce">🔄</div>
+                <p className="text-xs font-semibold">Đang tải...</p>
               </div>
-            ))}
+            ) : referredUsers.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <div className="text-3xl mb-2">👥</div>
+                <p className="text-xs font-semibold">Chưa có người nào được giới thiệu</p>
+                <p className="text-[10px] mt-1">Chia sẻ link để mời bạn bè tham gia!</p>
+              </div>
+            ) : (
+              referredUsers.map((user, idx) => {
+                const joinedDate = new Date(user.joinedAt);
+                const daysAgo = Math.floor((Date.now() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                return (
+                  <div key={idx} className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid #f0ebe4' }}>
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
+                      👤
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-heading text-sm font-bold truncate">{user.name}</p>
+                      <p className="text-[10px] font-semibold text-muted-foreground">
+                        ✅ Đã tham gia • {daysAgo === 0 ? 'Hôm nay' : daysAgo === 1 ? 'Hôm qua' : `${daysAgo} ngày trước`}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

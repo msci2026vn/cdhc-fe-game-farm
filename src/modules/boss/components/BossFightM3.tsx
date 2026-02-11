@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
-import { useBossProgressStore } from '../stores/bossProgressStore';
 import { usePlayerStore } from '@/shared/stores/playerStore';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
 
@@ -30,9 +28,6 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
     durationSeconds, fightStartTime,
   } = useMatch3(bossInfo);
 
-  const addOgn = useFarmStore(s => s.addOgn);
-  const { addKill, addDmg } = useBossProgressStore();
-  const addXp = usePlayerStore(s => s.addXp);
   const bossComplete = useBossComplete();
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);

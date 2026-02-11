@@ -20,6 +20,8 @@ import type {
   BuyResult,
   FriendData,
   FriendsResult,
+  AddFriendResult,
+  ReferralInfoResult,
   LeaderboardResult,
   SyncAction,
   SyncResult,
@@ -379,35 +381,127 @@ export const gameApi = {
 
   // ═══ SOCIAL ═══
   /**
-   * Get friends list
-   * TODO: bước 20 chuyển sang API thật
+   * Get friends list (bước 20 — real API)
    */
   getFriends: async (): Promise<FriendsResult> => {
-    // MOCK: Empty friends
-    return {
-      friends: [],
-      myReferralCode: 'MOCK123',
-    };
-    // Real API (bước 20): return gameClient.get<FriendsResult>('/game/social/friends');
+    const url = 'https://sta.cdhc.vn/api/game/social/friends';
+    console.log('[FARM-DEBUG] gameApi.getFriends():', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getFriends() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getFriends() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to fetch friends: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getFriends() SUCCESS:', json);
+    return json.data;
   },
 
   /**
-   * Interact with friend's garden
+   * Interact with friend's garden (bước 20 — real API)
    * BE Zod: { friendId: string uuid, type: enum['water','like','comment','gift'], data?: { comment?, giftId? } }
-   * TODO: bước 20 chuyển sang API thật
    */
   interactFriend: async (
     friendId: string,
     type: InteractType,
     data?: { comment?: string; giftId?: string }
   ): Promise<{ ognGained: number; xpGained: number; dailyLimitReached: boolean }> => {
-    // MOCK: Return interaction result
-    return {
-      ognGained: 5,
-      xpGained: 2,
-      dailyLimitReached: false,
-    };
-    // Real API (bước 20): return gameClient.post('/game/social/interact', { friendId, type, data });
+    const url = 'https://sta.cdhc.vn/api/game/social/interact';
+    console.log('[FARM-DEBUG] gameApi.interactFriend():', { url, friendId, type, data });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ friendId, type, data }),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.interactFriend() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.interactFriend() ERROR:', error);
+      const err = new Error(error?.error?.message || `Failed to interact: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.interactFriend() SUCCESS:', json);
+    return json.data;
+  },
+
+  /**
+   * Add friend by friend ID or referral code (bước 20 — real API)
+   * BE Zod: { friendId?: string uuid, referralCode?: string }
+   */
+  addFriend: async (
+    data: { friendId?: string; referralCode?: string }
+  ): Promise<{ friend: FriendData; referralCode: string }> => {
+    const url = 'https://sta.cdhc.vn/api/game/social/add-friend';
+    console.log('[FARM-DEBUG] gameApi.addFriend():', { url, data });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.addFriend() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.addFriend() ERROR:', error);
+      const err = new Error(error?.error?.message || `Failed to add friend: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.addFriend() SUCCESS:', json);
+    return json.data;
+  },
+
+  /**
+   * Get referral info including referred users and commission stats (bước 20 — real API)
+   */
+  getReferralInfo: async (): Promise<{
+    referralCode: string;
+    referredBy: { userId: string; name: string } | null;
+    referredUsers: Array<{ userId: string; name: string; joinedAt: string }>;
+    totalCommissionEarned: number;
+    commissionCount: number;
+  }> => {
+    const url = 'https://sta.cdhc.vn/api/game/social/referral';
+    console.log('[FARM-DEBUG] gameApi.getReferralInfo():', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getReferralInfo() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getReferralInfo() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to get referral info: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getReferralInfo() SUCCESS:', json);
+    return json.data;
   },
 
   // ═══ LEADERBOARD ═══
@@ -522,6 +616,8 @@ export type {
   BuyResult,
   FriendData,
   FriendsResult,
+  AddFriendResult,
+  ReferralInfoResult,
   LeaderboardResult,
   SyncAction,
   SyncResult,

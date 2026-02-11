@@ -1,0 +1,85 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { gameApi } from '../api/game-api';
+import { usePlayerStore } from '@/shared/stores/playerStore';
+import { useFarmStore } from '@/modules/farming/stores/farmStore';
+
+// ═══════════════════════════════════════════════════════════════
+// QUERIES
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Get friends list with interaction status
+ */
+export function useFriends() {
+  return useQuery({
+    queryKey: ['game', 'social', 'friends'],
+    queryFn: () => gameApi.getFriends(),
+    staleTime: 60_000, // 1 minute
+  });
+}
+
+/**
+ * Get referral info including referred users and commission stats
+ */
+export function useReferralInfo() {
+  return useQuery({
+    queryKey: ['game', 'social', 'referral'],
+    queryFn: () => gameApi.getReferralInfo(),
+    staleTime: 30_000, // 30 seconds
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MUTATIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Add friend by friend ID or referral code
+ */
+export function useAddFriend() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { friendId?: string; referralCode?: string }) =>
+      gameApi.addFriend(data),
+
+    onSuccess: (data) => {
+      console.log('[SOCIAL-DEBUG] useAddFriend.onSuccess:', data);
+
+      // Invalidate friends list
+      queryClient.invalidateQueries({ queryKey: ['game', 'social', 'friends'] });
+      // Invalidate referral info
+      queryClient.invalidateQueries({ queryKey: ['game', 'social', 'referral'] });
+    },
+  });
+}
+
+/**
+ * Interact with friend's garden (water/like/gift)
+ * Both users receive +5 OGN on successful interaction
+ */
+export function useInteractFriend() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { friendId: string; type: 'water' | 'like' | 'comment' | 'gift'; data?: { comment?: string; giftId?: string } }) =>
+      gameApi.interactFriend(data.friendId, data.type, data.data),
+
+    retry: false, // Don't retry interactions
+
+    onSuccess: (result, variables) => {
+      console.log('[SOCIAL-DEBUG] useInteractFriend.onSuccess:', result);
+
+      // Update OGN in Zustand stores immediately
+      if (result.ognGained) {
+        useFarmStore.getState().setOgn((prev) => prev + result.ognGained);
+        usePlayerStore.getState().setOgn((prev) => prev + result.ognGained);
+      }
+
+      // Invalidate profile for server truth
+      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      // Invalidate friends list to update interaction status
+      queryClient.invalidateQueries({ queryKey: ['game', 'social', 'friends'] });
+    },
+  });
+}

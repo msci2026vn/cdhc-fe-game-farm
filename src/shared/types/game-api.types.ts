@@ -202,6 +202,26 @@ export interface FriendsResult {
   myReferralCode: string;
 }
 
+export interface AddFriendResult {
+  friend: FriendData;
+  referralCode: string;
+}
+
+export interface ReferralInfoResult {
+  referralCode: string;
+  referredBy: {
+    userId: string;
+    name: string;
+  } | null;
+  referredUsers: Array<{
+    userId: string;
+    name: string;
+    joinedAt: string;
+  }>;
+  totalCommissionEarned: number;
+  commissionCount: number;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // LEADERBOARD
 // ═══════════════════════════════════════════════════════════════
@@ -318,6 +338,8 @@ export type QuizAnswerResponse = ApiResponse<QuizAnswerResult>;
 export type ShopItemsResponse = ApiResponse<ShopItemData[]>;
 export type BuyResponse = ApiResponse<BuyResult>;
 export type FriendsResponse = ApiResponse<FriendsResult>;
+export type AddFriendResponse = ApiResponse<AddFriendResult>;
+export type ReferralInfoResponse = ApiResponse<ReferralInfoResult>;
 export type InteractResponse = ApiResponse<InteractResult>;
 export type LeaderboardResponse = ApiResponse<LeaderboardResult>;
 export type SyncResponse = ApiResponse<SyncResult>;
