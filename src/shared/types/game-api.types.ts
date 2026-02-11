@@ -210,17 +210,41 @@ export interface AddFriendResult {
   referralCode: string;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// REFERRAL (Step 20 — Enhanced)
+// ═══════════════════════════════════════════════════════════════
+
+export interface ReferredUser {
+  userId: string;
+  name: string;
+  picture: string | null;
+  joinedAt: string;
+  lastSeen: string | null;
+  isOnline: boolean;
+  lastSeenAgo: string | null;
+  ogn: number;
+  level: number;
+}
+
+export interface CommissionTransaction {
+  id: string;
+  spenderId: string;
+  spenderName: string;
+  spendAction: string;
+  spendAmount: number;
+  commissionAmount: number;
+  commissionRateBps: number;
+  createdAt: string;
+}
+
 export interface ReferralInfoResult {
   referralCode: string;
   referredCount: number;
   totalCommissionEarned: number;
   commissionRate: number;
-  recentCommissions: Array<{
-    spenderName: string;
-    spendAmount: number;
-    commissionAmount: number;
-    createdAt: string;
-  }>;
+  commissionCount: number;
+  referredUsers: ReferredUser[];
+  recentCommissions: CommissionTransaction[];
 }
 
 // ═══════════════════════════════════════════════════════════════
