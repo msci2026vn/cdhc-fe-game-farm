@@ -475,18 +475,7 @@ export const gameApi = {
   /**
    * Get referral info including referred users and commission stats (bước 20 — real API)
    */
-  getReferralInfo: async (): Promise<{
-    referralCode: string;
-    referredCount: number;
-    totalCommissionEarned: number;
-    commissionRate: number;
-    recentCommissions: Array<{
-      spenderName: string;
-      spendAmount: number;
-      commissionAmount: number;
-      createdAt: string;
-    }>;
-  }> => {
+  getReferralInfo: async (): Promise<ReferralInfoResult> => {
     const url = 'https://sta.cdhc.vn/api/game/social/referral';
     console.log('[FARM-DEBUG] gameApi.getReferralInfo():', url);
 
