@@ -81,8 +81,8 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   // Victory / Defeat overlay
   if (result !== 'fighting') {
     const won = result === 'victory';
-    const currentLevel = useLevel();
     const serverData = bossComplete.data;
+    // FIX: Use `level` from line 32, not useLevel() in conditional (React hooks rules violation)
     return (
       <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-8">
         {/* Level up overlay */}
@@ -92,7 +92,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
               <div className="text-6xl mb-2">🎉</div>
               <div className="px-8 py-4 rounded-2xl font-heading text-xl font-bold text-white"
                 style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 0 60px rgba(108,92,231,0.8)' }}>
-                LEVEL UP! ⭐ Lv.{serverData?.newLevel ?? currentLevel}
+                LEVEL UP! ⭐ Lv.{serverData?.newLevel ?? level}
               </div>
             </div>
           </div>
