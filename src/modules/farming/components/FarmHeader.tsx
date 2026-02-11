@@ -10,7 +10,7 @@ export default function FarmHeader() {
   const weather = useWeatherStore((s) => s.weather);
 
   // Single hook for all profile data — 1 query, 1 subscription
-  const { data: profile } = usePlayerProfile();
+  const { data: profile, isLoading } = usePlayerProfile();
   const ogn = profile?.ogn ?? 0;
   const xp = profile?.xp ?? 0;
   const level = profile?.level ?? 1;
@@ -22,6 +22,48 @@ export default function FarmHeader() {
   const xpInRange = levelEnd - levelStart;
   const currentXpInRange = xp - levelStart;
   const xpPct = xpInRange > 0 ? Math.min(100, (currentXpInRange / xpInRange) * 100) : 100;
+
+  // Loading state — show skeleton while fetching profile
+  if (isLoading) {
+    return (
+      <div className="px-5 pb-3" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 50px)' }}>
+        {/* Top row skeleton */}
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-[46px] h-[46px] rounded-full bg-white/20 animate-pulse" />
+            <div className="flex flex-col gap-1.5">
+              <div className="h-4 w-24 bg-white/20 rounded animate-pulse" />
+              <div className="h-3 w-16 bg-white/20 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-10 h-10 rounded-full bg-white/20 animate-pulse" />
+            <div className="w-10 h-10 rounded-full bg-white/20 animate-pulse" />
+          </div>
+        </div>
+        {/* XP bar skeleton */}
+        <div className="mb-3 px-1">
+          <div className="flex justify-between mb-1">
+            <div className="h-3 w-20 bg-white/20 rounded animate-pulse" />
+            <div className="h-3 w-16 bg-white/20 rounded animate-pulse" />
+          </div>
+          <div className="h-2 rounded-full bg-white/20 animate-pulse" />
+        </div>
+        {/* Stats skeleton */}
+        <div className="flex gap-2">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="stat-chip flex-1 animate-pulse">
+              <div className="w-8 h-8 rounded-[10px] bg-white/20" />
+              <div className="flex flex-col gap-1">
+                <div className="h-4 w-12 bg-white/20 rounded" />
+                <div className="h-2.5 w-8 bg-white/20 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-5 pb-3" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 50px)' }}>

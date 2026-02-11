@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { queryClient } from '@/shared/lib/queryClient';
+import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
+import { gameApi } from '@/shared/api/game-api';
 
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
@@ -33,7 +36,20 @@ function LoginScreenContent() {
       console.log('[FARM-DEBUG] LoginScreen: Response data =', data);
 
       if (res.ok && data.success) {
-        console.log('[FARM-DEBUG] LoginScreen: ✅ Login successful → navigating to /farm');
+        console.log('[FARM-DEBUG] LoginScreen: ✅ Login successful → prefetching profile...');
+
+        // FIX: Prefetch profile ngay sau login → FarmingScreen mount có data sẵn
+        try {
+          await queryClient.prefetchQuery({
+            queryKey: PLAYER_PROFILE_KEY,
+            queryFn: () => gameApi.getProfile(),
+          });
+          console.log('[FARM-DEBUG] LoginScreen: Profile prefetched successfully');
+        } catch (prefetchError) {
+          // Prefetch failure không block navigation
+          console.warn('[FARM-DEBUG] LoginScreen: Profile prefetch failed (non-blocking):', prefetchError);
+        }
+
         // Login thành công → redirect /farm
         navigate('/farm', { replace: true });
       } else if (data.error?.code === 'NOT_APPROVED') {

@@ -4,28 +4,37 @@
  * Watches for level increases and dispatches a custom event
  * that LevelUpOverlay component listens to.
  *
- * Skips first render to avoid false positive on mount.
+ * FIX: Uses isSuccess to detect first data load vs actual level up.
+ * Only triggers when data was already loaded and level increased.
  */
 import { useEffect, useRef } from 'react';
-import { useLevel } from './usePlayerProfile';
+import { usePlayerProfile } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
 import { getLevelTitle } from '../stores/playerStore';
 
 export function useLevelUpDetector() {
-  const level = useLevel();
-  const prevLevelRef = useRef(level);
-  const initialRef = useRef(true);
+  const { data: profile, isSuccess } = usePlayerProfile();
+  const level = profile?.level ?? 1;
+
+  // Track if we've received first data from server
+  const dataLoadedRef = useRef(false);
+  const prevLevelRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Skip first render (mount) — not a real level up
-    if (initialRef.current) {
-      initialRef.current = false;
+    // Wait until data is successfully loaded from server
+    if (!isSuccess || !profile) return;
+
+    // First time receiving data from server — set baseline, NO trigger
+    if (!dataLoadedRef.current) {
+      dataLoadedRef.current = true;
       prevLevelRef.current = level;
+      console.log(`[FARM-DEBUG] LevelUp detector: baseline level = ${level} (first data load)`);
       return;
     }
 
-    if (level > prevLevelRef.current) {
-      console.log(`[FARM-DEBUG] 🎉 LEVEL UP! ${prevLevelRef.current} → ${level}`);
+    // Data was already loaded — check for actual level up
+    if (prevLevelRef.current !== null && level > prevLevelRef.current) {
+      console.log(`[FARM-DEBUG] 🎉 REAL LEVEL UP! ${prevLevelRef.current} → ${level}`);
 
       // Toast notification
       useUIStore.getState().addToast(
@@ -39,13 +48,11 @@ export function useLevelUpDetector() {
       window.dispatchEvent(new CustomEvent('farmverse:levelup', {
         detail: { oldLevel: prevLevelRef.current, newLevel: level }
       }));
-
-      prevLevelRef.current = level;
-    } else if (level !== prevLevelRef.current) {
-      // Level decreased (shouldn't happen normally, but handle gracefully)
-      prevLevelRef.current = level;
     }
-  }, [level]);
+
+    // Update previous level
+    prevLevelRef.current = level;
+  }, [level, isSuccess, profile]);
 
   return level;
 }

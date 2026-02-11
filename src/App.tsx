@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { queryClient } from '@/shared/lib/queryClient';
 import { AuthGuard } from '@/shared/components/AuthGuard';
 import { Toaster } from '@/components/ui/sonner';
 import { setNavigateToLogin } from '@/shared/utils/error-handler';
@@ -17,22 +18,6 @@ const BossScreen = lazy(() => import('@/modules/boss/screens/BossScreen'));
 const QuizScreen = lazy(() => import('@/modules/quiz/screens/QuizScreen'));
 const ShopScreen = lazy(() => import('@/modules/shop/screens/ShopScreen'));
 const ProfileScreen = lazy(() => import('@/modules/profile/screens/ProfileScreen'));
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error: any) => {
-        // Don't retry for 401, 403, 404
-        if ([401, 403, 404].includes(error?.status)) return false;
-        return failureCount < 2;
-      },
-      refetchOnWindowFocus: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
 
 const Fallback = () => (
   <div className="min-h-screen flex items-center justify-center splash-gradient">
