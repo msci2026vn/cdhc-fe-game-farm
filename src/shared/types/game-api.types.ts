@@ -231,16 +231,21 @@ export interface LeaderboardEntry {
   rank: number;
   userId: string;
   name: string;
-  avatar: string | null;
+  picture: string | null;
   ogn: number;
-  totalHarvests: number;
+  xp: number;
   level: number;
+  totalHarvests: number;
 }
 
 export interface LeaderboardResult {
-  players: LeaderboardEntry[];
-  myRank: number;
+  rankings: LeaderboardEntry[];
   total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  myRank: number | null;
+  sort: string;
 }
 
 // ═══════════════════════════════════════════════════════════════

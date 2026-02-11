@@ -511,20 +511,37 @@ export const gameApi = {
 
   // ═══ LEADERBOARD ═══
   /**
-   * Get leaderboard
-   * TODO: bước 21 chuyển sang API thật
+   * Get leaderboard (bước 21 — real API)
    */
   getLeaderboard: async (
-    sort: 'ogn' | 'harvests',
-    page?: number
+    sort: 'ogn' | 'xp' | 'level' | 'harvests' = 'ogn',
+    page = 1,
+    limit = 20
   ): Promise<LeaderboardResult> => {
-    // MOCK: Empty leaderboard
-    return {
-      players: [],
-      myRank: 0,
-      total: 0,
-    };
-    // Real API (bước 21): return gameClient.get<LeaderboardResult>(`/game/leaderboard?sort=${sort}&page=${page || 1}`);
+    const url = `https://sta.cdhc.vn/api/game/leaderboard?sort=${sort}&page=${page}&limit=${limit}`;
+    console.log('[FARM-DEBUG] gameApi.getLeaderboard():', { url, sort, page, limit });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getLeaderboard() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getLeaderboard() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to fetch leaderboard: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getLeaderboard() SUCCESS:', {
+      total: json.data.total,
+      myRank: json.data.myRank,
+      sort: json.data.sort,
+    });
+    return json.data;
   },
 
   // ═══ HEALTH CHECK ═══
