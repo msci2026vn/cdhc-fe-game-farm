@@ -5,6 +5,8 @@ import { AuthGuard } from '@/shared/components/AuthGuard';
 import { Toaster } from '@/components/ui/sonner';
 import { setNavigateToLogin } from '@/shared/utils/error-handler';
 import { useGameSync } from '@/shared/hooks/useGameSync';
+import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
+import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
 
 // Lazy load screens
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
@@ -38,20 +40,22 @@ const Fallback = () => (
 );
 
 /**
- * NavigateSetup — Configure 401 auto-redirect + Game Sync
+ * NavigateSetup — Configure 401 auto-redirect + Game Sync + Level Up detection
  * Must be inside BrowserRouter to use useNavigate
  */
 const NavigateSetup = () => {
   const navigate = useNavigate();
   // Initialize game sync engine (queues actions, auto-syncs every 60s)
   useGameSync();
+  // Watch for level changes and trigger animation
+  useLevelUpDetector();
 
   useEffect(() => {
     setNavigateToLogin(() => navigate('/login', { replace: true }));
     console.log('[FARM-DEBUG] NavigateSetup: setNavigateToLogin configured');
   }, [navigate]);
 
-  return null;
+  return <LevelUpOverlay />;
 };
 
 /**

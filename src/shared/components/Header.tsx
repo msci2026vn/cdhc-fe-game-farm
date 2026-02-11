@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
+import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -17,7 +18,9 @@ export default function Header() {
 
         <div className="flex items-center gap-1.5 bg-primary-foreground/15 rounded-full px-3 py-1.5">
           <span className="text-base">🪙</span>
-          <span className="font-heading font-bold text-sm">{ogn.toLocaleString('vi-VN')}</span>
+          <span className="font-heading font-bold text-sm">
+            <AnimatedNumber value={ogn} />
+          </span>
           <span className="text-xs opacity-80">OGN</span>
         </div>
 

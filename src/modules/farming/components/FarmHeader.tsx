@@ -1,18 +1,27 @@
 import { useNavigate } from 'react-router-dom';
 import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
-import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
-import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { xpForLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import WeatherControl from './WeatherControl';
 
 export default function FarmHeader() {
   const navigate = useNavigate();
-  const ogn = useOgn(); // TanStack Query single source of truth
   const weather = useWeatherStore((s) => s.weather);
-  const level = useLevel();
-  const xp = useXp();
-  const nextXp = xpForNextLevel(level);
-  const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
+
+  // Single hook for all profile data — 1 query, 1 subscription
+  const { data: profile } = usePlayerProfile();
+  const ogn = profile?.ogn ?? 0;
+  const xp = profile?.xp ?? 0;
+  const level = profile?.level ?? 1;
   const title = getLevelTitle(level);
+
+  // XP progress calculation (level-based)
+  const levelStart = xpForLevel(level);
+  const levelEnd = xpForLevel(level + 1);
+  const xpInRange = levelEnd - levelStart;
+  const currentXpInRange = xp - levelStart;
+  const xpPct = xpInRange > 0 ? Math.min(100, (currentXpInRange / xpInRange) * 100) : 100;
 
   return (
     <div className="px-5 pb-3" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 50px)' }}>
@@ -47,12 +56,18 @@ export default function FarmHeader() {
       {/* XP progress bar */}
       <div className="mb-3 px-1">
         <div className="flex justify-between text-[10px] font-bold mb-1">
-          <span className="text-game-green-mid">⭐ XP: {xp}/{nextXp}</span>
+          <span className="text-game-green-mid">⭐ XP: {currentXpInRange}/{xpInRange}</span>
           <span className="text-muted-foreground">Lv.{level} → Lv.{level + 1}</span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
-          <div className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${xpPct}%`, background: 'linear-gradient(90deg, #00b894, #55efc4)' }} />
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${xpPct}%`,
+              background: 'linear-gradient(90deg, #00b894, #55efc4)',
+              transition: 'width 0.8s ease-out',
+            }}
+          />
         </div>
       </div>
 
@@ -64,7 +79,9 @@ export default function FarmHeader() {
             🪙
           </div>
           <div>
-            <div className="font-heading text-base font-bold">{ogn.toLocaleString('vi-VN')}</div>
+            <div className="font-heading text-base font-bold">
+              <AnimatedNumber value={ogn} />
+            </div>
             <div className="text-[10px] font-semibold text-muted-foreground">OGN</div>
           </div>
         </div>

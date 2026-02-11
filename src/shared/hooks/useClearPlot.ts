@@ -7,6 +7,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 
 interface ClearResult {
   cleared: boolean;
@@ -51,6 +52,8 @@ export function useClearPlot() {
 
       // Invalidate farm plots query
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
+      // Invalidate profile (OGN/XP/Level might change)
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       console.log('[FARM-DEBUG] useClearPlot.onSuccess() — queries invalidated');
     },
 
