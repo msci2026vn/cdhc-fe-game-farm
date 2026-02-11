@@ -273,27 +273,25 @@ export interface LeaderboardResult {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SYNC
+// SYNC (Step 22 — Batch Actions)
 // ═══════════════════════════════════════════════════════════════
 
+// Action types that can be batched (small actions only)
+export type SyncActionType = 'water' | 'bug_catch' | 'xp_pickup' | 'daily_check';
+
 export interface SyncAction {
-  type:
-    | 'water'
-    | 'bug_catch'
-    | 'social_interact'
-    | 'plant'
-    | 'harvest'
-    | 'boss_kill'
-    | 'quiz'
-    | 'shop_buy';
-  timestamp: number;
-  data?: Record<string, unknown>;
+  type: SyncActionType;
+  count: number;      // Number of times this action was performed
+  timestamp: number;  // When the first action occurred (client time)
 }
 
 export interface SyncResult {
-  xp: number;
   ogn: number;
+  xp: number;
   level: number;
+  processed: number;  // Total actions processed
+  rejected: number;   // Total actions rejected (anti-cheat)
+  details: Array<{ type: string; count: number; ogn: number; xp: number }>;
 }
 
 // ═══════════════════════════════════════════════════════════════

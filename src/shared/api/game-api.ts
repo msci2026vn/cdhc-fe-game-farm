@@ -498,6 +498,34 @@ export const gameApi = {
     return json.data;
   },
 
+  /**
+   * Sync batched actions — reduce API calls from ~50/min to ~2/min
+   * (Bước 22 — Player Sync)
+   */
+  syncActions: async (actions: Array<{ type: 'water' | 'bug_catch' | 'xp_pickup' | 'daily_check'; count: number; timestamp: number }>): Promise<SyncResult> => {
+    const url = 'https://sta.cdhc.vn/api/game/player/sync';
+    console.log('[FARM-DEBUG] gameApi.syncActions():', { url, actionCount: actions.length });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ actions, clientTime: Date.now() }),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.syncActions() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.syncActions() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to sync: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.syncActions() SUCCESS:', json);
+    return json.data;
+  },
+
   // ═══ LEADERBOARD ═══
   /**
    * Get leaderboard (bước 21 — real API)

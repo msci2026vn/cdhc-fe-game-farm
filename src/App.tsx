@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import { AuthGuard } from '@/shared/components/AuthGuard';
 import { Toaster } from '@/components/ui/sonner';
 import { setNavigateToLogin } from '@/shared/utils/error-handler';
+import { useGameSync } from '@/shared/hooks/useGameSync';
 
 // Lazy load screens
 const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
@@ -37,11 +38,13 @@ const Fallback = () => (
 );
 
 /**
- * NavigateSetup — Configure 401 auto-redirect
+ * NavigateSetup — Configure 401 auto-redirect + Game Sync
  * Must be inside BrowserRouter to use useNavigate
  */
 const NavigateSetup = () => {
   const navigate = useNavigate();
+  // Initialize game sync engine (queues actions, auto-syncs every 60s)
+  useGameSync();
 
   useEffect(() => {
     setNavigateToLogin(() => navigate('/login', { replace: true }));
