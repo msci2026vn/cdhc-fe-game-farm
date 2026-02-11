@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { useOgn } from '@/shared/hooks/usePlayerProfile';
 
 export default function Header() {
   const navigate = useNavigate();
-  const ogn = useFarmStore((s) => s.ogn);
+  const ogn = useOgn(); // TanStack Query single source of truth
 
   return (
     <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur-sm text-primary-foreground">

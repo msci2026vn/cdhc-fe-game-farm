@@ -1,6 +1,7 @@
 import { BOSSES, BossInfo, DIFFICULTY_STYLES } from '../data/bosses';
 import { useBossProgress } from '@/shared/hooks/useBossProgress';
-import { usePlayerStore, xpForNextLevel } from '@/shared/stores/playerStore';
+import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
+import { xpForNextLevel } from '@/shared/stores/playerStore';
 
 interface Props {
   onSelect: (boss: BossInfo) => void;
@@ -8,7 +9,8 @@ interface Props {
 
 export default function BossList({ onSelect }: Props) {
   const { data: bossProgress } = useBossProgress();
-  const { level, xp } = usePlayerStore();
+  const level = useLevel();
+  const xp = useXp();
   const nextXp = xpForNextLevel(level);
   const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
 

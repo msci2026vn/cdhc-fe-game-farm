@@ -5,8 +5,7 @@ import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import { useShopItems } from '@/shared/hooks/useShopItems';
 import { useShopBuy } from '@/shared/hooks/useShopBuy';
-import { usePlayerStore } from '@/shared/stores/playerStore';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 type ShopTab = 'seed' | 'tool' | 'card' | 'nft';
@@ -31,8 +30,9 @@ export default function ShopScreen() {
   const [confirmItem, setConfirmItem] = useState<any>(null);
   const [buyAnim, setBuyAnim] = useState<string | null>(null);
 
-  const { level, xp } = usePlayerStore();
-  const ogn = useFarmStore((s) => s.ogn);
+  const level = useLevel();
+  const xp = useXp();
+  const ogn = useOgn();
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
 

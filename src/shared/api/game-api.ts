@@ -87,20 +87,6 @@ export const gameApi = {
     }
   },
 
-  /**
-   * Sync offline/actions to server
-   * TODO: bước 22 chuyển sang API thật
-   */
-  syncActions: async (actions: SyncAction[]): Promise<SyncResult> => {
-    // MOCK: Return sync result
-    return {
-      xp: 0,
-      ogn: 1250,
-      level: 1,
-    };
-    // Real API (bước 22): return gameClient.post<SyncResult>('/game/player/sync', { actions });
-  },
-
   // ═══ FARM ═══
   /**
    * Get all farm plots (bước 12 — real API)

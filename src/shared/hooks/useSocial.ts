@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
-import { usePlayerStore } from '@/shared/stores/playerStore';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 
 // ═══════════════════════════════════════════════════════════════
 // QUERIES
@@ -72,14 +71,8 @@ export function useInteractFriend() {
     onSuccess: (result, variables) => {
       console.log('[SOCIAL-DEBUG] useInteractFriend.onSuccess:', result);
 
-      // Update OGN in Zustand stores immediately
-      if (result.ognGain) {
-        useFarmStore.getState().setOgn((prev) => prev + result.ognGain);
-        usePlayerStore.getState().setOgn((prev) => prev + result.ognGain);
-      }
-
-      // Invalidate profile for server truth
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      // Invalidate profile for server truth (OGN will update from query)
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       // Invalidate friends list to update interaction status
       queryClient.invalidateQueries({ queryKey: ['game', 'social', 'friends'] });
     },

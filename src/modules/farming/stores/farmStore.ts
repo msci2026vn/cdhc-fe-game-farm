@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { FarmPlot, PlantType } from '../types/farm.types';
 import { useWeatherStore } from './weatherStore';
 import { getWeatherHappinessModifier } from '../utils/growth';
-import { usePlayerStore } from '@/shared/stores/playerStore';
 
 // Demo plant types
 export const PLANT_TYPES: PlantType[] = [
@@ -19,15 +18,12 @@ const HAPPINESS_DECAY_INTERVAL = 10_000; // lose 2 every 10s for demo
 
 interface FarmState {
   plots: FarmPlot[];
-  ogn: number;
   waterCooldowns: Record<string, number>; // plotId → cooldown end timestamp
 
   // Actions
   plantSeed: (plantType: PlantType, slotIndex: number) => void;
   waterPlot: (plotId: string) => boolean;
   harvestPlot: (plotId: string) => number; // returns OGN earned
-  addOgn: (amount: number) => void;
-  setOgn: (amount: number) => void;
   tickHappiness: () => void;
   getWaterCooldownRemaining: (plotId: string) => number;
 }
@@ -45,10 +41,8 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       mood: 'happy',
     },
   ],
-  ogn: 1250,
-  waterCooldowns: {},
 
-  setOgn: (amount) => set({ ogn: amount }),
+  waterCooldowns: {},
 
   plantSeed: (plantType, slotIndex) => {
     const newPlot: FarmPlot = {
@@ -62,7 +56,6 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       mood: 'happy',
     };
     set((s) => ({ plots: [...s.plots, newPlot] }));
-    usePlayerStore.getState().addXp(10);
   },
 
   waterPlot: (plotId) => {
@@ -74,11 +67,11 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       plots: s.plots.map((p) =>
         p.id === plotId
           ? {
-            ...p,
-            happiness: Math.min(100, p.happiness + HAPPINESS_GAIN),
-            lastWateredAt: Date.now(),
-            mood: 'happy' as const,
-          }
+              ...p,
+              happiness: Math.min(100, p.happiness + HAPPINESS_GAIN),
+              lastWateredAt: Date.now(),
+              mood: 'happy' as const,
+            }
           : p
       ),
       waterCooldowns: {
@@ -86,7 +79,6 @@ export const useFarmStore = create<FarmState>((set, get) => ({
         [plotId]: Date.now() + WATER_COOLDOWN_MS,
       },
     }));
-    usePlayerStore.getState().addXp(5);
     return true;
   },
 
@@ -96,13 +88,9 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     const reward = plot.plantType.rewardOGN;
     set((s) => ({
       plots: s.plots.filter((p) => p.id !== plotId),
-      ogn: s.ogn + reward,
     }));
-    usePlayerStore.getState().addXp(25);
     return reward;
   },
-
-  addOgn: (amount) => set((s) => ({ ogn: s.ogn + amount })),
 
   tickHappiness: () => {
     const weather = useWeatherStore.getState().weather;
@@ -114,7 +102,7 @@ export const useFarmStore = create<FarmState>((set, get) => ({
         const newHappiness = Math.max(0, p.happiness - decay);
         const isDead = newHappiness <= 0;
         const mood = newHappiness >= 50 ? 'happy' : 'sad';
-        return { ...p, happiness: newHappiness, isDead, mood: isDead ? 'sad' : mood } as FarmPlot;
+        return { ...p, happiness: newHappiness, isDead, mood } as FarmPlot;
       }),
     }));
   },

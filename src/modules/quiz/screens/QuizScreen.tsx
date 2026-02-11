@@ -2,14 +2,16 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuizStart } from '@/shared/hooks/useQuizStart';
 import { useQuizAnswer } from '@/shared/hooks/useQuizAnswer';
-import { usePlayerStore, xpForNextLevel } from '@/shared/stores/playerStore';
+import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
+import { xpForNextLevel } from '@/shared/stores/playerStore';
 import type { QuizQuestionData } from '@/shared/types/game-api.types';
 
 type Phase = 'idle' | 'playing' | 'answering' | 'revealed' | 'finished';
 
 export default function QuizScreen() {
   const navigate = useNavigate();
-  const { level, xp } = usePlayerStore();
+  const level = useLevel();
+  const xp = useXp();
   const nextXp = xpForNextLevel(level);
   const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
 

@@ -20,8 +20,7 @@ export function useBossComplete() {
             // Invalidate player profile (for OGN/XP)
             queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
 
-            // Update local store if needed (optional)
-            // useBossProgressStore.getState()... 
+            // Boss progress updated via TanStack Query invalidate
         },
         onError: (error) => {
             console.error('[FARM-DEBUG] useBossComplete.onError:', error);

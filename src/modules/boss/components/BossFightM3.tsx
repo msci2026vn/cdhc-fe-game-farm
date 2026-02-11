@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
-import { usePlayerStore } from '@/shared/stores/playerStore';
+import { useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
 
 interface Props {
@@ -29,6 +29,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   } = useMatch3(bossInfo);
 
   const bossComplete = useBossComplete();
+  const level = useLevel(); // TanStack Query single source of truth
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
@@ -80,7 +81,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   // Victory / Defeat overlay
   if (result !== 'fighting') {
     const won = result === 'victory';
-    const currentLevel = usePlayerStore.getState().level;
+    const currentLevel = useLevel();
     const serverData = bossComplete.data;
     return (
       <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-8">
@@ -221,7 +222,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           <button onClick={onBack} className="text-white/50 text-sm font-bold active:scale-95">← Thoát</button>
           <div className="px-2.5 py-1 rounded-lg font-heading text-xs font-bold text-white"
             style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-            ⭐ Lv.{usePlayerStore.getState().level}
+            ⭐ Lv.{level}
           </div>
         </div>
 

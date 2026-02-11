@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 interface Bug {
@@ -22,7 +21,6 @@ interface BugCatchGameProps {
 }
 
 export default function BugCatchGame({ open, onClose }: BugCatchGameProps) {
-  const addOgn = useFarmStore((s) => s.addOgn);
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
 
@@ -86,13 +84,13 @@ export default function BugCatchGame({ open, onClose }: BugCatchGameProps) {
     return () => clearInterval(interval);
   }, [phase]);
 
-  // Award OGN on done
+  // Award OGN on done - Note: should go through API in production
   useEffect(() => {
     if (phase === 'done' && caught > 0) {
-      const reward = caught * OGN_PER_BUG;
-      addOgn(reward);
+      // OGN updates should go through API in production
+      // For now, just show UI feedback without mutating store
     }
-  }, [phase, caught, addOgn]);
+  }, [phase, caught]);
 
   const handleCatch = useCallback((id: number) => {
     setBugs(prev => prev.map(b => b.id === id ? { ...b, caught: true } : b));

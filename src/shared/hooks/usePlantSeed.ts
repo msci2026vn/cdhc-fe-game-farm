@@ -10,7 +10,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 
 interface PlantSeedParams {
   slotIndex: number;
@@ -105,12 +105,17 @@ export function usePlantSeed() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] usePlantSeed.onSuccess() — SERVER CONFIRMED', JSON.stringify(data));
 
-      // Update store immediately
-      useFarmStore.getState().setOgn(data.ognRemaining);
+      // Optimistic: update OGN immediately for realtime UI
+      if (data.ognRemaining !== undefined) {
+        queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => ({
+          ...old,
+          ogn: data.ognRemaining,
+        }));
+      }
 
       // Invalidate to get real server data (replaces optimistic)
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       console.log('[FARM-DEBUG] usePlantSeed.onSuccess() — queries invalidated');
     },
 

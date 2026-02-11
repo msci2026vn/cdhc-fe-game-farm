@@ -1,33 +1,14 @@
 import { useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
-import { useActivityStore, formatActivityTime } from '@/shared/stores/activityStore';
-import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 
-type Tab = 'stats' | 'activity' | 'inventory' | 'achievements';
-
-const ACTIVITY_FILTERS = [
-  { key: 'all', label: 'Tất cả', emoji: '📋' },
-  { key: 'like', label: 'Thích', emoji: '❤️' },
-  { key: 'comment', label: 'Bình luận', emoji: '💬' },
-  { key: 'gift', label: 'Quà', emoji: '🎁' },
-  { key: 'buy', label: 'Mua', emoji: '🛒' },
-];
-
-const RARITY_COLORS: Record<string, string> = {
-  common: '#95a5a6',
-  rare: '#3498db',
-  epic: '#9b59b6',
-  legendary: '#f0b429',
-};
+type Tab = 'stats' | 'achievements';
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<Tab>('stats');
-  const [activityFilter, setActivityFilter] = useState('all');
   const { data: profile, isLoading, error } = usePlayerProfile();
-  const ogn = useFarmStore((s) => s.ogn);
-  const { likes, comments, gifts, harvests, activities, inventory } = useActivityStore();
+  const ogn = useOgn(); // TanStack Query single source of truth
 
   // Loading state
   if (isLoading) {
@@ -59,14 +40,8 @@ export default function ProfileScreen() {
   const nextXp = xpForNextLevel(level);
   const title = getLevelTitle(level);
 
-  const filteredActivity = activityFilter === 'all'
-    ? activities
-    : activities.filter((a) => a.type === activityFilter);
-
   const TABS: { key: Tab; label: string }[] = [
     { key: 'stats', label: '📊 Chỉ số' },
-    { key: 'activity', label: '📝 Hoạt động' },
-    { key: 'inventory', label: '🎒 Kho đồ' },
     { key: 'achievements', label: '🏆 Thành tựu' },
   ];
 
@@ -147,92 +122,6 @@ export default function ProfileScreen() {
                 </button>
               </div>
             ))}
-          </div>
-        )}
-
-        {/* Activity Tab */}
-        {tab === 'activity' && (
-          <div className="animate-fade-in">
-            <div className="flex gap-1.5 mb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              {ACTIVITY_FILTERS.map((f) => (
-                <button key={f.key} onClick={() => setActivityFilter(f.key)}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all ${activityFilter === f.key ? 'bg-primary text-white' : 'bg-white/70 text-muted-foreground'
-                    }`}>
-                  {f.emoji} {f.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              {filteredActivity.length === 0 && (
-                <div className="text-center py-10">
-                  <span className="text-4xl block mb-2">📝</span>
-                  <p className="text-xs text-muted-foreground font-semibold">Chưa có hoạt động nào</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Thích, bình luận, tặng quà bạn bè để thấy ở đây!</p>
-                </div>
-              )}
-              {filteredActivity.map((a, i) => (
-                <div key={i} className="bg-white rounded-xl p-3 flex items-start gap-3 animate-fade-in"
-                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)', animationDelay: `${i * 30}ms` }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0"
-                    style={{
-                      background: a.type === 'like' ? '#ffe0e0'
-                        : a.type === 'comment' ? '#e8d4ff'
-                          : a.type === 'gift' ? '#fff3d4'
-                            : a.type === 'water' ? '#d4eeff'
-                              : a.type === 'buy' ? '#ffecd2'
-                                : '#d4f8dc',
-                    }}>
-                    {a.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold leading-snug">{a.text}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{formatActivityTime(a.timestamp)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Inventory Tab */}
-        {tab === 'inventory' && (
-          <div className="animate-fade-in">
-            {inventory.length === 0 ? (
-              <div className="text-center py-10">
-                <span className="text-5xl block mb-3">🎒</span>
-                <p className="text-sm font-bold text-muted-foreground">Kho đồ trống</p>
-                <p className="text-[11px] text-muted-foreground mt-1">Mua vật phẩm từ Cửa hàng để bắt đầu!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-2.5">
-                {inventory.map((item) => (
-                  <div key={item.id} className="bg-white rounded-xl p-3 flex flex-col items-center gap-1 relative"
-                    style={{
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-                      borderWidth: 2,
-                      borderColor: item.rarity ? (RARITY_COLORS[item.rarity] || 'transparent') : 'transparent',
-                    }}>
-                    {/* Quantity badge */}
-                    {item.quantity > 1 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center"
-                        style={{ boxShadow: '0 2px 6px rgba(45,138,78,0.3)' }}>
-                        {item.quantity}
-                      </span>
-                    )}
-                    <span className="text-3xl">{item.emoji}</span>
-                    <span className="font-heading text-[10px] font-bold text-center leading-tight">{item.name}</span>
-                    <span className="text-[8px] text-muted-foreground text-center">{item.desc}</span>
-                    {item.rarity && item.rarity !== 'common' && (
-                      <span className="text-[7px] font-extrabold px-1.5 py-px rounded-full text-white mt-0.5"
-                        style={{ background: RARITY_COLORS[item.rarity] }}>
-                        {item.rarity.toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
 

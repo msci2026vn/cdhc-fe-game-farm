@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Friend } from '../data/friends';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
+import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { useActivityStore } from '@/shared/stores/activityStore';
 
 const GIFT_OPTIONS = [
   { emoji: '💧', name: 'Nước tưới', cost: 5 },
@@ -17,14 +16,9 @@ interface FriendGardenProps {
 }
 
 export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
-  const addOgn = useFarmStore((s) => s.addOgn);
-  const ogn = useFarmStore((s) => s.ogn);
+  const ogn = useOgn(); // TanStack Query single source of truth
   const showFlyUp = useUIStore((s) => s.showFlyUp);
   const addToast = useUIStore((s) => s.addToast);
-  const actAddLike = useActivityStore((s) => s.addLike);
-  const actAddComment = useActivityStore((s) => s.addComment);
-  const actAddGift = useActivityStore((s) => s.addGift);
-  const actAddWater = useActivityStore((s) => s.addWater);
   const [watered, setWatered] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -39,19 +33,18 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
   const handleWater = () => {
     if (watered) return;
     setWatered(true);
-    addOgn(5);
+    // Note: OGN updates should go through API in production
+    // For now, just show UI feedback without mutating store
     showFlyUp('+5 OGN 🪙');
     addToast(`Đã tưới giúp ${friend.name}! +5 OGN 💧`, 'success');
-    actAddWater(friend.name);
   };
 
   const handleLike = () => {
     if (liked) return;
     setLiked(true);
-    addOgn(2);
+    // Note: OGN updates should go through API in production
     showFlyUp('+2 OGN ❤️');
     addToast(`Đã thích vườn của ${friend.name}! ❤️`, 'success');
-    actAddLike(friend.name);
   };
 
   const handleComment = () => {
@@ -60,19 +53,17 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
       { name: 'Bạn', text: commentText.trim(), time: 'Vừa xong' },
       ...prev,
     ]);
-    addOgn(1);
+    // Note: OGN updates should go through API in production
     showFlyUp('+1 OGN 💬');
-    actAddComment(friend.name, commentText.trim());
     setCommentText('');
   };
 
   const handleGift = (gift: typeof GIFT_OPTIONS[0]) => {
     if (ogn < gift.cost || giftsSent.includes(gift.name)) return;
-    addOgn(-gift.cost);
+    // Note: OGN updates should go through API in production
     setGiftsSent((prev) => [...prev, gift.name]);
     showFlyUp(`${gift.emoji} -${gift.cost} OGN`);
     addToast(`Đã tặng ${gift.name} cho ${friend.name}! ${gift.emoji}`, 'success');
-    actAddGift(friend.name, gift.name);
   };
 
   const moodEmoji = friend.plant.happiness >= 70 ? '😊' : friend.plant.happiness >= 40 ? '😐' : '😢';

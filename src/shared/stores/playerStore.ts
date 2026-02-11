@@ -28,32 +28,5 @@ export const XP_REWARDS = {
   bugCatch: 8,
 };
 
-interface PlayerState {
-  xp: number;
-  level: number;
-  ogn: number;
-  addXp: (amount: number) => { leveledUp: boolean; newLevel: number };
-  addOgn: (amount: number) => void;
-  setOgn: (amount: number) => void;
-}
-
-export const usePlayerStore = create<PlayerState>((set, get) => ({
-  xp: 0,
-  level: 1,
-  ogn: 0,
-
-  addXp: (amount) => {
-    const state = get();
-    let newXp = state.xp + amount;
-    let newLevel = state.level;
-    while (newLevel < XP_TABLE.length - 1 && newXp >= xpForNextLevel(newLevel)) {
-      newLevel++;
-    }
-    const leveledUp = newLevel > state.level;
-    set({ xp: newXp, level: newLevel });
-    return { leveledUp, newLevel };
-  },
-
-  addOgn: (amount) => set((s) => ({ ogn: s.ogn + amount })),
-  setOgn: (amount) => set({ ogn: amount }),
-}));
+// NOTE: OGN, XP, Level are now managed by TanStack Query (usePlayerProfile)
+// This store only provides utility functions for XP calculations

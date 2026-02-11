@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
 import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
-import { usePlayerStore, xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
+import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 import WeatherControl from './WeatherControl';
 
 export default function FarmHeader() {
   const navigate = useNavigate();
-  const ogn = useFarmStore((s) => s.ogn);
+  const ogn = useOgn(); // TanStack Query single source of truth
   const weather = useWeatherStore((s) => s.weather);
-  const { level, xp } = usePlayerStore();
+  const level = useLevel();
+  const xp = useXp();
   const nextXp = xpForNextLevel(level);
   const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
   const title = getLevelTitle(level);

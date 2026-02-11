@@ -17,8 +17,6 @@ import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { usePlayerStore } from '@/shared/stores/playerStore';
-import { useActivityStore } from '@/shared/stores/activityStore';
 import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji, getWeatherGrowthMultiplier, getWeatherHappinessModifier } from '../utils/growth';
 import { formatTime } from '@/shared/utils/format';
 import { useCooldown } from '@/shared/hooks/useCooldown';
@@ -29,7 +27,7 @@ import { useClearPlot } from '@/shared/hooks/useClearPlot';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
-import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import {
   handleGameError,
   showPlantSuccess,
@@ -44,6 +42,7 @@ export default function FarmingScreen() {
   // API data (Step 12)
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
   const { data: profile } = usePlayerProfile();
+  const ogn = useOgn(); // TanStack Query single source of truth
 
   // Track mount count
   const mountCount = useRef(0);
@@ -63,17 +62,6 @@ export default function FarmingScreen() {
       plotCount: plots?.length ?? 'N/A',
     });
   }, [plotsLoading, plotsError, plots?.length]);
-
-  // Sync OGN from profile to store
-  const setOgn = useFarmStore((s) => s.setOgn);
-  const setPlayerOgn = usePlayerStore((s) => s.setOgn);
-  useEffect(() => {
-    if (profile?.ogn !== undefined) {
-      console.log('[FARM-DEBUG] FarmingScreen: Syncing OGN from profile =', profile.ogn);
-      setOgn(profile.ogn);
-      setPlayerOgn(profile.ogn);
-    }
-  }, [profile?.ogn, setOgn, setPlayerOgn]);
 
   // ─── NEW: Online status detection (Step 16) ───
   const isOnline = useOnlineStatus();
@@ -101,8 +89,7 @@ export default function FarmingScreen() {
     leveledUp: boolean;
   } | null>(null);
 
-  // Zustand for mutations (harvest still use Zustand)
-  const ogn = useFarmStore((s) => s.ogn);
+  // Zustand for UI-only state
   const plantSeedZustand = useFarmStore((s) => s.plantSeed); // Keep for fallback
   const waterPlotZustand = useFarmStore((s) => s.waterPlot); // Keep for fallback
   const harvestPlot = useFarmStore((s) => s.harvestPlot);
@@ -130,8 +117,6 @@ export default function FarmingScreen() {
 
   const cooldownSeconds = activePlot ? getCooldown(activePlot.id) : 0;
   const { remaining, isActive, start } = useCooldown(cooldownSeconds);
-
-  const addHarvest = useActivityStore((s) => s.addHarvest);
 
   const timeOfDay = useWeatherStore((s) => s.timeOfDay);
   const weather = useWeatherStore((s) => s.weather);
@@ -228,7 +213,6 @@ export default function FarmingScreen() {
           data.plantEmoji || '🌾',
           data.ognReward || 0
         );
-        addHarvest(data.plantName, data.ognReward);
 
         // Level up toast/animation
         if (data.leveledUp) {
@@ -241,7 +225,7 @@ export default function FarmingScreen() {
         handleGameError(error, 'harvest');
       },
     });
-  }, [harvestMutation, showFlyUp, addToast, addHarvest, activePlotIndex, plots]);
+  }, [harvestMutation, showFlyUp, addToast, activePlotIndex, plots]);
 
   // ─── NEW: Clear dead plot handler (Step 23) ───
   const handleClear = useCallback(() => {

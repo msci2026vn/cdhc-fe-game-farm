@@ -15,8 +15,10 @@
  * - Auto-resume on reconnect
  */
 import { useCallback, useEffect, useRef } from 'react';
+import { QueryClient } from '@tanstack/react-query';
 import * as gameApi from '../api/game-api';
 import type { SyncAction, SyncActionType } from '../types/game-api.types';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 
 const SYNC_INTERVAL = 60_000; // 60 giây
 const OFFLINE_STORAGE_KEY = 'farmverse_sync_queue';
@@ -34,6 +36,7 @@ interface QueuedAction {
 const actionQueue = new Map<string, QueuedAction>();
 let syncTimer: ReturnType<typeof setTimeout> | null = null;
 let isSyncing = false;
+let queryClientRef: QueryClient | null = null;
 
 function addToQueue(type: SyncActionType) {
   const existing = actionQueue.get(type);
@@ -62,9 +65,15 @@ async function flushQueue() {
     const result = await gameApi.syncActions(actions);
     console.log(`[FARM-DEBUG] sync: ✅ processed=${result.processed} ogn=${result.ogn} xp=${result.xp}`);
 
-    // Update stores with server canonical state
-    // Note: Stores must be imported and updated here
-    // Currently we rely on the caller to update stores via setOgn/setXp
+    // Update TanStack Query cache with server canonical state
+    if (queryClientRef) {
+      queryClientRef.setQueryData(PLAYER_PROFILE_KEY, (old: any) => ({
+        ...old,
+        ogn: result.ogn,
+        xp: result.xp,
+        level: result.level,
+      }));
+    }
 
     // Clear offline storage on success
     try {
@@ -113,7 +122,13 @@ function loadOfflineQueue() {
 // ═══════════════════════════════════════════════════════════════
 
 export function useGameSync() {
+  const queryClient = useQueryClient();
   const initialized = useRef(false);
+
+  // Capture queryClient reference for module-level flushQueue
+  useEffect(() => {
+    queryClientRef = queryClient;
+  }, [queryClient]);
 
   useEffect(() => {
     if (initialized.current) return;

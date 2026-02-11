@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
-import { useFarmStore } from '@/modules/farming/stores/farmStore';
-import { usePlayerStore } from '@/shared/stores/playerStore';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 
 export function useShopBuy() {
   const queryClient = useQueryClient();
@@ -34,14 +33,16 @@ export function useShopBuy() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] useShopBuy.onSuccess:', data);
 
-      // Update OGN in Zustand stores immediately (realtime)
+      // Optimistic: update OGN immediately for realtime UI
       if (data.ognRemaining !== undefined) {
-        useFarmStore.getState().setOgn(data.ognRemaining);
-        usePlayerStore.getState().setOgn(data.ognRemaining);
+        queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => ({
+          ...old,
+          ogn: data.ognRemaining,
+        }));
       }
 
       // Invalidate queries for server truth
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       // Refetch shop items (server truth)
       queryClient.invalidateQueries({ queryKey: ['game', 'shop', 'items'] });
     },
