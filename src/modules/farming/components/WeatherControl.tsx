@@ -8,13 +8,17 @@ export default function WeatherControl() {
   const { weather, timeOfDay, setWeather, setTimeOfDay } = useWeatherStore();
   const [open, setOpen] = useState(false);
 
+  // Safety fallback for invalid weather/time values
+  const safeWeather = (WEATHER_INFO[weather]?.emoji ? weather : 'sunny') as WeatherType;
+  const safeTimeOfDay = (TIME_INFO[timeOfDay]?.emoji ? timeOfDay : 'day') as TimeOfDay;
+
   return (
     <>
       {/* Toggle button */}
       <button onClick={() => setOpen(true)}
         className="w-10 h-10 rounded-full flex items-center justify-center text-lg header-btn-glass"
         title="Thời tiết">
-        {WEATHER_INFO[weather].emoji}
+        {WEATHER_INFO[safeWeather].emoji}
       </button>
 
       {/* Modal */}
@@ -36,11 +40,11 @@ export default function WeatherControl() {
                   {TIMES.map((t) => (
                     <button key={t} onClick={() => setTimeOfDay(t)}
                       className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all active:scale-95 ${
-                        timeOfDay === t ? 'border-primary bg-primary/5' : 'border-transparent'
+                        safeTimeOfDay === t ? 'border-primary bg-primary/5' : 'border-transparent'
                       }`}
-                      style={{ background: timeOfDay === t ? undefined : 'rgba(0,0,0,0.02)' }}>
-                      <span className="text-xl">{TIME_INFO[t].emoji}</span>
-                      <span className="text-[10px] font-bold">{TIME_INFO[t].label}</span>
+                      style={{ background: safeTimeOfDay === t ? undefined : 'rgba(0,0,0,0.02)' }}>
+                      <span className="text-xl">{TIME_INFO[t]?.emoji ?? '☀️'}</span>
+                      <span className="text-[10px] font-bold">{TIME_INFO[t]?.label ?? 'Ban ngày'}</span>
                     </button>
                   ))}
                 </div>
@@ -53,11 +57,11 @@ export default function WeatherControl() {
                   {WEATHERS.map((w) => (
                     <button key={w} onClick={() => setWeather(w)}
                       className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all active:scale-95 ${
-                        weather === w ? 'border-primary bg-primary/5' : 'border-transparent'
+                        safeWeather === w ? 'border-primary bg-primary/5' : 'border-transparent'
                       }`}
-                      style={{ background: weather === w ? undefined : 'rgba(0,0,0,0.02)' }}>
-                      <span className="text-xl">{WEATHER_INFO[w].emoji}</span>
-                      <span className="text-[10px] font-bold">{WEATHER_INFO[w].label}</span>
+                      style={{ background: safeWeather === w ? undefined : 'rgba(0,0,0,0.02)' }}>
+                      <span className="text-xl">{WEATHER_INFO[w]?.emoji ?? '☀️'}</span>
+                      <span className="text-[10px] font-bold">{WEATHER_INFO[w]?.label ?? 'Nắng'}</span>
                     </button>
                   ))}
                 </div>
@@ -66,7 +70,7 @@ export default function WeatherControl() {
               {/* Current info */}
               <div className="rounded-xl p-3 text-center text-xs font-semibold text-muted-foreground"
                 style={{ background: 'rgba(0,0,0,0.03)' }}>
-                Hiện tại: {TIME_INFO[timeOfDay].emoji} {TIME_INFO[timeOfDay].label} · {WEATHER_INFO[weather].emoji} {WEATHER_INFO[weather].label}
+                Hiện tại: {TIME_INFO[safeTimeOfDay].emoji} {TIME_INFO[safeTimeOfDay].label} · {WEATHER_INFO[safeWeather].emoji} {WEATHER_INFO[safeWeather].label}
               </div>
             </div>
           </div>

@@ -83,43 +83,43 @@ export function isDayTime(hour: number): boolean {
 
 /**
  * Map backend weather response to frontend WeatherData
- * Backend returns Open-Meteo format, frontend needs game format
+ * Backend returns format: { current: {...}, coordinates: {...}, provinceName }
+ * Frontend needs game format WeatherData
  */
 export function mapBackendWeatherToGameWeather(
   backendData: {
-    current_weather: {
+    current?: {
       temperature: number;
-      windspeed: number;
-      weathercode: number;
-      is_day: number;
+      humidity: number;
+      windSpeed: number;
+      weatherCode: number;
     };
-    hourly?: {
-      temperature_2m: number[];
-      relativehumidity_2m: number[];
-    };
-    location?: {
+    coordinates?: {
       lat: number;
       lon: number;
-      province?: string;
+    };
+    provinceName?: string;
+    hourly?: {
+      relative_humidity_2m?: number[];
     };
   },
   timestamp: string = new Date().toISOString()
 ): WeatherData {
-  const current = backendData.current_weather;
-  const hourly = backendData.hourly;
+  const current = backendData.current;
+  const coordinates = backendData.coordinates;
   const hour = new Date().getHours();
 
   // Get temperature
-  const temperature = current.temperature;
+  const temperature = current?.temperature ?? 28;
 
-  // Get humidity from hourly data (use current hour)
-  const humidity = hourly?.relativehumidity_2m?.[hour] ?? 60;
+  // Get humidity from current weather (backend now provides it directly)
+  const humidity = current?.humidity ?? 60;
 
   // Get wind speed
-  const windSpeed = current.windspeed;
+  const windSpeed = current?.windSpeed ?? 5;
 
   // Get WMO code
-  const wmoCode = current.weathercode;
+  const wmoCode = current?.weatherCode ?? 0;
 
   // Get time of day
   const timeOfDay = getTimeOfDay(hour);
@@ -135,9 +135,9 @@ export function mapBackendWeatherToGameWeather(
     windSpeed,
     wmoCode,
     location: {
-      lat: backendData.location?.lat ?? 0,
-      lon: backendData.location?.lon ?? 0,
-      province: backendData.location?.province,
+      lat: coordinates?.lat ?? 21.0285,
+      lon: coordinates?.lon ?? 105.8542,
+      province: backendData.provinceName,
     },
     timeOfDay,
     isDay,

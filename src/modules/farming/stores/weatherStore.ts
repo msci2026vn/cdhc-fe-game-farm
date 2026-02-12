@@ -21,6 +21,11 @@ interface WeatherState {
 
 const WEATHER_CYCLE: WeatherType[] = ['sunny', 'cloudy', 'rain', 'storm', 'snow', 'wind', 'cold', 'hot'];
 
+// Type guard to validate weather condition values
+function isValidWeatherType(value: string): value is WeatherType {
+  return WEATHER_CYCLE.includes(value as WeatherType);
+}
+
 function getTimeOfDay(): TimeOfDay {
   const h = new Date().getHours();
   if (h >= 5 && h < 7) return 'dawn';
@@ -41,14 +46,14 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
   setWeather: (weather) => set({ weather }),
   setTimeOfDay: (timeOfDay) => set({ timeOfDay }),
   setWeatherData: (data) => set({
-    weather: data.condition,
-    timeOfDay: data.timeOfDay,
-    temperature: data.temperature,
-    humidity: data.humidity,
-    windSpeed: data.windSpeed,
-    wmoCode: data.wmoCode,
-    location: data.location,
-    lastUpdated: data.lastUpdated,
+    weather: isValidWeatherType(data.condition) ? data.condition : 'sunny',
+    timeOfDay: data.timeOfDay ?? 'day',
+    temperature: data.temperature ?? 28,
+    humidity: data.humidity ?? 60,
+    windSpeed: data.windSpeed ?? 5,
+    wmoCode: data.wmoCode ?? 0,
+    location: data.location ?? { lat: 21.0285, lon: 105.8542 },
+    lastUpdated: data.lastUpdated ?? new Date().toISOString(),
   }),
   cycleWeather: () => {
     const curr = get().weather;

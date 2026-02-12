@@ -142,6 +142,9 @@ export default function FarmingScreen() {
   const timeOfDay = useWeatherStore((s) => s.timeOfDay);
   const weather = useWeatherStore((s) => s.weather);
 
+  // Safety fallback for invalid weather values
+  const safeWeather = (WEATHER_INFO[weather]?.emoji ? weather : 'sunny') as 'sunny' | 'cloudy' | 'rain' | 'storm' | 'snow' | 'wind' | 'cold' | 'hot';
+
   // Start happiness decay (one-time initialization)
   useEffect(() => { startHappinessDecay(); }, []);
 
@@ -478,7 +481,7 @@ export default function FarmingScreen() {
                       background: growthMult > 1 ? '#d4f8dc' : '#fff3d4',
                       color: growthMult > 1 ? '#1a7a30' : '#d49a1a',
                     }}>
-                    {WEATHER_INFO[weather].emoji} {growthMult > 1 ? `+${Math.round((growthMult - 1) * 100)}% tốc độ` : `${Math.round((growthMult - 1) * 100)}% tốc độ`}
+                    {WEATHER_INFO[safeWeather].emoji} {growthMult > 1 ? `+${Math.round((growthMult - 1) * 100)}% tốc độ` : `${Math.round((growthMult - 1) * 100)}% tốc độ`}
                   </span>
                 )}
                 {happyMod !== 1.0 && (

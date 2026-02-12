@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { gameClient } from './client';
+import { mapBackendWeatherToGameWeather } from '../utils/weatherMapper';
 import type { ApiResponse } from '../types/common';
 import type {
   PlayerProfile,
@@ -704,7 +705,12 @@ export const gameApi = {
 
     const json = await response.json();
     console.log('[FARM-DEBUG] gameApi.getWeather() SUCCESS:', json);
-    return json.data;
+
+    // Map backend response to frontend WeatherData format
+    const weatherData = mapBackendWeatherToGameWeather(json.data);
+    console.log('[FARM-DEBUG] gameApi.getWeather() MAPPED:', weatherData);
+
+    return weatherData;
   },
 };
 

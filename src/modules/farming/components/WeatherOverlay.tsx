@@ -165,11 +165,14 @@ export default function WeatherOverlay() {
   const timeOfDay = useWeatherStore((s) => s.timeOfDay);
   const effects = getWeatherEffects(weather, timeOfDay);
 
+  // Safety fallback for invalid timeOfDay values
+  const safeTimeOfDay = SKY_GRADIENTS[timeOfDay] ? timeOfDay : 'day';
+
   return (
     <>
       {/* Sky gradient overlay */}
       <div className="absolute inset-0 z-0 transition-all duration-1000"
-        style={{ background: SKY_GRADIENTS[timeOfDay] }} />
+        style={{ background: SKY_GRADIENTS[safeTimeOfDay] }} />
 
       {/* Dark tint for night */}
       {timeOfDay === 'night' && (
