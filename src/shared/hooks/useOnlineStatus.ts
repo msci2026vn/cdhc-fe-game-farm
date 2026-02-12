@@ -1,32 +1,30 @@
-import { useSyncExternalStore } from 'react';
-
 /**
- * useOnlineStatus — Detect network connectivity using SyncExternalStore (React 18+)
+ * useOnlineStatus — Detect network connectivity
  * FARMVERSE Step 16
  */
-function subscribe(callback: () => void) {
-  window.addEventListener('online', callback);
-  window.addEventListener('offline', callback);
-  console.log('[FARM-DEBUG] useOnlineStatus: Subscribed to network events');
-
-  return () => {
-    window.removeEventListener('online', callback);
-    window.removeEventListener('offline', callback);
-    console.log('[FARM-DEBUG] useOnlineStatus: Unsubscribed from network events');
-  };
-}
-
-function getSnapshot() {
-  return navigator.onLine;
-}
+import { useState, useEffect } from 'react';
 
 export function useOnlineStatus() {
-  const isOnline = useSyncExternalStore(subscribe, getSnapshot);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Extra log for debugging in console
-  if (!isOnline) {
-    console.warn('[FARM-DEBUG] useOnlineStatus: DETECTED OFFLINE');
-  }
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('[FARM-DEBUG] useOnlineStatus: ✅ ONLINE');
+      setIsOnline(true);
+    };
+    const handleOffline = () => {
+      console.log('[FARM-DEBUG] useOnlineStatus: ❌ OFFLINE');
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return isOnline;
 }
