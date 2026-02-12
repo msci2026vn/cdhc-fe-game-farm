@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
 
 type Tab = 'stats' | 'achievements';
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<Tab>('stats');
-  const { data: profile, isLoading, error } = usePlayerProfile();
+  const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
+  const { data: auth, isLoading: isAuthLoading } = useAuth();
   const ogn = useOgn(); // TanStack Query single source of truth
+
+  const isLoading = isProfileLoading || isAuthLoading;
 
   // Loading state
   if (isLoading) {
@@ -40,6 +44,9 @@ export default function ProfileScreen() {
   const nextXp = xpForNextLevel(level);
   const title = getLevelTitle(level);
 
+  const displayName = profile.name || auth?.user?.name || 'Nông dân';
+  const displayPicture = profile.picture || auth?.user?.picture;
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'stats', label: '📊 Chỉ số' },
     { key: 'achievements', label: '🏆 Thành tựu' },
@@ -50,13 +57,21 @@ export default function ProfileScreen() {
       {/* Profile header */}
       <div className="relative pt-safe px-5 pb-4">
         <div className="flex items-center gap-4">
-          <div className="w-[72px] h-[72px] rounded-full avatar-ring flex-shrink-0" style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
+          <div className="w-[72px] h-[72px] rounded-full avatar-ring flex-shrink-0 overflow-hidden" style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
             <div className="w-full h-full rounded-full bg-game-green-mid flex items-center justify-center text-[34px]">
-              🧑‍🌾
+              {displayPicture ? (
+                <img
+                  src={displayPicture}
+                  alt={displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                '🧑‍🌾'
+              )}
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-heading text-xl font-bold">{profile.name || 'Nông dân'}</h2>
+            <h2 className="font-heading text-xl font-bold">{displayName}</h2>
             <span className="inline-flex items-center gap-1 bg-game-green-mid text-white px-3 py-0.5 rounded-xl text-[11px] font-bold mt-1">
               ⭐ Lv.{level} — {title}
             </span>

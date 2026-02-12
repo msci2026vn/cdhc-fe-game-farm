@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { LEVEL_CONFIG, getLevelTitle } from '@/shared/stores/playerStore';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import WeatherControl from './WeatherControl';
@@ -10,12 +11,22 @@ export default function FarmHeader() {
   const weather = useWeatherStore((s) => s.weather);
   const temperature = useWeatherStore((s) => s.temperature);
 
-  // Single hook for all profile data — 1 query, 1 subscription
-  const { data: profile, isLoading } = usePlayerProfile();
+  // Profile data
+  const { data: profile, isLoading: isProfileLoading } = usePlayerProfile();
+
+  // Auth data (Gmail name/picture)
+  const { data: auth, isLoading: isAuthLoading } = useAuth();
+
+  const isLoading = isProfileLoading || isAuthLoading;
+
   const ogn = profile?.ogn ?? 0;
   const xp = profile?.xp ?? 0;
   const level = profile?.level ?? 1;
   const title = getLevelTitle(level);
+
+  // Google fallbacks
+  const displayName = profile?.name || auth?.user?.name || 'Farmer';
+  const displayPicture = profile?.picture || auth?.user?.picture;
 
   // XP progress calculation — LINEAR FORMULA (100 XP per level, matches backend)
   // Level 1: 0-99 XP, Level 2: 100-199 XP, Level 3: 200-299 XP, etc.
@@ -72,10 +83,10 @@ export default function FarmHeader() {
         <div className="flex items-center gap-2.5">
           <div className="w-[46px] h-[46px] rounded-full avatar-ring overflow-hidden" style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
             <div className="w-full h-full rounded-full bg-game-green-mid flex items-center justify-center text-[22px]">
-              {profile?.picture ? (
+              {displayPicture ? (
                 <img
-                  src={profile.picture}
-                  alt={profile.name}
+                  src={displayPicture}
+                  alt={displayName}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -84,7 +95,7 @@ export default function FarmHeader() {
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="font-heading text-[15px] font-bold">{profile?.name || 'Farmer'}</span>
+            <span className="font-heading text-[15px] font-bold">{displayName}</span>
             <span className="text-[11px] font-bold text-game-green-mid flex items-center gap-1">
               <span className="bg-game-green-mid text-white px-2 py-px rounded-[10px] text-[10px] font-bold">Lv.{level}</span>
               {title}
