@@ -909,4 +909,24 @@
       0 8px 0 #5D4037,
       0 15px 25px rgba(0, 0, 0, 0.4);
   }
+
+  .honey-text-green {
+    color: #76FF03;
+    text-shadow: 2px 2px 0 #FFF, 4px 4px 0 #1B5E20;
+    background: linear-gradient(180deg, #CCFF90 20%, #76FF03 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px #33691E;
+  }
+
+  .honey-text-night {
+    color: #C5CAE9;
+    text-shadow: 2px 2px 0 #FFF, 4px 4px 0 #1A237E;
+    background: linear-gradient(180deg, #E8EAF6 20%, #C5CAE9 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px #283593;
+  }
 }
