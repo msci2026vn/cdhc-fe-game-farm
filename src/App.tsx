@@ -10,14 +10,29 @@ import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
 import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
 import Toast from '@/shared/components/Toast';
 
-// Lazy load screens
-const SplashScreen = lazy(() => import('@/modules/splash/screens/SplashScreen'));
-const LoginScreen = lazy(() => import('@/modules/auth/screens/LoginScreen'));
-const FarmingScreen = lazy(() => import('@/modules/farming/screens/FarmingScreen'));
-const BossScreen = lazy(() => import('@/modules/boss/screens/BossScreen'));
-const QuizScreen = lazy(() => import('@/modules/quiz/screens/QuizScreen'));
-const ShopScreen = lazy(() => import('@/modules/shop/screens/ShopScreen'));
-const ProfileScreen = lazy(() => import('@/modules/profile/screens/ProfileScreen'));
+/**
+ * Helper to handle "Failed to fetch dynamically imported module"
+ * This usually happens when a new version is deployed and old assets are gone.
+ */
+const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
+  lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.error('[FARM-DEBUG] Chunk load failed, reloading...', error);
+      window.location.reload();
+      return { default: () => null };
+    }
+  });
+
+// Lazy load screens with retry logic
+const SplashScreen = lazyWithRetry(() => import('@/modules/splash/screens/SplashScreen'));
+const LoginScreen = lazyWithRetry(() => import('@/modules/auth/screens/LoginScreen'));
+const FarmingScreen = lazyWithRetry(() => import('@/modules/farming/screens/FarmingScreen'));
+const BossScreen = lazyWithRetry(() => import('@/modules/boss/screens/BossScreen'));
+const QuizScreen = lazyWithRetry(() => import('@/modules/quiz/screens/QuizScreen'));
+const ShopScreen = lazyWithRetry(() => import('@/modules/shop/screens/ShopScreen'));
+const ProfileScreen = lazyWithRetry(() => import('@/modules/profile/screens/ProfileScreen'));
 
 const Fallback = () => (
   <div className="min-h-screen flex items-center justify-center splash-gradient">
