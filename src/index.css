@@ -50,12 +50,24 @@
   font-size: 24px;
   z-index: 30;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+  animation: bug-wiggle 1s ease-in-out infinite;
+}
+
+@keyframes bug-wiggle {
+
+  0%,
+  100% {
+    transform: rotate(-8deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(8deg) scale(1.1);
+  }
 }
 
 .sprout-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  inset: 0;
   z-index: -1;
   background: linear-gradient(180deg, #4FC3F7 0%, #81C784 100%);
   overflow: hidden;
@@ -67,18 +79,66 @@
   animation: float-leaf 6s ease-in-out infinite;
 }
 
-@keyframes float {
+@keyframes bee-fly {
   0% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate(-10vw, 20vh) rotate(0deg) scaleX(1);
+  }
+
+  25% {
+    transform: translate(30vw, -10vh) rotate(10deg) scaleX(1);
   }
 
   50% {
-    transform: translateY(-10px) rotate(5deg);
+    transform: translate(110vw, 5vh) rotate(0deg) scaleX(1);
+  }
+
+  51% {
+    transform: translate(110vw, 5vh) rotate(0deg) scaleX(-1);
+  }
+
+  75% {
+    transform: translate(40vw, 30vh) rotate(-10deg) scaleX(-1);
   }
 
   100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate(-10vw, 20vh) rotate(0deg) scaleX(-1);
   }
+}
+
+@keyframes worm-crawl-around {
+  0% {
+    transform: translate(0, 0) scaleX(1);
+  }
+
+  25% {
+    transform: translate(20vw, -10vh) scaleX(1);
+  }
+
+  50% {
+    transform: translate(50vw, 0) scaleX(1);
+  }
+
+  51% {
+    transform: translate(50vw, 0) scaleX(-1);
+  }
+
+  75% {
+    transform: translate(25vw, 10vh) scaleX(-1);
+  }
+
+  100% {
+    transform: translate(0, 0) scaleX(-1);
+  }
+}
+
+.animate-bee {
+  animation: bee-fly 15s linear infinite;
+  display: inline-block;
+}
+
+.animate-worm-crawl {
+  animation: worm-crawl-around 25s linear infinite;
+  display: inline-block;
 }
 
 .btn-comic-red {

@@ -106,13 +106,22 @@ function LoginScreenContent() {
     <div className="min-h-screen font-sans antialiased overflow-hidden relative flex flex-col items-center justify-center bg-[#81C784]">
       {/* Background Decor */}
       <div className="sprout-bg">
+        {/* Sun */}
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[#FFD54F] border-[12px] border-[#FFB300] shadow-[0_0_100px_rgba(255,179,0,0.4)] z-0"></div>
+
+        {/* Leaves */}
         <div className="absolute top-10 left-10 text-6xl opacity-20 floating-leaf" style={{ animationDelay: '0s' }}>🌿</div>
         <div className="absolute top-40 right-10 text-5xl opacity-20 floating-leaf" style={{ animationDelay: '2s' }}>🌱</div>
         <div className="absolute bottom-20 left-20 text-7xl opacity-20 floating-leaf" style={{ animationDelay: '1s' }}>🍃</div>
         <div className="absolute bottom-40 right-30 text-4xl opacity-20 floating-leaf" style={{ animationDelay: '3s' }}>☘️</div>
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-yellow-300 border-8 border-yellow-500 shadow-[0_0_60px_rgba(253,216,53,0.6)]"></div>
-        <div className="absolute bottom-0 w-full h-1/3 bg-[#8BC34A] rounded-t-[50%] scale-150 translate-y-20 border-t-8 border-[#689F38]"></div>
-        <div className="absolute bottom-0 w-full h-1/4 bg-[#7CB342] rounded-t-[40%] scale-125 translate-x-20 translate-y-10 border-t-8 border-[#558B2F]"></div>
+
+        {/* Hills (Mountains) */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200%] h-1/3 bg-[#8BC34A] rounded-[100%] translate-y-1/2 border-t-[10px] border-[#689F38] z-0"></div>
+        <div className="absolute bottom-0 left-[20%] w-[180%] h-1/4 bg-[#7CB342] rounded-[100%] translate-y-1/3 border-t-[10px] border-[#558B2F] z-0"></div>
+
+        {/* Animated Critters */}
+        <div className="animate-bee text-5xl fixed">🐝</div>
+        <div className="animate-worm-crawl text-4xl fixed">🐛</div>
       </div>
 
       <div className="relative z-10 w-full max-w-sm px-4 flex flex-col items-center gap-6 mb-10">
