@@ -1,14 +1,34 @@
 import { create } from 'zustand';
 
-// XP required per level (cumulative)
-const XP_TABLE = [0, 0, 50, 120, 220, 360, 550, 800, 1100, 1500, 2000, 2600, 3400, 4400, 5600, 7000, 9000, 11500, 14500, 18000, 22000];
+// ═══════════════════════════════════════════════════════════════
+// LEVEL/XP CONFIG — MUST MATCH BACKEND EXACTLY
+// ═════════════════════════════════════════════════════════════════
+// Backend formula: reward.service.ts → floor(xp / 100) + 1
+// This means: Level 1 = 0-99 XP, Level 2 = 100-199 XP, etc.
 
+export const LEVEL_CONFIG = {
+  MAX_LEVEL: 50,
+  XP_PER_LEVEL: 100, // MUST match backend reward.service.ts
+
+  // Get level from total XP (same as backend)
+  getLevel: (xp: number): number => Math.min(Math.floor(xp / 100) + 1, 50),
+
+  // Get XP in current level
+  getXpInLevel: (xp: number): number => xp % 100,
+
+  // Get XP needed for current level (always 100 for linear)
+  getXpForLevel: (): number => 100,
+} as const;
+
+// Legacy aliases for backward compatibility
 export function xpForLevel(level: number): number {
-  return XP_TABLE[Math.min(level, XP_TABLE.length - 1)] || 0;
+  // Return START XP for this level (e.g., Level 2 starts at 100 XP)
+  return (level - 1) * LEVEL_CONFIG.XP_PER_LEVEL;
 }
 
 export function xpForNextLevel(level: number): number {
-  return xpForLevel(level + 1);
+  // Return END XP for this level (e.g., Level 2 ends at 199 XP, next starts at 200)
+  return level * LEVEL_CONFIG.XP_PER_LEVEL;
 }
 
 export function getLevelTitle(level: number): string {

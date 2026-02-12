@@ -1,7 +1,7 @@
 import { BOSSES, BossInfo, DIFFICULTY_STYLES } from '../data/bosses';
 import { useBossProgress } from '@/shared/hooks/useBossProgress';
 import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
-import { xpForNextLevel } from '@/shared/stores/playerStore';
+import { LEVEL_CONFIG } from '@/shared/stores/playerStore';
 
 interface Props {
   onSelect: (boss: BossInfo) => void;
@@ -11,8 +11,12 @@ export default function BossList({ onSelect }: Props) {
   const { data: bossProgress } = useBossProgress();
   const level = useLevel();
   const xp = useXp();
-  const nextXp = xpForNextLevel(level);
-  const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
+
+  // LINEAR FORMULA: 100 XP per level (matches backend)
+  const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);  // XP % 100
+  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel(); // Always 100
+  const xpPct = Math.min(100, (xpInLevel / xpForLevelUp) * 100);
+  const xpProgressText = `${xpInLevel}/${xpForLevelUp}`;
 
   // Calculate totals from server data
   const totalKills = bossProgress?.reduce((sum, p) => sum + p.kills, 0) ?? 0;
@@ -41,7 +45,7 @@ export default function BossList({ onSelect }: Props) {
         {/* XP bar */}
         <div className="mb-2">
           <div className="flex justify-between text-[10px] font-bold mb-1">
-            <span style={{ color: '#a29bfe' }}>XP: {xp}/{nextXp}</span>
+            <span style={{ color: '#a29bfe' }}>XP: {xpProgressText}</span>
             <span className="text-white/40">Level {level} → {level + 1}</span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>

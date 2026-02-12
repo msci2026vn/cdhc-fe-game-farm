@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
-import { xpForLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { LEVEL_CONFIG, getLevelTitle } from '@/shared/stores/playerStore';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import WeatherControl from './WeatherControl';
 
@@ -16,12 +16,11 @@ export default function FarmHeader() {
   const level = profile?.level ?? 1;
   const title = getLevelTitle(level);
 
-  // XP progress calculation (level-based)
-  const levelStart = xpForLevel(level);
-  const levelEnd = xpForLevel(level + 1);
-  const xpInRange = levelEnd - levelStart;
-  const currentXpInRange = xp - levelStart;
-  const xpPct = xpInRange > 0 ? Math.min(100, (currentXpInRange / xpInRange) * 100) : 100;
+  // XP progress calculation — LINEAR FORMULA (100 XP per level, matches backend)
+  // Level 1: 0-99 XP, Level 2: 100-199 XP, Level 3: 200-299 XP, etc.
+  const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);  // XP % 100
+  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel(); // Always 100
+  const xpPct = Math.min(100, (xpInLevel / xpForLevelUp) * 100);
 
   // Loading state — show skeleton while fetching profile
   if (isLoading) {
@@ -98,7 +97,7 @@ export default function FarmHeader() {
       {/* XP progress bar */}
       <div className="mb-3 px-1">
         <div className="flex justify-between text-[10px] font-bold mb-1">
-          <span className="text-game-green-mid">⭐ XP: {currentXpInRange}/{xpInRange}</span>
+          <span className="text-game-green-mid">⭐ XP: {xpInLevel}/{xpForLevelUp}</span>
           <span className="text-muted-foreground">Lv.{level} → Lv.{level + 1}</span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
