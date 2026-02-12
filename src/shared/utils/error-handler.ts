@@ -8,6 +8,7 @@
  */
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useUIStore } from '../stores/uiStore';
 
 // ─── Error code → Vietnamese message map ───
 const ERROR_MESSAGES: Record<string, string> = {
@@ -80,6 +81,7 @@ export function handleGameError(error: any, context?: string): string {
   // ─── Network error ───
   if (message.includes('fetch') || message.includes('network') || message.includes('Failed to fetch') || !navigator.onLine) {
     console.log('[FARM-DEBUG] handleGameError() — network error');
+    useUIStore.getState().setApiDisconnected(true);
     toast.error(ERROR_MESSAGES.NETWORK_ERROR, {
       icon: '📡',
       duration: 5000,

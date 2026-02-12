@@ -24,6 +24,10 @@ import { useUIStore } from '../stores/uiStore';
 const SYNC_INTERVAL = 60_000; // 60 giây
 const OFFLINE_STORAGE_KEY = 'farmverse_sync_queue';
 
+function getUI() {
+  return useUIStore.getState();
+}
+
 // ═══════════════════════════════════════════════════════════════
 // SINGLETON QUEUE (shared across components)
 // Module-level to persist across component re-renders
@@ -68,12 +72,13 @@ async function flushQueue() {
 
     // Toast notification on successful sync
     if (result.processed > 0) {
-      useUIStore.getState().addToast(
+      getUI().addToast(
         `Đã đồng bộ dữ liệu! +${result.ogn} OGN +${result.xp} XP`,
         'info',
         '🔄'
       );
     }
+    getUI().setApiDisconnected(false);
 
     // Update TanStack Query cache with server canonical state
     if (queryClientRef) {
@@ -93,11 +98,12 @@ async function flushQueue() {
     console.error('[FARM-DEBUG] sync: ❌ failed, saving to offline queue', e);
 
     // Toast notification on offline
-    useUIStore.getState().addToast(
+    getUI().addToast(
       'Mất kết nối... Lưu offline, sẽ đồng bộ sau.',
       'warning',
       '📡'
     );
+    getUI().setApiDisconnected(true);
 
     // Put actions back + save to localStorage for offline
     actions.forEach((a) => {

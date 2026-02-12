@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
+import { useUIStore } from '@/shared/stores/uiStore';
 
 const ConnectionLostOverlay = () => {
     const isOnline = useOnlineStatus();
+    const isApiDisconnected = useUIStore(s => s.isApiDisconnected);
     const [startTime, setStartTime] = useState<number | null>(null);
     const [elapsed, setElapsed] = useState(0);
 
+    const isVisible = !isOnline || isApiDisconnected;
+
     useEffect(() => {
         // Log status change
-        console.warn(`[FARM-DEBUG] ConnectionLostOverlay: Network status changed to ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+        console.warn(`[FARM-DEBUG] ConnectionLostOverlay: Network=${isOnline ? 'ON' : 'OFF'}, API=${isApiDisconnected ? 'OFF' : 'ON'}`);
 
-        if (!isOnline) {
+        if (isVisible) {
             if (!startTime) {
                 setStartTime(Date.now());
             }
@@ -23,9 +27,9 @@ const ConnectionLostOverlay = () => {
             setStartTime(null);
             setElapsed(0);
         }
-    }, [isOnline, startTime]);
+    }, [isOnline, isApiDisconnected, isVisible, startTime]);
 
-    if (isOnline) return null;
+    if (!isVisible) return null;
 
     const formatTime = (seconds: number) => {
         const hrs = Math.floor(seconds / 3600);
@@ -110,7 +114,7 @@ const ConnectionLostOverlay = () => {
                     </button>
 
                     <p className="mt-2 text-[10px] text-gray-500 font-extrabold text-center uppercase tracking-tighter opacity-70">
-                        Vui lòng kiểm tra đường truyền internet của bạn.
+                        {isApiDisconnected ? 'Không thể kết nối với máy chủ.' : 'Vui lòng kiểm tra đường truyền internet của bạn.'}
                     </p>
                 </div>
             </div>
