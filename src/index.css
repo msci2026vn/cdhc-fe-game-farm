@@ -121,81 +121,174 @@
 @keyframes bee-fly {
   0% {
     left: -10%;
-    top: 20%;
-    transform: scaleX(1) rotate(5deg);
+    top: 25%;
+    transform: scaleX(-1) rotate(5deg);
   }
 
   45% {
     left: 110%;
-    top: 10%;
-    transform: scaleX(1) rotate(-5deg);
+    top: 15%;
+    transform: scaleX(-1) rotate(-5deg);
   }
 
   50% {
     left: 110%;
-    top: 10%;
-    transform: scaleX(-1) rotate(-5deg);
+    top: 15%;
+    transform: scaleX(1) rotate(-5deg);
   }
 
   95% {
     left: -10%;
-    top: 30%;
-    transform: scaleX(-1) rotate(5deg);
+    top: 35%;
+    transform: scaleX(1) rotate(5deg);
   }
 
   100% {
     left: -10%;
-    top: 20%;
-    transform: scaleX(1) rotate(5deg);
+    top: 25%;
+    transform: scaleX(-1) rotate(5deg);
   }
 }
 
 @keyframes worm-crawl-global {
   0% {
-    left: -10%;
-    bottom: 10%;
+    left: -20%;
+    bottom: 15%;
     transform: scaleX(1);
   }
 
   48% {
     left: 110%;
-    bottom: 12%;
+    bottom: 18%;
     transform: scaleX(1);
   }
 
   50% {
     left: 110%;
-    bottom: 12%;
+    bottom: 18%;
     transform: scaleX(-1);
   }
 
   98% {
-    left: -10%;
-    bottom: 8%;
+    left: -20%;
+    bottom: 12%;
     transform: scaleX(-1);
   }
 
   100% {
-    left: -10%;
-    bottom: 10%;
+    left: -20%;
+    bottom: 15%;
     transform: scaleX(1);
   }
 }
 
 .animate-bee {
-  animation: bee-fly 18s linear infinite;
+  animation: bee-fly 25s linear infinite;
   position: fixed;
   z-index: 10;
   pointer-events: none;
-  font-size: 50px;
+  font-size: 45px;
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .animate-worm-crawl {
-  animation: worm-crawl-global 28s linear infinite;
+  animation: worm-crawl-global 40s linear infinite;
   position: fixed;
   z-index: 10;
   pointer-events: none;
-  font-size: 40px;
+  font-size: 35px;
+  filter: drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Weather Elements */
+.cloud-decoration {
+  position: absolute;
+  font-size: 100px;
+  opacity: 0.8;
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.1));
+  z-index: 2;
+  animation: cloud-float 25s ease-in-out infinite alternate;
+}
+
+@keyframes cloud-float {
+  from {
+    transform: translateX(-20px);
+  }
+
+  to {
+    transform: translateX(60px);
+  }
+}
+
+.moon-circle {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  width: 130px;
+  height: 130px;
+  background: #FFF9C4;
+  border-radius: 50%;
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.4), inset -15px -15px 0 rgba(0, 0, 0, 0.05);
+  z-index: 1;
+}
+
+.rain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.rain-drop {
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.3);
+  animation: rain-fall 0.8s linear infinite;
+}
+
+@keyframes rain-fall {
+  0% {
+    transform: translateY(-100vh) translateX(0);
+  }
+
+  100% {
+    transform: translateY(100vh) translateX(-30px);
+  }
+}
+
+.sun-glow {
+  animation: sun-pulse 5s ease-in-out infinite;
+}
+
+@keyframes sun-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
+@keyframes slow-crawl {
+
+  0%,
+  100% {
+    transform: translateX(0) scale(1.05);
+  }
+
+  50% {
+    transform: translateX(5px) scale(0.95);
+  }
+}
+
+.animate-slow-crawl {
+  animation: slow-crawl 3s ease-in-out infinite;
 }
 
 .btn-comic-red {

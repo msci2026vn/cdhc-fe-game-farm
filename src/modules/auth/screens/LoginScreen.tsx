@@ -5,6 +5,8 @@ import { queryClient } from '@/shared/lib/queryClient';
 import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
 import { gameApi } from '@/shared/api/game-api';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useWeather } from '@/shared/hooks/useWeather';
+import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
 
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
@@ -14,6 +16,11 @@ function LoginScreenContent() {
   const addToast = useUIStore((s) => s.addToast);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Sync weather data from API
+  const weatherQuery = useWeather();
+  const weather = weatherQuery.data?.condition || 'sunny';
+  const timeOfDay = weatherQuery.data?.timeOfDay || 'day';
 
   const handleAuthSuccess = async (idToken: string) => {
     setLoading(true);
@@ -102,19 +109,64 @@ function LoginScreenContent() {
     addToast('Tính năng đăng nhập ví Avalanche đang được phát triển! 🚀', 'info');
   };
 
+  // Determine which background elements to show
+  const isNight = timeOfDay === 'night';
+  const isRainy = weather === 'rain' || weather === 'storm';
+  const isCloudy = weather === 'cloudy';
+
   return (
-    <div className="min-h-screen font-sans antialiased relative flex flex-col items-center justify-center">
+    <div className={`min-h-screen font-sans antialiased relative flex flex-col items-center justify-center transition-colors duration-1000 ${isNight ? 'bg-[#1A237E]' : 'bg-[#81C784]'}`}>
       {/* Background Decor */}
-      <div className="sprout-bg">
-        <div className="sun-circle"></div>
+      <div className="sprout-bg" style={{
+        background: isNight
+          ? 'linear-gradient(180deg, #0D47A1 0%, #1A237E 100%)'
+          : 'linear-gradient(180deg, #4FC3F7 0%, #81C784 100%)'
+      }}>
+        {/* Sun or Moon */}
+        {!isNight ? (
+          <div className="sun-circle sun-glow">
+            {isCloudy && (
+              <div className="cloud-decoration -top-8 -left-16 opacity-80" style={{ transform: 'scale(0.8)' }}>☁️</div>
+            )}
+          </div>
+        ) : (
+          <div className="moon-circle sun-glow">
+            <div className="absolute top-4 left-4 text-white/20 text-xl">✨</div>
+          </div>
+        )}
 
-        <div className="hill-1"></div>
-        <div className="hill-2"></div>
+        {/* Clouds for cloudy weather */}
+        {isCloudy && (
+          <>
+            <div className="cloud-decoration top-[12%] left-[8%]" style={{ animationDelay: '2s' }}>☁️</div>
+            <div className="cloud-decoration top-[22%] right-[12%]" style={{ animationDelay: '5s' }}>☁️</div>
+          </>
+        )}
 
-        <div className="absolute top-10 left-10 text-6xl floating-leaf" style={{ animationDelay: '0s' }}>🌿</div>
-        <div className="absolute top-40 right-10 text-5xl floating-leaf" style={{ animationDelay: '2s' }}>🌱</div>
-        <div className="absolute bottom-20 left-20 text-7xl floating-leaf" style={{ animationDelay: '1s' }}>🍃</div>
-        <div className="absolute bottom-40 right-30 text-4xl floating-leaf" style={{ animationDelay: '3s' }}>☘️</div>
+        {/* Rain Particles */}
+        {isRainy && (
+          <div className="rain-overlay">
+            {[...Array(25)].map((_, i) => (
+              <div
+                key={i}
+                className="rain-drop"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `-${Math.random() * 20}%`,
+                  animationDelay: `${Math.random() * 1.5}s`,
+                  opacity: Math.random() * 0.4 + 0.1
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="hill-1" style={{ filter: isNight ? 'brightness(0.4)' : 'none' }}></div>
+        <div className="hill-2" style={{ filter: isNight ? 'brightness(0.3)' : 'none' }}></div>
+
+        <div className="absolute top-10 left-10 text-6xl floating-leaf" style={{ animationDelay: '0s', opacity: isNight ? 0.1 : 0.3 }}>🌿</div>
+        <div className="absolute top-40 right-10 text-5xl floating-leaf" style={{ animationDelay: '2s', opacity: isNight ? 0.1 : 0.3 }}>🌱</div>
+        <div className="absolute bottom-20 left-20 text-7xl floating-leaf" style={{ animationDelay: '1s', opacity: isNight ? 0.1 : 0.3 }}>🍃</div>
 
         <div className="animate-bee">🐝</div>
         <div className="animate-worm-crawl">🐛</div>
@@ -126,18 +178,22 @@ function LoginScreenContent() {
           <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">
             <span className="honey-text block">Organic</span>
             <span className="honey-text block text-6xl md:text-7xl mt-1" style={{
-              color: '#76FF03',
-              WebkitTextStroke: '2px #33691E',
-              background: 'linear-gradient(180deg, #CCFF90 20%, #76FF03 80%)',
+              color: isNight ? '#C5CAE9' : '#76FF03',
+              WebkitTextStroke: isNight ? '2px #283593' : '2px #33691E',
+              background: isNight
+                ? 'linear-gradient(180deg, #E8EAF6 20%, #C5CAE9 80%)'
+                : 'linear-gradient(180deg, #CCFF90 20%, #76FF03 80%)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '2px 2px 0 #FFF, 4px 4px 0 #1B5E20'
+              textShadow: isNight
+                ? '2px 2px 0 #FFF, 4px 4px 0 #1A237E'
+                : '2px 2px 0 #FFF, 4px 4px 0 #1B5E20'
             }}>Kingdom</span>
           </h1>
-          <div className="honey-drop w-3 h-6 top-[65%] right-[25%]"></div>
-          <div className="absolute top-0 -right-4 rotate-12 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer">🐞</div>
-          <div className="absolute bottom-0 -left-6 -rotate-12 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer">🐝</div>
+          <div className="honey-drop w-3 h-6 top-[65%] right-[25%]" style={{ background: isNight ? '#C5CAE9' : '#FFB300' }}></div>
+          <div className="absolute top-0 -right-4 rotate-12 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-slow-crawl">🐞</div>
+          <div className="absolute bottom-0 -left-6 -rotate-12 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-slow-crawl">🐝</div>
         </div>
 
         {/* Login Container */}
@@ -156,7 +212,7 @@ function LoginScreenContent() {
           <div className="space-y-4 relative">
             {/* Avalanche Login Button */}
             <div className="relative group">
-              <div className="worm-decoration -top-3 left-6 -rotate-12">🐛</div>
+              <div className="worm-decoration -top-3 left-6 -rotate-12 animate-slow-crawl">🐛</div>
               <button
                 onClick={handleAvalancheLogin}
                 className="w-full btn-comic-red text-white py-4 px-4 flex items-center justify-between gap-3 relative overflow-hidden"
@@ -181,7 +237,7 @@ function LoginScreenContent() {
 
             {/* Google Login Button */}
             <div className="relative group">
-              <div className="worm-decoration -bottom-2 -left-2 rotate-[20deg] text-xl">🪱</div>
+              <div className="worm-decoration -bottom-2 -left-2 rotate-[20deg] text-xl animate-slow-crawl">🪱</div>
 
               {/* This is the tricky part: triggering the ID token login */}
               {/* I'll use the official invisible button to trigger it properly so we get idToken */}
