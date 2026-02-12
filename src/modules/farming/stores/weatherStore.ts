@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { WeatherCondition, TimeOfDay, WeatherData } from '@/shared/types/game-api.types';
 
+export type { TimeOfDay };
 export type WeatherType = WeatherCondition;
 
 interface WeatherState {
