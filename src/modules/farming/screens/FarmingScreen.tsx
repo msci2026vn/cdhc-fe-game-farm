@@ -149,6 +149,42 @@ export default function FarmingScreen() {
   // Start happiness decay (one-time initialization)
   useEffect(() => { startHappinessDecay(); }, []);
 
+  // Celestial path calculation (Left to Right arc)
+  const getCelestialState = useCallback(() => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const totalMinutes = hours * 60 + minutes;
+
+    let isNightLocal = false;
+    let progress = 0;
+
+    // Day: 6 AM (360 min) to 6 PM (1080 min)
+    if (totalMinutes >= 360 && totalMinutes < 1080) {
+      isNightLocal = false;
+      progress = (totalMinutes - 360) / 720;
+    } else {
+      // Night: 6 PM (1080) to 6 AM (next day 360)
+      isNightLocal = true;
+      if (totalMinutes >= 1080) {
+        progress = (totalMinutes - 1080) / 720;
+      } else {
+        progress = (totalMinutes + 360) / 720;
+      }
+    }
+
+    // Progress 0 = Left, Progress 1 = Right
+    const left = -10 + progress * 105; // -10% to 95%
+    const top = 25 - (Math.sin(Math.PI * progress) * 18); // Arc path
+
+    return { left: `${left}%`, top: `${top}%`, isNight: isNightLocal };
+  }, []);
+
+  const celestial = getCelestialState();
+  const temperature = useWeatherStore((s) => s.temperature);
+  const locationName = useWeatherStore((s) => s.location.province) || 'Hà Nội';
+  const currentDate = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
+
   // All useCallback hooks MUST be above early returns to avoid React #310
   // Use ref to avoid dependency on activePlot changing every render
   const handleWater = useCallback(() => {
@@ -359,42 +395,6 @@ export default function FarmingScreen() {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk';
   const growthMult = getWeatherGrowthMultiplier(weather);
   const happyMod = getWeatherHappinessModifier(weather);
-
-  // Celestial path calculation (Left to Right arc)
-  const getCelestialState = useCallback(() => {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const totalMinutes = hours * 60 + minutes;
-
-    let isNightLocal = false;
-    let progress = 0;
-
-    // Day: 6 AM (360 min) to 6 PM (1080 min)
-    if (totalMinutes >= 360 && totalMinutes < 1080) {
-      isNightLocal = false;
-      progress = (totalMinutes - 360) / 720;
-    } else {
-      // Night: 6 PM (1080) to 6 AM (next day 360)
-      isNightLocal = true;
-      if (totalMinutes >= 1080) {
-        progress = (totalMinutes - 1080) / 720;
-      } else {
-        progress = (totalMinutes + 360) / 720;
-      }
-    }
-
-    // Progress 0 = Left, Progress 1 = Right
-    const left = -10 + progress * 105; // -10% to 95%
-    const top = 25 - (Math.sin(Math.PI * progress) * 18); // Arc path
-
-    return { left: `${left}%`, top: `${top}%`, isNight: isNightLocal };
-  }, []);
-
-  const celestial = getCelestialState();
-  const temperature = useWeatherStore((s) => s.temperature);
-  const locationName = useWeatherStore((s) => s.location.province) || 'Hà Nội';
-  const currentDate = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
 
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
