@@ -68,77 +68,134 @@
 .sprout-bg {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   background: linear-gradient(180deg, #4FC3F7 0%, #81C784 100%);
   overflow: hidden;
+  pointer-events: none;
+}
+
+.sun-circle {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  background: #FFD54F;
+  border: 12px solid #FFB300;
+  border-radius: 50%;
+  box-shadow: 0 0 80px rgba(255, 179, 0, 0.4);
+  z-index: 1;
+}
+
+.hill-1 {
+  position: absolute;
+  bottom: -150px;
+  left: -50%;
+  width: 200%;
+  height: 400px;
+  background: #8BC34A;
+  border-radius: 50%;
+  border-top: 10px solid #689F38;
+  z-index: 2;
+}
+
+.hill-2 {
+  position: absolute;
+  bottom: -200px;
+  right: -40%;
+  width: 180%;
+  height: 350px;
+  background: #7CB342;
+  border-radius: 50%;
+  border-top: 10px solid #558B2F;
+  z-index: 3;
 }
 
 .floating-leaf {
   position: absolute;
-  opacity: 0.6;
-  animation: float-leaf 6s ease-in-out infinite;
+  opacity: 0.3;
+  animation: float-leaf 8s ease-in-out infinite;
+  z-index: 4;
 }
 
 @keyframes bee-fly {
   0% {
-    transform: translate(-10vw, 20vh) rotate(0deg) scaleX(1);
+    left: -10%;
+    top: 20%;
+    transform: scaleX(1) rotate(5deg);
   }
 
-  25% {
-    transform: translate(30vw, -10vh) rotate(10deg) scaleX(1);
+  45% {
+    left: 110%;
+    top: 10%;
+    transform: scaleX(1) rotate(-5deg);
   }
 
   50% {
-    transform: translate(110vw, 5vh) rotate(0deg) scaleX(1);
+    left: 110%;
+    top: 10%;
+    transform: scaleX(-1) rotate(-5deg);
   }
 
-  51% {
-    transform: translate(110vw, 5vh) rotate(0deg) scaleX(-1);
-  }
-
-  75% {
-    transform: translate(40vw, 30vh) rotate(-10deg) scaleX(-1);
+  95% {
+    left: -10%;
+    top: 30%;
+    transform: scaleX(-1) rotate(5deg);
   }
 
   100% {
-    transform: translate(-10vw, 20vh) rotate(0deg) scaleX(-1);
+    left: -10%;
+    top: 20%;
+    transform: scaleX(1) rotate(5deg);
   }
 }
 
-@keyframes worm-crawl-around {
+@keyframes worm-crawl-global {
   0% {
-    transform: translate(0, 0) scaleX(1);
+    left: -10%;
+    bottom: 10%;
+    transform: scaleX(1);
   }
 
-  25% {
-    transform: translate(20vw, -10vh) scaleX(1);
+  48% {
+    left: 110%;
+    bottom: 12%;
+    transform: scaleX(1);
   }
 
   50% {
-    transform: translate(50vw, 0) scaleX(1);
+    left: 110%;
+    bottom: 12%;
+    transform: scaleX(-1);
   }
 
-  51% {
-    transform: translate(50vw, 0) scaleX(-1);
-  }
-
-  75% {
-    transform: translate(25vw, 10vh) scaleX(-1);
+  98% {
+    left: -10%;
+    bottom: 8%;
+    transform: scaleX(-1);
   }
 
   100% {
-    transform: translate(0, 0) scaleX(-1);
+    left: -10%;
+    bottom: 10%;
+    transform: scaleX(1);
   }
 }
 
 .animate-bee {
-  animation: bee-fly 15s linear infinite;
-  display: inline-block;
+  animation: bee-fly 18s linear infinite;
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 50px;
 }
 
 .animate-worm-crawl {
-  animation: worm-crawl-around 25s linear infinite;
-  display: inline-block;
+  animation: worm-crawl-global 28s linear infinite;
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 40px;
 }
 
 .btn-comic-red {

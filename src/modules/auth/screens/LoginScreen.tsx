@@ -103,25 +103,21 @@ function LoginScreenContent() {
   };
 
   return (
-    <div className="min-h-screen font-sans antialiased overflow-hidden relative flex flex-col items-center justify-center bg-[#81C784]">
+    <div className="min-h-screen font-sans antialiased relative flex flex-col items-center justify-center">
       {/* Background Decor */}
       <div className="sprout-bg">
-        {/* Sun */}
-        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[#FFD54F] border-[12px] border-[#FFB300] shadow-[0_0_100px_rgba(255,179,0,0.4)] z-0"></div>
+        <div className="sun-circle"></div>
 
-        {/* Leaves */}
-        <div className="absolute top-10 left-10 text-6xl opacity-20 floating-leaf" style={{ animationDelay: '0s' }}>🌿</div>
-        <div className="absolute top-40 right-10 text-5xl opacity-20 floating-leaf" style={{ animationDelay: '2s' }}>🌱</div>
-        <div className="absolute bottom-20 left-20 text-7xl opacity-20 floating-leaf" style={{ animationDelay: '1s' }}>🍃</div>
-        <div className="absolute bottom-40 right-30 text-4xl opacity-20 floating-leaf" style={{ animationDelay: '3s' }}>☘️</div>
+        <div className="hill-1"></div>
+        <div className="hill-2"></div>
 
-        {/* Hills (Mountains) */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200%] h-1/3 bg-[#8BC34A] rounded-[100%] translate-y-1/2 border-t-[10px] border-[#689F38] z-0"></div>
-        <div className="absolute bottom-0 left-[20%] w-[180%] h-1/4 bg-[#7CB342] rounded-[100%] translate-y-1/3 border-t-[10px] border-[#558B2F] z-0"></div>
+        <div className="absolute top-10 left-10 text-6xl floating-leaf" style={{ animationDelay: '0s' }}>🌿</div>
+        <div className="absolute top-40 right-10 text-5xl floating-leaf" style={{ animationDelay: '2s' }}>🌱</div>
+        <div className="absolute bottom-20 left-20 text-7xl floating-leaf" style={{ animationDelay: '1s' }}>🍃</div>
+        <div className="absolute bottom-40 right-30 text-4xl floating-leaf" style={{ animationDelay: '3s' }}>☘️</div>
 
-        {/* Animated Critters */}
-        <div className="animate-bee text-5xl fixed">🐝</div>
-        <div className="animate-worm-crawl text-4xl fixed">🐛</div>
+        <div className="animate-bee">🐝</div>
+        <div className="animate-worm-crawl">🐛</div>
       </div>
 
       <div className="relative z-10 w-full max-w-sm px-4 flex flex-col items-center gap-6 mb-10">
@@ -228,9 +224,11 @@ function LoginScreenContent() {
         </div>
 
         {/* Footer info */}
-        <div className="text-center mt-2 flex items-center justify-center gap-2 bg-white/60 px-4 py-2 rounded-full backdrop-blur-sm border-2 border-white/40 shadow-sm">
-          <span className="material-symbols-outlined text-green-700 text-sm">spa</span>
-          <span className="text-xs font-bold text-green-800 uppercase tracking-wide">Powered by Avalanche</span>
+        <div className="text-center mt-2 flex items-center justify-center gap-2 bg-[#A5D6A7] px-6 py-2.5 rounded-full border-2 border-[#81C784] shadow-sm">
+          <div className="w-5 h-5 bg-[#2E7D32] rounded-full flex items-center justify-center">
+            <span className="material-symbols-outlined text-white text-[12px] font-bold">spa</span>
+          </div>
+          <span className="text-[10px] font-black text-[#1B5E20] uppercase tracking-widest font-heading">Powered by Avalanche</span>
         </div>
       </div>
     </div>
