@@ -9,6 +9,7 @@ import { useGameSync } from '@/shared/hooks/useGameSync';
 import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
 import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
 import Toast from '@/shared/components/Toast';
+import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
@@ -100,6 +101,7 @@ const App = () => {
         </Suspense>
         <Toaster />
         <Toast />
+        <ConnectionLostOverlay />
       </BrowserRouter>
     </QueryClientProvider>
   );

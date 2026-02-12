@@ -400,13 +400,6 @@ export default function FarmingScreen() {
 
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
-      {/* Offline banner (Step 16) */}
-      {!isOnline && (
-        <div className="fixed top-0 left-0 right-0 bg-amber-900/80 text-amber-200 text-center text-[10px] py-1 px-4 z-[100] font-bold">
-          📡 Mất kết nối mạng
-        </div>
-      )}
-
       {/* Background Decor */}
       <div className="landscape-bg-v2" style={{
         background: celestial.isNight
