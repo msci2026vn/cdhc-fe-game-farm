@@ -165,7 +165,6 @@ export default function WeatherOverlay() {
   const timeOfDay = useWeatherStore((s) => s.timeOfDay);
   const effects = getWeatherEffects(weather, timeOfDay);
 
-  // Safety fallback for invalid timeOfDay values
   const safeTimeOfDay = SKY_GRADIENTS[timeOfDay] ? timeOfDay : 'day';
 
   return (
@@ -183,13 +182,36 @@ export default function WeatherOverlay() {
       {/* Storm darkening */}
       {weather === 'storm' && (
         <div className="absolute inset-0 z-[1] pointer-events-none"
-          style={{ background: 'rgba(30,30,50,0.25)' }} />
+          style={{ background: 'rgba(30,30,50,0.35)' }} />
+      )}
+
+      {/* Cloud darkening (Overcast) */}
+      {(weather === 'cloudy' || weather === 'rain') && (
+        <div className="absolute inset-0 z-[1] pointer-events-none transition-all duration-1000"
+          style={{ background: 'rgba(0,0,0,0.1)' }} />
+      )}
+
+      {/* Ground Overlay (The "Floor") */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/2 z-[2] transition-all duration-1000 pointer-events-none"
+        style={{
+          background: weather === 'snow'
+            ? 'linear-gradient(0deg, #f0f8ff 20%, transparent 100%)' // Snow ground
+            : weather === 'rain' || weather === 'storm'
+              ? 'linear-gradient(0deg, rgba(44, 62, 80, 0.1) 20%, transparent 100%)' // Wet ground
+              : 'transparent'
+        }}
+      />
+
+      {/* Ice/Frost for Cold */}
+      {weather === 'cold' && (
+        <div className="absolute inset-0 z-[10] pointer-events-none border-[15px] border-white/5"
+          style={{ boxShadow: 'inset 0 0 100px rgba(255,255,255,0.1)' }} />
       )}
 
       {/* Heat shimmer */}
       {weather === 'hot' && (
         <div className="absolute bottom-0 left-0 right-0 h-1/3 z-20 pointer-events-none animate-heat-shimmer"
-          style={{ background: 'linear-gradient(0deg, rgba(255,160,0,0.08), transparent)' }} />
+          style={{ background: 'linear-gradient(0deg, rgba(255,160,0,0.12), transparent)' }} />
       )}
 
       {effects}

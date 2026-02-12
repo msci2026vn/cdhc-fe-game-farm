@@ -379,17 +379,44 @@ export default function FarmingScreen() {
         {/* Farm Scene */}
         <div className="flex-1 relative flex flex-col items-center justify-center px-5 py-2" style={{ minHeight: '45vh' }}>
           {/* Sun/Moon */}
+          {/* Sun/Moon - Visibility based on weather */}
           {!isNight ? (
-            <div className="absolute top-2 right-8 w-[60px] h-[60px] rounded-full animate-sun-pulse"
-              style={{ background: 'radial-gradient(circle, #ffe066 30%, #f0b429 60%, transparent 70%)' }} />
+            // Hide sun during heavy weather
+            !['cloudy', 'rain', 'storm', 'snow'].includes(weather) && (
+              <div className="absolute top-2 right-8 w-[60px] h-[60px] rounded-full animate-sun-pulse z-[2]"
+                style={{ background: 'radial-gradient(circle, #ffe066 30%, #f0b429 60%, transparent 70%)' }} />
+            )
           ) : (
-            <div className="absolute top-2 right-8 w-[50px] h-[50px] rounded-full"
-              style={{ background: 'radial-gradient(circle, #f5f5dc 30%, #e8e4c9 60%, transparent 70%)', opacity: 0.8 }} />
+            // Hide moon during heavy weather
+            !['storm', 'snow'].includes(weather) && (
+              <div className="absolute top-2 right-8 w-[50px] h-[50px] rounded-full z-[2]"
+                style={{
+                  background: 'radial-gradient(circle, #f5f5dc 30%, #e8e4c9 60%, transparent 70%)',
+                  opacity: weather === 'cloudy' || weather === 'rain' ? 0.3 : 0.8
+                }} />
+            )
           )}
 
-          {/* Clouds */}
-          <span className="absolute top-1 left-[-30px] text-[30px] opacity-60 animate-cloud-drift" style={{ animationDuration: '25s' }}>☁️</span>
-          <span className="absolute top-8 left-[-60px] text-[22px] opacity-40 animate-cloud-drift" style={{ animationDuration: '35s', animationDelay: '8s' }}>☁️</span>
+          {/* Clouds - More visible during cloudy/rainy/stormy weather */}
+          <span className="absolute top-1 left-[-30px] text-[30px] opacity-60 animate-cloud-drift z-[2]"
+            style={{
+              animationDuration: '25s',
+              filter: (weather === 'storm' || weather === 'rain') ? 'brightness(0.6)' : 'none'
+            }}>☁️</span>
+          <span className="absolute top-8 left-[-60px] text-[22px] opacity-40 animate-cloud-drift z-[2]"
+            style={{
+              animationDuration: '35s',
+              animationDelay: '8s',
+              filter: (weather === 'storm' || weather === 'rain') ? 'brightness(0.6)' : 'none'
+            }}>☁️</span>
+          {(weather === 'cloudy' || weather === 'rain' || weather === 'storm') && (
+            <span className="absolute top-4 right-[-40px] text-[25px] opacity-50 animate-cloud-drift z-[2]"
+              style={{
+                animationDuration: '30s',
+                animationDelay: '15s',
+                filter: (weather === 'storm' || weather === 'rain') ? 'brightness(0.5)' : 'none'
+              }}>☁️</span>
+          )}
 
           {activePlot ? (
             <div className="flex flex-col items-center relative" style={{ width: 280 }}>
@@ -428,8 +455,8 @@ export default function FarmingScreen() {
                 {/* Pot body */}
                 <div className="h-[70px] rounded-b-[30px] plant-pot-gradient relative"
                   style={{ boxShadow: '0 8px 25px rgba(92,61,31,0.3)' }}>
-                  <span className="absolute bottom-4 left-0 right-0 text-center font-heading text-[11px] text-white/70 font-semibold tracking-wider">
-                    ORGANIC
+                  <span className="absolute bottom-4 left-0 right-0 text-center font-heading text-[11px] text-white/70 font-semibold tracking-wider uppercase">
+                    Organic
                   </span>
                 </div>
               </div>
@@ -620,12 +647,12 @@ export default function FarmingScreen() {
       )}
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
       <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
-        onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }}
+        onVisit={(f: any) => { setShowFriends(false); setVisitingFriend(f); }}
         onInvite={() => { setShowFriends(false); setShowInvite(true); }}
         onLeaderboard={() => { setShowFriends(false); setShowLeaderboard(true); }} />
       <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
       <Leaderboard open={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
-      {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
+      {visitingFriend && <FriendGarden friend={visitingFriend as any} onBack={() => setVisitingFriend(null)} />}
     </div>
   );
 }

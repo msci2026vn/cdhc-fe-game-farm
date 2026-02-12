@@ -114,38 +114,51 @@ export default function FarmHeader() {
       </div>
 
       {/* Stats bar */}
-      <div className="flex gap-2">
-        <div className="stat-chip flex-1">
-          <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
-            style={{ background: 'linear-gradient(135deg, #fff8dc, #ffe066)' }}>
-            🪙
-          </div>
-          <div>
-            <div className="font-heading text-base font-bold">
-              <AnimatedNumber value={ogn} />
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <div className="stat-chip flex-1">
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
+              style={{ background: 'linear-gradient(135deg, #fff8dc, #ffe066)' }}>
+              🪙
             </div>
-            <div className="text-[10px] font-semibold text-muted-foreground">OGN</div>
+            <div>
+              <div className="font-heading text-base font-bold">
+                <AnimatedNumber value={ogn} />
+              </div>
+              <div className="text-[10px] font-semibold text-muted-foreground">OGN</div>
+            </div>
+          </div>
+          <div className="stat-chip flex-1">
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
+              style={{ background: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)' }}>
+              🌡️
+            </div>
+            <div>
+              <div className="font-heading text-base font-bold">{Math.round(temperature)}°C</div>
+              <div className="text-[10px] font-semibold text-muted-foreground">Farm</div>
+            </div>
+          </div>
+          <div className="stat-chip flex-1">
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
+              style={{ background: 'linear-gradient(135deg, #d4f1ff, #87ceeb)' }}>
+              ⚡
+            </div>
+            <div>
+              <div className="font-heading text-base font-bold">8/10</div>
+              <div className="text-[10px] font-semibold text-muted-foreground">Energy</div>
+            </div>
           </div>
         </div>
-        <div className="stat-chip flex-1">
-          <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
-            style={{ background: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)' }}>
-            🌡️
+
+        {/* Sync Info - Subtle line at bottom of header */}
+        <div className="flex justify-between items-center px-1 opacity-50">
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-game-green-mid animate-pulse" />
+            <span className="text-[9px] font-bold uppercase tracking-tight text-game-green-dark">Syncing Live</span>
           </div>
-          <div>
-            <div className="font-heading text-base font-bold">{Math.round(temperature)}°C</div>
-            <div className="text-[10px] font-semibold text-muted-foreground">Farm</div>
-          </div>
-        </div>
-        <div className="stat-chip flex-1">
-          <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
-            style={{ background: 'linear-gradient(135deg, #d4f1ff, #87ceeb)' }}>
-            ⚡
-          </div>
-          <div>
-            <div className="font-heading text-base font-bold">8/10</div>
-            <div className="text-[10px] font-semibold text-muted-foreground">Energy</div>
-          </div>
+          <span className="text-[9px] font-bold text-muted-foreground">
+            Cập nhật: {new Date(useWeatherStore.getState().lastUpdated).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+          </span>
         </div>
       </div>
     </div>
