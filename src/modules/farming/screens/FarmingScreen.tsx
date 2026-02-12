@@ -360,6 +360,42 @@ export default function FarmingScreen() {
   const growthMult = getWeatherGrowthMultiplier(weather);
   const happyMod = getWeatherHappinessModifier(weather);
 
+  // Celestial path calculation (Left to Right arc)
+  const getCelestialState = useCallback(() => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const totalMinutes = hours * 60 + minutes;
+
+    let isNightLocal = false;
+    let progress = 0;
+
+    // Day: 6 AM (360 min) to 6 PM (1080 min)
+    if (totalMinutes >= 360 && totalMinutes < 1080) {
+      isNightLocal = false;
+      progress = (totalMinutes - 360) / 720;
+    } else {
+      // Night: 6 PM (1080) to 6 AM (next day 360)
+      isNightLocal = true;
+      if (totalMinutes >= 1080) {
+        progress = (totalMinutes - 1080) / 720;
+      } else {
+        progress = (totalMinutes + 360) / 720;
+      }
+    }
+
+    // Progress 0 = Left, Progress 1 = Right
+    const left = -10 + progress * 105; // -10% to 95%
+    const top = 25 - (Math.sin(Math.PI * progress) * 18); // Arc path
+
+    return { left: `${left}%`, top: `${top}%`, isNight: isNightLocal };
+  }, []);
+
+  const celestial = getCelestialState();
+  const temperature = useWeatherStore((s) => s.temperature);
+  const locationName = useWeatherStore((s) => s.location.province) || 'Hà Nội';
+  const currentDate = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
+
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
       {/* Offline banner (Step 16) */}
@@ -370,10 +406,36 @@ export default function FarmingScreen() {
       )}
 
       {/* Background Decor */}
-      <div className="landscape-bg-v2">
-        <div className="sun-v2"></div>
-        <div className="cloud w-32 h-12 top-16 left-10 cloud-decoration opacity-80" style={{ fontSize: '40px' }}>☁️</div>
-        <div className="cloud w-24 h-8 top-24 right-20 opacity-60 cloud-decoration" style={{ fontSize: '30px' }}>☁️</div>
+      <div className="landscape-bg-v2" style={{
+        background: celestial.isNight
+          ? 'linear-gradient(180deg, #1A237E 0%, #3949AB 40%, #A5D6A7 40%, #81C784 100%)'
+          : 'linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #A5D6A7 40%, #81C784 100%)'
+      }}>
+        {/* Real-time Celestial Body (Sun/Moon) */}
+        <div
+          className={celestial.isNight ? "moon-v2" : "sun-v2"}
+          style={{ left: celestial.left, top: celestial.top }}
+        ></div>
+
+        {/* Real-time Weather & Location Widget */}
+        <div className="absolute top-[13.5%] left-1/2 -translate-x-1/2 z-[2] w-[85%] max-w-[280px]">
+          <div className="weather-info-glass rounded-2xl px-4 py-2 flex items-center justify-between border-white/40">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-gray-700/60 uppercase tracking-tighter">{currentDate}</span>
+              <div className="flex items-center gap-1">
+                <span className="material-symbols-outlined text-[12px] text-blue-600">location_on</span>
+                <span className="text-[11px] font-bold text-gray-800">{locationName}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 border-l border-white/30 pl-3">
+              <span className="text-xl">{WEATHER_INFO[safeWeather]?.emoji || '☀️'}</span>
+              <span className="text-lg font-black text-gray-800 tracking-tighter">{Math.round(temperature)}°C</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="cloud w-32 h-12 top-20 left-10 cloud-decoration opacity-80" style={{ fontSize: '40px' }}>☁️</div>
+        <div className="cloud w-24 h-8 top-32 right-20 opacity-60 cloud-decoration" style={{ fontSize: '30px' }}>☁️</div>
         <div className="hill-bg-v2 opacity-50"></div>
         <div className="hill-fg-v2"></div>
 
