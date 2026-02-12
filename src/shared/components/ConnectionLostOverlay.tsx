@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 
 const ConnectionLostOverlay = () => {
@@ -7,7 +8,9 @@ const ConnectionLostOverlay = () => {
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
-        console.log('[FARM-DEBUG] ConnectionLostOverlay status:', isOnline ? 'ONLINE' : 'OFFLINE');
+        // Log status change
+        console.warn(`[FARM-DEBUG] ConnectionLostOverlay: Network status changed to ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+
         if (!isOnline) {
             if (!startTime) {
                 setStartTime(Date.now());
@@ -33,13 +36,14 @@ const ConnectionLostOverlay = () => {
             .join(':');
     };
 
-    return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-auto">
+    // Use Portal to ensure it's at the very top of the DOM
+    return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
             {/* Popup Container */}
-            <div className="relative w-full max-w-sm wood-frame-v2 p-1 pt-0 overflow-hidden transform scale-100 animate-bounce-in">
+            <div className="relative w-full max-w-sm wood-frame-v2 p-1 pt-0 overflow-hidden transform scale-100 animate-bounce-in shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                 {/* Nails */}
                 <div className="absolute top-3 left-3 w-3 h-3 bg-[#5D4037] rounded-full shadow-[inset_0_1px_2px_rgba(0,0,0,0.5),0_1px_0_rgba(255,255,255,0.2)] z-20"></div>
                 <div className="absolute top-3 right-3 w-3 h-3 bg-[#5D4037] rounded-full shadow-[inset_0_1px_2px_rgba(0,0,0,0.5),0_1px_0_rgba(255,255,255,0.2)] z-20"></div>
@@ -58,7 +62,7 @@ const ConnectionLostOverlay = () => {
                 <div className="bg-[#FFF8E1] m-3 mt-8 rounded-2xl border-4 border-[#D7CCC8] shadow-inner p-6 flex flex-col items-center relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10 stripe-pattern pointer-events-none"></div>
 
-                    {/* Momo Character Design */}
+                    {/* Character/Icon Area */}
                     <div className="relative w-48 h-32 flex items-center justify-center mb-4">
                         <div className="absolute top-2 right-6 opacity-30">
                             <span className="material-icons-round text-gray-400 text-6xl">signal_wifi_off</span>
@@ -74,7 +78,7 @@ const ConnectionLostOverlay = () => {
                                 <div className="absolute top-0 right-0 w-8 h-8 bg-black rounded-bl-3xl"></div>
                             </div>
 
-                            {/* Mouth/Blush Area */}
+                            {/* Mouth Area */}
                             <div className="absolute bottom-2 left-4 w-16 h-12 bg-pink-100 border-2 border-black rounded-3xl z-20">
                                 <div className="absolute top-4 left-3 w-2 h-3 bg-black rounded-full opacity-60"></div>
                                 <div className="absolute top-4 right-3 w-2 h-3 bg-black rounded-full opacity-60"></div>
@@ -110,7 +114,8 @@ const ConnectionLostOverlay = () => {
                     </p>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

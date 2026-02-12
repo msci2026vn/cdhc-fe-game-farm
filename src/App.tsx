@@ -78,6 +78,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ConnectionLostOverlay />
         <NavigateSetup />
         <Suspense fallback={<Fallback />}>
           <AuthGuard>
@@ -101,7 +102,6 @@ const App = () => {
         </Suspense>
         <Toaster />
         <Toast />
-        <ConnectionLostOverlay />
       </BrowserRouter>
     </QueryClientProvider>
   );
