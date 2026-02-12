@@ -644,16 +644,6 @@ export default function FarmingScreen() {
               <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">menu_book</span>
             </div>
           </button>
-
-          {/* Friends Button */}
-          <button
-            onClick={() => setShowFriends(true)}
-            className="action-btn group flex flex-col items-center justify-center gap-1 relative w-12 transition-transform active:scale-95"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#FF8A65] border-b-4 border-[#D84315] shadow-lg flex items-center justify-center group-hover:bg-[#FF7043] transition-colors ring-2 ring-white/50">
-              <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">group</span>
-            </div>
-          </button>
         </div>
 
         {/* Wooden Bottom Navigation */}
@@ -684,11 +674,11 @@ export default function FarmingScreen() {
               <span className="text-[9px] font-bold text-[#8B4513]">Shop</span>
             </button>
 
-            <button onClick={() => navigate('/profile')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
+            <button onClick={() => setShowFriends(true)} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
               <div className="w-8 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">person</span>
+                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">group</span>
               </div>
-              <span className="text-[9px] font-bold text-[#8B4513]">Profile</span>
+              <span className="text-[9px] font-bold text-[#8B4513]">Social</span>
             </button>
           </div>
         </nav>
