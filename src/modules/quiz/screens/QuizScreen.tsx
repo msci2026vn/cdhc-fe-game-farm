@@ -51,7 +51,6 @@ export default function QuizScreen() {
       }, 1000);
     } else if (timeLeft === 0 && phase === 'playing') {
       // Auto-submit or handle timeout if needed
-      // handleSubmit(); // Could auto-submit
     }
     return () => clearInterval(timer);
   }, [phase, timeLeft]);
@@ -76,13 +75,18 @@ export default function QuizScreen() {
 
   // Submit answer
   const handleSubmit = useCallback(() => {
-    if (!selected || !sessionId || phase !== 'playing') return;
+    if (!selected || !sessionId || phase !== 'playing') {
+      console.warn('[Quiz] Cannot submit:', { selected, sessionId, phase });
+      return;
+    }
+    console.log('[Quiz] Submitting answer:', { sessionId, idx, selected });
     setPhase('answering');
 
     answerQuiz.mutate(
       { sessionId, questionIndex: idx, answer: selected },
       {
         onSuccess: (data) => {
+          console.log('[Quiz] Answer response:', data);
           setLastResult({
             correct: data.correct,
             correctAnswer: data.correctAnswer,
@@ -98,7 +102,8 @@ export default function QuizScreen() {
             setPhase('revealed');
           }
         },
-        onError: () => {
+        onError: (err) => {
+          console.error('[Quiz] Answer error:', err);
           setPhase('playing');
         },
       }
@@ -128,21 +133,15 @@ export default function QuizScreen() {
       <div className="cloud w-24 h-8 top-24 left-20 absolute bg-white rounded-full opacity-60 shadow-sm" />
       <div className="absolute bottom-[20%] left-[-20%] w-[140%] h-[50%] bg-[#66BB6A] rounded-t-[100%] z-[-2]" />
       <div className="absolute bottom-0 left-0 w-full h-[35%] bg-gradient-to-b from-[#4CAF50] to-[#2E7D32] rounded-t-[100%] z-[-1]" />
-      <div className="absolute bottom-[20%] left-[5%] opacity-30 transform -rotate-12">
-        <span className="material-icons-round text-green-800 text-6xl">grass</span>
-      </div>
-      <div className="absolute bottom-[25%] right-[15%] opacity-30 transform rotate-6">
-        <span className="material-icons-round text-green-800 text-7xl">grass</span>
-      </div>
     </div>
   );
 
   // Finished screen
   if (phase === 'finished') {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto relative flex flex-col items-center justify-center px-8 overflow-hidden font-sans">
+      <div className="h-[100dvh] max-w-[430px] mx-auto relative flex flex-col items-center justify-center px-8 overflow-y-auto font-sans">
         <Background />
-        <div className="animate-scale-in text-center relative z-10 w-full">
+        <div className="animate-scale-in text-center relative z-10 w-full py-10">
           <div className="text-7xl mb-4">{totalCorrect >= total * 0.8 ? '🏆' : totalCorrect >= total * 0.5 ? '⭐' : '📖'}</div>
           <h2 className="font-heading text-2xl font-black text-white drop-shadow-md mb-2">Hoàn thành!</h2>
           <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-wood border-4 border-white mb-6">
@@ -176,9 +175,9 @@ export default function QuizScreen() {
   // Idle screen
   if (phase === 'idle') {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto relative flex flex-col items-center justify-center px-8 overflow-hidden font-sans">
+      <div className="h-[100dvh] max-w-[430px] mx-auto relative flex flex-col items-center justify-center px-8 overflow-y-auto font-sans">
         <Background />
-        <div className="animate-scale-in text-center relative z-10 w-full">
+        <div className="animate-scale-in text-center relative z-10 w-full py-10">
           <div className="text-7xl mb-4">📖</div>
           <h2 className="font-heading text-3xl font-black text-white drop-shadow-md mb-2 uppercase tracking-tight">Daily Quiz</h2>
           <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-wood border-4 border-white mb-8">
@@ -218,11 +217,11 @@ export default function QuizScreen() {
   };
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto relative flex flex-col px-6 py-6 font-sans overflow-x-hidden">
+    <div className="h-[100dvh] max-w-[430px] mx-auto relative flex flex-col px-6 py-6 font-sans overflow-y-auto overflow-x-hidden scrollbar-hide">
       <Background />
 
       {/* Header */}
-      <header className="flex items-center justify-between mb-8 relative z-20">
+      <header className="flex items-center justify-between mb-4 relative z-20 shrink-0">
         <button onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/60 transition-colors shadow-sm border border-white/50">
           <span className="material-icons-round text-2xl">arrow_back_ios_new</span>
@@ -238,19 +237,19 @@ export default function QuizScreen() {
       </header>
 
       {/* Progress & Timer */}
-      <div className="flex justify-between items-end mb-6 px-2 relative z-20">
+      <div className="flex justify-between items-end mb-4 px-2 relative z-20 shrink-0">
         <div className="flex flex-col gap-1.5 flex-1">
           <span className="text-[10px] font-black text-green-900 uppercase tracking-[0.1em] opacity-80">Question {idx + 1}/{total}</span>
-          <div className="w-[85%] h-3.5 bg-white/50 rounded-full overflow-hidden border border-white/30 p-[2px]">
-            <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.4)] transition-all duration-500"
+          <div className="w-[85%] h-3 bg-white/50 rounded-full overflow-hidden border border-white/30 p-[1px]">
+            <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.3)] transition-all duration-500"
               style={{ width: `${((idx + 1) / total) * 100}%` }} />
           </div>
         </div>
 
         {/* Circular Timer */}
-        <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-          <div className="absolute inset-0 bg-white/95 rounded-full border-[3px] border-white shadow-lg flex items-center justify-center">
-            <span className={`font-black text-lg ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-orange-600'}`}>
+        <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+          <div className="absolute inset-0 bg-white/95 rounded-full border-[2.5px] border-white shadow-lg flex items-center justify-center">
+            <span className={`font-black text-base ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-orange-600'}`}>
               {timeLeft}
             </span>
           </div>
@@ -260,27 +259,26 @@ export default function QuizScreen() {
               strokeWidth="8" strokeDasharray="289" strokeDashoffset={289 - (289 * timeLeft) / TIMER_SECONDS}
               strokeLinecap="round" className="transition-all duration-1000 ease-linear" />
           </svg>
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full border border-white">S</div>
         </div>
       </div>
 
       {/* Question Card */}
-      <div className="bg-white/90 backdrop-blur-md rounded-[32px] border-4 border-white shadow-card p-6 mb-8 relative z-10">
-        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-blue-100 rounded-full border-4 border-white shadow-md flex items-center justify-center">
-          <span className="material-icons-round text-blue-500 text-3xl">psychology</span>
+      <div className="bg-white/90 backdrop-blur-md rounded-[28px] border-4 border-white shadow-card p-5 mb-5 relative z-10 shrink-0">
+        <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-blue-100 rounded-full border-4 border-white shadow-md flex items-center justify-center">
+          <span className="material-icons-round text-blue-500 text-2xl">psychology</span>
         </div>
-        <div className="mt-4 text-center">
-          <h2 className="text-xl font-black text-gray-800 leading-tight mb-2 uppercase tracking-tight">
+        <div className="mt-2 text-center">
+          <h2 className="text-lg font-black text-gray-800 leading-tight mb-2 uppercase tracking-tight">
             {q?.question || 'Đang tải câu hỏi...'}
           </h2>
-          <div className="mt-4 w-full h-24 bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl flex items-center justify-center text-5xl">
+          <div className="mt-3 w-full h-20 bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl flex items-center justify-center text-4xl">
             {q?.image || '📖'}
           </div>
         </div>
       </div>
 
       {/* Answer Grid */}
-      <div className="grid grid-cols-1 gap-4 flex-grow content-start relative z-20">
+      <div className="grid grid-cols-1 gap-3 content-start relative z-20 mb-8 shrink-0">
         {q?.options.map((opt) => {
           const isSelected = selected === opt.letter;
           const isCorrect = phase === 'revealed' && opt.letter === lastResult?.correctAnswer;
@@ -289,12 +287,18 @@ export default function QuizScreen() {
 
           let finalBtnStyle = `${colors.bg} ${colors.border} ${colors.shadow}`;
           if (isCorrect) finalBtnStyle = 'bg-green-500 border-green-700 shadow-[0_4px_0_0_#15803d]';
-          if (isWrong) finalBtnStyle = 'bg-red-500 border-red-700 shadow-[0_4px_0_0_#b91c1c]';
+          else if (isWrong) finalBtnStyle = 'bg-red-500 border-red-700 shadow-[0_4px_0_0_#b91c1c]';
+          else if (isSelected && phase === 'playing') {
+            finalBtnStyle = `${colors.bg} brightness-110 border-white shadow-[0_4px_0_0_rgba(255,255,255,0.5)] scale-[1.02]`;
+          }
 
           return (
             <button
               key={opt.letter}
-              onClick={() => phase === 'playing' && setSelected(opt.letter)}
+              onClick={() => {
+                console.log('[Quiz] Selected:', opt.letter);
+                if (phase === 'playing') setSelected(opt.letter);
+              }}
               disabled={phase !== 'playing'}
               className={`answer-btn group relative w-full p-4 rounded-2xl border-b-4 ${finalBtnStyle} transition-all active:border-b-0 active:translate-y-1 disabled:pointer-events-none`}
             >
@@ -309,7 +313,7 @@ export default function QuizScreen() {
               <div className="absolute top-3 right-3">
                 {isCorrect && <span className="material-icons-round text-white text-2xl">check_circle</span>}
                 {isWrong && <span className="material-icons-round text-white text-2xl">cancel</span>}
-                {phase === 'playing' && isSelected && <span className="material-icons-round text-white/60 text-2xl animate-pulse">radio_button_checked</span>}
+                {phase === 'playing' && isSelected && <span className="material-icons-round text-white text-2xl animate-pulse">radio_button_checked</span>}
               </div>
             </button>
           );
@@ -317,10 +321,13 @@ export default function QuizScreen() {
       </div>
 
       {/* Footer Controls */}
-      <div className="mt-8 pb-6 relative z-20">
+      <div className="mt-auto pb-8 relative z-20 shrink-0">
         {phase === 'playing' ? (
           <button
-            onClick={handleSubmit}
+            onClick={() => {
+              console.log('[Quiz] Confirm clicked', { selected, sessionId });
+              handleSubmit();
+            }}
             disabled={!selected}
             className="w-full py-5 rounded-3xl bg-[#77D373] border-b-6 border-[#2E7D32] text-white font-black text-xl shadow-btn-green active:border-b-0 active:translate-y-2 transition-all disabled:opacity-50 disabled:grayscale uppercase"
           >
@@ -328,13 +335,16 @@ export default function QuizScreen() {
           </button>
         ) : phase === 'revealed' ? (
           <button
-            onClick={handleNext}
+            onClick={() => {
+              console.log('[Quiz] Next clicked');
+              handleNext();
+            }}
             className="w-full py-5 rounded-3xl bg-[#4FC3F7] border-b-6 border-[#0288D1] shadow-btn-blue text-white font-black text-xl active:border-b-0 active:translate-y-2 transition-all animate-bounce-in uppercase"
           >
             {idx >= total - 1 ? 'XEM KẾT QUẢ 🏆' : 'CÂU TIẾP THEO ➜'}
           </button>
         ) : (
-          <div className="h-24" /> /* Reserved space */
+          <div className="h-20" /> /* Reserved space */
         )}
       </div>
 
