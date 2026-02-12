@@ -417,23 +417,6 @@ export default function FarmingScreen() {
           style={{ left: celestial.left, top: celestial.top }}
         ></div>
 
-        {/* Real-time Weather & Location Widget */}
-        <div className="absolute top-[13.5%] left-1/2 -translate-x-1/2 z-[2] w-[85%] max-w-[280px]">
-          <div className="weather-info-glass rounded-2xl px-4 py-2 flex items-center justify-between border-white/40">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-gray-700/60 uppercase tracking-tighter">{currentDate}</span>
-              <div className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-[12px] text-blue-600">location_on</span>
-                <span className="text-[11px] font-bold text-gray-800">{locationName}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 border-l border-white/30 pl-3">
-              <span className="text-xl">{WEATHER_INFO[safeWeather]?.emoji || '☀️'}</span>
-              <span className="text-lg font-black text-gray-800 tracking-tighter">{Math.round(temperature)}°C</span>
-            </div>
-          </div>
-        </div>
-
         <div className="cloud w-32 h-12 top-20 left-10 cloud-decoration opacity-80" style={{ fontSize: '40px' }}>☁️</div>
         <div className="cloud w-24 h-8 top-32 right-20 opacity-60 cloud-decoration" style={{ fontSize: '30px' }}>☁️</div>
         <div className="hill-bg-v2 opacity-50"></div>
@@ -450,10 +433,11 @@ export default function FarmingScreen() {
 
       <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pb-24">
         {/* Header Section */}
-        <header className="flex items-start justify-between px-6 pt-10 pb-4">
-          <div className="flex flex-col gap-4">
+        <header className="flex flex-col gap-5 px-6 pt-10 pb-4">
+          {/* Top Row: Profile & Weather */}
+          <div className="flex items-center justify-between gap-2">
             {/* User Profile Glass UI */}
-            <div className="flex items-center gap-3 glass-ui-v2 p-1.5 pr-4 rounded-full">
+            <div className="flex items-center gap-2.5 glass-ui-v2 p-1 pr-3.5 rounded-full flex-shrink-0">
               <div className="relative group cursor-pointer" onClick={() => navigate('/profile')}>
                 <div className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-game-green-mid flex items-center justify-center">
                   {profile?.picture ? (
@@ -463,14 +447,37 @@ export default function FarmingScreen() {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col translate-y-[-2px]">
-                <h1 className="font-extrabold text-[13px] text-gray-800 leading-none mb-1">{profile?.name || 'Farmer'}</h1>
-                <div className="flex items-center gap-1">
+              <div className="flex flex-col translate-y-[-1px]">
+                <h1 className="font-black text-[12px] text-gray-800 leading-none mb-1.5">{profile?.name || 'Farmer'}</h1>
+                <div className="flex items-center gap-2">
                   <span className="bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-yellow-500 uppercase tracking-tighter">Lv.{profile?.level || 1}</span>
+                  {/* Notification Bell next to Level tag */}
+                  <button
+                    onClick={() => navigate('/points')}
+                    className="flex items-center justify-center text-amber-900 transition-transform active:scale-90 hover:scale-110">
+                    <span className="material-symbols-outlined text-[18px]">notifications</span>
+                  </button>
                 </div>
               </div>
             </div>
 
+            {/* Weather Pill (Moved to top row) */}
+            <div className="weather-info-glass rounded-full px-3.5 py-1.5 flex items-center gap-3 border-white/40 flex-shrink overflow-hidden max-w-[160px]">
+              <div className="flex flex-col items-end overflow-hidden">
+                <span className="text-[8px] font-black text-gray-700/60 uppercase tracking-tighter whitespace-nowrap">{currentDate}</span>
+                <div className="flex items-center gap-0.5">
+                  <span className="material-symbols-outlined text-[10px] text-blue-600">location_on</span>
+                  <span className="text-[10px] font-bold text-gray-800 truncate">{locationName}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 border-l border-white/20 pl-2.5">
+                <span className="text-xl leading-none">{WEATHER_INFO[safeWeather]?.emoji || '☀️'}</span>
+                <span className="text-[13px] font-black text-gray-800 tracking-tighter leading-none">{Math.round(temperature)}°C</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start justify-between">
             {/* Wood Signs for Stats */}
             <div className="flex flex-col gap-2 relative z-20 w-fit">
               <div className="wood-sign-v2 rounded-lg p-2 flex items-center justify-between gap-3 h-10 w-32 transform -rotate-2">
@@ -490,33 +497,18 @@ export default function FarmingScreen() {
                 <span className="font-black text-[#5D4037] text-sm leading-none drop-shadow-sm">8/10</span>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-col items-end gap-3">
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate('/points')}
-                className="w-10 h-10 rounded-full glass-ui-v2 flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-soft active:scale-95">
-                <span className="material-symbols-outlined text-xl drop-shadow-md text-amber-900">notifications</span>
-              </button>
-              <button
-                onClick={() => navigate('/settings')}
-                className="w-10 h-10 rounded-full glass-ui-v2 flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-soft active:scale-95">
-                <span className="material-symbols-outlined text-xl drop-shadow-md text-amber-900">settings</span>
-              </button>
-            </div>
 
             {/* Mini Map */}
-            <div className="mini-map-v2 w-28 h-28 rounded-xl relative group cursor-pointer transition-transform hover:scale-105 active:scale-95 overflow-hidden">
+            <div className="mini-map-v2 w-24 h-24 rounded-xl relative group cursor-pointer transition-transform hover:scale-105 active:scale-95 overflow-hidden shadow-soft">
               <div className="absolute inset-0 bg-[#81C784] map-grid-v2"></div>
               <div className="absolute top-0 right-0 w-8 h-full bg-[#4FC3F7] transform -skew-x-12 opacity-80 border-l-2 border-white/20"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                <div className="w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-ping absolute"></div>
-                <div className="w-3 h-3 bg-red-500 rounded-full border-2 border-white relative"></div>
+                <div className="w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-ping absolute"></div>
+                <div className="w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white relative"></div>
               </div>
-              <div className="absolute top-2 left-2 w-4 h-4 rounded-full bg-[#388E3C]"></div>
-              <div className="absolute bottom-2 right-6 w-5 h-5 rounded bg-[#388E3C] transform rotate-45"></div>
-              <div className="absolute bottom-0 w-full bg-[#5D4037]/80 text-[8px] text-white text-center font-bold py-0.5">
+              <div className="absolute top-2 left-2 w-3.5 h-3.5 rounded-full bg-[#388E3C]"></div>
+              <div className="absolute bottom-2 right-5 w-4.5 h-4.5 rounded bg-[#388E3C] transform rotate-45"></div>
+              <div className="absolute bottom-0 w-full bg-[#5D4037]/80 text-[7px] text-white text-center font-bold py-0.5">
                 Region 1
               </div>
             </div>
