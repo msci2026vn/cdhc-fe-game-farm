@@ -484,7 +484,10 @@ export default function FarmingScreen() {
           <div className="flex items-start justify-between">
             {/* Wood Signs for Stats */}
             <div className="flex flex-col gap-2 relative z-20 w-fit">
-              <div className="wood-sign-v2 rounded-lg p-2 flex items-center justify-between gap-3 h-10 w-32 transform -rotate-2">
+              <div
+                onClick={() => navigate('/ogn-history')}
+                className="wood-sign-v2 rounded-lg p-2 flex items-center justify-between gap-3 h-10 w-32 transform -rotate-2 cursor-pointer active:scale-95 transition-transform"
+              >
                 <div className="flex items-center gap-1">
                   <span className="text-yellow-600 text-[16px] drop-shadow-sm">🪙</span>
                   <span className="text-[10px] font-black text-[#8B4513] uppercase">OGN</span>
