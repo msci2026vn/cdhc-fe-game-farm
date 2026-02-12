@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
-import { useLevel } from '@/shared/hooks/usePlayerProfile';
+import { useLevel, usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
 
 interface Props {
@@ -12,12 +12,12 @@ interface Props {
 
 // Combo visual configs
 const COMBO_VFX: Record<string, { emoji: string; particles: string[]; size: string }> = {
-  'COMBO':     { emoji: '💥', particles: ['✨', '💫'], size: 'text-base' },
-  'SUPER':     { emoji: '🌟', particles: ['⚡', '💛', '✨'], size: 'text-lg' },
-  'MEGA':      { emoji: '🔥', particles: ['💥', '🔥', '💢'], size: 'text-xl' },
-  'ULTRA':     { emoji: '💜', particles: ['💎', '💠', '🌀', '✨'], size: 'text-2xl' },
+  'COMBO': { emoji: '💥', particles: ['✨', '💫'], size: 'text-base' },
+  'SUPER': { emoji: '🌟', particles: ['⚡', '💛', '✨'], size: 'text-lg' },
+  'MEGA': { emoji: '🔥', particles: ['💥', '🔥', '💢'], size: 'text-xl' },
+  'ULTRA': { emoji: '💜', particles: ['💎', '💠', '🌀', '✨'], size: 'text-2xl' },
   'LEGENDARY': { emoji: '👑', particles: ['🌈', '💎', '⭐', '👑'], size: 'text-2xl' },
-  '🔥 GODLIKE':{ emoji: '☄️', particles: ['🔥', '💀', '⚡', '💥', '☄️'], size: 'text-3xl' },
+  '🔥 GODLIKE': { emoji: '☄️', particles: ['🔥', '💀', '⚡', '💥', '☄️'], size: 'text-3xl' },
 };
 
 export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
@@ -29,6 +29,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   } = useMatch3(bossInfo);
 
   const bossComplete = useBossComplete();
+  const { data: profile } = usePlayerProfile();
   const level = useLevel(); // TanStack Query single source of truth
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);
@@ -196,13 +197,12 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           <div className={`absolute inset-0 ${attackWarning.phase === 'dodge_window' ? 'animate-boss-atk-flash' : ''}`}
             style={{ background: attackWarning.phase === 'warning' ? 'rgba(243,156,18,0.08)' : 'transparent' }} />
           <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50">
-            <div className={`px-4 py-2 rounded-full font-heading text-sm font-bold text-center ${
-              attackWarning.phase === 'dodge_window' ? 'animate-pulse' : 'animate-scale-in'
-            }`} style={{
-              background: attackWarning.phase === 'warning' ? 'rgba(243,156,18,0.9)' : 'rgba(231,76,60,0.95)',
-              color: '#fff',
-              boxShadow: '0 0 20px rgba(231,76,60,0.5)',
-            }}>
+            <div className={`px-4 py-2 rounded-full font-heading text-sm font-bold text-center ${attackWarning.phase === 'dodge_window' ? 'animate-pulse' : 'animate-scale-in'
+              }`} style={{
+                background: attackWarning.phase === 'warning' ? 'rgba(243,156,18,0.9)' : 'rgba(231,76,60,0.95)',
+                color: '#fff',
+                boxShadow: '0 0 20px rgba(231,76,60,0.5)',
+              }}>
               {attackWarning.phase === 'warning'
                 ? `⚠️ ${attackWarning.skill?.name || 'Boss'} sắp tấn công!`
                 : '🏃 BẤM NÉ NGAY!'}
@@ -245,9 +245,8 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
 
         {/* Boss sprite + damage popups */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${
-            attackWarning?.phase === 'dodge_window' ? 'animate-boss-attack' : ''
-          }`} style={{ filter: 'drop-shadow(0 0 30px rgba(231,76,60,0.5))' }}>
+          <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${attackWarning?.phase === 'dodge_window' ? 'animate-boss-attack' : ''
+            }`} style={{ filter: 'drop-shadow(0 0 30px rgba(231,76,60,0.5))' }}>
             {bossInfo.emoji}
           </span>
           {popups.map(p => (
@@ -261,18 +260,17 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           {/* Enhanced combo indicator */}
           {showCombo && combo >= 2 && (
             <div className="absolute top-0 left-1/2 -translate-x-1/2 animate-combo-burst pointer-events-none z-20">
-              <div className={`px-5 py-2 rounded-full font-heading font-bold text-white text-center ${
-                combo >= 8 ? 'animate-pulse' : ''
-              }`} style={{
-                background: combo >= 8 ? 'linear-gradient(135deg, #f0932b, #e74c3c, #e056fd)' :
-                  combo >= 6 ? 'linear-gradient(135deg, #e056fd, #f0932b)' :
-                  combo >= 5 ? 'linear-gradient(135deg, #fd79a8, #e056fd)' :
-                  combo >= 4 ? 'linear-gradient(135deg, #e74c3c, #fd79a8)' :
-                  combo >= 3 ? 'linear-gradient(135deg, #f39c12, #e74c3c)' :
-                  'linear-gradient(135deg, #6c5ce7, #a29bfe)',
-                boxShadow: `0 0 ${combo >= 5 ? 40 : 20}px ${comboInfo.color}80`,
-                border: combo >= 6 ? '2px solid rgba(255,255,255,0.4)' : 'none',
-              }}>
+              <div className={`px-5 py-2 rounded-full font-heading font-bold text-white text-center ${combo >= 8 ? 'animate-pulse' : ''
+                }`} style={{
+                  background: combo >= 8 ? 'linear-gradient(135deg, #f0932b, #e74c3c, #e056fd)' :
+                    combo >= 6 ? 'linear-gradient(135deg, #e056fd, #f0932b)' :
+                      combo >= 5 ? 'linear-gradient(135deg, #fd79a8, #e056fd)' :
+                        combo >= 4 ? 'linear-gradient(135deg, #e74c3c, #fd79a8)' :
+                          combo >= 3 ? 'linear-gradient(135deg, #f39c12, #e74c3c)' :
+                            'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                  boxShadow: `0 0 ${combo >= 5 ? 40 : 20}px ${comboInfo.color}80`,
+                  border: combo >= 6 ? '2px solid rgba(255,255,255,0.4)' : 'none',
+                }}>
                 <span className={comboVfx?.size || 'text-lg'}>
                   {comboVfx?.emoji || '💥'} {comboInfo.label} x{combo}
                 </span>
@@ -289,7 +287,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           {[
             { rank: '1', name: 'CryptoFarmer', dmg: '2,450', bg: 'linear-gradient(135deg, #f0b429, #d49a1a)' },
             { rank: '2', name: 'GreenHero92', dmg: '1,820', bg: 'linear-gradient(135deg, #c0c0c0, #808080)' },
-            { rank: '3', name: 'Farmer Minh ⭐', dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
+            { rank: '3', name: `${profile?.name || 'Farmer'} ⭐`, dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
           ].map(r => (
             <div key={r.rank} className="flex items-center gap-2 py-1">
               <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold text-white"
@@ -352,11 +350,10 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         {/* Bottom: Dodge + Ult row */}
         <div className="flex items-center gap-2 mt-2">
           <button onClick={handleDodge}
-            className={`px-4 py-2 rounded-[20px] font-heading text-xs font-bold transition-all ${
-              attackWarning?.phase === 'dodge_window'
+            className={`px-4 py-2 rounded-[20px] font-heading text-xs font-bold transition-all ${attackWarning?.phase === 'dodge_window'
                 ? 'animate-dodge-pulse text-white scale-110'
                 : 'text-white/40'
-            }`}
+              }`}
             style={attackWarning?.phase === 'dodge_window'
               ? { background: 'linear-gradient(135deg, #f39c12, #e74c3c)', boxShadow: '0 0 20px rgba(243,156,18,0.6)' }
               : { background: 'rgba(255,255,255,0.08)' }
@@ -369,9 +366,8 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           </div>
 
           <button onClick={fireUltimate}
-            className={`px-4 py-2 rounded-[20px] text-white font-heading text-xs font-bold ult-btn-gradient transition-all ${
-              ultReady ? 'opacity-100 animate-ult-glow scale-105' : 'opacity-40'
-            }`}>
+            className={`px-4 py-2 rounded-[20px] text-white font-heading text-xs font-bold ult-btn-gradient transition-all ${ultReady ? 'opacity-100 animate-ult-glow scale-105' : 'opacity-40'
+              }`}>
             ⚡ ULT
           </button>
         </div>

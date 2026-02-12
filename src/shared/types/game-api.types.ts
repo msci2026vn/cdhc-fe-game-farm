@@ -11,6 +11,8 @@ import type { ApiResponse } from './common';
 
 export interface PlayerProfile {
   userId: string;
+  name: string;
+  picture: string | null;
   xp: number;
   level: number;
   ogn: number;
@@ -106,6 +108,8 @@ export interface BossCompleteResult {
   won: boolean;
   ognReward: number;
   xpGained: number;
+  leveledUp?: boolean;
+  newLevel?: number;
   bossProgress: {
     kills: number;
     totalDamage: number;
@@ -344,6 +348,7 @@ export interface AuthStatus {
     id: string;
     name: string;
     email: string;
+    picture: string | null;
   } | null;
 }
 

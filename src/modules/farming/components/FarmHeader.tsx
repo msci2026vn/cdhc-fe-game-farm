@@ -70,13 +70,21 @@ export default function FarmHeader() {
       {/* Top row: avatar + buttons */}
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-[46px] h-[46px] rounded-full avatar-ring" style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+          <div className="w-[46px] h-[46px] rounded-full avatar-ring overflow-hidden" style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
             <div className="w-full h-full rounded-full bg-game-green-mid flex items-center justify-center text-[22px]">
-              🧑‍🌾
+              {profile?.picture ? (
+                <img
+                  src={profile.picture}
+                  alt={profile.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                '🧑‍🌾'
+              )}
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="font-heading text-[15px] font-bold">Farmer Minh</span>
+            <span className="font-heading text-[15px] font-bold">{profile?.name || 'Farmer'}</span>
             <span className="text-[11px] font-bold text-game-green-mid flex items-center gap-1">
               <span className="bg-game-green-mid text-white px-2 py-px rounded-[10px] text-[10px] font-bold">Lv.{level}</span>
               {title}
