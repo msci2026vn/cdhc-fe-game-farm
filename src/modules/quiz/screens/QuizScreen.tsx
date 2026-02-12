@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuizStart } from '@/shared/hooks/useQuizStart';
 import { useQuizAnswer } from '@/shared/hooks/useQuizAnswer';
 import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
-import { xpForNextLevel } from '@/shared/stores/playerStore';
+import { LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import type { QuizQuestionData } from '@/shared/types/game-api.types';
 
 type Phase = 'idle' | 'playing' | 'answering' | 'revealed' | 'finished';
@@ -12,8 +12,11 @@ export default function QuizScreen() {
   const navigate = useNavigate();
   const level = useLevel();
   const xp = useXp();
-  const nextXp = xpForNextLevel(level);
-  const xpPct = nextXp > 0 ? Math.min(100, Math.round((xp / nextXp) * 100)) : 100;
+
+  // Calculate relative XP for the progress bar (Linear 100 XP system)
+  const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);
+  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel();
+  const xpPct = Math.min(100, Math.round((xpInLevel / xpForLevelUp) * 100));
 
   const startQuiz = useQuizStart();
   const answerQuiz = useQuizAnswer();
@@ -201,17 +204,16 @@ export default function QuizScreen() {
           <div className="h-full rounded-full transition-all duration-500"
             style={{ width: `${xpPct}%`, background: 'linear-gradient(90deg, #00b894, #55efc4)' }} />
         </div>
-        <span className="text-[9px] font-bold text-muted-foreground">{xp}/{nextXp}</span>
+        <span className="text-[9px] font-bold text-muted-foreground">{xpInLevel}/{xpForLevelUp}</span>
       </div>
 
       {/* Progress dots */}
       <div className="flex justify-center gap-2 px-5 mb-5">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${
-            i < idx ? 'bg-game-green-light w-12' :
+          <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i < idx ? 'bg-game-green-light w-12' :
             i === idx ? 'bg-game-gold-DEFAULT w-16' :
-            'w-12'
-          }`} style={i > idx ? { background: 'rgba(45,138,78,0.15)' } : {}} />
+              'w-12'
+            }`} style={i > idx ? { background: 'rgba(45,138,78,0.15)' } : {}} />
         ))}
       </div>
 
