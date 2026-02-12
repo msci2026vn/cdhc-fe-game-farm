@@ -182,8 +182,7 @@ export default function FarmingScreen() {
 
   const celestial = getCelestialState();
   const temperature = useWeatherStore((s) => s.temperature);
-  const locationName = useWeatherStore((s) => s.location.province) || 'Hà Nội';
-  const currentDate = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
+  const locationName = useWeatherStore((s) => s.location.province) || 'Thái Nguyên';
 
   // All useCallback hooks MUST be above early returns to avoid React #310
   // Use ref to avoid dependency on activePlot changing every render
@@ -394,7 +393,10 @@ export default function FarmingScreen() {
 
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk';
   const growthMult = getWeatherGrowthMultiplier(weather);
-  const happyMod = getWeatherHappinessModifier(weather);
+  const currentDate = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const isNightLocal = celestial.isNight;
+  const textColor = isNightLocal ? 'text-white' : 'text-gray-800';
+  const subTextColor = isNightLocal ? 'text-white/60' : 'text-gray-700/60';
 
   return (
     <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
@@ -462,17 +464,19 @@ export default function FarmingScreen() {
             </div>
 
             {/* Weather Pill (Moved to top row) */}
-            <div className="weather-info-glass rounded-full px-3.5 py-1.5 flex items-center gap-3 border-white/40 flex-shrink overflow-hidden max-w-[160px]">
-              <div className="flex flex-col items-end overflow-hidden">
-                <span className="text-[8px] font-black text-gray-700/60 uppercase tracking-tighter whitespace-nowrap">{currentDate}</span>
+            <div className="weather-info-glass rounded-full px-4 py-1.5 flex items-center gap-3 border-white/40 flex-shrink-0 overflow-visible">
+              <div className="flex flex-col items-end">
+                <span className={`text-[9px] font-black ${subTextColor} uppercase tracking-tighter whitespace-nowrap`}>{currentDate}</span>
                 <div className="flex items-center gap-0.5">
-                  <span className="material-symbols-outlined text-[10px] text-blue-600">location_on</span>
-                  <span className="text-[10px] font-bold text-gray-800 truncate">{locationName}</span>
+                  <span className="material-symbols-outlined text-[11px] text-blue-500">location_on</span>
+                  <span className={`text-[11px] font-bold ${textColor} whitespace-nowrap`}>{locationName}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 border-l border-white/20 pl-2.5">
-                <span className="text-xl leading-none">{WEATHER_INFO[safeWeather]?.emoji || '☀️'}</span>
-                <span className="text-[13px] font-black text-gray-800 tracking-tighter leading-none">{Math.round(temperature)}°C</span>
+              <div className="flex items-center gap-1.5 border-l border-white/20 pl-3">
+                <span className={`material-symbols-outlined text-[20px] leading-none ${temperature > 25 ? 'text-red-500' : 'text-blue-400'}`}>
+                  {temperature > 25 ? 'device_thermostat' : 'ac_unit'}
+                </span>
+                <span className={`text-[14px] font-black ${textColor} tracking-tighter leading-none`}>{Math.round(temperature)}°C</span>
               </div>
             </div>
           </div>
