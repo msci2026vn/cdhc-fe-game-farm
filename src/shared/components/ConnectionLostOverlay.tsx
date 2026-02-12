@@ -7,6 +7,7 @@ const ConnectionLostOverlay = () => {
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
+        console.log('[FARM-DEBUG] ConnectionLostOverlay status:', isOnline ? 'ONLINE' : 'OFFLINE');
         if (!isOnline) {
             if (!startTime) {
                 setStartTime(Date.now());
@@ -33,7 +34,7 @@ const ConnectionLostOverlay = () => {
     };
 
     return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-auto">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
