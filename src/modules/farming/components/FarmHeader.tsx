@@ -8,6 +8,7 @@ import WeatherControl from './WeatherControl';
 export default function FarmHeader() {
   const navigate = useNavigate();
   const weather = useWeatherStore((s) => s.weather);
+  const temperature = useWeatherStore((s) => s.temperature);
 
   // Single hook for all profile data — 1 query, 1 subscription
   const { data: profile, isLoading } = usePlayerProfile();
@@ -132,7 +133,7 @@ export default function FarmHeader() {
             🌡️
           </div>
           <div>
-            <div className="font-heading text-base font-bold">28°C</div>
+            <div className="font-heading text-base font-bold">{Math.round(temperature)}°C</div>
             <div className="text-[10px] font-semibold text-muted-foreground">Farm</div>
           </div>
         </div>

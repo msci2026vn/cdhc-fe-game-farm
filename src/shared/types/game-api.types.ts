@@ -302,6 +302,34 @@ export interface SyncResult {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// WEATHER (GPS Integration)
+// ═══════════════════════════════════════════════════════════════
+
+export type WeatherCondition = 'sunny' | 'cloudy' | 'rain' | 'storm' | 'snow' | 'wind' | 'cold' | 'hot';
+export type TimeOfDay = 'dawn' | 'day' | 'dusk' | 'night';
+
+export interface WeatherData {
+  condition: WeatherCondition;
+  temperature: number;        // Celsius
+  humidity: number;           // Percentage
+  windSpeed: number;          // km/h
+  wmoCode: number;            // WMO weather code
+  location: {
+    lat: number;
+    lon: number;
+    province?: string;
+  };
+  timeOfDay: TimeOfDay;
+  isDay: boolean;
+  lastUpdated: string;         // ISO timestamp
+}
+
+export interface WeatherRequest {
+  lat?: number;
+  lon?: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // HEALTH & AUTH
 // ═══════════════════════════════════════════════════════════════
 

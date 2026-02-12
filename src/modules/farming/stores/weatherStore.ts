@@ -1,13 +1,20 @@
 import { create } from 'zustand';
+import type { WeatherCondition, TimeOfDay, WeatherData } from '@/shared/types/game-api.types';
 
-export type WeatherType = 'sunny' | 'cloudy' | 'rain' | 'storm' | 'snow' | 'wind' | 'cold' | 'hot';
-export type TimeOfDay = 'dawn' | 'day' | 'dusk' | 'night';
+export type WeatherType = WeatherCondition;
 
 interface WeatherState {
   weather: WeatherType;
   timeOfDay: TimeOfDay;
+  temperature: number;     // Celsius
+  humidity: number;        // Percentage
+  windSpeed: number;       // km/h
+  wmoCode: number;        // WMO weather code
+  location: { lat: number; lon: number; province?: string };
+  lastUpdated: string;     // ISO timestamp
   setWeather: (w: WeatherType) => void;
   setTimeOfDay: (t: TimeOfDay) => void;
+  setWeatherData: (data: WeatherData) => void;
   cycleWeather: () => void;
   autoTimeOfDay: () => void;
 }
@@ -25,8 +32,24 @@ function getTimeOfDay(): TimeOfDay {
 export const useWeatherStore = create<WeatherState>((set, get) => ({
   weather: 'sunny',
   timeOfDay: getTimeOfDay(),
+  temperature: 28,
+  humidity: 60,
+  windSpeed: 5,
+  wmoCode: 0,
+  location: { lat: 21.0285, lon: 105.8542, province: 'Hà Nội' },
+  lastUpdated: new Date().toISOString(),
   setWeather: (weather) => set({ weather }),
   setTimeOfDay: (timeOfDay) => set({ timeOfDay }),
+  setWeatherData: (data) => set({
+    weather: data.condition,
+    timeOfDay: data.timeOfDay,
+    temperature: data.temperature,
+    humidity: data.humidity,
+    windSpeed: data.windSpeed,
+    wmoCode: data.wmoCode,
+    location: data.location,
+    lastUpdated: data.lastUpdated,
+  }),
   cycleWeather: () => {
     const curr = get().weather;
     const idx = WEATHER_CYCLE.indexOf(curr);

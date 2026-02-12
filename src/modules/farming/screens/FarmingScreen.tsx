@@ -25,6 +25,7 @@ import { useWaterPlot } from '@/shared/hooks/useWaterPlot';
 import { useHarvestPlot } from '@/shared/hooks/useHarvestPlot';
 import { useClearPlot } from '@/shared/hooks/useClearPlot';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
+import { useWeather } from '@/shared/hooks/useWeather';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
@@ -43,6 +44,26 @@ export default function FarmingScreen() {
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
   const { data: profile } = usePlayerProfile();
   const ogn = useOgn(); // TanStack Query single source of truth
+
+  // Weather data (Step 31 — GPS/Weather Integration)
+  const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useWeather();
+  const setWeatherData = useWeatherStore((s) => s.setWeatherData);
+
+  // Sync weather data to store when fetched
+  useEffect(() => {
+    if (weatherData) {
+      console.log('[FarmingScreen] Weather data fetched:', weatherData);
+      setWeatherData(weatherData);
+    }
+  }, [weatherData, setWeatherData]);
+
+  // Log weather errors but don't block the UI
+  useEffect(() => {
+    if (weatherError) {
+      console.error('[FarmingScreen] Weather fetch failed:', weatherError);
+      // Weather is non-blocking — use default weather from store
+    }
+  }, [weatherError]);
 
   // Track mount count
   const mountCount = useRef(0);
