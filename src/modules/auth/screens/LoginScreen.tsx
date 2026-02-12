@@ -192,8 +192,8 @@ function LoginScreenContent() {
             }}>Kingdom</span>
           </h1>
           <div className="honey-drop w-3 h-6 top-[65%] right-[25%]" style={{ background: isNight ? '#C5CAE9' : '#FFB300' }}></div>
-          <div className="absolute top-0 -right-4 rotate-12 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-slow-crawl">🐞</div>
-          <div className="absolute bottom-0 -left-6 -rotate-12 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-slow-crawl">🐝</div>
+          <div className="absolute top-0 -right-4 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-ladybug-title">🐞</div>
+          <div className="absolute bottom-0 -left-6 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-bee-title">🐝</div>
         </div>
 
         {/* Login Container */}
