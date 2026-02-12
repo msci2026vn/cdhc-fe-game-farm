@@ -71,40 +71,7 @@ function LoginScreenContent() {
     }
   };
 
-  // Google Login Hook for custom button
-  // Note: flow: 'implicit' returns access_token, but our BE expects idToken.
-  // We need to use 'google-one-tap' or the standard button if we want idToken easily, 
-  // OR use a more advanced flow. 
-  // For simplicity and compatibility with the existing BE, I'll use the implicit flow to get a token 
-  // if possible, BUT the original code used the GoogleLogin component which provides the credential (idToken).
-  // Actually, useGoogleLogin doesn't easily provide idToken without extra steps.
-  // Instead, I'll use a invisible GoogleLogin component and trigger it, or just use a custom button 
-  // that triggers useGoogleLogin and then we might need to change BE or get the idToken.
-  // WAIT: There is 'google-one-tap' but it's not a button.
-  // Let's use useGoogleLogin with flow: 'auth-code' OR just use the standard button but styled.
-  // Stying the standard Google button is limited.
-  // I will use 'user-one-tap' and a custom button that triggers the login.
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      // BE needs idToken, but useGoogleLogin implicit returns access_token.
-      // If BE only accepts idToken, we have a problem. 
-      // Let's assume the BE can handle access_token or we use the standard component hiddenly.
-      // Actually, many BEs use the access_token to fetch user info from https://www.googleapis.com/oauth2/v3/userinfo.
-      // But since I must maintain "các luồng chức năng", I'll try to find a way to get the idToken or stick to the component.
-      // I'll use GoogleLogin component with a custom render if possible? No, @react-oauth/google doesn't support custom render for GoogleLogin anymore.
-      // BUT we can use `useGoogleLogin` and then fetch the user info if needed.
-      // FOR NOW, I will use a clever trick: style the button like the template and use `useGoogleLogin`.
-      // If it fails because of idToken, I'll have to adjust.
-      console.log('[FARM-DEBUG] LoginScreen: Google Success', tokenResponse);
-      // If we only have access_token, we might need to send that instead.
-      // Let's check the original LoginScreen again. It sent data.credential.
-      addToast('Đang xử lý đăng nhập Google...', 'info');
-      // For now, I'll provide the UI and a placeholder action for the button.
-    },
-    onError: () => setError('❌ Google Sign-In thất bại. Vui lòng thử lại.'),
-  });
-
+  // Google Login Hook is not used since BE needs idToken and library's GoogleLogin is easier
   const handleAvalancheLogin = () => {
     addToast('Tính năng đăng nhập ví Avalanche đang được phát triển! 🚀', 'info');
   };
@@ -239,21 +206,21 @@ function LoginScreenContent() {
             <div className="relative group">
               <div className="worm-decoration -bottom-2 -left-2 rotate-[20deg] text-xl animate-slow-crawl">🪱</div>
 
-              {/* This is the tricky part: triggering the ID token login */}
-              {/* I'll use the official invisible button to trigger it properly so we get idToken */}
-              <div className="opacity-0 absolute inset-0 z-20">
-                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                  <div className="w-full h-full">
-                    {/* We can't use style on this, but we can overlay it */}
-                    {/* However, the best way to get ID Token is to use the provided GoogleLogin but make it invisible */}
-                    {/* and place it on top of our custom button */}
-                  </div>
-                </GoogleOAuthProvider>
+              {/* Robust invisible overlay for GoogleLogin */}
+              <div className="absolute inset-0 z-30 opacity-[0.01] overflow-hidden scale-[2] origin-center">
+                <GoogleLogin
+                  onSuccess={(res) => {
+                    if (res.credential) handleAuthSuccess(res.credential);
+                  }}
+                  onError={() => setError('❌ Đăng nhập Google thất bại')}
+                  useOneTap
+                  width="400"
+                />
               </div>
 
               <button
-                className="w-full btn-comic-white text-gray-700 py-3 px-4 flex items-center justify-center gap-3 active:translate-y-[6px] active:shadow-none transition-all"
-                style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
+                className="w-full btn-comic-white text-gray-700 py-4 px-4 flex items-center justify-center gap-3 active:translate-y-[2px] transition-all relative z-10"
+                style={{ cursor: loading ? 'wait' : 'pointer' }}
               >
                 <div className="absolute inset-0 z-10 overflow-hidden rounded-2xl opacity-0">
                   {/* GoogleLogin component is overlaid in the parent wrapper */}
@@ -295,54 +262,9 @@ function LoginScreenContent() {
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function LoginScreen() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('https://sta.cdhc.vn/api/auth/google', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: credentialResponse.credential }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        await queryClient.prefetchQuery({
-          queryKey: PLAYER_PROFILE_KEY,
-          queryFn: () => gameApi.getProfile(),
-        });
-        navigate('/farm', { replace: true });
-      } else {
-        setError(data.error?.message || '❌ Đăng nhập thất bại');
-      }
-    } catch (err) {
-      setError('❌ Lỗi kết nối');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="relative min-h-screen">
-        <LoginScreenContent />
-
-        {/* Transparent overlay of GoogleLogin component to handle logic */}
-        <div className="fixed top-[65.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[310px] h-[55px] opacity-[0.01] overflow-hidden z-[100] cursor-pointer pointer-events-auto">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => { }}
-            useOneTap
-            type="standard"
-            shape="pill"
-            width="310px"
-          />
-        </div>
-      </div>
+      <LoginScreenContent />
     </GoogleOAuthProvider>
   );
 }
