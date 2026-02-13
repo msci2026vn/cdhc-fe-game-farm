@@ -33,6 +33,10 @@ import type {
   QuizAnswer,
   InteractType,
   WeatherData,
+  // MỚI — Inventory types
+  InventoryResponse,
+  SellResult,
+  SellAllResult,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -711,6 +715,87 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.getWeather() MAPPED:', weatherData);
 
     return weatherData;
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // INVENTORY — Kho đồ (MỚI)
+  // ═════════════════════════════════════════════════════════════════
+  
+  /**
+   * Xem kho đồ — danh sách nông sản đã thu hoạch
+   */
+  getInventory: async (): Promise<InventoryResponse> => {
+    const url = 'https://sta.cdhc.vn/api/game/inventory';
+    console.log('[FARM-DEBUG] gameApi.getInventory():', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getInventory() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getInventory() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to fetch inventory: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getInventory() SUCCESS:', json);
+    return json.data;
+  },
+
+  /**
+   * Bán 1 nông sản — truyền UUID của inventory record
+   */
+  sellInventoryItem: async (id: string): Promise<SellResult> => {
+    const url = 'https://sta.cdhc.vn/api/game/inventory/sell';
+    console.log('[FARM-DEBUG] gameApi.sellInventoryItem():', { url, id });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+
+    console.log('[FARM-DEBUG] gameApi.sellInventoryItem() status:', response.status);
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.sellInventoryItem() SUCCESS:', json);
+    return json.data;
+  },
+
+  /**
+   * Bán hết tất cả nông sản chưa hết hạn
+   */
+  sellAllInventory: async (): Promise<SellAllResult> => {
+    const url = 'https://sta.cdhc.vn/api/game/inventory/sell-all';
+    console.log('[FARM-DEBUG] gameApi.sellAllInventory():', url);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.sellAllInventory() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.sellAllInventory() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to sell all: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.sellAllInventory() SUCCESS:', json);
+    return json.data;
   },
 };
 

@@ -157,6 +157,18 @@ export default function ShopScreen() {
                 </span>
               )}
 
+              {/* Season tag */}
+              {item.seasonStatus === 'off_season' && (
+                <span className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700">
+                  Trái vụ ⚠️
+                </span>
+              )}
+              {item.seasonStatus === 'in_season' && (
+                <span className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
+                  Đúng vụ ✅
+                </span>
+              )}
+
               {isAnimating && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="text-4xl animate-bounce">✅</span>

@@ -4,6 +4,7 @@ const tabs = [
   { to: '/farm', emoji: '🌱', label: 'Nông trại' },
   { to: '/boss', emoji: '🐉', label: 'Boss' },
   { to: '/shop', emoji: '🛒', label: 'Cửa hàng' },
+  { to: '/inventory', emoji: '🌾', label: 'Kho đồ' },
   { to: '/profile', emoji: '👤', label: 'Hồ sơ' },
 ];
 
@@ -30,7 +31,7 @@ export default function BottomNav() {
             {({ isActive }) => (
               <>
                 <span className="text-[22px]">{tab.emoji}</span>
-                <span className={`text-[10px] font-bold ${isActive ? 'text-game-green-dark' : 'text-muted-foreground'}`}>
+                <span className={`text-[9px] font-bold ${isActive ? 'text-game-green-dark' : 'text-muted-foreground'}`}>
                   {tab.label}
                 </span>
               </>

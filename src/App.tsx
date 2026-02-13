@@ -33,6 +33,7 @@ const FarmingScreen = lazyWithRetry(() => import('@/modules/farming/screens/Farm
 const BossScreen = lazyWithRetry(() => import('@/modules/boss/screens/BossScreen'));
 const QuizScreen = lazyWithRetry(() => import('@/modules/quiz/screens/QuizScreen'));
 const ShopScreen = lazyWithRetry(() => import('@/modules/shop/screens/ShopScreen'));
+const InventoryScreen = lazyWithRetry(() => import('@/modules/inventory/screens/InventoryScreen'));
 const ProfileScreen = lazyWithRetry(() => import('@/modules/profile/screens/ProfileScreen'));
 const OgnHistoryScreen = lazyWithRetry(() => import('@/modules/profile/screens/OgnHistoryScreen'));
 
@@ -92,6 +93,7 @@ const App = () => {
               <Route path="/boss" element={<BossScreen />} />
               <Route path="/quiz" element={<QuizScreen />} />
               <Route path="/shop" element={<ShopScreen />} />
+              <Route path="/inventory" element={<InventoryScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />
               <Route path="/ogn-history" element={<OgnHistoryScreen />} />
 

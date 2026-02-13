@@ -106,8 +106,10 @@ export default function FarmingScreen() {
 
   // ─── NEW: Harvest result state (for animation) ───
   const [harvestResult, setHarvestResult] = useState<{
-    ognReward: number;
     plantEmoji: string;
+    plantName: string;
+    xp: number;
+    message: string;
     leveledUp: boolean;
   } | null>(null);
 
@@ -256,23 +258,26 @@ export default function FarmingScreen() {
       onSuccess: (data) => {
         console.log('[FARM-DEBUG] FarmingScreen — HARVEST SUCCESS:', JSON.stringify(data));
 
-        // Show harvest animation
+        // MỚI — Lấy thông tin từ response
+        const plantEmoji = data.inventory?.plantEmoji || data.plantEmoji || '🌾';
+        const plantName = data.inventory?.plantName || data.plantName || 'Nông sản';
+        const xp = data.reward?.xp || data.xpGained || 0;
+
+        // Show harvest animation — MỚI structure
         setHarvestResult({
-          ognReward: data.ognReward,
-          plantEmoji: data.plantEmoji,
+          plantEmoji,
+          plantName,
+          xp,
+          message: 'Đã vào kho! Bán lấy tiền 💰',
           leveledUp: data.leveledUp,
         });
 
         // Clear animation after 3s
         setTimeout(() => setHarvestResult(null), 3000);
 
-        // Show effects
-        showFlyUp(`+${data.ognReward} OGN 🪙`);
-        showHarvestSuccess(
-          data.plantName || '',
-          data.plantEmoji || '🌾',
-          data.ognReward || 0
-        );
+        // Show effects — MỚI: KHÔNG hiện OGN
+        showFlyUp(`+${xp} XP 🌾 Vào kho!`);
+        // showHarvestSuccess no longer used — toast shown from useHarvestPlot hook
 
         // Level up toast/animation
         if (data.leveledUp) {
@@ -692,7 +697,7 @@ export default function FarmingScreen() {
               className="w-full py-4 rounded-2xl btn-green text-white font-heading font-black text-lg shadow-[0_8px_0_#1b5e20] active:translate-y-1 active:shadow-[0_4px_0_#1b5e20] transition-all flex items-center justify-center gap-2"
             >
               <span className="text-2xl">🌾</span>
-              {harvestMutation.isPending ? 'Harvesting...' : `Harvest (+${activePlot.plantType.rewardOGN} OGN)`}
+              {harvestMutation.isPending ? 'Đang thu hoạch...' : 'Thu hoạch 🌾'}
             </button>
           </div>
         )}
@@ -722,14 +727,22 @@ export default function FarmingScreen() {
 
       {/* ─── NEW: Harvest animation overlay (Step 15) ─── */}
       {harvestResult && (
-        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-black/30">
+        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-black/30"
+          onClick={() => setHarvestResult(null)}
+        >
           <div className="animate-bounce text-center bg-white rounded-2xl p-6 shadow-2xl">
             <div className="text-6xl mb-2">{harvestResult.plantEmoji}</div>
-            <div className="text-2xl font-bold text-amber-500 animate-pulse">
-              +{harvestResult.ognReward} OGN
+            <div className="text-lg font-bold text-green-600">
+              Đã thu hoạch {harvestResult.plantName}!
+            </div>
+            <div className="text-sm text-amber-500 mt-1">
+              +{harvestResult.xp} XP
+            </div>
+            <div className="text-sm text-blue-500 mt-2 animate-bounce">
+              🌾 Vào kho bán lấy tiền!
             </div>
             {harvestResult.leveledUp && (
-              <div className="text-xl font-bold text-purple-500 mt-2">
+              <div className="mt-2">
                 🎉 LEVEL UP!
               </div>
             )}

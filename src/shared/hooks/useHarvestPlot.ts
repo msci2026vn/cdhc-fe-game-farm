@@ -52,22 +52,28 @@ export function useHarvestPlot() {
 
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] useHarvestPlot.onSuccess() — HARVEST CONFIRMED', JSON.stringify({
-        ognReward: data.ognReward,
-        xpGained: data.xpGained,
-        newOgn: data.newOgn,
+        reward: data.reward,
+        inventory: data.inventory,
         leveledUp: data.leveledUp,
       }));
 
-      // Toast notification
+      // MỚI — Lấy thông tin từ inventory object hoặc fallback về legacy
+      const plantName = data.inventory?.plantName || data.plantName || 'cây';
+      const plantEmoji = data.inventory?.plantEmoji || data.plantEmoji || '🌾';
+      const xp = data.reward?.xp || data.xpGained || 0;
+
+      // MỚI — Toast notification — KHÔNG hiện OGN, chỉ XP + message vào kho
       useUIStore.getState().addToast(
-        `Thu hoạch ${data.plantName || 'cây'}! +${data.ognReward || 0} OGN +${data.xpGained || 0} XP`,
+        `${plantEmoji} Thu hoạch ${plantName}! +${xp} XP — Vào kho bán lấy tiền!`,
         'success',
-        '🎉'
+        '🌾'
       );
 
       // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
       queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      // MỚI — Invalidate inventory để kho đồ cập nhật
+      queryClient.invalidateQueries({ queryKey: ['game', 'inventory'] });
       console.log('[FARM-DEBUG] useHarvestPlot.onSuccess() — queries invalidated');
     },
 

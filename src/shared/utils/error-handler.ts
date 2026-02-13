@@ -145,9 +145,11 @@ export function showWaterSuccess(message?: string) {
   toast.success(message || 'Đã tưới nước! 💧', { duration: 2000 });
 }
 
-export function showHarvestSuccess(plantName: string, emoji: string, ognReward: number) {
-  console.log('[FARM-DEBUG] showHarvestSuccess:', plantName, ognReward);
-  toast.success(`Thu hoạch ${plantName} ${emoji}! +${ognReward} OGN`, {
+export function showHarvestSuccess(plantName: string, emoji: string, xp: number) {
+  // MỚI — Không hiện OGN, chỉ hiện XP + message vào kho
+  const message = `${emoji} ${plantName} +${xp} XP — Vào kho bán!`;
+  console.log('[FARM-DEBUG] showHarvestSuccess:', plantName, xp);
+  toast.success(message, {
     duration: 3000,
   });
 }

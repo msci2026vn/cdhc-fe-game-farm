@@ -66,10 +66,25 @@ export interface WaterResult {
   newHappiness: number;
 }
 
+// MỚI — Harvest KHÔNG trả OGN, trả inventory info
 export interface HarvestResult {
-  ognReward: number;
-  xpGained: number;
-  ognTotal: number;
+  reward: {
+    xp: number;
+  };
+  inventory?: {
+    itemId: string;
+    plantName: string;
+    plantEmoji: string;
+    expiresAt: string;
+    shelfLifeHours: number;
+    message: string;
+  };
+  // Backward compatible — legacy fallback
+  xpGained?: number;
+  ognReward?: number;
+  ognTotal?: number;
+  plantName?: string;
+  plantEmoji?: string;
   leveledUp: boolean;
   newLevel?: number;
 }
@@ -171,6 +186,7 @@ export interface ShopItemData {
   category: 'seed' | 'tool' | 'card' | 'nft';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   owned: number;
+  seasonStatus?: 'in_season' | 'off_season';
 }
 
 export interface BuyResult {
@@ -391,6 +407,62 @@ export interface SyncRequest {
   actions: SyncAction[];
 }
 
+
+// ═════════════════════════════════════════════════════════════
+// INVENTORY — Kho đồ nông sản (MỚI)
+// ═════════════════════════════════════════════════════════════
+
+export interface InventoryItem {
+  id: string;               // UUID — dùng để bán
+  itemId: string;            // plant type: 'tomato', 'lettuce'...
+  plantName: string;
+  plantEmoji: string;
+  quantity: number;
+  harvestedAt: string;
+  expiresAt: string | null;
+  freshnessPercent: number;  // 0-100
+  freshnessLabel: string;    // 'Tươi 🟢', 'Sắp héo 🟡', 'Gần hỏ 🔴', 'Hết hạn 🥀'
+  sellPrice: number;         // OGN nhận được khi bán
+  seasonTag: string;         // 'Đúng vụ ✅' hoặc 'Trái vụ ⚠️'
+}
+
+export interface InventoryResponse {
+  items: InventoryItem[];
+  expiredItems?: Array<{
+    id: string;
+    itemId: string;
+    plantName: string;
+    plantEmoji: string;
+    message: string;
+  }>;
+}
+
+export interface SellResult {
+  sold: {
+    plantName: string;
+    plantEmoji: string;
+    sellPrice: number;
+    freshnessLabel: string;
+    seasonTag: string;
+  };
+  message: string;
+  newOgn: number;
+}
+
+export interface SellAllResult {
+  soldItems: Array<{
+    plantName: string;
+    plantEmoji: string;
+    sellPrice: number;
+  }>;
+  totalOgn: number;
+  expiredItems?: Array<{ plantName: string; message: string }>;
+  message: string;
+}
+
+export interface InventoryRequest {
+  id: string;
+}
 // ═══════════════════════════════════════════════════════════════
 // WRAPPER TYPES
 // ═══════════════════════════════════════════════════════════════
@@ -413,3 +485,7 @@ export type LeaderboardResponse = ApiResponse<LeaderboardResult>;
 export type SyncResponse = ApiResponse<SyncResult>;
 export type PingResponse = ApiResponse<PingResult>;
 export type AuthStatusResponse = ApiResponse<AuthStatus>;
+
+export type InventoryResponseType = ApiResponse<InventoryResponse>;
+export type SellResponseType = ApiResponse<SellResult>;
+export type SellAllResponseType = ApiResponse<SellAllResult>;
