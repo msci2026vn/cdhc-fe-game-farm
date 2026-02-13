@@ -695,13 +695,6 @@ export default function FarmingScreen() {
               </div>
               <span className="text-[8px] font-bold text-[#8B4513]">Bạn bè</span>
             </button>
-
-            <button onClick={() => navigate('/profile')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">person</span>
-              </div>
-              <span className="text-[8px] font-bold text-[#8B4513]">Hồ sơ</span>
-            </button>
           </div>
         </nav>
 

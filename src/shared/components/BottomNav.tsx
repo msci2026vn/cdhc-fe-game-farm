@@ -2,10 +2,9 @@ import { NavLink } from 'react-router-dom';
 
 const tabs = [
   { to: '/farm', emoji: '🌱', label: 'Nông trại' },
-  { to: '/boss', emoji: '🐉', label: 'Boss' },
   { to: '/shop', emoji: '🛒', label: 'Cửa hàng' },
   { to: '/inventory', emoji: '🌾', label: 'Kho đồ' },
-  { to: '/profile', emoji: '👤', label: 'Hồ sơ' },
+  { to: '/friends', emoji: '👥', label: 'Bạn bè' },
 ];
 
 export default function BottomNav() {
@@ -23,8 +22,7 @@ export default function BottomNav() {
             key={tab.to}
             to={tab.to}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-[10px] transition-all duration-200 ${
-                isActive ? 'bg-game-green-pale' : ''
+              `flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-[10px] transition-all duration-200 ${isActive ? 'bg-game-green-pale' : ''
               }`
             }
           >
