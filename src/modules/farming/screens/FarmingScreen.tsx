@@ -649,41 +649,58 @@ export default function FarmingScreen() {
               <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">menu_book</span>
             </div>
           </button>
+
+          {/* Boss Button - Moved here from bottom nav */}
+          <button
+            onClick={() => navigate('/boss')}
+            className="action-btn group flex flex-col items-center justify-center gap-1 relative w-12 transition-transform active:scale-95"
+          >
+            <div className="w-12 h-12 rounded-xl bg-[#9575CD] border-b-4 border-[#5E35B1] shadow-lg flex items-center justify-center group-hover:bg-[#7E57C2] transition-colors ring-2 ring-white/50">
+              <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">sports_esports</span>
+            </div>
+          </button>
         </div>
 
         {/* Wooden Bottom Navigation */}
-        <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[92%] max-w-sm z-50">
+        <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50">
           <div className="absolute inset-0 bg-[#DEB887] rounded-full border-4 border-[#8B4513] shadow-[0_8px_0_#5D4037,0_15px_20px_rgba(0,0,0,0.3)] wood-pattern-v1"></div>
           <div className="absolute top-1/2 left-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner"></div>
           <div className="absolute top-1/2 right-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner"></div>
 
-          <div className="relative flex justify-between items-center px-6 py-3">
+          <div className="relative flex justify-between items-center px-4 py-3">
             <button onClick={() => navigate('/farm')} className="flex flex-col items-center gap-1 w-12 group">
               <div className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#DEB887] flex items-center justify-center shadow-inner transform -translate-y-2 transition-all duration-200">
                 <span className="material-symbols-outlined text-[#90EE90] text-xl">spa</span>
               </div>
-              <span className="text-[9px] font-black text-[#5D4037] uppercase tracking-wide">Farm</span>
-            </button>
-
-            <button onClick={() => navigate('/boss')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">sports_esports</span>
-              </div>
-              <span className="text-[9px] font-bold text-[#8B4513]">Boss</span>
+              <span className="text-[8px] font-black text-[#5D4037] uppercase tracking-tighter">Nông trại</span>
             </button>
 
             <button onClick={() => navigate('/shop')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
               <div className="w-8 h-8 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">storefront</span>
               </div>
-              <span className="text-[9px] font-bold text-[#8B4513]">Shop</span>
+              <span className="text-[8px] font-bold text-[#8B4513]">Cửa hàng</span>
+            </button>
+
+            <button onClick={() => navigate('/inventory')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
+              <div className="w-8 h-8 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">inventory_2</span>
+              </div>
+              <span className="text-[8px] font-bold text-[#8B4513]">Kho đồ</span>
             </button>
 
             <button onClick={() => setShowFriends(true)} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
               <div className="w-8 h-8 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">group</span>
               </div>
-              <span className="text-[9px] font-bold text-[#8B4513]">Social</span>
+              <span className="text-[8px] font-bold text-[#8B4513]">Bạn bè</span>
+            </button>
+
+            <button onClick={() => navigate('/profile')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
+              <div className="w-8 h-8 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">person</span>
+              </div>
+              <span className="text-[8px] font-bold text-[#8B4513]">Hồ sơ</span>
             </button>
           </div>
         </nav>
