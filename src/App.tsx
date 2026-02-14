@@ -27,7 +27,6 @@ const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
   });
 
 // Lazy load screens with retry logic
-const SplashScreen = lazyWithRetry(() => import('@/modules/splash/screens/SplashScreen'));
 const LoginScreen = lazyWithRetry(() => import('@/modules/auth/screens/LoginScreen'));
 const FarmingScreen = lazyWithRetry(() => import('@/modules/farming/screens/FarmingScreen'));
 const BossScreen = lazyWithRetry(() => import('@/modules/boss/screens/BossScreen'));
@@ -38,7 +37,7 @@ const ProfileScreen = lazyWithRetry(() => import('@/modules/profile/screens/Prof
 const OgnHistoryScreen = lazyWithRetry(() => import('@/modules/profile/screens/OgnHistoryScreen'));
 
 const Fallback = () => (
-  <div className="min-h-screen flex items-center justify-center splash-gradient">
+  <div className="h-[100dvh] flex items-center justify-center splash-gradient">
     <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
   </div>
 );
@@ -56,24 +55,16 @@ const NavigateSetup = () => {
 
   useEffect(() => {
     setNavigateToLogin(() => navigate('/login', { replace: true }));
-    console.log('[FARM-DEBUG] NavigateSetup: setNavigateToLogin configured');
   }, [navigate]);
 
   return <LevelUpOverlay />;
 };
 
 /**
- * App Router with AuthGuard
+ * App Router
  *
- * Routes:
- * - / → SplashScreen (auth check → redirect /farm hoặc /login)
- * - /login → LoginScreen (Google OAuth)
- * - /farm → FarmingScreen (protected by AuthGuard)
- * - /boss → BossScreen (protected by AuthGuard)
- * - /quiz → QuizScreen (protected by AuthGuard)
- * - /shop → ShopScreen (protected by AuthGuard)
- * - /profile → ProfileScreen (protected by AuthGuard)
- * - * → Redirect to /
+ * /login is PUBLIC — no AuthGuard, no ping delay
+ * All other routes are PROTECTED — AuthGuard checks once on mount
  */
 const App = () => {
   return (
@@ -82,25 +73,27 @@ const App = () => {
         <ConnectionLostOverlay />
         <NavigateSetup />
         <Suspense fallback={<Fallback />}>
-          <AuthGuard>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Navigate to="/farm" replace />} />
-              <Route path="/login" element={<LoginScreen />} />
+          <Routes>
+            {/* Public routes — NO AuthGuard */}
+            <Route path="/login" element={<LoginScreen />} />
 
-              {/* Protected routes (require auth) */}
-              <Route path="/farm" element={<FarmingScreen />} />
-              <Route path="/boss" element={<BossScreen />} />
-              <Route path="/quiz" element={<QuizScreen />} />
-              <Route path="/shop" element={<ShopScreen />} />
-              <Route path="/inventory" element={<InventoryScreen />} />
-              <Route path="/profile" element={<ProfileScreen />} />
-              <Route path="/ogn-history" element={<OgnHistoryScreen />} />
-
-              {/* Catch-all */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </AuthGuard>
+            {/* Protected routes — wrapped in AuthGuard */}
+            <Route path="/*" element={
+              <AuthGuard>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/farm" replace />} />
+                  <Route path="/farm" element={<FarmingScreen />} />
+                  <Route path="/boss" element={<BossScreen />} />
+                  <Route path="/quiz" element={<QuizScreen />} />
+                  <Route path="/shop" element={<ShopScreen />} />
+                  <Route path="/inventory" element={<InventoryScreen />} />
+                  <Route path="/profile" element={<ProfileScreen />} />
+                  <Route path="/ogn-history" element={<OgnHistoryScreen />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </AuthGuard>
+            } />
+          </Routes>
         </Suspense>
         <Toaster />
         <Toast />

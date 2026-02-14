@@ -5,8 +5,6 @@ import { queryClient } from '@/shared/lib/queryClient';
 import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
 import { gameApi } from '@/shared/api/game-api';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { useWeather } from '@/shared/hooks/useWeather';
-import { useWeatherStore } from '@/modules/farming/stores/weatherStore';
 
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
@@ -17,10 +15,9 @@ function LoginScreenContent() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Sync weather data from API
-  const weatherQuery = useWeather();
-  const weather = weatherQuery.data?.condition || 'sunny';
-  const timeOfDay = weatherQuery.data?.timeOfDay || 'day';
+  // Static defaults — no API call needed on login screen
+  const weather = 'sunny';
+  const timeOfDay = 'day';
 
   const handleAuthSuccess = async (idToken: string) => {
     setLoading(true);
