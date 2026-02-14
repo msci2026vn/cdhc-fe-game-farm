@@ -4,7 +4,7 @@ const tabs = [
   { to: '/farm', icon: 'spa', label: 'Nông trại' },
   { to: '/shop', icon: 'storefront', label: 'Cửa hàng' },
   { to: '/inventory', icon: 'inventory_2', label: 'Kho đồ' },
-  { to: '/profile', icon: 'person', label: 'Hồ sơ' },
+  { to: '/friends', icon: 'group', label: 'Bạn bè' },
 ];
 
 export default function BottomNav() {
@@ -27,9 +27,8 @@ export default function BottomNav() {
             <button
               key={tab.to}
               onClick={() => navigate(tab.to)}
-              className={`flex flex-col items-center gap-1 w-12 group ${
-                isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'
-              }`}
+              className={`flex flex-col items-center gap-1 w-12 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'
+                }`}
             >
               {isActive ? (
                 <div className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#DEB887] flex items-center justify-center shadow-inner transform -translate-y-2 transition-all duration-200">
@@ -40,9 +39,8 @@ export default function BottomNav() {
                   <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">{tab.icon}</span>
                 </div>
               )}
-              <span className={`text-[8px] font-bold ${
-                isActive ? 'font-black text-[#5D4037] uppercase tracking-tighter' : 'text-[#8B4513]'
-              }`}>
+              <span className={`text-[8px] font-bold ${isActive ? 'font-black text-[#5D4037] uppercase tracking-tighter' : 'text-[#8B4513]'
+                }`}>
                 {tab.label}
               </span>
             </button>

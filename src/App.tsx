@@ -32,6 +32,7 @@ const BossScreen = lazyWithRetry(() => import('@/modules/boss/screens/BossScreen
 const QuizScreen = lazyWithRetry(() => import('@/modules/quiz/screens/QuizScreen'));
 const ShopScreen = lazyWithRetry(() => import('@/modules/shop/screens/ShopScreen'));
 const InventoryScreen = lazyWithRetry(() => import('@/modules/inventory/screens/InventoryScreen'));
+const FriendsScreen = lazyWithRetry(() => import('@/modules/friends/screens/FriendsScreen'));
 const ProfileScreen = lazyWithRetry(() => import('@/modules/profile/screens/ProfileScreen'));
 const OgnHistoryScreen = lazyWithRetry(() => import('@/modules/profile/screens/OgnHistoryScreen'));
 
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
         <Route path="/quiz" element={<QuizScreen />} />
         <Route path="/shop" element={<ShopScreen />} />
         <Route path="/inventory" element={<InventoryScreen />} />
+        <Route path="/friends" element={<FriendsScreen />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/ogn-history" element={<OgnHistoryScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
