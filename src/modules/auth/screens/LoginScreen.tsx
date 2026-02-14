@@ -199,8 +199,10 @@ function LoginScreenContent() {
                   onSuccess={(res) => {
                     if (res.credential) handleAuthSuccess(res.credential);
                   }}
-                  onError={() => setError('❌ Đăng nhập Google thất bại')}
-                  useOneTap
+                  onError={() => {
+                    // FedCM/silent sign-in failure is expected — don't show error
+                    console.warn('[LoginScreen] GoogleLogin onError — user needs to click manually');
+                  }}
                   width="400"
                 />
               </div>

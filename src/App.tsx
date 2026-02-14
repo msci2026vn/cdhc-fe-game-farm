@@ -13,7 +13,6 @@ import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
- * This usually happens when a new version is deployed and old assets are gone.
  */
 const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
   lazy(async () => {
@@ -26,7 +25,7 @@ const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
     }
   });
 
-// Lazy load screens with retry logic
+// Lazy load screens
 const LoginScreen = lazyWithRetry(() => import('@/modules/auth/screens/LoginScreen'));
 const FarmingScreen = lazyWithRetry(() => import('@/modules/farming/screens/FarmingScreen'));
 const BossScreen = lazyWithRetry(() => import('@/modules/boss/screens/BossScreen'));
@@ -43,28 +42,52 @@ const Fallback = () => (
 );
 
 /**
- * NavigateSetup — Configure 401 auto-redirect + Game Sync + Level Up detection
- * Must be inside BrowserRouter to use useNavigate
+ * NavigateSetup — ONLY configure 401 redirect
+ * Runs globally (before auth) — no API calls here!
  */
 const NavigateSetup = () => {
   const navigate = useNavigate();
-  // Initialize game sync engine (queues actions, auto-syncs every 60s)
-  useGameSync();
-  // Watch for level changes and trigger animation
-  useLevelUpDetector();
 
   useEffect(() => {
     setNavigateToLogin(() => navigate('/login', { replace: true }));
   }, [navigate]);
 
-  return <LevelUpOverlay />;
+  return null;
+};
+
+/**
+ * AuthenticatedApp — Only runs AFTER AuthGuard confirms authentication
+ * Game sync + level up detector + protected routes live here
+ */
+const AuthenticatedApp = () => {
+  // These hooks call usePlayerProfile → getProfile API
+  // Safe here because AuthGuard already confirmed auth
+  useGameSync();
+  useLevelUpDetector();
+
+  return (
+    <>
+      <LevelUpOverlay />
+      <Routes>
+        <Route path="/" element={<Navigate to="/farm" replace />} />
+        <Route path="/farm" element={<FarmingScreen />} />
+        <Route path="/boss" element={<BossScreen />} />
+        <Route path="/quiz" element={<QuizScreen />} />
+        <Route path="/shop" element={<ShopScreen />} />
+        <Route path="/inventory" element={<InventoryScreen />} />
+        <Route path="/profile" element={<ProfileScreen />} />
+        <Route path="/ogn-history" element={<OgnHistoryScreen />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
+  );
 };
 
 /**
  * App Router
  *
- * /login is PUBLIC — no AuthGuard, no ping delay
- * All other routes are PROTECTED — AuthGuard checks once on mount
+ * /login → PUBLIC (no AuthGuard, no API calls)
+ * /* → PROTECTED (AuthGuard → then game hooks + routes)
  */
 const App = () => {
   return (
@@ -74,23 +97,13 @@ const App = () => {
         <NavigateSetup />
         <Suspense fallback={<Fallback />}>
           <Routes>
-            {/* Public routes — NO AuthGuard */}
+            {/* Public — NO AuthGuard, NO game hooks */}
             <Route path="/login" element={<LoginScreen />} />
 
-            {/* Protected routes — wrapped in AuthGuard */}
+            {/* Protected — AuthGuard first, then game hooks */}
             <Route path="/*" element={
               <AuthGuard>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/farm" replace />} />
-                  <Route path="/farm" element={<FarmingScreen />} />
-                  <Route path="/boss" element={<BossScreen />} />
-                  <Route path="/quiz" element={<QuizScreen />} />
-                  <Route path="/shop" element={<ShopScreen />} />
-                  <Route path="/inventory" element={<InventoryScreen />} />
-                  <Route path="/profile" element={<ProfileScreen />} />
-                  <Route path="/ogn-history" element={<OgnHistoryScreen />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                <AuthenticatedApp />
               </AuthGuard>
             } />
           </Routes>
