@@ -46,8 +46,9 @@ export default function ProfileScreen() {
   const nextXp = xpForNextLevel(level);
   const title = getLevelTitle(level);
 
-  const displayName = profile.name || auth?.user?.name || 'Nông dân';
-  const displayPicture = profile.picture || auth?.user?.picture;
+  const user = auth?.user;
+  const displayName = user?.name || (user as any)?.fullName || profile.name || (profile as any)?.fullName || 'Nông dân';
+  const displayPicture = user?.picture || (user as any)?.avatar || (user as any)?.avatarUrl || profile.picture || (profile as any)?.avatar || (profile as any)?.avatarUrl;
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'stats', label: '📊 Chỉ số' },

@@ -24,9 +24,10 @@ export default function FarmHeader() {
   const level = profile?.level ?? 1;
   const title = getLevelTitle(level);
 
-  // Google fallbacks
-  const displayName = profile?.name || auth?.user?.name || 'Farmer';
-  const displayPicture = profile?.picture || auth?.user?.picture;
+  // Google fallbacks - Prioritize Google data (Gmail name/picture)
+  const user = auth?.user;
+  const displayName = user?.name || (user as any)?.fullName || profile?.name || (profile as any)?.fullName || 'Farmer';
+  const displayPicture = user?.picture || (user as any)?.avatar || (user as any)?.avatarUrl || profile?.picture || (profile as any)?.avatar || (profile as any)?.avatarUrl;
 
   // XP progress calculation — LINEAR FORMULA (100 XP per level, matches backend)
   // Level 1: 0-99 XP, Level 2: 100-199 XP, Level 3: 200-299 XP, etc.

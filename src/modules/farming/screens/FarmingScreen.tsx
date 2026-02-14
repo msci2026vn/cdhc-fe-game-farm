@@ -30,6 +30,7 @@ import { useWeather } from '@/shared/hooks/useWeather';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
+import { useAuth } from '@/shared/hooks/useAuth';
 import {
   handleGameError,
   showPlantSuccess,
@@ -44,6 +45,7 @@ export default function FarmingScreen() {
   // API data (Step 12)
   const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
   const { data: profile } = usePlayerProfile();
+  const { data: auth } = useAuth();
   const ogn = useOgn(); // TanStack Query single source of truth
 
   // Weather data (Step 31 — GPS/Weather Integration)
@@ -440,15 +442,21 @@ export default function FarmingScreen() {
             <div className="flex items-center gap-2.5 glass-ui-v2 p-1 pr-3.5 rounded-full flex-shrink-0">
               <div className="relative group cursor-pointer" onClick={() => navigate('/profile')}>
                 <div className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-game-green-mid flex items-center justify-center">
-                  {profile?.picture ? (
-                    <img alt={profile?.name} className="w-full h-full object-cover" src={profile.picture} />
+                  {(auth?.user?.picture || profile?.picture) ? (
+                    <img
+                      alt={auth?.user?.name || profile?.name}
+                      className="w-full h-full object-cover"
+                      src={auth?.user?.picture || profile?.picture}
+                    />
                   ) : (
                     <span className="text-xl">🧑‍🌾</span>
                   )}
                 </div>
               </div>
               <div className="flex flex-col translate-y-[-1px]">
-                <h1 className="font-black text-[12px] text-gray-800 leading-none mb-1.5">{profile?.name || 'Farmer'}</h1>
+                <h1 className="font-black text-[12px] text-gray-800 leading-none mb-1.5">
+                  {auth?.user?.name || profile?.name || 'Farmer'}
+                </h1>
                 <div className="flex items-center gap-2">
                   <span className="bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-yellow-500 uppercase tracking-tighter">Lv.{profile?.level || 1}</span>
                   {/* Notification Bell next to Level tag */}

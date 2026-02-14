@@ -3,6 +3,7 @@ import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
 import { useLevel, usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
 
 interface Props {
@@ -30,6 +31,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
 
   const bossComplete = useBossComplete();
   const { data: profile } = usePlayerProfile();
+  const { data: auth } = useAuth();
   const level = useLevel(); // TanStack Query single source of truth
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);
@@ -287,7 +289,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           {[
             { rank: '1', name: 'CryptoFarmer', dmg: '2,450', bg: 'linear-gradient(135deg, #f0b429, #d49a1a)' },
             { rank: '2', name: 'GreenHero92', dmg: '1,820', bg: 'linear-gradient(135deg, #c0c0c0, #808080)' },
-            { rank: '3', name: `${profile?.name || 'Farmer'} ⭐`, dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
+            { rank: '3', name: `${auth?.user?.name || profile?.name || 'Farmer'} ⭐`, dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
           ].map(r => (
             <div key={r.rank} className="flex items-center gap-2 py-1">
               <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold text-white"
@@ -351,8 +353,8 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         <div className="flex items-center gap-2 mt-2">
           <button onClick={handleDodge}
             className={`px-4 py-2 rounded-[20px] font-heading text-xs font-bold transition-all ${attackWarning?.phase === 'dodge_window'
-                ? 'animate-dodge-pulse text-white scale-110'
-                : 'text-white/40'
+              ? 'animate-dodge-pulse text-white scale-110'
+              : 'text-white/40'
               }`}
             style={attackWarning?.phase === 'dodge_window'
               ? { background: 'linear-gradient(135deg, #f39c12, #e74c3c)', boxShadow: '0 0 20px rgba(243,156,18,0.6)' }

@@ -365,6 +365,9 @@ export interface AuthStatus {
     name: string;
     email: string;
     picture: string | null;
+    fullName?: string;    // Fallback for Google Auth
+    avatarUrl?: string;   // Fallback for some APIs
+    avatar?: string;      // Fallback for consistency with FriendData
   } | null;
 }
 
