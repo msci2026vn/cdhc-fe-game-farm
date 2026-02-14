@@ -1,18 +1,35 @@
 import { useNavigate } from 'react-router-dom';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
+import { useOgnHistory } from '@/shared/hooks/useOgnHistory';
+import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 const OgnHistoryScreen = () => {
     const navigate = useNavigate();
     const ognBalance = useOgn();
+    const { data: transactions, isLoading, error, refetch } = useOgnHistory(50);
 
-    // Mock transaction data based on HTML template
-    const transactions = [
-        { id: 1, type: 'reward', title: 'Thu hoạch cà phê', time: '14:30', amount: '+50', category: 'Thưởng', icon: 'eco', color: 'green' },
-        { id: 2, type: 'spent', title: 'Mua hạt giống', time: '09:15', amount: '-10', category: 'Mua sắm', icon: 'shopping_basket', color: 'red' },
-        { id: 3, type: 'reward', title: 'Thưởng Boss Thế Giới', time: '18:45', amount: '+120', category: 'Sự kiện', icon: 'military_tech', color: 'amber' },
-        { id: 4, type: 'spent', title: 'Nâng cấp kho', time: '10:20', amount: '-200', category: 'Nâng cấp', icon: 'construction', color: 'blue' },
-        { id: 5, type: 'reward', title: 'Quà đăng nhập', time: '07:00', amount: '+10', category: 'Hệ thống', icon: 'card_giftcard', color: 'pink' },
-    ];
+    // Group transactions by date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const todayTransactions = transactions?.filter(t => {
+        const txDate = new Date(t.createdAt);
+        return txDate >= today;
+    }) || [];
+
+    const yesterdayTransactions = transactions?.filter(t => {
+        const txDate = new Date(t.createdAt);
+        return txDate >= yesterday && txDate < today;
+    }) || [];
+
+    const olderTransactions = transactions?.filter(t => {
+        const txDate = new Date(t.createdAt);
+        return txDate < yesterday;
+    }) || [];
 
     return (
         <div className="h-[100dvh] font-sans text-gray-800 antialiased overflow-hidden flex flex-col relative bg-[#FFF8E1]">
@@ -25,8 +42,11 @@ const OgnHistoryScreen = () => {
                     <span className="material-icons-round">arrow_back</span>
                 </button>
                 <h1 className="text-xl font-black text-[#5D4037] drop-shadow-sm uppercase tracking-wide">Lịch sử OGN</h1>
-                <button className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center">
-                    <span className="material-icons-round">filter_list</span>
+                <button
+                    onClick={() => refetch()}
+                    className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
+                >
+                    <span className="material-icons-round">refresh</span>
                 </button>
             </div>
 
@@ -51,23 +71,66 @@ const OgnHistoryScreen = () => {
 
             {/* List */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-8 space-y-6">
-                <div>
-                    <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest">Hôm nay</h3>
-                    <div className="space-y-3">
-                        {transactions.slice(0, 2).map((tx) => (
-                            <TransactionItem key={tx.id} {...tx} />
-                        ))}
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                        <div className="w-12 h-12 border-4 border-[#8B4513] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[#8B4513] font-bold text-sm">Đang tải...</p>
                     </div>
-                </div>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                        <span className="material-icons-round text-red-500 text-5xl">error_outline</span>
+                        <p className="text-red-600 font-bold text-sm">Lỗi tải dữ liệu</p>
+                        <button
+                            onClick={() => refetch()}
+                            className="px-6 py-2 rounded-full bg-[#8B4513] text-[#E6D690] font-bold text-sm shadow-wood-button active:translate-y-1 active:shadow-none transition-all"
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                ) : !transactions || transactions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                        <span className="material-icons-round text-[#8B4513] text-5xl opacity-50">receipt_long</span>
+                        <p className="text-[#8B4513] font-bold text-sm opacity-70">Chưa có giao dịch nào</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Today */}
+                        {todayTransactions.length > 0 && (
+                            <div>
+                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest">Hôm nay</h3>
+                                <div className="space-y-3">
+                                    {todayTransactions.map((tx) => (
+                                        <TransactionItem key={tx.id} {...tx} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
-                <div>
-                    <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">Hôm qua</h3>
-                    <div className="space-y-3">
-                        {transactions.slice(2).map((tx) => (
-                            <TransactionItem key={tx.id} {...tx} />
-                        ))}
-                    </div>
-                </div>
+                        {/* Yesterday */}
+                        {yesterdayTransactions.length > 0 && (
+                            <div>
+                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">Hôm qua</h3>
+                                <div className="space-y-3">
+                                    {yesterdayTransactions.map((tx) => (
+                                        <TransactionItem key={tx.id} {...tx} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Older */}
+                        {olderTransactions.length > 0 && (
+                            <div>
+                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">Cũ hơn</h3>
+                                <div className="space-y-3">
+                                    {olderTransactions.map((tx) => (
+                                        <TransactionItem key={tx.id} {...tx} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
 
             {/* Decorative fade at bottom */}
@@ -77,16 +140,33 @@ const OgnHistoryScreen = () => {
 };
 
 interface TransactionItemProps {
-    title: string;
-    time: string;
-    amount: string;
-    category: string;
-    icon: string;
-    color: string;
+    amount: number;
+    type: string;
+    description: string;
+    createdAt: string;
 }
 
-const TransactionItem = ({ title, time, amount, category, icon, color }: TransactionItemProps) => {
-    const isPositive = amount.startsWith('+');
+const TransactionItem = ({ amount, type, description, createdAt }: TransactionItemProps) => {
+    const isPositive = amount >= 0;
+    const amountStr = (amount >= 0 ? '+' : '') + amount;
+
+    // Map transaction type to icon and color
+    const getIconAndColor = (type: string) => {
+        const map: Record<string, { icon: string; color: string; category: string }> = {
+            'plant_seed': { icon: 'agriculture', color: 'red', category: 'Trồng' },
+            'harvest_sell': { icon: 'spa', color: 'green', category: 'Bán' },
+            'shop_buy': { icon: 'shopping_basket', color: 'red', category: 'Mua' },
+            'boss_reward': { icon: 'military_tech', color: 'amber', category: 'Boss' },
+            'quiz_reward': { icon: 'quiz', color: 'pink', category: 'Quiz' },
+            'daily_login': { icon: 'card_giftcard', color: 'pink', category: 'Hệ thống' },
+            'referral': { icon: 'people', color: 'blue', category: 'Giới thiệu' },
+            'social_interact': { icon: 'favorite', color: 'pink', category: 'Xã hội' },
+            'system': { icon: 'settings', color: 'blue', category: 'Hệ thống' },
+        };
+        return map[type] || { icon: 'receipt', color: 'blue', category: 'Khác' };
+    };
+
+    const { icon, color, category } = getIconAndColor(type);
 
     const iconColorMap: Record<string, string> = {
         green: 'bg-green-100 border-green-200 text-green-600',
@@ -104,6 +184,8 @@ const TransactionItem = ({ title, time, amount, category, icon, color }: Transac
         pink: 'bg-pink-50 border-pink-100 text-pink-700',
     };
 
+    const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: vi });
+
     return (
         <div className="parchment-card rounded-2xl p-4 flex items-center justify-between relative group active:scale-[0.98] transition-transform duration-200">
             <div className="flex items-center gap-4">
@@ -111,14 +193,14 @@ const TransactionItem = ({ title, time, amount, category, icon, color }: Transac
                     <span className="material-icons-round text-2xl">{icon}</span>
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-extrabold text-[#5D4037] text-base leading-tight">{title}</span>
+                    <span className="font-extrabold text-[#5D4037] text-base leading-tight">{description}</span>
                     <span className="text-[10px] font-bold text-[#8B4513] opacity-50 flex items-center gap-1 mt-1">
-                        <span className="material-icons-round text-[12px]">schedule</span> {time}
+                        <span className="material-icons-round text-[12px]">schedule</span> {timeAgo}
                     </span>
                 </div>
             </div>
             <div className="flex flex-col items-end gap-1.5">
-                <span className={`font-black text-lg ${isPositive ? 'text-green-600' : 'text-red-500'}`}>{amount} OGN</span>
+                <span className={`font-black text-lg ${isPositive ? 'text-green-600' : 'text-red-500'}`}>{amountStr} OGN</span>
                 <div className={`px-2.5 py-0.5 rounded-full border ${badgeColorMap[color]}`}>
                     <span className="text-[9px] font-black uppercase tracking-tighter">{category}</span>
                 </div>

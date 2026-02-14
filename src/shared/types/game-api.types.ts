@@ -492,3 +492,25 @@ export type AuthStatusResponse = ApiResponse<AuthStatus>;
 export type InventoryResponseType = ApiResponse<InventoryResponse>;
 export type SellResponseType = ApiResponse<SellResult>;
 export type SellAllResponseType = ApiResponse<SellAllResult>;
+
+// ═════════════════════════════════════════════════════════════
+// OGN TRANSACTION HISTORY
+// ═════════════════════════════════════════════════════════════
+
+export interface OgnTransaction {
+  id: string;
+  amount: number;             // +50 or -10
+  type: string;              // 'plant_seed' | 'harvest_sell' | 'shop_buy' | 'boss_reward' | 'quiz_reward' | 'daily_login' | 'referral' | 'social_interact' | 'system'
+  category: string;          // 'earn' | 'spend'
+  description: string;       // Vietnamese description
+  balanceAfter: number;       // OGN balance after this transaction
+  metadata: Record<string, unknown> | null;
+  createdAt: string;         // ISO timestamp
+}
+
+export interface OgnHistoryResult {
+  transactions: OgnTransaction[];
+  total: number;
+}
+
+export interface OgnHistoryResponse extends ApiResponse<OgnHistoryResult> {}

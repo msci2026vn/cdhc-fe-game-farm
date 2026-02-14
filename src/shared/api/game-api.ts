@@ -816,6 +816,33 @@ export const gameApi = {
 };
 
 // Export types for use in stores and components
+
+  /**
+   * Get OGN transaction history
+   */
+  getOgnHistory: async (limit = 50, offset = 0): Promise<OgnHistoryResult> => {
+    const url = `https://sta.cdhc.vn/api/game/ogn/history?limit=${limit}&offset=${offset}`;
+    console.log('[FARM-DEBUG] gameApi.getOgnHistory():', { url, limit, offset });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('[FARM-DEBUG] gameApi.getOgnHistory() status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[FARM-DEBUG] gameApi.getOgnHistory() ERROR:', error);
+      throw new Error(error?.error?.message || `Failed to fetch OGN history: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log('[FARM-DEBUG] gameApi.getOgnHistory() SUCCESS:', json);
+    return json.data;
+  },
+
 export type {
   PlayerProfile,
   FarmPlotData,
