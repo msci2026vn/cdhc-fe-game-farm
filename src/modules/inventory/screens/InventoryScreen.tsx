@@ -37,7 +37,7 @@ export default function InventoryScreen() {
       )}
 
       {/* DANH SÁCH NÔNG SẢN */}
-      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-32">
+      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-36">
 
         {/* Loading */}
         {isLoading && (
@@ -128,7 +128,7 @@ export default function InventoryScreen() {
 
       {/* NÚT BÁN HẾT (fixed bottom) */}
       {items.length > 1 && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px]">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px]">
           <button
             onClick={() => !sellAllMutation.isPending && sellAllMutation.mutate()}
             disabled={sellAllMutation.isPending}

@@ -112,7 +112,7 @@ export default function ProfileScreen() {
       </div>
 
       {/* Scrollable section */}
-      <div className="flex-1 overflow-y-auto px-5 pb-24" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex-1 overflow-y-auto px-5 pb-6" style={{ scrollbarWidth: 'none' }}>
 
         {/* Stats Tab */}
         {tab === 'stats' && (
@@ -172,7 +172,7 @@ export default function ProfileScreen() {
       </div>
 
       {/* Logout button */}
-      <div className="px-5 pb-24">
+      <div className="px-5 pb-28">
         <button
           onClick={async () => {
             if (loggingOut) return;

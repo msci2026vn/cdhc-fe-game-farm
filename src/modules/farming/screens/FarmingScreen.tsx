@@ -662,41 +662,7 @@ export default function FarmingScreen() {
         </div>
 
         {/* Wooden Bottom Navigation */}
-        <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50">
-          <div className="absolute inset-0 bg-[#DEB887] rounded-full border-4 border-[#8B4513] shadow-[0_8px_0_#5D4037,0_15px_20px_rgba(0,0,0,0.3)] wood-pattern-v1"></div>
-          <div className="absolute top-1/2 left-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner"></div>
-          <div className="absolute top-1/2 right-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner"></div>
-
-          <div className="relative flex justify-between items-center px-4 py-3">
-            <button onClick={() => navigate('/farm')} className="flex flex-col items-center gap-1 w-12 group">
-              <div className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#DEB887] flex items-center justify-center shadow-inner transform -translate-y-2 transition-all duration-200">
-                <span className="material-symbols-outlined text-[#90EE90] text-xl">spa</span>
-              </div>
-              <span className="text-[8px] font-black text-[#5D4037] uppercase tracking-tighter">Nông trại</span>
-            </button>
-
-            <button onClick={() => navigate('/shop')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">storefront</span>
-              </div>
-              <span className="text-[8px] font-bold text-[#8B4513]">Cửa hàng</span>
-            </button>
-
-            <button onClick={() => navigate('/inventory')} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">inventory_2</span>
-              </div>
-              <span className="text-[8px] font-bold text-[#8B4513]">Kho đồ</span>
-            </button>
-
-            <button onClick={() => setShowFriends(true)} className="flex flex-col items-center gap-1 w-12 group opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">group</span>
-              </div>
-              <span className="text-[8px] font-bold text-[#8B4513]">Bạn bè</span>
-            </button>
-          </div>
-        </nav>
+        <BottomNav />
 
         {/* Harvest / Clear Floating Action Button */}
         {activePlot && harvestReady && !activePlot.isDead && (

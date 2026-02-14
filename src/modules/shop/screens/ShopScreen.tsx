@@ -120,7 +120,7 @@ export default function ShopScreen() {
 
       {/* Grid */}
       <div
-        className="flex-1 overflow-y-auto px-5 pt-4 pb-24 grid grid-cols-2 gap-3 content-start"
+        className="flex-1 overflow-y-auto px-5 pt-4 pb-28 grid grid-cols-2 gap-3 content-start"
         style={{ scrollbarWidth: 'none' }}
       >
         {tabItems.map((item) => {

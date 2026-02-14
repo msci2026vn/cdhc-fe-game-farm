@@ -28,7 +28,7 @@ export default function BossList({ onSelect }: Props) {
   };
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col pb-[90px]">
+    <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col pb-28">
       <div className="px-5 pt-safe pb-3">
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-heading text-xl font-bold text-white flex items-center gap-2">
