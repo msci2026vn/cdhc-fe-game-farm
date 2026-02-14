@@ -7,6 +7,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
 import type { SellResult, SellAllResult } from '../types/game-api.types';
 
@@ -18,8 +19,16 @@ export function useSellInventory() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] useSellInventory.onSuccess()', data);
 
+      // Optimistic: update OGN immediately from sell response
+      if (data.newOgn !== undefined) {
+        queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => {
+          if (!old) return old;
+          return { ...old, ogn: data.newOgn };
+        });
+      }
+
       // Update OGN balance
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       // Refresh inventory list
       queryClient.invalidateQueries({ queryKey: ['game', 'inventory'] });
 
@@ -52,7 +61,8 @@ export function useSellAllInventory() {
     onSuccess: (data) => {
       console.log('[FARM-DEBUG] useSellAllInventory.onSuccess()', data);
 
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      // Invalidate profile + inventory for fresh data
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       queryClient.invalidateQueries({ queryKey: ['game', 'inventory'] });
 
       useUIStore.getState().addToast(

@@ -7,6 +7,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
 
 import { HarvestResult } from '../types/game-api.types';
@@ -59,9 +60,22 @@ export function useHarvestPlot() {
         '🌾'
       );
 
+      // Optimistic: update OGN + XP immediately from harvest response
+      if (data.reward) {
+        queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            ogn: data.reward.ognRemaining ?? old.ogn,
+            xp: data.reward.xpTotal ?? old.xp,
+            level: data.reward.level ?? old.level,
+          };
+        });
+      }
+
       // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
       // MỚI — Invalidate inventory để kho đồ cập nhật
       queryClient.invalidateQueries({ queryKey: ['game', 'inventory'] });
       console.log('[FARM-DEBUG] useHarvestPlot.onSuccess() — queries invalidated');

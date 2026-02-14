@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { BossFightInput, BossCompleteResult } from '../types/game-api.types';
 import { useUIStore } from '../stores/uiStore';
 
@@ -34,7 +35,7 @@ export function useBossComplete() {
             queryClient.invalidateQueries({ queryKey: ['game', 'boss', 'progress'] });
 
             // Invalidate player profile (for OGN/XP)
-            queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+            queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
 
             // Boss progress updated via TanStack Query invalidate
         },

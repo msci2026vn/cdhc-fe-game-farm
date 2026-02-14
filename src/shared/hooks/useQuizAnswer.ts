@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
 
 export function useQuizAnswer() {
@@ -28,7 +29,7 @@ export function useQuizAnswer() {
       }
 
       // Invalidate profile queries to update OGN/XP
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
     },
     onError: (error: Error) => {
       console.error('[FARM-DEBUG] useQuizAnswer.onError:', error.message);

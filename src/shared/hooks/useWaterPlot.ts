@@ -10,6 +10,7 @@
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
+import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
 
 interface WaterResult {
@@ -72,9 +73,21 @@ export function useWaterPlot() {
         '💧'
       );
 
+      // Optimistic: update XP/Level immediately from water response
+      if (data.xpTotal !== undefined) {
+        queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            xp: data.xpTotal,
+            level: data.level ?? old.level,
+          };
+        });
+      }
+
       // Invalidate to get real server data
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
-      queryClient.invalidateQueries({ queryKey: ['game', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
 
       console.log('[FARM-DEBUG] useWaterPlot.onSuccess() — queries invalidated, cooldown:', data.cooldownSeconds, 's');
     },
