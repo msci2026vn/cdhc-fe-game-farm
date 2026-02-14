@@ -37,6 +37,7 @@ import type {
   InventoryResponse,
   SellResult,
   SellAllResult,
+  OgnHistoryResult,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -813,9 +814,6 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.sellAllInventory() SUCCESS:', json);
     return json.data;
   },
-};
-
-// Export types for use in stores and components
 
   /**
    * Get OGN transaction history
@@ -842,6 +840,7 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.getOgnHistory() SUCCESS:', json);
     return json.data;
   },
+};
 
 export type {
   PlayerProfile,
