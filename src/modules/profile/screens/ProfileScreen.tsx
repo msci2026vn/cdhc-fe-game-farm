@@ -3,11 +3,13 @@ import BottomNav from '@/shared/components/BottomNav';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { gameApi } from '@/shared/api/game-api';
 
 type Tab = 'stats' | 'achievements';
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<Tab>('stats');
+  const [loggingOut, setLoggingOut] = useState(false);
   const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
   const ogn = useOgn(); // TanStack Query single source of truth
@@ -167,6 +169,21 @@ export default function ProfileScreen() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Logout button */}
+      <div className="px-5 pb-24">
+        <button
+          onClick={async () => {
+            if (loggingOut) return;
+            setLoggingOut(true);
+            await gameApi.logout();
+          }}
+          disabled={loggingOut}
+          className="w-full py-3 rounded-xl font-heading text-sm font-bold text-red-600 bg-red-50 border border-red-200 active:bg-red-100 transition-all disabled:opacity-50"
+        >
+          {loggingOut ? '⏳ Đang đăng xuất...' : '🚪 Đăng xuất'}
+        </button>
       </div>
 
       <BottomNav />

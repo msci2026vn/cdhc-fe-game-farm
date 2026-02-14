@@ -640,6 +640,22 @@ export const gameApi = {
   },
 
   /**
+   * Logout — xóa session cookie phía server, redirect về /login
+   */
+  logout: async (): Promise<void> => {
+    try {
+      await fetch('https://sta.cdhc.vn/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.warn('[GameAPI] logout request failed:', error);
+    }
+    // Dù API thành công hay thất bại, luôn redirect về login
+    window.location.href = '/login';
+  },
+
+  /**
    * Get auth status - Check if user is logged in
    * Bước 10 — REAL API: Calls /api/auth/me
    */
