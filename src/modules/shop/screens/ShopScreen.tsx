@@ -74,7 +74,7 @@ export default function ShopScreen() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto relative shop-gradient flex items-center justify-center">
+      <div className="h-[100dvh] max-w-[430px] mx-auto relative shop-gradient flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-bounce">🛒</div>
           <p className="text-white font-heading">Đang tải cửa hàng...</p>
@@ -84,9 +84,9 @@ export default function ShopScreen() {
   }
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto relative shop-gradient flex flex-col">
+    <div className="h-[100dvh] max-w-[430px] mx-auto relative shop-gradient flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center px-5 pt-safe pb-4">
+      <div className="flex-shrink-0 flex justify-between items-center px-5 pt-safe pb-3">
         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center text-xl header-btn-glass">
           ←
         </button>
@@ -100,7 +100,7 @@ export default function ShopScreen() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1.5 px-5 mt-2">
+      <div className="flex-shrink-0 flex gap-1.5 px-5 mt-1">
         {TABS.map((tab) => (
           <button
             key={tab.key}
@@ -120,7 +120,7 @@ export default function ShopScreen() {
 
       {/* Grid */}
       <div
-        className="flex-1 overflow-y-auto px-5 pt-4 pb-28 grid grid-cols-2 gap-3 content-start"
+        className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-24 grid grid-cols-2 gap-3 content-start"
         style={{ scrollbarWidth: 'none' }}
       >
         {tabItems.map((item) => {

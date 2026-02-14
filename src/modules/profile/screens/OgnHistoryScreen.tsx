@@ -15,9 +15,9 @@ const OgnHistoryScreen = () => {
     ];
 
     return (
-        <div className="min-h-screen font-sans text-gray-800 antialiased overflow-hidden flex flex-col relative bg-[#FFF8E1]">
+        <div className="h-[100dvh] font-sans text-gray-800 antialiased overflow-hidden flex flex-col relative bg-[#FFF8E1]">
             {/* Header */}
-            <div className="wood-header-history sticky top-0 z-50 pt-12 pb-4 px-4 flex items-center justify-between">
+            <div className="flex-shrink-0 wood-header-history sticky top-0 z-50 pt-12 pb-4 px-4 flex items-center justify-between">
                 <button
                     onClick={() => navigate(-1)}
                     className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
@@ -31,7 +31,7 @@ const OgnHistoryScreen = () => {
             </div>
 
             {/* Balance Card */}
-            <div className="px-4 py-6 bg-gradient-to-b from-[#FFF8E1] to-transparent z-10">
+            <div className="flex-shrink-0 px-4 py-4 bg-gradient-to-b from-[#FFF8E1] to-transparent z-10">
                 <div className="relative w-full max-w-sm mx-auto">
                     <span className="material-icons-round absolute -top-4 -left-2 text-green-700/20 text-5xl transform -rotate-12">spa</span>
                     <span className="material-icons-round absolute -bottom-4 -right-2 text-green-700/20 text-5xl transform rotate-45">spa</span>
@@ -50,7 +50,7 @@ const OgnHistoryScreen = () => {
             </div>
 
             {/* List */}
-            <div className="flex-grow overflow-y-auto px-4 pb-24 space-y-6">
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-8 space-y-6">
                 <div>
                     <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest">Hôm nay</h3>
                     <div className="space-y-3">

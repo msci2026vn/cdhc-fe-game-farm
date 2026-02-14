@@ -616,10 +616,22 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   body {
     @apply bg-background font-body antialiased;
     color: hsl(var(--text-dark));
+    height: 100dvh;
+    overflow: hidden;
     overscroll-behavior: none;
+  }
+
+  #root {
+    height: 100dvh;
+    overflow: hidden;
   }
 
   h1,

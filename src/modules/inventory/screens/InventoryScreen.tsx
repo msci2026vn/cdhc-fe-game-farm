@@ -17,10 +17,10 @@ export default function InventoryScreen() {
   const totalSellPrice = items.reduce((sum, item) => sum + item.sellPrice, 0);
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto bg-gradient-to-b from-amber-50 to-orange-50 flex flex-col">
+    <div className="h-[100dvh] max-w-[430px] mx-auto bg-gradient-to-b from-amber-50 to-orange-50 flex flex-col overflow-hidden">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center px-5 pt-safe pb-3 bg-white/80 backdrop-blur-sm border-b border-amber-100">
+      <div className="flex-shrink-0 flex justify-between items-center px-5 pt-safe pb-3 bg-white/80 backdrop-blur-sm border-b border-amber-100">
         <h1 className="font-bold text-xl">🌾 Kho đồ</h1>
         <span className="text-sm text-gray-500">{items.length} nông sản</span>
       </div>
@@ -37,7 +37,7 @@ export default function InventoryScreen() {
       )}
 
       {/* DANH SÁCH NÔNG SẢN */}
-      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-36">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-4 pb-28">
 
         {/* Loading */}
         {isLoading && (
