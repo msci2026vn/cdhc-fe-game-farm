@@ -127,12 +127,12 @@ export default function QuizScreen() {
   const Background = () => (
     <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none"
       style={{ background: 'linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #A5D6A7 40%, #81C784 100%)' }}>
-      <div className="absolute top-[5%] left-[10%] w-20 h-20 rounded-full shadow-[0_0_40px_#FFEB3B]"
+      <div className="absolute top-[10%] right-[15%] w-20 h-20 rounded-full shadow-[0_0_40px_#FFEB3B]"
         style={{ background: 'radial-gradient(circle, #FDB813 0%, #F57F17 100%)' }} />
-      <div className="cloud w-32 h-12 top-16 right-10 absolute bg-white rounded-full opacity-80 shadow-sm" />
-      <div className="cloud w-24 h-8 top-24 left-20 absolute bg-white rounded-full opacity-60 shadow-sm" />
+      <div className="cloud w-32 h-12 top-16 left-10 animate-pulse absolute bg-white rounded-full opacity-80" />
+      <div className="cloud w-24 h-8 top-24 right-20 absolute bg-white rounded-full opacity-60" />
       <div className="absolute bottom-[20%] left-[-20%] w-[140%] h-[50%] bg-[#66BB6A] rounded-t-[100%] z-[-2]" />
-      <div className="absolute bottom-0 left-0 w-full h-[35%] bg-gradient-to-b from-[#4CAF50] to-[#2E7D32] rounded-t-[100%] z-[-1]" />
+      <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-b from-[#4CAF50] to-[#2E7D32] rounded-t-[100%] z-[-1]" />
     </div>
   );
 
@@ -175,31 +175,63 @@ export default function QuizScreen() {
   // Idle screen
   if (phase === 'idle') {
     return (
-      <div className="h-[100dvh] max-w-[430px] mx-auto relative flex flex-col items-center justify-center px-8 overflow-y-auto font-sans">
+      <div className="h-[100dvh] w-full relative flex flex-col items-center justify-center p-6 overflow-hidden font-sans">
         <Background />
-        <div className="animate-scale-in text-center relative z-10 w-full py-10">
-          <div className="text-7xl mb-4">📖</div>
-          <h2 className="font-heading text-3xl font-black text-white drop-shadow-md mb-2 uppercase tracking-tight">Daily Quiz</h2>
-          <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-wood border-4 border-white mb-8">
-            <p className="text-gray-700 font-bold text-sm mb-4 leading-relaxed">
-              Thử thách kiến thức về nông nghiệp hữu cơ để kiếm phần thưởng hấp dẫn!
-            </p>
-            <div className="flex items-center justify-center gap-2 bg-amber-100 py-3 rounded-xl border-2 border-amber-200">
-              <span className="text-2xl">🪙</span>
-              <span className="font-black text-lg text-amber-800">+2 OGN / CÂU ĐÚNG</span>
+
+        {/* Wood Panel */}
+        <div className="wood-panel w-full max-w-sm rounded-[30px] p-8 flex flex-col items-center gap-6 relative mt-16 animate-bounce-in">
+          {/* Floating Book Icon */}
+          <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 animate-[float_4s_ease-in-out_infinite] z-20">
+            <div className="book-icon transform -rotate-6">
+              <div className="book-spine"></div>
+              <div className="book-face">
+                <div className="book-eye"></div>
+                <div className="book-eye"></div>
+                <div className="book-smile"></div>
+              </div>
+              {/* Book tabs */}
+              <div className="absolute -right-2 top-8 w-4 h-10 bg-white rounded-r-md shadow-sm z-10"></div>
+              <div className="absolute -right-2 top-20 w-4 h-10 bg-white rounded-r-md shadow-sm z-10"></div>
             </div>
           </div>
-          <button
-            onClick={handleStart}
-            disabled={startQuiz.isPending}
-            className="w-full py-4 rounded-2xl bg-[#77D373] border-b-4 border-[#2E7D32] text-white font-black text-xl shadow-btn-green active:border-b-0 active:translate-y-1 transition-all disabled:opacity-50"
-          >
-            {startQuiz.isPending ? 'Đang tải...' : 'BẮT ĐẦU NGAY'}
-          </button>
-          <button onClick={() => navigate(-1)}
-            className="w-full py-3 mt-4 rounded-2xl bg-white/80 backdrop-blur-sm text-gray-600 font-bold active:scale-[0.97] transition-all border border-white/50">
-            QUAY LẠI
-          </button>
+
+          <div className="mt-16 text-center space-y-2 w-full z-10">
+            <h1 className="text-3xl font-black text-[#4CAF50] drop-shadow-[0_3px_0_rgba(0,0,0,0.3)] tracking-wide uppercase leading-tight"
+              style={{ WebkitTextStroke: '1.5px #1B5E20', textShadow: '2px 2px 0px #A5D6A7' }}>
+              Nhà Nông<br />Thông Thái
+            </h1>
+            <div className="h-1.5 w-24 mx-auto bg-[#8B4513]/20 rounded-full my-4"></div>
+            <p className="text-[#5D4037] font-bold text-lg leading-tight">
+              Trả lời 5 câu hỏi về nông nghiệp hữu cơ để kiếm OGN và XP!
+            </p>
+          </div>
+
+          <div className="w-full bg-[#FFF9C4] rounded-xl border-2 border-[#FBC02D] p-3 flex items-center justify-center gap-2 shadow-sm animate-[wiggle_1s_ease-in-out_infinite]">
+            <span className="text-2xl">🪙</span>
+            <span className="text-[#F57F17] font-black text-lg">+2 OGN/câu đúng</span>
+          </div>
+
+          <div className="w-full mt-2 flex flex-col gap-3">
+            <button onClick={handleStart} disabled={startQuiz.isPending}
+              className="w-full group relative active:scale-95 transition-transform duration-100 touch-manipulation">
+              <div className="absolute inset-0 bg-[#2E7D32] rounded-2xl shadow-[0_10px_10px_rgba(0,0,0,0.2)] translate-y-2 group-active:translate-y-1 group-active:shadow-none transition-all"></div>
+              <div className="relative bg-[#4CAF50] rounded-2xl border-t-2 border-[#81C784] p-4 flex items-center justify-center gap-2 transform group-active:translate-y-1 transition-all">
+                <span className="material-icons-round text-white text-3xl">play_circle</span>
+                <span className="text-white font-black text-xl uppercase tracking-wide drop-shadow-md">
+                  {startQuiz.isPending ? 'Đang tải...' : 'Bắt đầu quiz'}
+                </span>
+              </div>
+            </button>
+
+            <button onClick={() => navigate(-1)}
+              className="w-full group relative active:scale-95 transition-transform duration-100 touch-manipulation">
+              <div className="absolute inset-0 bg-[#5D4037] rounded-2xl shadow-[0_10px_10px_rgba(0,0,0,0.2)] translate-y-2 group-active:translate-y-1 group-active:shadow-none transition-all"></div>
+              <div className="relative bg-[#8D6E63] rounded-2xl border-t-2 border-[#A1887F] p-3 flex items-center justify-center gap-2 transform group-active:translate-y-1 transition-all">
+                <span className="material-icons-round text-white text-2xl">arrow_back</span>
+                <span className="text-white font-bold text-lg uppercase tracking-wide drop-shadow-md">Quay lại</span>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -366,6 +398,14 @@ export default function QuizScreen() {
           0%, 100% { transform: rotate(-5deg) scaleX(-1); }
           50% { transform: rotate(5deg) scaleX(-1); }
         }
+        @keyframes float {
+          0%, 100% { transform: translate(-50%, 0); }
+          50% { transform: translate(-50%, -10px); }
+        }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
         @keyframes bounce-in {
           0% { transform: scale(0.3); opacity: 0; }
           50% { transform: scale(1.05); opacity: 1; }
@@ -373,7 +413,95 @@ export default function QuizScreen() {
           100% { transform: scale(1); }
         }
         .animate-bounce-in { animation: bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-        .shadow-wood { box-shadow: 0 8px 0 0 #5D4037, 0 15px 20px rgba(0,0,0,0.3); }
+        
+        /* Custom UI Elements */
+        .wood-panel {
+          background-color: #DEB887;
+          background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 4px);
+          border: 6px solid #8B4513;
+          box-shadow: 0 8px 0 #5D4037, 0 15px 20px rgba(0,0,0,0.3);
+        }
+        .wood-panel::before, .wood-panel::after {
+          content: '';
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background: #3E2723;
+          border-radius: 50%;
+          top: 10px;
+          box-shadow: 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .wood-panel::before { left: 10px; }
+        .wood-panel::after { right: 10px; }
+
+        .book-icon {
+          width: 100px;
+          height: 120px;
+          background: #4CAF50;
+          border-radius: 8px 16px 16px 8px;
+          position: relative;
+          box-shadow: 4px 4px 0 #2E7D32, 6px 6px 6px rgba(0,0,0,0.2);
+        }
+        .book-icon::before {
+          content: '';
+          position: absolute;
+          top: 4px;
+          left: 4px;
+          right: 4px;
+          bottom: 4px;
+          background: #81C784;
+          border-radius: 4px 12px 12px 4px;
+          border: 2px dashed #fff;
+        }
+        .book-spine {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 12px;
+          background: #388E3C;
+          border-radius: 4px 0 0 4px;
+          z-index: 2;
+        }
+        .book-face {
+          position: absolute;
+          top: 50%;
+          left: 55%;
+          transform: translate(-50%, -50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          z-index: 3;
+        }
+        .book-eye {
+          width: 10px;
+          height: 10px;
+          background: #212121;
+          border-radius: 50%;
+          position: relative;
+        }
+        .book-eye::after {
+          content: '';
+          width: 3px;
+          height: 3px;
+          background: #fff;
+          border-radius: 50%;
+          position: absolute;
+          top: 2px;
+          right: 2px;
+        }
+        .book-smile {
+          position: absolute;
+          bottom: -12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 16px;
+          height: 8px;
+          border-bottom: 3px solid #212121;
+          border-radius: 0 0 16px 16px;
+        }
+
         .shadow-btn-blue { box-shadow: 0 5px 0 0 #1565C0, 0 10px 15px rgba(0,0,0,0.2); }
         .shadow-btn-green { box-shadow: 0 5px 0 0 #2E7D32, 0 10px 15px rgba(0,0,0,0.2); }
         .shadow-btn-yellow { box-shadow: 0 5px 0 0 #EF6C00, 0 10px 15px rgba(0,0,0,0.2); }
