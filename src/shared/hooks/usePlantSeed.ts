@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 import { PLAYER_PROFILE_KEY } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
+import { PLANT_TYPES, getPlantTypeById } from '../../modules/farming/data/plants';
 
 interface PlantSeedParams {
   slotIndex: number;
@@ -72,6 +73,7 @@ export function usePlantSeed() {
         if (!old) return old;
 
         // Create temporary plot data
+        const plantType = getPlantTypeById(plantTypeId);
         const optimisticPlot = {
           id: `temp-${Date.now()}`,
           slotIndex,
@@ -83,11 +85,11 @@ export function usePlantSeed() {
           plantType: {
             id: plantTypeId,
             name: plantTypeId.charAt(0).toUpperCase() + plantTypeId.slice(1),
-            emoji: '🌱', // seedling until server confirms
+            emoji: plantType?.emoji || '🌱', // seedling until server confirms
             growthDurationMs: 3600000, // default 1 hour
             rewardOGN: 100,
             rewardXP: 25,
-            shopPrice: 200,
+            shopPrice: plantType?.price || 0,
           },
         };
 
@@ -103,12 +105,16 @@ export function usePlantSeed() {
     },
 
     // ─── Success: invalidate để lấy data thật từ server ───
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       console.log('[FARM-DEBUG] usePlantSeed.onSuccess() — SERVER CONFIRMED', JSON.stringify(data));
+
+      // Get price from server data OR fallback to local data
+      const plantType = getPlantTypeById(variables.plantTypeId);
+      const price = data.plot?.plantType?.shopPrice || plantType?.price || 0;
 
       // Toast notification
       useUIStore.getState().addToast(
-        `Đã trồng ${data.plantType?.name || 'cây'}! -${data.plot?.plantType?.shopPrice || 0} OGN`,
+        `Đã trồng ${plantType?.name || data.plantType?.name || 'cây'}! -${price} OGN`,
         'success',
         '🌱'
       );
@@ -133,8 +139,8 @@ export function usePlantSeed() {
 
       // Toast notification
       const msg = error.message?.includes('OGN') ? 'Không đủ OGN!' :
-                  error.message?.includes('SLOT') || error.message?.includes('FULL') ? 'Ô trồng đã đầy!' :
-                  'Không thể trồng cây.';
+        error.message?.includes('SLOT') || error.message?.includes('FULL') ? 'Ô trồng đã đầy!' :
+          'Không thể trồng cây.';
       useUIStore.getState().addToast(msg, 'error');
 
       // Rollback
