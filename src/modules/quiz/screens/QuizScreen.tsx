@@ -179,10 +179,10 @@ export default function QuizScreen() {
         <Background />
 
         {/* Wood Panel */}
-        <div className="wood-panel w-full max-w-sm rounded-[30px] p-8 flex flex-col items-center gap-6 relative mt-16 animate-bounce-in">
+        <div className="wood-panel w-full max-w-sm rounded-[30px] p-8 flex flex-col items-center gap-6 relative mt-12 animate-bounce-in">
           {/* Floating Book Icon */}
           <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 animate-[float_4s_ease-in-out_infinite] z-20">
-            <div className="book-icon transform -rotate-6">
+            <div className="book-icon transform -rotate-3">
               <div className="book-spine"></div>
               <div className="book-face">
                 <div className="book-eye"></div>
@@ -191,16 +191,16 @@ export default function QuizScreen() {
               </div>
               {/* Book tabs */}
               <div className="absolute -right-2 top-8 w-4 h-10 bg-white rounded-r-md shadow-sm z-10"></div>
-              <div className="absolute -right-2 top-20 w-4 h-10 bg-white rounded-r-md shadow-sm z-10"></div>
+              <div className="absolute -right-2 top-24 w-4 h-10 bg-white rounded-r-md shadow-sm z-10"></div>
             </div>
           </div>
 
           <div className="mt-16 text-center space-y-2 w-full z-10">
-            <h1 className="text-3xl font-black text-[#4CAF50] drop-shadow-[0_3px_0_rgba(0,0,0,0.3)] tracking-wide uppercase leading-tight"
+            <h1 className="text-3xl font-black text-[#4CAF50] drop-shadow-[0_3px_0_rgba(0,0,0,0.3)] tracking-wide stroke-black uppercase leading-tight"
               style={{ WebkitTextStroke: '1.5px #1B5E20', textShadow: '2px 2px 0px #A5D6A7' }}>
               Nhà Nông<br />Thông Thái
             </h1>
-            <div className="h-1.5 w-24 mx-auto bg-[#8B4513]/20 rounded-full my-4"></div>
+            <div className="h-1 w-24 mx-auto bg-[#8B4513]/20 rounded-full my-4"></div>
             <p className="text-[#5D4037] font-bold text-lg leading-tight">
               Trả lời 5 câu hỏi về nông nghiệp hữu cơ để kiếm OGN và XP!
             </p>
@@ -211,12 +211,12 @@ export default function QuizScreen() {
             <span className="text-[#F57F17] font-black text-lg">+2 OGN/câu đúng</span>
           </div>
 
-          <div className="w-full mt-2 flex flex-col gap-3">
+          <div className="w-full mt-2 flex flex-col gap-4">
             <button onClick={handleStart} disabled={startQuiz.isPending}
               className="w-full group relative active:scale-95 transition-transform duration-100 touch-manipulation">
-              <div className="absolute inset-0 bg-[#2E7D32] rounded-2xl shadow-[0_10px_10px_rgba(0,0,0,0.2)] translate-y-2 group-active:translate-y-1 group-active:shadow-none transition-all"></div>
+              <div className="absolute inset-0 bg-[#388E3C] rounded-2xl shadow-btn-green translate-y-2 group-active:translate-y-1 group-active:shadow-none transition-all"></div>
               <div className="relative bg-[#4CAF50] rounded-2xl border-t-2 border-[#81C784] p-4 flex items-center justify-center gap-2 transform group-active:translate-y-1 transition-all">
-                <span className="material-icons-round text-white text-3xl">play_circle</span>
+                <span className="material-icons-round text-white text-3xl font-bold">play_circle</span>
                 <span className="text-white font-black text-xl uppercase tracking-wide drop-shadow-md">
                   {startQuiz.isPending ? 'Đang tải...' : 'Bắt đầu quiz'}
                 </span>
@@ -224,8 +224,8 @@ export default function QuizScreen() {
             </button>
 
             <button onClick={() => navigate(-1)}
-              className="w-full group relative active:scale-95 transition-transform duration-100 touch-manipulation">
-              <div className="absolute inset-0 bg-[#5D4037] rounded-2xl shadow-[0_10px_10px_rgba(0,0,0,0.2)] translate-y-2 group-active:translate-y-1 group-active:shadow-none transition-all"></div>
+              className="w-full group relative active:scale-95 transition-transform duration-100 touch-manipulation mt-2">
+              <div className="absolute inset-0 bg-[#5D4037] rounded-2xl shadow-btn-wood translate-y-2 group-active:translate-y-1 group-active:shadow-none transition-all"></div>
               <div className="relative bg-[#8D6E63] rounded-2xl border-t-2 border-[#A1887F] p-3 flex items-center justify-center gap-2 transform group-active:translate-y-1 transition-all">
                 <span className="material-icons-round text-white text-2xl">arrow_back</span>
                 <span className="text-white font-bold text-lg uppercase tracking-wide drop-shadow-md">Quay lại</span>
@@ -435,22 +435,22 @@ export default function QuizScreen() {
         .wood-panel::after { right: 10px; }
 
         .book-icon {
-          width: 100px;
-          height: 120px;
+          width: 120px;
+          height: 140px;
           background: #4CAF50;
-          border-radius: 8px 16px 16px 8px;
+          border-radius: 10px 20px 20px 10px;
           position: relative;
-          box-shadow: 4px 4px 0 #2E7D32, 6px 6px 6px rgba(0,0,0,0.2);
+          box-shadow: 5px 5px 0 #2E7D32, 8px 8px 10px rgba(0,0,0,0.2);
         }
         .book-icon::before {
           content: '';
           position: absolute;
-          top: 4px;
-          left: 4px;
-          right: 4px;
-          bottom: 4px;
+          top: 5px;
+          left: 5px;
+          right: 5px;
+          bottom: 5px;
           background: #81C784;
-          border-radius: 4px 12px 12px 4px;
+          border-radius: 5px 15px 15px 5px;
           border: 2px dashed #fff;
         }
         .book-spine {
@@ -458,33 +458,33 @@ export default function QuizScreen() {
           left: 0;
           top: 0;
           bottom: 0;
-          width: 12px;
+          width: 15px;
           background: #388E3C;
-          border-radius: 4px 0 0 4px;
+          border-radius: 5px 0 0 5px;
           z-index: 2;
         }
         .book-face {
           position: absolute;
           top: 50%;
-          left: 55%;
+          left: 50%;
           transform: translate(-50%, -50%);
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
+          gap: 15px;
           z-index: 3;
         }
         .book-eye {
-          width: 10px;
-          height: 10px;
+          width: 12px;
+          height: 12px;
           background: #212121;
           border-radius: 50%;
           position: relative;
         }
         .book-eye::after {
           content: '';
-          width: 3px;
-          height: 3px;
+          width: 4px;
+          height: 4px;
           background: #fff;
           border-radius: 50%;
           position: absolute;
@@ -493,17 +493,18 @@ export default function QuizScreen() {
         }
         .book-smile {
           position: absolute;
-          bottom: -12px;
+          bottom: -15px;
           left: 50%;
           transform: translateX(-50%);
-          width: 16px;
-          height: 8px;
+          width: 20px;
+          height: 10px;
           border-bottom: 3px solid #212121;
-          border-radius: 0 0 16px 16px;
+          border-radius: 0 0 20px 20px;
         }
 
         .shadow-btn-blue { box-shadow: 0 5px 0 0 #1565C0, 0 10px 15px rgba(0,0,0,0.2); }
-        .shadow-btn-green { box-shadow: 0 5px 0 0 #2E7D32, 0 10px 15px rgba(0,0,0,0.2); }
+        .shadow-btn-green { box-shadow: 0 6px 0 0 #2E7D32, 0 10px 10px rgba(0,0,0,0.2); }
+        .shadow-btn-wood { box-shadow: 0 6px 0 0 #5D4037, 0 10px 10px rgba(0,0,0,0.2); }
         .shadow-btn-yellow { box-shadow: 0 5px 0 0 #EF6C00, 0 10px 15px rgba(0,0,0,0.2); }
         .shadow-btn-red { box-shadow: 0 5px 0 0 #C62828, 0 10px 15px rgba(0,0,0,0.2); }
       `}</style>
