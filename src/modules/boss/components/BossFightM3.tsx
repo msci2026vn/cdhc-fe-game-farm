@@ -5,6 +5,9 @@ import { BossInfo } from '../data/bosses';
 import { useLevel, usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
+import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
+import { STAT_CONFIG } from '@/shared/utils/stat-constants';
+import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 
 interface Props {
   boss: BossInfo;
@@ -22,17 +25,33 @@ const COMBO_VFX: Record<string, { emoji: string; particles: string[]; size: stri
 };
 
 export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
+  const { data: statInfo } = usePlayerStats();
+
+  // Compute effective combat stats from stat info (or use defaults)
+  const combatStats: PlayerCombatStats = statInfo ? {
+    atk: statInfo.effectiveStats.atk,
+    hp: statInfo.effectiveStats.hp,
+    def: statInfo.effectiveStats.def,
+    mana: statInfo.effectiveStats.mana,
+  } : {
+    atk: STAT_CONFIG.BASE.ATK,
+    hp: STAT_CONFIG.BASE.HP,
+    def: STAT_CONFIG.BASE.DEF,
+    mana: STAT_CONFIG.BASE.MANA,
+  };
+
   const {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
     handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime,
-  } = useMatch3(bossInfo);
+    milestones, manaDodgeCost, manaUltCost,
+  } = useMatch3(bossInfo, combatStats);
 
   const bossComplete = useBossComplete();
   const { data: profile } = usePlayerProfile();
   const { data: auth } = useAuth();
-  const level = useLevel(); // TanStack Query single source of truth
+  const level = useLevel();
   const rewardedRef = useRef(false);
   const [levelUpShow, setLevelUpShow] = useState(false);
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
@@ -76,7 +95,9 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
 
   const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
-  const shieldPct = Math.min(100, Math.round((boss.shield / 500) * 100));
+  const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200); // dynamic shield max for bar display
+  const shieldPct = Math.min(100, Math.round((boss.shield / shieldMax) * 100));
+  const manaPct = boss.maxMana > 0 ? Math.round((boss.mana / boss.maxMana) * 100) : 0;
   const ultReady = boss.ultCharge >= 100;
   const comboInfo = getComboInfo(combo);
   const comboVfx = COMBO_VFX[comboInfo.label];
@@ -307,12 +328,12 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
         {/* Player stats row */}
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-1.5 mb-2">
           <div className="flex-1">
-            <div className="flex justify-between text-[10px] font-bold mb-1" style={{ color: '#55efc4' }}>
+            <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#55efc4' }}>
               <span>❤️ HP</span><span>{boss.playerHp}/{boss.playerMaxHp}</span>
             </div>
-            <div className="h-2.5 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <div className="h-2 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
               <div className="h-full rounded-md transition-all duration-500" style={{
                 width: `${playerHpPct}%`,
                 background: playerHpPct > 30 ? 'linear-gradient(90deg, #00b894, #55efc4)' : 'linear-gradient(90deg, #e74c3c, #ff6b6b)',
@@ -320,11 +341,19 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
             </div>
           </div>
           <div className="flex-1">
-            <div className="flex justify-between text-[10px] font-bold mb-1" style={{ color: '#74b9ff' }}>
-              <span>🛡️ Shield</span><span>{boss.shield}</span>
+            <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#74b9ff' }}>
+              <span>🛡️ DEF</span><span>{boss.shield}</span>
             </div>
-            <div className="h-2.5 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <div className="h-2 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
               <div className="h-full rounded-md transition-all duration-500" style={{ width: `${shieldPct}%`, background: 'linear-gradient(90deg, #0984e3, #74b9ff)' }} />
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#a29bfe' }}>
+              <span>✨ Mana</span><span>{boss.mana}/{boss.maxMana}</span>
+            </div>
+            <div className="h-2 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div className="h-full rounded-md transition-all duration-500" style={{ width: `${manaPct}%`, background: 'linear-gradient(90deg, #6c5ce7, #a29bfe)' }} />
             </div>
           </div>
         </div>
@@ -352,15 +381,15 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         {/* Bottom: Dodge + Ult row */}
         <div className="flex items-center gap-2 mt-2">
           <button onClick={handleDodge}
-            className={`px-4 py-2 rounded-[20px] font-heading text-xs font-bold transition-all ${attackWarning?.phase === 'dodge_window'
+            className={`px-3 py-2 rounded-[20px] font-heading text-xs font-bold transition-all ${attackWarning?.phase === 'dodge_window' && boss.mana >= manaDodgeCost
               ? 'animate-dodge-pulse text-white scale-110'
               : 'text-white/40'
               }`}
-            style={attackWarning?.phase === 'dodge_window'
+            style={attackWarning?.phase === 'dodge_window' && boss.mana >= manaDodgeCost
               ? { background: 'linear-gradient(135deg, #f39c12, #e74c3c)', boxShadow: '0 0 20px rgba(243,156,18,0.6)' }
               : { background: 'rgba(255,255,255,0.08)' }
             }>
-            🏃 NÉ
+            🏃 NE ({manaDodgeCost})
           </button>
 
           <div className="flex-1 h-2 rounded overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>

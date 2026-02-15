@@ -1,5 +1,13 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { BossInfo } from '../data/bosses';
+import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
+import {
+  getActiveMilestones,
+  atkGemDamage, starGemDamage, maxPlayerHp, startingShield,
+  hpPerGem, shieldPerGem, actualBossDamage,
+  ultDamage as calcUltDamage, manaRegenPerTurn,
+  dodgeCost, ultCost,
+} from '@/shared/utils/combat-formulas';
 
 const COLS = 6;
 const ROWS = 6;
@@ -76,6 +84,11 @@ export interface BossState {
   bossHp: number; bossMaxHp: number;
   playerHp: number; playerMaxHp: number;
   shield: number; ultCharge: number;
+  mana: number; maxMana: number;
+  turnCount: number;
+  immortalUsed: boolean;
+  lastCrit: boolean;
+  ultCooldown: number; // for superMana milestone
 }
 
 export interface DamagePopup { id: number; text: string; color: string; x: number; y: number; }
@@ -94,8 +107,6 @@ function getComboInfo(combo: number) {
   for (const t of COMBO_TIERS) { if (combo >= t.min) tier = t; }
   return tier;
 }
-
-const DMG_PER_GEM: Record<GemType, number> = { atk: 45, hp: 0, def: 0, star: 25 };
 
 // Boss attack config
 const BOSS_ATK_INTERVAL = 4000;
@@ -121,7 +132,21 @@ export interface BossAttackWarning {
   phase: 'warning' | 'dodge_window' | 'hit';
 }
 
-export function useMatch3(bossInfo: BossInfo) {
+export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
+  // Compute stat-based values
+  const milestones = useMemo(() => getActiveMilestones(playerStats), [playerStats]);
+  const dmgPerGem = useMemo(() => ({
+    atk: atkGemDamage(playerStats.atk),
+    hp: 0,
+    def: 0,
+    star: starGemDamage(playerStats.atk),
+  }), [playerStats.atk]);
+  const hpHealPerGem = useMemo(() => hpPerGem(playerStats.hp), [playerStats.hp]);
+  const shieldGainPerGem = useMemo(() => shieldPerGem(playerStats.def), [playerStats.def]);
+  const manaRegen = useMemo(() => manaRegenPerTurn(playerStats.mana), [playerStats.mana]);
+  const manaDodgeCost = useMemo(() => dodgeCost(milestones.dodgeCostReduced), [milestones.dodgeCostReduced]);
+  const manaUltCost = useMemo(() => ultCost(milestones.ultCostReduced), [milestones.ultCostReduced]);
+
   const [grid, setGrid] = useState<Gem[]>(createGrid);
   const [selected, setSelected] = useState<number | null>(null);
   const [animating, setAnimating] = useState(false);
@@ -131,8 +156,16 @@ export function useMatch3(bossInfo: BossInfo) {
   const comboRef = useRef(0);
   const [boss, setBoss] = useState<BossState>({
     bossHp: bossInfo.hp, bossMaxHp: bossInfo.hp,
-    playerHp: 1000, playerMaxHp: 1000,
-    shield: 200, ultCharge: 0,
+    playerHp: maxPlayerHp(playerStats.hp),
+    playerMaxHp: maxPlayerHp(playerStats.hp),
+    shield: startingShield(playerStats.def),
+    ultCharge: 0,
+    mana: playerStats.mana,
+    maxMana: playerStats.mana,
+    turnCount: 0,
+    immortalUsed: false,
+    lastCrit: false,
+    ultCooldown: 0,
   });
   const [popups, setPopups] = useState<DamagePopup[]>([]);
   const popupId = useRef(0);
@@ -193,57 +226,116 @@ export function useMatch3(bossInfo: BossInfo) {
           return;
         }
 
-        // Apply damage
+        // Apply damage with stat-based reduction
         setBoss(prev => {
           if (prev.bossHp <= 0 || prev.playerHp <= 0) return prev;
+
+          // Fort milestone: immune every 10 turns
+          if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
+            addPopup('🏰 Mien nhiem!', '#74b9ff');
+            setBossAttackMsg({ text: 'Thanh Tri bat!', emoji: '🏰' });
+            setTimeout(() => setBossAttackMsg(null), 1000);
+            return prev;
+          }
+
+          // Apply DEF damage reduction
+          const reducedDmg = actualBossDamage(totalDmg, playerStats.def);
+
           let shieldLeft = prev.shield;
-          let hpDmg = totalDmg;
+          let hpDmg = reducedDmg;
           if (shieldLeft > 0) {
-            const absorbed = Math.min(shieldLeft, totalDmg);
+            const absorbed = Math.min(shieldLeft, reducedDmg);
             shieldLeft -= absorbed;
             hpDmg -= absorbed;
           }
-          const newPlayerHp = Math.max(0, prev.playerHp - hpDmg);
-          return { ...prev, playerHp: newPlayerHp, shield: shieldLeft };
+          let newPlayerHp = Math.max(0, prev.playerHp - hpDmg);
+
+          // Immortal milestone: revive once
+          if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
+            newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
+            addPopup('👼 Bat Tu!', '#a29bfe');
+            return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
+          }
+
+          // Reflect milestone: reflect damage back to boss
+          let newBossHp = prev.bossHp;
+          if (milestones.reflectPercent > 0 && reducedDmg > 0) {
+            const reflectDmg = Math.floor(reducedDmg * milestones.reflectPercent);
+            newBossHp = Math.max(0, prev.bossHp - reflectDmg);
+            if (reflectDmg > 0) {
+              setTotalDmgDealt(d => d + reflectDmg);
+              addPopup(`🛡️ Phan -${reflectDmg}`, '#74b9ff');
+            }
+          }
+
+          return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, bossHp: newBossHp };
         });
 
+        const reducedDmgDisplay = actualBossDamage(totalDmg, playerStats.def);
         if (skill) {
-          setBossAttackMsg({ text: `${skill.name}! -${totalDmg}`, emoji: skill.emoji });
+          setBossAttackMsg({ text: `${skill.name}! -${reducedDmgDisplay}`, emoji: skill.emoji });
         } else {
-          setBossAttackMsg({ text: `Boss tấn công! -${totalDmg}`, emoji: '💥' });
+          setBossAttackMsg({ text: `Boss tan cong! -${reducedDmgDisplay}`, emoji: '💥' });
         }
         setScreenShake(true);
-        addPopup(`-${totalDmg}`, '#e74c3c');
+        addPopup(`-${reducedDmgDisplay}`, '#e74c3c');
         setTimeout(() => { setBossAttackMsg(null); setScreenShake(false); }, 1200);
       }, DODGE_WARNING_MS + DODGE_WINDOW_MS);
     }, BOSS_ATK_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [bossInfo.attack, result, addPopup]);
+  }, [bossInfo.attack, result, addPopup, milestones, playerStats.def]);
 
-  // Dodge handler
+  // Dodge handler — costs mana
   const handleDodge = useCallback(() => {
-    if (attackWarning?.phase === 'dodge_window') {
+    if (attackWarning?.phase !== 'dodge_window') return;
+    // Check mana
+    setBoss(prev => {
+      if (prev.mana < manaDodgeCost) {
+        addPopup(`Thieu mana! (${manaDodgeCost})`, '#e74c3c');
+        return prev;
+      }
       dodgedRef.current = true;
       setAttackWarning(null);
-    }
-  }, [attackWarning]);
+      return { ...prev, mana: prev.mana - manaDodgeCost };
+    });
+  }, [attackWarning, manaDodgeCost, addPopup]);
 
-  // Ultimate: massive damage burst
+  // Ultimate: massive damage burst — uses mana (or free with superMana)
   const fireUltimate = useCallback(() => {
     if (boss.ultCharge < 100 || result !== 'fighting') return;
-    setUltActive(true);
-    const ultDmg = Math.round(bossInfo.hp * 0.15); // 15% of boss max HP
-    setBoss(prev => ({
-      ...prev,
-      bossHp: Math.max(0, prev.bossHp - ultDmg),
-      ultCharge: 0,
-    }));
-    setTotalDmgDealt(d => d + ultDmg);
-    addPopup(`⚡ ULTIMATE -${ultDmg}`, '#e056fd');
-    setScreenShake(true);
-    setTimeout(() => { setUltActive(false); setScreenShake(false); }, 1500);
-  }, [boss.ultCharge, bossInfo.hp, result, addPopup]);
+
+    setBoss(prev => {
+      // SuperMana: free ULT with cooldown
+      if (milestones.hasSuperMana) {
+        if (prev.ultCooldown > 0) {
+          addPopup(`ULT CD: ${prev.ultCooldown} turn`, '#e74c3c');
+          return prev;
+        }
+      } else {
+        // Normal: check mana cost
+        if (prev.mana < manaUltCost) {
+          addPopup(`Thieu mana! (${manaUltCost})`, '#e74c3c');
+          return prev;
+        }
+      }
+
+      setUltActive(true);
+      const ultDmg = calcUltDamage(playerStats.atk, playerStats.mana);
+      setTotalDmgDealt(d => d + ultDmg);
+      addPopup(`⚡ ULTIMATE -${ultDmg}`, '#e056fd');
+      setScreenShake(true);
+      setTimeout(() => { setUltActive(false); setScreenShake(false); }, 1500);
+
+      return {
+        ...prev,
+        bossHp: Math.max(0, prev.bossHp - ultDmg),
+        ultCharge: 0,
+        mana: milestones.hasSuperMana ? prev.mana : prev.mana - manaUltCost,
+        ultCooldown: milestones.hasSuperMana ? 8 : 0,
+      };
+    });
+  }, [boss.ultCharge, result, addPopup, milestones, manaUltCost, playerStats]);
 
   const processMatches = useCallback((currentGrid: Gem[], currentCombo: number) => {
     const matched = findMatches(currentGrid);
@@ -266,28 +358,58 @@ export function useMatch3(bossInfo: BossInfo) {
 
     setTimeout(() => {
       setBoss(prev => {
-        let { bossHp, playerHp, shield, ultCharge } = prev;
+        let { bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown } = prev;
         const atkCount = tally.atk || 0;
         const hpCount = tally.hp || 0;
         const defCount = tally.def || 0;
         const starCount = tally.star || 0;
 
-        const baseDmg = atkCount * DMG_PER_GEM.atk + starCount * DMG_PER_GEM.star;
-        const totalDmg = Math.round(baseDmg * comboInfo.mult);
+        // Increment turn
+        turnCount++;
+        if (ultCooldown > 0) ultCooldown--;
+
+        // Stat-based damage
+        const baseDmg = atkCount * dmgPerGem.atk + starCount * dmgPerGem.star;
+        let totalDmg = Math.round(baseDmg * comboInfo.mult);
+
+        // Crit check
+        let isCrit = false;
+        if (milestones.critChance > 0 && totalDmg > 0 && Math.random() < milestones.critChance) {
+          totalDmg = Math.round(totalDmg * milestones.critMultiplier);
+          isCrit = true;
+        }
+
         bossHp = Math.max(0, bossHp - totalDmg);
-        playerHp = Math.min(prev.playerMaxHp, playerHp + Math.round(hpCount * 30 * comboInfo.mult));
-        shield = shield + Math.round(defCount * 25 * comboInfo.mult);
+
+        // Stat-based heal & shield
+        const healAmt = Math.round(hpCount * hpHealPerGem * comboInfo.mult);
+        playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
+        const shieldAmt = Math.round(defCount * shieldGainPerGem * comboInfo.mult);
+        shield = shield + shieldAmt;
+
+        // Mana regen per turn
+        mana = Math.min(prev.maxMana, mana + manaRegen);
+
+        // ULT charge (unchanged formula)
         ultCharge = Math.min(100, ultCharge + starCount * 8 + atkCount * 3 + (newCombo >= 2 ? 5 : 0));
+
+        // HP regen milestone (every N turns)
+        if (milestones.regenPercent > 0 && turnCount % milestones.regenInterval === 0) {
+          const regenHp = Math.floor(prev.playerMaxHp * milestones.regenPercent);
+          playerHp = Math.min(prev.playerMaxHp, playerHp + regenHp);
+          addPopup(`💚 Hoi +${regenHp} HP`, '#55efc4');
+        }
 
         if (totalDmg > 0) {
           setTotalDmgDealt(d => d + totalDmg);
-          const label = newCombo >= 2 ? `-${totalDmg} (x${comboInfo.mult})` : `-${totalDmg}`;
-          addPopup(label, comboInfo.color);
+          const critLabel = isCrit ? ' CRIT!' : '';
+          const label = newCombo >= 2 ? `-${totalDmg} (x${comboInfo.mult})${critLabel}` : `-${totalDmg}${critLabel}`;
+          addPopup(label, isCrit ? '#ff6b6b' : comboInfo.color);
         }
-        if (hpCount > 0) addPopup(`+${Math.round(hpCount * 30 * comboInfo.mult)} HP`, '#55efc4');
-        if (defCount > 0) addPopup(`+${Math.round(defCount * 25 * comboInfo.mult)} 🛡️`, '#74b9ff');
+        if (hpCount > 0) addPopup(`+${healAmt} HP`, '#55efc4');
+        if (defCount > 0) addPopup(`+${shieldAmt} 🛡️`, '#74b9ff');
 
-        return { ...prev, bossHp, playerHp, shield, ultCharge };
+        return { ...prev, bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown, lastCrit: isCrit };
       });
 
       const cleared = currentGrid.map((g, i) => matched.has(i) ? null : g) as (Gem | null)[];
@@ -296,7 +418,7 @@ export function useMatch3(bossInfo: BossInfo) {
       setMatchedCells(new Set());
       setTimeout(() => processMatches(fallen, newCombo), 300);
     }, 350);
-  }, [addPopup]);
+  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones]);
 
   const handleTap = useCallback((idx: number) => {
     if (animating || result !== 'fighting') return;
@@ -333,5 +455,6 @@ export function useMatch3(bossInfo: BossInfo) {
     handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime: fightStartTime.current,
+    milestones, manaDodgeCost, manaUltCost,
   };
 }
