@@ -15,14 +15,14 @@ export function useAllocateStats() {
       queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
 
       useUIStore.getState().addToast(
-        'Phan bo chi so thanh cong!',
+        'Phân bổ chỉ số thành công!',
         'success',
         '✅'
       );
     },
     onError: (error) => {
       useUIStore.getState().addToast(
-        error.message || 'Khong the phan bo chi so',
+        error.message || 'Không thể phân bổ chỉ số',
         'error'
       );
     },

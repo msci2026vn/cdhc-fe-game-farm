@@ -15,14 +15,14 @@ export function useResetStats() {
       queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
 
       useUIStore.getState().addToast(
-        `Da reset chi so! -${data.ognSpent} OGN`,
+        `Đã reset chỉ số! -${data.ognSpent} OGN`,
         'success',
         '🔄'
       );
     },
     onError: (error) => {
       useUIStore.getState().addToast(
-        error.message || 'Khong the reset chi so',
+        error.message || 'Không thể reset chỉ số',
         'error'
       );
     },

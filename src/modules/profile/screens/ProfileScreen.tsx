@@ -140,7 +140,7 @@ export default function ProfileScreen() {
         {tab === 'stats' && (
           <div className="space-y-2 animate-fade-in">
             <div className="flex items-center justify-between">
-              <h3 className="font-heading text-sm font-bold flex items-center gap-2">📈 Chi so nhan vat</h3>
+              <h3 className="font-heading text-sm font-bold flex items-center gap-2">📈 Chỉ số nhân vật</h3>
               {(statInfo?.freePoints ?? 0) > 0 && (
                 <button
                   onClick={() => setShowStatModal(true)}
@@ -149,16 +149,16 @@ export default function ProfileScreen() {
                   <span className="bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
                     {statInfo!.freePoints}
                   </span>
-                  Phan bo ngay!
+                  Phân bổ ngay!
                 </button>
               )}
             </div>
 
             {/* Stat bars — real data */}
             {[
-              { key: 'atk' as const, emoji: '⚔️', name: 'Sat thuong (ATK)', color: '#e74c3c', bg: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)', maxVal: 2000 },
-              { key: 'hp' as const, emoji: '❤️', name: 'Mau toi da (HP)', color: '#4eca6a', bg: 'linear-gradient(135deg, #d4f8dc, #a8e6a0)', maxVal: 5000 },
-              { key: 'def' as const, emoji: '🛡️', name: 'Giap co ban (DEF)', color: '#3498db', bg: 'linear-gradient(135deg, #d4eeff, #a8d4f0)', maxVal: 1000 },
+              { key: 'atk' as const, emoji: '⚔️', name: 'Sát thương (ATK)', color: '#e74c3c', bg: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)', maxVal: 2000 },
+              { key: 'hp' as const, emoji: '❤️', name: 'Máu tối đa (HP)', color: '#4eca6a', bg: 'linear-gradient(135deg, #d4f8dc, #a8e6a0)', maxVal: 5000 },
+              { key: 'def' as const, emoji: '🛡️', name: 'Giáp cơ bản (DEF)', color: '#3498db', bg: 'linear-gradient(135deg, #d4eeff, #a8d4f0)', maxVal: 1000 },
               { key: 'mana' as const, emoji: '✨', name: 'Mana', color: '#9b59b6', bg: 'linear-gradient(135deg, #f0d4ff, #d4a8f0)', maxVal: 1500 },
             ].map((u) => {
               const points = statInfo?.stats?.[u.key] ?? 0;
@@ -171,7 +171,7 @@ export default function ProfileScreen() {
                     style={{ background: u.bg }}>{u.emoji}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold">{u.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{effective.toLocaleString('vi-VN')} ({points} diem)</p>
+                    <p className="text-[10px] text-muted-foreground">{effective.toLocaleString('vi-VN')} ({points} điểm)</p>
                     <div className="h-1.5 rounded-full bg-muted mt-1 overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, background: u.color }} />
                     </div>
@@ -184,7 +184,7 @@ export default function ProfileScreen() {
             {statInfo?.autoEnabled && statInfo.autoPreset && (
               <div className="bg-blue-50 rounded-xl p-2 text-center">
                 <p className="text-[10px] font-bold text-blue-600">
-                  🤖 Tu dong phan bo: {statInfo.autoPreset === 'attack' ? '⚔️ Tan cong' : statInfo.autoPreset === 'defense' ? '🛡️ Phong thu' : '✨ Can bang'}
+                  🤖 Tự động phân bổ: {statInfo.autoPreset === 'attack' ? '⚔️ Tấn công' : statInfo.autoPreset === 'defense' ? '🛡️ Phòng thủ' : '✨ Cân bằng'}
                 </p>
               </div>
             )}
@@ -196,20 +196,20 @@ export default function ProfileScreen() {
                 disabled={resetStats.isPending}
                 className="w-full py-2 rounded-xl text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all disabled:opacity-50"
               >
-                🔄 Reset chi so ({formatOGN(statInfo.resetInfo.nextCost)} OGN) · {statInfo.resetInfo.weeklyCount}/3 tuan nay
+                🔄 Reset chỉ số ({formatOGN(statInfo.resetInfo.nextCost)} OGN) · {statInfo.resetInfo.weeklyCount}/3 tuần này
               </button>
             )}
 
             {/* Next milestones */}
             {statInfo?.milestones?.next && statInfo.milestones.next.length > 0 && (
               <div className="mt-2">
-                <p className="text-[10px] font-bold text-gray-400 mb-1">💡 Moc tiep theo</p>
+                <p className="text-[10px] font-bold text-gray-400 mb-1">💡 Mốc tiếp theo</p>
                 {statInfo.milestones.next.slice(0, 3).map((m) => (
                   <div key={m.id} className="flex items-center gap-2 bg-gray-50 rounded-lg p-1.5 mb-1">
                     <span className="text-sm">{m.icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] font-bold">{m.name}</p>
-                      <p className="text-[9px] text-gray-400">{m.description} · Con {m.remaining} diem</p>
+                      <p className="text-[9px] text-gray-400">{m.description} · Còn {m.remaining} điểm</p>
                     </div>
                   </div>
                 ))}
@@ -219,7 +219,7 @@ export default function ProfileScreen() {
             {/* Unlocked milestones */}
             {statInfo?.milestones?.unlocked && statInfo.milestones.unlocked.length > 0 && (
               <div className="mt-2">
-                <p className="text-[10px] font-bold text-gray-400 mb-1">🏅 Da mo khoa</p>
+                <p className="text-[10px] font-bold text-gray-400 mb-1">🏅 Đã mở khóa</p>
                 {statInfo.milestones.unlocked.map((m) => (
                   <div key={m.id} className="flex items-center gap-2 bg-amber-50 rounded-lg p-1.5 mb-1">
                     <span className="text-sm">{m.icon}</span>
@@ -300,15 +300,15 @@ export default function ProfileScreen() {
           <div className="bg-white rounded-2xl p-5 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="text-4xl mb-2">🔄</div>
-              <h3 className="font-heading text-lg font-bold mb-1">Reset chi so?</h3>
+              <h3 className="font-heading text-lg font-bold mb-1">Reset chỉ số?</h3>
               <p className="text-sm text-gray-600 mb-3">
-                Tat ca diem chi so se duoc tra lai. Ban co the phan bo lai.
+                Tất cả điểm chỉ số sẽ được trả lại. Bạn có thể phân bổ lại.
               </p>
               <div className="bg-orange-50 rounded-xl p-3 mb-4">
-                <p className="text-xs text-orange-700 font-bold mb-1">Chi phi reset</p>
+                <p className="text-xs text-orange-700 font-bold mb-1">Chi phí reset</p>
                 <p className="text-2xl font-black text-orange-600">{formatOGN(statInfo.resetInfo.nextCost)} OGN</p>
                 <p className="text-[10px] text-orange-500 mt-1">
-                  Lan reset {statInfo.resetInfo.weeklyCount + 1}/3 tuan nay
+                  Lần reset {statInfo.resetInfo.weeklyCount + 1}/3 tuần này
                 </p>
               </div>
               <div className="flex gap-2">
@@ -316,7 +316,7 @@ export default function ProfileScreen() {
                   onClick={() => setShowResetConfirm(false)}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
                 >
-                  Huy
+                  Hủy
                 </button>
                 <button
                   onClick={() => {
@@ -325,7 +325,7 @@ export default function ProfileScreen() {
                       onError: (err: any) => {
                         setShowResetConfirm(false);
                         setResetError({
-                          message: err.message || 'Khong the reset chi so',
+                          message: err.message || 'Không thể reset chỉ số',
                           code: err.code || 'UNKNOWN'
                         });
                       }
@@ -334,7 +334,7 @@ export default function ProfileScreen() {
                   disabled={resetStats.isPending}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 active:scale-95 shadow-lg disabled:opacity-50"
                 >
-                  {resetStats.isPending ? '...' : 'Xac nhan'}
+                  {resetStats.isPending ? '...' : 'Xác nhận'}
                 </button>
               </div>
             </div>

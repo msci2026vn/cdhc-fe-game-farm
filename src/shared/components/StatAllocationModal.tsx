@@ -26,9 +26,9 @@ const STAT_META: { key: StatKey; emoji: string; label: string; color: string; bg
 ];
 
 const PRESETS: { key: 'attack' | 'defense' | 'balance'; emoji: string; label: string }[] = [
-  { key: 'attack', emoji: '⚔️', label: 'Tan cong' },
-  { key: 'defense', emoji: '🛡️', label: 'Phong thu' },
-  { key: 'balance', emoji: '✨', label: 'Can bang' },
+  { key: 'attack', emoji: '⚔️', label: 'Tấn công' },
+  { key: 'defense', emoji: '🛡️', label: 'Phòng thủ' },
+  { key: 'balance', emoji: '✨', label: 'Cân bằng' },
 ];
 
 /**
@@ -143,7 +143,7 @@ export function StatAllocationModal({
 
     const onError = (err: any) => {
       setErrorModal({
-        message: err.message || 'Khong the phan bo chi so',
+        message: err.message || 'Không thể phân bổ chỉ số',
         code: err.code || 'UNKNOWN'
       });
     };
@@ -168,11 +168,11 @@ export function StatAllocationModal({
         >
           {/* Header */}
           <div className="p-4 pb-2 text-center flex-shrink-0">
-            <h3 className="font-heading text-lg font-bold">Phan bo chi so</h3>
+            <h3 className="font-heading text-lg font-bold">Phân bổ chỉ số</h3>
             <div className="inline-flex items-center gap-1.5 mt-1 bg-amber-50 px-3 py-1 rounded-full">
               <span className="text-sm">🎯</span>
               <span className="text-sm font-bold text-amber-700">
-                Con lai: <span className="text-amber-500">{remaining}</span> diem
+                Còn lại: <span className="text-amber-500">{remaining}</span> điểm
               </span>
             </div>
           </div>
@@ -230,7 +230,7 @@ export function StatAllocationModal({
                     {/* Milestone hint */}
                     {milestone && (
                       <p className="text-[9px] text-gray-400 mt-0.5">
-                        💡 Con {milestone.remaining} → {milestone.name}
+                        💡 Còn {milestone.remaining} → {milestone.name}
                       </p>
                     )}
                   </div>
@@ -248,8 +248,8 @@ export function StatAllocationModal({
                     onClick={() => handlePreset(p.key)}
                     disabled={isPending}
                     className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${selectedPreset === p.key
-                        ? 'bg-primary text-white shadow-md'
-                        : 'bg-gray-100 text-gray-600'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-gray-100 text-gray-600'
                       }`}
                   >
                     {p.emoji} {p.label}
@@ -267,14 +267,14 @@ export function StatAllocationModal({
                 disabled={isPending}
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
               >
-                Dong
+                Đóng
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={totalPending === 0 || isPending}
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 active:scale-95 shadow-lg disabled:opacity-50"
               >
-                {isPending ? '...' : 'Xac nhan'}
+                {isPending ? '...' : 'Xác nhận'}
               </button>
             </div>
           </div>
