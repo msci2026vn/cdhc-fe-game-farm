@@ -77,7 +77,7 @@ export default function FriendsList({ open, onClose, onVisit, onInvite, onLeader
                 {/* Stats */}
                 <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
                   <span className="text-lg">🪙</span>
-                  <span className="text-[9px] font-bold text-muted-foreground">{friend.ogn.toLocaleString('vi-VN')}</span>
+                  <span className="text-[9px] font-bold text-muted-foreground">{(friend.ogn ?? 0).toLocaleString('vi-VN')}</span>
                 </div>
 
                 {/* Arrow */}

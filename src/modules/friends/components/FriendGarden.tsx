@@ -100,7 +100,7 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
         {[
           { icon: '🪙', val: (friendInfo?.ogn ?? friend.ogn).toLocaleString('vi-VN'), label: 'OGN' },
           { icon: '🌱', val: `${farmData?.plots.length ?? 0}/${totalSlots}`, label: 'Ô trồng' },
-          { icon: '🌾', val: friend.totalHarvest.toString(), label: 'Thu hoạch' },
+          { icon: '🌾', val: (friend.totalHarvest ?? 0).toString(), label: 'Thu hoạch' },
         ].map((s) => (
           <div key={s.label} className="flex-1 stat-chip rounded-xl px-2.5 py-2 flex items-center gap-2">
             <span className="text-base">{s.icon}</span>

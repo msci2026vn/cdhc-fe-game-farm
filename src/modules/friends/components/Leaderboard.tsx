@@ -103,7 +103,7 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
                         : 'linear-gradient(180deg, #cd7f32, #a0522d)',
                   }}>
                   <span className="text-white font-heading text-sm font-bold pb-2">
-                    {displayValue.toLocaleString('vi-VN')}
+                    {(displayValue ?? 0).toLocaleString('vi-VN')}
                   </span>
                 </div>
               </div>
@@ -167,7 +167,7 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
                   className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'bg-primary/5' : ''}`}
                   style={{ borderBottom: '1px solid #f0ebe4' }}>
                   <span className="w-7 text-center font-heading text-sm font-bold text-muted-foreground">
-                    #{entry.rank}
+                    #{entry.rank ?? '-'}
                   </span>
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
                     style={{ background: 'rgba(240,180,41,0.1)' }}>
@@ -178,14 +178,14 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
                       {entry.name} {isMe && '(Bạn)'}
                     </p>
                     <p className="text-[10px] text-muted-foreground font-semibold">
-                      Lv.{entry.level}
+                      Lv.{entry.level ?? 1}
                     </p>
                   </div>
                   <span className="font-heading text-sm font-bold" style={{ color: '#d49a1a' }}>
-                    {tab === 'ogn' && `🪙 ${displayValue.toLocaleString('vi-VN')}`}
-                    {tab === 'xp' && `⭐ ${displayValue.toLocaleString('vi-VN')}`}
-                    {tab === 'level' && `🏆 Lv.${displayValue}`}
-                    {tab === 'harvests' && `🌾 ${displayValue}`}
+                    {tab === 'ogn' && `🪙 ${(displayValue ?? 0).toLocaleString('vi-VN')}`}
+                    {tab === 'xp' && `⭐ ${(displayValue ?? 0).toLocaleString('vi-VN')}`}
+                    {tab === 'level' && `🏆 Lv.${displayValue ?? 0}`}
+                    {tab === 'harvests' && `🌾 ${displayValue ?? 0}`}
                   </span>
                 </div>
               );

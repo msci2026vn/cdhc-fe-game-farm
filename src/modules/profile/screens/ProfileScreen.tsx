@@ -98,10 +98,10 @@ export default function ProfileScreen() {
         {/* Quick stats row */}^M
         <div className="grid grid-cols-4 gap-1.5 mt-3">
           {[
-            { val: profile.totalHarvests.toString(), label: 'Thu hoạch', emoji: '🌾' },
-            { val: profile.likesCount.toString(), label: 'Lượt thích', emoji: '❤️' },
-            { val: profile.commentsCount.toString(), label: 'Bình luận', emoji: '💬' },
-            { val: profile.giftsCount.toString(), label: 'Quà tặng', emoji: '🎁' },
+            { val: (profile.totalHarvests ?? 0).toString(), label: 'Thu hoạch', emoji: '🌾' },
+            { val: (profile.likesCount ?? 0).toString(), label: 'Lượt thích', emoji: '❤️' },
+            { val: (profile.commentsCount ?? 0).toString(), label: 'Bình luận', emoji: '💬' },
+            { val: (profile.giftsCount ?? 0).toString(), label: 'Quà tặng', emoji: '🎁' },
           ].map((s) => (
             <div key={s.label} className="rounded-xl p-2 text-center glass-card">
               <span className="text-sm block">{s.emoji}</span>
