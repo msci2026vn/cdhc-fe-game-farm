@@ -76,10 +76,10 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
             const heights = [120, 90, 70];
             const medals = ['🥇', '🥈', '🥉'];
 
-            const displayValue = tab === 'ogn' ? entry.ogn
-              : tab === 'xp' ? entry.xp
-              : tab === 'level' ? entry.level
-              : entry.totalHarvests;
+            const displayValue = tab === 'ogn' ? (entry.ogn ?? 0)
+              : tab === 'xp' ? (entry.xp ?? 0)
+                : tab === 'level' ? (entry.level ?? 0)
+                  : (entry.totalHarvests ?? 0);
 
             return (
               <div key={entry.userId} className="flex flex-col items-center" style={{ width: 90 }}>
@@ -157,10 +157,10 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
           ) : (
             rankings.slice(3).map((entry) => {
               const isMe = entry.userId === myUserId;
-              const displayValue = tab === 'ogn' ? entry.ogn
-                : tab === 'xp' ? entry.xp
-                : tab === 'level' ? entry.level
-                : entry.totalHarvests;
+              const displayValue = tab === 'ogn' ? (entry.ogn ?? 0)
+                : tab === 'xp' ? (entry.xp ?? 0)
+                  : tab === 'level' ? (entry.level ?? 0)
+                    : (entry.totalHarvests ?? 0);
 
               return (
                 <div key={entry.userId}
