@@ -1,14 +1,9 @@
 /**
  * useFarmPlots — TanStack Query hook for farm plots
  *
- * FARMVERSE Step 12
- *
- * Returns user's farm plots from server with:
- * - Real-time growth percentage
- * - Plant type info (name, emoji)
- * - Auto-refresh every 60s (growth changes over time)
- *
- * Transforms BE response to match FE FarmPlot format expected by components.
+ * Fetches plots ONCE on mount. No polling.
+ * Growth is calculated client-side by useGrowthTimer.
+ * Re-fetches only after user actions (plant/water/harvest) via invalidateQueries.
  */
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -88,16 +83,11 @@ function transformPlot(apiPlot: ApiFarmPlot): FarmPlot {
 export function useFarmPlots() {
   return useQuery<FarmPlotsResponse>({
     queryKey: ['game', 'farm', 'plots'],
-    queryFn: async () => {
-      console.log('[FARM-DEBUG] useFarmPlots: 🔄 Fetching plots from API...');
-      const data = await gameApi.getPlots();
-      console.log('[FARM-DEBUG] useFarmPlots: ✅ Received data =', JSON.stringify(data));
-      return data;
-    },
-    staleTime: 0, // FIX: Set to 0 to always refetch when invalidated
-    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    queryFn: () => gameApi.getPlots(),
+    staleTime: Infinity,          // Never auto-refetch; growth is client-side
+    gcTime: 1000 * 60 * 10,      // Keep in cache 10 minutes
+    refetchOnWindowFocus: false,  // No poll on focus
+    refetchOnMount: true,         // Fetch once on mount
     retry: 2,
   });
 }

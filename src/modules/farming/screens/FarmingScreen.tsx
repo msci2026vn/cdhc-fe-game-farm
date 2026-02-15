@@ -1,15 +1,12 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
-import FarmHeader from '../components/FarmHeader';
 import PlantSeedModal from '../components/PlantSeedModal';
 import PlantPickerModal from '../components/PlantPickerModal';
 import BugCatchGame from '../components/BugCatchGame';
-import WeatherOverlay from '../components/WeatherOverlay';
-import WeatherControl from '../components/WeatherControl';
 import FriendsList from '@/modules/friends/components/FriendsList';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
@@ -18,8 +15,7 @@ import { Friend } from '@/modules/friends/data/friends';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { calculateGrowthPercent, calculateStage, isHarvestReady, getPlantSprite, getMoodEmoji, getWeatherGrowthMultiplier, getWeatherHappinessModifier } from '../utils/growth';
-import { formatTime } from '@/shared/utils/format';
+import { calculateStage, getPlantSprite, getWeatherGrowthMultiplier } from '../utils/growth';
 import { useCooldown } from '@/shared/hooks/useCooldown';
 import { usePlantSeed } from '@/shared/hooks/usePlantSeed';
 import { useWaterPlot } from '@/shared/hooks/useWaterPlot';
@@ -29,13 +25,13 @@ import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { useWeather } from '@/shared/hooks/useWeather';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
+import { useGrowthTimer } from '@/shared/hooks/useGrowthTimer';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import {
   handleGameError,
   showPlantSuccess,
   showWaterSuccess,
-  showHarvestSuccess,
   showLevelUp,
   formatCooldown,
 } from '@/shared/utils/error-handler';
@@ -68,24 +64,17 @@ export default function FarmingScreen() {
     }
   }, [weatherError]);
 
-  // Track mount count
-  const mountCount = useRef(0);
-  useEffect(() => {
-    mountCount.current++;
-    console.log(`[FARM-DEBUG] FarmingScreen: ✅ MOUNT #${mountCount.current}`);
-    return () => {
-      console.log(`[FARM-DEBUG] FarmingScreen: ❌ UNMOUNT #${mountCount.current}`);
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log('[FARM-DEBUG] FarmingScreen: State =', {
-      isLoading: plotsLoading,
-      hasError: !!plotsError,
-      errorMsg: plotsError?.message,
-      plotCount: plots?.length ?? 'N/A',
-    });
-  }, [plotsLoading, plotsError, plots?.length]);
+  // Client-side growth timer — updates every 1s, ZERO API calls
+  const plotGrowthInputs = useMemo(
+    () => plots.map(p => ({
+      plotId: p.id,
+      plantedAt: p.plantedAt,
+      growthDurationMs: p.plantType.growthDurationMs,
+      isDead: p.isDead,
+    })),
+    [plots]
+  );
+  const growthMap = useGrowthTimer(plotGrowthInputs);
 
   // ─── NEW: Online status detection (Step 16) ───
   const isOnline = useOnlineStatus();
@@ -106,12 +95,12 @@ export default function FarmingScreen() {
   const [waterCooldowns, setWaterCooldowns] = useState<Record<string, number>>({});
   // key = plotId, value = cooldownEndTimestamp
 
-  // ─── NEW: Harvest result state (for animation) ───
+  // ─── Harvest result state (for animation) ───
   const [harvestResult, setHarvestResult] = useState<{
     plantEmoji: string;
     plantName: string;
+    ognEarned: number;
     xp: number;
-    message: string;
     leveledUp: boolean;
   } | null>(null);
 
@@ -252,47 +241,39 @@ export default function FarmingScreen() {
 
   const handleHarvest = useCallback(() => {
     const currentPlot = plots[activePlotIndex];
-    if (!currentPlot || !isHarvestReady(currentPlot)) return;
+    if (!currentPlot) return;
 
-    console.log('[FARM-DEBUG] FarmingScreen — HARVEST CLICKED:', currentPlot.id);
+    // Use client-side growth check
+    const growth = growthMap.get(currentPlot.id);
+    if (!growth?.isReady) return;
 
     harvestMutation.mutate(currentPlot.id, {
       onSuccess: (data) => {
-        console.log('[FARM-DEBUG] FarmingScreen — HARVEST SUCCESS:', JSON.stringify(data));
+        const plantEmoji = data.plantEmoji || '🌾';
+        const plantName = data.plantName || 'Nông sản';
+        const ognEarned = data.ognEarned || 0;
+        const xp = data.xpGained || 0;
 
-        // MỚI — Lấy thông tin từ response
-        const plantEmoji = data.inventory?.plantEmoji || data.plantEmoji || '🌾';
-        const plantName = data.inventory?.plantName || data.plantName || 'Nông sản';
-        const xp = data.reward?.xp || data.xpGained || 0;
-
-        // Show harvest animation — MỚI structure
         setHarvestResult({
           plantEmoji,
           plantName,
+          ognEarned,
           xp,
-          message: 'Đã vào kho! Bán lấy tiền 💰',
           leveledUp: data.leveledUp,
         });
-
-        // Clear animation after 3s
         setTimeout(() => setHarvestResult(null), 3000);
 
-        // Show effects — MỚI: KHÔNG hiện OGN
-        showFlyUp(`+${xp} XP 🌾 Vào kho!`);
-        // showHarvestSuccess no longer used — toast shown from useHarvestPlot hook
+        showFlyUp(`+${ognEarned} OGN +${xp} XP`);
 
-        // Level up toast/animation
         if (data.leveledUp) {
-          console.log('[FARM-DEBUG] FarmingScreen — 🎉 LEVEL UP! Level:', data.newLevel);
           showLevelUp(data.newLevel);
         }
       },
       onError: (error) => {
-        console.error('[FARM-DEBUG] FarmingScreen — HARVEST ERROR:', error.message);
         handleGameError(error, 'harvest');
       },
     });
-  }, [harvestMutation, showFlyUp, addToast, activePlotIndex, plots]);
+  }, [harvestMutation, showFlyUp, activePlotIndex, plots, growthMap]);
 
   // ─── NEW: Clear dead plot handler (Step 23) ───
   const handleClear = useCallback(() => {
@@ -390,9 +371,10 @@ export default function FarmingScreen() {
     );
   }
 
-  const growthPct = activePlot ? calculateGrowthPercent(activePlot) : 0;
+  const activeGrowth = activePlot ? growthMap.get(activePlot.id) : undefined;
+  const growthPct = activeGrowth?.percent ?? 0;
   const stage = activePlot ? calculateStage(activePlot) : 'seed';
-  const harvestReady = activePlot ? isHarvestReady(activePlot) : false;
+  const harvestReady = activeGrowth?.isReady ?? false;
 
   const STAGE_LABELS: Record<string, string> = {
     seed: 'Giai đoạn 1/5', sprout: 'Giai đoạn 2/5', seedling: 'Giai đoạn 3/5', mature: 'Giai đoạn 4/5', dead: 'Đã chết',
@@ -593,7 +575,7 @@ export default function FarmingScreen() {
                 <div className="flex justify-center mt-1">
                   <div className="bg-yellow-100/80 text-yellow-800 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border border-yellow-200">
                     <span className="material-symbols-outlined text-[14px]">timer</span>
-                    {activePlot.isDead ? 'Dead' : harvestReady ? 'Ready!' : 'Growing...'}
+                    {activePlot.isDead ? 'Dead' : harvestReady ? '🌾 Thu hoạch!' : `⏳ ${activeGrowth?.remainingText || 'Growing...'}`}
                   </div>
                 </div>
               </div>
@@ -717,16 +699,16 @@ export default function FarmingScreen() {
           <div className="animate-bounce text-center bg-white rounded-2xl p-6 shadow-2xl">
             <div className="text-6xl mb-2">{harvestResult.plantEmoji}</div>
             <div className="text-lg font-bold text-green-600">
-              Đã thu hoạch {harvestResult.plantName}!
+              Thu hoạch {harvestResult.plantName}!
+            </div>
+            <div className="text-sm text-yellow-600 font-bold mt-1">
+              +{harvestResult.ognEarned} OGN 🪙
             </div>
             <div className="text-sm text-amber-500 mt-1">
               +{harvestResult.xp} XP
             </div>
-            <div className="text-sm text-blue-500 mt-2 animate-bounce">
-              🌾 Vào kho bán lấy tiền!
-            </div>
             {harvestResult.leveledUp && (
-              <div className="mt-2">
+              <div className="mt-2 text-purple-600 font-bold">
                 🎉 LEVEL UP!
               </div>
             )}
