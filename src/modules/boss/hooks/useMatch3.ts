@@ -132,6 +132,24 @@ export interface BossAttackWarning {
   phase: 'warning' | 'dodge_window' | 'hit';
 }
 
+export interface CombatStats {
+  critCount: number;
+  reflectTotal: number;
+  dodgeCount: number;
+  ultCount: number;
+  totalHealed: number;
+  totalShieldGained: number;
+  turnsPlayed: number;
+}
+
+export type CombatNotifType = 'crit' | 'reflect' | 'regen' | 'fort' | 'immortal' | 'dodge';
+export interface CombatNotif {
+  id: number;
+  type: CombatNotifType;
+  text: string;
+  color: string;
+}
+
 export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
   // Compute stat-based values
   const milestones = useMemo(() => getActiveMilestones(playerStats), [playerStats]);
@@ -173,6 +191,18 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
   const [screenShake, setScreenShake] = useState(false);
   const [result, setResult] = useState<FightResult>('fighting');
   const [totalDmgDealt, setTotalDmgDealt] = useState(0);
+  const [combatStatsTracker, setCombatStatsTracker] = useState<CombatStats>({
+    critCount: 0, reflectTotal: 0, dodgeCount: 0, ultCount: 0,
+    totalHealed: 0, totalShieldGained: 0, turnsPlayed: 0,
+  });
+  const [combatNotifs, setCombatNotifs] = useState<CombatNotif[]>([]);
+  const notifIdRef = useRef(0);
+
+  const addCombatNotif = useCallback((type: CombatNotifType, text: string, color: string) => {
+    const id = notifIdRef.current++;
+    setCombatNotifs(prev => [...prev, { id, type, text, color }]);
+    setTimeout(() => setCombatNotifs(prev => prev.filter(n => n.id !== id)), 2000);
+  }, []);
 
   // Fight start time (for duration tracking / anti-cheat)
   const fightStartTime = useRef(Date.now());
@@ -233,6 +263,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
           // Fort milestone: immune every 10 turns
           if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
             addPopup('🏰 Mien nhiem!', '#74b9ff');
+            addCombatNotif('fort', '🏰 Thanh Tri bat!', '#74b9ff');
             setBossAttackMsg({ text: 'Thanh Tri bat!', emoji: '🏰' });
             setTimeout(() => setBossAttackMsg(null), 1000);
             return prev;
@@ -254,6 +285,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
           if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
             newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
             addPopup('👼 Bat Tu!', '#a29bfe');
+            addCombatNotif('immortal', '👼 Bat Tu kich hoat!', '#a29bfe');
             return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
           }
 
@@ -264,7 +296,9 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
             newBossHp = Math.max(0, prev.bossHp - reflectDmg);
             if (reflectDmg > 0) {
               setTotalDmgDealt(d => d + reflectDmg);
+              setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));
               addPopup(`🛡️ Phan -${reflectDmg}`, '#74b9ff');
+              addCombatNotif('reflect', `🛡️ Phan xa ${reflectDmg} DMG!`, '#74b9ff');
             }
           }
 
@@ -297,9 +331,11 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
       }
       dodgedRef.current = true;
       setAttackWarning(null);
+      setCombatStatsTracker(s => ({ ...s, dodgeCount: s.dodgeCount + 1 }));
+      addCombatNotif('dodge', '🏃 Ne thanh cong!', '#55efc4');
       return { ...prev, mana: prev.mana - manaDodgeCost };
     });
-  }, [attackWarning, manaDodgeCost, addPopup]);
+  }, [attackWarning, manaDodgeCost, addPopup, addCombatNotif]);
 
   // Ultimate: massive damage burst — uses mana (or free with superMana)
   const fireUltimate = useCallback(() => {
@@ -323,6 +359,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
       setUltActive(true);
       const ultDmg = calcUltDamage(playerStats.atk, playerStats.mana);
       setTotalDmgDealt(d => d + ultDmg);
+      setCombatStatsTracker(s => ({ ...s, ultCount: s.ultCount + 1 }));
       addPopup(`⚡ ULTIMATE -${ultDmg}`, '#e056fd');
       setScreenShake(true);
       setTimeout(() => { setUltActive(false); setScreenShake(false); }, 1500);
@@ -377,6 +414,8 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
         if (milestones.critChance > 0 && totalDmg > 0 && Math.random() < milestones.critChance) {
           totalDmg = Math.round(totalDmg * milestones.critMultiplier);
           isCrit = true;
+          setCombatStatsTracker(s => ({ ...s, critCount: s.critCount + 1 }));
+          addCombatNotif('crit', `CRIT! x${milestones.critMultiplier}`, '#ff6b6b');
         }
 
         bossHp = Math.max(0, bossHp - totalDmg);
@@ -386,6 +425,9 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
         playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
         const shieldAmt = Math.round(defCount * shieldGainPerGem * comboInfo.mult);
         shield = shield + shieldAmt;
+
+        if (healAmt > 0) setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + healAmt }));
+        if (shieldAmt > 0) setCombatStatsTracker(s => ({ ...s, totalShieldGained: s.totalShieldGained + shieldAmt }));
 
         // Mana regen per turn
         mana = Math.min(prev.maxMana, mana + manaRegen);
@@ -398,7 +440,11 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
           const regenHp = Math.floor(prev.playerMaxHp * milestones.regenPercent);
           playerHp = Math.min(prev.playerMaxHp, playerHp + regenHp);
           addPopup(`💚 Hoi +${regenHp} HP`, '#55efc4');
+          addCombatNotif('regen', `💚 Hoi phuc +${regenHp} HP`, '#55efc4');
+          setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + regenHp }));
         }
+
+        setCombatStatsTracker(s => ({ ...s, turnsPlayed: turnCount }));
 
         if (totalDmg > 0) {
           setTotalDmgDealt(d => d + totalDmg);
@@ -456,5 +502,6 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime: fightStartTime.current,
     milestones, manaDodgeCost, manaUltCost,
+    combatStatsTracker, combatNotifs,
   };
 }

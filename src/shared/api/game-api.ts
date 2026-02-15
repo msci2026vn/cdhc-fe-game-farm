@@ -80,6 +80,8 @@ import type {
   AllocateStatsResponse,
   ResetStatsResponse,
   AutoSettingRequest,
+  // Weekly boss (Phase 4)
+  WeeklyBossInfo,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -1249,6 +1251,31 @@ export const gameApi = {
     const json = await response.json();
     return json;
   },
+
+  /**
+   * Get weekly boss rotation info
+   */
+  getWeeklyBoss: async (): Promise<WeeklyBossInfo> => {
+    const url = 'https://sta.cdhc.vn/api/game/boss/weekly';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getWeeklyBoss');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
 };
 
 export type {
@@ -1286,4 +1313,5 @@ export type {
   AllocateStatsResponse,
   ResetStatsResponse,
   AutoSettingRequest,
+  WeeklyBossInfo,
 };

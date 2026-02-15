@@ -449,6 +449,18 @@ export interface BossStatus {
   nextFightAt: string | null;
 }
 
+export interface WeeklyBossInfo {
+  bossId: string;
+  bossName: string;
+  bossEmoji: string;
+  weakness: 'atk' | 'hp' | 'def' | 'mana';
+  rewardMultiplier: number;
+  weekNumber: number;
+  year: number;
+  startsAt: string;
+  endsAt: string;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // HEALTH & AUTH
 // ═══════════════════════════════════════════════════════════════

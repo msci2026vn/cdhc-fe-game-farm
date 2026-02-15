@@ -8,6 +8,7 @@ import { useBossComplete } from '@/shared/hooks/useBossComplete';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
+import { BuildAura, getDominantAura, AURA_CONFIGS } from '@/shared/components/BuildAura';
 
 interface Props {
   boss: BossInfo;
@@ -46,7 +47,11 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime,
     milestones, manaDodgeCost, manaUltCost,
+    combatStatsTracker, combatNotifs,
   } = useMatch3(bossInfo, combatStats);
+
+  const auraType = getDominantAura(combatStats);
+  const auraConfig = AURA_CONFIGS[auraType];
 
   const bossComplete = useBossComplete();
   const { data: profile } = usePlayerProfile();
@@ -130,10 +135,50 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           <p className="text-white/60 text-sm mb-1">
             {won ? `Đã tiêu diệt ${bossInfo.name}!` : `${bossInfo.name} đã đánh bại bạn!`}
           </p>
-          <div className="flex items-center justify-center gap-4 my-4 text-sm font-bold">
+          <div className="flex items-center justify-center gap-4 my-3 text-sm font-bold">
             <span style={{ color: '#ff6b6b' }}>⚔️ {totalDmgDealt.toLocaleString()} DMG</span>
             {serverData?.won && <span style={{ color: '#fdcb6e' }}>🪙 +{serverData.ognReward} OGN</span>}
             {serverData?.won && <span style={{ color: '#a29bfe' }}>⭐ +{serverData.xpGained} XP</span>}
+          </div>
+
+          {/* Combat stats summary */}
+          <div className="grid grid-cols-3 gap-2 mb-4 px-2">
+            {combatStatsTracker.critCount > 0 && (
+              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(255,107,107,0.15)', border: '1px solid rgba(255,107,107,0.2)' }}>
+                <div className="text-sm">💥</div>
+                <div className="text-[10px] font-bold" style={{ color: '#ff6b6b' }}>{combatStatsTracker.critCount} Crit</div>
+              </div>
+            )}
+            {combatStatsTracker.dodgeCount > 0 && (
+              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(85,239,196,0.15)', border: '1px solid rgba(85,239,196,0.2)' }}>
+                <div className="text-sm">🏃</div>
+                <div className="text-[10px] font-bold" style={{ color: '#55efc4' }}>{combatStatsTracker.dodgeCount} Ne</div>
+              </div>
+            )}
+            {combatStatsTracker.ultCount > 0 && (
+              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(162,155,254,0.15)', border: '1px solid rgba(162,155,254,0.2)' }}>
+                <div className="text-sm">⚡</div>
+                <div className="text-[10px] font-bold" style={{ color: '#a29bfe' }}>{combatStatsTracker.ultCount} ULT</div>
+              </div>
+            )}
+            {combatStatsTracker.reflectTotal > 0 && (
+              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(116,185,255,0.15)', border: '1px solid rgba(116,185,255,0.2)' }}>
+                <div className="text-sm">🛡️</div>
+                <div className="text-[10px] font-bold" style={{ color: '#74b9ff' }}>{combatStatsTracker.reflectTotal} Phan xa</div>
+              </div>
+            )}
+            {combatStatsTracker.totalHealed > 0 && (
+              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(85,239,196,0.15)', border: '1px solid rgba(85,239,196,0.2)' }}>
+                <div className="text-sm">💚</div>
+                <div className="text-[10px] font-bold" style={{ color: '#55efc4' }}>{combatStatsTracker.totalHealed} HP hoi</div>
+              </div>
+            )}
+            {combatStatsTracker.turnsPlayed > 0 && (
+              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(253,203,110,0.15)', border: '1px solid rgba(253,203,110,0.2)' }}>
+                <div className="text-sm">🔄</div>
+                <div className="text-[10px] font-bold" style={{ color: '#fdcb6e' }}>{combatStatsTracker.turnsPlayed} Luot</div>
+              </div>
+            )}
           </div>
           {serverData?.won && (
             <div className="flex gap-3 mb-6">
@@ -234,18 +279,38 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         </div>
       )}
 
+      {/* Combat notifications (right side) */}
+      {combatNotifs.length > 0 && (
+        <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
+          {combatNotifs.slice(-3).map(n => (
+            <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
+              style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
+              {n.text}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Top half: Boss arena */}
       <div className="flex-[0_0_46%] pt-safe px-5 pb-2 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
         }} />
 
-        {/* Header with level */}
+        {/* Header with level + stats */}
         <div className="flex justify-between items-center mb-2 z-10">
           <button onClick={onBack} className="text-white/50 text-sm font-bold active:scale-95">← Thoát</button>
-          <div className="px-2.5 py-1 rounded-lg font-heading text-xs font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-            ⭐ Lv.{level}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: '#ff6b6b', background: 'rgba(255,107,107,0.15)' }}>
+              ⚔️{combatStats.atk}
+            </span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: '#74b9ff', background: 'rgba(116,185,255,0.15)' }}>
+              🛡️{combatStats.def}
+            </span>
+            <div className="px-2.5 py-1 rounded-lg font-heading text-xs font-bold text-white"
+              style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
+              Lv.{level}
+            </div>
           </div>
         </div>
 

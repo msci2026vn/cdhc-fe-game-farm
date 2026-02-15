@@ -1,18 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BOSSES, BossInfo, DIFFICULTY_STYLES } from '../data/bosses';
 import { useBossProgress } from '@/shared/hooks/useBossProgress';
 import { useBossStatus } from '@/shared/hooks/useBossStatus';
 import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
 import { LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import { formatTime } from '@/shared/utils/format';
+import { useWeeklyBoss } from '@/shared/hooks/useWeeklyBoss';
+import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
+import { atkGemDamage, starGemDamage } from '@/shared/utils/combat-formulas';
+import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 
 interface Props {
   onSelect: (boss: BossInfo) => void;
 }
 
+const WEAKNESS_LABELS: Record<string, { label: string; emoji: string }> = {
+  atk: { label: 'ATK', emoji: '⚔️' },
+  hp: { label: 'HP', emoji: '❤️' },
+  def: { label: 'DEF', emoji: '🛡️' },
+  mana: { label: 'Mana', emoji: '✨' },
+};
+
 export default function BossList({ onSelect }: Props) {
   const { data: bossProgress } = useBossProgress();
   const { data: bossStatus } = useBossStatus();
+  const { data: weeklyBoss } = useWeeklyBoss();
+  const { data: statInfo } = usePlayerStats();
   const level = useLevel();
   const xp = useXp();
 
@@ -53,6 +66,30 @@ export default function BossList({ onSelect }: Props) {
   const noFightsLeft = fightsUsed >= fightsMax;
   const onCooldown = cooldown > 0;
   const canFight = !noFightsLeft && !onCooldown;
+
+  // Weekly boss countdown
+  const [weeklyCountdown, setWeeklyCountdown] = useState('');
+  useEffect(() => {
+    if (!weeklyBoss) return;
+    const update = () => {
+      const end = new Date(weeklyBoss.endsAt).getTime();
+      const diff = Math.max(0, end - Date.now());
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      setWeeklyCountdown(d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`);
+    };
+    update();
+    const timer = setInterval(update, 60000);
+    return () => clearInterval(timer);
+  }, [weeklyBoss]);
+
+  // Estimated turns to kill (stat preview)
+  const estimateTurns = useMemo(() => {
+    const effectiveAtk = statInfo?.effectiveStats.atk ?? STAT_CONFIG.BASE.ATK;
+    const dmgPerTurn = atkGemDamage(effectiveAtk) * 2 + starGemDamage(effectiveAtk); // ~avg 3 gems per turn
+    return (bossHp: number) => dmgPerTurn > 0 ? Math.ceil(bossHp / dmgPerTurn) : 999;
+  }, [statInfo]);
 
   // Helper to get kills for a boss
   const getKills = (bossId: string) => {
@@ -119,11 +156,55 @@ export default function BossList({ onSelect }: Props) {
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-24 space-y-3">
+        {/* Weekly Boss Banner */}
+        {weeklyBoss && (
+          <div className="rounded-xl p-3 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(162,155,254,0.2), rgba(108,92,231,0.3))', border: '1px solid rgba(162,155,254,0.4)' }}>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{weeklyBoss.bossEmoji}</span>
+                <div>
+                  <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Boss tuan nay</div>
+                  <div className="font-heading text-sm font-bold text-white">{weeklyBoss.bossName}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[9px] text-white/40">Ket thuc</div>
+                <div className="font-mono text-xs font-bold text-white/80">{weeklyCountdown}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-bold">
+              <span style={{ color: '#fdcb6e' }}>x{weeklyBoss.rewardMultiplier} thuong</span>
+              <span style={{ color: '#a29bfe' }}>
+                Diem yeu: {WEAKNESS_LABELS[weeklyBoss.weakness]?.emoji} {WEAKNESS_LABELS[weeklyBoss.weakness]?.label}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* First-time stat banner */}
+        {statInfo && statInfo.freePoints > 0 && (
+          <div className="rounded-xl p-3"
+            style={{ background: 'rgba(253,203,110,0.15)', border: '1px solid rgba(253,203,110,0.3)' }}>
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🎯</span>
+              <div className="flex-1">
+                <p className="text-[11px] font-bold text-yellow-300">
+                  Ban co {statInfo.freePoints} diem chi so chua phan bo!
+                </p>
+                <p className="text-[10px] text-white/50">Vao Profile &rarr; Chi so de tang suc manh.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {BOSSES.map((boss) => {
           const style = DIFFICULTY_STYLES[boss.difficulty];
           const kills = getKills(boss.id);
           const locked = level < boss.unlockLevel;
           const disabled = locked || !canFight;
+          const isWeekly = weeklyBoss?.bossId === boss.id;
+          const turns = estimateTurns(boss.hp);
 
           return (
             <button key={boss.id}
@@ -132,7 +213,11 @@ export default function BossList({ onSelect }: Props) {
               className={`w-full rounded-xl p-4 flex items-center gap-4 transition-transform ${
                 disabled ? 'opacity-50 grayscale' : 'active:scale-[0.97]'
               }`}
-              style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${disabled ? 'rgba(255,255,255,0.1)' : style.border}` }}>
+              style={{
+                background: isWeekly ? 'rgba(162,155,254,0.12)' : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${disabled ? 'rgba(255,255,255,0.1)' : isWeekly ? 'rgba(162,155,254,0.5)' : style.border}`,
+                boxShadow: isWeekly ? '0 0 15px rgba(162,155,254,0.15)' : 'none',
+              }}>
               <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 relative"
                 style={{ background: locked ? 'rgba(255,255,255,0.05)' : style.bg }}>
                 {locked ? '🔒' : boss.emoji}
@@ -140,6 +225,12 @@ export default function BossList({ onSelect }: Props) {
                   <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
                     style={{ background: 'linear-gradient(135deg, #e74c3c, #ff6b6b)' }}>
                     {kills}
+                  </span>
+                )}
+                {isWeekly && !locked && (
+                  <span className="absolute -bottom-1 -left-1 text-[9px] px-1 py-0.5 rounded font-bold text-white"
+                    style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
+                    TUAN
                   </span>
                 )}
               </div>
@@ -150,6 +241,7 @@ export default function BossList({ onSelect }: Props) {
                     style={{ background: style.bg, color: style.text, border: `1px solid ${style.border}` }}>
                     {style.label}
                   </span>
+                  {isWeekly && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(162,155,254,0.3)', color: '#a29bfe' }}>x{weeklyBoss.rewardMultiplier}</span>}
                   {kills > 0 && <span className="text-[10px]">✅</span>}
                 </div>
                 {locked ? (
@@ -162,6 +254,10 @@ export default function BossList({ onSelect }: Props) {
                       <span style={{ color: '#fdcb6e' }}>ATK {boss.attack}</span>
                       <span style={{ color: '#55efc4' }}>+{boss.reward} OGN</span>
                       <span style={{ color: '#a29bfe' }}>+{boss.xpReward} XP</span>
+                    </div>
+                    {/* Stat preview: estimated turns */}
+                    <div className="mt-1 text-[9px] font-bold text-white/30">
+                      ~{turns} luot de ha
                     </div>
                   </>
                 )}
