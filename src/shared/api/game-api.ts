@@ -69,6 +69,11 @@ import type {
   OgnHistoryResult,
   // Friend farm
   FriendFarmData,
+  // Economy v2
+  LevelInfo,
+  LevelUpResult,
+  DailyStatus,
+  BossStatus,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -673,7 +678,7 @@ export const gameApi = {
    * Sync batched actions — reduce API calls from ~50/min to ~2/min
    * (Bước 22 — Player Sync)
    */
-  syncActions: async (actions: Array<{ type: 'water' | 'bug_catch' | 'xp_pickup' | 'daily_check'; count: number; timestamp: number }>): Promise<SyncResult> => {
+  syncActions: async (actions: Array<{ type: 'bug_catch' | 'xp_pickup' | 'daily_check'; count: number; timestamp: number }>): Promise<SyncResult> => {
     const url = 'https://sta.cdhc.vn/api/game/player/sync';
     console.log('[FARM-DEBUG] gameApi.syncActions():', { url, actionCount: actions.length });
 
@@ -1007,6 +1012,108 @@ export const gameApi = {
     console.log('[FARM-DEBUG] gameApi.getOgnHistory() SUCCESS:', json);
     return json.data;
   },
+
+  // ═══ LEVEL SYSTEM (Economy v2) ═══
+
+  /**
+   * Get level info — tier progress, fees, can level up
+   */
+  getLevelInfo: async (): Promise<LevelInfo> => {
+    const url = 'https://sta.cdhc.vn/api/game/player/level-info';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getLevelInfo');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Manual level-up — pay OGN fee to level up
+   */
+  levelUp: async (): Promise<LevelUpResult> => {
+    const url = 'https://sta.cdhc.vn/api/game/player/level-up';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('levelUp');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Get daily status — XP cap, boss fights, sync caps
+   */
+  getDailyStatus: async (): Promise<DailyStatus> => {
+    const url = 'https://sta.cdhc.vn/api/game/player/daily-status';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getDailyStatus');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Get boss status — cooldown, daily fights remaining
+   */
+  getBossStatus: async (): Promise<BossStatus> => {
+    const url = 'https://sta.cdhc.vn/api/game/boss/status';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getBossStatus');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
 };
 
 export type {
@@ -1035,4 +1142,8 @@ export type {
   QuizAnswer,
   InteractType,
   FriendFarmData,
+  LevelInfo,
+  LevelUpResult,
+  DailyStatus,
+  BossStatus,
 };

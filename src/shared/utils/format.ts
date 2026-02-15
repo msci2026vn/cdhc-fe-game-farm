@@ -10,6 +10,16 @@ export function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+export function formatGrowthTime(ms: number): string {
+  const minutes = Math.floor(ms / 60000);
+  const hours = Math.floor(minutes / 60);
+  if (hours > 0) {
+    const remainingMin = minutes % 60;
+    return remainingMin > 0 ? `${hours} gio ${remainingMin} phut` : `${hours} gio`;
+  }
+  return `${minutes} phut`;
+}
+
 export function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('vi-VN', {
     day: '2-digit',

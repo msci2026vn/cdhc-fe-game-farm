@@ -326,7 +326,7 @@ export interface LeaderboardResult {
 // ═══════════════════════════════════════════════════════════════
 
 // Action types that can be batched (small actions only)
-export type SyncActionType = 'water' | 'bug_catch' | 'xp_pickup' | 'daily_check';
+export type SyncActionType = 'bug_catch' | 'xp_pickup' | 'daily_check';
 
 export interface SyncAction {
   type: SyncActionType;
@@ -369,6 +369,75 @@ export interface WeatherData {
 export interface WeatherRequest {
   lat?: number;
   lon?: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEVEL SYSTEM (Economy v2)
+// ═══════════════════════════════════════════════════════════════
+
+export interface LevelTierInfo {
+  minLevel: number;
+  maxLevel: number;
+  xpPerLevel: number;
+  ognFeePerLevel: number;
+  title: string;
+  icon: string;
+}
+
+export interface LevelInfo {
+  level: number;
+  xp: number;
+  ogn: number;
+  xpInLevel: number;
+  xpForNextLevel: number;
+  levelUpFee: number;
+  canLevelUp: boolean;
+  pendingLevelUp: boolean;
+  title: string;
+  icon: string;
+  maxLevel: number;
+  tiers: LevelTierInfo[];
+}
+
+export interface LevelUpResult {
+  success: boolean;
+  newLevel: number;
+  ognSpent: number;
+  title: string;
+  icon: string;
+  pendingMore?: boolean;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DAILY STATUS (Economy v2)
+// ═══════════════════════════════════════════════════════════════
+
+export interface DailyStatus {
+  date: string;
+  xp: {
+    used: number;
+    cap: number;
+    remaining: number;
+  };
+  boss: {
+    fightsUsed: number;
+    fightsMax: number;
+    cooldownRemaining: number;
+    canFight: boolean;
+  };
+  sync: Record<string, { used: number; max: number }>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOSS STATUS (Economy v2)
+// ═══════════════════════════════════════════════════════════════
+
+export interface BossStatus {
+  dailyFightsUsed: number;
+  dailyFightsMax: number;
+  cooldownRemaining: number;
+  canFight: boolean;
+  nextFightAt: string | null;
 }
 
 // ═══════════════════════════════════════════════════════════════

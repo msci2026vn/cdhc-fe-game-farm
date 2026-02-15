@@ -7,10 +7,10 @@ export interface PlantType {
 }
 
 export const PLANT_TYPES: PlantType[] = [
-    { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', price: 50, growthTime: '30s' },
-    { id: 'tomato', name: 'Cà Chua', emoji: '🍅', price: 200, growthTime: '2m' },
-    { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', price: 280, growthTime: '2m30' },
-    { id: 'chili', name: 'Ớt', emoji: '🌶️', price: 400, growthTime: '3m20' },
+    { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', price: 50, growthTime: '15 phut' },
+    { id: 'tomato', name: 'Cà Chua', emoji: '🍅', price: 200, growthTime: '1 gio' },
+    { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', price: 400, growthTime: '3 gio' },
+    { id: 'chili', name: 'Ớt', emoji: '🌶️', price: 800, growthTime: '6 gio' },
 ];
 
 export const getPlantTypeById = (id: string): PlantType | undefined => {

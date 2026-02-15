@@ -4,6 +4,8 @@ import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { LEVEL_CONFIG, getLevelTitle } from '@/shared/stores/playerStore';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
+import { LevelUpButton } from '@/shared/components/LevelUpButton';
+import { DailyXpBar } from '@/shared/components/DailyXpBar';
 import WeatherControl from './WeatherControl';
 
 export default function FarmHeader() {
@@ -29,10 +31,9 @@ export default function FarmHeader() {
   const displayName = user?.name || (user as any)?.fullName || profile?.name || (profile as any)?.fullName || 'Farmer';
   const displayPicture = user?.picture || (user as any)?.avatar || (user as any)?.avatarUrl || profile?.picture || (profile as any)?.avatar || (profile as any)?.avatarUrl;
 
-  // XP progress calculation — LINEAR FORMULA (100 XP per level, matches backend)
-  // Level 1: 0-99 XP, Level 2: 100-199 XP, Level 3: 200-299 XP, etc.
-  const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);  // XP % 100
-  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel(); // Always 100
+  // XP progress calculation — TIER-BASED (progressive XP per level)
+  const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);
+  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel(xp);
   const xpPct = Math.min(100, (xpInLevel / xpForLevelUp) * 100);
 
   // Loading state — show skeleton while fetching profile
@@ -100,6 +101,7 @@ export default function FarmHeader() {
             <span className="text-[11px] font-bold text-game-green-mid flex items-center gap-1">
               <span className="bg-game-green-mid text-white px-2 py-px rounded-[10px] text-[10px] font-bold">Lv.{level}</span>
               {title}
+              <LevelUpButton />
             </span>
           </div>
         </div>
@@ -116,10 +118,10 @@ export default function FarmHeader() {
       </div>
 
       {/* XP progress bar */}
-      <div className="mb-3 px-1">
+      <div className="mb-1 px-1">
         <div className="flex justify-between text-[10px] font-bold mb-1">
-          <span className="text-game-green-mid">⭐ XP: {xpInLevel}/{xpForLevelUp}</span>
-          <span className="text-muted-foreground">Lv.{level} → Lv.{level + 1}</span>
+          <span className="text-game-green-mid">XP: {xpInLevel}/{xpForLevelUp}</span>
+          <span className="text-muted-foreground">Lv.{level} &rarr; Lv.{level + 1}</span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
           <div
@@ -131,6 +133,11 @@ export default function FarmHeader() {
             }}
           />
         </div>
+      </div>
+
+      {/* Daily XP progress bar */}
+      <div className="mb-3">
+        <DailyXpBar />
       </div>
 
       {/* Stats bar */}
@@ -177,7 +184,7 @@ export default function FarmHeader() {
             <span className="text-[9px] font-bold uppercase tracking-tight text-game-green-dark">Syncing Live</span>
           </div>
           <span className="text-[9px] font-bold text-muted-foreground">
-            Cập nhật: {new Date(useWeatherStore.getState().lastUpdated).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(useWeatherStore.getState().lastUpdated).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
       </div>

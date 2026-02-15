@@ -31,13 +31,14 @@ export function useBossComplete() {
               );
             }
 
-            // Invalidate boss progress
+            // Invalidate boss progress + status (cooldown, daily fights)
             queryClient.invalidateQueries({ queryKey: ['game', 'boss', 'progress'] });
+            queryClient.invalidateQueries({ queryKey: ['game', 'boss', 'status'] });
 
-            // Invalidate player profile (for OGN/XP)
+            // Invalidate player profile + daily status (for OGN/XP/daily cap)
             queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
-
-            // Boss progress updated via TanStack Query invalidate
+            queryClient.invalidateQueries({ queryKey: ['game', 'daily-status'] });
+            queryClient.invalidateQueries({ queryKey: ['game', 'level-info'] });
         },
         onError: (error) => {
             console.error('[FARM-DEBUG] useBossComplete.onError:', error);

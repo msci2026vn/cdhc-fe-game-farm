@@ -3,12 +3,12 @@ import { FarmPlot, PlantType } from '../types/farm.types';
 import { useWeatherStore } from './weatherStore';
 import { getWeatherHappinessModifier } from '../utils/growth';
 
-// Demo plant types
+// Plant types — match backend DB values (updated 2026-02-15)
 export const PLANT_TYPES: PlantType[] = [
-  { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 30_000, rewardOGN: 100, shopPrice: 50 },
-  { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 120_000, rewardOGN: 400, shopPrice: 200 },
-  { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 150_000, rewardOGN: 560, shopPrice: 280 },
-  { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 200_000, rewardOGN: 800, shopPrice: 400 },
+  { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 900_000, rewardOGN: 100, shopPrice: 50 },
+  { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 3_600_000, rewardOGN: 400, shopPrice: 200 },
+  { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 10_800_000, rewardOGN: 800, shopPrice: 400 },
+  { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 21_600_000, rewardOGN: 1600, shopPrice: 800 },
 ];
 
 const WATER_COOLDOWN_MS = 15_000; // 15s for demo (real: 1 hour)

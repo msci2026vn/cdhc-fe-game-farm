@@ -9,12 +9,12 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 
-// Plant type lookup table (matches BE plant_types data)
+// Plant type lookup table (matches BE plant_types DB — updated 2026-02-15)
 const PLANT_TYPES: Record<string, { id: string; name: string; emoji: string; growthDurationMs: number; rewardOGN: number; rewardXP: number; shopPrice: number }> = {
-  wheat: { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 30000, rewardOGN: 100, rewardXP: 5, shopPrice: 50 },
-  tomato: { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 120000, rewardOGN: 400, rewardXP: 25, shopPrice: 200 },
-  carrot: { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 150000, rewardOGN: 560, rewardXP: 25, shopPrice: 280 },
-  chili: { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 200000, rewardOGN: 800, rewardXP: 25, shopPrice: 400 },
+  wheat: { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 900000, rewardOGN: 100, rewardXP: 5, shopPrice: 50 },
+  tomato: { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 3600000, rewardOGN: 400, rewardXP: 15, shopPrice: 200 },
+  carrot: { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 10800000, rewardOGN: 800, rewardXP: 30, shopPrice: 400 },
+  chili: { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 21600000, rewardOGN: 1600, rewardXP: 50, shopPrice: 800 },
 };
 
 // BE response format

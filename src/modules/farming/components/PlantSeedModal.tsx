@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PlantType } from '../types/farm.types';
 import { PLANT_TYPES } from '../stores/farmStore';
+import { formatGrowthTime } from '@/shared/utils/format';
 
 interface PlantSeedModalProps {
   open: boolean;
@@ -37,7 +38,7 @@ export default function PlantSeedModal({ open, onClose, onSelect }: PlantSeedMod
               <span className="text-3xl">{pt.emoji}</span>
               <span className="font-heading font-semibold text-sm">{pt.name}</span>
               <span className="text-[10px] text-muted-foreground">
-                ⏱️ {Math.round(pt.growthDurationMs / 60000)} phút
+                ⏱️ {formatGrowthTime(pt.growthDurationMs)}
               </span>
               <span className="text-xs font-bold text-secondary-foreground">
                 🪙 {pt.rewardOGN} OGN

@@ -88,10 +88,10 @@ export default function ProfileScreen() {
         <div className="mt-3 bg-black/20 rounded-full h-4 relative overflow-hidden backdrop-blur-sm border border-white/10 mx-1">
           <div
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-500"
-            style={{ width: `${(LEVEL_CONFIG.getXpInLevel(xp) / LEVEL_CONFIG.getXpForLevel()) * 100}%` }}
+            style={{ width: `${(LEVEL_CONFIG.getXpInLevel(xp) / LEVEL_CONFIG.getXpForLevel(xp)) * 100}%` }}
           />
           <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white uppercase tracking-wider shadow-sm">
-            XP {LEVEL_CONFIG.getXpInLevel(xp)} / {LEVEL_CONFIG.getXpForLevel()}
+            XP {LEVEL_CONFIG.getXpInLevel(xp)} / {LEVEL_CONFIG.getXpForLevel(xp)}
           </div>
         </div>
 

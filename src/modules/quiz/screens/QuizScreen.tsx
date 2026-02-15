@@ -15,9 +15,9 @@ export default function QuizScreen() {
   const level = useLevel();
   const xp = useXp();
 
-  // Calculate relative XP for the progress bar (Linear 100 XP system)
+  // Calculate relative XP for the progress bar (tier-based progressive XP)
   const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);
-  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel();
+  const xpForLevelUp = LEVEL_CONFIG.getXpForLevel(xp);
   const xpPct = Math.min(100, Math.round((xpInLevel / xpForLevelUp) * 100));
 
   const startQuiz = useQuizStart();
