@@ -31,18 +31,55 @@ const PRESETS: { key: 'attack' | 'defense' | 'balance'; emoji: string; label: st
   { key: 'balance', emoji: '✨', label: 'Can bang' },
 ];
 
+/**
+ * Must match BE stat-config.ts PRESETS + calculateAutoAllocation logic.
+ * attack: {atk:2, hp:1, def:0, mana:0} per 3 pts
+ * defense: {atk:0, hp:1, def:1, mana:1} per 3 pts
+ * balance: rotation of 4 rounds, each 3 pts
+ */
 function getPresetAllocation(preset: 'attack' | 'defense' | 'balance', points: number) {
-  switch (preset) {
-    case 'attack':
-      return { atk: Math.ceil(points * 0.5), hp: Math.floor(points * 0.2), def: Math.floor(points * 0.1), mana: Math.floor(points * 0.2) };
-    case 'defense':
-      return { atk: Math.floor(points * 0.1), hp: Math.ceil(points * 0.4), def: Math.floor(points * 0.3), mana: Math.floor(points * 0.2) };
-    case 'balance': {
-      const each = Math.floor(points / 4);
-      const remainder = points - each * 4;
-      return { atk: each + remainder, hp: each, def: each, mana: each };
+  const result = { atk: 0, hp: 0, def: 0, mana: 0 };
+  if (points <= 0) return result;
+
+  if (preset === 'balance') {
+    // Match BE BALANCE_ROTATION: 4 rounds cycling
+    const rotation = [
+      { atk: 1, hp: 1, def: 1, mana: 0 },
+      { atk: 1, hp: 1, def: 0, mana: 1 },
+      { atk: 1, hp: 0, def: 1, mana: 1 },
+      { atk: 0, hp: 1, def: 1, mana: 1 },
+    ];
+    let remaining = points;
+    let roundIdx = 0;
+    while (remaining > 0) {
+      const round = rotation[roundIdx % rotation.length]!;
+      for (const key of ['atk', 'hp', 'def', 'mana'] as const) {
+        if (remaining <= 0) break;
+        const add = Math.min(round[key], remaining);
+        result[key] += add;
+        remaining -= add;
+      }
+      roundIdx++;
+    }
+    return result;
+  }
+
+  // attack & defense: fixed pattern per round
+  const patterns: Record<string, { atk: number; hp: number; def: number; mana: number }> = {
+    attack:  { atk: 2, hp: 1, def: 0, mana: 0 },
+    defense: { atk: 0, hp: 1, def: 1, mana: 1 },
+  };
+  const pattern = patterns[preset]!;
+  let remaining = points;
+  while (remaining > 0) {
+    for (const key of ['atk', 'hp', 'def', 'mana'] as const) {
+      if (remaining <= 0) break;
+      const add = Math.min(pattern[key], remaining);
+      result[key] += add;
+      remaining -= add;
     }
   }
+  return result;
 }
 
 export function StatAllocationModal({
