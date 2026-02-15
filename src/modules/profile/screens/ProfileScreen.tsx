@@ -4,14 +4,23 @@ import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { xpForNextLevel, getLevelTitle, LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import { gameApi } from '@/shared/api/game-api';
+import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
+import { useResetStats } from '@/shared/hooks/useResetStats';
+import { StatAllocationModal } from '@/shared/components/StatAllocationModal';
+import { STAT_CONFIG } from '@/shared/utils/stat-constants';
+import { formatOGN } from '@/shared/utils/format';
 
 type Tab = 'stats' | 'achievements';
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<Tab>('stats');
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showStatModal, setShowStatModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
+  const { data: statInfo } = usePlayerStats();
+  const resetStats = useResetStats();
   const ogn = useOgn(); // TanStack Query single source of truth
 
   const isLoading = isProfileLoading || isAuthLoading;
@@ -129,28 +138,98 @@ export default function ProfileScreen() {
         {/* Stats Tab */}
         {tab === 'stats' && (
           <div className="space-y-2 animate-fade-in">
-            <h3 className="font-heading text-sm font-bold flex items-center gap-2">📈 Nâng cấp chỉ số</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading text-sm font-bold flex items-center gap-2">📈 Chi so nhan vat</h3>
+              {(statInfo?.freePoints ?? 0) > 0 && (
+                <button
+                  onClick={() => setShowStatModal(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 animate-pulse active:scale-95 shadow-md"
+                >
+                  <span className="bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
+                    {statInfo!.freePoints}
+                  </span>
+                  Phan bo ngay!
+                </button>
+              )}
+            </div>
+
+            {/* Stat bars — real data */}
             {[
-              { emoji: '⚔️', name: 'Sát thương (ATK)', desc: '120 → 140', progress: 60, color: '#e74c3c', bg: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)', cost: 100 },
-              { emoji: '❤️', name: 'Máu tối đa (HP)', desc: '1000 → 1200', progress: 40, color: '#4eca6a', bg: 'linear-gradient(135deg, #d4f8dc, #a8e6a0)', cost: 80 },
-              { emoji: '🛡️', name: 'Giáp cơ bản (DEF)', desc: '80 → 100', progress: 80, color: '#3498db', bg: 'linear-gradient(135deg, #d4eeff, #a8d4f0)', cost: 60 },
-            ].map((u) => (
-              <div key={u.name} className="bg-white rounded-xl p-2.5 flex items-center gap-2.5"
-                style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                  style={{ background: u.bg }}>{u.emoji}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold">{u.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{u.desc}</p>
-                  <div className="h-1.5 rounded-full bg-muted mt-1 overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${u.progress}%`, background: u.color }} />
+              { key: 'atk' as const, emoji: '⚔️', name: 'Sat thuong (ATK)', color: '#e74c3c', bg: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)', maxVal: 2000 },
+              { key: 'hp' as const, emoji: '❤️', name: 'Mau toi da (HP)', color: '#4eca6a', bg: 'linear-gradient(135deg, #d4f8dc, #a8e6a0)', maxVal: 5000 },
+              { key: 'def' as const, emoji: '🛡️', name: 'Giap co ban (DEF)', color: '#3498db', bg: 'linear-gradient(135deg, #d4eeff, #a8d4f0)', maxVal: 1000 },
+              { key: 'mana' as const, emoji: '✨', name: 'Mana', color: '#9b59b6', bg: 'linear-gradient(135deg, #f0d4ff, #d4a8f0)', maxVal: 1500 },
+            ].map((u) => {
+              const points = statInfo?.stats?.[u.key] ?? 0;
+              const effective = statInfo?.effectiveStats?.[u.key] ?? 0;
+              const progress = Math.min(100, (effective / u.maxVal) * 100);
+              return (
+                <div key={u.key} className="bg-white rounded-xl p-2.5 flex items-center gap-2.5"
+                  style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                    style={{ background: u.bg }}>{u.emoji}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold">{u.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{effective.toLocaleString('vi-VN')} ({points} diem)</p>
+                    <div className="h-1.5 rounded-full bg-muted mt-1 overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, background: u.color }} />
+                    </div>
                   </div>
                 </div>
-                <button className="btn-gold px-2.5 py-1 rounded-xl font-heading text-[10px] font-bold text-white whitespace-nowrap">
-                  🪙 {u.cost}
-                </button>
+              );
+            })}
+
+            {/* Auto preset indicator */}
+            {statInfo?.autoEnabled && statInfo.autoPreset && (
+              <div className="bg-blue-50 rounded-xl p-2 text-center">
+                <p className="text-[10px] font-bold text-blue-600">
+                  🤖 Tu dong phan bo: {statInfo.autoPreset === 'attack' ? '⚔️ Tan cong' : statInfo.autoPreset === 'defense' ? '🛡️ Phong thu' : '✨ Can bang'}
+                </p>
               </div>
-            ))}
+            )}
+
+            {/* Reset button */}
+            {statInfo && (statInfo.stats.atk + statInfo.stats.hp + statInfo.stats.def + statInfo.stats.mana) > 0 && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                disabled={resetStats.isPending}
+                className="w-full py-2 rounded-xl text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all disabled:opacity-50"
+              >
+                🔄 Reset chi so ({formatOGN(statInfo.resetInfo.nextCost)} OGN) · {statInfo.resetInfo.weeklyCount}/3 tuan nay
+              </button>
+            )}
+
+            {/* Next milestones */}
+            {statInfo?.milestones?.next && statInfo.milestones.next.length > 0 && (
+              <div className="mt-2">
+                <p className="text-[10px] font-bold text-gray-400 mb-1">💡 Moc tiep theo</p>
+                {statInfo.milestones.next.slice(0, 3).map((m) => (
+                  <div key={m.id} className="flex items-center gap-2 bg-gray-50 rounded-lg p-1.5 mb-1">
+                    <span className="text-sm">{m.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold">{m.name}</p>
+                      <p className="text-[9px] text-gray-400">{m.description} · Con {m.remaining} diem</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Unlocked milestones */}
+            {statInfo?.milestones?.unlocked && statInfo.milestones.unlocked.length > 0 && (
+              <div className="mt-2">
+                <p className="text-[10px] font-bold text-gray-400 mb-1">🏅 Da mo khoa</p>
+                {statInfo.milestones.unlocked.map((m) => (
+                  <div key={m.id} className="flex items-center gap-2 bg-amber-50 rounded-lg p-1.5 mb-1">
+                    <span className="text-sm">{m.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-amber-700">{m.name}</p>
+                      <p className="text-[9px] text-amber-500">{m.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -199,6 +278,61 @@ export default function ProfileScreen() {
       </div>
 
       <BottomNav />
+
+      {/* Stat Allocation Modal */}
+      {statInfo && (
+        <StatAllocationModal
+          isOpen={showStatModal}
+          onClose={() => setShowStatModal(false)}
+          freePoints={statInfo.freePoints}
+          currentStats={statInfo.stats}
+          effectiveStats={statInfo.effectiveStats}
+          nextMilestones={statInfo.milestones?.next ?? []}
+          autoPreset={statInfo.autoPreset}
+          autoEnabled={statInfo.autoEnabled}
+        />
+      )}
+
+      {/* Reset Confirmation */}
+      {showResetConfirm && statInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setShowResetConfirm(false)}>
+          <div className="bg-white rounded-2xl p-5 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🔄</div>
+              <h3 className="font-heading text-lg font-bold mb-1">Reset chi so?</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Tat ca diem chi so se duoc tra lai. Ban co the phan bo lai.
+              </p>
+              <div className="bg-orange-50 rounded-xl p-3 mb-4">
+                <p className="text-xs text-orange-700 font-bold mb-1">Chi phi reset</p>
+                <p className="text-2xl font-black text-orange-600">{formatOGN(statInfo.resetInfo.nextCost)} OGN</p>
+                <p className="text-[10px] text-orange-500 mt-1">
+                  Lan reset {statInfo.resetInfo.weeklyCount + 1}/3 tuan nay
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
+                >
+                  Huy
+                </button>
+                <button
+                  onClick={() => {
+                    resetStats.mutate(undefined, {
+                      onSuccess: () => setShowResetConfirm(false),
+                    });
+                  }}
+                  disabled={resetStats.isPending}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 active:scale-95 shadow-lg disabled:opacity-50"
+                >
+                  {resetStats.isPending ? '...' : 'Xac nhan'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 }

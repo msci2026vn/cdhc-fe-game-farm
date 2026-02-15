@@ -26,6 +26,15 @@ export interface PlayerProfile {
   createdAt: string;
   updatedAt: string;
   lastPlayedAt: string | null;
+  // Stat system (Phase 2)
+  statAtk?: number;
+  statHp?: number;
+  statDef?: number;
+  statMana?: number;
+  freeStatPoints?: number;
+  totalStatPointsEarned?: number;
+  autoPreset?: string | null;
+  autoEnabled?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -605,3 +614,75 @@ export interface OgnHistoryResult {
 }
 
 export interface OgnHistoryResponse extends ApiResponse<OgnHistoryResult> {}
+
+// ═══════════════════════════════════════════════════════════════
+// STAT SYSTEM (Phase 2)
+// ═══════════════════════════════════════════════════════════════
+
+export interface StatInfo {
+  stats: {
+    atk: number;
+    hp: number;
+    def: number;
+    mana: number;
+  };
+  effectiveStats: {
+    atk: number;
+    hp: number;
+    def: number;
+    mana: number;
+  };
+  freePoints: number;
+  totalEarned: number;
+  milestones: {
+    unlocked: MilestoneInfo[];
+    next: MilestoneNextInfo[];
+  };
+  resetInfo: {
+    weeklyCount: number;
+    nextCost: number;
+    weekResetsAt: string;
+  };
+  autoPreset: string | null;
+  autoEnabled: boolean;
+}
+
+export interface MilestoneInfo {
+  id: string;
+  stat: 'atk' | 'hp' | 'def' | 'mana';
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export interface MilestoneNextInfo extends MilestoneInfo {
+  threshold: number;
+  remaining: number;
+}
+
+export interface AllocateStatsRequest {
+  atk: number;
+  hp: number;
+  def: number;
+  mana: number;
+}
+
+export interface AllocateStatsResponse {
+  success: boolean;
+  newStats: { atk: number; hp: number; def: number; mana: number };
+  effectiveStats: { atk: number; hp: number; def: number; mana: number };
+  freePointsRemaining: number;
+  newMilestones: MilestoneInfo[];
+}
+
+export interface ResetStatsResponse {
+  success: boolean;
+  ognSpent: number;
+  freePoints: number;
+  nextResetCost: number;
+}
+
+export interface AutoSettingRequest {
+  preset: 'attack' | 'defense' | 'balance';
+  enabled: boolean;
+}

@@ -8,12 +8,15 @@
  * Only triggers when data was already loaded and level increased.
  */
 import { useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePlayerProfile } from './usePlayerProfile';
 import { useUIStore } from '../stores/uiStore';
 import { getLevelTitle } from '../stores/playerStore';
+import { PLAYER_STATS_KEY } from './usePlayerStats';
 
 export function useLevelUpDetector() {
   const { data: profile, isSuccess } = usePlayerProfile();
+  const queryClient = useQueryClient();
   const level = profile?.level ?? 1;
 
   // Track if we've received first data from server
@@ -35,6 +38,9 @@ export function useLevelUpDetector() {
     // Data was already loaded — check for actual level up
     if (prevLevelRef.current !== null && level > prevLevelRef.current) {
       console.log(`[FARM-DEBUG] 🎉 REAL LEVEL UP! ${prevLevelRef.current} → ${level}`);
+
+      // Invalidate player stats to refresh freePoints
+      queryClient.invalidateQueries({ queryKey: PLAYER_STATS_KEY });
 
       // Toast notification
       useUIStore.getState().addToast(

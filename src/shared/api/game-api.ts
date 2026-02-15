@@ -74,6 +74,12 @@ import type {
   LevelUpResult,
   DailyStatus,
   BossStatus,
+  // Stat system (Phase 2)
+  StatInfo,
+  AllocateStatsRequest,
+  AllocateStatsResponse,
+  ResetStatsResponse,
+  AutoSettingRequest,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -1114,6 +1120,135 @@ export const gameApi = {
     const json = await response.json();
     return json.data;
   },
+
+  // ═══ STAT SYSTEM (Phase 2) ═══
+
+  /**
+   * Get stat info — stats, effective stats, free points, milestones, reset info
+   */
+  getStatInfo: async (): Promise<StatInfo> => {
+    const url = 'https://sta.cdhc.vn/api/game/stat/info';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getStatInfo');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Allocate stat points manually
+   */
+  allocateStats: async (allocation: AllocateStatsRequest): Promise<AllocateStatsResponse> => {
+    const url = 'https://sta.cdhc.vn/api/game/stat/allocate';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(allocation),
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('allocateStats');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Auto-allocate stat points by preset
+   */
+  autoAllocateStats: async (preset: 'attack' | 'defense' | 'balance'): Promise<AllocateStatsResponse> => {
+    const url = 'https://sta.cdhc.vn/api/game/stat/auto-allocate';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preset }),
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('autoAllocateStats');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Reset all stats — costs OGN, increases weekly
+   */
+  resetStats: async (): Promise<ResetStatsResponse> => {
+    const url = 'https://sta.cdhc.vn/api/game/stat/reset';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('resetStats');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Update auto-allocation setting (preset + enabled)
+   */
+  updateAutoSetting: async (setting: AutoSettingRequest): Promise<{ success: boolean }> => {
+    const url = 'https://sta.cdhc.vn/api/game/stat/auto-setting';
+
+    const response = await fetch(url, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(setting),
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('updateAutoSetting');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json;
+  },
 };
 
 export type {
@@ -1146,4 +1281,9 @@ export type {
   LevelUpResult,
   DailyStatus,
   BossStatus,
+  StatInfo,
+  AllocateStatsRequest,
+  AllocateStatsResponse,
+  ResetStatsResponse,
+  AutoSettingRequest,
 };
