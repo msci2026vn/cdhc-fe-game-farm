@@ -2,7 +2,7 @@ import { useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { xpForNextLevel, getLevelTitle } from '@/shared/stores/playerStore';
+import { xpForNextLevel, getLevelTitle, LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import { gameApi } from '@/shared/api/game-api';
 
 type Tab = 'stats' | 'achievements';
@@ -84,7 +84,18 @@ export default function ProfileScreen() {
           </div>
         </div>
 
-        {/* Quick stats row */}
+        {/* XP Bar */}
+        <div className="mt-3 bg-black/20 rounded-full h-4 relative overflow-hidden backdrop-blur-sm border border-white/10 mx-1">
+          <div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-500"
+            style={{ width: `${(LEVEL_CONFIG.getXpInLevel(xp) / LEVEL_CONFIG.getXpForLevel()) * 100}%` }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white uppercase tracking-wider shadow-sm">
+            XP {LEVEL_CONFIG.getXpInLevel(xp)} / {LEVEL_CONFIG.getXpForLevel()}
+          </div>
+        </div>
+
+        {/* Quick stats row */}^M
         <div className="grid grid-cols-4 gap-1.5 mt-3">
           {[
             { val: profile.totalHarvests.toString(), label: 'Thu hoạch', emoji: '🌾' },
@@ -188,6 +199,6 @@ export default function ProfileScreen() {
       </div>
 
       <BottomNav />
-    </div>
+    </div >
   );
 }
