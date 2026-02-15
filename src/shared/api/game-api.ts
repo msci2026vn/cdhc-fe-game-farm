@@ -1,11 +1,40 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME API - All game-related API calls
-// Currently in MOCK mode - returns dummy data matching Zustand store shapes
-// TODO: Each function will be converted to real API in later steps
 // ═══════════════════════════════════════════════════════════════
 
 import { gameClient } from './client';
 import { mapBackendWeatherToGameWeather } from '../utils/weatherMapper';
+import { queryClient } from '../lib/queryClient';
+
+// ═══════════════════════════════════════════════════════════════
+// GLOBAL 401 HANDLER
+// ═══════════════════════════════════════════════════════════════
+let isRedirecting = false;
+
+function handleUnauthorized(context: string = 'API') {
+  if (isRedirecting) return; // Prevent multiple redirects
+  isRedirecting = true;
+
+  console.warn(`[GameAPI] 401 Unauthorized in ${context} — redirecting to login`);
+
+  // Clear all cached queries
+  queryClient.clear();
+
+  // Show toast notification (if available)
+  try {
+    const toastEvent = new CustomEvent('session-expired', {
+      detail: { message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.' }
+    });
+    window.dispatchEvent(toastEvent);
+  } catch (e) {
+    // Ignore if toast not available
+  }
+
+  // Redirect to login after a short delay to show toast
+  setTimeout(() => {
+    window.location.href = '/login';
+  }, 500);
+}
 import type { ApiResponse } from '../types/common';
 import type {
   PlayerProfile,
@@ -44,6 +73,12 @@ import type {
 // ERROR HANDLER HELPER
 // ═══════════════════════════════════════════════════════════════
 async function handleApiError(response: Response): Promise<never> {
+  // Handle 401 globally — redirect to login
+  if (response.status === 401) {
+    handleUnauthorized('API call');
+    throw new Error('Session expired');
+  }
+
   const errorData = await response.json().catch(() => ({}));
   const err = new Error(errorData?.error?.message || `API Error: ${response.status}`);
   (err as any).status = response.status;
@@ -78,7 +113,8 @@ export const gameApi = {
       });
 
       if (response.status === 401) {
-        console.warn('[GameAPI] Chưa đăng nhập');
+        // Session expired — redirect to login
+        handleUnauthorized('getProfile');
         return null;
       }
 
@@ -109,6 +145,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.getPlots: Response status =', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('getPlots');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -265,6 +306,11 @@ export const gameApi = {
       'content-type': response.headers.get('content-type'),
     });
 
+    if (response.status === 401) {
+      handleUnauthorized('completeBoss');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.completeBoss() ERROR:', error);
@@ -292,6 +338,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.getBossProgress() status:', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('getBossProgress');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -321,6 +372,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.startQuiz() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('startQuiz');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.startQuiz() ERROR:', error);
@@ -349,6 +405,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.answerQuiz() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('answerQuiz');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.answerQuiz() ERROR:', error);
@@ -375,6 +436,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.getShopItems() status:', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('getShopItems');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -404,6 +470,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.buyItem() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('buyItem');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.buyItem() ERROR:', error);
@@ -432,6 +503,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.getFriends() status:', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('getFriends');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -465,6 +541,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.interactFriend() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('interactFriend');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.interactFriend() ERROR:', error);
@@ -497,6 +578,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.addFriend() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('addFriend');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.addFriend() ERROR:', error);
@@ -525,6 +611,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.getReferralInfo() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('getReferralInfo');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.getReferralInfo() ERROR:', error);
@@ -552,6 +643,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.syncActions() status:', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('syncActions');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -584,6 +680,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.getLeaderboard() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('getLeaderboard');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.getLeaderboard() ERROR:', error);
@@ -613,6 +714,8 @@ export const gameApi = {
       });
 
       if (res.status === 401) {
+        // Session expired — redirect to login
+        handleUnauthorized('ping');
         return { success: false, message: 'Unauthorized — cần đăng nhập' };
       }
 
@@ -669,6 +772,8 @@ export const gameApi = {
       });
 
       if (response.status === 401) {
+        // Don't redirect here - this is used to check auth status initially
+        // The caller (AuthGuard) will handle the redirect
         return { isLoggedIn: false, user: null };
       }
 
@@ -718,6 +823,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.getWeather() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('getWeather');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.getWeather() ERROR:', error);
@@ -752,6 +862,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.getInventory() status:', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('getInventory');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -804,6 +919,11 @@ export const gameApi = {
 
     console.log('[FARM-DEBUG] gameApi.sellAllInventory() status:', response.status);
 
+    if (response.status === 401) {
+      handleUnauthorized('sellAllInventory');
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error('[FARM-DEBUG] gameApi.sellAllInventory() ERROR:', error);
@@ -829,6 +949,11 @@ export const gameApi = {
     });
 
     console.log('[FARM-DEBUG] gameApi.getOgnHistory() status:', response.status);
+
+    if (response.status === 401) {
+      handleUnauthorized('getOgnHistory');
+      throw new Error('Session expired');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
