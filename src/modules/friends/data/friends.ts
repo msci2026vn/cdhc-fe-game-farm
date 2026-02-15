@@ -27,7 +27,7 @@ export const FRIENDS: Friend[] = [
   },
   {
     id: 'f2', name: 'GreenHero92', avatar: '🧑‍🌾', level: 8, title: 'Nông dân Bạc', online: true,
-    plant: { emoji: '🥬', name: 'Rau Muống', growthPct: 45, stage: 'Giai đoạn 2/5', happiness: 65 },
+    plant: { emoji: '🌾', name: 'Lúa Mì', growthPct: 45, stage: 'Giai đoạn 2/5', happiness: 65 },
     stats: { ogn: 2800, totalHarvest: 21, daysActive: 30 },
   },
   {
@@ -42,7 +42,7 @@ export const FRIENDS: Friend[] = [
   },
   {
     id: 'f5', name: 'OrganicMaster', avatar: '🧓', level: 20, title: 'Huyền Thoại', online: true,
-    plant: { emoji: '🥒', name: 'Dưa Leo', growthPct: 60, stage: 'Giai đoạn 3/5', happiness: 80 },
+    plant: { emoji: '🌾', name: 'Lúa Mì', growthPct: 60, stage: 'Giai đoạn 3/5', happiness: 80 },
     stats: { ogn: 15400, totalHarvest: 120, daysActive: 180 },
   },
 ];

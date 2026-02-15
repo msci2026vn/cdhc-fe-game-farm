@@ -68,25 +68,16 @@ export interface WaterResult {
 
 // MỚI — Harvest KHÔNG trả OGN, trả inventory info
 export interface HarvestResult {
-  reward: {
-    xp: number;
-  };
-  inventory?: {
-    itemId: string;
-    plantName: string;
-    plantEmoji: string;
-    expiresAt: string;
-    shelfLifeHours: number;
-    message: string;
-  };
-  // Backward compatible — legacy fallback
-  xpGained?: number;
-  ognReward?: number;
-  ognTotal?: number;
-  plantName?: string;
-  plantEmoji?: string;
+  ognEarned: number;
+  xpGained: number;
+  newOgn: number;
+  newXp: number;
+  newLevel: number;
+  totalHarvests: number;
   leveledUp: boolean;
-  newLevel?: number;
+  plantName: string;
+  plantEmoji: string;
+  message: string;
 }
 
 export interface ClearResult {
@@ -375,7 +366,7 @@ export interface AuthStatus {
 // REQUEST TYPES (match BE Zod schemas)
 // ═══════════════════════════════════════════════════════════════
 
-export type PlantTypeId = 'tomato' | 'lettuce' | 'cucumber' | 'carrot' | 'chili';
+export type PlantTypeId = 'tomato' | 'carrot' | 'chili' | 'wheat';
 export type QuizAnswer = 'A' | 'B' | 'C' | 'D';
 export type InteractType = 'water' | 'like' | 'comment' | 'gift';
 
@@ -417,7 +408,7 @@ export interface SyncRequest {
 
 export interface InventoryItem {
   id: string;               // UUID — dùng để bán
-  itemId: string;            // plant type: 'tomato', 'lettuce'...
+  itemId: string;            // plant type: 'tomato', 'carrot', 'chili', 'wheat'
   plantName: string;
   plantEmoji: string;
   quantity: number;

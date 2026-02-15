@@ -42,43 +42,32 @@ export function useHarvestPlot() {
     },
 
     onSuccess: (data) => {
-      console.log('[FARM-DEBUG] useHarvestPlot.onSuccess() — HARVEST CONFIRMED', JSON.stringify({
-        reward: data.reward,
-        inventory: data.inventory,
-        leveledUp: data.leveledUp,
-      }));
+      const plantName = data.plantName || 'cây';
+      const plantEmoji = data.plantEmoji || '🌾';
+      const ognEarned = data.ognEarned || 0;
+      const xp = data.xpGained || 0;
 
-      // MỚI — Lấy thông tin từ inventory object hoặc fallback về legacy
-      const plantName = data.inventory?.plantName || data.plantName || 'cây';
-      const plantEmoji = data.inventory?.plantEmoji || data.plantEmoji || '🌾';
-      const xp = data.reward?.xp || data.xpGained || 0;
-
-      // MỚI — Toast notification — KHÔNG hiện OGN, chỉ XP + message vào kho
+      // Toast: harvest = sell directly, show OGN earned
       useUIStore.getState().addToast(
-        `${plantEmoji} Thu hoạch ${plantName}! +${xp} XP — Vào kho bán lấy tiền!`,
+        `${plantEmoji} Thu hoạch ${plantName}! +${ognEarned} OGN +${xp} XP`,
         'success',
         '🌾'
       );
 
-      // Optimistic: update OGN + XP immediately from harvest response
-      if (data.reward) {
-        queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => {
-          if (!old) return old;
-          return {
-            ...old,
-            ogn: data.reward.ognRemaining ?? old.ogn,
-            xp: data.reward.xpTotal ?? old.xp,
-            level: data.reward.level ?? old.level,
-          };
-        });
-      }
+      // Optimistic: update OGN + XP from harvest response
+      queryClient.setQueryData(PLAYER_PROFILE_KEY, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          ogn: data.newOgn ?? old.ogn,
+          xp: data.newXp ?? old.xp,
+          level: data.newLevel ?? old.level,
+        };
+      });
 
-      // Invalidate all relevant queries
+      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['game', 'farm', 'plots'] });
       queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
-      // MỚI — Invalidate inventory để kho đồ cập nhật
-      queryClient.invalidateQueries({ queryKey: ['game', 'inventory'] });
-      console.log('[FARM-DEBUG] useHarvestPlot.onSuccess() — queries invalidated');
     },
 
     onError: (error: any, _plotId, context: any) => {

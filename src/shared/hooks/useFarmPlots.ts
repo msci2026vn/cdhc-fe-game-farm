@@ -16,11 +16,10 @@ import { gameApi } from '../api/game-api';
 
 // Plant type lookup table (matches BE plant_types data)
 const PLANT_TYPES: Record<string, { id: string; name: string; emoji: string; growthDurationMs: number; rewardOGN: number; rewardXP: number; shopPrice: number }> = {
-  tomato: { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 120000, rewardOGN: 100, rewardXP: 25, shopPrice: 200 },
-  lettuce: { id: 'lettuce', name: 'Rau Muống', emoji: '🥬', growthDurationMs: 90000, rewardOGN: 60, rewardXP: 25, shopPrice: 150 },
-  cucumber: { id: 'cucumber', name: 'Dưa Leo', emoji: '🥒', growthDurationMs: 180000, rewardOGN: 150, rewardXP: 25, shopPrice: 350 },
-  carrot: { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 150000, rewardOGN: 120, rewardXP: 25, shopPrice: 280 },
-  chili: { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 200000, rewardOGN: 180, rewardXP: 25, shopPrice: 400 },
+  wheat: { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 30000, rewardOGN: 100, rewardXP: 5, shopPrice: 50 },
+  tomato: { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 120000, rewardOGN: 400, rewardXP: 25, shopPrice: 200 },
+  carrot: { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 150000, rewardOGN: 560, rewardXP: 25, shopPrice: 280 },
+  chili: { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 200000, rewardOGN: 800, rewardXP: 25, shopPrice: 400 },
 };
 
 // BE response format

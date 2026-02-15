@@ -164,7 +164,7 @@ export const gameApi = {
 
   /**
    * Plant a seed in a slot (bước 13 — real API)
-   * BE Zod: { plantTypeId: enum['tomato','lettuce','cucumber','carrot','chili'], slotIndex: int 0-5 }
+   * BE Zod: { plantTypeId: enum['tomato','carrot','chili','wheat'], slotIndex: int 0-5 }
    */
   plantSeed: async (
     slotIndex: number,

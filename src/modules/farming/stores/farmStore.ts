@@ -5,11 +5,10 @@ import { getWeatherHappinessModifier } from '../utils/growth';
 
 // Demo plant types
 export const PLANT_TYPES: PlantType[] = [
-  { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 120_000, rewardOGN: 100, shopPrice: 200 },
-  { id: 'lettuce', name: 'Rau Muống', emoji: '🥬', growthDurationMs: 90_000, rewardOGN: 60, shopPrice: 150 },
-  { id: 'cucumber', name: 'Dưa Leo', emoji: '🥒', growthDurationMs: 180_000, rewardOGN: 150, shopPrice: 350 },
-  { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 150_000, rewardOGN: 120, shopPrice: 280 },
-  { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 200_000, rewardOGN: 180, shopPrice: 400 },
+  { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 30_000, rewardOGN: 100, shopPrice: 50 },
+  { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 120_000, rewardOGN: 400, shopPrice: 200 },
+  { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 150_000, rewardOGN: 560, shopPrice: 280 },
+  { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 200_000, rewardOGN: 800, shopPrice: 400 },
 ];
 
 const WATER_COOLDOWN_MS = 15_000; // 15s for demo (real: 1 hour)
