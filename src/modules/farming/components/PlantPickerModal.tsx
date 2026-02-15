@@ -12,6 +12,9 @@ import { X } from 'lucide-react';
 // TODO Step 21: Lấy từ API thay vì hardcode
 import { PLANT_TYPES } from '../data/plants';
 
+// ...
+import { useShopItems } from '@/shared/hooks/useShopItems';
+
 interface PlantPickerModalProps {
   onSelect: (plantTypeId: string) => void;
   onClose: () => void;
@@ -19,6 +22,17 @@ interface PlantPickerModalProps {
 }
 
 export default function PlantPickerModal({ onSelect, onClose, isPlanting }: PlantPickerModalProps) {
+  const { data: shopData } = useShopItems();
+  const shopItems = shopData?.items || [];
+
+  // Create price map from shop items (category = 'seed')
+  const priceMap = new Map<string, number>();
+  shopItems.forEach((item) => {
+    if (item.category === 'seed') {
+      priceMap.set(item.id, item.price);
+    }
+  });
+
   console.log('[FARM-DEBUG] PlantPickerModal — RENDER, isPlanting:', isPlanting);
 
   const handleSelect = (plantTypeId: string) => {
@@ -55,25 +69,32 @@ export default function PlantPickerModal({ onSelect, onClose, isPlanting }: Plan
 
         {/* Plant list */}
         <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-          {PLANT_TYPES.map((plant) => (
-            <button
-              key={plant.id}
-              onClick={() => handleSelect(plant.id)}
-              disabled={isPlanting}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl
-                         bg-white/5 hover:bg-white/10 border border-white/10
-                         hover:border-emerald-500/30 transition-all
-                         active:scale-95 disabled:opacity-50"
-            >
-              <span className="text-3xl">{plant.emoji}</span>
-              <span className="text-sm font-medium text-white">{plant.name}</span>
-              <div className="flex items-center gap-1 text-xs text-amber-400">
-                <span>💰 {plant.price} OGN</span>
-              </div>
-              <span className="text-[10px] text-white/40">⏱ {plant.growthTime}</span>
-            </button>
-          ))}
+          {PLANT_TYPES.map((plant) => {
+            // Use dynamic price from shop if available, otherwise fallback to hardcoded
+            const dynamicPrice = priceMap.get(plant.id);
+            const displayPrice = dynamicPrice !== undefined ? dynamicPrice : plant.price;
+
+            return (
+              <button
+                key={plant.id}
+                onClick={() => handleSelect(plant.id)}
+                disabled={isPlanting}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl
+                          bg-white/5 hover:bg-white/10 border border-white/10
+                          hover:border-emerald-500/30 transition-all
+                          active:scale-95 disabled:opacity-50"
+              >
+                <span className="text-3xl">{plant.emoji}</span>
+                <span className="text-sm font-medium text-white">{plant.name}</span>
+                <div className="flex items-center gap-1 text-xs text-amber-400">
+                  <span>💰 {displayPrice} OGN</span>
+                </div>
+                <span className="text-[10px] text-white/40">⏱ {plant.growthTime}</span>
+              </button>
+            );
+          })}
         </div>
+// ...
 
         {/* Loading indicator */}
         {isPlanting && (

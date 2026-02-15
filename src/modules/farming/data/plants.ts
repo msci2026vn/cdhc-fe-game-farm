@@ -14,7 +14,7 @@ export const PLANT_TYPES: PlantType[] = [
     { id: 'chili', name: 'Ớt', emoji: '🌶️', price: 250, growthTime: '1h30' },
     { id: 'corn', name: 'Bắp', emoji: '🌽', price: 160, growthTime: '55m' },
     { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', price: 100, growthTime: '30m' },
-    { id: 'sunflower', name: 'Hướng Dương', emoji: '🌻', price: 300, growthTime: '2h' },
+    { id: 'sunflower', name: 'Hướng Dương', emoji: '🌻', price: 200, growthTime: '2h' },
 ];
 
 export const getPlantTypeById = (id: string): PlantType | undefined => {
