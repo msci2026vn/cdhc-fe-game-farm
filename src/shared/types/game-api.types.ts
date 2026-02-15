@@ -229,6 +229,37 @@ export interface AddFriendResult {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// FRIEND FARM (view-only)
+// ═══════════════════════════════════════════════════════════════
+
+export interface FriendFarmPlot {
+  id: string;
+  slotIndex: number;
+  plantTypeId: string;
+  plantName: string;
+  plantEmoji: string;
+  plantedAt: number;
+  happiness: number;
+  lastWateredAt: number | null;
+  isDead: boolean;
+  growthPercent: number;
+  isReady: boolean;
+  growthDurationMs: number;
+}
+
+export interface FriendFarmData {
+  friend: {
+    id: string;
+    name: string | null;
+    picture: string | null;
+    level: number;
+    ogn: number;
+  };
+  plots: FriendFarmPlot[];
+  totalSlots: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // REFERRAL (Step 20 — Enhanced)
 // ═══════════════════════════════════════════════════════════════
 

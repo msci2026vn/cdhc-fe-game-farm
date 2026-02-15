@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/shared/components/BottomNav';
 import { useFriends } from '@/shared/hooks/useSocial';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
@@ -8,7 +7,6 @@ import FriendGarden from '@/modules/friends/components/FriendGarden';
 import type { FriendData } from '@/shared/types/game-api.types';
 
 export default function FriendsScreen() {
-    const navigate = useNavigate();
     const { data: friendsData, isLoading } = useFriends();
     const friends = friendsData?.friends || [];
 
@@ -18,7 +16,7 @@ export default function FriendsScreen() {
 
     // If visiting a friend, show their garden
     if (visitingFriend) {
-        return <FriendGarden friend={visitingFriend as any} onBack={() => setVisitingFriend(null)} />;
+        return <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />;
     }
 
     return (

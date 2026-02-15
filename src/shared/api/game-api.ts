@@ -62,11 +62,13 @@ import type {
   QuizAnswer,
   InteractType,
   WeatherData,
-  // MỚI — Inventory types
+  // Inventory types
   InventoryResponse,
   SellResult,
   SellAllResult,
   OgnHistoryResult,
+  // Friend farm
+  FriendFarmData,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -597,6 +599,31 @@ export const gameApi = {
   },
 
   /**
+   * Get friend's farm (view-only) — plots + friend info
+   */
+  getFriendFarm: async (friendId: string): Promise<FriendFarmData> => {
+    const url = `https://sta.cdhc.vn/api/game/social/friend-farm/${friendId}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getFriendFarm');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
    * Get referral info including referred users and commission stats (bước 20 — real API)
    */
   getReferralInfo: async (): Promise<ReferralInfoResult> => {
@@ -992,4 +1019,5 @@ export type {
   PlantTypeId,
   QuizAnswer,
   InteractType,
+  FriendFarmData,
 };

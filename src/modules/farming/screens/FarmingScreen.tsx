@@ -11,7 +11,7 @@ import FriendsList from '@/modules/friends/components/FriendsList';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
-import { Friend } from '@/modules/friends/data/friends';
+import type { FriendData } from '@/shared/types/game-api.types';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
 import { useUIStore } from '@/shared/stores/uiStore';
@@ -118,7 +118,7 @@ export default function FarmingScreen() {
   const [showBugGame, setShowBugGame] = useState(false);
   const [showWaterEffect, setShowWaterEffect] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
-  const [visitingFriend, setVisitingFriend] = useState<Friend | null>(null);
+  const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   // REMOVED: forceUpdate interval - not needed with TanStack Query
@@ -726,12 +726,12 @@ export default function FarmingScreen() {
       )}
       <BugCatchGame open={showBugGame} onClose={() => setShowBugGame(false)} />
       <FriendsList open={showFriends} onClose={() => setShowFriends(false)}
-        onVisit={(f: any) => { setShowFriends(false); setVisitingFriend(f); }}
+        onVisit={(f) => { setShowFriends(false); setVisitingFriend(f); }}
         onInvite={() => { setShowFriends(false); setShowInvite(true); }}
         onLeaderboard={() => { setShowFriends(false); setShowLeaderboard(true); }} />
       <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
       <Leaderboard open={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
-      {visitingFriend && <FriendGarden friend={visitingFriend as any} onBack={() => setVisitingFriend(null)} />}
+      {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
     </div>
   );
 }
