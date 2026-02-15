@@ -43,12 +43,8 @@ export default function ShopScreen() {
   const items = shopData?.items || [];
   const tabItems = items.filter((i) => i.category === activeTab);
 
-  const handleBuyClick = (item: any) => {
-    if (ogn < item.price) {
-      addToast('Không đủ OGN! Hãy kiếm thêm 💰', 'error');
-      return;
-    }
-    setConfirmItem(item);
+  const handleBuyClick = (_item: any) => {
+    addToast('Chức năng đang phát triển 🚀', 'info');
   };
 
   const confirmBuy = () => {
@@ -187,17 +183,14 @@ export default function ShopScreen() {
               </span>
 
               <button
-                onClick={() => !isBuying && handleBuyClick(item)}
-                disabled={isBuying || !canAfford}
-                className="flex items-center gap-1 px-4 py-1.5 rounded-[20px] font-heading text-[13px] font-bold text-white mt-1 transition-all active:scale-95 disabled:opacity-60"
+                onClick={() => handleBuyClick(item)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-[20px] font-heading text-[11px] font-bold text-white mt-1 transition-all active:scale-95"
                 style={{
-                  background: canAfford
-                    ? 'linear-gradient(135deg, hsl(42, 87%, 55%), hsl(38, 79%, 47%))'
-                    : 'linear-gradient(135deg, #bdc3c7, #95a5a6)',
-                  boxShadow: canAfford ? '0 3px 10px rgba(240,180,41,0.3)' : 'none',
+                  background: 'linear-gradient(135deg, #bdc3c7, #95a5a6)',
+                  boxShadow: 'none',
                 }}
               >
-                {isBuying ? '...' : canAfford ? `🪙 ${item.price}` : `🔒 ${item.price}`}
+                Đang phát triển
               </button>
             </div>
           );
