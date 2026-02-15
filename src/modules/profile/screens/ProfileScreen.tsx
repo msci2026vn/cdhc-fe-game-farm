@@ -17,6 +17,7 @@ export default function ProfileScreen() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [showStatModal, setShowStatModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetError, setResetError] = useState<{ message: string; code: string } | null>(null);
   const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
   const { data: statInfo } = usePlayerStats();
@@ -321,6 +322,13 @@ export default function ProfileScreen() {
                   onClick={() => {
                     resetStats.mutate(undefined, {
                       onSuccess: () => setShowResetConfirm(false),
+                      onError: (err: any) => {
+                        setShowResetConfirm(false);
+                        setResetError({
+                          message: err.message || 'Khong the reset chi so',
+                          code: err.code || 'UNKNOWN'
+                        });
+                      }
                     });
                   }}
                   disabled={resetStats.isPending}
@@ -329,6 +337,28 @@ export default function ProfileScreen() {
                   {resetStats.isPending ? '...' : 'Xac nhan'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Reset Error Modal */}
+      {resetError && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setResetError(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="text-4xl mb-3">⚠️</div>
+              <h3 className="font-heading text-lg font-bold mb-2">Lỗi reset chỉ số</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                {resetError.code === 'INSUFFICIENT_OGN'
+                  ? 'Bạn không có đủ OGN để thực hiện reset chỉ số. Vui lòng kiểm tra lại số dư.'
+                  : resetError.message}
+              </p>
+              <button
+                onClick={() => setResetError(null)}
+                className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-gray-500 to-gray-600 active:scale-95 shadow-lg"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>

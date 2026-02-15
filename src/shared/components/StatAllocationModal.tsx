@@ -66,7 +66,7 @@ function getPresetAllocation(preset: 'attack' | 'defense' | 'balance', points: n
 
   // attack & defense: fixed pattern per round
   const patterns: Record<string, { atk: number; hp: number; def: number; mana: number }> = {
-    attack:  { atk: 2, hp: 1, def: 0, mana: 0 },
+    attack: { atk: 2, hp: 1, def: 0, mana: 0 },
     defense: { atk: 0, hp: 1, def: 1, mana: 1 },
   };
   const pattern = patterns[preset]!;
@@ -95,6 +95,7 @@ export function StatAllocationModal({
   const [pending, setPending] = useState({ atk: 0, hp: 0, def: 0, mana: 0 });
   const [selectedPreset, setSelectedPreset] = useState<'attack' | 'defense' | 'balance' | null>(null);
   const [milestonePopup, setMilestonePopup] = useState<MilestoneInfo | null>(null);
+  const [errorModal, setErrorModal] = useState<{ message: string; code: string } | null>(null);
 
   const allocateStats = useAllocateStats();
   const autoAllocateStats = useAutoAllocateStats();
@@ -140,10 +141,17 @@ export function StatAllocationModal({
       setSelectedPreset(null);
     };
 
+    const onError = (err: any) => {
+      setErrorModal({
+        message: err.message || 'Khong the phan bo chi so',
+        code: err.code || 'UNKNOWN'
+      });
+    };
+
     if (selectedPreset) {
-      autoAllocateStats.mutate(selectedPreset, { onSuccess });
+      autoAllocateStats.mutate(selectedPreset, { onSuccess, onError });
     } else {
-      allocateStats.mutate(pending, { onSuccess });
+      allocateStats.mutate(pending, { onSuccess, onError });
     }
   }, [totalPending, selectedPreset, pending, allocateStats, autoAllocateStats, onClose]);
 
@@ -239,11 +247,10 @@ export function StatAllocationModal({
                     key={p.key}
                     onClick={() => handlePreset(p.key)}
                     disabled={isPending}
-                    className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
-                      selectedPreset === p.key
+                    className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${selectedPreset === p.key
                         ? 'bg-primary text-white shadow-md'
                         : 'bg-gray-100 text-gray-600'
-                    }`}
+                      }`}
                   >
                     {p.emoji} {p.label}
                   </button>
@@ -284,6 +291,29 @@ export function StatAllocationModal({
             onClose();
           }}
         />
+      )}
+
+      {/* Error Modal */}
+      {errorModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setErrorModal(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="text-4xl mb-3">⚠️</div>
+              <h3 className="font-heading text-lg font-bold mb-2">Lỗi phân bổ</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                {errorModal.code === 'INSUFFICIENT_OGN'
+                  ? 'Bạn không có đủ OGN để thực hiện thao tác này.'
+                  : errorModal.message}
+              </p>
+              <button
+                onClick={() => setErrorModal(null)}
+                className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-gray-500 to-gray-600 active:scale-95 shadow-lg"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
