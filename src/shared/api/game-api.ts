@@ -519,7 +519,22 @@ export const gameApi = {
 
     const json = await response.json();
     console.log('[FARM-DEBUG] gameApi.getFriends() SUCCESS:', json);
-    return json.data;
+
+    // Map backend fields → FriendData (BE returns friendId/picture, FE expects id/avatar)
+    const raw = json.data?.friends || [];
+    const friends = raw.map((f: Record<string, unknown>) => ({
+      id: f.friendId || f.id,
+      name: (f.name as string) || 'Unknown',
+      avatar: (f.picture as string) || null,
+      level: (f.level as number) ?? 1,
+      title: (f.title as string) || '',
+      online: (f.online as boolean) ?? false,
+      plantCount: (f.plantCount as number) ?? 0,
+      totalHarvest: (f.totalHarvest as number) ?? 0,
+      ogn: (f.ogn as number) ?? 0,
+    }));
+
+    return { friends, myReferralCode: json.data?.myReferralCode || '' };
   },
 
   /**
