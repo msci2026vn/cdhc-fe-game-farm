@@ -1252,6 +1252,90 @@ export const gameApi = {
     return json;
   },
 
+  // ═══ CAMPAIGN ═══
+
+  /**
+   * Get all campaign zones with progress
+   */
+  getCampaignZones: async (): Promise<{ zones: import('@/modules/campaign/types/campaign.types').CampaignZone[] }> => {
+    const url = 'https://sta.cdhc.vn/api/game/boss/campaign/zones';
+    console.log('[FARM-DEBUG] gameApi.getCampaignZones():', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getCampaignZones');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Get bosses for a specific campaign zone
+   */
+  getZoneBosses: async (zoneNumber: number): Promise<{
+    zone: import('@/modules/campaign/types/campaign.types').ZoneInfo;
+    bosses: import('@/modules/campaign/types/campaign.types').ZoneBoss[];
+  }> => {
+    const url = `https://sta.cdhc.vn/api/game/boss/campaign/zones/${zoneNumber}/bosses`;
+    console.log('[FARM-DEBUG] gameApi.getZoneBosses():', { url, zoneNumber });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getZoneBosses');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Start a campaign battle session
+   */
+  startCampaignBattle: async (bossId: string): Promise<{ sessionId: string }> => {
+    const url = 'https://sta.cdhc.vn/api/game/boss/battle/start';
+    console.log('[FARM-DEBUG] gameApi.startCampaignBattle():', { url, bossId });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bossId }),
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('startCampaignBattle');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
   /**
    * Get weekly boss rotation info
    */

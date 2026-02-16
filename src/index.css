@@ -789,6 +789,42 @@
     background: linear-gradient(135deg, #6c5ce7, #a29bfe);
     box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
   }
+
+  /* ═══════ Campaign Zone Gradients ═══════ */
+  .zone-bg-1  { background: linear-gradient(180deg, #A5D6A7 0%, #66BB6A 50%, #2E7D32 100%); }
+  .zone-bg-2  { background: linear-gradient(180deg, #C8E6C9 0%, #81C784 50%, #388E3C 100%); }
+  .zone-bg-3  { background: linear-gradient(180deg, #FFCDD2 0%, #EF9A9A 50%, #C62828 100%); }
+  .zone-bg-4  { background: linear-gradient(180deg, #FFE0B2 0%, #FFCC80 50%, #E65100 100%); }
+  .zone-bg-5  { background: linear-gradient(180deg, #D7CCC8 0%, #BCAAA4 50%, #4E342E 100%); }
+  .zone-bg-6  { background: linear-gradient(180deg, #FFF9C4 0%, #FFF176 50%, #F9A825 100%); }
+  .zone-bg-7  { background: linear-gradient(180deg, #C8E6C9 0%, #A5D6A7 50%, #1B5E20 100%); }
+  .zone-bg-8  { background: linear-gradient(180deg, #B2DFDB 0%, #80CBC4 50%, #004D40 100%); }
+  .zone-bg-9  { background: linear-gradient(180deg, #FFAB91 0%, #FF7043 50%, #BF360C 100%); }
+  .zone-bg-10 { background: linear-gradient(180deg, #37474F 0%, #263238 50%, #0d0d1a 100%); }
+
+  /* Campaign map gradient (full map background) */
+  .campaign-map-gradient {
+    background: linear-gradient(180deg,
+      #0d0d1a 0%,
+      #BF360C 15%,
+      #004D40 30%,
+      #1B5E20 42%,
+      #F9A825 52%,
+      #4E342E 62%,
+      #E65100 72%,
+      #C62828 80%,
+      #388E3C 90%,
+      #2E7D32 100%
+    );
+  }
+}
+
+/* ═══════ Campaign Animations ═══════ */
+@keyframes campaign-ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+.campaign-ping {
+  animation: campaign-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 @layer utilities {

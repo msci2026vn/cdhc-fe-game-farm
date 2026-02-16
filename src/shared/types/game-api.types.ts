@@ -117,6 +117,12 @@ export interface BossFightInput {
   won: boolean;
   totalDamage: number;
   durationSeconds: number;
+  // Campaign combat sync (Prompt 12)
+  stars?: number;
+  playerHpPercent?: number;
+  maxCombo?: number;
+  dodgeCount?: number;
+  isCampaign?: boolean;
 }
 
 export interface BossCompleteResult {
@@ -129,6 +135,21 @@ export interface BossCompleteResult {
     kills: number;
     totalDamage: number;
   };
+  // Campaign combat sync (Prompt 12)
+  stars?: number;
+  isFirstClear?: boolean;
+  zoneProgress?: {
+    bossesCleared: number;
+    totalBosses: number;
+    totalStars: number;
+    maxStars: number;
+    isZoneCleared: boolean;
+  };
+  campaignRewards?: {
+    starBonus: number;
+    firstClearBonus: number;
+  };
+  remainingBattles?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════

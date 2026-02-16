@@ -7,6 +7,7 @@ import { BossInfo } from '../data/bosses';
 export default function BossScreen() {
   const [selectedBoss, setSelectedBoss] = useState<BossInfo | null>(null);
 
+  // Weekly boss mode: list → select → combat
   if (selectedBoss) {
     return <BossFightM3 boss={selectedBoss} onBack={() => setSelectedBoss(null)} />;
   }

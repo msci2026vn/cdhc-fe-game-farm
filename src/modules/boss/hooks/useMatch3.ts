@@ -110,19 +110,42 @@ function getComboInfo(combo: number) {
 
 // Boss attack config
 const BOSS_ATK_INTERVAL = 4000;
-const BOSS_SKILL_CHANCE = 0.2;
+const BOSS_SKILL_CHANCE = 0.25;
+const SKILL_DMG_MULT = 2.5;
+const SKILL_WARNING_MS = 1500;
+
+// Archetype-based skill names
+const ARCHETYPE_SKILLS: Record<string, string[]> = {
+  glass_cannon: ['Đòn chí mạng!', 'Song kiếm!', 'Cuồng nộ!'],
+  tank:         ['Lao đầu!', 'Đập đất!', 'Giáp gai!'],
+  healer:       ['Hồi máu!', 'Bào tử hồi!', 'Hút máu!'],
+  assassin:     ['Đa đòn!', 'Tấn công tốc!', 'Ám sát!'],
+  controller:   ['Xáo trộn!', 'Hút mana!', 'Choáng!'],
+  hybrid:       ['Hỗn hợp!', 'Toàn diện!', 'Tổng lực!'],
+  all:          ['Đế Vương giáng!', 'Thiên phạt!'],
+  none:         ['Tấn công mạnh!', 'Lửa Địa Ngục!', 'Sấm Sét!', 'Đòn Cuồng Phong!'],
+};
+
+function getBossSkillName(archetype: string): string {
+  const pool = ARCHETYPE_SKILLS[archetype] || ARCHETYPE_SKILLS.none;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Enrage: boss gets stronger over time
+function getEnrageMultiplier(startTime: number): number {
+  const elapsed = (Date.now() - startTime) / 1000;
+  return 1 + Math.floor(elapsed / 30) * 0.10;
+}
+
+// Stars by time
+function calculateTimeStars(duration: number, bossLevel: number): number {
+  const baseTime = 45 + bossLevel * 0.5;
+  if (duration <= baseTime) return 3;
+  if (duration <= baseTime * 1.5) return 2;
+  return 1;
+}
 
 interface BossAttackInfo { name: string; emoji: string; dmgMult: number; }
-const BOSS_SKILLS: BossAttackInfo[] = [
-  { name: 'Lửa Địa Ngục', emoji: '🔥', dmgMult: 2.0 },
-  { name: 'Sấm Sét', emoji: '⚡', dmgMult: 1.8 },
-  { name: 'Nọc Độc', emoji: '☠️', dmgMult: 1.5 },
-  { name: 'Đòn Cuồng Phong', emoji: '🌪️', dmgMult: 2.5 },
-];
-
-// Dodge mechanic: boss warns 1.5s before attacking, player taps dodge button
-const DODGE_WARNING_MS = 1500;
-const DODGE_WINDOW_MS = 800; // time to tap dodge after warning
 
 export type FightResult = 'fighting' | 'victory' | 'defeat';
 
@@ -130,6 +153,13 @@ export interface BossAttackWarning {
   skill: BossAttackInfo | null;
   rawDmg: number;
   phase: 'warning' | 'dodge_window' | 'hit';
+}
+
+/** Skill warning shown as overlay — only for skill attacks (25% chance) */
+export interface SkillWarning {
+  name: string;
+  damage: number;
+  countdown: number;
 }
 
 export interface CombatStats {
@@ -150,7 +180,7 @@ export interface CombatNotif {
   color: string;
 }
 
-export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
+export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, turnLimit = 0) {
   // Compute stat-based values
   const milestones = useMemo(() => getActiveMilestones(playerStats), [playerStats]);
   const dmgPerGem = useMemo(() => ({
@@ -207,7 +237,16 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
   // Fight start time (for duration tracking / anti-cheat)
   const fightStartTime = useRef(Date.now());
 
-  // Dodge mechanic
+  // Max combo tracking
+  const maxComboRef = useRef(0);
+
+  // Stars (computed on victory)
+  const [stars, setStars] = useState(0);
+
+  // Skill warning overlay (only for skill attacks)
+  const [skillWarning, setSkillWarning] = useState<SkillWarning | null>(null);
+
+  // Dodge mechanic (skill-only)
   const [attackWarning, setAttackWarning] = useState<BossAttackWarning | null>(null);
   const dodgedRef = useRef(false);
   const [ultActive, setUltActive] = useState(false);
@@ -220,122 +259,137 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
     setTimeout(() => setPopups(prev => prev.filter(p => p.id !== id)), 1400);
   }, []);
 
-  // Check victory/defeat
+  // Check victory/defeat — compute stars on victory
   useEffect(() => {
-    if (boss.bossHp <= 0 && result === 'fighting') setResult('victory');
+    if (boss.bossHp <= 0 && result === 'fighting') {
+      const finalDuration = Math.floor((Date.now() - fightStartTime.current) / 1000);
+      const bossLevel = bossInfo.unlockLevel || 1;
+      setStars(calculateTimeStars(finalDuration, bossLevel));
+      setResult('victory');
+    }
     if (boss.playerHp <= 0 && result === 'fighting') setResult('defeat');
-  }, [boss.bossHp, boss.playerHp, result]);
+    if (turnLimit > 0 && boss.turnCount >= turnLimit && result === 'fighting' && boss.bossHp > 0) setResult('defeat');
+  }, [boss.bossHp, boss.playerHp, boss.turnCount, turnLimit, result, bossInfo.unlockLevel]);
 
-  // Boss auto-attack with warning + dodge
+  // ═══ Helper: apply boss damage to player (shared by normal + skill attacks) ═══
+  const applyBossDamageToPlayer = useCallback((dmgAmount: number, label: string, emoji: string) => {
+    setBoss(prev => {
+      if (prev.bossHp <= 0 || prev.playerHp <= 0) return prev;
+
+      // Fort milestone: immune every 10 turns
+      if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
+        addPopup('🏰 Mien nhiem!', '#74b9ff');
+        addCombatNotif('fort', '🏰 Thanh Tri bat!', '#74b9ff');
+        setBossAttackMsg({ text: 'Thanh Tri bat!', emoji: '🏰' });
+        setTimeout(() => setBossAttackMsg(null), 1000);
+        return prev;
+      }
+
+      // Apply DEF damage reduction
+      const reducedDmg = actualBossDamage(dmgAmount, playerStats.def);
+
+      let shieldLeft = prev.shield;
+      let hpDmg = reducedDmg;
+      if (shieldLeft > 0) {
+        const absorbed = Math.min(shieldLeft, reducedDmg);
+        shieldLeft -= absorbed;
+        hpDmg -= absorbed;
+      }
+      let newPlayerHp = Math.max(0, prev.playerHp - hpDmg);
+
+      // Immortal milestone: revive once
+      if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
+        newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
+        addPopup('👼 Bat Tu!', '#a29bfe');
+        addCombatNotif('immortal', '👼 Bat Tu kich hoat!', '#a29bfe');
+        return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
+      }
+
+      // Reflect milestone: reflect damage back to boss
+      let newBossHp = prev.bossHp;
+      if (milestones.reflectPercent > 0 && reducedDmg > 0) {
+        const reflectDmg = Math.floor(reducedDmg * milestones.reflectPercent);
+        newBossHp = Math.max(0, prev.bossHp - reflectDmg);
+        if (reflectDmg > 0) {
+          setTotalDmgDealt(d => d + reflectDmg);
+          setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));
+          addPopup(`🛡️ Phan -${reflectDmg}`, '#74b9ff');
+          addCombatNotif('reflect', `🛡️ Phan xa ${reflectDmg} DMG!`, '#74b9ff');
+        }
+      }
+
+      return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, bossHp: newBossHp };
+    });
+
+    const reducedDisplay = actualBossDamage(dmgAmount, playerStats.def);
+    setBossAttackMsg({ text: `${label} -${reducedDisplay}`, emoji });
+    setScreenShake(true);
+    addPopup(`-${reducedDisplay}`, '#e74c3c');
+    setTimeout(() => { setBossAttackMsg(null); setScreenShake(false); }, 1200);
+  }, [milestones, playerStats.def, addPopup, addCombatNotif]);
+
+  // ═══ Boss auto-attack: Normal (instant) vs Skill (warning + dodge) + Enrage ═══
   useEffect(() => {
     if (result !== 'fighting') return;
 
     const interval = setInterval(() => {
+      // Enrage: +10% ATK every 30 seconds
+      const enrageMult = getEnrageMultiplier(fightStartTime.current);
+      const baseAtk = bossInfo.attack * enrageMult;
+
       const isSkill = Math.random() < BOSS_SKILL_CHANCE;
-      const skill = isSkill ? BOSS_SKILLS[Math.floor(Math.random() * BOSS_SKILLS.length)] : null;
-      const rawDmg = bossInfo.attack + Math.floor(Math.random() * Math.round(bossInfo.attack * 0.3));
-      const totalDmg = Math.round(rawDmg * (skill?.dmgMult || 1));
 
-      // Phase 1: Warning
-      dodgedRef.current = false;
-      setAttackWarning({ skill, rawDmg: totalDmg, phase: 'warning' });
+      if (isSkill) {
+        // ══ SKILL ATTACK: 1.5s warning, player can dodge ══
+        const skillName = getBossSkillName(bossInfo.archetype || 'none');
+        const skillDmg = Math.round(baseAtk * SKILL_DMG_MULT);
 
-      // Phase 2: Dodge window
-      setTimeout(() => {
-        setAttackWarning(prev => prev ? { ...prev, phase: 'dodge_window' } : null);
-      }, DODGE_WARNING_MS);
+        dodgedRef.current = false;
+        // Set both warning types for backward compat + new overlay
+        setAttackWarning({ skill: { name: skillName, emoji: '⚠️', dmgMult: SKILL_DMG_MULT }, rawDmg: skillDmg, phase: 'warning' });
+        setSkillWarning({ name: skillName, damage: skillDmg, countdown: 1.5 });
 
-      // Phase 3: Hit (if not dodged)
-      setTimeout(() => {
-        setAttackWarning(null);
+        // After 1.5s: resolve
+        setTimeout(() => {
+          setAttackWarning(null);
+          setSkillWarning(null);
 
-        if (dodgedRef.current) {
-          // Dodged! No damage, show message
-          setBossAttackMsg({ text: 'NÉ THÀNH CÔNG! 🏃', emoji: '💨' });
-          setTimeout(() => setBossAttackMsg(null), 1000);
-          return;
-        }
-
-        // Apply damage with stat-based reduction
-        setBoss(prev => {
-          if (prev.bossHp <= 0 || prev.playerHp <= 0) return prev;
-
-          // Fort milestone: immune every 10 turns
-          if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
-            addPopup('🏰 Mien nhiem!', '#74b9ff');
-            addCombatNotif('fort', '🏰 Thanh Tri bat!', '#74b9ff');
-            setBossAttackMsg({ text: 'Thanh Tri bat!', emoji: '🏰' });
+          if (dodgedRef.current) {
+            setBossAttackMsg({ text: 'NÉ THÀNH CÔNG! 🏃', emoji: '💨' });
             setTimeout(() => setBossAttackMsg(null), 1000);
-            return prev;
+            return;
           }
 
-          // Apply DEF damage reduction
-          const reducedDmg = actualBossDamage(totalDmg, playerStats.def);
-
-          let shieldLeft = prev.shield;
-          let hpDmg = reducedDmg;
-          if (shieldLeft > 0) {
-            const absorbed = Math.min(shieldLeft, reducedDmg);
-            shieldLeft -= absorbed;
-            hpDmg -= absorbed;
-          }
-          let newPlayerHp = Math.max(0, prev.playerHp - hpDmg);
-
-          // Immortal milestone: revive once
-          if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
-            newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
-            addPopup('👼 Bat Tu!', '#a29bfe');
-            addCombatNotif('immortal', '👼 Bat Tu kich hoat!', '#a29bfe');
-            return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
-          }
-
-          // Reflect milestone: reflect damage back to boss
-          let newBossHp = prev.bossHp;
-          if (milestones.reflectPercent > 0 && reducedDmg > 0) {
-            const reflectDmg = Math.floor(reducedDmg * milestones.reflectPercent);
-            newBossHp = Math.max(0, prev.bossHp - reflectDmg);
-            if (reflectDmg > 0) {
-              setTotalDmgDealt(d => d + reflectDmg);
-              setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));
-              addPopup(`🛡️ Phan -${reflectDmg}`, '#74b9ff');
-              addCombatNotif('reflect', `🛡️ Phan xa ${reflectDmg} DMG!`, '#74b9ff');
-            }
-          }
-
-          return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, bossHp: newBossHp };
-        });
-
-        const reducedDmgDisplay = actualBossDamage(totalDmg, playerStats.def);
-        if (skill) {
-          setBossAttackMsg({ text: `${skill.name}! -${reducedDmgDisplay}`, emoji: skill.emoji });
-        } else {
-          setBossAttackMsg({ text: `Boss tan cong! -${reducedDmgDisplay}`, emoji: '💥' });
-        }
-        setScreenShake(true);
-        addPopup(`-${reducedDmgDisplay}`, '#e74c3c');
-        setTimeout(() => { setBossAttackMsg(null); setScreenShake(false); }, 1200);
-      }, DODGE_WARNING_MS + DODGE_WINDOW_MS);
+          // Not dodged → full skill damage
+          applyBossDamageToPlayer(skillDmg, `${skillName}`, '💀');
+        }, SKILL_WARNING_MS);
+      } else {
+        // ══ NORMAL ATTACK: instant, no warning, no dodge ══
+        const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.3)));
+        applyBossDamageToPlayer(normalDmg, 'Boss tấn công!', '💥');
+      }
     }, BOSS_ATK_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [bossInfo.attack, result, addPopup, milestones, playerStats.def]);
+  }, [bossInfo.attack, bossInfo.archetype, result, applyBossDamageToPlayer]);
 
-  // Dodge handler — costs mana
+  // Dodge handler — only works during skill warning, costs mana
   const handleDodge = useCallback(() => {
-    if (attackWarning?.phase !== 'dodge_window') return;
-    // Check mana
+    // Can only dodge when there's an active skill warning
+    if (!skillWarning && attackWarning?.phase !== 'dodge_window' && attackWarning?.phase !== 'warning') return;
     setBoss(prev => {
       if (prev.mana < manaDodgeCost) {
-        addPopup(`Thieu mana! (${manaDodgeCost})`, '#e74c3c');
+        addPopup(`Thiếu mana! (${manaDodgeCost})`, '#e74c3c');
         return prev;
       }
       dodgedRef.current = true;
       setAttackWarning(null);
+      setSkillWarning(null);
       setCombatStatsTracker(s => ({ ...s, dodgeCount: s.dodgeCount + 1 }));
-      addCombatNotif('dodge', '🏃 Ne thanh cong!', '#55efc4');
+      addCombatNotif('dodge', '🏃 Né thành công!', '#55efc4');
       return { ...prev, mana: prev.mana - manaDodgeCost };
     });
-  }, [attackWarning, manaDodgeCost, addPopup, addCombatNotif]);
+  }, [skillWarning, attackWarning, manaDodgeCost, addPopup, addCombatNotif]);
 
   // Ultimate: massive damage burst — uses mana (or free with superMana)
   const fireUltimate = useCallback(() => {
@@ -385,6 +439,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
     }
     const newCombo = currentCombo + 1;
     comboRef.current = newCombo;
+    if (newCombo > maxComboRef.current) maxComboRef.current = newCombo;
     setCombo(newCombo);
     if (newCombo >= 2) setShowCombo(true);
     const comboInfo = getComboInfo(newCombo);
@@ -496,6 +551,9 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
   // Calculate fight duration in seconds
   const durationSeconds = Math.floor((Date.now() - fightStartTime.current) / 1000);
 
+  // Compute enrage multiplier for UI (red glow when >= 1.3)
+  const enrageMultiplier = getEnrageMultiplier(fightStartTime.current);
+
   return {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
     handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
@@ -503,5 +561,10 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats) {
     durationSeconds, fightStartTime: fightStartTime.current,
     milestones, manaDodgeCost, manaUltCost,
     combatStatsTracker, combatNotifs,
+    // ═══ New: Prompt 12 ═══
+    skillWarning,
+    enrageMultiplier,
+    stars,
+    maxCombo: maxComboRef.current,
   };
 }

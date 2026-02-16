@@ -39,13 +39,31 @@ export function useBossComplete() {
             queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
             queryClient.invalidateQueries({ queryKey: ['game', 'daily-status'] });
             queryClient.invalidateQueries({ queryKey: ['game', 'level-info'] });
+
+            // Invalidate campaign data (zone progress refreshes when player navigates back)
+            queryClient.invalidateQueries({ queryKey: ['game', 'campaign'] });
         },
         onError: (error) => {
             console.error('[FARM-DEBUG] useBossComplete.onError:', error);
-            useUIStore.getState().addToast(
-              'Không thể hoàn thành trận đấu.',
-              'error'
-            );
+            const code = (error as any)?.code;
+            if (code === 'CAMPAIGN_DAILY_LIMIT') {
+              useUIStore.getState().addToast(
+                'Hết lượt đánh hôm nay! Quay lại ngày mai',
+                'warning',
+                '🌅'
+              );
+            } else if (code === 'CAMPAIGN_COOLDOWN') {
+              useUIStore.getState().addToast(
+                'Đợi chút rồi đánh tiếp nhé!',
+                'warning',
+                '⏱️'
+              );
+            } else {
+              useUIStore.getState().addToast(
+                'Không thể hoàn thành trận đấu.',
+                'error'
+              );
+            }
         },
     });
 }

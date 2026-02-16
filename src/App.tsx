@@ -35,6 +35,9 @@ const InventoryScreen = lazyWithRetry(() => import('@/modules/inventory/screens/
 const FriendsScreen = lazyWithRetry(() => import('@/modules/friends/screens/FriendsScreen'));
 const ProfileScreen = lazyWithRetry(() => import('@/modules/profile/screens/ProfileScreen'));
 const OgnHistoryScreen = lazyWithRetry(() => import('@/modules/profile/screens/OgnHistoryScreen'));
+const CampaignMapScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignMapScreen'));
+const CampaignZoneScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignZoneScreen'));
+const CampaignBattleScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignBattleScreen'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -79,6 +82,9 @@ const AuthenticatedApp = () => {
         <Route path="/friends" element={<FriendsScreen />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/ogn-history" element={<OgnHistoryScreen />} />
+        <Route path="/campaign" element={<CampaignMapScreen />} />
+        <Route path="/campaign/battle/:bossId" element={<CampaignBattleScreen />} />
+        <Route path="/campaign/:zoneNumber" element={<CampaignZoneScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

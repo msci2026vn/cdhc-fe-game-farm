@@ -649,6 +649,16 @@ export default function FarmingScreen() {
               <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">sports_esports</span>
             </div>
           </button>
+
+          {/* Campaign Map Button */}
+          <button
+            onClick={() => navigate('/campaign')}
+            className="action-btn group flex flex-col items-center justify-center gap-1 relative w-12 transition-transform active:scale-95"
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-b from-amber-500 to-amber-700 border-b-4 border-amber-900 shadow-lg flex items-center justify-center group-hover:from-amber-400 group-hover:to-amber-600 transition-colors ring-2 ring-white/50">
+              <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">explore</span>
+            </div>
+          </button>
         </div>
 
         {/* Wooden Bottom Navigation */}

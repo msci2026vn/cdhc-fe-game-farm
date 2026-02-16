@@ -9,6 +9,9 @@ export interface BossInfo {
   description: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'legendary';
   unlockLevel: number;
+  // Campaign extensions (optional — set by CampaignBattleLoader)
+  archetype?: string;
+  def?: number;
 }
 
 export const BOSSES: BossInfo[] = [

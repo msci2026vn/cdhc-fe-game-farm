@@ -1,0 +1,197 @@
+import { cn } from '@/lib/utils';
+import {
+  Drawer,
+  DrawerContent,
+} from '@/components/ui/drawer';
+import type { ZoneBoss, ZoneInfo } from '../types/campaign.types';
+import { BOSS_DETAILS } from '../data/bossDetails';
+import { ARCHETYPE_INFO } from '../data/archetypes';
+import { ZONE_META } from '../data/zones';
+
+interface BossDetailSheetProps {
+  boss: ZoneBoss | null;
+  zone: ZoneInfo | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onFight: (bossId: string) => void;
+}
+
+/**
+ * BossDetailSheet — Bottom drawer showing boss info before combat.
+ * Uses static BOSS_DETAILS fallback + ARCHETYPE_INFO for counter tips.
+ * Reuses existing CSS classes: stat-chip, glass-card, btn-comic-red.
+ */
+export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFight }: BossDetailSheetProps) {
+  if (!boss || !zone) return null;
+
+  const detail = BOSS_DETAILS[boss.bossNumber];
+  const archetype = ARCHETYPE_INFO[boss.archetype] || ARCHETYPE_INFO['none'];
+  const meta = ZONE_META[zone.zoneNumber];
+  const hasRecord = boss.isCleared && boss.bestStars > 0;
+  const hasSpecial = detail?.specialVi && detail.specialVi !== 'Không có';
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-w-[430px] mx-auto rounded-t-3xl border-0 bg-white">
+        <div className="px-6 pb-8 pt-2 max-h-[85vh] overflow-y-auto">
+
+          {/* ═══ BOSS VISUAL ═══ */}
+          <div className="flex flex-col items-center gap-2 mb-6">
+            {/* Emoji */}
+            <div className="text-6xl drop-shadow-lg">
+              {meta?.bossEmoji[boss.bossNumber % 4 === 0 ? 4 : boss.bossNumber % 4] || boss.emoji || '👾'}
+            </div>
+
+            {/* Tier badge */}
+            <div className={cn(
+              'px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-white',
+              boss.tier === 'boss' && 'bg-red-500',
+              boss.tier === 'elite' && 'bg-blue-500',
+              boss.tier === 'minion' && 'bg-gray-500',
+            )}>
+              {boss.tier === 'boss' && '👑 '}{boss.tier}
+            </div>
+
+            {/* Name */}
+            <h2 className="font-heading text-2xl font-black text-gray-900">
+              {boss.name}
+            </h2>
+
+            {/* Zone context */}
+            <p className="text-sm text-gray-500">
+              {meta?.icon} Vùng {zone.zoneNumber}: {zone.name}
+            </p>
+          </div>
+
+          {/* ═══ STATS GRID ═══ */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <StatChip icon="❤️" label="HP" value={formatNumber(boss.hp)} />
+            <StatChip icon="⚔️" label="ATK" value={formatNumber(detail?.atk ?? boss.attack ?? 0)} />
+            <StatChip icon="🛡️" label="DEF" value={formatNumber(detail?.def ?? 0)} />
+            <StatChip icon="⏱️" label="Lượt" value={`${detail?.turnLimit ?? '?'}`} />
+            <StatChip icon="🔄" label="Freq" value={`×${detail?.freq ?? 1}`} />
+            <StatChip icon="💚" label="Hồi" value={detail?.healPercent ? `${detail.healPercent}%` : '—'} />
+          </div>
+
+          {/* ═══ ARCHETYPE TAG ═══ */}
+          {boss.archetype && boss.archetype !== 'none' && (
+            <div className={cn('rounded-xl p-3 mb-4 text-white', archetype.color)}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{archetype.icon}</span>
+                <span className="font-heading font-bold text-sm">{archetype.label}</span>
+              </div>
+              <p className="text-xs opacity-90">{archetype.tipVi}</p>
+            </div>
+          )}
+
+          {/* ═══ CƠ CHẾ ĐẶC BIỆT ═══ */}
+          {hasSpecial && (
+            <div className="glass-card rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
+                <span className="font-heading font-bold text-sm text-gray-800">Cơ chế đặc biệt</span>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed">{detail?.specialVi}</p>
+            </div>
+          )}
+
+          {/* ═══ GỢI Ý COUNTER ═══ */}
+          {archetype.counterText && (
+            <div className="glass-card rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-blue-500 text-lg">tips_and_updates</span>
+                <span className="font-heading font-bold text-sm text-gray-800">Gợi ý build</span>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-sm text-green-700 flex items-start gap-1.5">
+                  <span className="flex-shrink-0">✅</span>
+                  <span>Tốt: {archetype.counterIcon} {archetype.counterText}</span>
+                </p>
+                {archetype.worstText && (
+                  <p className="text-sm text-red-600 flex items-start gap-1.5">
+                    <span className="flex-shrink-0">⚠️</span>
+                    <span>Khó: {archetype.worstIcon} {archetype.worstText}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ═══ KỶ LỤC ═══ */}
+          {hasRecord && (
+            <div className="glass-card rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="material-symbols-outlined text-yellow-500 text-lg"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  emoji_events
+                </span>
+                <span className="font-heading font-bold text-sm text-gray-800">Kỷ lục của bạn</span>
+              </div>
+              <div className="flex items-center justify-between">
+                {/* Stars */}
+                <div className="flex gap-0.5">
+                  {[1, 2, 3].map(i => (
+                    <span
+                      key={i}
+                      className={cn(
+                        'material-symbols-outlined text-lg',
+                        i <= boss.bestStars ? 'text-yellow-400' : 'text-gray-300'
+                      )}
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      star
+                    </span>
+                  ))}
+                </div>
+                {/* Stats */}
+                <div className="flex items-center gap-3">
+                  {boss.bestTurns != null && (
+                    <span className="text-xs text-gray-600">{boss.bestTurns} lượt</span>
+                  )}
+                  {boss.bestHpPercent != null && (
+                    <span className="text-xs text-gray-600">HP {boss.bestHpPercent}%</span>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">Đã clear {boss.clearCount} lần</p>
+            </div>
+          )}
+
+          {/* ═══ FIGHT BUTTON ═══ */}
+          <button
+            onClick={() => onFight(boss.id)}
+            className="btn-comic-red w-full py-4 rounded-2xl text-white font-heading text-xl font-black uppercase tracking-wider flex items-center justify-center gap-3 active:scale-95 transition-transform"
+          >
+            <span className="material-symbols-outlined text-2xl">swords</span>
+            ĐÁNH!
+          </button>
+
+          <p className="text-center text-xs text-gray-400 mt-2">
+            Recommended Lv. {detail?.recommendedLevel ?? '?'}
+          </p>
+
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+/** Stat chip — reuses stat-chip class from index.css */
+function StatChip({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="stat-chip flex flex-col items-center gap-1 py-2.5 rounded-xl">
+      <span className="text-lg leading-none">{icon}</span>
+      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{label}</span>
+      <span className="font-heading font-bold text-sm text-gray-800">{value}</span>
+    </div>
+  );
+}
+
+/** Format large numbers (e.g. 4500 → "4.5k") */
+function formatNumber(n: number): string {
+  if (n >= 10000) return `${(n / 1000).toFixed(0)}k`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return n.toString();
+}

@@ -2,30 +2,44 @@ import { useEffect, useRef, useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
-import { useLevel, usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
-import { BuildAura, getDominantAura, AURA_CONFIGS } from '@/shared/components/BuildAura';
+import { getDominantAura } from '@/shared/components/BuildAura';
+import BossSkillWarning from './BossSkillWarning';
+
+// HUD components
+import {
+  BossHPBar, PlayerHPBar, ManaBar, SkillBar, BattleTopBar,
+  ComboDisplay, COMBO_VFX, DamagePopupLayer,
+  BossRageOverlay, BattleResult,
+} from './hud';
 
 interface Props {
   boss: BossInfo;
   onBack: () => void;
+  /** Campaign mode props */
+  isCampaign?: boolean;
+  campaignBossId?: string;
+  zoneName?: string;
+  archetype?: string;
+  archetypeIcon?: string;
+  archetypeTip?: string;
+  turnLimit?: number;
+  healPerTurn?: number;
+  onRetry?: () => void;
 }
 
-// Combo visual configs
-const COMBO_VFX: Record<string, { emoji: string; particles: string[]; size: string }> = {
-  'COMBO': { emoji: '💥', particles: ['✨', '💫'], size: 'text-base' },
-  'SUPER': { emoji: '🌟', particles: ['⚡', '💛', '✨'], size: 'text-lg' },
-  'MEGA': { emoji: '🔥', particles: ['💥', '🔥', '💢'], size: 'text-xl' },
-  'ULTRA': { emoji: '💜', particles: ['💎', '💠', '🌀', '✨'], size: 'text-2xl' },
-  'LEGENDARY': { emoji: '👑', particles: ['🌈', '💎', '⭐', '👑'], size: 'text-2xl' },
-  '🔥 GODLIKE': { emoji: '☄️', particles: ['🔥', '💀', '⚡', '💥', '☄️'], size: 'text-3xl' },
-};
-
-export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
+export default function BossFightM3({
+  boss: bossInfo, onBack,
+  isCampaign = false, campaignBossId, zoneName,
+  archetype, archetypeIcon, archetypeTip,
+  turnLimit = 0, healPerTurn = 0,
+  onRetry,
+}: Props) {
   const { data: statInfo } = usePlayerStats();
 
   // Compute effective combat stats from stat info (or use defaults)
@@ -48,17 +62,15 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
     durationSeconds, fightStartTime,
     milestones, manaDodgeCost, manaUltCost,
     combatStatsTracker, combatNotifs,
-  } = useMatch3(bossInfo, combatStats);
+    skillWarning, enrageMultiplier, stars, maxCombo,
+  } = useMatch3(bossInfo, combatStats, turnLimit);
 
   const auraType = getDominantAura(combatStats);
-  const auraConfig = AURA_CONFIGS[auraType];
 
   const bossComplete = useBossComplete();
-  const { data: profile } = usePlayerProfile();
   const { data: auth } = useAuth();
   const level = useLevel();
   const rewardedRef = useRef(false);
-  const [levelUpShow, setLevelUpShow] = useState(false);
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
   const particleId = useRef(0);
 
@@ -66,16 +78,20 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
   useEffect(() => {
     if (result !== 'fighting' && !rewardedRef.current) {
       rewardedRef.current = true;
-
-      // Call boss complete API
+      const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
       bossComplete.mutate({
-        bossId: bossInfo.id,
+        bossId: campaignBossId || bossInfo.id,
         won: result === 'victory',
         totalDamage: totalDmgDealt,
         durationSeconds,
+        stars: result === 'victory' ? stars : 0,
+        playerHpPercent: playerHpPct,
+        maxCombo,
+        dodgeCount: combatStatsTracker.dodgeCount,
+        isCampaign,
       });
     }
-  }, [result, bossInfo.id, totalDmgDealt, durationSeconds, bossComplete]);
+  }, [result, bossInfo.id, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, isCampaign, boss.playerHp, boss.playerMaxHp]);
 
   // Spawn combo particles
   useEffect(() => {
@@ -100,106 +116,42 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
 
   const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
-  const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200); // dynamic shield max for bar display
-  const shieldPct = Math.min(100, Math.round((boss.shield / shieldMax) * 100));
-  const manaPct = boss.maxMana > 0 ? Math.round((boss.mana / boss.maxMana) * 100) : 0;
-  const ultReady = boss.ultCharge >= 100;
+  const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
   const comboInfo = getComboInfo(combo);
-  const comboVfx = COMBO_VFX[comboInfo.label];
 
-  // Victory / Defeat overlay
+  // Determine max turns: campaign turnLimit or default 99
+  const maxTurns = turnLimit > 0 ? turnLimit : 99;
+
+  // Turn limit defeat is now handled inside useMatch3
+
+  // Victory / Defeat screen using BattleResult component
   if (result !== 'fighting') {
     const won = result === 'victory';
     const serverData = bossComplete.data;
-    // FIX: Use `level` from line 32, not useLevel() in conditional (React hooks rules violation)
+
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-8">
-        {/* Level up overlay */}
-        {levelUpShow && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="animate-scale-in text-center">
-              <div className="text-6xl mb-2">🎉</div>
-              <div className="px-8 py-4 rounded-2xl font-heading text-xl font-bold text-white"
-                style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 0 60px rgba(108,92,231,0.8)' }}>
-                LEVEL UP! ⭐ Lv.{serverData?.newLevel ?? level}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="animate-scale-in text-center">
-          <div className="text-[80px] mb-4">{won ? '🏆' : '💀'}</div>
-          <h2 className="font-heading text-2xl font-bold text-white mb-2">
-            {won ? 'Chiến thắng!' : 'Thất bại!'}
-          </h2>
-          <p className="text-white/60 text-sm mb-1">
-            {won ? `Đã tiêu diệt ${bossInfo.name}!` : `${bossInfo.name} đã đánh bại bạn!`}
-          </p>
-          <div className="flex items-center justify-center gap-4 my-3 text-sm font-bold">
-            <span style={{ color: '#ff6b6b' }}>⚔️ {totalDmgDealt.toLocaleString()} DMG</span>
-            {serverData?.won && <span style={{ color: '#fdcb6e' }}>🪙 +{serverData.ognReward} OGN</span>}
-            {serverData?.won && <span style={{ color: '#a29bfe' }}>⭐ +{serverData.xpGained} XP</span>}
-          </div>
-
-          {/* Combat stats summary */}
-          <div className="grid grid-cols-3 gap-2 mb-4 px-2">
-            {combatStatsTracker.critCount > 0 && (
-              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(255,107,107,0.15)', border: '1px solid rgba(255,107,107,0.2)' }}>
-                <div className="text-sm">💥</div>
-                <div className="text-[10px] font-bold" style={{ color: '#ff6b6b' }}>{combatStatsTracker.critCount} Crit</div>
-              </div>
-            )}
-            {combatStatsTracker.dodgeCount > 0 && (
-              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(85,239,196,0.15)', border: '1px solid rgba(85,239,196,0.2)' }}>
-                <div className="text-sm">🏃</div>
-                <div className="text-[10px] font-bold" style={{ color: '#55efc4' }}>{combatStatsTracker.dodgeCount} Ne</div>
-              </div>
-            )}
-            {combatStatsTracker.ultCount > 0 && (
-              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(162,155,254,0.15)', border: '1px solid rgba(162,155,254,0.2)' }}>
-                <div className="text-sm">⚡</div>
-                <div className="text-[10px] font-bold" style={{ color: '#a29bfe' }}>{combatStatsTracker.ultCount} ULT</div>
-              </div>
-            )}
-            {combatStatsTracker.reflectTotal > 0 && (
-              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(116,185,255,0.15)', border: '1px solid rgba(116,185,255,0.2)' }}>
-                <div className="text-sm">🛡️</div>
-                <div className="text-[10px] font-bold" style={{ color: '#74b9ff' }}>{combatStatsTracker.reflectTotal} Phan xa</div>
-              </div>
-            )}
-            {combatStatsTracker.totalHealed > 0 && (
-              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(85,239,196,0.15)', border: '1px solid rgba(85,239,196,0.2)' }}>
-                <div className="text-sm">💚</div>
-                <div className="text-[10px] font-bold" style={{ color: '#55efc4' }}>{combatStatsTracker.totalHealed} HP hoi</div>
-              </div>
-            )}
-            {combatStatsTracker.turnsPlayed > 0 && (
-              <div className="text-center px-2 py-1.5 rounded-lg" style={{ background: 'rgba(253,203,110,0.15)', border: '1px solid rgba(253,203,110,0.2)' }}>
-                <div className="text-sm">🔄</div>
-                <div className="text-[10px] font-bold" style={{ color: '#fdcb6e' }}>{combatStatsTracker.turnsPlayed} Luot</div>
-              </div>
-            )}
-          </div>
-          {serverData?.won && (
-            <div className="flex gap-3 mb-6">
-              <div className="flex-1 px-4 py-3 rounded-xl animate-fade-in"
-                style={{ background: 'rgba(240,180,41,0.15)', border: '1px solid rgba(240,180,41,0.3)' }}>
-                <span className="text-xl">🪙</span>
-                <span className="font-heading text-lg font-bold ml-1" style={{ color: '#d49a1a' }}>+{serverData.ognReward}</span>
-              </div>
-              <div className="flex-1 px-4 py-3 rounded-xl animate-fade-in"
-                style={{ background: 'rgba(108,92,231,0.15)', border: '1px solid rgba(108,92,231,0.3)' }}>
-                <span className="text-xl">⭐</span>
-                <span className="font-heading text-lg font-bold ml-1" style={{ color: '#a29bfe' }}>+{serverData.xpGained} XP</span>
-              </div>
-            </div>
-          )}
-          <button onClick={onBack}
-            className="w-full py-4 rounded-lg btn-green text-white font-heading text-base font-bold active:scale-[0.97] transition-transform">
-            Quay lại danh sách
-          </button>
-        </div>
-      </div>
+      <BattleResult
+        won={won}
+        bossName={bossInfo.name}
+        bossEmoji={bossInfo.emoji}
+        totalDmgDealt={totalDmgDealt}
+        serverData={serverData}
+        combatStats={combatStatsTracker}
+        playerLevel={level}
+        isCampaign={isCampaign}
+        playerHpPct={playerHpPct}
+        turnUsed={boss.turnCount}
+        turnMax={maxTurns}
+        archetype={archetype}
+        archetypeTip={archetypeTip}
+        onBack={onBack}
+        onRetry={onRetry}
+        leveledUp={serverData?.leveledUp}
+        newLevel={serverData?.newLevel}
+        combatStars={stars}
+        durationSeconds={durationSeconds}
+        maxCombo={maxCombo}
+      />
     );
   }
 
@@ -216,7 +168,6 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
               ⚡ ULTIMATE! ⚡
             </div>
           </div>
-          {/* Ult particles */}
           {Array.from({ length: 12 }).map((_, i) => (
             <span key={i} className="absolute animate-sparkle-up text-2xl pointer-events-none"
               style={{ left: `${10 + Math.random() * 80}%`, top: `${20 + Math.random() * 50}%`, animationDelay: `${i * 0.1}s` }}>
@@ -241,7 +192,6 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
               <span className="text-sm">{bossAttackMsg.text}</span>
             </div>
           </div>
-          {/* Impact particles for boss attacks */}
           {bossAttackMsg.emoji !== '💨' && Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="absolute animate-sparkle-up text-xl pointer-events-none"
               style={{ left: `${15 + Math.random() * 70}%`, top: `${30 + Math.random() * 40}%`, animationDelay: `${i * 0.05}s` }}>
@@ -259,24 +209,16 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         </span>
       ))}
 
-      {/* Dodge warning overlay */}
-      {attackWarning && (
-        <div className="absolute inset-0 z-40 pointer-events-none">
-          <div className={`absolute inset-0 ${attackWarning.phase === 'dodge_window' ? 'animate-boss-atk-flash' : ''}`}
-            style={{ background: attackWarning.phase === 'warning' ? 'rgba(243,156,18,0.08)' : 'transparent' }} />
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50">
-            <div className={`px-4 py-2 rounded-full font-heading text-sm font-bold text-center ${attackWarning.phase === 'dodge_window' ? 'animate-pulse' : 'animate-scale-in'
-              }`} style={{
-                background: attackWarning.phase === 'warning' ? 'rgba(243,156,18,0.9)' : 'rgba(231,76,60,0.95)',
-                color: '#fff',
-                boxShadow: '0 0 20px rgba(231,76,60,0.5)',
-              }}>
-              {attackWarning.phase === 'warning'
-                ? `⚠️ ${attackWarning.skill?.name || 'Boss'} sắp tấn công!`
-                : '🏃 BẤM NÉ NGAY!'}
-            </div>
-          </div>
-        </div>
+      {/* Skill warning overlay — only for skill attacks (25% chance) */}
+      {skillWarning && (
+        <BossSkillWarning
+          warning={skillWarning}
+          bossName={bossInfo.name}
+          bossEmoji={bossInfo.emoji}
+          manaCost={manaDodgeCost}
+          currentMana={boss.mana}
+          onDodge={handleDodge}
+        />
       )}
 
       {/* Combat notifications (right side) */}
@@ -291,81 +233,70 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         </div>
       )}
 
+      {/* Boss rage overlay */}
+      <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossInfo.emoji} />
+
       {/* Top half: Boss arena */}
       <div className="flex-[0_0_46%] pt-safe px-5 pb-2 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
         }} />
 
-        {/* Header with level + stats */}
-        <div className="flex justify-between items-center mb-2 z-10">
-          <button onClick={onBack} className="text-white/50 text-sm font-bold active:scale-95">← Thoát</button>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: '#ff6b6b', background: 'rgba(255,107,107,0.15)' }}>
-              ⚔️{combatStats.atk}
-            </span>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: '#74b9ff', background: 'rgba(116,185,255,0.15)' }}>
-              🛡️{combatStats.def}
-            </span>
-            <div className="px-2.5 py-1 rounded-lg font-heading text-xs font-bold text-white"
-              style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-              Lv.{level}
-            </div>
-          </div>
-        </div>
+        {/* Top bar: Turn counter + stats + retreat */}
+        <BattleTopBar
+          turn={boss.turnCount}
+          maxTurns={maxTurns}
+          level={level}
+          atk={combatStats.atk}
+          def={combatStats.def}
+          onRetreat={onBack}
+          isCampaign={isCampaign}
+        />
 
-        {/* Boss name + HP */}
-        <div className="z-10 mb-2">
-          <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2 mb-1.5">
-            <span className="text-xl">{bossInfo.emoji}</span> {bossInfo.name}
-          </h2>
-          <div className="w-full h-5 rounded-xl overflow-hidden relative"
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div className="h-full rounded-xl relative boss-hp-glow transition-all duration-500"
-              style={{ width: `${bossHpPct}%`, background: 'linear-gradient(90deg, #e74c3c, #ff6b6b)' }}>
-              <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-xl" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3), transparent)' }} />
-            </div>
-            <span className="absolute inset-0 flex items-center justify-center font-heading text-[11px] font-bold text-white text-shadow-sm">
-              {boss.bossHp.toLocaleString()} / {boss.bossMaxHp.toLocaleString()} HP
+        {/* Campaign zone label */}
+        {isCampaign && zoneName && (
+          <div className="z-10 mb-1">
+            <span className="text-[9px] font-bold px-2 py-0.5 rounded"
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+              📍 {zoneName}
             </span>
           </div>
-        </div>
+        )}
 
-        {/* Boss sprite + damage popups */}
+        {/* Boss HP bar */}
+        <BossHPBar
+          name={bossInfo.name}
+          emoji={bossInfo.emoji}
+          hp={boss.bossHp}
+          maxHp={boss.bossMaxHp}
+          archetype={archetype}
+          archetypeIcon={archetypeIcon}
+          healPerTurn={healPerTurn}
+        />
+
+        {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${attackWarning?.phase === 'dodge_window' ? 'animate-boss-attack' : ''
-            }`} style={{ filter: 'drop-shadow(0 0 30px rgba(231,76,60,0.5))' }}>
+          <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
+            }`} style={{
+              filter: enrageMultiplier >= 1.3
+                ? `drop-shadow(0 0 30px rgba(231,76,60,0.5)) drop-shadow(0 0 15px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
+                : 'drop-shadow(0 0 30px rgba(231,76,60,0.5))',
+              transition: 'filter 1s ease',
+            }}>
             {bossInfo.emoji}
           </span>
-          {popups.map(p => (
-            <span key={p.id}
-              className="absolute font-heading text-2xl font-bold animate-damage-float text-shadow-sm pointer-events-none"
-              style={{ color: p.color, left: `${p.x}%`, top: `${p.y}%` }}>
-              {p.text}
-            </span>
-          ))}
 
-          {/* Enhanced combo indicator */}
-          {showCombo && combo >= 2 && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 animate-combo-burst pointer-events-none z-20">
-              <div className={`px-5 py-2 rounded-full font-heading font-bold text-white text-center ${combo >= 8 ? 'animate-pulse' : ''
-                }`} style={{
-                  background: combo >= 8 ? 'linear-gradient(135deg, #f0932b, #e74c3c, #e056fd)' :
-                    combo >= 6 ? 'linear-gradient(135deg, #e056fd, #f0932b)' :
-                      combo >= 5 ? 'linear-gradient(135deg, #fd79a8, #e056fd)' :
-                        combo >= 4 ? 'linear-gradient(135deg, #e74c3c, #fd79a8)' :
-                          combo >= 3 ? 'linear-gradient(135deg, #f39c12, #e74c3c)' :
-                            'linear-gradient(135deg, #6c5ce7, #a29bfe)',
-                  boxShadow: `0 0 ${combo >= 5 ? 40 : 20}px ${comboInfo.color}80`,
-                  border: combo >= 6 ? '2px solid rgba(255,255,255,0.4)' : 'none',
-                }}>
-                <span className={comboVfx?.size || 'text-lg'}>
-                  {comboVfx?.emoji || '💥'} {comboInfo.label} x{combo}
-                </span>
-                <span className="block text-[10px] text-white/80">DMG ×{comboInfo.mult}</span>
-              </div>
-            </div>
-          )}
+          {/* Damage popups */}
+          <DamagePopupLayer popups={popups} />
+
+          {/* Combo display */}
+          <ComboDisplay
+            combo={combo}
+            show={showCombo}
+            label={comboInfo.label}
+            mult={comboInfo.mult}
+            color={comboInfo.color}
+          />
         </div>
 
         {/* Mini leaderboard */}
@@ -375,7 +306,7 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           {[
             { rank: '1', name: 'CryptoFarmer', dmg: '2,450', bg: 'linear-gradient(135deg, #f0b429, #d49a1a)' },
             { rank: '2', name: 'GreenHero92', dmg: '1,820', bg: 'linear-gradient(135deg, #c0c0c0, #808080)' },
-            { rank: '3', name: `${auth?.user?.name || profile?.name || 'Farmer'} ⭐`, dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
+            { rank: '3', name: `${auth?.user?.name || 'Farmer'} ⭐`, dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
           ].map(r => (
             <div key={r.rank} className="flex items-center gap-2 py-1">
               <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold text-white"
@@ -387,43 +318,29 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
         </div>
       </div>
 
-      {/* Bottom half: Match-3 + Dodge */}
+      {/* Bottom half: Match-3 + Skills */}
       <div className="flex-[0_0_54%] rounded-t-2xl px-4 pt-3 pb-[80px] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
         <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
-        {/* Player stats row */}
-        <div className="flex gap-1.5 mb-2">
-          <div className="flex-1">
-            <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#55efc4' }}>
-              <span>❤️ HP</span><span>{boss.playerHp}/{boss.playerMaxHp}</span>
-            </div>
-            <div className="h-2 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <div className="h-full rounded-md transition-all duration-500" style={{
-                width: `${playerHpPct}%`,
-                background: playerHpPct > 30 ? 'linear-gradient(90deg, #00b894, #55efc4)' : 'linear-gradient(90deg, #e74c3c, #ff6b6b)',
-              }} />
-            </div>
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#74b9ff' }}>
-              <span>🛡️ DEF</span><span>{boss.shield}</span>
-            </div>
-            <div className="h-2 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <div className="h-full rounded-md transition-all duration-500" style={{ width: `${shieldPct}%`, background: 'linear-gradient(90deg, #0984e3, #74b9ff)' }} />
-            </div>
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#a29bfe' }}>
-              <span>✨ Mana</span><span>{boss.mana}/{boss.maxMana}</span>
-            </div>
-            <div className="h-2 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <div className="h-full rounded-md transition-all duration-500" style={{ width: `${manaPct}%`, background: 'linear-gradient(90deg, #6c5ce7, #a29bfe)' }} />
-            </div>
-          </div>
-        </div>
+        {/* Player HP + Shield bars */}
+        <PlayerHPBar
+          hp={boss.playerHp}
+          maxHp={boss.playerMaxHp}
+          shield={boss.shield}
+          maxShield={shieldMax}
+          def={combatStats.def}
+        />
 
-        {/* Gem grid */}
+        {/* Mana bar */}
+        <ManaBar
+          mana={boss.mana}
+          maxMana={boss.maxMana}
+          dodgeCost={manaDodgeCost}
+          ultCost={manaUltCost}
+        />
+
+        {/* Gem grid (EXISTING — unchanged) */}
         <div className="grid grid-cols-6 gap-1.5 p-1.5 rounded-lg flex-1"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
           {grid.map((gem, i) => {
@@ -443,30 +360,18 @@ export default function BossFightM3({ boss: bossInfo, onBack }: Props) {
           })}
         </div>
 
-        {/* Bottom: Dodge + Ult row */}
-        <div className="flex items-center gap-2 mt-2">
-          <button onClick={handleDodge}
-            className={`px-3 py-2 rounded-[20px] font-heading text-xs font-bold transition-all ${attackWarning?.phase === 'dodge_window' && boss.mana >= manaDodgeCost
-              ? 'animate-dodge-pulse text-white scale-110'
-              : 'text-white/40'
-              }`}
-            style={attackWarning?.phase === 'dodge_window' && boss.mana >= manaDodgeCost
-              ? { background: 'linear-gradient(135deg, #f39c12, #e74c3c)', boxShadow: '0 0 20px rgba(243,156,18,0.6)' }
-              : { background: 'rgba(255,255,255,0.08)' }
-            }>
-            🏃 NE ({manaDodgeCost})
-          </button>
-
-          <div className="flex-1 h-2 rounded overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-            <div className="h-full rounded ult-gradient transition-all duration-500" style={{ width: `${boss.ultCharge}%` }} />
-          </div>
-
-          <button onClick={fireUltimate}
-            className={`px-4 py-2 rounded-[20px] text-white font-heading text-xs font-bold ult-btn-gradient transition-all ${ultReady ? 'opacity-100 animate-ult-glow scale-105' : 'opacity-40'
-              }`}>
-            ⚡ ULT
-          </button>
-        </div>
+        {/* Skill bar: Dodge + ULT charge + ULT button */}
+        <SkillBar
+          mana={boss.mana}
+          maxMana={boss.maxMana}
+          dodgeCost={manaDodgeCost}
+          ultCost={manaUltCost}
+          ultCharge={boss.ultCharge}
+          ultCooldown={boss.ultCooldown}
+          isDodgeWindow={!!skillWarning}
+          onDodge={handleDodge}
+          onUlt={fireUltimate}
+        />
       </div>
 
       <BottomNav />
