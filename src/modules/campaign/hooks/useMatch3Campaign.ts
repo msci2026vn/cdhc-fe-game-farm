@@ -505,6 +505,12 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     setTimeout(() => { setBossAttackMsg(null); setScreenShake(false); setLastPlayerDamage(0); }, 1200);
   }, [milestones, playerStats.def, addPopup, addCombatNotif]);
 
+  // ═══ Stable ref for applyBossDamageToPlayer ═══
+  // Prevents boss attack interval from restarting on every re-render
+  // (elapsedSeconds timer causes 1s re-renders → unstable callback → interval never completes)
+  const applyBossDamageRef = useRef(applyBossDamageToPlayer);
+  useEffect(() => { applyBossDamageRef.current = applyBossDamageToPlayer; }, [applyBossDamageToPlayer]);
+
   // ═══ Boss auto-attack: reads activeBossStats ref for phase support ═══
   useEffect(() => {
     if (result !== 'fighting') return;
@@ -535,7 +541,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
             return;
           }
 
-          applyBossDamageToPlayer(skillDmg, `${skillName}`, '💀');
+          applyBossDamageRef.current(skillDmg, `${skillName}`, '💀');
         }, SKILL_WARNING_MS);
         pendingHitsRef.current.push(skillTimeout);
       } else {
@@ -545,7 +551,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
           const hitTimeout = setTimeout(() => {
             const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.3)));
             const hitLabel = freq > 1 ? `Đòn ${i + 1}/${freq}!` : 'Boss tấn công!';
-            applyBossDamageToPlayer(normalDmg, hitLabel, '💥');
+            applyBossDamageRef.current(normalDmg, hitLabel, '💥');
           }, i * MULTI_HIT_DELAY);
           pendingHitsRef.current.push(hitTimeout);
         }
@@ -557,7 +563,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       pendingHitsRef.current.forEach(t => clearTimeout(t));
       pendingHitsRef.current = [];
     };
-  }, [bossData.archetype, result, applyBossDamageToPlayer]);
+  }, [bossData.archetype, result]);
 
   // ═══ Boss Heal Timer — reads activeBossStats for dynamic healPercent ═══
   // Re-runs when currentPhase changes (for phase bosses) to pick up new healPercent
