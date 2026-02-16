@@ -166,8 +166,8 @@ function getBossSkillName(archetype: string): string {
 }
 
 // ═══ Enrage: boss gets stronger over time ═══
-function getEnrageMultiplier(startTime: number): number {
-  const elapsed = (Date.now() - startTime) / 1000;
+function getEnrageMultiplier(startTime: number, pausedMs: number = 0): number {
+  const elapsed = (Date.now() - startTime - pausedMs) / 1000;
   return 1 + Math.floor(elapsed / 30) * 0.10;
 }
 
@@ -305,8 +305,17 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
   const fightStartTime = useRef(Date.now());
   const maxComboRef = useRef(0);
   const [stars, setStars] = useState(0);
+
+  // Pause support
+  const isPausedRef = useRef(false);
+  const pausedAtRef = useRef<number | null>(null);
+  const totalPausedMsRef = useRef(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
   const [skillWarning, setSkillWarning] = useState<SkillWarning | null>(null);
   const [attackWarning, setAttackWarning] = useState<BossAttackWarning | null>(null);
+  const [lastPlayerDamage, setLastPlayerDamage] = useState(0);
   const dodgedRef = useRef(false);
   const [ultActive, setUltActive] = useState(false);
 
@@ -319,6 +328,35 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     const y = 15 + Math.random() * 40;
     setPopups(prev => [...prev, { id, text, color, x, y }]);
     setTimeout(() => setPopups(prev => prev.filter(p => p.id !== id)), 1400);
+  }, []);
+
+  // ═══ Elapsed seconds timer (pause-aware) ═══
+  useEffect(() => {
+    if (result !== 'fighting') return;
+    const timer = setInterval(() => {
+      if (isPausedRef.current) return;
+      const now = Date.now();
+      const totalElapsed = now - fightStartTime.current - totalPausedMsRef.current;
+      setElapsedSeconds(Math.floor(Math.max(0, totalElapsed) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [result]);
+
+  const pauseBattle = useCallback(() => {
+    if (isPausedRef.current) return;
+    isPausedRef.current = true;
+    pausedAtRef.current = Date.now();
+    setIsPaused(true);
+  }, []);
+
+  const resumeBattle = useCallback(() => {
+    if (!isPausedRef.current) return;
+    isPausedRef.current = false;
+    if (pausedAtRef.current) {
+      totalPausedMsRef.current += Date.now() - pausedAtRef.current;
+      pausedAtRef.current = null;
+    }
+    setIsPaused(false);
   }, []);
 
   // ═══ Self-destruct: Phase 4 boss loses 2% maxHP every 5s ═══
@@ -378,13 +416,13 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
   }, [boss.bossHp, boss.bossMaxHp, isMultiPhase, result, checkPhaseTransition]);
 
   // Check victory/defeat — compute stars on victory
+  // NOTE: Turn limit defeat removed — campaign uses time-based enrage instead
   useEffect(() => {
     if (boss.bossHp <= 0 && result === 'fighting') {
-      const finalDuration = Math.floor((Date.now() - fightStartTime.current) / 1000);
+      const finalDuration = Math.floor((Date.now() - fightStartTime.current - totalPausedMsRef.current) / 1000);
       const bossLevel = bossData.unlockLevel || 1;
       setStars(calculateTimeStars(finalDuration, bossLevel));
       setResult('victory');
-      // Cleanup self-destruct timer on victory
       if (selfDestructTimerRef.current) {
         clearInterval(selfDestructTimerRef.current);
         selfDestructTimerRef.current = null;
@@ -397,14 +435,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         selfDestructTimerRef.current = null;
       }
     }
-    if (turnLimit > 0 && boss.turnCount >= turnLimit && result === 'fighting' && boss.bossHp > 0) {
-      setResult('defeat');
-      if (selfDestructTimerRef.current) {
-        clearInterval(selfDestructTimerRef.current);
-        selfDestructTimerRef.current = null;
-      }
-    }
-  }, [boss.bossHp, boss.playerHp, boss.turnCount, turnLimit, result, bossData.unlockLevel]);
+  }, [boss.bossHp, boss.playerHp, result, bossData.unlockLevel]);
 
   // Cleanup self-destruct timer on unmount
   useEffect(() => {
@@ -469,8 +500,9 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     const reducedDisplay = actualBossDamage(dmgAmount, playerStats.def);
     setBossAttackMsg({ text: `${label} -${reducedDisplay}`, emoji });
     setScreenShake(true);
+    setLastPlayerDamage(reducedDisplay);
     addPopup(`-${reducedDisplay}`, '#e74c3c');
-    setTimeout(() => { setBossAttackMsg(null); setScreenShake(false); }, 1200);
+    setTimeout(() => { setBossAttackMsg(null); setScreenShake(false); setLastPlayerDamage(0); }, 1200);
   }, [milestones, playerStats.def, addPopup, addCombatNotif]);
 
   // ═══ Boss auto-attack: reads activeBossStats ref for phase support ═══
@@ -478,7 +510,8 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     if (result !== 'fighting') return;
 
     const interval = setInterval(() => {
-      const enrageMult = getEnrageMultiplier(fightStartTime.current);
+      if (isPausedRef.current) return;
+      const enrageMult = getEnrageMultiplier(fightStartTime.current, totalPausedMsRef.current);
       const baseAtk = activeBossStats.current.atk * enrageMult;
 
       const isSkill = Math.random() < BOSS_SKILL_CHANCE;
@@ -535,6 +568,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     if (hp <= 0) return;
 
     const healTimer = setInterval(() => {
+      if (isPausedRef.current) return;
       // Re-read in case phase changed mid-interval
       const currentHealPct = activeBossStats.current.healPercent;
       if (currentHealPct <= 0) return;
@@ -710,7 +744,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif]);
 
   const handleTap = useCallback((idx: number) => {
-    if (animating || result !== 'fighting') return;
+    if (animating || result !== 'fighting' || isPausedRef.current) return;
     if (selected === null) { setSelected(idx); return; }
     if (selected === idx) { setSelected(null); return; }
     if (!areAdjacent(selected, idx)) { setSelected(idx); return; }
@@ -736,9 +770,9 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     setTimeout(() => processMatches(newGrid, 0), 200);
   }, [grid, selected, animating, processMatches, result]);
 
-  // Duration tracking
-  const durationSeconds = Math.floor((Date.now() - fightStartTime.current) / 1000);
-  const enrageMultiplier = getEnrageMultiplier(fightStartTime.current);
+  // Duration tracking (pause-aware)
+  const durationSeconds = Math.floor((Date.now() - fightStartTime.current - totalPausedMsRef.current) / 1000);
+  const enrageMultiplier = getEnrageMultiplier(fightStartTime.current, totalPausedMsRef.current);
 
   return {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
@@ -748,6 +782,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     milestones, manaDodgeCost, manaUltCost,
     combatStatsTracker, combatNotifs,
     skillWarning,
+    lastPlayerDamage,
     enrageMultiplier,
     stars,
     maxCombo: maxComboRef.current,
@@ -756,5 +791,10 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     totalPhases: isMultiPhase ? phases!.length : 1,
     showPhaseTransition,
     activeBossStats: activeBossStats.current,
+    // Pause + timer
+    elapsedSeconds,
+    isPaused,
+    pauseBattle,
+    resumeBattle,
   };
 }

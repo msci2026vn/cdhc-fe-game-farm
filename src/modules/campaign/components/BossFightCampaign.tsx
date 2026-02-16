@@ -5,7 +5,6 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { useEffect, useRef, useState } from 'react';
-import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3Campaign, CampaignBossData } from '../hooks/useMatch3Campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -61,8 +60,9 @@ export default function BossFightCampaign({
     durationSeconds, fightStartTime,
     milestones, manaDodgeCost, manaUltCost,
     combatStatsTracker, combatNotifs,
-    skillWarning, enrageMultiplier, stars, maxCombo,
+    skillWarning, lastPlayerDamage, enrageMultiplier, stars, maxCombo,
     currentPhase, totalPhases, showPhaseTransition, activeBossStats,
+    elapsedSeconds, pauseBattle, resumeBattle,
   } = useMatch3Campaign(bossData, combatStats);
 
   const auraType = getDominantAura(combatStats);
@@ -74,8 +74,36 @@ export default function BossFightCampaign({
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
   const particleId = useRef(0);
 
-  const turnLimit = bossData.turnLimit || 0;
-  const maxTurns = turnLimit > 0 ? turnLimit : 99;
+  // ═══ Death phase: dying overlay → then BattleResult ═══
+  const [deathPhase, setDeathPhase] = useState<'none' | 'dying' | 'done'>('none');
+
+  useEffect(() => {
+    if (result === 'defeat' && deathPhase === 'none') {
+      setDeathPhase('dying');
+      const timer = setTimeout(() => setDeathPhase('done'), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [result, deathPhase]);
+
+  // ═══ Enrage alert ═══
+  const enrageLevel = Math.round((enrageMultiplier - 1) * 10);
+  const prevEnrageLevelRef = useRef(0);
+  const [enrageAlert, setEnrageAlert] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (result !== 'fighting') return;
+    if (enrageLevel > prevEnrageLevelRef.current && enrageLevel > 0) {
+      prevEnrageLevelRef.current = enrageLevel;
+      const alerts: Record<number, string> = {
+        1: '⚡ Boss tức giận! +10%',
+        2: '🔥 Boss cuồng nộ! +20%',
+        3: '💀 Boss điên cuồng! +30%',
+      };
+      setEnrageAlert(alerts[enrageLevel] || `☠️ RẤT NGUY HIỂM! +${enrageLevel * 10}%`);
+      const timer = setTimeout(() => setEnrageAlert(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [enrageLevel, result]);
 
   // Call API on fight end
   useEffect(() => {
@@ -122,8 +150,38 @@ export default function BossFightCampaign({
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
   const comboInfo = getComboInfo(combo);
 
-  // Victory / Defeat screen
-  if (result !== 'fighting') {
+  // ═══ Death overlay (shown before BattleResult on defeat) ═══
+  if (result === 'defeat' && deathPhase === 'dying') {
+    return (
+      <div className="min-h-screen max-w-[430px] mx-auto relative boss-gradient flex flex-col items-center justify-center">
+        {/* Red vignette */}
+        <div className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(139,0,0,0.5) 100%)' }} />
+        <div className="absolute inset-0 bg-black/60 animate-fade-in" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center text-center px-6">
+          <span className="text-7xl mb-4 animate-bounce">💀</span>
+          <h1 className="text-3xl font-heading font-bold text-red-400 mb-2">
+            Bạn đã gục!
+          </h1>
+          <p className="text-gray-400 mb-8 text-sm">
+            {bossData.emoji} {bossData.name} đã đánh bại bạn
+          </p>
+          <button
+            onClick={() => setDeathPhase('done')}
+            className="px-8 py-3 bg-gray-700 text-white rounded-xl text-lg font-heading font-bold hover:bg-gray-600 transition active:scale-95"
+            style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+          >
+            Xem kết quả
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Victory / Defeat summary screen
+  if (result === 'victory' || (result === 'defeat' && deathPhase === 'done')) {
     const won = result === 'victory';
     const serverData = bossComplete.data;
 
@@ -139,7 +197,7 @@ export default function BossFightCampaign({
         isCampaign={true}
         playerHpPct={playerHpPct}
         turnUsed={boss.turnCount}
-        turnMax={maxTurns}
+        turnMax={0}
         archetype={archetype}
         archetypeTip={archetypeTip}
         onBack={onBack}
@@ -207,7 +265,11 @@ export default function BossFightCampaign({
         </span>
       ))}
 
-      {/* Skill warning — removed overlay, handled by inline text + NÉ button glow below */}
+      {/* Skill warning — screen edge glow (does NOT block interaction) */}
+      {skillWarning && (
+        <div className="absolute inset-0 pointer-events-none z-30 animate-pulse"
+          style={{ boxShadow: 'inset 0 0 60px rgba(231,76,60,0.3), inset 0 0 120px rgba(231,76,60,0.15)' }} />
+      )}
 
       {/* Phase transition overlay */}
       {showPhaseTransition && (
@@ -231,6 +293,29 @@ export default function BossFightCampaign({
         </div>
       )}
 
+      {/* Red vignette flash when player takes damage */}
+      {screenShake && !ultActive && (
+        <div className="absolute inset-0 pointer-events-none z-40 animate-fade-in"
+          style={{ boxShadow: 'inset 0 0 80px rgba(231,76,60,0.25), inset 0 0 40px rgba(231,76,60,0.15)' }} />
+      )}
+
+      {/* Enrage alert popup (3s then fade) */}
+      {enrageAlert && (
+        <div className={`absolute top-20 left-4 right-4 z-40 text-center py-2 px-4 rounded-lg pointer-events-none animate-fade-in font-heading font-bold ${
+          enrageLevel >= 4 ? 'text-red-300 text-lg animate-pulse' :
+          enrageLevel >= 3 ? 'text-red-400' :
+          enrageLevel >= 2 ? 'text-orange-300' :
+          'text-yellow-300 text-sm'
+        }`} style={{
+          background: enrageLevel >= 3 ? 'rgba(139,0,0,0.85)' :
+                      enrageLevel >= 2 ? 'rgba(180,90,0,0.8)' :
+                      'rgba(120,100,0,0.75)',
+          boxShadow: enrageLevel >= 3 ? '0 0 20px rgba(231,76,60,0.4)' : 'none',
+        }}>
+          {enrageAlert}
+        </div>
+      )}
+
       {/* Boss rage overlay */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossData.emoji} />
 
@@ -243,12 +328,16 @@ export default function BossFightCampaign({
         {/* Top bar */}
         <BattleTopBar
           turn={boss.turnCount}
-          maxTurns={maxTurns}
+          maxTurns={0}
           level={level}
           atk={combatStats.atk}
           def={combatStats.def}
           onRetreat={onBack}
           isCampaign={true}
+          elapsedSeconds={elapsedSeconds}
+          enrageLevel={enrageLevel}
+          onPause={pauseBattle}
+          onResume={resumeBattle}
         />
 
         {/* Zone label */}
@@ -275,8 +364,8 @@ export default function BossFightCampaign({
         />
 
         {/* Campaign-specific boss info badges (dynamic from active phase) */}
-        {(activeBossStats.def > 0 || activeBossStats.freq > 1) && (
-          <div className="z-10 flex gap-1.5 mt-1">
+        {(activeBossStats.def > 0 || activeBossStats.freq > 1 || enrageLevel > 0) && (
+          <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
             {activeBossStats.def > 0 && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
                 style={{ background: 'rgba(116,185,255,0.2)', color: '#74b9ff', border: '1px solid rgba(116,185,255,0.3)' }}>
@@ -287,6 +376,16 @@ export default function BossFightCampaign({
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
                 style={{ background: 'rgba(253,121,168,0.2)', color: '#fd79a8', border: '1px solid rgba(253,121,168,0.3)' }}>
                 ⚡ x{activeBossStats.freq} đòn
+              </span>
+            )}
+            {enrageLevel > 0 && (
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${enrageLevel >= 3 ? 'animate-pulse' : ''}`}
+                style={{
+                  background: enrageLevel >= 3 ? 'rgba(231,76,60,0.3)' : enrageLevel >= 2 ? 'rgba(243,156,18,0.2)' : 'rgba(253,203,110,0.2)',
+                  color: enrageLevel >= 3 ? '#ff6b6b' : enrageLevel >= 2 ? '#f39c12' : '#fdcb6e',
+                  border: `1px solid ${enrageLevel >= 3 ? 'rgba(231,76,60,0.4)' : enrageLevel >= 2 ? 'rgba(243,156,18,0.3)' : 'rgba(253,203,110,0.3)'}`,
+                }}>
+                {enrageLevel >= 3 ? '💀' : enrageLevel >= 2 ? '🔥' : '⚡'} +{enrageLevel * 10}% ATK
               </span>
             )}
           </div>
@@ -317,17 +416,29 @@ export default function BossFightCampaign({
       </div>
 
       {/* Bottom half: Match-3 + Skills */}
-      <div className="flex-[0_0_54%] rounded-t-2xl px-4 pt-3 pb-[80px] flex flex-col"
+      <div className="flex-[0_0_54%] rounded-t-2xl px-4 pt-3 pb-4 flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
         <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
-        <PlayerHPBar
-          hp={boss.playerHp}
-          maxHp={boss.playerMaxHp}
-          shield={boss.shield}
-          maxShield={shieldMax}
-          def={combatStats.def}
-        />
+        {/* Player damage popup near HP bar */}
+        <div className="relative">
+          <PlayerHPBar
+            hp={boss.playerHp}
+            maxHp={boss.playerMaxHp}
+            shield={boss.shield}
+            maxShield={shieldMax}
+            def={combatStats.def}
+            isHit={!!lastPlayerDamage}
+          />
+          {lastPlayerDamage > 0 && (
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-damage-float">
+              <span className="font-heading text-xl font-bold text-red-500"
+                style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
+                -{lastPlayerDamage}
+              </span>
+            </div>
+          )}
+        </div>
 
         <ManaBar
           mana={boss.mana}
@@ -338,9 +449,10 @@ export default function BossFightCampaign({
 
         {/* Skill warning inline text (does NOT block gem grid) */}
         {skillWarning && (
-          <div className="text-center text-sm font-bold text-red-400 animate-pulse py-1 rounded-lg"
-            style={{ background: 'rgba(231,76,60,0.15)', border: '1px solid rgba(231,76,60,0.3)' }}>
-            ⚠️ {skillWarning.name} ~{skillWarning.damage} dame!
+          <div className="text-center py-1 pointer-events-none animate-pulse">
+            <span className="bg-red-900/80 text-red-300 px-4 py-1 rounded-full text-sm font-bold">
+              ⚡ Đòn mạnh đang đến!
+            </span>
           </div>
         )}
 
@@ -376,8 +488,6 @@ export default function BossFightCampaign({
           onUlt={fireUltimate}
         />
       </div>
-
-      <BottomNav />
     </div>
   );
 }
