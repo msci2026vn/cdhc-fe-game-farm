@@ -7,6 +7,7 @@ import { gameApi } from '@/shared/api/game-api';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { useResetStats } from '@/shared/hooks/useResetStats';
 import { StatAllocationModal } from '@/shared/components/StatAllocationModal';
+import { StatHelpModal } from '@/shared/components/StatHelpModal';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import { formatOGN } from '@/shared/utils/format';
 
@@ -18,6 +19,7 @@ export default function ProfileScreen() {
   const [showStatModal, setShowStatModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetError, setResetError] = useState<{ message: string; code: string } | null>(null);
+  const [helpStat, setHelpStat] = useState<'atk' | 'hp' | 'def' | 'mana' | null>(null);
   const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
   const { data: statInfo } = usePlayerStats();
@@ -176,6 +178,12 @@ export default function ProfileScreen() {
                       <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, background: u.color }} />
                     </div>
                   </div>
+                  <button
+                    onClick={() => setHelpStat(u.key)}
+                    className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-[10px] font-semibold flex items-center justify-center active:bg-gray-100 active:text-gray-600 shrink-0"
+                  >
+                    ?
+                  </button>
                 </div>
               );
             })}
@@ -341,6 +349,15 @@ export default function ProfileScreen() {
           </div>
         </div>
       )}
+      {/* Stat Help Modal */}
+      {helpStat && (
+        <StatHelpModal
+          stat={helpStat}
+          isOpen={!!helpStat}
+          onClose={() => setHelpStat(null)}
+        />
+      )}
+
       {/* Reset Error Modal */}
       {resetError && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setResetError(null)}>
