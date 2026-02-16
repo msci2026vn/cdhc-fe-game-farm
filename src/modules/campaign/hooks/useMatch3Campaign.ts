@@ -171,9 +171,9 @@ function getEnrageMultiplier(startTime: number): number {
   return 1 + Math.floor(elapsed / 30) * 0.10;
 }
 
-// ═══ Stars by time (matches backend formula) ═══
+// ═══ Stars by time — rebalanced for ×15 HP bosses ═══
 function calculateTimeStars(duration: number, bossLevel: number): number {
-  const baseTime = 45 + bossLevel * 0.5;
+  const baseTime = 60 + bossLevel * 1.5;
   if (duration <= baseTime) return 3;
   if (duration <= baseTime * 1.5) return 2;
   return 1;
