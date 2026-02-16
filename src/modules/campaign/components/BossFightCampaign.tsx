@@ -14,7 +14,7 @@ import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import { getDominantAura } from '@/shared/components/BuildAura';
-import BossSkillWarning from '@/modules/boss/components/BossSkillWarning';
+// BossSkillWarning overlay removed — NÉ button in SkillBar handles dodge now
 
 // HUD components (reused from boss module)
 import {
@@ -207,17 +207,7 @@ export default function BossFightCampaign({
         </span>
       ))}
 
-      {/* Skill warning overlay */}
-      {skillWarning && (
-        <BossSkillWarning
-          warning={skillWarning}
-          bossName={bossData.name}
-          bossEmoji={bossData.emoji}
-          manaCost={manaDodgeCost}
-          currentMana={boss.mana}
-          onDodge={handleDodge}
-        />
-      )}
+      {/* Skill warning — removed overlay, handled by inline text + NÉ button glow below */}
 
       {/* Phase transition overlay */}
       {showPhaseTransition && (
@@ -345,6 +335,14 @@ export default function BossFightCampaign({
           dodgeCost={manaDodgeCost}
           ultCost={manaUltCost}
         />
+
+        {/* Skill warning inline text (does NOT block gem grid) */}
+        {skillWarning && (
+          <div className="text-center text-sm font-bold text-red-400 animate-pulse py-1 rounded-lg"
+            style={{ background: 'rgba(231,76,60,0.15)', border: '1px solid rgba(231,76,60,0.3)' }}>
+            ⚠️ {skillWarning.name} ~{skillWarning.damage} dame!
+          </div>
+        )}
 
         {/* Gem grid */}
         <div className="grid grid-cols-6 gap-1.5 p-1.5 rounded-lg flex-1"

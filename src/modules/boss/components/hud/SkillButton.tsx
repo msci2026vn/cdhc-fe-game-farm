@@ -36,7 +36,7 @@ export default function SkillButton({
   };
 
   const activeGradient = isDodgeActive
-    ? 'linear-gradient(135deg, #f39c12, #e74c3c)'
+    ? 'linear-gradient(135deg, #e74c3c, #c0392b)'
     : gradients[variant];
 
   return (
@@ -47,7 +47,7 @@ export default function SkillButton({
         relative min-w-[100px] h-[48px] rounded-2xl font-heading text-xs font-bold
         flex items-center justify-center gap-1.5 transition-all
         ${isDodgeActive
-          ? 'animate-dodge-pulse text-white scale-105'
+          ? 'animate-bounce text-white scale-110 ring-2 ring-red-500'
           : isReady
             ? 'text-white active:scale-95'
             : 'text-white/40 opacity-50'
@@ -56,7 +56,7 @@ export default function SkillButton({
       style={{
         background: isReady || isDodgeActive ? activeGradient : 'rgba(255,255,255,0.08)',
         boxShadow: isDodgeActive
-          ? '0 0 20px rgba(243,156,18,0.6)'
+          ? '0 0 25px rgba(231,76,60,0.7), 0 0 50px rgba(231,76,60,0.3)'
           : isReady
             ? `0 4px 12px ${variant === 'ult' ? 'rgba(108,92,231,0.3)' : 'rgba(9,132,227,0.3)'}`
             : 'none',
