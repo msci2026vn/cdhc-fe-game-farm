@@ -11,6 +11,7 @@ import { BOSS_DETAILS } from '../data/bossDetails';
 import { ARCHETYPE_INFO } from '../data/archetypes';
 import { ZONE_META } from '../data/zones';
 import { DE_VUONG_PHASES } from '../data/deVuongPhases';
+import { BOSS_SKILLS } from '../data/bossSkills';
 import type { ZoneBoss } from '../types/campaign.types';
 import type { CampaignBossData } from '../hooks/useMatch3Campaign';
 import BossFightCampaign from '../components/BossFightCampaign';
@@ -42,6 +43,8 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBoss
     turnLimit: detail?.turnLimit ?? 0,
     // Inject 4-phase data for De Vuong (boss #40)
     phases: boss.bossNumber === 40 ? DE_VUONG_PHASES : undefined,
+    // Inject special skills from static data
+    skills: BOSS_SKILLS[boss.bossNumber] ?? [],
   };
 }
 

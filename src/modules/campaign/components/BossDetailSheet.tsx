@@ -7,6 +7,7 @@ import type { ZoneBoss, ZoneInfo } from '../types/campaign.types';
 import { BOSS_DETAILS } from '../data/bossDetails';
 import { ARCHETYPE_INFO } from '../data/archetypes';
 import { ZONE_META } from '../data/zones';
+import { BOSS_SKILLS, getSkillDescVi } from '../data/bossSkills';
 
 interface BossDetailSheetProps {
   boss: ZoneBoss | null;
@@ -29,6 +30,8 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
   const meta = ZONE_META[zone.zoneNumber];
   const hasRecord = boss.isCleared && boss.bestStars > 0;
   const hasSpecial = detail?.specialVi && detail.specialVi !== 'Không có';
+  const skills = BOSS_SKILLS[boss.bossNumber] ?? [];
+  const hasSkills = skills.length > 0;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -84,8 +87,27 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             </div>
           )}
 
-          {/* ═══ CƠ CHẾ ĐẶC BIỆT ═══ */}
-          {hasSpecial && (
+          {/* ═══ KỸ NĂNG ĐẶC BIỆT ═══ */}
+          {hasSkills ? (
+            <div className="glass-card rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
+                <span className="font-heading font-bold text-sm text-gray-800">Kỹ năng đặc biệt</span>
+              </div>
+              <div className="space-y-2">
+                {skills.map((s, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm">
+                    <span className="text-lg leading-none flex-shrink-0">{s.icon}</span>
+                    <div>
+                      <span className="font-bold text-gray-800">{s.label}</span>
+                      <span className="text-gray-500 ml-1.5">{getSkillDescVi(s)}</span>
+                      <span className="text-gray-400 ml-1.5 text-xs">({s.cooldown}s CD)</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : hasSpecial && (
             <div className="glass-card rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>

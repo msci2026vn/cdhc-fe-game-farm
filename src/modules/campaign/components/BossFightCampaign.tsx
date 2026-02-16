@@ -63,6 +63,9 @@ export default function BossFightCampaign({
     skillWarning, lastPlayerDamage, enrageMultiplier, stars, maxCombo,
     currentPhase, totalPhases, showPhaseTransition, activeBossStats,
     elapsedSeconds, pauseBattle, resumeBattle,
+    // Boss skills
+    activeDebuffs, isStunned, skillAlert,
+    activeBossBuffs, egg, lockedGems,
   } = useMatch3Campaign(bossData, combatStats);
 
   const auraType = getDominantAura(combatStats);
@@ -391,17 +394,55 @@ export default function BossFightCampaign({
           </div>
         )}
 
+        {/* Boss buffs (shield/reflect) */}
+        {activeBossBuffs.length > 0 && (
+          <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
+            {activeBossBuffs.map((b, i) => (
+              <span key={`${b.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
+                style={{
+                  background: b.type === 'shield' ? 'rgba(116,185,255,0.3)' : 'rgba(108,92,231,0.3)',
+                  color: b.type === 'shield' ? '#74b9ff' : '#a29bfe',
+                  border: `1px solid ${b.type === 'shield' ? 'rgba(116,185,255,0.4)' : 'rgba(108,92,231,0.4)'}`,
+                }}>
+                {b.icon} {b.label} {b.remainingSec}s
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
           <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
             }`} style={{
-              filter: enrageMultiplier >= 1.3
-                ? `drop-shadow(0 0 30px rgba(231,76,60,0.5)) drop-shadow(0 0 15px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
-                : 'drop-shadow(0 0 30px rgba(231,76,60,0.5))',
+              filter: [
+                enrageMultiplier >= 1.3
+                  ? `drop-shadow(0 0 30px rgba(231,76,60,0.5)) drop-shadow(0 0 15px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
+                  : 'drop-shadow(0 0 30px rgba(231,76,60,0.5))',
+                activeBossBuffs.some(b => b.type === 'shield') && 'drop-shadow(0 0 25px rgba(116,185,255,0.7))',
+                activeBossBuffs.some(b => b.type === 'reflect') && 'drop-shadow(0 0 25px rgba(168,85,247,0.7))',
+              ].filter(Boolean).join(' '),
               transition: 'filter 1s ease',
             }}>
             {bossData.emoji}
           </span>
+
+          {/* Egg */}
+          {egg && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center animate-scale-in">
+              <span className={`text-4xl ${egg.countdown <= 3 ? 'animate-pulse' : 'animate-boss-idle'}`}>🥚</span>
+              <div className="w-12 h-1.5 rounded-full bg-gray-700 mt-1 overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.round((egg.hp / egg.maxHp) * 100)}%`,
+                    background: egg.hp / egg.maxHp > 0.5 ? '#27ae60' : egg.hp / egg.maxHp > 0.25 ? '#f39c12' : '#e74c3c',
+                  }} />
+              </div>
+              <span className="text-[9px] font-bold text-white mt-0.5">{egg.hp}/{egg.maxHp}</span>
+              {egg.countdown <= 3 && (
+                <span className="text-[8px] font-bold text-red-400 animate-pulse">SẮP NỞ!</span>
+              )}
+            </div>
+          )}
 
           <DamagePopupLayer popups={popups} />
 
@@ -420,8 +461,33 @@ export default function BossFightCampaign({
         style={{ background: 'rgba(0,0,0,0.3)' }}>
         <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
+        {/* Debuff bar (Phase 1 boss skills) */}
+        {activeDebuffs.length > 0 && (
+          <div className="flex gap-1.5 mb-1 flex-wrap">
+            {activeDebuffs.map((d, i) => (
+              <span key={`${d.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
+                style={{
+                  background: d.type === 'burn' ? 'rgba(231,76,60,0.3)' :
+                              d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' :
+                              'rgba(253,121,168,0.3)',
+                  color: d.type === 'burn' ? '#ff6b6b' :
+                         d.type === 'heal_block' ? '#a29bfe' :
+                         '#fd79a8',
+                  border: `1px solid ${
+                    d.type === 'burn' ? 'rgba(231,76,60,0.4)' :
+                    d.type === 'heal_block' ? 'rgba(108,92,231,0.4)' :
+                    'rgba(253,121,168,0.4)'
+                  }`,
+                }}>
+                {d.icon} {d.label} {d.remainingSec}s
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Player damage popup near HP bar */}
-        <div className="relative">
+        <div className={`relative ${activeDebuffs.some(d => d.type === 'burn') ? 'ring-1 ring-orange-500/50' : ''}`}
+          style={activeDebuffs.some(d => d.type === 'burn') ? { boxShadow: '0 0 12px rgba(231,76,60,0.3), inset 0 0 8px rgba(231,76,60,0.15)' } : {}}>
           <PlayerHPBar
             hp={boss.playerHp}
             maxHp={boss.playerMaxHp}
@@ -456,24 +522,54 @@ export default function BossFightCampaign({
           </div>
         )}
 
-        {/* Gem grid */}
-        <div className="grid grid-cols-6 gap-1.5 p-1.5 rounded-lg flex-1"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          {grid.map((gem, i) => {
-            const meta = GEM_META[gem.type];
-            const isSelected = selected === i;
-            const isMatched = matchedCells.has(i);
-            return (
-              <div key={gem.id} onClick={() => handleTap(i)}
-                className={`aspect-square rounded-[10px] flex items-center justify-center text-[22px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
-                  ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
-                  ${isMatched ? 'animate-gem-pop' : ''}
-                  ${animating && !isMatched ? 'pointer-events-none' : ''}
-                `}>
-                {meta.emoji}
+        {/* Boss skill alert banner */}
+        {skillAlert && (
+          <div className="text-center py-1 animate-fade-in">
+            <span className="px-4 py-1.5 rounded-full text-xs font-bold text-purple-200"
+              style={{ background: 'rgba(108,92,231,0.85)', boxShadow: '0 0 15px rgba(108,92,231,0.3)' }}>
+              {skillAlert.icon} {skillAlert.text}
+            </span>
+          </div>
+        )}
+
+        {/* Gem grid + Stun overlay */}
+        <div className="relative flex-1">
+          <div className={`grid grid-cols-6 gap-1.5 p-1.5 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''}`}
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            {grid.map((gem, i) => {
+              const meta = GEM_META[gem.type];
+              const isSelected = selected === i;
+              const isMatched = matchedCells.has(i);
+              return (
+                <div key={gem.id} onClick={() => handleTap(i)}
+                  className={`aspect-square rounded-[10px] flex items-center justify-center text-[22px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                    ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
+                    ${isMatched ? 'animate-gem-pop' : ''}
+                    ${animating && !isMatched ? 'pointer-events-none' : ''}
+                    ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
+                  `}>
+                  {meta.emoji}
+                  {lockedGems.has(i) && (
+                    <span className="absolute inset-0 flex items-center justify-center text-xs pointer-events-none">🔒</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Stun overlay */}
+          {isStunned && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg"
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
+              <div className="text-center animate-scale-in">
+                <span className="text-5xl block" style={{ animation: 'spin 1s linear infinite' }}>💫</span>
+                <span className="text-white font-heading font-bold text-xl block mt-2"
+                  style={{ textShadow: '0 0 20px rgba(253,203,110,0.8)' }}>
+                  CHOÁNG!
+                </span>
               </div>
-            );
-          })}
+            </div>
+          )}
         </div>
 
         <SkillBar

@@ -15,6 +15,7 @@ import {
   dodgeCost, ultCost,
 } from '@/shared/utils/combat-formulas';
 import type { BossPhase } from '../data/deVuongPhases';
+import type { BossSkill } from '../data/bossSkills';
 
 // ═══ Campaign boss data interface (superset of BossInfo) ═══
 export interface CampaignBossData {
@@ -34,6 +35,7 @@ export interface CampaignBossData {
   healPercent: number;  // % maxHP healed per 5 seconds (0-2)
   turnLimit: number;    // Max turns (0 = unlimited)
   phases?: BossPhase[]; // Multi-phase boss data (only boss #40)
+  skills?: BossSkill[];     // Boss special skills (from bossSkills.ts)
 }
 
 // ═══ Grid constants (same as useMatch3) ═══
@@ -121,6 +123,28 @@ export interface BossState {
 }
 
 export interface DamagePopup { id: number; text: string; color: string; x: number; y: number; }
+
+export interface ActiveDebuff {
+  type: string;
+  remainingSec: number;
+  icon: string;
+  label: string;
+  value: number;
+}
+
+export interface ActiveBossBuff {
+  type: string;
+  remainingSec: number;
+  icon: string;
+  label: string;
+}
+
+export interface EggState {
+  hp: number;
+  maxHp: number;
+  countdown: number;
+  healPercent: number;
+}
 
 // ═══ Combo tiers ═══
 const COMBO_TIERS = [
@@ -322,6 +346,24 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
   // Track pending multi-hit timeouts for cleanup
   const pendingHitsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // ═══ Boss Special Skills (Phase 1) ═══
+  const [activeDebuffs, setActiveDebuffs] = useState<ActiveDebuff[]>([]);
+  const activeDebuffsRef = useRef<ActiveDebuff[]>([]);
+  const [isStunned, setIsStunned] = useState(false);
+  const isStunnedRef = useRef(false);
+  const [skillAlert, setSkillAlert] = useState<{ icon: string; text: string } | null>(null);
+  const skillCooldownsRef = useRef<Record<string, number>>({});
+  const skillTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const bossHpRef = useRef(bossData.hp);
+
+  // ═══ Boss Special Skills (Phase 2) ═══
+  const [activeBossBuffs, setActiveBossBuffs] = useState<ActiveBossBuff[]>([]);
+  const activeBossBuffsRef = useRef<ActiveBossBuff[]>([]);
+  const [egg, setEgg] = useState<EggState | null>(null);
+  const eggRef = useRef<EggState | null>(null);
+  const [lockedGems, setLockedGems] = useState<Set<number>>(new Set());
+  const lockedGemsRef = useRef<Set<number>>(new Set());
+
   const addPopup = useCallback((text: string, color: string) => {
     const id = popupId.current++;
     const x = 20 + Math.random() * 60;
@@ -461,8 +503,9 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         return prev;
       }
 
-      // Apply player DEF damage reduction
-      const reducedDmg = actualBossDamage(dmgAmount, playerStats.def);
+      // Apply player DEF damage reduction (armor_break → DEF 0)
+      const isArmorBroken = activeDebuffsRef.current.some(d => d.type === 'armor_break');
+      const reducedDmg = actualBossDamage(dmgAmount, isArmorBroken ? 0 : playerStats.def);
 
       let shieldLeft = prev.shield;
       let hpDmg = reducedDmg;
@@ -497,7 +540,8 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, bossHp: newBossHp };
     });
 
-    const reducedDisplay = actualBossDamage(dmgAmount, playerStats.def);
+    const isArmorBrokenDisplay = activeDebuffsRef.current.some(d => d.type === 'armor_break');
+    const reducedDisplay = actualBossDamage(dmgAmount, isArmorBrokenDisplay ? 0 : playerStats.def);
     setBossAttackMsg({ text: `${label} -${reducedDisplay}`, emoji });
     setScreenShake(true);
     setLastPlayerDamage(reducedDisplay);
@@ -591,6 +635,223 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     return () => clearInterval(healTimer);
   }, [currentPhase, result, addPopup]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ═══ Boss HP ref sync (for skill trigger checks) ═══
+  useEffect(() => { bossHpRef.current = boss.bossHp; }, [boss.bossHp]);
+
+  // ═══ Boss Special Skills interval — check every 3s ═══
+  useEffect(() => {
+    if (result !== 'fighting' || !bossData.skills?.length) return;
+
+    const interval = setInterval(() => {
+      if (isPausedRef.current) return;
+
+      const readySkills = bossData.skills!
+        .filter(s => {
+          const lastUsed = skillCooldownsRef.current[s.type] || 0;
+          return (Date.now() - lastUsed) >= s.cooldown * 1000;
+        })
+        .filter(s => {
+          if (s.triggerHpPercent) {
+            const hpPct = (bossHpRef.current / bossData.hp) * 100;
+            return hpPct <= s.triggerHpPercent;
+          }
+          return true;
+        });
+
+      if (readySkills.length === 0) return;
+
+      const skill = readySkills[Math.floor(Math.random() * readySkills.length)];
+      skillCooldownsRef.current[skill.type] = Date.now();
+
+      // Show alert
+      setSkillAlert({ icon: skill.icon, text: `${bossData.name} ${skill.label}` });
+      const alertTimeout = setTimeout(() => setSkillAlert(null), 2500);
+      skillTimersRef.current.push(alertTimeout);
+
+      switch (skill.type) {
+        case 'stun': {
+          isStunnedRef.current = true;
+          setIsStunned(true);
+          const stunTimeout = setTimeout(() => {
+            isStunnedRef.current = false;
+            setIsStunned(false);
+          }, skill.duration * 1000);
+          skillTimersRef.current.push(stunTimeout);
+          break;
+        }
+        case 'burn': {
+          activeDebuffsRef.current = activeDebuffsRef.current.filter(d => d.type !== 'burn');
+          activeDebuffsRef.current.push({
+            type: 'burn', remainingSec: skill.duration,
+            icon: skill.icon, label: skill.label, value: skill.value,
+          });
+          setActiveDebuffs([...activeDebuffsRef.current]);
+          break;
+        }
+        case 'heal_block': {
+          activeDebuffsRef.current = activeDebuffsRef.current.filter(d => d.type !== 'heal_block');
+          activeDebuffsRef.current.push({
+            type: 'heal_block', remainingSec: skill.duration,
+            icon: skill.icon, label: skill.label, value: 0,
+          });
+          setActiveDebuffs([...activeDebuffsRef.current]);
+          break;
+        }
+        case 'armor_break': {
+          activeDebuffsRef.current = activeDebuffsRef.current.filter(d => d.type !== 'armor_break');
+          activeDebuffsRef.current.push({
+            type: 'armor_break', remainingSec: skill.duration,
+            icon: skill.icon, label: skill.label, value: 0,
+          });
+          setActiveDebuffs([...activeDebuffsRef.current]);
+          break;
+        }
+        case 'shield': {
+          activeBossBuffsRef.current = activeBossBuffsRef.current.filter(b => b.type !== 'shield');
+          activeBossBuffsRef.current.push({
+            type: 'shield', remainingSec: skill.duration,
+            icon: skill.icon, label: skill.label,
+          });
+          setActiveBossBuffs([...activeBossBuffsRef.current]);
+          break;
+        }
+        case 'reflect': {
+          activeBossBuffsRef.current = activeBossBuffsRef.current.filter(b => b.type !== 'reflect');
+          activeBossBuffsRef.current.push({
+            type: 'reflect', remainingSec: skill.duration,
+            icon: skill.icon, label: skill.label,
+          });
+          setActiveBossBuffs([...activeBossBuffsRef.current]);
+          break;
+        }
+        case 'egg': {
+          // Only 1 egg at a time
+          if (!eggRef.current) {
+            const eggHp = Math.round(bossData.hp * 0.1); // 10% of boss max HP
+            const newEgg: EggState = {
+              hp: eggHp, maxHp: eggHp,
+              countdown: skill.duration,
+              healPercent: skill.value,
+            };
+            eggRef.current = newEgg;
+            setEgg(newEgg);
+          }
+          break;
+        }
+        case 'gem_lock': {
+          const available: number[] = [];
+          for (let gi = 0; gi < 36; gi++) {
+            if (!lockedGemsRef.current.has(gi)) available.push(gi);
+          }
+          const count = Math.min(skill.value, available.length);
+          const shuffled = available.sort(() => Math.random() - 0.5).slice(0, count);
+          const newLocked = new Set(lockedGemsRef.current);
+          shuffled.forEach(gi => newLocked.add(gi));
+          lockedGemsRef.current = newLocked;
+          setLockedGems(new Set(newLocked));
+          // Auto-unlock after duration
+          const unlockTimeout = setTimeout(() => {
+            shuffled.forEach(gi => lockedGemsRef.current.delete(gi));
+            setLockedGems(new Set(lockedGemsRef.current));
+          }, skill.duration * 1000);
+          skillTimersRef.current.push(unlockTimeout);
+          break;
+        }
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [result, bossData.skills, bossData.hp, bossData.name]);
+
+  // ═══ Tick — every 1s (debuffs + boss buffs + egg countdown) ═══
+  useEffect(() => {
+    if (result !== 'fighting') return;
+
+    const ticker = setInterval(() => {
+      if (isPausedRef.current) return;
+
+      // === Player debuffs ===
+      const debuffs = activeDebuffsRef.current;
+      if (debuffs.length > 0) {
+        // Apply burn DOT
+        const burn = debuffs.find(d => d.type === 'burn');
+        if (burn && burn.value > 0) {
+          setBoss(prev => {
+            if (prev.playerHp <= 0) return prev;
+            const dmg = Math.round(prev.playerMaxHp * burn.value / 100);
+            addPopup(`-${dmg} 🔥`, '#e74c3c');
+            return { ...prev, playerHp: Math.max(0, prev.playerHp - dmg) };
+          });
+        }
+
+        // Tick down and remove expired
+        activeDebuffsRef.current = debuffs
+          .map(d => ({ ...d, remainingSec: d.remainingSec - 1 }))
+          .filter(d => d.remainingSec > 0);
+        setActiveDebuffs([...activeDebuffsRef.current]);
+      }
+
+      // === Boss buffs (shield/reflect countdown) ===
+      const buffs = activeBossBuffsRef.current;
+      if (buffs.length > 0) {
+        activeBossBuffsRef.current = buffs
+          .map(b => ({ ...b, remainingSec: b.remainingSec - 1 }))
+          .filter(b => b.remainingSec > 0);
+        setActiveBossBuffs([...activeBossBuffsRef.current]);
+      }
+
+      // === Egg countdown ===
+      const currentEgg = eggRef.current;
+      if (currentEgg) {
+        const newCountdown = currentEgg.countdown - 1;
+        if (newCountdown <= 0) {
+          // Egg hatches → boss heals
+          const healAmount = Math.round(bossData.hp * currentEgg.healPercent / 100);
+          setBoss(prev => {
+            const newHp = Math.min(prev.bossMaxHp, prev.bossHp + healAmount);
+            return { ...prev, bossHp: newHp };
+          });
+          addPopup(`+${healAmount} 🥚→💚`, '#27ae60');
+          eggRef.current = null;
+          setEgg(null);
+        } else {
+          eggRef.current = { ...currentEgg, countdown: newCountdown };
+          setEgg({ ...currentEgg, countdown: newCountdown });
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(ticker);
+  }, [result, addPopup, bossData.hp]);
+
+  // ═══ Cleanup skill timers on battle end ═══
+  useEffect(() => {
+    if (result !== 'fighting') {
+      skillTimersRef.current.forEach(t => clearTimeout(t));
+      skillTimersRef.current = [];
+      activeDebuffsRef.current = [];
+      setActiveDebuffs([]);
+      isStunnedRef.current = false;
+      setIsStunned(false);
+      setSkillAlert(null);
+      // Phase 2 cleanup
+      activeBossBuffsRef.current = [];
+      setActiveBossBuffs([]);
+      eggRef.current = null;
+      setEgg(null);
+      lockedGemsRef.current = new Set();
+      setLockedGems(new Set());
+    }
+  }, [result]);
+
+  // Cleanup skill timers on unmount
+  useEffect(() => {
+    return () => {
+      skillTimersRef.current.forEach(t => clearTimeout(t));
+      skillTimersRef.current = [];
+    };
+  }, []);
+
   // Dodge handler — only works during skill warning, costs mana
   const handleDodge = useCallback(() => {
     if (!skillWarning && attackWarning?.phase !== 'dodge_window' && attackWarning?.phase !== 'warning') return;
@@ -626,10 +887,42 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       }
 
       setUltActive(true);
-      // ULT damage is ALSO reduced by boss DEF (from active phase stats)
       const currentDef = activeBossStats.current.def;
       const rawUltDmg = calcUltDamage(playerStats.atk, playerStats.mana);
-      const ultDmg = bossDEFReduction(rawUltDmg, currentDef);
+      const dmgAfterDef = bossDEFReduction(rawUltDmg, currentDef);
+      let ultDmg = dmgAfterDef;
+
+      // Egg absorbs first
+      const ultEgg = eggRef.current;
+      if (ultEgg && ultEgg.hp > 0 && ultDmg > 0) {
+        const absorbed = Math.min(ultEgg.hp, ultDmg);
+        ultDmg -= absorbed;
+        const newEggHp = ultEgg.hp - absorbed;
+        addPopup(`🥚 -${absorbed}`, '#fdcb6e');
+        if (newEggHp <= 0) {
+          eggRef.current = null;
+          setEgg(null);
+          addPopup('🥚💥 Trứng vỡ!', '#fd79a8');
+        } else {
+          eggRef.current = { ...ultEgg, hp: newEggHp };
+          setEgg({ ...ultEgg, hp: newEggHp });
+        }
+      }
+
+      // Shield blocks remaining
+      if (activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) {
+        addPopup('🛡️ Bất tử!', '#74b9ff');
+        ultDmg = 0;
+      }
+
+      // Reflect: 30% of DEF-reduced damage back to player
+      let reflectDmg = 0;
+      const ultReflectBuff = activeBossBuffsRef.current.find(b => b.type === 'reflect');
+      if (ultReflectBuff && dmgAfterDef > 0) {
+        reflectDmg = Math.round(dmgAfterDef * 0.3);
+        if (reflectDmg > 0) addPopup(`🔄 Phản -${reflectDmg}`, '#e056fd');
+      }
+
       setTotalDmgDealt(d => d + ultDmg);
       setCombatStatsTracker(s => ({ ...s, ultCount: s.ultCount + 1 }));
       if (currentDef > 0) {
@@ -643,6 +936,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       return {
         ...prev,
         bossHp: Math.max(0, prev.bossHp - ultDmg),
+        playerHp: Math.max(0, prev.playerHp - reflectDmg),
         ultCharge: 0,
         mana: milestones.hasSuperMana ? prev.mana : prev.mana - manaUltCost,
         ultCooldown: milestones.hasSuperMana ? 8 : 0,
@@ -695,15 +989,53 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
           addCombatNotif('crit', `CRIT! x${milestones.critMultiplier}`, '#ff6b6b');
         }
 
-        // ═══ BOSS DEF REDUCTION (reads from activeBossStats ref) ═══
+        // ═══ DAMAGE PIPELINE: DEF → Egg → Shield → Boss → Reflect ═══
         const currentDef = activeBossStats.current.def;
-        const actualDmg = bossDEFReduction(totalDmg, currentDef);
+        const dmgAfterDef = bossDEFReduction(totalDmg, currentDef);
+        let actualDmg = dmgAfterDef;
+
+        // 1. Egg absorbs damage first
+        const pipelineEgg = eggRef.current;
+        if (pipelineEgg && pipelineEgg.hp > 0 && actualDmg > 0) {
+          const absorbed = Math.min(pipelineEgg.hp, actualDmg);
+          actualDmg -= absorbed;
+          const newEggHp = pipelineEgg.hp - absorbed;
+          addPopup(`🥚 -${absorbed}`, '#fdcb6e');
+          if (newEggHp <= 0) {
+            eggRef.current = null;
+            setEgg(null);
+            addPopup('🥚💥 Trứng vỡ!', '#fd79a8');
+          } else {
+            eggRef.current = { ...pipelineEgg, hp: newEggHp };
+            setEgg({ ...pipelineEgg, hp: newEggHp });
+          }
+        }
+
+        // 2. Shield blocks remaining damage
+        if (activeBossBuffsRef.current.some(b => b.type === 'shield') && actualDmg > 0) {
+          addPopup('🛡️ Bất tử!', '#74b9ff');
+          actualDmg = 0;
+        }
+
+        // 3. Apply damage to boss
         bossHp = Math.max(0, bossHp - actualDmg);
 
-        // Stat-based heal & shield
-        const healAmt = Math.round(hpCount * hpHealPerGem * comboInfo.mult);
+        // 4. Reflect: % of DEF-reduced damage back to player
+        const reflectBuff = activeBossBuffsRef.current.find(b => b.type === 'reflect');
+        if (reflectBuff && dmgAfterDef > 0) {
+          const reflectDmg = Math.round(dmgAfterDef * 0.3);
+          if (reflectDmg > 0) {
+            playerHp = Math.max(0, playerHp - reflectDmg);
+            addPopup(`🔄 Phản -${reflectDmg}`, '#e056fd');
+          }
+        }
+
+        // Stat-based heal & shield (check debuffs)
+        const isHealBlocked = activeDebuffsRef.current.some(d => d.type === 'heal_block');
+        const healAmt = isHealBlocked ? 0 : Math.round(hpCount * hpHealPerGem * comboInfo.mult);
         playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
-        const shieldAmt = Math.round(defCount * shieldGainPerGem * comboInfo.mult);
+        const isArmorBrokenMatch = activeDebuffsRef.current.some(d => d.type === 'armor_break');
+        const shieldAmt = isArmorBrokenMatch ? 0 : Math.round(defCount * shieldGainPerGem * comboInfo.mult);
         shield = shield + shieldAmt;
 
         if (healAmt > 0) setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + healAmt }));
@@ -735,8 +1067,14 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
             : `-${actualDmg}${critLabel}${defLabel}`;
           addPopup(label, isCrit ? '#ff6b6b' : comboInfo.color);
         }
-        if (hpCount > 0) addPopup(`+${healAmt} HP`, '#55efc4');
-        if (defCount > 0) addPopup(`+${shieldAmt} 🛡️`, '#74b9ff');
+        if (hpCount > 0) {
+          if (isHealBlocked) addPopup('🚫 Khóa hồi!', '#a29bfe');
+          else addPopup(`+${healAmt} HP`, '#55efc4');
+        }
+        if (defCount > 0) {
+          if (isArmorBrokenMatch) addPopup('💔 DEF 0!', '#fd79a8');
+          else addPopup(`+${shieldAmt} 🛡️`, '#74b9ff');
+        }
 
         return { ...prev, bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown, lastCrit: isCrit };
       });
@@ -750,7 +1088,9 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif]);
 
   const handleTap = useCallback((idx: number) => {
-    if (animating || result !== 'fighting' || isPausedRef.current) return;
+    if (animating || result !== 'fighting' || isPausedRef.current || isStunnedRef.current) return;
+    // Gem lock: can't interact with locked gems
+    if (lockedGemsRef.current.has(idx)) return;
     if (selected === null) { setSelected(idx); return; }
     if (selected === idx) { setSelected(null); return; }
     if (!areAdjacent(selected, idx)) { setSelected(idx); return; }
@@ -802,5 +1142,13 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     isPaused,
     pauseBattle,
     resumeBattle,
+    // Boss skills
+    activeDebuffs,
+    isStunned,
+    skillAlert,
+    // Boss skills (Phase 2)
+    activeBossBuffs,
+    egg,
+    lockedGems,
   };
 }
