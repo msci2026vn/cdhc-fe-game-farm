@@ -21,7 +21,9 @@ interface Props {
  * Transform a campaign ZoneBoss → BossInfo that useMatch3 understands.
  */
 function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): BossInfo {
-  const detail = BOSS_DETAILS[boss.bossNumber];
+  // DB boss_number is per-zone (1-4), static data uses global (1-40)
+  const globalBossNumber = (zoneNumber - 1) * 4 + boss.bossNumber;
+  const detail = BOSS_DETAILS[globalBossNumber];
   const meta = ZONE_META[zoneNumber];
   const bossInZone = boss.bossNumber % 4 === 0 ? 4 : boss.bossNumber % 4;
   const emoji = meta?.bossEmoji[bossInZone] || boss.emoji || '👾';
@@ -90,7 +92,8 @@ export default function CampaignBattleLoader({ bossId }: Props) {
   }
 
   const bossInfo = transformCampaignBoss(targetBoss, zoneNumber);
-  const detail = BOSS_DETAILS[targetBoss.bossNumber];
+  const globalBossNum = (zoneNumber - 1) * 4 + targetBoss.bossNumber;
+  const detail = BOSS_DETAILS[globalBossNum];
   const archInfo = ARCHETYPE_INFO[targetBoss.archetype] || ARCHETYPE_INFO['none'];
 
   return (

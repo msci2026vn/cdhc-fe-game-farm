@@ -25,12 +25,14 @@ interface BossDetailSheetProps {
 export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFight }: BossDetailSheetProps) {
   if (!boss || !zone) return null;
 
-  const detail = BOSS_DETAILS[boss.bossNumber];
+  // DB boss_number is per-zone (1-4), static data uses global (1-40)
+  const globalBossNumber = (zone.zoneNumber - 1) * 4 + boss.bossNumber;
+  const detail = BOSS_DETAILS[globalBossNumber];
   const archetype = ARCHETYPE_INFO[boss.archetype] || ARCHETYPE_INFO['none'];
   const meta = ZONE_META[zone.zoneNumber];
   const hasRecord = boss.isCleared && boss.bestStars > 0;
   const hasSpecial = detail?.specialVi && detail.specialVi !== 'Không có';
-  const skills = BOSS_SKILLS[boss.bossNumber] ?? [];
+  const skills = BOSS_SKILLS[globalBossNumber] ?? [];
   const hasSkills = skills.length > 0;
 
   return (

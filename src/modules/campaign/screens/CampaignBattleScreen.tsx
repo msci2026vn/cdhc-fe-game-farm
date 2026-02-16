@@ -20,7 +20,9 @@ import BossFightCampaign from '../components/BossFightCampaign';
  * Transform a campaign ZoneBoss + static detail → CampaignBossData
  */
 function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBossData {
-  const detail = BOSS_DETAILS[boss.bossNumber];
+  // DB boss_number is per-zone (1-4), static data uses global (1-40)
+  const globalBossNumber = (zoneNumber - 1) * 4 + boss.bossNumber;
+  const detail = BOSS_DETAILS[globalBossNumber];
   const meta = ZONE_META[zoneNumber];
   const bossInZone = boss.bossNumber % 4 === 0 ? 4 : boss.bossNumber % 4;
   const emoji = meta?.bossEmoji[bossInZone] || boss.emoji || '👾';
@@ -42,9 +44,9 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBoss
     healPercent: detail?.healPercent ?? 0,
     turnLimit: detail?.turnLimit ?? 0,
     // Inject 4-phase data for De Vuong (boss #40)
-    phases: boss.bossNumber === 40 ? DE_VUONG_PHASES : undefined,
+    phases: globalBossNumber === 40 ? DE_VUONG_PHASES : undefined,
     // Inject special skills from static data
-    skills: BOSS_SKILLS[boss.bossNumber] ?? [],
+    skills: BOSS_SKILLS[globalBossNumber] ?? [],
   };
 }
 
