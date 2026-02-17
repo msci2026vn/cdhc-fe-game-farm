@@ -640,13 +640,13 @@ export default function FarmingScreen() {
             </div>
           </button>
 
-          {/* Boss Button - Moved here from bottom nav */}
+          {/* Prayer Button */}
           <button
-            onClick={() => navigate('/boss')}
+            onClick={() => navigate('/prayer')}
             className="action-btn group flex flex-col items-center justify-center gap-1 relative w-12 transition-transform active:scale-95"
           >
-            <div className="w-12 h-12 rounded-xl bg-[#9575CD] border-b-4 border-[#5E35B1] shadow-lg flex items-center justify-center group-hover:bg-[#7E57C2] transition-colors ring-2 ring-white/50">
-              <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">sports_esports</span>
+            <div className="w-12 h-12 rounded-xl bg-[#9575CD] border-b-4 border-[#5E35B1] shadow-lg flex items-center justify-center group-hover:bg-[#7E57C2] transition-colors ring-2 ring-white/50 animate-prayer-glow">
+              <span className="text-2xl drop-shadow-md">🙏</span>
             </div>
           </button>
 

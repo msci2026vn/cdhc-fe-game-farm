@@ -53,8 +53,8 @@ export const gameClient = {
     }
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({ message: 'Lỗi kết nối' }));
-      throw new Error(error.message || `HTTP ${res.status}`);
+      const body = await res.json().catch(() => ({ message: 'Lỗi kết nối' }));
+      throw new Error(body.error?.message || body.message || `HTTP ${res.status}`);
     }
 
     const result: ApiResponse<T> = await res.json();
@@ -78,8 +78,8 @@ export const gameClient = {
     }
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({ message: 'Lỗi kết nối' }));
-      throw new Error(error.message || `HTTP ${res.status}`);
+      const body = await res.json().catch(() => ({ message: 'Lỗi kết nối' }));
+      throw new Error(body.error?.message || body.message || `HTTP ${res.status}`);
     }
 
     const result: ApiResponse<T> = await res.json();

@@ -802,6 +802,16 @@
   .zone-bg-9  { background: linear-gradient(180deg, #FFAB91 0%, #FF7043 50%, #BF360C 100%); }
   .zone-bg-10 { background: linear-gradient(180deg, #37474F 0%, #263238 50%, #0d0d1a 100%); }
 
+  /* Prayer */
+  .prayer-gradient {
+    background: linear-gradient(180deg,
+      #1a1a3e 0%,
+      #2d1b69 30%,
+      #4a2c8a 60%,
+      #7c5cbf 100%
+    );
+  }
+
   /* Campaign map gradient (full map background) */
   .campaign-map-gradient {
     background: linear-gradient(180deg,
@@ -976,5 +986,14 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 2px #283593;
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

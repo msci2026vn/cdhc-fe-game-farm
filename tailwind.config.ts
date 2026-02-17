@@ -252,6 +252,15 @@ export default {
           "0%, 100%": { transform: "scale(1.1)", boxShadow: "0 0 15px rgba(243,156,18,0.5)" },
           "50%": { transform: "scale(1.2)", boxShadow: "0 0 30px rgba(243,156,18,0.8)" },
         },
+        "prayer-ascend": {
+          "0%": { transform: "translateY(0) scale(1)", opacity: "1" },
+          "30%": { transform: "translateY(-20px) scale(1.15)", opacity: "1" },
+          "100%": { transform: "translateY(-120px) scale(0.5)", opacity: "0" },
+        },
+        "prayer-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(168,85,247,0.3)" },
+          "50%": { boxShadow: "0 0 20px 10px rgba(168,85,247,0.5)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -286,6 +295,8 @@ export default {
         "boss-atk-flash": "boss-atk-flash 0.8s ease-out",
         "ult-flash": "ult-flash 1.5s ease-out",
         "dodge-pulse": "dodge-pulse 0.4s ease-in-out infinite",
+        "prayer-ascend": "prayer-ascend 1s ease-out forwards",
+        "prayer-glow": "prayer-glow 2s ease-in-out infinite",
       },
     },
   },

@@ -12,7 +12,12 @@
       "Bash(npm run build:*)",
       "Bash(xargs:*)",
       "Bash(npx:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(if not exist \"D:\\\\be\\\\docs\" mkdir \"D:\\\\be\\\\docs\")",
+      "Bash(pm2 list:*)",
+      "Bash(curl:*)",
+      "Bash(pm2 status:*)",
+      "Bash(ssh:*)"
     ]
   }
 }

@@ -38,6 +38,7 @@ const OgnHistoryScreen = lazyWithRetry(() => import('@/modules/profile/screens/O
 const CampaignMapScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignMapScreen'));
 const CampaignZoneScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignZoneScreen'));
 const CampaignBattleScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignBattleScreen'));
+const PrayerScreen = lazyWithRetry(() => import('@/modules/prayer/screens/PrayerScreen'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -85,6 +86,7 @@ const AuthenticatedApp = () => {
         <Route path="/campaign" element={<CampaignMapScreen />} />
         <Route path="/campaign/battle/:bossId" element={<CampaignBattleScreen />} />
         <Route path="/campaign/:zoneNumber" element={<CampaignZoneScreen />} />
+        <Route path="/prayer" element={<PrayerScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
