@@ -622,14 +622,13 @@ export default function FarmingScreen() {
             )}
           </button>
 
-          {/* Catch Bug Button */}
+          {/* Prayer Button */}
           <button
-            onClick={() => setShowBugGame(true)}
+            onClick={() => navigate('/prayer')}
             className="action-btn group flex flex-col items-center justify-center gap-1 relative w-12 transition-transform active:scale-95"
           >
-            <span className="absolute top-[-5px] right-[-5px] w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md border-2 border-white z-10 animate-bounce">!</span>
-            <div className="w-12 h-12 rounded-xl bg-[#AED581] border-b-4 border-[#689F38] shadow-lg flex items-center justify-center group-hover:bg-[#9CCC65] transition-colors ring-2 ring-white/50">
-              <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">pest_control</span>
+            <div className="w-12 h-12 rounded-xl bg-[#9575CD] border-b-4 border-[#5E35B1] shadow-lg flex items-center justify-center group-hover:bg-[#7E57C2] transition-colors ring-2 ring-white/50 animate-prayer-glow">
+              <span className="text-2xl drop-shadow-md">🙏</span>
             </div>
           </button>
 
