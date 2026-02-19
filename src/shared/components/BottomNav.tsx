@@ -12,7 +12,7 @@ export default function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50">
+    <nav className="fixed left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50" style={{ bottom: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}>
       {/* Wooden background */}
       <div className="absolute inset-0 bg-[#DEB887] rounded-full border-4 border-[#8B4513] shadow-[0_8px_0_#5D4037,0_15px_20px_rgba(0,0,0,0.3)] wood-pattern-v1" />
       {/* Decorative wooden knots */}

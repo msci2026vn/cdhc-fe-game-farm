@@ -156,7 +156,7 @@ export default function BossFightCampaign({
   // ═══ Death overlay (shown before BattleResult on defeat) ═══
   if (result === 'defeat' && deathPhase === 'dying') {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto relative boss-gradient flex flex-col items-center justify-center">
+      <div className="h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col items-center justify-center overflow-hidden">
         {/* Red vignette */}
         <div className="absolute inset-0"
           style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(139,0,0,0.5) 100%)' }} />
@@ -215,7 +215,7 @@ export default function BossFightCampaign({
   }
 
   return (
-    <div className={`min-h-screen max-w-[430px] mx-auto relative boss-gradient flex flex-col ${screenShake ? 'animate-screen-shake' : ''}`}>
+    <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
       {/* Ultimate fullscreen flash */}
       {ultActive && (
         <div className="absolute inset-0 z-50 pointer-events-none">

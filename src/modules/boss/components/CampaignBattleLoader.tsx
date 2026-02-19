@@ -59,7 +59,7 @@ export default function CampaignBattleLoader({ bossId }: Props) {
   // Loading
   if (isLoading) {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex items-center justify-center">
+      <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
           <p className="text-white/80 font-heading font-bold text-sm">Đang tải boss...</p>
@@ -71,7 +71,7 @@ export default function CampaignBattleLoader({ bossId }: Props) {
   // Error or boss not found
   if (error || !targetBoss) {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex items-center justify-center px-6">
+      <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden px-6">
         <div className="text-center">
           <span className="text-5xl mb-4 block">😵</span>
           <p className="text-red-300 font-heading font-bold mb-2">

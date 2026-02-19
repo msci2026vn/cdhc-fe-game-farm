@@ -20,7 +20,7 @@ export default function FriendsScreen() {
     }
 
     return (
-        <div className="min-h-screen max-w-[430px] mx-auto relative flex flex-col overflow-hidden bg-[#e8f5e9]">
+        <div className="h-[100dvh] max-w-[430px] mx-auto relative flex flex-col overflow-hidden bg-[#e8f5e9]">
             {/* Background gradient similar to other screens */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#green-50] to-[#e8f5e9] z-0" />
 

@@ -65,7 +65,7 @@ export default function BattleResult({
   }, [leveledUp]);
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-6 relative">
+    <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Level up overlay */}
       {showLevelUp && (
         <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">

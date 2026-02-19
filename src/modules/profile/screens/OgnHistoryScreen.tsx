@@ -34,7 +34,7 @@ const OgnHistoryScreen = () => {
     return (
         <div className="h-[100dvh] font-sans text-gray-800 antialiased overflow-hidden flex flex-col relative bg-[#FFF8E1]">
             {/* Header */}
-            <div className="flex-shrink-0 wood-header-history sticky top-0 z-50 pt-12 pb-4 px-4 flex items-center justify-between">
+            <div className="flex-shrink-0 wood-header-history sticky top-0 z-50 pt-safe pb-4 px-4 flex items-center justify-between">
                 <button
                     onClick={() => navigate(-1)}
                     className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"

@@ -79,7 +79,7 @@ function LoginScreenContent() {
   const isCloudy = weather === 'cloudy';
 
   return (
-    <div className={`min-h-screen font-sans antialiased relative flex flex-col items-center justify-center transition-colors duration-1000 ${isNight ? 'bg-[#1A237E]' : 'bg-[#81C784]'}`}>
+    <div className={`h-[100dvh] font-sans antialiased relative flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000 ${isNight ? 'bg-[#1A237E]' : 'bg-[#81C784]'}`}>
       {/* Background Decor */}
       <div className="sprout-bg" style={{
         background: isNight
@@ -136,7 +136,7 @@ function LoginScreenContent() {
         <div className="animate-worm-crawl">🐛</div>
       </div>
 
-      <div className="relative z-10 w-full max-w-sm px-4 flex flex-col items-center gap-6 mb-10">
+      <div className="relative z-10 w-full max-w-sm px-4 flex flex-col items-center gap-6 mb-10 overflow-y-auto max-h-full" style={{ scrollbarWidth: 'none' }}>
         {/* Title Section */}
         <div className="relative w-full flex flex-col items-center justify-center pt-8 pb-4">
           <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">

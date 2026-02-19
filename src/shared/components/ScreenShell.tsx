@@ -13,9 +13,9 @@ interface ScreenShellProps {
 
 export default function ScreenShell({ children, hideHeader, hideNav, className = '' }: ScreenShellProps) {
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto relative">
+    <div className={`h-[100dvh] max-w-[430px] mx-auto relative flex flex-col overflow-hidden ${className}`}>
       {!hideHeader && <Header />}
-      <main className={`pb-20 ${className}`}>
+      <main className="flex-1 min-h-0 overflow-y-auto pb-24">
         {children}
       </main>
       {!hideNav && <BottomNav />}

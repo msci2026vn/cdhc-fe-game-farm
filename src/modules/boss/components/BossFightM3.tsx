@@ -156,7 +156,7 @@ export default function BossFightM3({
   }
 
   return (
-    <div className={`min-h-screen max-w-[430px] mx-auto relative boss-gradient flex flex-col ${screenShake ? 'animate-screen-shake' : ''}`}>
+    <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
       {/* Ultimate fullscreen flash */}
       {ultActive && (
         <div className="absolute inset-0 z-50 pointer-events-none">

@@ -343,7 +343,7 @@ export default function FarmingScreen() {
   // Loading state
   if (plotsLoading) {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
+      <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
         <div className="text-center">
           <div className="animate-pulse text-4xl mb-2">🌱</div>
           <p className="text-sm text-white/70">Đang tải vườn...</p>
@@ -361,7 +361,7 @@ export default function FarmingScreen() {
   // Error state
   if (plotsError) {
     return (
-      <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
+      <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
         <div className="text-center px-4">
           <div className="text-4xl mb-2">😵</div>
           <p className="text-red-400 text-sm mb-2">Lỗi tải vườn</p>
@@ -388,7 +388,7 @@ export default function FarmingScreen() {
   const subTextColor = isNightLocal ? 'text-white/60' : 'text-gray-700/60';
 
   return (
-    <div className="min-h-screen max-w-[430px] mx-auto relative overflow-hidden">
+    <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col">
       {/* Background Decor */}
       <div className="landscape-bg-v2" style={{
         background: celestial.isNight
@@ -415,9 +415,9 @@ export default function FarmingScreen() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pb-24">
+      <div className="relative z-10 max-w-md mx-auto flex-1 min-h-0 flex flex-col pb-24 overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: 'none' }}>
         {/* Header Section */}
-        <header className="flex flex-col gap-5 px-6 pt-10 pb-4">
+        <header className="flex flex-col gap-5 px-6 pt-safe pb-4">
           {/* Top Row: Profile & Weather */}
           <div className="flex items-center justify-between gap-2">
             {/* User Profile Glass UI */}
