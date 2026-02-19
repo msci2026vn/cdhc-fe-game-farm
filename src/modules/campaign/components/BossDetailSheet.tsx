@@ -8,6 +8,7 @@ import { BOSS_DETAILS } from '../data/bossDetails';
 import { ARCHETYPE_INFO } from '../data/archetypes';
 import { ZONE_META } from '../data/zones';
 import { BOSS_SKILLS, getSkillDescVi } from '../data/bossSkills';
+import { playSound } from '@/shared/audio';
 
 interface BossDetailSheetProps {
   boss: ZoneBoss | null;
@@ -185,7 +186,7 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
 
           {/* ═══ FIGHT BUTTON ═══ */}
           <button
-            onClick={() => onFight(boss.id)}
+            onClick={() => { playSound('boss_select'); onFight(boss.id); }}
             className="btn-comic-red w-full py-4 rounded-2xl text-white font-heading text-xl font-black uppercase tracking-wider flex items-center justify-center gap-3 active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-2xl">swords</span>

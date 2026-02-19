@@ -3,6 +3,7 @@ import { useSellInventory, useSellAllInventory } from '@/shared/hooks/useSellInv
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
+import { playSound } from '@/shared/audio';
 
 export default function InventoryScreen() {
   const { data, isLoading, error } = useInventory();
@@ -109,7 +110,7 @@ export default function InventoryScreen() {
 
                   {/* Nút Bán */}
                   <button
-                    onClick={() => !isSelling && sellMutation.mutate(item.id)}
+                    onClick={() => { if (!isSelling) { playSound('shop_buy'); sellMutation.mutate(item.id); } }}
                     disabled={isSelling}
                     className={`w-full mt-2 py-1.5 rounded-xl text-sm font-bold text-white transition-all ${
                       isSelling
@@ -130,7 +131,7 @@ export default function InventoryScreen() {
       {items.length > 1 && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px]">
           <button
-            onClick={() => !sellAllMutation.isPending && sellAllMutation.mutate()}
+            onClick={() => { if (!sellAllMutation.isPending) { playSound('shop_buy'); sellAllMutation.mutate(); } }}
             disabled={sellAllMutation.isPending}
             className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all"
           >

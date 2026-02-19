@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ZoneBoss } from '../types/campaign.types';
 import type { StageState } from '../types/campaign.types';
+import { playSound } from '@/shared/audio';
 
 interface BossNodeProps {
   boss: ZoneBoss;
@@ -19,7 +20,7 @@ export default function BossNode({ boss, state, onClick }: BossNodeProps) {
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => { if (!isLocked) playSound('boss_select'); onClick(); }}
       disabled={isLocked}
       className={cn(
         'relative flex flex-col items-center transition-transform',

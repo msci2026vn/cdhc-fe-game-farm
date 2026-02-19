@@ -10,6 +10,7 @@ import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
 import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
 import Toast from '@/shared/components/Toast';
 import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
+import { audioManager } from '@/shared/audio';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
@@ -69,6 +70,17 @@ const AuthenticatedApp = () => {
   // Safe here because AuthGuard already confirmed auth
   useGameSync();
   useLevelUpDetector();
+
+  // Initialize audio on first user interaction
+  useEffect(() => {
+    const init = () => audioManager.init();
+    window.addEventListener('touchstart', init, { once: true });
+    window.addEventListener('click', init, { once: true });
+    return () => {
+      window.removeEventListener('touchstart', init);
+      window.removeEventListener('click', init);
+    };
+  }, []);
 
   return (
     <>

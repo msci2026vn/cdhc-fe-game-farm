@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ZoneBoss } from '../types/campaign.types';
 import type { StageState } from '../types/campaign.types';
+import { playSound } from '@/shared/audio';
 
 interface StageNodeProps {
   boss: ZoneBoss;
@@ -19,7 +20,7 @@ export default function StageNode({ boss, state, onClick }: StageNodeProps) {
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => { if (!isLocked) playSound('ui_click'); onClick(); }}
       disabled={isLocked}
       className={cn(
         'relative flex flex-col items-center gap-1 transition-transform',

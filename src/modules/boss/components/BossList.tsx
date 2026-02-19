@@ -9,6 +9,7 @@ import { useWeeklyBoss } from '@/shared/hooks/useWeeklyBoss';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { atkGemDamage, starGemDamage } from '@/shared/utils/combat-formulas';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
+import { playSound } from '@/shared/audio';
 
 interface Props {
   onSelect: (boss: BossInfo) => void;
@@ -208,7 +209,7 @@ export default function BossList({ onSelect }: Props) {
 
           return (
             <button key={boss.id}
-              onClick={() => !disabled && onSelect(boss)}
+              onClick={() => { if (!disabled) { playSound('boss_select'); onSelect(boss); } }}
               disabled={disabled}
               className={`w-full rounded-xl p-4 flex items-center gap-4 transition-transform ${
                 disabled ? 'opacity-50 grayscale' : 'active:scale-[0.97]'

@@ -8,6 +8,7 @@ import {
   ultDamage as calcUltDamage, manaRegenPerTurn,
   dodgeCost, ultCost,
 } from '@/shared/utils/combat-formulas';
+import { playSound, AudioManager } from '@/shared/audio';
 
 const COLS = 6;
 const ROWS = 6;
@@ -266,9 +267,10 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
       const bossLevel = bossInfo.unlockLevel || 1;
       setStars(calculateTimeStars(finalDuration, bossLevel));
       setResult('victory');
+      playSound('victory');
     }
-    if (boss.playerHp <= 0 && result === 'fighting') setResult('defeat');
-    if (turnLimit > 0 && boss.turnCount >= turnLimit && result === 'fighting' && boss.bossHp > 0) setResult('defeat');
+    if (boss.playerHp <= 0 && result === 'fighting') { setResult('defeat'); playSound('defeat'); }
+    if (turnLimit > 0 && boss.turnCount >= turnLimit && result === 'fighting' && boss.bossHp > 0) { setResult('defeat'); playSound('defeat'); }
   }, [boss.bossHp, boss.playerHp, boss.turnCount, turnLimit, result, bossInfo.unlockLevel]);
 
   // ═══ Helper: apply boss damage to player (shared by normal + skill attacks) ═══
@@ -344,6 +346,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
         const skillName = getBossSkillName(bossInfo.archetype || 'none');
         const skillDmg = Math.round(baseAtk * SKILL_DMG_MULT);
 
+        playSound('boss_skill');
         dodgedRef.current = false;
         // Set both warning types for backward compat + new overlay
         setAttackWarning({ skill: { name: skillName, emoji: '⚠️', dmgMult: SKILL_DMG_MULT }, rawDmg: skillDmg, phase: 'warning' });
@@ -365,6 +368,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
         }, SKILL_WARNING_MS);
       } else {
         // ══ NORMAL ATTACK: instant, no warning, no dodge ══
+        playSound('boss_attack');
         const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.3)));
         applyBossDamageToPlayer(normalDmg, 'Boss tấn công!', '💥');
       }
@@ -387,6 +391,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
       setSkillWarning(null);
       setCombatStatsTracker(s => ({ ...s, dodgeCount: s.dodgeCount + 1 }));
       addCombatNotif('dodge', '🏃 Né thành công!', '#55efc4');
+      playSound('dodge_success');
       return { ...prev, mana: prev.mana - manaDodgeCost };
     });
   }, [skillWarning, attackWarning, manaDodgeCost, addPopup, addCombatNotif]);
@@ -411,6 +416,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
       }
 
       setUltActive(true);
+      playSound('ult_fire');
       const ultDmg = calcUltDamage(playerStats.atk, playerStats.mana);
       setTotalDmgDealt(d => d + ultDmg);
       setCombatStatsTracker(s => ({ ...s, ultCount: s.ultCount + 1 }));
@@ -444,6 +450,11 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
     if (newCombo >= 2) setShowCombo(true);
     const comboInfo = getComboInfo(newCombo);
 
+    // Sound: gem match + combo escalation
+    const comboSfx = AudioManager.comboSound(newCombo);
+    if (comboSfx) playSound(comboSfx);
+    else playSound('gem_match');
+
     const tally: Partial<Record<GemType, number>> = {};
     matched.forEach(idx => { const t = currentGrid[idx].type; tally[t] = (tally[t] || 0) + 1; });
     setMatchedCells(new Set(matched));
@@ -471,6 +482,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
           isCrit = true;
           setCombatStatsTracker(s => ({ ...s, critCount: s.critCount + 1 }));
           addCombatNotif('crit', `CRIT! x${milestones.critMultiplier}`, '#ff6b6b');
+          playSound('damage_crit');
         }
 
         bossHp = Math.max(0, bossHp - totalDmg);
@@ -506,9 +518,10 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
           const critLabel = isCrit ? ' CRIT!' : '';
           const label = newCombo >= 2 ? `-${totalDmg} (x${comboInfo.mult})${critLabel}` : `-${totalDmg}${critLabel}`;
           addPopup(label, isCrit ? '#ff6b6b' : comboInfo.color);
+          if (!isCrit) playSound('damage_dealt');
         }
-        if (hpCount > 0) addPopup(`+${healAmt} HP`, '#55efc4');
-        if (defCount > 0) addPopup(`+${shieldAmt} 🛡️`, '#74b9ff');
+        if (hpCount > 0) { addPopup(`+${healAmt} HP`, '#55efc4'); playSound('heal'); }
+        if (defCount > 0) { addPopup(`+${shieldAmt} 🛡️`, '#74b9ff'); playSound('shield_gain'); }
 
         return { ...prev, bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown, lastCrit: isCrit };
       });
@@ -523,12 +536,13 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
 
   const handleTap = useCallback((idx: number) => {
     if (animating || result !== 'fighting') return;
-    if (selected === null) { setSelected(idx); return; }
+    if (selected === null) { setSelected(idx); playSound('gem_select'); return; }
     if (selected === idx) { setSelected(null); return; }
-    if (!areAdjacent(selected, idx)) { setSelected(idx); return; }
+    if (!areAdjacent(selected, idx)) { setSelected(idx); playSound('gem_select'); return; }
 
     setAnimating(true);
     setSelected(null);
+    playSound('gem_swap');
     const newGrid = [...grid];
     [newGrid[selected], newGrid[idx]] = [newGrid[idx], newGrid[selected]];
 
@@ -536,6 +550,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
     if (matched.size === 0) {
       setGrid(newGrid);
       setTimeout(() => {
+        playSound('gem_no_match');
         const reverted = [...newGrid];
         [reverted[selected], reverted[idx]] = [reverted[idx], reverted[selected]];
         setGrid(reverted);

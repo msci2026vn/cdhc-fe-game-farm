@@ -17,6 +17,7 @@ import { PrayerHistory } from '../components/PrayerHistory';
 import { PrayerSparkles } from '../components/PrayerSparkles';
 import { PrayerTextFly } from '../components/PrayerTextFly';
 import type { PrayerOfferResponse } from '../types/prayer.types';
+import { playSound } from '@/shared/audio';
 
 const CATEGORIES = [
   { key: 'all', label: 'Tất cả', emoji: '🙏' },
@@ -52,11 +53,15 @@ export default function PrayerScreen() {
         { type: 'preset', presetId: selectedPresetId },
         {
           onSuccess: (data) => {
+            playSound('prayer_submit');
             setRewardData(data);
             setShowSparkles(true);
             setFlyText(currentText);
             setSelectedPresetId(null);
             refetchStatus();
+            if (data.ognReward > 0 || data.xpReward > 0) {
+              setTimeout(() => playSound('prayer_reward'), 600);
+            }
           },
         },
       );
@@ -66,11 +71,15 @@ export default function PrayerScreen() {
         { type: 'custom', text: customText },
         {
           onSuccess: (data) => {
+            playSound('prayer_submit');
             setRewardData(data);
             setShowSparkles(true);
             setFlyText(currentText);
             setCustomText('');
             refetchStatus();
+            if (data.ognReward > 0 || data.xpReward > 0) {
+              setTimeout(() => playSound('prayer_reward'), 600);
+            }
           },
         },
       );

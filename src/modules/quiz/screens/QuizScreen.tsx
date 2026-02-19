@@ -5,6 +5,7 @@ import { useQuizAnswer } from '@/shared/hooks/useQuizAnswer';
 import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
 import { LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import type { QuizQuestionData } from '@/shared/types/game-api.types';
+import { playSound } from '@/shared/audio';
 
 type Phase = 'idle' | 'playing' | 'answering' | 'revealed' | 'finished';
 
@@ -51,6 +52,8 @@ export default function QuizScreen() {
       }, 1000);
     } else if (timeLeft === 0 && phase === 'playing') {
       // Auto-submit or handle timeout if needed
+    } else if (timeLeft <= 5 && timeLeft > 0 && phase === 'playing') {
+      playSound('quiz_timer_low');
     }
     return () => clearInterval(timer);
   }, [phase, timeLeft]);
@@ -59,6 +62,7 @@ export default function QuizScreen() {
   const handleStart = useCallback(() => {
     startQuiz.mutate(undefined, {
       onSuccess: (data) => {
+        playSound('quiz_start');
         setSessionId(data.sessionId);
         setQuestions(data.questions);
         setIdx(0);
@@ -87,6 +91,7 @@ export default function QuizScreen() {
       {
         onSuccess: (data) => {
           console.log('[Quiz] Answer response:', data);
+          playSound(data.correct ? 'quiz_correct' : 'quiz_wrong');
           setLastResult({
             correct: data.correct,
             correctAnswer: data.correctAnswer,
@@ -98,6 +103,7 @@ export default function QuizScreen() {
             setTotalOgn(data.totalOgnGained || 0);
             setTotalXp(data.totalXpGained || 0);
             setPhase('finished');
+            playSound('quiz_complete');
           } else {
             setPhase('revealed');
           }
@@ -329,7 +335,7 @@ export default function QuizScreen() {
               key={opt.letter}
               onClick={() => {
                 console.log('[Quiz] Selected:', opt.letter);
-                if (phase === 'playing') setSelected(opt.letter);
+                if (phase === 'playing') { setSelected(opt.letter); playSound('quiz_select'); }
               }}
               disabled={phase !== 'playing'}
               className={`answer-btn group relative w-full p-4 rounded-2xl border-b-4 ${finalBtnStyle} transition-all active:border-b-0 active:translate-y-1 disabled:pointer-events-none`}

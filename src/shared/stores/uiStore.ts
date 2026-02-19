@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { playSound } from '@/shared/audio';
 
 interface ToastItem {
   id: string;
@@ -30,6 +31,7 @@ export const useUIStore = create<UIState>((set) => ({
     set((s) => ({
       toasts: [...s.toasts.slice(-4), { id, message, type, icon, duration: toastDuration }], // max 5 toasts
     }));
+    playSound('ui_toast');
 
     setTimeout(() => {
       set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
@@ -39,6 +41,8 @@ export const useUIStore = create<UIState>((set) => ({
   flyUpText: null,
   showFlyUp: (text) => {
     set({ flyUpText: text });
+    if (text.includes('OGN')) playSound('ogn_gain');
+    else if (text.includes('XP')) playSound('xp_gain');
     setTimeout(() => set({ flyUpText: null }), 1200);
   },
   clearFlyUp: () => set({ flyUpText: null }),

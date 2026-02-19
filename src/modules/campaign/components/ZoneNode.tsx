@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { CampaignZone } from '../types/campaign.types';
 import { ZONE_META } from '../data/zones';
+import { playSound } from '@/shared/audio';
 
 interface ZoneNodeProps {
   zone: CampaignZone;
@@ -23,7 +24,7 @@ export default function ZoneNode({ zone, onClick }: ZoneNodeProps) {
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => { if (!isLocked) playSound('ui_click'); onClick(); }}
       disabled={isLocked}
       className={cn(
         'relative flex flex-col items-center gap-1.5 group transition-transform',

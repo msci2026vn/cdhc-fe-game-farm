@@ -2,6 +2,8 @@
 // SkillButton — Dodge/ULT button with ready/no-mana/cooldown states
 // ═══════════════════════════════════════════════════════════════
 
+import { playSound } from '@/shared/audio';
+
 interface SkillButtonProps {
   icon: string;
   label: string;
@@ -41,7 +43,7 @@ export default function SkillButton({
 
   return (
     <button
-      onClick={onUse}
+      onClick={() => { playSound('ui_click'); onUse(); }}
       disabled={!isReady && !isDodgeActive}
       className={`
         relative min-w-[80px] h-[38px] rounded-xl font-heading text-[11px] font-bold

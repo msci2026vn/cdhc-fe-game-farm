@@ -7,6 +7,7 @@
  * (Sau này có thể lấy từ API GET /shop/items)
  */
 import { X } from 'lucide-react';
+import { playSound } from '@/shared/audio';
 
 // Plant types data — match BE seed data
 // TODO Step 21: Lấy từ API thay vì hardcode
@@ -37,6 +38,7 @@ export default function PlantPickerModal({ onSelect, onClose, isPlanting }: Plan
 
   const handleSelect = (plantTypeId: string) => {
     console.log('[FARM-DEBUG] PlantPickerModal — SELECTED:', plantTypeId);
+    playSound('ui_click');
     onSelect(plantTypeId);
   };
 

@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import TurnCounter from './TurnCounter';
+import { SoundToggle } from '@/shared/audio';
 
 interface BattleTopBarProps {
   turn: number;
@@ -86,6 +87,7 @@ export default function BattleTopBar({
 
         {/* Right: stats + retreat */}
         <div className="flex items-center gap-1.5">
+          <SoundToggle />
           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
             style={{ color: '#ff6b6b', background: 'rgba(255,107,107,0.15)' }}>
             ⚔️{atk}

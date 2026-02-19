@@ -35,6 +35,7 @@ import {
   showLevelUp,
   formatCooldown,
 } from '@/shared/utils/error-handler';
+import { playSound } from '@/shared/audio';
 
 export default function FarmingScreen() {
   const navigate = useNavigate();
@@ -197,6 +198,7 @@ export default function FarmingScreen() {
     waterMutation.mutate(currentPlot.id, {
       onSuccess: (data) => {
         console.log('[FARM-DEBUG] FarmingScreen — WATER SUCCESS:', JSON.stringify(data));
+        playSound('water_plant');
 
         // Set local cooldown timer
         const endTime = Date.now() + ((data.cooldownSeconds || 3600) * 1000);
@@ -249,6 +251,7 @@ export default function FarmingScreen() {
 
     harvestMutation.mutate(currentPlot.id, {
       onSuccess: (data) => {
+        playSound('harvest');
         const plantEmoji = data.plantEmoji || '🌾';
         const plantName = data.plantName || 'Nông sản';
         const ognEarned = data.ognEarned || 0;
@@ -319,6 +322,7 @@ export default function FarmingScreen() {
       {
         onSuccess: (data) => {
           console.log('[FARM-DEBUG] FarmingScreen — ✅ PLANT SUCCESS:', JSON.stringify(data));
+          playSound('plant_seed');
           setShowPlantPicker(false);
           showPlantSuccess(
             data.plantType?.name || 'Cây',

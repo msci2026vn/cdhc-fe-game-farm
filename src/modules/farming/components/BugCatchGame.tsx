@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { playSound } from '@/shared/audio';
 
 interface Bug {
   id: number;
@@ -95,6 +96,7 @@ export default function BugCatchGame({ open, onClose }: BugCatchGameProps) {
   const handleCatch = useCallback((id: number) => {
     setBugs(prev => prev.map(b => b.id === id ? { ...b, caught: true } : b));
     setCaught(c => c + 1);
+    playSound('bug_catch');
     // Remove after catch animation
     setTimeout(() => setBugs(prev => prev.filter(b => b.id !== id)), 300);
   }, []);

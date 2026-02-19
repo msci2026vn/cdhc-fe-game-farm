@@ -12,6 +12,7 @@ import { getLevelTitle } from '@/shared/stores/playerStore';
 import { usePlayerStats, PLAYER_STATS_KEY } from '@/shared/hooks/usePlayerStats';
 import { StatAllocationModal } from './StatAllocationModal';
 import { useQueryClient } from '@tanstack/react-query';
+import { playSound } from '@/shared/audio';
 
 interface LevelUpEventDetail {
   oldLevel: number;
@@ -31,6 +32,7 @@ export function LevelUpOverlay() {
       setLevelData(e.detail);
       setShow(true);
       setShowStatPrompt(false);
+      playSound('level_up');
 
       // Invalidate player stats to get updated freePoints
       queryClient.invalidateQueries({ queryKey: PLAYER_STATS_KEY });

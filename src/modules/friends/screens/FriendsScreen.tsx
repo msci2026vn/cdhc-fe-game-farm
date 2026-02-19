@@ -5,6 +5,7 @@ import InviteFriends from '@/modules/friends/components/InviteFriends';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import type { FriendData } from '@/shared/types/game-api.types';
+import { playSound } from '@/shared/audio';
 
 export default function FriendsScreen() {
     const { data: friendsData, isLoading } = useFriends();
@@ -43,13 +44,13 @@ export default function FriendsScreen() {
                 {/* Quick Actions in Header */}
                 <div className="flex gap-3 mt-6">
                     <button
-                        onClick={() => setShowInvite(true)}
+                        onClick={() => { playSound('ui_click'); setShowInvite(true); }}
                         className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl py-2 px-3 flex items-center justify-center gap-2 active:scale-95 transition-transform">
                         <span className="text-lg">💌</span>
                         <span className="text-xs font-bold text-white">Mời bạn</span>
                     </button>
                     <button
-                        onClick={() => setShowLeaderboard(true)}
+                        onClick={() => { playSound('ui_click'); setShowLeaderboard(true); }}
                         className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl py-2 px-3 flex items-center justify-center gap-2 active:scale-95 transition-transform">
                         <span className="text-lg">🏆</span>
                         <span className="text-xs font-bold text-white">BXH</span>

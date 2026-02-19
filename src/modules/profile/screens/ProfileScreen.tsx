@@ -10,6 +10,7 @@ import { StatAllocationModal } from '@/shared/components/StatAllocationModal';
 import { StatHelpModal } from '@/shared/components/StatHelpModal';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import { formatOGN } from '@/shared/utils/format';
+import { playSound } from '@/shared/audio';
 
 type Tab = 'stats' | 'achievements';
 
@@ -127,7 +128,7 @@ export default function ProfileScreen() {
       {/* Tab bar — fixed, không scroll */}
       <div className="flex-shrink-0 flex gap-1 px-5 mb-2">
         {TABS.map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)}
+          <button key={t.key} onClick={() => { playSound('ui_tab'); setTab(t.key); }}
             className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all ${tab === t.key ? 'bg-primary text-white shadow-md' : 'bg-white/60 text-muted-foreground'
               }`}>
             {t.label}

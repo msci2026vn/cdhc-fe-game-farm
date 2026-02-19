@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import type { SkillWarning } from '../hooks/useMatch3';
+import { playSound } from '@/shared/audio';
 
 interface Props {
   warning: SkillWarning;
@@ -87,6 +88,7 @@ export default function BossSkillWarning({ warning, bossName, bossEmoji, manaCos
         <button
           onClick={(e) => {
             e.stopPropagation();
+            playSound('ui_click');
             onDodge();
           }}
           disabled={!canDodge}

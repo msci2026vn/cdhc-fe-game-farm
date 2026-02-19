@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { playSound } from '@/shared/audio';
 
 const tabs = [
   { to: '/farm', icon: 'spa', label: 'Nông trại' },
@@ -26,7 +27,7 @@ export default function BottomNav() {
           return (
             <button
               key={tab.to}
-              onClick={() => navigate(tab.to)}
+              onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
               className={`flex flex-col items-center gap-1 w-12 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'
                 }`}
             >

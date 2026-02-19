@@ -7,6 +7,7 @@ import { useShopItems } from '@/shared/hooks/useShopItems';
 import { useShopBuy } from '@/shared/hooks/useShopBuy';
 import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { playSound } from '@/shared/audio';
 
 type ShopTab = 'seed' | 'tool' | 'card' | 'nft';
 
@@ -44,6 +45,7 @@ export default function ShopScreen() {
   const tabItems = items.filter((i) => i.category === activeTab);
 
   const handleBuyClick = (_item: any) => {
+    playSound('ui_click');
     addToast('Chức năng đang phát triển 🚀', 'info');
   };
 
@@ -56,6 +58,7 @@ export default function ShopScreen() {
       { itemId: item.id, quantity: 1 },
       {
         onSuccess: (data) => {
+          playSound('shop_buy');
           setBuyAnim(item.id);
           setTimeout(() => setBuyAnim(null), 800);
           showFlyUp(`-${data.ognSpent} OGN 🛒`);
@@ -100,7 +103,7 @@ export default function ShopScreen() {
         {TABS.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => { setActiveTab(tab.key); playSound('ui_tab'); }}
             className={`flex-1 py-2 rounded-[20px] text-[13px] font-bold transition-all ${tab.key === activeTab ? 'bg-game-green-mid text-white' : 'text-muted-foreground'
               }`}
             style={
