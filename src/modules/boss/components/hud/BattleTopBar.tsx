@@ -71,7 +71,7 @@ export default function BattleTopBar({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-2 z-10">
+      <div className="flex justify-between items-center mb-1 z-10">
         {/* Left: TurnCounter (weekly) or Timer (campaign) */}
         {isCampaign ? (
           <div className={`flex items-center gap-1 ${timerColor}`}>

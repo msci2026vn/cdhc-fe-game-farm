@@ -23,7 +23,7 @@ export default function SkillBar({
   const ultReady = ultCharge >= 100;
 
   return (
-    <div className="flex items-center gap-2 mt-2">
+    <div className="flex items-center gap-2 mt-1.5">
       {/* Dodge */}
       <SkillButton
         icon="🏃"
@@ -37,7 +37,7 @@ export default function SkillBar({
 
       {/* ULT charge bar (between buttons) */}
       <div className="flex-1 flex flex-col gap-0.5">
-        <div className="h-2.5 rounded-lg overflow-hidden relative"
+        <div className="h-2 rounded-lg overflow-hidden relative"
           style={{ background: 'rgba(255,255,255,0.1)' }}>
           <div className={`h-full rounded-lg transition-all duration-500 ${ultReady ? 'animate-pulse' : ''}`}
             style={{

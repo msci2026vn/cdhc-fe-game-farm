@@ -18,14 +18,14 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
   const isCritical = hpPct <= 30 && hpPct > 0;
 
   return (
-    <div className={`flex gap-1.5 mb-1.5 rounded-lg transition-all duration-200 ${isHit ? 'ring-1 ring-red-500/60 bg-red-500/10 animate-screen-shake' : ''}`}>
+    <div className={`flex gap-1 mb-1 rounded-lg transition-all duration-200 ${isHit ? 'ring-1 ring-red-500/60 bg-red-500/10 animate-screen-shake' : ''}`}>
       {/* HP */}
       <div className="flex-1">
-        <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#55efc4' }}>
+        <div className="flex justify-between text-[8px] font-bold mb-px" style={{ color: '#55efc4' }}>
           <span>❤️ HP</span>
           <span>{hp.toLocaleString()}/{maxHp.toLocaleString()}</span>
         </div>
-        <div className={`h-2.5 rounded-md overflow-hidden relative ${isCritical ? 'animate-pulse' : ''}`}
+        <div className={`h-2 rounded-md overflow-hidden relative ${isCritical ? 'animate-pulse' : ''}`}
           style={{ background: 'rgba(255,255,255,0.1)' }}>
           <div className="h-full rounded-md transition-all duration-500"
             style={{
@@ -41,11 +41,11 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
 
       {/* Shield */}
       <div className="flex-1">
-        <div className="flex justify-between text-[9px] font-bold mb-0.5" style={{ color: '#74b9ff' }}>
+        <div className="flex justify-between text-[8px] font-bold mb-px" style={{ color: '#74b9ff' }}>
           <span>🛡️ DEF {def}</span>
           <span>{shield}</span>
         </div>
-        <div className="h-2.5 rounded-md overflow-hidden relative"
+        <div className="h-2 rounded-md overflow-hidden relative"
           style={{ background: 'rgba(255,255,255,0.1)' }}>
           <div className="h-full rounded-md transition-all duration-500"
             style={{

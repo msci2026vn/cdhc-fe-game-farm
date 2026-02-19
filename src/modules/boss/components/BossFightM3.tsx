@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import BottomNav from '@/shared/components/BottomNav';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
@@ -236,8 +235,8 @@ export default function BossFightM3({
       {/* Boss rage overlay */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossInfo.emoji} />
 
-      {/* Top half: Boss arena */}
-      <div className="flex-[0_0_46%] pt-safe px-5 pb-2 flex flex-col relative overflow-hidden">
+      {/* Top half: Boss arena — compact for mobile */}
+      <div className="flex-[0_0_36%] pt-safe px-4 pb-1 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
         }} />
@@ -276,11 +275,11 @@ export default function BossFightM3({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
+          <span className={`text-[56px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
             }`} style={{
               filter: enrageMultiplier >= 1.3
-                ? `drop-shadow(0 0 30px rgba(231,76,60,0.5)) drop-shadow(0 0 15px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
-                : 'drop-shadow(0 0 30px rgba(231,76,60,0.5))',
+                ? `drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
+                : 'drop-shadow(0 0 20px rgba(231,76,60,0.5))',
               transition: 'filter 1s ease',
             }}>
             {bossInfo.emoji}
@@ -299,29 +298,12 @@ export default function BossFightM3({
           />
         </div>
 
-        {/* Mini leaderboard */}
-        <div className="z-10 mt-1 rounded-lg p-2 px-3"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-1.5">🏆 Top Damage</div>
-          {[
-            { rank: '1', name: 'CryptoFarmer', dmg: '2,450', bg: 'linear-gradient(135deg, #f0b429, #d49a1a)' },
-            { rank: '2', name: 'GreenHero92', dmg: '1,820', bg: 'linear-gradient(135deg, #c0c0c0, #808080)' },
-            { rank: '3', name: `${auth?.user?.name || 'Farmer'} ⭐`, dmg: '1,540', bg: 'linear-gradient(135deg, #cd7f32, #8b5e34)' },
-          ].map(r => (
-            <div key={r.rank} className="flex items-center gap-2 py-1">
-              <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold text-white"
-                style={{ background: r.bg }}>{r.rank}</span>
-              <span className="flex-1 text-xs text-white/80 font-semibold">{r.name}</span>
-              <span className="font-heading text-xs font-bold" style={{ color: '#ffe066' }}>{r.dmg} DMG</span>
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Bottom half: Match-3 + Skills */}
-      <div className="flex-[0_0_54%] rounded-t-2xl px-4 pt-3 pb-[80px] flex flex-col"
+      {/* Bottom half: Match-3 + Skills — expanded for mobile */}
+      <div className="flex-[1_1_64%] rounded-t-2xl px-3 pt-2 pb-[max(env(safe-area-inset-bottom,8px),8px)] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
-        <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: 'rgba(255,255,255,0.2)' }} />
+        <div className="w-8 h-0.5 rounded-full mx-auto mb-1" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
         {/* Player HP + Shield bars */}
         <PlayerHPBar
@@ -340,8 +322,8 @@ export default function BossFightM3({
           ultCost={manaUltCost}
         />
 
-        {/* Gem grid (EXISTING — unchanged) */}
-        <div className="grid grid-cols-6 gap-1.5 p-1.5 rounded-lg flex-1"
+        {/* Gem grid — compact for mobile */}
+        <div className="grid grid-cols-6 gap-1 p-1 rounded-lg flex-1"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
           {grid.map((gem, i) => {
             const meta = GEM_META[gem.type];
@@ -349,7 +331,7 @@ export default function BossFightM3({
             const isMatched = matchedCells.has(i);
             return (
               <div key={gem.id} onClick={() => handleTap(i)}
-                className={`aspect-square rounded-[10px] flex items-center justify-center text-[22px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
                   ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
                   ${isMatched ? 'animate-gem-pop' : ''}
                   ${animating && !isMatched ? 'pointer-events-none' : ''}
@@ -374,7 +356,6 @@ export default function BossFightM3({
         />
       </div>
 
-      <BottomNav />
     </div>
   );
 }

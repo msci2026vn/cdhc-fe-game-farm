@@ -36,11 +36,11 @@ export default function BossHPBar({
   const hasPhases = totalPhases && totalPhases > 1;
 
   return (
-    <div className="z-10 mb-2">
+    <div className="z-10 mb-1">
       {/* Boss name row */}
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2">
-          <span className="text-xl">{emoji}</span> {name}
+      <div className="flex items-center justify-between mb-0.5">
+        <h2 className="font-heading text-sm font-bold text-white flex items-center gap-1.5">
+          <span className="text-base">{emoji}</span> {name}
         </h2>
         <div className="flex items-center gap-1.5">
           {archetype && archetype !== 'none' && (
@@ -65,11 +65,11 @@ export default function BossHPBar({
       </div>
 
       {/* HP bar */}
-      <div className="w-full h-5 rounded-xl overflow-hidden relative"
+      <div className="w-full h-3.5 rounded-lg overflow-hidden relative"
         style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
 
         {/* Fill */}
-        <div className="h-full rounded-xl relative transition-all duration-500"
+        <div className="h-full rounded-lg relative transition-all duration-500"
           style={{
             width: `${pct}%`,
             background: hpGradient(pct),

@@ -322,8 +322,8 @@ export default function BossFightCampaign({
       {/* Boss rage overlay */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossData.emoji} />
 
-      {/* Top half: Boss arena */}
-      <div className="flex-[0_0_46%] pt-safe px-5 pb-2 flex flex-col relative overflow-hidden">
+      {/* Top half: Boss arena — compact for mobile */}
+      <div className="flex-[0_0_38%] pt-safe px-4 pb-1 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
         }} />
@@ -412,14 +412,14 @@ export default function BossFightCampaign({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[80px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
+          <span className={`text-[56px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
             }`} style={{
               filter: [
                 enrageMultiplier >= 1.3
-                  ? `drop-shadow(0 0 30px rgba(231,76,60,0.5)) drop-shadow(0 0 15px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
-                  : 'drop-shadow(0 0 30px rgba(231,76,60,0.5))',
-                activeBossBuffs.some(b => b.type === 'shield') && 'drop-shadow(0 0 25px rgba(116,185,255,0.7))',
-                activeBossBuffs.some(b => b.type === 'reflect') && 'drop-shadow(0 0 25px rgba(168,85,247,0.7))',
+                  ? `drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
+                  : 'drop-shadow(0 0 20px rgba(231,76,60,0.5))',
+                activeBossBuffs.some(b => b.type === 'shield') && 'drop-shadow(0 0 15px rgba(116,185,255,0.7))',
+                activeBossBuffs.some(b => b.type === 'reflect') && 'drop-shadow(0 0 15px rgba(168,85,247,0.7))',
               ].filter(Boolean).join(' '),
               transition: 'filter 1s ease',
             }}>
@@ -456,10 +456,10 @@ export default function BossFightCampaign({
         </div>
       </div>
 
-      {/* Bottom half: Match-3 + Skills */}
-      <div className="flex-[0_0_54%] rounded-t-2xl px-4 pt-3 pb-4 flex flex-col"
+      {/* Bottom half: Match-3 + Skills — expanded for mobile */}
+      <div className="flex-[1_1_62%] rounded-t-2xl px-3 pt-2 pb-[max(env(safe-area-inset-bottom,8px),8px)] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
-        <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: 'rgba(255,255,255,0.2)' }} />
+        <div className="w-8 h-0.5 rounded-full mx-auto mb-1" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
         {/* Debuff bar (Phase 1 boss skills) */}
         {activeDebuffs.length > 0 && (
@@ -534,7 +534,7 @@ export default function BossFightCampaign({
 
         {/* Gem grid + Stun overlay */}
         <div className="relative flex-1">
-          <div className={`grid grid-cols-6 gap-1.5 p-1.5 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''}`}
+          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''}`}
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {grid.map((gem, i) => {
               const meta = GEM_META[gem.type];
@@ -542,7 +542,7 @@ export default function BossFightCampaign({
               const isMatched = matchedCells.has(i);
               return (
                 <div key={gem.id} onClick={() => handleTap(i)}
-                  className={`aspect-square rounded-[10px] flex items-center justify-center text-[22px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                  className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}
@@ -550,7 +550,7 @@ export default function BossFightCampaign({
                   `}>
                   {meta.emoji}
                   {lockedGems.has(i) && (
-                    <span className="absolute inset-0 flex items-center justify-center text-xs pointer-events-none">🔒</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">🔒</span>
                   )}
                 </div>
               );

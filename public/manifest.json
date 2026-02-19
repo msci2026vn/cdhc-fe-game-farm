@@ -1,0 +1,28 @@
+{
+  "name": "Organic Kingdom",
+  "short_name": "OGN Kingdom",
+  "description": "Nông trại hữu cơ thông minh - Grow, Learn, Battle",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2d8a4e",
+  "theme_color": "#2d8a4e",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

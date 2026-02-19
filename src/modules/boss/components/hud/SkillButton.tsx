@@ -44,8 +44,8 @@ export default function SkillButton({
       onClick={onUse}
       disabled={!isReady && !isDodgeActive}
       className={`
-        relative min-w-[100px] h-[48px] rounded-2xl font-heading text-xs font-bold
-        flex items-center justify-center gap-1.5 transition-all
+        relative min-w-[90px] h-[42px] rounded-xl font-heading text-xs font-bold
+        flex items-center justify-center gap-1 transition-all
         ${isDodgeActive
           ? 'animate-bounce text-white scale-110 ring-2 ring-red-500'
           : isReady
