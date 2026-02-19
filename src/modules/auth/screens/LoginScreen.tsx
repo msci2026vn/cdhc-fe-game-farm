@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { queryClient } from '@/shared/lib/queryClient';
 import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
-import { gameApi } from '@/shared/api/game-api';
+import { gameApi, resetRedirectLock } from '@/shared/api/game-api';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 // Google Client ID từ BE .env
@@ -41,6 +41,9 @@ function LoginScreenContent() {
 
       if (res.ok && data.success) {
         console.log('[FARM-DEBUG] LoginScreen: ✅ Login successful → prefetching profile...');
+
+        // Reset the 401 redirect lock so future session expiries can trigger redirect again
+        resetRedirectLock();
 
         try {
           await queryClient.prefetchQuery({

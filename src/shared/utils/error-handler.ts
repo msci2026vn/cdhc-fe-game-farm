@@ -68,13 +68,12 @@ export function handleGameError(error: any, context?: string): string {
     cooldownRemaining: error?.cooldownRemaining,
   }));
 
-  // ─── 401: Session expired → redirect login ───
+  // ─── 401: Session expired ───
+  // NOTE: Don't redirect here! The global handleUnauthorized() in game-api.ts
+  // is the single source of truth for 401 redirects. Having multiple redirect
+  // sources caused race conditions (player kicked to login mid-boss-fight).
   if (status === 401 || code === 'UNAUTHORIZED' || message.includes('401') || message.includes('Unauthorized')) {
-    console.log('[FARM-DEBUG] handleGameError() — 401 → redirecting to login');
-    toast.error(ERROR_MESSAGES.UNAUTHORIZED);
-    setTimeout(() => {
-      navigateToLogin?.();
-    }, 1500);
+    console.log('[FARM-DEBUG] handleGameError() — 401 detected (redirect handled by game-api.ts)');
     return ERROR_MESSAGES.UNAUTHORIZED;
   }
 

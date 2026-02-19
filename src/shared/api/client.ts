@@ -1,6 +1,15 @@
 import { API_BASE_URL } from '../utils/constants';
 import type { ApiResponse } from '../types/common';
 
+// ═══════════════════════════════════════════════════════════════
+// Import the single source-of-truth 401 handler from game-api.
+// Previously, client.ts had its own `window.location.href = '/login'`
+// which raced with handleUnauthorized() and caused double redirects.
+// ═══════════════════════════════════════════════════════════════
+// NOTE: We lazily import to avoid circular dependency issues.
+// game-api.ts imports from client.ts → client.ts can't import from game-api.ts at top-level.
+// Instead we just throw and let the caller (game-api.ts) handle 401.
+
 type RequestOptions = RequestInit & { skipAuth?: boolean };
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -16,8 +25,11 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   });
 
   if (res.status === 401 && !skipAuth) {
-    window.location.href = '/login';
-    throw new Error('Unauthorized');
+    // Don't redirect here — let the caller (game-api.ts) handle it
+    // through handleUnauthorized() which is the single source of truth.
+    const err = new Error('Unauthorized');
+    (err as any).status = 401;
+    throw err;
   }
 
   if (!res.ok) {
@@ -37,7 +49,8 @@ export const api = {
 
 // ═══════════════════════════════════════════════════════════════
 // GAME CLIENT - Wrapper for game API endpoints
-// Automatically parses { success, data } responses and handles 401
+// Automatically parses { success, data } responses
+// 401 handling delegated to caller (game-api.ts handleUnauthorized)
 // ═══════════════════════════════════════════════════════════════
 export const gameClient = {
   get: async <T>(path: string): Promise<T> => {
@@ -48,8 +61,10 @@ export const gameClient = {
     });
 
     if (res.status === 401) {
-      window.location.href = '/login';
-      throw new Error('Unauthorized');
+      // Don't redirect here — throw and let game-api.ts handle via handleUnauthorized
+      const err = new Error('Unauthorized');
+      (err as any).status = 401;
+      throw err;
     }
 
     if (!res.ok) {
@@ -73,8 +88,10 @@ export const gameClient = {
     });
 
     if (res.status === 401) {
-      window.location.href = '/login';
-      throw new Error('Unauthorized');
+      // Don't redirect here — throw and let game-api.ts handle via handleUnauthorized
+      const err = new Error('Unauthorized');
+      (err as any).status = 401;
+      throw err;
     }
 
     if (!res.ok) {
