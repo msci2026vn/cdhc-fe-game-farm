@@ -28,6 +28,52 @@ interface PredictResult {
   alreadyPredicted?: boolean;
 }
 
+interface RatioData {
+  date: string;
+  totalUp: number;
+  totalDown: number;
+  percentUp: number;
+  percentDown: number;
+  totalVotes: number;
+}
+
+interface HistoryStats {
+  total: number;
+  won: number;
+  lost: number;
+  pending: number;
+  accuracy: number;
+  currentStreak: number;
+  bestStreak: number;
+  totalEarned: number;
+  totalPenalty: number;
+}
+
+interface PredictionRow {
+  id: string;
+  targetDate: string;
+  direction: 'up' | 'down';
+  status: 'pending' | 'won' | 'lost' | 'refund';
+  reward: number | null;
+  penalty: number | null;
+  actualDirection: string | null;
+  actualChange: string | null;
+  streakAfter: number | null;
+  predictedAt: string;
+}
+
+interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  avatar: string | null;
+  totalCorrect: number;
+  totalPredictions: number;
+  accuracy: number;
+  bestStreak: number;
+  totalEarned: number;
+}
+
 const BASE = 'https://sta.cdhc.vn';
 
 // Vietnamese names for each commodity ID
@@ -49,6 +95,8 @@ const COMMODITY_ICON: Record<string, { icon: string; bg: string; border: string;
 };
 const DEFAULT_ICON = { icon: 'eco', bg: 'bg-green-100', border: 'border-green-300', text: 'text-green-700' };
 
+type TabId = 'prices' | 'history' | 'leaderboard';
+
 // ─── Countdown hook — counts down to 18:00 every day ─────────────────────────
 function useCountdownTo18() {
   const getSecondsLeft = useCallback(() => {
@@ -56,7 +104,6 @@ function useCountdownTo18() {
     const target = new Date(now);
     target.setHours(18, 0, 0, 0);
     if (now >= target) {
-      // already past 18:00 → count to 18:00 next day
       target.setDate(target.getDate() + 1);
     }
     return Math.max(0, Math.floor((target.getTime() - now.getTime()) / 1000));
@@ -81,21 +128,41 @@ function useCountdownTo18() {
 export default function MarketScreen() {
   const navigate = useNavigate();
 
+  // Core data
   const [data, setData]                   = useState<MarketData | null>(null);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState<string | null>(null);
+
+  // Predict
   const [predicting, setPredicting]       = useState(false);
   const [predictResult, setPredictResult] = useState<PredictResult | null>(null);
   const [streak, setStreak]               = useState(0);
 
-  const { h, m, s, pad, secs } = useCountdownTo18();
-  const isUrgent = secs <= 3600; // last hour — pulse red
+  // New: ratio, history, leaderboard
+  const [ratio, setRatio]                 = useState<RatioData | null>(null);
+  const [history, setHistory]             = useState<{ predictions: PredictionRow[]; stats: HistoryStats } | null>(null);
+  const [leaderboard, setLeaderboard]     = useState<LeaderboardEntry[]>([]);
+  const [activeTab, setActiveTab]         = useState<TabId>('prices');
 
+  const { h, m, s, pad, secs } = useCountdownTo18();
+  const isUrgent = secs <= 3600;
+
+  // ── Initial data load ──
   useEffect(() => {
     fetchMarketData();
     checkExistingPrediction();
+    fetchRatio();
+    fetchLeaderboard();
   }, []);
 
+  // ── Fetch history when tab switches ──
+  useEffect(() => {
+    if (activeTab === 'history' && !history) {
+      fetchHistory();
+    }
+  }, [activeTab]);
+
+  // ── API calls ──
   async function fetchMarketData() {
     try {
       setLoading(true);
@@ -147,6 +214,36 @@ export default function MarketScreen() {
     }
   }
 
+  async function fetchRatio() {
+    try {
+      const res = await fetch(`${BASE}/api/market/ratio`);
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.success && json.data) setRatio(json.data);
+    } catch { /* ignore */ }
+  }
+
+  async function fetchHistory() {
+    try {
+      const res = await fetch(`${BASE}/api/market/predictions/history`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.success && json.data) setHistory(json.data);
+    } catch { /* ignore */ }
+  }
+
+  async function fetchLeaderboard() {
+    try {
+      const res = await fetch(`${BASE}/api/market/leaderboard`);
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.success && json.data?.leaderboard) setLeaderboard(json.data.leaderboard);
+    } catch { /* ignore */ }
+  }
+
   async function handlePredict(direction: 'up' | 'down') {
     if (predicting || predictResult?.success || predictResult?.alreadyPredicted) return;
     try {
@@ -169,6 +266,7 @@ export default function MarketScreen() {
             ? '🔺 Đã dự đoán TĂNG! Kết quả công bố lúc 18:00.'
             : '🔻 Đã dự đoán GIẢM! Kết quả công bố lúc 18:00.',
         });
+        fetchRatio(); // refresh ratio after predict
       } else {
         const code = json?.error?.code || '';
         const msg  = json?.error?.message || 'Không thể dự đoán';
@@ -188,7 +286,7 @@ export default function MarketScreen() {
     }
   }
 
-  // ── Loading ──────────────────────────────────────────────────────────────────
+  // ── Loading ──
   if (loading) {
     return (
       <div className="max-w-md mx-auto h-screen flex flex-col items-center justify-center relative bg-gradient-to-b from-[#dcedc8] to-[#aed581]">
@@ -198,7 +296,7 @@ export default function MarketScreen() {
     );
   }
 
-  // ── Error ────────────────────────────────────────────────────────────────────
+  // ── Error ──
   if (error || !data) {
     return (
       <div className="max-w-md mx-auto h-screen flex flex-col relative bg-gradient-to-b from-[#dcedc8] to-[#aed581] overflow-hidden">
@@ -226,7 +324,7 @@ export default function MarketScreen() {
     );
   }
 
-  // ── Main ─────────────────────────────────────────────────────────────────────
+  // ── Main ──
   const isUp            = data.index.direction === 'up';
   const buttonsDisabled = predicting || !!predictResult?.success || !!predictResult?.alreadyPredicted;
 
@@ -331,61 +429,278 @@ export default function MarketScreen() {
           </div>
         </div>
 
-        {/* ── Commodity Prices ── */}
+        {/* ── Tab Navigation ── */}
         <div
-          className="p-1 rounded-2xl relative"
+          className="p-1 rounded-2xl"
           style={{
             background: '#8c6239',
             border: '3px solid #5d4037',
             boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 0 #3e2723, 0 6px 12px rgba(0,0,0,0.3)',
           }}
         >
-          <div className="absolute -top-3 -right-2 rotate-12 z-20">
-            <span className="material-symbols-outlined text-green-700 text-3xl drop-shadow-sm">eco</span>
-          </div>
-
-          <div className="bg-[#fefae0] rounded-xl p-4 border border-[#bcaaa4]"
-            style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
-            <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-2 mb-3 uppercase text-sm">
-              Bảng giá hôm nay
-            </h3>
-
-            <div className="space-y-3">
-              {data.prices.map(p => {
-                const change   = parseFloat(p.percentChange);
-                const positive = change >= 0;
-                const ic       = COMMODITY_ICON[p.commodityId] || DEFAULT_ICON;
-                const vi       = COMMODITY_VI[p.commodityId];
-                const displayName    = p.name || vi?.name    || p.commodityId;
-                const displaySubname = vi?.subname || p.commodityId;
-                return (
-                  <div key={p.commodityId}
-                    className="flex items-center justify-between bg-white/60 p-2 rounded-lg border border-[#8c6239]/10">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${ic.bg} ${ic.border}`}>
-                        <span className={`material-symbols-outlined ${ic.text}`}>{ic.icon}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#5d4037]">{displayName}</span>
-                        <span className="text-xs text-gray-500">{displaySubname}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="font-bold text-[#5d4037]">{parseFloat(p.price).toFixed(2)}</span>
-                      <span className={`text-xs font-bold ${positive ? 'text-green-600' : 'text-red-500'}`}>
-                        {positive ? '+' : ''}{change.toFixed(2)}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-3 text-center text-[10px] text-gray-500 italic">
-              Cập nhật: vừa xong
-            </div>
+          <div className="flex rounded-xl overflow-hidden">
+            {([
+              { id: 'prices' as TabId, label: 'Giá', icon: 'show_chart' },
+              { id: 'history' as TabId, label: 'Lịch sử', icon: 'history' },
+              { id: 'leaderboard' as TabId, label: 'Xếp hạng', icon: 'emoji_events' },
+            ]).map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-2.5 flex items-center justify-center gap-1 font-bold text-sm transition-all
+                  ${activeTab === tab.id
+                    ? 'bg-[#fefae0] text-[#5d4037]'
+                    : 'bg-[#5d4037] text-[#bcaaa4] active:bg-[#4e342e]'
+                  }`}
+              >
+                <span className="material-symbols-outlined text-base">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
+
+        {/* ── TAB: Prices ── */}
+        {activeTab === 'prices' && (
+          <div
+            className="p-1 rounded-2xl relative"
+            style={{
+              background: '#8c6239',
+              border: '3px solid #5d4037',
+              boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 0 #3e2723, 0 6px 12px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div className="absolute -top-3 -right-2 rotate-12 z-20">
+              <span className="material-symbols-outlined text-green-700 text-3xl drop-shadow-sm">eco</span>
+            </div>
+
+            <div className="bg-[#fefae0] rounded-xl p-4 border border-[#bcaaa4]"
+              style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
+              <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-2 mb-3 uppercase text-sm">
+                Bảng giá hôm nay
+              </h3>
+
+              <div className="space-y-3">
+                {data.prices.map(p => {
+                  const change   = parseFloat(p.percentChange);
+                  const positive = change >= 0;
+                  const ic       = COMMODITY_ICON[p.commodityId] || DEFAULT_ICON;
+                  const vi       = COMMODITY_VI[p.commodityId];
+                  const displayName    = p.name || vi?.name    || p.commodityId;
+                  const displaySubname = vi?.subname || p.commodityId;
+                  return (
+                    <div key={p.commodityId}
+                      className="flex items-center justify-between bg-white/60 p-2 rounded-lg border border-[#8c6239]/10">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${ic.bg} ${ic.border}`}>
+                          <span className={`material-symbols-outlined ${ic.text}`}>{ic.icon}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[#5d4037]">{displayName}</span>
+                          <span className="text-xs text-gray-500">{displaySubname}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="font-bold text-[#5d4037]">{parseFloat(p.price).toFixed(2)}</span>
+                        <span className={`text-xs font-bold ${positive ? 'text-green-600' : 'text-red-500'}`}>
+                          {positive ? '+' : ''}{change.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 text-center text-[10px] text-gray-500 italic">
+                Cập nhật: vừa xong
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: History ── */}
+        {activeTab === 'history' && (
+          <div className="space-y-3">
+            {/* Stats overview */}
+            {history?.stats && (
+              <div
+                className="p-1 rounded-2xl"
+                style={{
+                  background: '#8c6239',
+                  border: '3px solid #5d4037',
+                  boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 0 #3e2723, 0 6px 12px rgba(0,0,0,0.3)',
+                }}
+              >
+                <div className="bg-[#fefae0] rounded-xl p-4 border border-[#bcaaa4]"
+                  style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
+                  <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-2 mb-3 uppercase text-sm">
+                    Thống kê của bạn
+                  </h3>
+
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="bg-green-50 rounded-lg p-2 text-center border border-green-200">
+                      <div className="text-xl font-black text-green-600">{history.stats.won}</div>
+                      <div className="text-[10px] font-bold text-green-700 uppercase">Đúng</div>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-2 text-center border border-red-200">
+                      <div className="text-xl font-black text-red-500">{history.stats.lost}</div>
+                      <div className="text-[10px] font-bold text-red-700 uppercase">Sai</div>
+                    </div>
+                    <div className="bg-amber-50 rounded-lg p-2 text-center border border-amber-200">
+                      <div className="text-xl font-black text-[#5d4037]">{history.stats.accuracy}%</div>
+                      <div className="text-[10px] font-bold text-[#8c6239] uppercase">Chính xác</div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between text-xs text-[#5d4037] bg-white/60 rounded-lg p-2 border border-[#8c6239]/10">
+                    <span className="font-semibold">Streak: <span className="text-orange-600">{history.stats.currentStreak}</span></span>
+                    <span className="font-semibold">Kỷ lục: <span className="text-amber-600">{history.stats.bestStreak}</span></span>
+                    <span className="font-semibold">Lời: <span className={history.stats.totalEarned - history.stats.totalPenalty >= 0 ? 'text-green-600' : 'text-red-500'}>
+                      {history.stats.totalEarned - history.stats.totalPenalty >= 0 ? '+' : ''}{history.stats.totalEarned - history.stats.totalPenalty}
+                    </span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Prediction list */}
+            <div
+              className="p-1 rounded-2xl"
+              style={{
+                background: '#8c6239',
+                border: '3px solid #5d4037',
+                boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 0 #3e2723, 0 6px 12px rgba(0,0,0,0.3)',
+              }}
+            >
+              <div className="bg-[#fefae0] rounded-xl p-4 border border-[#bcaaa4]"
+                style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
+                <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-2 mb-3 uppercase text-sm">
+                  Lịch sử dự đoán
+                </h3>
+
+                <div className="space-y-2">
+                  {history?.predictions?.map((p) => (
+                    <div key={p.id}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border ${
+                        p.status === 'won' ? 'bg-green-50 border-green-200' :
+                        p.status === 'lost' ? 'bg-red-50 border-red-200' :
+                        p.status === 'refund' ? 'bg-gray-50 border-gray-200' :
+                        'bg-yellow-50 border-yellow-200'
+                      }`}
+                    >
+                      <div>
+                        <div className="text-sm font-bold text-[#5d4037]">{p.targetDate}</div>
+                        <div className="text-xs text-gray-600">
+                          {p.direction === 'up' ? '🔺 TĂNG' : '🔻 GIẢM'}
+                          {p.actualDirection && (
+                            <span className="ml-1.5 text-gray-500">
+                              → {p.actualDirection === 'up' ? '📈' : p.actualDirection === 'down' ? '📉' : '➡️'} {p.actualChange}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {p.status === 'won' && (
+                          <span className="text-green-600 font-bold text-sm">+{p.reward} OGN</span>
+                        )}
+                        {p.status === 'lost' && (
+                          <span className="text-red-500 font-bold text-sm">-{p.penalty} OGN</span>
+                        )}
+                        {p.status === 'pending' && (
+                          <span className="text-yellow-600 font-semibold text-sm">Chờ...</span>
+                        )}
+                        {p.status === 'refund' && (
+                          <span className="text-gray-500 font-semibold text-sm">Hoàn</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!history?.predictions || history.predictions.length === 0) && (
+                    <div className="text-center py-6">
+                      <div className="text-3xl mb-2">📋</div>
+                      <p className="text-sm text-[#5d4037]/60 font-semibold">Chưa có dự đoán nào</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: Leaderboard ── */}
+        {activeTab === 'leaderboard' && (
+          <div
+            className="p-1 rounded-2xl"
+            style={{
+              background: '#8c6239',
+              border: '3px solid #5d4037',
+              boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 0 #3e2723, 0 6px 12px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div className="bg-[#fefae0] rounded-xl p-4 border border-[#bcaaa4]"
+              style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
+              <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-2 mb-3 uppercase text-sm">
+                Top dự đoán
+              </h3>
+
+              <div className="space-y-2">
+                {leaderboard.map((entry) => {
+                  const rankColors = entry.rank === 1
+                    ? 'bg-yellow-400 text-yellow-900 border-yellow-500'
+                    : entry.rank === 2
+                    ? 'bg-gray-300 text-gray-700 border-gray-400'
+                    : entry.rank === 3
+                    ? 'bg-orange-300 text-orange-800 border-orange-400'
+                    : 'bg-[#f4e4bc] text-[#5d4037] border-[#8c6239]/30';
+
+                  return (
+                    <div key={entry.userId}
+                      className="flex items-center gap-3 p-2.5 rounded-lg bg-white/60 border border-[#8c6239]/10">
+                      {/* Rank badge */}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm border ${rankColors} shrink-0`}>
+                        {entry.rank}
+                      </div>
+
+                      {/* Avatar + Name */}
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {entry.avatar ? (
+                          <img src={entry.avatar} alt="" className="w-8 h-8 rounded-full border border-[#8c6239]/20 shrink-0" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-[#8c6239]/20 flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[#5d4037] text-sm">person</span>
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="font-bold text-sm text-[#5d4037] truncate">{entry.username}</div>
+                          <div className="text-[10px] text-gray-500">
+                            {entry.totalCorrect}/{entry.totalPredictions} đúng ({entry.accuracy}%)
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="text-right shrink-0">
+                        <div className="text-sm font-bold text-green-600">+{entry.totalEarned}</div>
+                        {entry.bestStreak > 0 && (
+                          <div className="text-[10px] text-orange-600 font-bold">Best: {entry.bestStreak}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {leaderboard.length === 0 && (
+                  <div className="text-center py-6">
+                    <div className="text-3xl mb-2">🏆</div>
+                    <p className="text-sm text-[#5d4037]/60 font-semibold">Chưa đủ dữ liệu</p>
+                    <p className="text-xs text-gray-400 mt-1">Cần ít nhất 1 lượt dự đoán</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="h-2" />
       </div>
@@ -457,6 +772,27 @@ export default function MarketScreen() {
             }`}
           >
             {predictResult.message}
+          </div>
+        )}
+
+        {/* Ratio bar — shown when ratio data available */}
+        {ratio && ratio.totalVotes > 0 && (
+          <div className="mb-3">
+            <div className="flex items-center justify-between text-[10px] text-[#bcaaa4] mb-1 px-0.5">
+              <span>TĂNG {ratio.percentUp}%</span>
+              <span className="font-semibold text-[#e9c46a]">{ratio.totalVotes} người</span>
+              <span>GIẢM {ratio.percentDown}%</span>
+            </div>
+            <div className="flex rounded-full overflow-hidden h-3 border border-[#8c6239]/50">
+              <div
+                className="bg-red-500 transition-all duration-500"
+                style={{ width: `${ratio.percentUp}%` }}
+              />
+              <div
+                className="bg-green-500 transition-all duration-500"
+                style={{ width: `${ratio.percentDown}%` }}
+              />
+            </div>
           </div>
         )}
 
