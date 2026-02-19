@@ -120,7 +120,7 @@ export default function SplashScreen() {
         <div className="w-[140px] h-[140px] mx-auto mb-5 rounded-full flex items-center justify-center animate-logo-pulse"
           style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)' }}
         >
-          <span className="text-7xl">🌳</span>
+          <img src="/icons/icon-192x192.png" alt="Organic Kingdom" className="w-[120px] h-[120px] rounded-full" />
         </div>
         <h1 className="font-heading text-4xl font-bold text-white text-shadow-md tracking-wide">
           Organic Kingdom
