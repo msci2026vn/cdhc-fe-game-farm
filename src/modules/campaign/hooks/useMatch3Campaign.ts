@@ -16,6 +16,7 @@ import {
 } from '@/shared/utils/combat-formulas';
 import type { BossPhase } from '../data/deVuongPhases';
 import type { BossSkill } from '../data/bossSkills';
+import { playSound, AudioManager } from '@/shared/audio';
 
 // ═══ Campaign boss data interface (superset of BossInfo) ═══
 export interface CampaignBossData {
@@ -465,6 +466,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       const bossLevel = bossData.unlockLevel || 1;
       setStars(calculateTimeStars(finalDuration, bossLevel));
       setResult('victory');
+      playSound('victory');
       if (selfDestructTimerRef.current) {
         clearInterval(selfDestructTimerRef.current);
         selfDestructTimerRef.current = null;
@@ -472,6 +474,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     }
     if (boss.playerHp <= 0 && result === 'fighting') {
       setResult('defeat');
+      playSound('defeat');
       if (selfDestructTimerRef.current) {
         clearInterval(selfDestructTimerRef.current);
         selfDestructTimerRef.current = null;
@@ -571,6 +574,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         const skillName = getBossSkillName(bossData.archetype || 'none');
         const skillDmg = Math.round(baseAtk * SKILL_DMG_MULT);
 
+        playSound('boss_skill');
         dodgedRef.current = false;
         setAttackWarning({ skill: { name: skillName, emoji: '⚠️', dmgMult: SKILL_DMG_MULT }, rawDmg: skillDmg, phase: 'warning' });
         setSkillWarning({ name: skillName, damage: skillDmg, countdown: 1.5 });
@@ -590,6 +594,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         pendingHitsRef.current.push(skillTimeout);
       } else {
         // ══ NORMAL ATTACK: freq hits from activeBossStats, 300ms apart ══
+        playSound('boss_attack');
         const freq = Math.max(1, activeBossStats.current.freq);
         for (let i = 0; i < freq; i++) {
           const hitTimeout = setTimeout(() => {
@@ -863,6 +868,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       dodgedRef.current = true;
       setAttackWarning(null);
       setSkillWarning(null);
+      playSound('dodge_success');
       setCombatStatsTracker(s => ({ ...s, dodgeCount: s.dodgeCount + 1 }));
       addCombatNotif('dodge', '🏃 Né thành công!', '#55efc4');
       return { ...prev, mana: prev.mana - manaDodgeCost };
@@ -887,6 +893,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       }
 
       setUltActive(true);
+      playSound('ult_fire');
       const currentDef = activeBossStats.current.def;
       const rawUltDmg = calcUltDamage(playerStats.atk, playerStats.mana);
       const dmgAfterDef = bossDEFReduction(rawUltDmg, currentDef);
@@ -961,6 +968,11 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     if (newCombo >= 2) setShowCombo(true);
     const comboInfo = getComboInfo(newCombo);
 
+    // Audio: combo sounds or basic gem_match
+    const comboSfx = AudioManager.comboSound(newCombo);
+    if (comboSfx) playSound(comboSfx);
+    else playSound('gem_match');
+
     const tally: Partial<Record<GemType, number>> = {};
     matched.forEach(idx => { const t = currentGrid[idx].type; tally[t] = (tally[t] || 0) + 1; });
     setMatchedCells(new Set(matched));
@@ -985,6 +997,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         if (milestones.critChance > 0 && totalDmg > 0 && Math.random() < milestones.critChance) {
           totalDmg = Math.round(totalDmg * milestones.critMultiplier);
           isCrit = true;
+          playSound('damage_crit');
           setCombatStatsTracker(s => ({ ...s, critCount: s.critCount + 1 }));
           addCombatNotif('crit', `CRIT! x${milestones.critMultiplier}`, '#ff6b6b');
         }
@@ -1060,6 +1073,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
 
         if (actualDmg > 0) {
           setTotalDmgDealt(d => d + actualDmg);
+          if (!isCrit) playSound('damage_dealt');
           const critLabel = isCrit ? ' CRIT!' : '';
           const defLabel = currentDef > 0 ? ' 🛡️' : '';
           const label = newCombo >= 2
@@ -1069,11 +1083,11 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         }
         if (hpCount > 0) {
           if (isHealBlocked) addPopup('🚫 Khóa hồi!', '#a29bfe');
-          else addPopup(`+${healAmt} HP`, '#55efc4');
+          else { addPopup(`+${healAmt} HP`, '#55efc4'); if (healAmt > 0) playSound('heal'); }
         }
         if (defCount > 0) {
           if (isArmorBrokenMatch) addPopup('💔 DEF 0!', '#fd79a8');
-          else addPopup(`+${shieldAmt} 🛡️`, '#74b9ff');
+          else { addPopup(`+${shieldAmt} 🛡️`, '#74b9ff'); if (shieldAmt > 0) playSound('shield_gain'); }
         }
 
         return { ...prev, bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown, lastCrit: isCrit };
@@ -1091,10 +1105,11 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     if (animating || result !== 'fighting' || isPausedRef.current || isStunnedRef.current) return;
     // Gem lock: can't interact with locked gems
     if (lockedGemsRef.current.has(idx)) return;
-    if (selected === null) { setSelected(idx); return; }
+    if (selected === null) { playSound('gem_select'); setSelected(idx); return; }
     if (selected === idx) { setSelected(null); return; }
-    if (!areAdjacent(selected, idx)) { setSelected(idx); return; }
+    if (!areAdjacent(selected, idx)) { playSound('gem_select'); setSelected(idx); return; }
 
+    playSound('gem_swap');
     setAnimating(true);
     setSelected(null);
     const newGrid = [...grid];
@@ -1104,6 +1119,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     if (matched.size === 0) {
       setGrid(newGrid);
       setTimeout(() => {
+        playSound('gem_no_match');
         const reverted = [...newGrid];
         [reverted[selected], reverted[idx]] = [reverted[idx], reverted[selected]];
         setGrid(reverted);

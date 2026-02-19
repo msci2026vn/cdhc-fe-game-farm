@@ -8,6 +8,7 @@ import MapPath from '../components/MapPath';
 import { useZoneBosses } from '../hooks/useZoneBosses';
 import { ZONE_META } from '../data/zones';
 import type { StageState, ZoneBoss } from '../types/campaign.types';
+import { playSound } from '@/shared/audio';
 
 /**
  * CampaignZoneScreen — Zone detail with 4 stages (3 minions/elites + 1 boss).
@@ -197,7 +198,7 @@ function ZoneBottomNav() {
           return (
             <button
               key={tab.to}
-              onClick={() => navigate(tab.to)}
+              onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
               className={`flex flex-col items-center gap-1 w-12 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}
             >
               {isActive ? (

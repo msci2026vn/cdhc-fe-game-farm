@@ -8,6 +8,7 @@ import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import { getDominantAura } from '@/shared/components/BuildAura';
+import { audioManager } from '@/shared/audio';
 import BossSkillWarning from './BossSkillWarning';
 
 // HUD components
@@ -65,6 +66,18 @@ export default function BossFightM3({
   } = useMatch3(bossInfo, combatStats, turnLimit);
 
   const auraType = getDominantAura(combatStats);
+
+  // ═══ BGM: Start battle music, stop on end/unmount ═══
+  useEffect(() => {
+    audioManager.startBgm('battle');
+    return () => { audioManager.stopBgm(); };
+  }, []);
+
+  useEffect(() => {
+    if (result !== 'fighting') {
+      audioManager.stopBgm();
+    }
+  }, [result]);
 
   const bossComplete = useBossComplete();
   const { data: auth } = useAuth();

@@ -13,6 +13,7 @@ import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import { getDominantAura } from '@/shared/components/BuildAura';
+import { audioManager } from '@/shared/audio';
 // BossSkillWarning overlay removed — NÉ button in SkillBar handles dodge now
 
 // HUD components (reused from boss module)
@@ -69,6 +70,19 @@ export default function BossFightCampaign({
   } = useMatch3Campaign(bossData, combatStats);
 
   const auraType = getDominantAura(combatStats);
+
+  // ═══ BGM: Start campaign battle music, stop on end/unmount ═══
+  useEffect(() => {
+    audioManager.startBgm('campaign');
+    return () => { audioManager.stopBgm(); };
+  }, []);
+
+  // Stop BGM when battle ends
+  useEffect(() => {
+    if (result !== 'fighting') {
+      audioManager.stopBgm();
+    }
+  }, [result]);
 
   const bossComplete = useBossComplete();
   const { data: auth } = useAuth();

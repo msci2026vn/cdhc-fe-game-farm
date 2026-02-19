@@ -522,6 +522,135 @@ export class AudioManager {
     if (combo >= 2) return 'combo_2';
     return null;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // BGM — Lightweight procedural background music
+  // Uses looping oscillators with slow LFO for ambient feel
+  // ═══════════════════════════════════════════════════════════
+
+  private bgmNodes: {
+    oscs: OscillatorNode[];
+    gains: GainNode[];
+    masterGain: GainNode | null;
+    lfo: OscillatorNode | null;
+  } = { oscs: [], gains: [], masterGain: null, lfo: null };
+  private bgmPlaying = false;
+  private currentBgm: string | null = null;
+
+  /** BGM presets: each is a chord + tempo config */
+  private static BGM_PRESETS: Record<string, {
+    notes: number[];      // Frequencies for chord tones
+    types: OscillatorType[];
+    volumes: number[];
+    lfoRate: number;       // LFO speed (Hz) for gentle pulsing
+    lfoDepth: number;      // How much volume wobble (0-1)
+    masterVol: number;     // Overall BGM volume
+  }> = {
+    battle: {
+      // Dark minor chord: Dm (D3, F3, A3) + bass D2
+      notes: [73.42, 146.83, 174.61, 220.00],
+      types: ['sine', 'triangle', 'sine', 'sine'],
+      volumes: [0.12, 0.08, 0.06, 0.05],
+      lfoRate: 0.15,
+      lfoDepth: 0.4,
+      masterVol: 0.25,
+    },
+    campaign: {
+      // Epic minor: Am (A2, C3, E3) + bass A1
+      notes: [55.00, 110.00, 130.81, 164.81],
+      types: ['triangle', 'sine', 'sine', 'triangle'],
+      volumes: [0.10, 0.07, 0.06, 0.05],
+      lfoRate: 0.12,
+      lfoDepth: 0.35,
+      masterVol: 0.22,
+    },
+    boss: {
+      // Intense: Em (E2, B2, E3, G3) — darker
+      notes: [82.41, 123.47, 164.81, 196.00],
+      types: ['sawtooth', 'triangle', 'sine', 'sine'],
+      volumes: [0.08, 0.06, 0.05, 0.04],
+      lfoRate: 0.25,
+      lfoDepth: 0.5,
+      masterVol: 0.20,
+    },
+  };
+
+  /** Start BGM loop — ultra-light: just 4 oscillators + 1 LFO */
+  startBgm(preset: 'battle' | 'campaign' | 'boss' = 'campaign') {
+    if (this.settings.muted) return;
+    if (this.bgmPlaying && this.currentBgm === preset) return;
+    this.stopBgm(); // stop previous if different
+
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+
+    const config = AudioManager.BGM_PRESETS[preset];
+    if (!config) return;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = config.masterVol * this.settings.volume;
+    masterGain.connect(ctx.destination);
+
+    // LFO for gentle pulsing volume
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    lfo.type = 'sine';
+    lfo.frequency.value = config.lfoRate;
+    lfoGain.gain.value = config.lfoDepth * config.masterVol * this.settings.volume;
+    lfo.connect(lfoGain);
+    lfoGain.connect(masterGain.gain);
+    lfo.start();
+
+    const oscs: OscillatorNode[] = [];
+    const gains: GainNode[] = [];
+
+    config.notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = config.types[i] || 'sine';
+      osc.frequency.value = freq;
+      // Slight detune for warmth
+      osc.detune.value = (i - 1.5) * 3;
+      gain.gain.value = config.volumes[i] * this.settings.volume;
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start();
+      oscs.push(osc);
+      gains.push(gain);
+    });
+
+    this.bgmNodes = { oscs, gains, masterGain, lfo };
+    this.bgmPlaying = true;
+    this.currentBgm = preset;
+  }
+
+  /** Stop BGM with gentle fade-out */
+  stopBgm() {
+    if (!this.bgmPlaying) return;
+    const { oscs, gains, masterGain, lfo } = this.bgmNodes;
+
+    // Fade out over 500ms
+    const ctx = this.ctx;
+    if (ctx && masterGain) {
+      const now = ctx.currentTime;
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(0, now + 0.5);
+    }
+
+    setTimeout(() => {
+      oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch {} });
+      gains.forEach(g => { try { g.disconnect(); } catch {} });
+      if (lfo) { try { lfo.stop(); lfo.disconnect(); } catch {} }
+      if (masterGain) { try { masterGain.disconnect(); } catch {} }
+    }, 600);
+
+    this.bgmNodes = { oscs: [], gains: [], masterGain: null, lfo: null };
+    this.bgmPlaying = false;
+    this.currentBgm = null;
+  }
+
+  /** Check if BGM is currently playing */
+  get isBgmPlaying() { return this.bgmPlaying; }
 }
 
 // Singleton instance

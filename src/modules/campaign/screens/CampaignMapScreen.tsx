@@ -6,6 +6,7 @@ import ZoneNode from '../components/ZoneNode';
 import { useCampaignZones } from '../hooks/useCampaignZones';
 import { ZONE_META, ZONE_POSITIONS } from '../data/zones';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { playSound } from '@/shared/audio';
 
 /**
  * CampaignMapScreen — Vertical scroll map of 10 zones.
@@ -152,6 +153,7 @@ export default function CampaignMapScreen() {
                     zone={zone}
                     onClick={() => {
                       if (zone.isUnlocked) {
+                        playSound('ui_click');
                         navigate(`/campaign/${zone.zoneNumber}`);
                       }
                     }}
@@ -209,7 +211,7 @@ function CampaignBottomNav() {
         {tabs.map((tab) => (
           <button
             key={tab.to}
-            onClick={() => navigate(tab.to)}
+            onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
             className={`flex flex-col items-center gap-1 w-12 group ${tab.active ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}
           >
             {tab.active ? (
