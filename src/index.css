@@ -727,6 +727,128 @@
     height: 40%;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
     border-radius: 8px 8px 50% 50%;
+    pointer-events: none;
+  }
+
+  /* ═══ Gem Match Explosion Ring ═══ */
+  .gem-match-burst::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: match-ring 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* Bright flash on matched gem */
+  .gem-match-burst::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%);
+    animation: match-flash 0.4s ease-out forwards;
+    pointer-events: none;
+    z-index: 19;
+  }
+
+  /* ═══ Gem type glow colors for matched state ═══ */
+  .gem-atk.gem-match-burst { color: #ff6b6b; }
+  .gem-hp.gem-match-burst { color: #55efc4; }
+  .gem-def.gem-match-burst { color: #74b9ff; }
+  .gem-star.gem-match-burst { color: #fdcb6e; }
+  .gem-mana.gem-match-burst { color: #a29bfe; }
+  .gem-heal.gem-match-burst { color: #55efc4; }
+
+  /* ═══ Cascade landing bounce ═══ */
+  .gem-landed {
+    animation: gem-land 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ═══ Grid board shake on big combos ═══ */
+  .grid-combo-shake {
+    animation: grid-shake 0.35s ease-out;
+  }
+
+  /* ═══ Combo flash overlay (on the grid) ═══ */
+  .combo-flash-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 15;
+    animation: match-flash 0.5s ease-out forwards;
+  }
+  .combo-flash-2 { background: radial-gradient(circle, rgba(162,155,254,0.3) 0%, transparent 70%); }
+  .combo-flash-3 { background: radial-gradient(circle, rgba(253,203,110,0.4) 0%, transparent 70%); }
+  .combo-flash-4 { background: radial-gradient(circle, rgba(255,107,107,0.4) 0%, transparent 70%); }
+  .combo-flash-5 { background: radial-gradient(circle, rgba(253,121,168,0.5) 0%, transparent 70%); }
+  .combo-flash-6 { background: radial-gradient(circle, rgba(224,86,253,0.5) 0%, transparent 70%); }
+
+  /* ═══ Combo badge effects ═══ */
+
+  /* Expanding ring behind combo badge for high combos */
+  .combo-ring-burst {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    animation: match-ring 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+
+  /* Pulsing glow for high combo badges */
+  .combo-badge-high {
+    animation: combo-badge-pulse 0.6s ease-in-out;
+  }
+
+  /* Godlike badge: rainbow shimmer + scale */
+  .combo-badge-godlike {
+    animation: combo-badge-godlike 0.8s ease-in-out;
+  }
+
+  /* Inner shimmer overlay on badge */
+  .combo-inner-glow {
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.3) 50%,
+      rgba(255,255,255,0) 100%
+    );
+    background-size: 200% 200%;
+    animation: combo-shimmer 0.8s ease-out;
+    pointer-events: none;
+  }
+
+  @keyframes combo-badge-pulse {
+    0% { transform: scale(0.8); }
+    40% { transform: scale(1.15); }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes combo-badge-godlike {
+    0% { transform: scale(0.5); filter: brightness(2); }
+    30% { transform: scale(1.25); filter: brightness(1.5); }
+    60% { transform: scale(0.95); filter: brightness(1); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
+
+  @keyframes combo-shimmer {
+    0% { background-position: -100% -100%; opacity: 0; }
+    30% { opacity: 1; }
+    100% { background-position: 100% 100%; opacity: 0; }
+  }
+
+  /* GPU-accelerated transforms for smooth mobile */
+  .gem-shine,
+  .gem-match-burst,
+  .gem-landed {
+    will-change: transform, opacity;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   /* Gold button */
