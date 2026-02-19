@@ -322,8 +322,8 @@ export default function BossFightCampaign({
       {/* Boss rage overlay */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossData.emoji} />
 
-      {/* Top half: Boss arena — compact for mobile */}
-      <div className="flex-[0_0_38%] pt-safe px-4 pb-1 flex flex-col relative overflow-hidden">
+      {/* Top half: Boss arena — ultra-compact for mobile */}
+      <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
         }} />
@@ -412,7 +412,7 @@ export default function BossFightCampaign({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[56px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
+          <span className={`text-[48px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
             }`} style={{
               filter: [
                 enrageMultiplier >= 1.3
@@ -456,10 +456,9 @@ export default function BossFightCampaign({
         </div>
       </div>
 
-      {/* Bottom half: Match-3 + Skills — expanded for mobile */}
-      <div className="flex-[1_1_62%] rounded-t-2xl px-3 pt-2 pb-[max(env(safe-area-inset-bottom,8px),8px)] flex flex-col"
+      {/* Bottom half: Match-3 + Skills — max space for grid */}
+      <div className="flex-[1_1_70%] rounded-t-2xl px-3 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
-        <div className="w-8 h-0.5 rounded-full mx-auto mb-1" style={{ background: 'rgba(255,255,255,0.2)' }} />
 
         {/* Debuff bar (Phase 1 boss skills) */}
         {activeDebuffs.length > 0 && (

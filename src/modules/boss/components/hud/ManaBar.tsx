@@ -15,7 +15,7 @@ export default function ManaBar({ mana, maxMana, dodgeCost, ultCost }: ManaBarPr
   const canUlt = mana >= ultCost;
 
   return (
-    <div className="mb-1">
+    <div className="mb-0.5">
       <div className="flex justify-between text-[8px] font-bold mb-px">
         <span style={{ color: '#a29bfe' }}>✨ Mana</span>
         <div className="flex items-center gap-2">
