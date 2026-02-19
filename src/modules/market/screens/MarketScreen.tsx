@@ -86,11 +86,15 @@ export default function MarketScreen() {
   const [error, setError]                 = useState<string | null>(null);
   const [predicting, setPredicting]       = useState(false);
   const [predictResult, setPredictResult] = useState<PredictResult | null>(null);
+  const [streak, setStreak]               = useState(0);
 
   const { h, m, s, pad, secs } = useCountdownTo18();
   const isUrgent = secs <= 3600; // last hour — pulse red
 
-  useEffect(() => { fetchMarketData(); }, []);
+  useEffect(() => {
+    fetchMarketData();
+    checkExistingPrediction();
+  }, []);
 
   async function fetchMarketData() {
     try {
@@ -113,6 +117,36 @@ export default function MarketScreen() {
     }
   }
 
+  async function checkExistingPrediction() {
+    try {
+      const res = await fetch(`${BASE}/api/market/predictions?status=pending&limit=1`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (!json.success) return;
+
+      const { predictions = [], currentStreak = 0 } = json.data || {};
+      setStreak(currentStreak);
+
+      if (predictions.length > 0) {
+        const pred = predictions[0];
+        setPredictResult({
+          success: true,
+          direction: pred.direction,
+          alreadyPredicted: true,
+          message: pred.direction === 'up'
+            ? '🔺 Đã dự đoán TĂNG! Chờ kết quả lúc 18:00.'
+            : '🔻 Đã dự đoán GIẢM! Chờ kết quả lúc 18:00.',
+        });
+      }
+    } catch {
+      // Ignore — user not logged in or network error
+    }
+  }
+
   async function handlePredict(direction: 'up' | 'down') {
     if (predicting || predictResult?.success || predictResult?.alreadyPredicted) return;
     try {
@@ -130,6 +164,7 @@ export default function MarketScreen() {
         setPredictResult({
           success: true,
           direction,
+          alreadyPredicted: true,
           message: direction === 'up'
             ? '🔺 Đã dự đoán TĂNG! Kết quả công bố lúc 18:00.'
             : '🔻 Đã dự đoán GIẢM! Kết quả công bố lúc 18:00.',
@@ -425,13 +460,18 @@ export default function MarketScreen() {
           </div>
         )}
 
-        {/* OGN info */}
+        {/* OGN info + streak */}
         <div className="bg-[#3e2723]/50 rounded-lg p-2 text-center border border-[#8c6239]/30">
           <p className="text-[#fefae0] text-sm font-medium">
             Đúng: <span className="text-green-400 font-bold">+200 OGN</span>
             <span className="mx-2 text-white/30">|</span>
             Sai: <span className="text-red-400 font-bold">-150 OGN</span>
           </p>
+          {streak > 0 && (
+            <p className="text-[#e9c46a] text-xs font-bold mt-1">
+              Chuỗi đúng: {streak} ngày liên tiếp
+            </p>
+          )}
         </div>
       </div>
 
