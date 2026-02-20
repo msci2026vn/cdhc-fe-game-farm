@@ -6,6 +6,7 @@ import { playSound } from '@/shared/audio';
 interface BossNodeProps {
   boss: ZoneBoss;
   state: StageState;
+  globalBossNumber?: number;
   onClick: () => void;
 }
 
@@ -13,7 +14,7 @@ interface BossNodeProps {
  * BossNode — the final boss of a zone.
  * Larger node with crown, stone platform, and BOSS badge.
  */
-export default function BossNode({ boss, state, onClick }: BossNodeProps) {
+export default function BossNode({ boss, state, globalBossNumber, onClick }: BossNodeProps) {
   const isCompleted = state === 'completed';
   const isCurrent = state === 'current';
   const isLocked = state === 'locked';
@@ -53,6 +54,8 @@ export default function BossNode({ boss, state, onClick }: BossNodeProps) {
             </span>
           ) : isLocked ? (
             <span className="material-symbols-outlined text-white/60 text-3xl">lock</span>
+          ) : globalBossNumber ? (
+            <img src={`/assets/campaign-bosses/boss-${globalBossNumber}.svg`} alt={boss.name} className="w-16 h-16 object-contain drop-shadow-lg" />
           ) : (
             <span className="text-5xl drop-shadow-lg">{boss.emoji}</span>
           )}

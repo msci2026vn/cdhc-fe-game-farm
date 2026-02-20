@@ -43,9 +43,9 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
 
           {/* ═══ BOSS VISUAL ═══ */}
           <div className="flex flex-col items-center gap-2 mb-6">
-            {/* Emoji */}
-            <div className="text-6xl drop-shadow-lg">
-              {meta?.bossEmoji[boss.bossNumber % 4 === 0 ? 4 : boss.bossNumber % 4] || boss.emoji || '👾'}
+            {/* Visual */}
+            <div className="drop-shadow-lg">
+              <img src={`/assets/campaign-bosses/boss-${globalBossNumber}.svg`} alt={boss.name} className="w-28 h-28 object-contain inline-block" />
             </div>
 
             {/* Tier badge */}

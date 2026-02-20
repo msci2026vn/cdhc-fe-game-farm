@@ -121,6 +121,7 @@ export default function CampaignZoneScreen() {
             <StageNode
               boss={regularBosses[0]}
               state={getStageState(regularBosses[0])}
+              globalBossNumber={(zoneNumber - 1) * 4 + regularBosses[0].bossNumber}
               onClick={() => handleStageClick(regularBosses[0])}
             />
           </div>
@@ -132,6 +133,7 @@ export default function CampaignZoneScreen() {
             <StageNode
               boss={regularBosses[1]}
               state={getStageState(regularBosses[1])}
+              globalBossNumber={(zoneNumber - 1) * 4 + regularBosses[1].bossNumber}
               onClick={() => handleStageClick(regularBosses[1])}
             />
           </div>
@@ -143,6 +145,7 @@ export default function CampaignZoneScreen() {
             <StageNode
               boss={regularBosses[2]}
               state={getStageState(regularBosses[2])}
+              globalBossNumber={(zoneNumber - 1) * 4 + regularBosses[2].bossNumber}
               onClick={() => handleStageClick(regularBosses[2])}
             />
           </div>
@@ -154,6 +157,7 @@ export default function CampaignZoneScreen() {
             <BossNode
               boss={zoneBoss}
               state={getStageState(zoneBoss)}
+              globalBossNumber={(zoneNumber - 1) * 4 + zoneBoss.bossNumber}
               onClick={() => handleStageClick(zoneBoss)}
             />
           </div>

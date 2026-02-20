@@ -178,7 +178,13 @@ export default function BossFightCampaign({
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center text-center px-6">
-          <span className="text-7xl mb-4 animate-bounce">💀</span>
+          <div className="mb-4 animate-bounce drop-shadow-lg">
+            {bossData.image ? (
+              <img src={bossData.image} alt={bossData.name} className="w-24 h-24 object-contain" />
+            ) : (
+              <span className="text-7xl">💀</span>
+            )}
+          </div>
           <h1 className="text-3xl font-heading font-bold text-red-400 mb-2">
             Bạn đã gục!
           </h1>
@@ -318,17 +324,16 @@ export default function BossFightCampaign({
 
       {/* Enrage alert popup (3s then fade) */}
       {enrageAlert && (
-        <div className={`absolute top-20 left-4 right-4 z-40 text-center py-2 px-4 rounded-lg pointer-events-none animate-fade-in font-heading font-bold ${
-          enrageLevel >= 4 ? 'text-red-300 text-lg animate-pulse' :
-          enrageLevel >= 3 ? 'text-red-400' :
-          enrageLevel >= 2 ? 'text-orange-300' :
-          'text-yellow-300 text-sm'
-        }`} style={{
-          background: enrageLevel >= 3 ? 'rgba(139,0,0,0.85)' :
-                      enrageLevel >= 2 ? 'rgba(180,90,0,0.8)' :
-                      'rgba(120,100,0,0.75)',
-          boxShadow: enrageLevel >= 3 ? '0 0 20px rgba(231,76,60,0.4)' : 'none',
-        }}>
+        <div className={`absolute top-20 left-4 right-4 z-40 text-center py-2 px-4 rounded-lg pointer-events-none animate-fade-in font-heading font-bold ${enrageLevel >= 4 ? 'text-red-300 text-lg animate-pulse' :
+            enrageLevel >= 3 ? 'text-red-400' :
+              enrageLevel >= 2 ? 'text-orange-300' :
+                'text-yellow-300 text-sm'
+          }`} style={{
+            background: enrageLevel >= 3 ? 'rgba(139,0,0,0.85)' :
+              enrageLevel >= 2 ? 'rgba(180,90,0,0.8)' :
+                'rgba(120,100,0,0.75)',
+            boxShadow: enrageLevel >= 3 ? '0 0 20px rgba(231,76,60,0.4)' : 'none',
+          }}>
           {enrageAlert}
         </div>
       )}
@@ -426,8 +431,8 @@ export default function BossFightCampaign({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[48px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
-            }`} style={{
+          <div className={`animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''}`}
+            style={{
               filter: [
                 enrageMultiplier >= 1.3
                   ? `drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
@@ -437,8 +442,12 @@ export default function BossFightCampaign({
               ].filter(Boolean).join(' '),
               transition: 'filter 1s ease',
             }}>
-            {bossData.emoji}
-          </span>
+            {bossData.image ? (
+              <img src={bossData.image} alt={bossData.name} className="w-40 h-40 object-contain drop-shadow-xl" />
+            ) : (
+              <span className="text-[48px]">{bossData.emoji}</span>
+            )}
+          </div>
 
           {/* Egg */}
           {egg && (
@@ -481,16 +490,15 @@ export default function BossFightCampaign({
               <span key={`${d.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
                 style={{
                   background: d.type === 'burn' ? 'rgba(231,76,60,0.3)' :
-                              d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' :
-                              'rgba(253,121,168,0.3)',
+                    d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' :
+                      'rgba(253,121,168,0.3)',
                   color: d.type === 'burn' ? '#ff6b6b' :
-                         d.type === 'heal_block' ? '#a29bfe' :
-                         '#fd79a8',
-                  border: `1px solid ${
-                    d.type === 'burn' ? 'rgba(231,76,60,0.4)' :
-                    d.type === 'heal_block' ? 'rgba(108,92,231,0.4)' :
-                    'rgba(253,121,168,0.4)'
-                  }`,
+                    d.type === 'heal_block' ? '#a29bfe' :
+                      '#fd79a8',
+                  border: `1px solid ${d.type === 'burn' ? 'rgba(231,76,60,0.4)' :
+                      d.type === 'heal_block' ? 'rgba(108,92,231,0.4)' :
+                        'rgba(253,121,168,0.4)'
+                    }`,
                 }}>
                 {d.icon} {d.label} {d.remainingSec}s
               </span>

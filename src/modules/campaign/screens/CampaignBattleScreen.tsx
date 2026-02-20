@@ -26,11 +26,13 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBoss
   const meta = ZONE_META[zoneNumber];
   const bossInZone = boss.bossNumber % 4 === 0 ? 4 : boss.bossNumber % 4;
   const emoji = meta?.bossEmoji[bossInZone] || boss.emoji || '👾';
+  const image = `/assets/campaign-bosses/boss-${globalBossNumber}.svg`;
 
   return {
     id: String(boss.id),
     name: boss.name,
     emoji,
+    image,
     hp: boss.hp,
     attack: detail?.atk ?? boss.attack,
     reward: boss.reward,

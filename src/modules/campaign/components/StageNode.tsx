@@ -6,6 +6,7 @@ import { playSound } from '@/shared/audio';
 interface StageNodeProps {
   boss: ZoneBoss;
   state: StageState;
+  globalBossNumber?: number;
   onClick: () => void;
 }
 
@@ -13,7 +14,7 @@ interface StageNodeProps {
  * StageNode — represents a single stage (minion/elite) within a zone.
  * 3 states: completed (green circle), current (blue square + FIGHT!), locked (gray circle)
  */
-export default function StageNode({ boss, state, onClick }: StageNodeProps) {
+export default function StageNode({ boss, state, globalBossNumber, onClick }: StageNodeProps) {
   const isCompleted = state === 'completed';
   const isCurrent = state === 'current';
   const isLocked = state === 'locked';
@@ -52,7 +53,11 @@ export default function StageNode({ boss, state, onClick }: StageNodeProps) {
           {/* Ping animation */}
           <div className="absolute inset-0 w-20 h-20 rounded-2xl bg-yellow-400/40 campaign-ping" />
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-blue-400 to-blue-600 border-4 border-white shadow-[0_6px_0_#0D47A1] flex items-center justify-center">
-            <span className="text-3xl drop-shadow-lg">{boss.emoji}</span>
+            {globalBossNumber ? (
+              <img src={`/assets/campaign-bosses/boss-${globalBossNumber}.svg`} alt={boss.name} className="w-14 h-14 object-contain drop-shadow-md" />
+            ) : (
+              <span className="text-3xl drop-shadow-lg">{boss.emoji}</span>
+            )}
           </div>
           {/* FIGHT! badge */}
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border-2 border-white shadow-md animate-bounce">

@@ -23,6 +23,7 @@ export interface CampaignBossData {
   id: string;
   name: string;
   emoji: string;
+  image?: string;
   hp: number;
   attack: number;
   reward: number;
@@ -49,9 +50,9 @@ export interface Gem { type: GemType; id: number; }
 
 const GEM_META: Record<GemType, { emoji: string; css: string }> = {
   atk: { emoji: '⚔️', css: 'gem-atk' },
-  hp:  { emoji: '💚', css: 'gem-hp' },
+  hp: { emoji: '💚', css: 'gem-hp' },
   def: { emoji: '🛡️', css: 'gem-def' },
-  star:{ emoji: '⭐', css: 'gem-star' },
+  star: { emoji: '⭐', css: 'gem-star' },
 };
 
 let nextId = 0;
@@ -176,13 +177,13 @@ const SELF_DESTRUCT_HP_PERCENT = 0.02; // 2% maxHP per tick
 // ═══ Archetype-based skill names ═══
 const ARCHETYPE_SKILLS: Record<string, string[]> = {
   glass_cannon: ['Đòn chí mạng!', 'Song kiếm!', 'Cuồng nộ!'],
-  tank:         ['Lao đầu!', 'Đập đất!', 'Giáp gai!'],
-  healer:       ['Hồi máu!', 'Bào tử hồi!', 'Hút máu!'],
-  assassin:     ['Đa đòn!', 'Tấn công tốc!', 'Ám sát!'],
-  controller:   ['Xáo trộn!', 'Hút mana!', 'Choáng!'],
-  hybrid:       ['Hỗn hợp!', 'Toàn diện!', 'Tổng lực!'],
-  all:          ['Đế Vương giáng!', 'Thiên phạt!'],
-  none:         ['Tấn công mạnh!', 'Lửa Địa Ngục!', 'Sấm Sét!', 'Đòn Cuồng Phong!'],
+  tank: ['Lao đầu!', 'Đập đất!', 'Giáp gai!'],
+  healer: ['Hồi máu!', 'Bào tử hồi!', 'Hút máu!'],
+  assassin: ['Đa đòn!', 'Tấn công tốc!', 'Ám sát!'],
+  controller: ['Xáo trộn!', 'Hút mana!', 'Choáng!'],
+  hybrid: ['Hỗn hợp!', 'Toàn diện!', 'Tổng lực!'],
+  all: ['Đế Vương giáng!', 'Thiên phạt!'],
+  none: ['Tấn công mạnh!', 'Lửa Địa Ngục!', 'Sấm Sét!', 'Đòn Cuồng Phong!'],
 };
 
 function getBossSkillName(archetype: string): string {
