@@ -211,17 +211,25 @@ export default function BossList({ onSelect }: Props) {
             <button key={boss.id}
               onClick={() => { if (!disabled) { playSound('boss_select'); onSelect(boss); } }}
               disabled={disabled}
-              className={`w-full rounded-xl p-4 flex items-center gap-4 transition-transform ${
-                disabled ? 'opacity-50 grayscale' : 'active:scale-[0.97]'
-              }`}
+              className={`w-full rounded-xl p-4 flex items-center gap-4 transition-transform ${disabled ? 'opacity-50 grayscale' : 'active:scale-[0.97]'
+                }`}
               style={{
                 background: isWeekly ? 'rgba(162,155,254,0.12)' : 'rgba(255,255,255,0.06)',
                 border: `1px solid ${disabled ? 'rgba(255,255,255,0.1)' : isWeekly ? 'rgba(162,155,254,0.5)' : style.border}`,
                 boxShadow: isWeekly ? '0 0 15px rgba(162,155,254,0.15)' : 'none',
               }}>
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 relative"
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 relative overflow-hidden"
                 style={{ background: locked ? 'rgba(255,255,255,0.05)' : style.bg }}>
-                {locked ? '🔒' : boss.emoji}
+                {boss.image ? (
+                  <img src={boss.image} alt={boss.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">{boss.emoji}</span>
+                )}
+                {locked && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                    <span className="text-xl drop-shadow-md">🔒</span>
+                  </div>
+                )}
                 {kills > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
                     style={{ background: 'linear-gradient(135deg, #e74c3c, #ff6b6b)' }}>

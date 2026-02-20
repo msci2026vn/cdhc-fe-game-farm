@@ -288,15 +288,19 @@ export default function BossFightM3({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <span className={`text-[48px] animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''
-            }`} style={{
+          <div className={`animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''}`}
+            style={{
               filter: enrageMultiplier >= 1.3
                 ? `drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
                 : 'drop-shadow(0 0 20px rgba(231,76,60,0.5))',
               transition: 'filter 1s ease',
             }}>
-            {bossInfo.emoji}
-          </span>
+            {bossInfo.image ? (
+              <img src={bossInfo.image} alt={bossInfo.name} className="w-40 h-40 object-contain" />
+            ) : (
+              <span className="text-[48px]">{bossInfo.emoji}</span>
+            )}
+          </div>
 
           {/* Damage popups */}
           <DamagePopupLayer popups={popups} />

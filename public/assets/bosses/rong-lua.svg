@@ -1,0 +1,69 @@
+<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes basketSway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(1deg); } }
+    @keyframes cloudMove { 0% { transform: translateX(200px); } 100% { transform: translateX(-100px); } }
+    @keyframes fireFlicker { 0% { opacity: 0.8; transform: scaleY(1); } 50% { opacity: 1; transform: scaleY(1.2); } 100% { opacity: 0.8; transform: scaleY(1); } }
+    .balloon { animation: float 3s infinite alternate ease-in-out; transform-origin: center; }
+    .basket { animation: basketSway 4s infinite alternate ease-in-out; transform-origin: top center; }
+    .cloud { animation: cloudMove 20s infinite linear; }
+    .fire { animation: fireFlicker 0.2s infinite alternate ease-in-out; transform-origin: bottom center; }
+  </style>
+  
+  <rect width="200" height="150" fill="#bbdefb" />
+  
+  <!-- Clouds -->
+  <g fill="#FFF" opacity="0.9" class="cloud" transform="translate(180, 20) scale(0.7)">
+    <circle cx="20" cy="20" r="20"/><circle cx="50" cy="20" r="25"/><circle cx="80" cy="20" r="20"/>
+  </g>
+  <g fill="#FFF" opacity="0.6" class="cloud" transform="translate(40, 60) scale(0.5)" style="animation-duration: 35s">
+    <circle cx="20" cy="20" r="20"/><circle cx="50" cy="20" r="25"/><circle cx="80" cy="20" r="20"/>
+  </g>
+
+  <!-- Mountain Background -->
+  <g transform="translate(0, 100)">
+    <polygon points="0,50 40,-20 90,50" fill="#90caf9"/>
+    <polygon points="60,50 120,-40 200,50" fill="#64b5f6"/>
+  </g>
+  <rect x="0" y="140" width="200" height="10" fill="#81c784" />
+
+  <g class="balloon" transform="translate(100, 65)">
+    <!-- Actual Balloon Canopy -->
+    <path d="M0,-50 C30,-50 45,-25 35,0 C25,25 15,35 0,35 C-15,35 -25,25 -35,0 C-45,-25 -30,-50 0,-50 Z" fill="#e53935" stroke="#b71c1c" stroke-width="2"/>
+    <path d="M0,-50 C15,-50 20,-20 15,0 C10,20 5,30 0,35 C-5,30 -10,20 -15,0 C-20,-20 -15,-50 0,-50 Z" fill="#ffca28"/>
+    <!-- Burner flame -->
+    <g transform="translate(0, 36)" class="fire">
+      <path d="M-5,10 Q0,0 5,10 Q0,5 -5,10 Z" fill="#ffb300"/>
+      <path d="M-3,10 Q0,5 3,10 Q0,8 -3,10 Z" fill="#ff5252"/>
+    </g>
+    <!-- Ropes -->
+    <line x1="-15" y1="35" x2="-10" y2="45" stroke="#5d4037" stroke-width="1.5"/>
+    <line x1="15" y1="35" x2="10" y2="45" stroke="#5d4037" stroke-width="1.5"/>
+
+    <g class="basket">
+      <!-- Character: Baby Fire Dragon -->
+      <g transform="translate(0, 48)">
+        <!-- Cape blowing horizontally -->
+        <path d="M-5,-5 Q-20,0 -30,-15 Q-15,-10 -5,5 Z" fill="#ffb300" stroke="#f57c00" stroke-width="1"/>
+        <!-- Dragon Head -->
+        <circle cx="0" cy="-10" r="10" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+        <path d="M0,-20 L-5,-25 L-2,-18 Z" fill="#ffca28" stroke="#f57c00" stroke-width="1"/>
+        <path d="M5,-18 L10,-23 L8,-15 Z" fill="#ffca28" stroke="#f57c00" stroke-width="1"/>
+        <!-- Snout -->
+        <path d="M0,-7 Q12,-7 14,-2 Q12,5 0,2 Z" fill="#ef5350" stroke="#b71c1c" stroke-width="1"/>
+        <circle cx="8" cy="-3" r="1" fill="#333"/>
+        <circle cx="12" cy="-3" r="1" fill="#333"/>
+        <!-- Eyes / Shades -->
+        <rect x="-3" y="-12" width="12" height="5" rx="1" fill="#212121" transform="rotate(-5, 3, -12)"/>
+        <!-- Tiny hands gripping basket -->
+        <circle cx="-6" cy="2" r="2.5" fill="#d32f2f" stroke="#b71c1c" stroke-width="1"/>
+        <circle cx="6" cy="2" r="2.5" fill="#d32f2f" stroke="#b71c1c" stroke-width="1"/>
+      </g>
+
+      <!-- Basket proper -->
+      <rect x="-12" y="45" width="24" height="15" rx="2" fill="#8d6e63" stroke="#5d4037" stroke-width="2"/>
+      <line x1="-12" y1="50" x2="12" y2="50" stroke="#6d4c41" stroke-width="1"/>
+      <line x1="-12" y1="55" x2="12" y2="55" stroke="#6d4c41" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
