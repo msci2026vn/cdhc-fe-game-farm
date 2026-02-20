@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { useReferralInfo } from '@/shared/hooks/useSocial';
 import type { ReferredUser, CommissionTransaction } from '@/shared/types/game-api.types';
+import { playSound } from '@/shared/audio';
 
 interface InviteFriendsProps {
   open: boolean;
@@ -176,6 +177,7 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
 
   const handleCopy = useCallback(async () => {
     try {
+      playSound('ui_click');
       await navigator.clipboard.writeText(referralLink);
       setCopied(true);
       addToast('Đã copy link mời! 📋', 'success');
@@ -186,6 +188,7 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
   }, [referralLink, addToast]);
 
   const handleShare = useCallback(async () => {
+    playSound('ui_click');
     if (navigator.share) {
       try {
         await navigator.share({
@@ -203,6 +206,7 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
 
   const toggleTab = useCallback(
     (tab: DetailTab) => {
+      playSound('ui_tab');
       setActiveTab((prev) => (prev === tab ? 'none' : tab));
     },
     []
@@ -224,7 +228,7 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
           style={{ background: 'linear-gradient(135deg, #f0b429, #e67e22)' }}
         >
           <button
-            onClick={onClose}
+            onClick={() => { playSound('ui_modal_close'); onClose(); }}
             className="absolute right-4 top-4 text-white/70 text-xl font-bold w-8 h-8 flex items-center justify-center"
           >
             ✕

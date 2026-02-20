@@ -1,5 +1,6 @@
 import { useFriends } from '@/shared/hooks/useSocial';
 import type { FriendData } from '@/shared/types/game-api.types';
+import { playSound } from '@/shared/audio';
 
 interface FriendsListProps {
   open: boolean;
@@ -27,7 +28,7 @@ export default function FriendsList({ open, onClose, onVisit, onInvite, onLeader
           <h3 className="font-heading text-lg font-bold text-white flex items-center gap-2">
             🏡 Bạn bè {isLoading ? '...' : `(${friends.length})`}
           </h3>
-          <button onClick={onClose} className="text-white/70 text-xl font-bold w-8 h-8 flex items-center justify-center">✕</button>
+          <button onClick={() => { playSound('ui_modal_close'); onClose(); }} className="text-white/70 text-xl font-bold w-8 h-8 flex items-center justify-center">✕</button>
         </div>
 
         {/* Friends list */}
@@ -46,7 +47,7 @@ export default function FriendsList({ open, onClose, onVisit, onInvite, onLeader
           ) : (
             friends.map((friend) => (
               <button key={friend.id}
-                onClick={() => onVisit(friend)}
+                onClick={() => { playSound('ui_click'); onVisit(friend); }}
                 className="w-full flex items-center gap-3 px-5 py-3.5 transition-colors active:bg-green-50"
                 style={{ borderBottom: '1px solid #f0ebe4' }}>
                 {/* Avatar */}
@@ -89,13 +90,13 @@ export default function FriendsList({ open, onClose, onVisit, onInvite, onLeader
           {/* Action buttons */}
           <div className="px-5 py-5 space-y-3 text-center">
             {onLeaderboard && (
-              <button onClick={onLeaderboard}
+              <button onClick={() => { playSound('ui_click'); onLeaderboard?.(); }}
                 className="w-full py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
                 style={{ background: 'linear-gradient(135deg, #f0b429, #e67e22)', boxShadow: '0 4px 15px rgba(240,180,41,0.3)' }}>
                 🏆 Bảng xếp hạng
               </button>
             )}
-            <button onClick={onInvite}
+            <button onClick={() => { playSound('ui_click'); onInvite(); }}
               className="w-full py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
               style={{ background: 'linear-gradient(135deg, #2d8a4e, #4eca6a)', boxShadow: '0 4px 15px rgba(45,138,78,0.3)' }}>
               🎁 Mời bạn bè nhận {50} OGN

@@ -7,7 +7,7 @@ import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import { LevelUpButton } from '@/shared/components/LevelUpButton';
 import { DailyXpBar } from '@/shared/components/DailyXpBar';
 import WeatherControl from './WeatherControl';
-import { SoundToggle } from '@/shared/audio';
+import { SoundToggle, playSound } from '@/shared/audio';
 
 export default function FarmHeader() {
   const navigate = useNavigate();
@@ -109,11 +109,11 @@ export default function FarmHeader() {
         <div className="flex gap-2">
           <SoundToggle className="header-btn-glass" />
           <WeatherControl />
-          <button onClick={() => navigate('/points')}
+          <button onClick={() => { playSound('ui_notification'); navigate('/points'); }}
             className="w-10 h-10 rounded-full header-btn-glass flex items-center justify-center text-lg transition-transform active:scale-90">
             🔔
           </button>
-          <button className="w-10 h-10 rounded-full header-btn-glass flex items-center justify-center text-lg transition-transform active:scale-90">
+          <button onClick={() => playSound('ui_click')} className="w-10 h-10 rounded-full header-btn-glass flex items-center justify-center text-lg transition-transform active:scale-90">
             ⚙️
           </button>
         </div>

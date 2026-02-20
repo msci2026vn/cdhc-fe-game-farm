@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import CampaignHeader from '../components/CampaignHeader';
 import StageNode from '../components/StageNode';
@@ -8,7 +8,7 @@ import MapPath from '../components/MapPath';
 import { useZoneBosses } from '../hooks/useZoneBosses';
 import { ZONE_META } from '../data/zones';
 import type { StageState, ZoneBoss } from '../types/campaign.types';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 /**
  * CampaignZoneScreen — Zone detail with 4 stages (3 minions/elites + 1 boss).
@@ -24,6 +24,13 @@ export default function CampaignZoneScreen() {
   const zone = data?.zone ?? null;
   const bosses = data?.bosses ?? [];
   const meta = ZONE_META[zoneNumber];
+
+  // BGM — share campaign_map music
+  useEffect(() => {
+    audioManager.preloadScene('campaign');
+    audioManager.startBgm('campaign_map');
+    return () => { audioManager.stopBgm(); };
+  }, []);
 
   // Boss detail sheet state
   const [selectedBoss, setSelectedBoss] = useState<ZoneBoss | null>(null);

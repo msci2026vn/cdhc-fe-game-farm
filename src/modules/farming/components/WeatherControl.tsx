@@ -1,5 +1,6 @@
 import { useWeatherStore, WEATHER_INFO, TIME_INFO, WeatherType, TimeOfDay } from '../stores/weatherStore';
 import { useState } from 'react';
+import { playSound } from '@/shared/audio';
 
 const WEATHERS: WeatherType[] = ['sunny', 'cloudy', 'rain', 'storm', 'snow', 'wind', 'cold', 'hot'];
 const TIMES: TimeOfDay[] = ['dawn', 'day', 'dusk', 'night'];
@@ -29,7 +30,7 @@ export default function WeatherControl() {
   return (
     <>
       {/* Toggle button */}
-      <button onClick={() => setOpen(true)}
+      <button onClick={() => { playSound('ui_modal_open'); setOpen(true); }}
         className="w-10 h-10 rounded-full flex items-center justify-center text-lg header-btn-glass relative group"
         title="Thông tin thời tiết">
         {WEATHER_INFO[safeWeather].emoji}
@@ -42,7 +43,7 @@ export default function WeatherControl() {
       {/* Modal */}
       {open && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => { playSound('ui_modal_close'); setOpen(false); }} />
           <div className="relative w-full max-w-[430px] rounded-t-3xl bg-white/95 overflow-hidden shadow-2xl animate-modal-slide-up border-t border-white/20">
             {/* Header */}
             <div className="px-6 py-4 flex justify-between items-center bg-gradient-to-r from-[#1e3799] to-[#0984e3]">
@@ -52,7 +53,7 @@ export default function WeatherControl() {
                 </h3>
                 <span className="text-[10px] text-white/80 font-medium uppercase tracking-wider">Tự động đồng bộ từ API</span>
               </div>
-              <button onClick={() => setOpen(false)}
+              <button onClick={() => { playSound('ui_modal_close'); setOpen(false); }}
                 className="bg-white/10 hover:bg-white/20 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors">
                 ✕
               </button>

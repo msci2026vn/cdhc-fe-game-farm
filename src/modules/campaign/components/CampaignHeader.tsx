@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { playSound } from '@/shared/audio';
 
 interface CampaignHeaderProps {
   title: string;
@@ -20,7 +21,7 @@ export default function CampaignHeader({ title, stars, maxStars, backTo = '/farm
 
           {/* Back button */}
           <button
-            onClick={() => navigate(backTo)}
+            onClick={() => { playSound('ui_back'); navigate(backTo); }}
             className="w-10 h-10 rounded-full bg-[#DEB887] border-2 border-[#8B4513] shadow-[0_4px_0_#5D4037] flex items-center justify-center active:translate-y-1 active:shadow-[0_2px_0_#5D4037] transition-all"
           >
             <span className="material-symbols-outlined text-[#5D4037] text-xl">arrow_back</span>

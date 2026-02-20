@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { playSound } from '@/shared/audio';
 
 interface PrayerButtonProps {
   onClick: () => void;
@@ -41,7 +42,7 @@ export function PrayerButton({
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => { if (!isDisabled) playSound('prayer_submit'); onClick(); }}
       disabled={isDisabled}
       className={cn(
         'w-full py-4 rounded-2xl font-heading text-lg font-bold',

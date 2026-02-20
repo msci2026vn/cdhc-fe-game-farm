@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '@/shared/utils/constants';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MarketIndex {
@@ -132,6 +132,12 @@ function useCountdownTo18() {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function MarketScreen() {
   const navigate = useNavigate();
+
+  // BGM
+  useEffect(() => {
+    audioManager.startBgm('shop');
+    return () => { audioManager.stopBgm(); };
+  }, []);
 
   // Core data
   const [data, setData]                   = useState<MarketData | null>(null);

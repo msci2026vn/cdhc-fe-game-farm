@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { playSound } from '@/shared/audio';
 
 interface PrayerCardProps {
   text: string;
@@ -21,7 +22,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
 export function PrayerCard({ text, category, isSelected, onClick }: PrayerCardProps) {
   return (
     <div
-      onClick={onClick}
+      onClick={() => { playSound('ui_click'); onClick?.(); }}
       className={cn(
         'rounded-2xl p-5 min-h-[140px] flex flex-col justify-between cursor-pointer',
         'bg-white/10 backdrop-blur-sm border border-white/20',

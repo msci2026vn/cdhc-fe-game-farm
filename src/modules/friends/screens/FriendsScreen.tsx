@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
 import { useFriends } from '@/shared/hooks/useSocial';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import type { FriendData } from '@/shared/types/game-api.types';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 export default function FriendsScreen() {
     const { data: friendsData, isLoading } = useFriends();
@@ -14,6 +14,11 @@ export default function FriendsScreen() {
     const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
     const [showInvite, setShowInvite] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
+
+    useEffect(() => {
+      audioManager.startBgm('farm');
+      return () => { audioManager.stopBgm(); };
+    }, []);
 
     // If visiting a friend, show their garden
     if (visitingFriend) {

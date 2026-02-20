@@ -9,6 +9,7 @@ import { useFriendFarm } from '@/shared/hooks/useFriendFarm';
 import { useGrowthTimer } from '@/shared/hooks/useGrowthTimer';
 import { useInteractFriend } from '@/shared/hooks/useSocial';
 import type { FriendData } from '@/shared/types/game-api.types';
+import { playSound } from '@/shared/audio';
 
 interface FriendGardenProps {
   friend: FriendData;
@@ -43,10 +44,12 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
   }, [farmData?.plots, totalSlots]);
 
   const handleWater = () => {
+    playSound('water_plant');
     interact.mutate({ friendId: friend.id, type: 'water' });
   };
 
   const handleLike = () => {
+    playSound('ui_click');
     interact.mutate({ friendId: friend.id, type: 'like' });
   };
 
@@ -60,7 +63,7 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
       {/* Header */}
       <div className="relative z-10 flex items-center gap-3 px-5 pt-safe pb-3">
         <button
-          onClick={onBack}
+          onClick={() => { playSound('ui_back'); onBack(); }}
           className="w-10 h-10 rounded-full flex items-center justify-center text-xl header-btn-glass"
         >
           ←

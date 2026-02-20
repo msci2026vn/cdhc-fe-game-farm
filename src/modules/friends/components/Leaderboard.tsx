@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLeaderboard } from '@/shared/hooks/useLeaderboard';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useQueryClient } from '@tanstack/react-query';
+import { playSound } from '@/shared/audio';
 
 type Tab = 'ogn' | 'xp' | 'level' | 'harvests';
 
@@ -54,7 +55,7 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
               { key: 'level' as Tab, label: '🏆 Cấp độ' },
               { key: 'harvests' as Tab, label: '🌾 Thu hoạch' },
             ]).map((t) => (
-              <button key={t.key} onClick={() => setTab(t.key)}
+              <button key={t.key} onClick={() => { playSound('ui_tab'); setTab(t.key); }}
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
                   background: tab === t.key ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.2)',
@@ -204,12 +205,12 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
 
         {/* Close */}
         <div className="p-4 flex gap-2">
-          <button onClick={() => refetch()}
+          <button onClick={() => { playSound('ui_click'); refetch(); }}
             className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
             style={{ background: 'linear-gradient(135deg, #3498db, #74b9ff)' }}>
             🔄 Làm mới
           </button>
-          <button onClick={onClose}
+          <button onClick={() => { playSound('ui_modal_close'); onClose(); }}
             className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-muted-foreground bg-muted active:scale-[0.97] transition-transform">
             Đóng
           </button>

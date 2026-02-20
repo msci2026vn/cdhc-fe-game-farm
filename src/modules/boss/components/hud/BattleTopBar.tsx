@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import TurnCounter from './TurnCounter';
-import { SoundToggle } from '@/shared/audio';
+import { SoundToggle, playSound } from '@/shared/audio';
 
 interface BattleTopBarProps {
   turn: number;
@@ -51,15 +51,18 @@ export default function BattleTopBar({
   }, [showRetreatConfirm, isCampaign]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRetreatClick = () => {
+    playSound('ui_modal_open');
     setShowRetreatConfirm(true);
   };
 
   const confirmRetreat = () => {
+    playSound('ui_click');
     setShowRetreatConfirm(false);
     onRetreat();
   };
 
   const dismissRetreat = () => {
+    playSound('ui_modal_close');
     setShowRetreatConfirm(false);
   };
 

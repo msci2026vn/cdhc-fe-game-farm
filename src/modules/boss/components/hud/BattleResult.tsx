@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import type { CombatStats } from '../../hooks/useMatch3';
 import type { BossCompleteResult } from '@/shared/types/game-api.types';
+import { playSound } from '@/shared/audio';
 
 interface BattleResultProps {
   won: boolean;
@@ -56,6 +57,14 @@ export default function BattleResult({
   const [showLevelUp, setShowLevelUp] = useState(false);
   // Use server-validated stars if available, else use FE combat stars
   const stars = won ? (serverData?.stars ?? combatStars) : 0;
+
+  // Play victory/defeat sound on mount
+  useEffect(() => {
+    playSound(won ? 'victory' : 'defeat');
+    if (won && stars > 0) {
+      setTimeout(() => playSound('star_earn'), 400);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (leveledUp) {
@@ -208,7 +217,7 @@ export default function BattleResult({
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          <button onClick={onBack}
+          <button onClick={() => { playSound('ui_click'); onBack(); }}
             className="flex-1 py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
             style={{
               background: isCampaign
@@ -220,7 +229,7 @@ export default function BattleResult({
             {isCampaign ? '📋 Về Map' : 'Quay lại'}
           </button>
           {onRetry && (
-            <button onClick={onRetry}
+            <button onClick={() => { playSound('ui_click'); onRetry(); }}
               className="flex-1 py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform btn-green">
               🔄 {won ? 'Đánh lại' : 'Thử lại'}
             </button>

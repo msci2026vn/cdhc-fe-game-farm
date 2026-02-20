@@ -329,9 +329,11 @@ export class AudioManager {
     buffer: AudioBuffer,
     dest: AudioNode,
     volume: number,
+    playbackRate = 1,
   ) {
     const source = ctx.createBufferSource();
     source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
 
     const gain = ctx.createGain();
     gain.gain.value = volume;
@@ -339,6 +341,148 @@ export class AudioManager {
     source.connect(gain);
     gain.connect(dest);
     source.start(0);
+  }
+
+  /**
+   * Play with slight pitch + volume randomization to avoid repetitive sounds.
+   * Great for combat hits, match pops, farming actions.
+   */
+  playVaried(name: SoundName, pitchRange = 0.1, volumeRange = 0.1) {
+    if (this.settings.muted) return;
+
+    const throttleMs = name.startsWith('ui_') || name === 'gem_select' ? 30 : 50;
+    if (this.shouldThrottle(name, throttleMs)) return;
+    this.trackSound(0.5);
+
+    const entry = SOUND_REGISTRY[name];
+    if (!entry) return;
+
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+
+    const categoryGain = this.categoryGains[entry.category];
+    if (!categoryGain) return;
+
+    const pitchVariation = 1 - pitchRange / 2 + Math.random() * pitchRange;
+    const volumeVariation = 1 - volumeRange + Math.random() * volumeRange;
+    const finalVolume = (entry.volume ?? 1) * volumeVariation;
+
+    const cached = this.bufferCache.get(entry.url);
+    if (cached) {
+      this.playBuffer(ctx, cached, categoryGain, finalVolume, pitchVariation);
+      return;
+    }
+
+    FallbackSynth.playSfx(ctx, categoryGain, name);
+    this.loadBuffer(entry.url).catch(() => {});
+  }
+
+  /**
+   * Play a combo sound with pitch escalation based on combo level.
+   * Uses chromatic scale: each combo level = 1 semitone up.
+   */
+  playComboEscalated(combo: number) {
+    if (this.settings.muted) return;
+
+    const name = AudioManager.comboSound(combo);
+    if (!name) return;
+
+    const entry = SOUND_REGISTRY[name];
+    if (!entry) return;
+
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+
+    const categoryGain = this.categoryGains[entry.category];
+    if (!categoryGain) return;
+
+    // Chromatic pitch: each combo = 1 semitone up, max 1 octave
+    const semitones = Math.min(combo - 1, 12);
+    const playbackRate = Math.pow(2, semitones / 12);
+    // Volume escalates slightly
+    const volume = Math.min((entry.volume ?? 0.4) + combo * 0.03, 1.0);
+
+    if (this.shouldThrottle(name, 30)) return;
+    this.trackSound(0.5);
+
+    const cached = this.bufferCache.get(entry.url);
+    if (cached) {
+      this.playBuffer(ctx, cached, categoryGain, volume, playbackRate);
+    } else {
+      FallbackSynth.playSfx(ctx, categoryGain, name);
+      this.loadBuffer(entry.url).catch(() => {});
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // AMBIENT LOOPS — for layered background sounds (farm weather, etc.)
+  // ═══════════════════════════════════════════════════════════
+
+  private ambientSources: Map<string, { source: AudioBufferSourceNode; gain: GainNode }> = new Map();
+
+  /** Play a looping ambient sound (e.g., rain, birds). Returns stop function. */
+  playAmbientLoop(name: SoundName, volume = 0.15): () => void {
+    if (this.settings.muted) return () => {};
+
+    const entry = SOUND_REGISTRY[name];
+    if (!entry) return () => {};
+
+    const ctx = this.ensureContext();
+    if (!ctx) return () => {};
+
+    const ambientGain = this.categoryGains.ambient;
+    if (!ambientGain) return () => {};
+
+    // Stop existing loop with same name
+    this.stopAmbientLoop(name);
+
+    const cached = this.bufferCache.get(entry.url);
+    if (!cached) {
+      // Load for next time
+      this.loadBuffer(entry.url).catch(() => {});
+      return () => {};
+    }
+
+    const source = ctx.createBufferSource();
+    source.buffer = cached;
+    source.loop = true;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 1);
+
+    source.connect(gain);
+    gain.connect(ambientGain);
+    source.start(0);
+
+    this.ambientSources.set(name, { source, gain });
+
+    return () => this.stopAmbientLoop(name);
+  }
+
+  /** Stop a specific ambient loop with fade-out */
+  stopAmbientLoop(name: string) {
+    const entry = this.ambientSources.get(name);
+    if (!entry || !this.ctx) return;
+
+    const { source, gain } = entry;
+    const now = this.ctx.currentTime;
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.5);
+
+    setTimeout(() => {
+      try { source.stop(); source.disconnect(); } catch {}
+      try { gain.disconnect(); } catch {}
+    }, 600);
+
+    this.ambientSources.delete(name);
+  }
+
+  /** Stop all ambient loops */
+  stopAllAmbient() {
+    for (const name of this.ambientSources.keys()) {
+      this.stopAmbientLoop(name);
+    }
   }
 
   /** Get combo sound name from combo count */
