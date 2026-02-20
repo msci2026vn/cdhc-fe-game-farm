@@ -35,7 +35,7 @@ import {
   showLevelUp,
   formatCooldown,
 } from '@/shared/utils/error-handler';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 export default function FarmingScreen() {
   const navigate = useNavigate();
@@ -48,6 +48,9 @@ export default function FarmingScreen() {
   // Weather data (Step 31 — GPS/Weather Integration)
   const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useWeather();
   const setWeatherData = useWeatherStore((s) => s.setWeatherData);
+
+  // Preload farming sounds
+  useEffect(() => { audioManager.preloadScene('farming'); }, []);
 
   // Sync weather data to store when fetched
   useEffect(() => {

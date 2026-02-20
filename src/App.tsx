@@ -72,9 +72,13 @@ const AuthenticatedApp = () => {
   useGameSync();
   useLevelUpDetector();
 
-  // Initialize audio on first user interaction
+  // Initialize audio on first user interaction + preload UI sounds
   useEffect(() => {
-    const init = () => audioManager.init();
+    const init = () => {
+      audioManager.init();
+      audioManager.preloadScene('ui');
+      audioManager.preloadScene('progression');
+    };
     window.addEventListener('touchstart', init, { once: true });
     window.addEventListener('click', init, { once: true });
     return () => {

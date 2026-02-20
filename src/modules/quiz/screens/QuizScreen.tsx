@@ -5,7 +5,7 @@ import { useQuizAnswer } from '@/shared/hooks/useQuizAnswer';
 import { useLevel, useXp } from '@/shared/hooks/usePlayerProfile';
 import { LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import type { QuizQuestionData } from '@/shared/types/game-api.types';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 type Phase = 'idle' | 'playing' | 'answering' | 'revealed' | 'finished';
 
@@ -42,6 +42,9 @@ export default function QuizScreen() {
 
   const q = questions[idx];
   const total = questions.length;
+
+  // Preload quiz sounds
+  useEffect(() => { audioManager.preloadScene('quiz'); }, []);
 
   // Timer logic
   useEffect(() => {

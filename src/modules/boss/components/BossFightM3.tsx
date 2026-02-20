@@ -67,8 +67,9 @@ export default function BossFightM3({
 
   const auraType = getDominantAura(combatStats);
 
-  // ═══ BGM: Start battle music, stop on end/unmount ═══
+  // ═══ Preload battle sounds + BGM ═══
   useEffect(() => {
+    audioManager.preloadScene('battle');
     audioManager.startBgm('battle');
     return () => { audioManager.stopBgm(); };
   }, []);

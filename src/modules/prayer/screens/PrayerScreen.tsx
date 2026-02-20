@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import BottomNav from '@/shared/components/BottomNav';
@@ -17,7 +17,7 @@ import { PrayerHistory } from '../components/PrayerHistory';
 import { PrayerSparkles } from '../components/PrayerSparkles';
 import { PrayerTextFly } from '../components/PrayerTextFly';
 import type { PrayerOfferResponse } from '../types/prayer.types';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 const CATEGORIES = [
   { key: 'all', label: 'Tất cả', emoji: '🙏' },
@@ -41,6 +41,9 @@ export default function PrayerScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
+
+  // Preload prayer sounds
+  useEffect(() => { audioManager.preloadScene('prayer'); }, []);
 
   const { data: status, refetch: refetchStatus } = usePrayerStatus();
   const { data: presets } = usePrayerPresets(selectedCategory === 'all' ? undefined : selectedCategory);

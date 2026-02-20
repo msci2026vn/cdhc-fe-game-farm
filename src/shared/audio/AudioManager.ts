@@ -1,58 +1,65 @@
 /**
- * AudioManager — Lightweight synthesized game audio
+ * AudioManager — File-based game audio with oscillator fallback
  *
- * Zero external files. All sounds generated via Web Audio API.
- * Total overhead: ~3KB gzipped. No downloads needed.
- *
- * Design:
- * - Single AudioContext, lazy-initialized on first user interaction
- * - All sounds are procedurally generated (no files to load)
+ * Features:
+ * - AudioBuffer loading: fetch → decodeAudioData → cache
+ * - Per-category gain nodes: master → bgm/sfx/ui/ambient
+ * - File-first with FallbackSynth when MP3 files fail to load
+ * - BGM crossfade with linearRampToValueAtTime
+ * - Scene-based preloading
+ * - Throttling + max concurrent limits
  * - Volume/mute persisted in localStorage
- * - Safe for mobile: respects autoplay policies
  */
 
-type SoundName =
-  // Battle - Match 3
-  | 'gem_select' | 'gem_swap' | 'gem_match' | 'gem_no_match'
-  | 'combo_2' | 'combo_3' | 'combo_4' | 'combo_5' | 'combo_6' | 'combo_godlike'
-  // Battle - Combat
-  | 'damage_dealt' | 'damage_crit' | 'boss_attack' | 'boss_skill'
-  | 'dodge_success' | 'shield_gain' | 'heal' | 'ult_charge' | 'ult_fire'
-  | 'boss_enrage'
-  // Battle - Result
-  | 'victory' | 'defeat'
-  // Farming
-  | 'plant_seed' | 'water_plant' | 'harvest' | 'bug_catch' | 'plant_die'
-  // Prayer
-  | 'prayer_submit' | 'prayer_reward' | 'prayer_sparkle'
-  // Quiz
-  | 'quiz_start' | 'quiz_select' | 'quiz_correct' | 'quiz_wrong' | 'quiz_timer_low' | 'quiz_complete'
-  // Shop
-  | 'shop_buy' | 'shop_confirm'
-  // UI
-  | 'ui_click' | 'ui_tab' | 'ui_back' | 'ui_modal_open' | 'ui_modal_close'
-  | 'ui_toast' | 'ui_notification'
-  // Progression
-  | 'level_up' | 'xp_gain' | 'ogn_gain' | 'star_earn'
-  // Campaign
-  | 'zone_unlock' | 'zone_clear' | 'boss_select';
+import { FallbackSynth } from './FallbackSynth';
+import {
+  SOUND_REGISTRY,
+  BGM_REGISTRY,
+  SCENE_PRELOADS,
+  type SoundName,
+  type AudioCategory,
+} from './SoundRegistry';
 
-export type { SoundName };
+export type { SoundName, AudioCategory };
 
 const STORAGE_KEY = 'farmverse_audio';
 
-interface AudioSettings {
+export interface AudioSettings {
   muted: boolean;
-  volume: number; // 0-1
-  sfxVolume: number; // 0-1
+  masterVolume: number;
+  bgmVolume: number;
+  sfxVolume: number;
+  uiVolume: number;
+  ambientVolume: number;
 }
+
+const DEFAULT_SETTINGS: AudioSettings = {
+  muted: false,
+  masterVolume: 0.7,
+  bgmVolume: 0.8,
+  sfxVolume: 0.8,
+  uiVolume: 0.7,
+  ambientVolume: 0.5,
+};
 
 function loadSettings(): AudioSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Migrate from old format (volume/sfxVolume → new format)
+      if ('volume' in parsed && !('masterVolume' in parsed)) {
+        return {
+          ...DEFAULT_SETTINGS,
+          muted: parsed.muted ?? false,
+          masterVolume: parsed.volume ?? 0.7,
+          sfxVolume: parsed.sfxVolume ?? 0.8,
+        };
+      }
+      return { ...DEFAULT_SETTINGS, ...parsed };
+    }
   } catch { /* ignore */ }
-  return { muted: false, volume: 0.7, sfxVolume: 0.8 };
+  return { ...DEFAULT_SETTINGS };
 }
 
 function saveSettings(s: AudioSettings) {
@@ -61,19 +68,39 @@ function saveSettings(s: AudioSettings) {
 
 export class AudioManager {
   private ctx: AudioContext | null = null;
-  private settings: AudioSettings;
   private initialized = false;
-  /** Throttle: track last play time per sound to avoid spam on weak phones */
+  private settings: AudioSettings;
+
+  // Gain node chain: source → categoryGain → masterGain → destination
+  private masterGain: GainNode | null = null;
+  private categoryGains: Record<AudioCategory, GainNode | null> = {
+    bgm: null, sfx: null, ui: null, ambient: null,
+  };
+
+  // AudioBuffer cache
+  private bufferCache: Map<string, AudioBuffer> = new Map();
+  private loadingPromises: Map<string, Promise<AudioBuffer | null>> = new Map();
+
+  // Throttling
   private lastPlayTime: Map<string, number> = new Map();
-  /** Max concurrent sounds to prevent audio overload */
   private activeSounds = 0;
-  private static MAX_CONCURRENT = 8;
+  private static MAX_CONCURRENT = 12;
+
+  // BGM state
+  private bgmSource: AudioBufferSourceNode | null = null;
+  private bgmGainNode: GainNode | null = null;
+  private bgmFallback: { stop: () => void } | null = null;
+  private bgmPlaying = false;
+  private currentBgm: string | null = null;
 
   constructor() {
     this.settings = loadSettings();
   }
 
-  /** Initialize AudioContext — must be called from user gesture */
+  // ═══════════════════════════════════════════════════════════
+  // CONTEXT & INITIALIZATION
+  // ═══════════════════════════════════════════════════════════
+
   private ensureContext(): AudioContext | null {
     if (this.ctx && this.ctx.state !== 'closed') {
       if (this.ctx.state === 'suspended') {
@@ -83,6 +110,7 @@ export class AudioManager {
     }
     try {
       this.ctx = new AudioContext();
+      this.setupGainNodes();
       this.initialized = true;
       return this.ctx;
     } catch {
@@ -90,7 +118,32 @@ export class AudioManager {
     }
   }
 
-  /** Initialize on first user interaction */
+  private setupGainNodes() {
+    const ctx = this.ctx!;
+
+    this.masterGain = ctx.createGain();
+    this.masterGain.gain.value = this.settings.muted ? 0 : this.settings.masterVolume;
+    this.masterGain.connect(ctx.destination);
+
+    const categories: AudioCategory[] = ['bgm', 'sfx', 'ui', 'ambient'];
+    for (const cat of categories) {
+      const gain = ctx.createGain();
+      gain.gain.value = this.getCategoryVolume(cat);
+      gain.connect(this.masterGain);
+      this.categoryGains[cat] = gain;
+    }
+  }
+
+  private getCategoryVolume(cat: AudioCategory): number {
+    switch (cat) {
+      case 'bgm': return this.settings.bgmVolume;
+      case 'sfx': return this.settings.sfxVolume;
+      case 'ui': return this.settings.uiVolume;
+      case 'ambient': return this.settings.ambientVolume;
+    }
+  }
+
+  /** Initialize AudioContext — call from user gesture */
   init() {
     if (this.initialized) return;
     this.ensureContext();
@@ -101,40 +154,126 @@ export class AudioManager {
   // ═══════════════════════════════════════════════════════════
 
   get muted() { return this.settings.muted; }
-  get volume() { return this.settings.volume; }
+  get volume() { return this.settings.masterVolume; }
   get sfxVolume() { return this.settings.sfxVolume; }
+  get bgmVolume() { return this.settings.bgmVolume; }
+  get uiVolume() { return this.settings.uiVolume; }
+  get ambientVolume() { return this.settings.ambientVolume; }
+  get allSettings() { return { ...this.settings }; }
 
   setMuted(m: boolean) {
     this.settings.muted = m;
+    if (this.masterGain) {
+      this.masterGain.gain.value = m ? 0 : this.settings.masterVolume;
+    }
+    if (m) this.stopBgm();
     saveSettings(this.settings);
   }
 
   toggleMute() {
-    this.settings.muted = !this.settings.muted;
-    saveSettings(this.settings);
+    this.setMuted(!this.settings.muted);
     return this.settings.muted;
   }
 
   setVolume(v: number) {
-    this.settings.volume = Math.max(0, Math.min(1, v));
+    this.settings.masterVolume = Math.max(0, Math.min(1, v));
+    if (this.masterGain && !this.settings.muted) {
+      this.masterGain.gain.value = this.settings.masterVolume;
+    }
     saveSettings(this.settings);
   }
 
   setSfxVolume(v: number) {
     this.settings.sfxVolume = Math.max(0, Math.min(1, v));
+    if (this.categoryGains.sfx) {
+      this.categoryGains.sfx.gain.value = this.settings.sfxVolume;
+    }
     saveSettings(this.settings);
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // CORE SYNTH HELPERS
-  // ═══════════════════════════════════════════════════════════
-
-  private getGain(): number {
-    if (this.settings.muted) return 0;
-    return this.settings.volume * this.settings.sfxVolume;
+  setBgmVolume(v: number) {
+    this.settings.bgmVolume = Math.max(0, Math.min(1, v));
+    if (this.categoryGains.bgm) {
+      this.categoryGains.bgm.gain.value = this.settings.bgmVolume;
+    }
+    saveSettings(this.settings);
   }
 
-  /** Throttle check — returns true if sound should be skipped */
+  setUiVolume(v: number) {
+    this.settings.uiVolume = Math.max(0, Math.min(1, v));
+    if (this.categoryGains.ui) {
+      this.categoryGains.ui.gain.value = this.settings.uiVolume;
+    }
+    saveSettings(this.settings);
+  }
+
+  setAmbientVolume(v: number) {
+    this.settings.ambientVolume = Math.max(0, Math.min(1, v));
+    if (this.categoryGains.ambient) {
+      this.categoryGains.ambient.gain.value = this.settings.ambientVolume;
+    }
+    saveSettings(this.settings);
+  }
+
+  setCategoryVolume(cat: AudioCategory, v: number) {
+    switch (cat) {
+      case 'bgm': this.setBgmVolume(v); break;
+      case 'sfx': this.setSfxVolume(v); break;
+      case 'ui': this.setUiVolume(v); break;
+      case 'ambient': this.setAmbientVolume(v); break;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // AUDIO BUFFER LOADING
+  // ═══════════════════════════════════════════════════════════
+
+  /** Load a single audio file into buffer cache */
+  private async loadBuffer(url: string): Promise<AudioBuffer | null> {
+    if (this.bufferCache.has(url)) return this.bufferCache.get(url)!;
+
+    // Deduplicate concurrent loads
+    const existing = this.loadingPromises.get(url);
+    if (existing) return existing;
+
+    const promise = (async () => {
+      try {
+        const ctx = this.ensureContext();
+        if (!ctx) return null;
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        this.bufferCache.set(url, audioBuffer);
+        return audioBuffer;
+      } catch {
+        return null;
+      } finally {
+        this.loadingPromises.delete(url);
+      }
+    })();
+
+    this.loadingPromises.set(url, promise);
+    return promise;
+  }
+
+  /** Preload a single sound by name */
+  async preload(name: SoundName): Promise<void> {
+    const entry = SOUND_REGISTRY[name];
+    if (entry) await this.loadBuffer(entry.url);
+  }
+
+  /** Preload all sounds for a scene */
+  async preloadScene(scene: string): Promise<void> {
+    const sounds = SCENE_PRELOADS[scene];
+    if (!sounds) return;
+    await Promise.all(sounds.map(name => this.preload(name)));
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // THROTTLING
+  // ═══════════════════════════════════════════════════════════
+
   private shouldThrottle(name: string, minIntervalMs = 50): boolean {
     const now = Date.now();
     const last = this.lastPlayTime.get(name) || 0;
@@ -144,372 +283,61 @@ export class AudioManager {
     return false;
   }
 
-  /** Track active sound count for auto-cleanup */
   private trackSound(duration: number) {
     this.activeSounds++;
     setTimeout(() => { this.activeSounds = Math.max(0, this.activeSounds - 1); }, duration * 1000 + 100);
   }
 
-  /** Play a single tone */
-  private tone(freq: number, duration: number, vol = 1, type: OscillatorType = 'sine', delay = 0) {
-    const ctx = this.ensureContext();
-    if (!ctx || this.settings.muted) return;
-
-    const gain = ctx.createGain();
-    const osc = ctx.createOscillator();
-    osc.type = type;
-    osc.frequency.value = freq;
-
-    const effectiveVol = vol * this.getGain();
-    const now = ctx.currentTime + delay;
-
-    gain.gain.setValueAtTime(effectiveVol, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + duration + 0.05);
-  }
-
-  /** Play noise burst (for percussion-like sounds) */
-  private noise(duration: number, vol = 0.3, delay = 0) {
-    const ctx = this.ensureContext();
-    if (!ctx || this.settings.muted) return;
-
-    const bufferSize = Math.floor(ctx.sampleRate * duration);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-
-    const gain = ctx.createGain();
-    const effectiveVol = vol * this.getGain();
-    const now = ctx.currentTime + delay;
-
-    gain.gain.setValueAtTime(effectiveVol, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-    // Bandpass filter for different textures
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1000;
-    filter.Q.value = 1;
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    source.start(now);
-    source.stop(now + duration + 0.05);
-  }
-
-  /** Play a quick arpeggio */
-  private arpeggio(freqs: number[], noteLen: number, vol = 0.5, type: OscillatorType = 'sine') {
-    freqs.forEach((f, i) => this.tone(f, noteLen, vol, type, i * noteLen * 0.7));
-  }
-
   // ═══════════════════════════════════════════════════════════
-  // SOUND DEFINITIONS
+  // SFX PLAYBACK
   // ═══════════════════════════════════════════════════════════
 
+  /** Play a sound effect — file-first, fallback to synth */
   play(name: SoundName) {
     if (this.settings.muted) return;
 
-    // Throttle: prevent same sound playing too fast (50ms min for combat, 30ms for UI)
     const throttleMs = name.startsWith('ui_') || name === 'gem_select' ? 30 : 50;
     if (this.shouldThrottle(name, throttleMs)) return;
     this.trackSound(0.5);
 
-    switch (name) {
-      // ─── BATTLE: Match-3 ───
-      case 'gem_select':
-        this.tone(880, 0.08, 0.3, 'sine');
-        break;
+    const entry = SOUND_REGISTRY[name];
+    if (!entry) return;
 
-      case 'gem_swap':
-        this.tone(440, 0.08, 0.25, 'sine');
-        this.tone(660, 0.08, 0.25, 'sine', 0.06);
-        break;
+    const ctx = this.ensureContext();
+    if (!ctx) return;
 
-      case 'gem_match':
-        this.tone(523, 0.15, 0.4, 'sine');
-        this.tone(659, 0.15, 0.35, 'sine', 0.08);
-        this.tone(784, 0.2, 0.3, 'sine', 0.16);
-        break;
+    const categoryGain = this.categoryGains[entry.category];
+    if (!categoryGain) return;
 
-      case 'gem_no_match':
-        this.tone(300, 0.15, 0.25, 'square');
-        this.tone(250, 0.2, 0.2, 'square', 0.1);
-        break;
-
-      // ─── COMBOS (escalating pitch & complexity) ───
-      case 'combo_2':
-        this.arpeggio([523, 659, 784], 0.1, 0.35);
-        break;
-
-      case 'combo_3':
-        this.arpeggio([587, 740, 880, 1047], 0.09, 0.4);
-        break;
-
-      case 'combo_4':
-        this.arpeggio([659, 831, 988, 1175, 1319], 0.08, 0.45, 'triangle');
-        break;
-
-      case 'combo_5':
-        this.arpeggio([784, 988, 1175, 1397, 1568], 0.07, 0.5, 'triangle');
-        this.noise(0.1, 0.15, 0.2);
-        break;
-
-      case 'combo_6':
-        this.arpeggio([880, 1047, 1319, 1568, 1760, 2093], 0.06, 0.5, 'triangle');
-        this.noise(0.15, 0.2, 0.25);
-        break;
-
-      case 'combo_godlike':
-        this.arpeggio([523, 659, 784, 1047, 1319, 1568, 2093], 0.06, 0.55, 'sawtooth');
-        this.noise(0.2, 0.25, 0.3);
-        this.tone(2093, 0.5, 0.3, 'sine', 0.35);
-        break;
-
-      // ─── BATTLE: Combat ───
-      case 'damage_dealt':
-        this.noise(0.08, 0.3);
-        this.tone(200, 0.1, 0.35, 'square');
-        break;
-
-      case 'damage_crit':
-        this.noise(0.12, 0.4);
-        this.tone(150, 0.08, 0.4, 'square');
-        this.tone(400, 0.15, 0.35, 'sawtooth', 0.05);
-        break;
-
-      case 'boss_attack':
-        this.tone(150, 0.2, 0.45, 'sawtooth');
-        this.tone(100, 0.3, 0.35, 'square', 0.1);
-        this.noise(0.15, 0.3, 0.05);
-        break;
-
-      case 'boss_skill':
-        this.tone(200, 0.1, 0.4, 'sawtooth');
-        this.tone(100, 0.15, 0.45, 'square', 0.08);
-        this.tone(80, 0.2, 0.4, 'sawtooth', 0.15);
-        this.noise(0.2, 0.35, 0.1);
-        break;
-
-      case 'dodge_success':
-        this.tone(800, 0.08, 0.35, 'sine');
-        this.tone(1200, 0.1, 0.3, 'sine', 0.06);
-        this.tone(1600, 0.12, 0.25, 'sine', 0.12);
-        break;
-
-      case 'shield_gain':
-        this.tone(400, 0.15, 0.3, 'triangle');
-        this.tone(600, 0.15, 0.25, 'triangle', 0.08);
-        break;
-
-      case 'heal':
-        this.arpeggio([392, 494, 587, 784], 0.12, 0.3, 'sine');
-        break;
-
-      case 'ult_charge':
-        this.tone(220, 0.05, 0.2, 'triangle');
-        break;
-
-      case 'ult_fire':
-        this.noise(0.3, 0.4);
-        this.arpeggio([262, 392, 523, 784, 1047, 1319], 0.08, 0.5, 'sawtooth');
-        this.tone(100, 0.5, 0.35, 'square', 0.2);
-        break;
-
-      case 'boss_enrage':
-        this.tone(100, 0.4, 0.4, 'sawtooth');
-        this.tone(80, 0.5, 0.35, 'square', 0.2);
-        this.noise(0.3, 0.3, 0.1);
-        break;
-
-      // ─── BATTLE: Result ───
-      case 'victory':
-        this.arpeggio([523, 659, 784, 1047], 0.2, 0.5, 'sine');
-        this.arpeggio([784, 988, 1175, 1568], 0.2, 0.45, 'triangle');
-        this.tone(1568, 0.6, 0.4, 'sine', 0.8);
-        break;
-
-      case 'defeat':
-        this.tone(400, 0.3, 0.4, 'sine');
-        this.tone(350, 0.3, 0.35, 'sine', 0.3);
-        this.tone(300, 0.3, 0.3, 'sine', 0.6);
-        this.tone(200, 0.6, 0.35, 'sine', 0.9);
-        break;
-
-      // ─── FARMING ───
-      case 'plant_seed':
-        this.tone(330, 0.1, 0.3, 'sine');
-        this.tone(440, 0.12, 0.25, 'sine', 0.08);
-        this.noise(0.05, 0.15, 0.05);
-        break;
-
-      case 'water_plant':
-        // Bubbly water sound
-        this.tone(600, 0.06, 0.25, 'sine');
-        this.tone(800, 0.06, 0.2, 'sine', 0.05);
-        this.tone(700, 0.06, 0.2, 'sine', 0.1);
-        this.tone(900, 0.06, 0.18, 'sine', 0.15);
-        this.tone(650, 0.08, 0.2, 'sine', 0.2);
-        break;
-
-      case 'harvest':
-        this.arpeggio([440, 554, 659, 880], 0.12, 0.45, 'sine');
-        this.tone(880, 0.3, 0.35, 'triangle', 0.4);
-        this.noise(0.1, 0.15, 0.3);
-        break;
-
-      case 'bug_catch':
-        this.tone(800, 0.05, 0.3, 'square');
-        this.tone(1200, 0.08, 0.25, 'sine', 0.04);
-        break;
-
-      case 'plant_die':
-        this.tone(300, 0.2, 0.3, 'sine');
-        this.tone(250, 0.25, 0.25, 'sine', 0.15);
-        this.tone(200, 0.3, 0.2, 'sine', 0.3);
-        break;
-
-      // ─── PRAYER ───
-      case 'prayer_submit':
-        // Sacred bell-like
-        this.tone(523, 0.4, 0.35, 'sine');
-        this.tone(659, 0.4, 0.3, 'sine', 0.15);
-        this.tone(784, 0.5, 0.35, 'sine', 0.3);
-        this.tone(1047, 0.6, 0.25, 'sine', 0.45);
-        break;
-
-      case 'prayer_reward':
-        this.arpeggio([523, 659, 784, 1047, 1319], 0.15, 0.4, 'sine');
-        break;
-
-      case 'prayer_sparkle':
-        this.tone(1500 + Math.random() * 500, 0.1, 0.15, 'sine');
-        break;
-
-      // ─── QUIZ ───
-      case 'quiz_start':
-        this.arpeggio([392, 494, 587, 784], 0.1, 0.35, 'triangle');
-        break;
-
-      case 'quiz_select':
-        this.tone(660, 0.08, 0.25, 'sine');
-        break;
-
-      case 'quiz_correct':
-        this.arpeggio([523, 659, 784], 0.12, 0.45, 'sine');
-        this.tone(1047, 0.3, 0.3, 'sine', 0.3);
-        break;
-
-      case 'quiz_wrong':
-        this.tone(300, 0.15, 0.35, 'square');
-        this.tone(200, 0.25, 0.3, 'square', 0.12);
-        break;
-
-      case 'quiz_timer_low':
-        this.tone(800, 0.08, 0.3, 'square');
-        break;
-
-      case 'quiz_complete':
-        this.arpeggio([523, 659, 784, 1047], 0.15, 0.4, 'sine');
-        this.tone(1568, 0.5, 0.3, 'sine', 0.5);
-        break;
-
-      // ─── SHOP ───
-      case 'shop_buy':
-        this.tone(800, 0.08, 0.3, 'sine');
-        this.tone(1000, 0.08, 0.25, 'sine', 0.06);
-        this.tone(1200, 0.1, 0.3, 'sine', 0.12);
-        this.noise(0.08, 0.15, 0.1);
-        break;
-
-      case 'shop_confirm':
-        this.tone(600, 0.1, 0.3, 'sine');
-        this.tone(800, 0.12, 0.25, 'sine', 0.08);
-        break;
-
-      // ─── UI ───
-      case 'ui_click':
-        this.tone(800, 0.04, 0.2, 'sine');
-        break;
-
-      case 'ui_tab':
-        this.tone(600, 0.05, 0.2, 'sine');
-        this.tone(800, 0.05, 0.15, 'sine', 0.03);
-        break;
-
-      case 'ui_back':
-        this.tone(600, 0.05, 0.2, 'sine');
-        this.tone(400, 0.06, 0.15, 'sine', 0.04);
-        break;
-
-      case 'ui_modal_open':
-        this.tone(400, 0.08, 0.2, 'sine');
-        this.tone(600, 0.08, 0.18, 'sine', 0.06);
-        break;
-
-      case 'ui_modal_close':
-        this.tone(600, 0.06, 0.18, 'sine');
-        this.tone(400, 0.08, 0.15, 'sine', 0.04);
-        break;
-
-      case 'ui_toast':
-        this.tone(1000, 0.06, 0.2, 'sine');
-        break;
-
-      case 'ui_notification':
-        this.tone(880, 0.08, 0.25, 'sine');
-        this.tone(1100, 0.1, 0.2, 'sine', 0.08);
-        break;
-
-      // ─── PROGRESSION ───
-      case 'level_up':
-        this.arpeggio([392, 494, 587, 784, 988, 1175], 0.12, 0.5, 'sine');
-        this.arpeggio([784, 988, 1175, 1568], 0.15, 0.4, 'triangle');
-        this.noise(0.15, 0.2, 0.5);
-        this.tone(1568, 0.8, 0.35, 'sine', 0.7);
-        break;
-
-      case 'xp_gain':
-        this.tone(800, 0.06, 0.2, 'sine');
-        this.tone(1000, 0.06, 0.15, 'sine', 0.04);
-        break;
-
-      case 'ogn_gain':
-        this.tone(1000, 0.06, 0.25, 'sine');
-        this.tone(1200, 0.06, 0.2, 'sine', 0.05);
-        this.tone(1500, 0.08, 0.2, 'sine', 0.1);
-        break;
-
-      case 'star_earn':
-        this.tone(1200, 0.1, 0.3, 'sine');
-        this.tone(1500, 0.12, 0.25, 'sine', 0.08);
-        this.tone(1800, 0.15, 0.3, 'sine', 0.16);
-        break;
-
-      // ─── CAMPAIGN ───
-      case 'zone_unlock':
-        this.arpeggio([440, 554, 659, 880, 1047], 0.1, 0.4, 'triangle');
-        this.noise(0.1, 0.2, 0.3);
-        break;
-
-      case 'zone_clear':
-        this.arpeggio([523, 659, 784, 1047], 0.15, 0.45, 'sine');
-        this.tone(1047, 0.4, 0.3, 'sine', 0.5);
-        break;
-
-      case 'boss_select':
-        this.tone(200, 0.15, 0.3, 'sine');
-        this.tone(300, 0.15, 0.25, 'sine', 0.1);
-        this.tone(400, 0.15, 0.3, 'sine', 0.2);
-        break;
+    // Try cached buffer first (instant playback)
+    const cached = this.bufferCache.get(entry.url);
+    if (cached) {
+      this.playBuffer(ctx, cached, categoryGain, entry.volume ?? 1);
+      return;
     }
+
+    // Try async load, with synth fallback for immediate feedback
+    FallbackSynth.playSfx(ctx, categoryGain, name);
+
+    // Also start loading the file for next time
+    this.loadBuffer(entry.url).catch(() => {});
+  }
+
+  private playBuffer(
+    ctx: AudioContext,
+    buffer: AudioBuffer,
+    dest: AudioNode,
+    volume: number,
+  ) {
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+
+    source.connect(gain);
+    gain.connect(dest);
+    source.start(0);
   }
 
   /** Get combo sound name from combo count */
@@ -524,132 +352,107 @@ export class AudioManager {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // BGM — Lightweight procedural background music
-  // Uses looping oscillators with slow LFO for ambient feel
+  // BGM — File-based with crossfade and oscillator fallback
   // ═══════════════════════════════════════════════════════════
 
-  private bgmNodes: {
-    oscs: OscillatorNode[];
-    gains: GainNode[];
-    masterGain: GainNode | null;
-    lfo: OscillatorNode | null;
-  } = { oscs: [], gains: [], masterGain: null, lfo: null };
-  private bgmPlaying = false;
-  private currentBgm: string | null = null;
-
-  /** BGM presets: each is a chord + tempo config */
-  private static BGM_PRESETS: Record<string, {
-    notes: number[];      // Frequencies for chord tones
-    types: OscillatorType[];
-    volumes: number[];
-    lfoRate: number;       // LFO speed (Hz) for gentle pulsing
-    lfoDepth: number;      // How much volume wobble (0-1)
-    masterVol: number;     // Overall BGM volume
-  }> = {
-    battle: {
-      // Dark minor chord: Dm (D3, F3, A3) + bass D2
-      notes: [73.42, 146.83, 174.61, 220.00],
-      types: ['sine', 'triangle', 'sine', 'sine'],
-      volumes: [0.12, 0.08, 0.06, 0.05],
-      lfoRate: 0.15,
-      lfoDepth: 0.4,
-      masterVol: 0.25,
-    },
-    campaign: {
-      // Epic minor: Am (A2, C3, E3) + bass A1
-      notes: [55.00, 110.00, 130.81, 164.81],
-      types: ['triangle', 'sine', 'sine', 'triangle'],
-      volumes: [0.10, 0.07, 0.06, 0.05],
-      lfoRate: 0.12,
-      lfoDepth: 0.35,
-      masterVol: 0.22,
-    },
-    boss: {
-      // Intense: Em (E2, B2, E3, G3) — darker
-      notes: [82.41, 123.47, 164.81, 196.00],
-      types: ['sawtooth', 'triangle', 'sine', 'sine'],
-      volumes: [0.08, 0.06, 0.05, 0.04],
-      lfoRate: 0.25,
-      lfoDepth: 0.5,
-      masterVol: 0.20,
-    },
-  };
-
-  /** Start BGM loop — ultra-light: just 4 oscillators + 1 LFO */
   startBgm(preset: 'battle' | 'campaign' | 'boss' = 'campaign') {
     if (this.settings.muted) return;
     if (this.bgmPlaying && this.currentBgm === preset) return;
-    this.stopBgm(); // stop previous if different
 
     const ctx = this.ensureContext();
     if (!ctx) return;
 
-    const config = AudioManager.BGM_PRESETS[preset];
-    if (!config) return;
+    const bgmGain = this.categoryGains.bgm;
+    if (!bgmGain) return;
 
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = config.masterVol * this.settings.volume;
-    masterGain.connect(ctx.destination);
+    // Crossfade: fade out old BGM
+    this.stopBgm();
 
-    // LFO for gentle pulsing volume
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.type = 'sine';
-    lfo.frequency.value = config.lfoRate;
-    lfoGain.gain.value = config.lfoDepth * config.masterVol * this.settings.volume;
-    lfo.connect(lfoGain);
-    lfoGain.connect(masterGain.gain);
-    lfo.start();
-
-    const oscs: OscillatorNode[] = [];
-    const gains: GainNode[] = [];
-
-    config.notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = config.types[i] || 'sine';
-      osc.frequency.value = freq;
-      // Slight detune for warmth
-      osc.detune.value = (i - 1.5) * 3;
-      gain.gain.value = config.volumes[i] * this.settings.volume;
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.start();
-      oscs.push(osc);
-      gains.push(gain);
-    });
-
-    this.bgmNodes = { oscs, gains, masterGain, lfo };
-    this.bgmPlaying = true;
     this.currentBgm = preset;
-  }
+    this.bgmPlaying = true;
 
-  /** Stop BGM with gentle fade-out */
-  stopBgm() {
-    if (!this.bgmPlaying) return;
-    const { oscs, gains, masterGain, lfo } = this.bgmNodes;
-
-    // Fade out over 500ms
-    const ctx = this.ctx;
-    if (ctx && masterGain) {
-      const now = ctx.currentTime;
-      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
-      masterGain.gain.linearRampToValueAtTime(0, now + 0.5);
+    const bgmEntry = BGM_REGISTRY[preset];
+    if (!bgmEntry) {
+      // No registry entry — use oscillator fallback
+      this.bgmFallback = FallbackSynth.startBgm(ctx, bgmGain, preset, 1);
+      return;
     }
 
-    setTimeout(() => {
-      oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch {} });
-      gains.forEach(g => { try { g.disconnect(); } catch {} });
-      if (lfo) { try { lfo.stop(); lfo.disconnect(); } catch {} }
-      if (masterGain) { try { masterGain.disconnect(); } catch {} }
-    }, 600);
+    // Try loading the BGM file
+    this.loadBuffer(bgmEntry.url).then(buffer => {
+      // Check we're still supposed to play this preset
+      if (this.currentBgm !== preset || !this.bgmPlaying) return;
 
-    this.bgmNodes = { oscs: [], gains: [], masterGain: null, lfo: null };
+      if (buffer) {
+        // Play file-based BGM
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = bgmEntry.loop;
+
+        const gainNode = ctx.createGain();
+        // Fade in
+        gainNode.gain.setValueAtTime(0, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(bgmEntry.volume, ctx.currentTime + 0.5);
+
+        source.connect(gainNode);
+        gainNode.connect(bgmGain);
+        source.start(0);
+
+        // Stop any fallback that may have started
+        if (this.bgmFallback) {
+          this.bgmFallback.stop();
+          this.bgmFallback = null;
+        }
+
+        this.bgmSource = source;
+        this.bgmGainNode = gainNode;
+      } else {
+        // File failed to load — use oscillator fallback
+        if (!this.bgmFallback) {
+          this.bgmFallback = FallbackSynth.startBgm(ctx, bgmGain, preset, 1);
+        }
+      }
+    }).catch(() => {
+      // On error, start oscillator fallback
+      if (this.currentBgm === preset && !this.bgmFallback) {
+        this.bgmFallback = FallbackSynth.startBgm(ctx, bgmGain, preset, 1);
+      }
+    });
+
+    // Start oscillator fallback immediately for instant audio while file loads
+    this.bgmFallback = FallbackSynth.startBgm(ctx, bgmGain, preset, 1);
+  }
+
+  stopBgm() {
+    if (!this.bgmPlaying) return;
+
+    // Fade out file-based BGM
+    if (this.bgmSource && this.bgmGainNode && this.ctx) {
+      const now = this.ctx.currentTime;
+      this.bgmGainNode.gain.setValueAtTime(this.bgmGainNode.gain.value, now);
+      this.bgmGainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+
+      const source = this.bgmSource;
+      const gainNode = this.bgmGainNode;
+      setTimeout(() => {
+        try { source.stop(); source.disconnect(); } catch {}
+        try { gainNode.disconnect(); } catch {}
+      }, 600);
+
+      this.bgmSource = null;
+      this.bgmGainNode = null;
+    }
+
+    // Stop oscillator fallback
+    if (this.bgmFallback) {
+      this.bgmFallback.stop();
+      this.bgmFallback = null;
+    }
+
     this.bgmPlaying = false;
     this.currentBgm = null;
   }
 
-  /** Check if BGM is currently playing */
   get isBgmPlaying() { return this.bgmPlaying; }
 }
 

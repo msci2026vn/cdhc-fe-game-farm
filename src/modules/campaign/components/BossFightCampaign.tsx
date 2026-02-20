@@ -71,8 +71,10 @@ export default function BossFightCampaign({
 
   const auraType = getDominantAura(combatStats);
 
-  // ═══ BGM: Start campaign battle music, stop on end/unmount ═══
+  // ═══ Preload battle sounds + BGM ═══
   useEffect(() => {
+    audioManager.preloadScene('battle');
+    audioManager.preloadScene('campaign');
     audioManager.startBgm('campaign');
     return () => { audioManager.stopBgm(); };
   }, []);
