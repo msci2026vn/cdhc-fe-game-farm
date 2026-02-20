@@ -129,6 +129,15 @@ export default function FarmingScreen() {
   const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [isMuted, setIsMuted] = useState(audioManager.muted);
+
+  const toggleMute = () => {
+    const muted = audioManager.toggleMute();
+    setIsMuted(muted);
+    if (!muted) {
+      playSound('ui_click');
+    }
+  };
   // REMOVED: forceUpdate interval - not needed with TanStack Query
   // Growth is calculated real-time using Date.now(), and plots update via API
 
@@ -457,6 +466,14 @@ export default function FarmingScreen() {
                     onClick={() => navigate('/points')}
                     className="flex items-center justify-center text-amber-900 transition-transform active:scale-90 hover:scale-110">
                     <span className="material-symbols-outlined text-[18px]">notifications</span>
+                  </button>
+                  {/* Audio Toggle */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+                    className={`flex items-center justify-center transition-transform active:scale-90 hover:scale-110 ${isMuted ? 'text-amber-900/50' : 'text-amber-900'}`}>
+                    <span className="material-symbols-outlined text-[18px]">
+                      {isMuted ? 'volume_off' : 'volume_up'}
+                    </span>
                   </button>
                 </div>
               </div>
