@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '@/shared/utils/constants';
+import { playSound } from '@/shared/audio';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MarketIndex {
@@ -306,7 +307,7 @@ export default function MarketScreen() {
     return (
       <div className="max-w-md mx-auto h-screen flex flex-col relative bg-gradient-to-b from-[#dcedc8] to-[#aed581] overflow-hidden">
         <div className="relative z-30 px-4 pt-4 pb-2 flex items-center justify-between">
-          <button onClick={() => navigate(-1)}
+          <button onClick={() => { playSound('ui_back'); navigate(-1); }}
             className="w-10 h-10 rounded-full bg-[#f4e4bc] border-2 border-[#8c6239] shadow-[0_2px_0_#5d4037] flex items-center justify-center active:translate-y-0.5 active:shadow-none transition-all">
             <span className="material-symbols-outlined text-[#5d4037]">arrow_back</span>
           </button>
@@ -442,7 +443,7 @@ export default function MarketScreen() {
               )}
             </p>
             <button
-              onClick={() => setShowGuide(true)}
+              onClick={() => { playSound('ui_modal_open'); setShowGuide(true); }}
               className="mt-1.5 text-[11px] text-[#8c6239] font-semibold underline underline-offset-2 active:opacity-60"
             >
               Hướng dẫn đọc chỉ số
@@ -467,7 +468,7 @@ export default function MarketScreen() {
             ]).map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => { playSound('ui_tab'); setActiveTab(tab.id); }}
                 className={`flex-1 py-2.5 flex items-center justify-center gap-1 font-bold text-sm transition-all
                   ${activeTab === tab.id
                     ? 'bg-[#fefae0] text-[#5d4037]'
@@ -740,7 +741,7 @@ export default function MarketScreen() {
         <div className="flex gap-4 mb-4">
           {/* TĂNG */}
           <button
-            onClick={() => handlePredict('up')}
+            onClick={() => { playSound('ui_click'); handlePredict('up'); }}
             disabled={buttonsDisabled}
             className={`flex-1 group relative h-20 rounded-xl border-b-4 shadow-lg overflow-hidden transition-all
               ${buttonsDisabled
@@ -762,7 +763,7 @@ export default function MarketScreen() {
 
           {/* GIẢM */}
           <button
-            onClick={() => handlePredict('down')}
+            onClick={() => { playSound('ui_click'); handlePredict('down'); }}
             disabled={buttonsDisabled}
             className={`flex-1 group relative h-20 rounded-xl border-b-4 shadow-lg overflow-hidden transition-all
               ${buttonsDisabled
@@ -836,7 +837,7 @@ export default function MarketScreen() {
       {/* ── Guide Modal ── */}
       {showGuide && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowGuide(false)}>
+          onClick={() => { playSound('ui_modal_close'); setShowGuide(false); }}>
           <div
             className="bg-[#fefae0] rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto p-5 border-2 border-[#8c6239] shadow-2xl"
             onClick={e => e.stopPropagation()}

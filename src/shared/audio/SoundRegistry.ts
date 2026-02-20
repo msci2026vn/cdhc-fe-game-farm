@@ -112,10 +112,17 @@ export const SOUND_REGISTRY: Record<SoundName, SoundEntry> = {
   boss_select: { url: '/audio/sfx/campaign/boss-select.mp3', category: 'sfx', volume: 0.3 },
 };
 
+export type BgmPreset = 'battle' | 'campaign' | 'boss' | 'farm' | 'shop' | 'quiz' | 'prayer' | 'campaign_map';
+
 export const BGM_REGISTRY: Record<string, { url: string; loop: boolean; volume: number }> = {
-  battle:   { url: '/audio/bgm/battle.mp3', loop: true, volume: 0.25 },
-  campaign: { url: '/audio/bgm/campaign.mp3', loop: true, volume: 0.22 },
-  boss:     { url: '/audio/bgm/boss.mp3', loop: true, volume: 0.20 },
+  battle:       { url: '/audio/bgm/battle.mp3', loop: true, volume: 0.25 },
+  campaign:     { url: '/audio/bgm/campaign.mp3', loop: true, volume: 0.22 },
+  boss:         { url: '/audio/bgm/boss.mp3', loop: true, volume: 0.20 },
+  farm:         { url: '/audio/bgm/farm.mp3', loop: true, volume: 0.15 },
+  shop:         { url: '/audio/bgm/shop.mp3', loop: true, volume: 0.14 },
+  quiz:         { url: '/audio/bgm/quiz.mp3', loop: true, volume: 0.16 },
+  prayer:       { url: '/audio/bgm/prayer.mp3', loop: true, volume: 0.12 },
+  campaign_map: { url: '/audio/bgm/campaign-map.mp3', loop: true, volume: 0.18 },
 };
 
 /** Sounds to preload per scene — loaded in parallel at mount time */

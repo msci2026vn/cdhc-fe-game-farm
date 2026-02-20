@@ -369,6 +369,51 @@ export class FallbackSynth {
       lfoDepth: 0.5,
       masterVol: 0.20,
     },
+    farm: {
+      // Pastoral C major: C3, E3, G3, C4 — warm and peaceful
+      notes: [130.81, 164.81, 196.00, 261.63],
+      types: ['sine', 'triangle', 'sine', 'sine'],
+      volumes: [0.08, 0.06, 0.05, 0.04],
+      lfoRate: 0.08,
+      lfoDepth: 0.25,
+      masterVol: 0.15,
+    },
+    shop: {
+      // Cheerful F major: F3, A3, C4, F4
+      notes: [174.61, 220.00, 261.63, 349.23],
+      types: ['triangle', 'sine', 'sine', 'triangle'],
+      volumes: [0.07, 0.05, 0.04, 0.03],
+      lfoRate: 0.1,
+      lfoDepth: 0.3,
+      masterVol: 0.14,
+    },
+    quiz: {
+      // Thinking Bb major: Bb2, D3, F3, Bb3
+      notes: [116.54, 146.83, 174.61, 233.08],
+      types: ['triangle', 'sine', 'triangle', 'sine'],
+      volumes: [0.07, 0.06, 0.05, 0.04],
+      lfoRate: 0.18,
+      lfoDepth: 0.3,
+      masterVol: 0.16,
+    },
+    prayer: {
+      // Sacred Ab major: Ab2, C3, Eb3, Ab3 — meditative
+      notes: [103.83, 130.81, 155.56, 207.65],
+      types: ['sine', 'sine', 'triangle', 'sine'],
+      volumes: [0.06, 0.05, 0.04, 0.03],
+      lfoRate: 0.06,
+      lfoDepth: 0.2,
+      masterVol: 0.12,
+    },
+    campaign_map: {
+      // Adventure G major: G2, B2, D3, G3
+      notes: [98.00, 123.47, 146.83, 196.00],
+      types: ['triangle', 'sine', 'sine', 'triangle'],
+      volumes: [0.08, 0.06, 0.05, 0.04],
+      lfoRate: 0.1,
+      lfoDepth: 0.3,
+      masterVol: 0.18,
+    },
   };
 
   /** Start oscillator-based BGM. Returns cleanup function. */

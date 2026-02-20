@@ -4,6 +4,7 @@ import { useAutoAllocateStats } from '../hooks/useAutoAllocateStats';
 import { STAT_CONFIG } from '../utils/stat-constants';
 import { MilestonePopup } from './MilestonePopup';
 import type { MilestoneNextInfo, MilestoneInfo, AllocateStatsResponse } from '../types/game-api.types';
+import { playSound } from '../audio';
 
 interface StatAllocationModalProps {
   isOpen: boolean;
@@ -105,17 +106,20 @@ export function StatAllocationModal({
 
   const handleIncrement = useCallback((key: StatKey) => {
     if (remaining <= 0) return;
+    playSound('ui_click');
     setPending((p) => ({ ...p, [key]: p[key] + 1 }));
     setSelectedPreset(null);
   }, [remaining]);
 
   const handleDecrement = useCallback((key: StatKey) => {
     if (pending[key] <= 0) return;
+    playSound('ui_click');
     setPending((p) => ({ ...p, [key]: p[key] - 1 }));
     setSelectedPreset(null);
   }, [pending]);
 
   const handlePreset = useCallback((preset: 'attack' | 'defense' | 'balance') => {
+    playSound('ui_tab');
     const alloc = getPresetAllocation(preset, freePoints);
     setPending(alloc);
     setSelectedPreset(preset);
@@ -130,6 +134,7 @@ export function StatAllocationModal({
 
   const handleSubmit = useCallback(() => {
     if (totalPending === 0) return;
+    playSound('shop_confirm');
 
     const onSuccess = (data: AllocateStatsResponse) => {
       if (data.newMilestones?.length > 0) {

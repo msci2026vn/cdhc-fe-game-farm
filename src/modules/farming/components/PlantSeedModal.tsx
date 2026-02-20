@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PlantType } from '../types/farm.types';
 import { PLANT_TYPES } from '../stores/farmStore';
 import { formatGrowthTime } from '@/shared/utils/format';
+import { playSound } from '@/shared/audio';
 
 interface PlantSeedModalProps {
   open: boolean;
@@ -17,7 +18,7 @@ export default function PlantSeedModal({ open, onClose, onSelect }: PlantSeedMod
   return (
     <div className="fixed inset-0 z-[150] flex items-end justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={() => { playSound('ui_modal_close'); onClose(); }} />
       
       {/* Modal */}
       <div className="relative bg-card rounded-t-3xl w-full max-w-[430px] p-5 pb-8 animate-slide-up shadow-xl">
@@ -28,7 +29,7 @@ export default function PlantSeedModal({ open, onClose, onSelect }: PlantSeedMod
           {PLANT_TYPES.map((pt) => (
             <button
               key={pt.id}
-              onClick={() => setSelected(pt.id)}
+              onClick={() => { playSound('ui_click'); setSelected(pt.id); }}
               className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
                 selected === pt.id
                   ? 'border-primary bg-primary-pale shadow-md'
@@ -51,7 +52,7 @@ export default function PlantSeedModal({ open, onClose, onSelect }: PlantSeedMod
           disabled={!selected}
           onClick={() => {
             const pt = PLANT_TYPES.find((p) => p.id === selected);
-            if (pt) onSelect(pt);
+            if (pt) { playSound('plant_seed'); onSelect(pt); }
           }}
           className={`w-full mt-4 py-3.5 rounded-2xl font-heading font-bold text-base transition-all ${
             selected

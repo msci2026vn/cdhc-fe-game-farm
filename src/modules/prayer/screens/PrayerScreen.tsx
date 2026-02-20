@@ -42,8 +42,12 @@ export default function PrayerScreen() {
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
 
-  // Preload prayer sounds
-  useEffect(() => { audioManager.preloadScene('prayer'); }, []);
+  // Preload prayer sounds + start BGM
+  useEffect(() => {
+    audioManager.preloadScene('prayer');
+    audioManager.startBgm('prayer');
+    return () => { audioManager.stopBgm(); };
+  }, []);
 
   const { data: status, refetch: refetchStatus } = usePrayerStatus();
   const { data: presets } = usePrayerPresets(selectedCategory === 'all' ? undefined : selectedCategory);

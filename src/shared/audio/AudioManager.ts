@@ -18,6 +18,7 @@ import {
   SCENE_PRELOADS,
   type SoundName,
   type AudioCategory,
+  type BgmPreset,
 } from './SoundRegistry';
 
 export type { SoundName, AudioCategory };
@@ -355,7 +356,7 @@ export class AudioManager {
   // BGM — File-based with crossfade and oscillator fallback
   // ═══════════════════════════════════════════════════════════
 
-  startBgm(preset: 'battle' | 'campaign' | 'boss' = 'campaign') {
+  startBgm(preset: BgmPreset = 'campaign') {
     if (this.settings.muted) return;
     if (this.bgmPlaying && this.currentBgm === preset) return;
 

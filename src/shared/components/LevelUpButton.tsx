@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useLevelInfo } from '../hooks/useLevelInfo';
 import { useLevelUp } from '../hooks/useLevelUp';
 import { formatOGN } from '../utils/format';
+import { playSound } from '../audio';
 
 export function LevelUpButton() {
   const { data: info, isLoading } = useLevelInfo();
@@ -34,7 +35,7 @@ export function LevelUpButton() {
     <>
       {/* Level-up button */}
       <button
-        onClick={() => canAfford && setShowConfirm(true)}
+        onClick={() => { if (canAfford) { playSound('ui_modal_open'); setShowConfirm(true); } }}
         disabled={!canAfford || levelUp.isPending}
         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${
           canAfford
@@ -55,7 +56,7 @@ export function LevelUpButton() {
 
       {/* Confirmation popup */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setShowConfirm(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => { playSound('ui_modal_close'); setShowConfirm(false); }}>
           <div className="bg-white rounded-2xl p-5 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="text-4xl mb-2">{info.icon}</div>
@@ -74,13 +75,14 @@ export function LevelUpButton() {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => setShowConfirm(false)}
+                  onClick={() => { playSound('ui_back'); setShowConfirm(false); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
                 >
                   Huy
                 </button>
                 <button
                   onClick={() => {
+                    playSound('level_up');
                     levelUp.mutate();
                     setShowConfirm(false);
                   }}

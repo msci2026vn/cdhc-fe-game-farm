@@ -3,6 +3,7 @@ import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useOgnHistory } from '@/shared/hooks/useOgnHistory';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { playSound } from '@/shared/audio';
 
 const OgnHistoryScreen = () => {
     const navigate = useNavigate();
@@ -36,14 +37,14 @@ const OgnHistoryScreen = () => {
             {/* Header */}
             <div className="flex-shrink-0 wood-header-history sticky top-0 z-50 pt-safe pb-4 px-4 flex items-center justify-between">
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => { playSound('ui_back'); navigate(-1); }}
                     className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
                 >
                     <span className="material-icons-round">arrow_back</span>
                 </button>
                 <h1 className="text-xl font-black text-[#5D4037] drop-shadow-sm uppercase tracking-wide">Lịch sử OGN</h1>
                 <button
-                    onClick={() => refetch()}
+                    onClick={() => { playSound('ui_click'); refetch(); }}
                     className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
                 >
                     <span className="material-icons-round">refresh</span>

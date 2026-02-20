@@ -43,8 +43,12 @@ export default function QuizScreen() {
   const q = questions[idx];
   const total = questions.length;
 
-  // Preload quiz sounds
-  useEffect(() => { audioManager.preloadScene('quiz'); }, []);
+  // Preload quiz sounds + start BGM
+  useEffect(() => {
+    audioManager.preloadScene('quiz');
+    audioManager.startBgm('quiz');
+    return () => { audioManager.stopBgm(); };
+  }, []);
 
   // Timer logic
   useEffect(() => {

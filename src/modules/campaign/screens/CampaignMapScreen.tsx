@@ -6,7 +6,7 @@ import ZoneNode from '../components/ZoneNode';
 import { useCampaignZones } from '../hooks/useCampaignZones';
 import { ZONE_META, ZONE_POSITIONS } from '../data/zones';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 /**
  * CampaignMapScreen — Vertical scroll map of 10 zones.
@@ -31,6 +31,13 @@ export default function CampaignMapScreen() {
     const openZone = zones.find(z => z.isUnlocked && !z.isZoneCleared);
     return openZone?.zoneNumber ?? 1;
   }, [zones]);
+
+  // BGM
+  useEffect(() => {
+    audioManager.preloadScene('campaign');
+    audioManager.startBgm('campaign_map');
+    return () => { audioManager.stopBgm(); };
+  }, []);
 
   // Auto-scroll to current zone on mount
   useEffect(() => {

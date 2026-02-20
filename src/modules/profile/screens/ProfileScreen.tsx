@@ -155,7 +155,7 @@ export default function ProfileScreen() {
               <h3 className="font-heading text-sm font-bold flex items-center gap-2">📈 Chỉ số nhân vật</h3>
               {(statInfo?.freePoints ?? 0) > 0 && (
                 <button
-                  onClick={() => setShowStatModal(true)}
+                  onClick={() => { playSound('ui_modal_open'); setShowStatModal(true); }}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 animate-pulse active:scale-95 shadow-md"
                 >
                   <span className="bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
@@ -210,7 +210,7 @@ export default function ProfileScreen() {
             {/* Reset button */}
             {statInfo && (statInfo.stats.atk + statInfo.stats.hp + statInfo.stats.def + statInfo.stats.mana) > 0 && (
               <button
-                onClick={() => setShowResetConfirm(true)}
+                onClick={() => { playSound('ui_modal_open'); setShowResetConfirm(true); }}
                 disabled={resetStats.isPending}
                 className="w-full py-2 rounded-xl text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all disabled:opacity-50"
               >

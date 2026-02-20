@@ -49,8 +49,12 @@ export default function FarmingScreen() {
   const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useWeather();
   const setWeatherData = useWeatherStore((s) => s.setWeatherData);
 
-  // Preload farming sounds
-  useEffect(() => { audioManager.preloadScene('farming'); }, []);
+  // Preload farming sounds + start BGM
+  useEffect(() => {
+    audioManager.preloadScene('farming');
+    audioManager.startBgm('farm');
+    return () => { audioManager.stopBgm(); };
+  }, []);
 
   // Sync weather data to store when fetched
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { STAT_CONFIG } from '../utils/stat-constants';
+import { playSound } from '../audio';
 
 type StatKey = 'atk' | 'hp' | 'def' | 'mana';
 
@@ -102,8 +103,10 @@ export function StatHelpModal({ stat, isOpen, onClose }: StatHelpModalProps) {
 
   const data = STAT_HELP_DATA[stat];
 
+  const handleClose = () => { playSound('ui_modal_close'); onClose(); };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 animate-fade-in" onClick={handleClose}>
       <div
         className="bg-white rounded-t-2xl max-w-[430px] w-full shadow-2xl max-h-[80dvh] flex flex-col animate-slide-up"
         onClick={(e) => e.stopPropagation()}
@@ -120,7 +123,7 @@ export function StatHelpModal({ stat, isOpen, onClose }: StatHelpModalProps) {
             <h3 className="font-heading text-base font-bold">{data.name}</h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm font-bold active:bg-gray-200"
           >
             ✕
@@ -182,7 +185,7 @@ export function StatHelpModal({ stat, isOpen, onClose }: StatHelpModalProps) {
         {/* Footer button */}
         <div className="p-4 pt-2 flex-shrink-0">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-full py-2.5 rounded-xl text-sm font-bold text-white active:scale-95 transition-all shadow-lg"
             style={{ background: `linear-gradient(135deg, ${data.color}, ${data.color}cc)` }}
           >

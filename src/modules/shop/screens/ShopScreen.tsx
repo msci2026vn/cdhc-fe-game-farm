@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
@@ -7,7 +7,7 @@ import { useShopItems } from '@/shared/hooks/useShopItems';
 import { useShopBuy } from '@/shared/hooks/useShopBuy';
 import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useUIStore } from '@/shared/stores/uiStore';
-import { playSound } from '@/shared/audio';
+import { playSound, audioManager } from '@/shared/audio';
 
 type ShopTab = 'seed' | 'tool' | 'card' | 'nft';
 
@@ -28,6 +28,13 @@ const RARITY_STYLES: Record<string, { border: string; badge: string; badgeText: 
 export default function ShopScreen() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ShopTab>('seed');
+
+  // BGM
+  useEffect(() => {
+    audioManager.preloadScene('shop');
+    audioManager.startBgm('shop');
+    return () => { audioManager.stopBgm(); };
+  }, []);
   const [confirmItem, setConfirmItem] = useState<any>(null);
   const [buyAnim, setBuyAnim] = useState<string | null>(null);
 

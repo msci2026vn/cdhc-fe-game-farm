@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
+import { playSound } from '@/shared/audio';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -26,13 +27,13 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate('/camera')}
+            onClick={() => { playSound('ui_click'); navigate('/camera'); }}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-foreground/10 transition-colors"
           >
             📷
           </button>
           <button
-            onClick={() => navigate('/points')}
+            onClick={() => { playSound('ui_notification'); navigate('/points'); }}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-foreground/10 transition-colors"
           >
             🔔
