@@ -28,7 +28,7 @@ function LoginScreenContent() {
       console.log('[FARM-DEBUG] LoginScreen: Sending Google ID token to BE');
 
       // Gửi Google ID token lên BE
-      const res = await fetch(API_BASE_URL + '/auth/google', {
+      const res = await fetch(API_BASE_URL + '/api/auth/google', {
         method: 'POST',
         credentials: 'include', // ← Nhận cookie từ BE
         headers: { 'Content-Type': 'application/json' },

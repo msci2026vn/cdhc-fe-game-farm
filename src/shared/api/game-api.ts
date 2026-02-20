@@ -143,7 +143,7 @@ export const gameApi = {
    */
   getProfile: async (): Promise<PlayerProfile | null> => {
     try {
-      const response = await fetch(API_BASE_URL + '/game/player/profile', {
+      const response = await fetch(API_BASE_URL + '/api/game/player/profile', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -172,7 +172,7 @@ export const gameApi = {
    * Get all farm plots (bước 12 — real API)
    */
   getPlots: async () => {
-    const url = API_BASE_URL + '/game/farm/plots';
+    const url = API_BASE_URL + '/api/game/farm/plots';
     console.log('[FARM-DEBUG] gameApi.getPlots: Calling', url);
 
     const response = await fetch(url, {
@@ -207,7 +207,7 @@ export const gameApi = {
     slotIndex: number,
     plantTypeId: PlantTypeId
   ): Promise<{ plot: FarmPlotData; ognRemaining: number; plantType: { name: string; emoji: string; growthDurationMs: number } }> => {
-    const url = API_BASE_URL + '/game/farm/plant';
+    const url = API_BASE_URL + '/api/game/farm/plant';
     console.log('[FARM-DEBUG] gameApi.plantSeed:', { url, slotIndex, plantTypeId });
 
     const response = await fetch(url, {
@@ -233,7 +233,7 @@ export const gameApi = {
    * BE Zod: { plotId: string uuid }
    */
   waterPlot: async (plotId: string): Promise<WaterResult> => {
-    const url = API_BASE_URL + '/game/farm/water';
+    const url = API_BASE_URL + '/api/game/farm/water';
     const body = { plotId };
 
     console.log('[FARM-DEBUG] gameApi.waterPlot() — REQUEST', JSON.stringify({ url, plotId }));
@@ -261,7 +261,7 @@ export const gameApi = {
    * BE Zod: { plotId: string uuid }
    */
   harvestPlot: async (plotId: string): Promise<HarvestResult> => {
-    const url = API_BASE_URL + '/game/farm/harvest';
+    const url = API_BASE_URL + '/api/game/farm/harvest';
     const body = { plotId };
 
     console.log('[FARM-DEBUG] gameApi.harvestPlot() — REQUEST', JSON.stringify({ url, plotId }));
@@ -289,7 +289,7 @@ export const gameApi = {
    * BE Zod: { plotId: string uuid }
    */
   clearPlot: async (plotId: string): Promise<{ cleared: boolean; plotId: string; slotIndex: number }> => {
-    const url = API_BASE_URL + '/game/farm/clear';
+    const url = API_BASE_URL + '/api/game/farm/clear';
     const body = { plotId };
 
     console.log('[FARM-DEBUG] gameApi.clearPlot() — REQUEST', JSON.stringify({ url, plotId }));
@@ -318,7 +318,7 @@ export const gameApi = {
    * BE Zod: { bossId: string, won: boolean, totalDamage: int 0-100000, durationSeconds: 0-3600 }
    */
   completeBoss: async (data: BossFightInput): Promise<BossCompleteResult> => {
-    const url = API_BASE_URL + '/game/boss/complete';
+    const url = API_BASE_URL + '/api/game/boss/complete';
     const timestamp = new Date().toISOString();
     console.log('[FARM-DEBUG] gameApi.completeBoss() — START', JSON.stringify({
       url,
@@ -366,7 +366,7 @@ export const gameApi = {
    * Get boss progress (bước 17 — real API)
    */
   getBossProgress: async () => {
-    const url = API_BASE_URL + '/game/boss/progress';
+    const url = API_BASE_URL + '/api/game/boss/progress';
     console.log('[FARM-DEBUG] gameApi.getBossProgress():', url);
 
     const response = await fetch(url, {
@@ -398,7 +398,7 @@ export const gameApi = {
    * Server returns 5 random questions WITHOUT correctAnswer
    */
   startQuiz: async (): Promise<QuizStartResult> => {
-    const url = API_BASE_URL + '/game/quiz/start';
+    const url = API_BASE_URL + '/api/game/quiz/start';
     console.log('[FARM-DEBUG] gameApi.startQuiz():', url);
 
     const response = await fetch(url, {
@@ -430,7 +430,7 @@ export const gameApi = {
    * Server validates answer and returns rewards
    */
   answerQuiz: async (input: QuizAnswerInput): Promise<QuizAnswerResult> => {
-    const url = API_BASE_URL + '/game/quiz/answer';
+    const url = API_BASE_URL + '/api/game/quiz/answer';
     console.log('[FARM-DEBUG] gameApi.answerQuiz():', { url, ...input });
 
     const response = await fetch(url, {
@@ -463,7 +463,7 @@ export const gameApi = {
    * Get shop items and inventory (bước 19 — real API)
    */
   getShopItems: async (): Promise<{ items: ShopItemData[] }> => {
-    const url = API_BASE_URL + '/game/shop/items';
+    const url = API_BASE_URL + '/api/game/shop/items';
     console.log('[FARM-DEBUG] gameApi.getShopItems():', url);
 
     const response = await fetch(url, {
@@ -495,7 +495,7 @@ export const gameApi = {
    * BE Zod: { itemId: string, quantity?: int 1-99, default 1 }
    */
   buyItem: async (itemId: string, quantity?: number): Promise<BuyResult> => {
-    const url = API_BASE_URL + '/game/shop/buy';
+    const url = API_BASE_URL + '/api/game/shop/buy';
     console.log('[FARM-DEBUG] gameApi.buyItem():', { url, itemId, quantity });
 
     const response = await fetch(url, {
@@ -530,7 +530,7 @@ export const gameApi = {
    * Get friends list (bước 20 — real API)
    */
   getFriends: async (): Promise<FriendsResult> => {
-    const url = API_BASE_URL + '/game/social/friends';
+    const url = API_BASE_URL + '/api/game/social/friends';
     console.log('[FARM-DEBUG] gameApi.getFriends():', url);
 
     const response = await fetch(url, {
@@ -581,7 +581,7 @@ export const gameApi = {
     type: InteractType,
     data?: { comment?: string; giftId?: string }
   ): Promise<{ success: boolean; ognGain: number; xpGain: number; friendOgnGain: number; dailyCount: number; dailyLimit: number }> => {
-    const url = API_BASE_URL + '/game/social/interact';
+    const url = API_BASE_URL + '/api/game/social/interact';
     console.log('[FARM-DEBUG] gameApi.interactFriend():', { url, friendId, type, data });
 
     const response = await fetch(url, {
@@ -618,7 +618,7 @@ export const gameApi = {
   addFriend: async (
     data: { friendId?: string; referralCode?: string }
   ): Promise<{ friend: FriendData; referralCode: string }> => {
-    const url = API_BASE_URL + '/game/social/add-friend';
+    const url = API_BASE_URL + '/api/game/social/add-friend';
     console.log('[FARM-DEBUG] gameApi.addFriend():', { url, data });
 
     const response = await fetch(url, {
@@ -652,7 +652,7 @@ export const gameApi = {
    * Get friend's farm (view-only) — plots + friend info
    */
   getFriendFarm: async (friendId: string): Promise<FriendFarmData> => {
-    const url = `${API_BASE_URL}/game/social/friend-farm/${friendId}`;
+    const url = `${API_BASE_URL}/api/game/social/friend-farm/${friendId}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -677,7 +677,7 @@ export const gameApi = {
    * Get referral info including referred users and commission stats (bước 20 — real API)
    */
   getReferralInfo: async (): Promise<ReferralInfoResult> => {
-    const url = API_BASE_URL + '/game/social/referral';
+    const url = API_BASE_URL + '/api/game/social/referral';
     console.log('[FARM-DEBUG] gameApi.getReferralInfo():', url);
 
     const response = await fetch(url, {
@@ -709,7 +709,7 @@ export const gameApi = {
    * (Bước 22 — Player Sync)
    */
   syncActions: async (actions: Array<{ type: 'bug_catch' | 'xp_pickup' | 'daily_check'; count: number; timestamp: number }>): Promise<SyncResult> => {
-    const url = API_BASE_URL + '/game/player/sync';
+    const url = API_BASE_URL + '/api/game/player/sync';
     console.log('[FARM-DEBUG] gameApi.syncActions():', { url, actionCount: actions.length });
 
     const response = await fetch(url, {
@@ -746,7 +746,7 @@ export const gameApi = {
     page = 1,
     limit = 20
   ): Promise<LeaderboardResult> => {
-    const url = `${API_BASE_URL}/game/leaderboard?sort=${sort}&page=${page}&limit=${limit}`;
+    const url = `${API_BASE_URL}/api/game/leaderboard?sort=${sort}&page=${page}&limit=${limit}`;
     console.log('[FARM-DEBUG] gameApi.getLeaderboard():', { url, sort, page, limit });
 
     const response = await fetch(url, {
@@ -784,7 +784,7 @@ export const gameApi = {
    */
   ping: async (): Promise<PingResult> => {
     try {
-      const res = await fetch(API_BASE_URL + '/game/ping', {
+      const res = await fetch(API_BASE_URL + '/api/game/ping', {
         method: 'GET',
         credentials: 'include', // ← BẮT BUỘC — gửi cookie cross-subdomain
         headers: { 'Accept': 'application/json' },
@@ -825,7 +825,7 @@ export const gameApi = {
    */
   logout: async (): Promise<void> => {
     try {
-      await fetch(API_BASE_URL + '/auth/logout', {
+      await fetch(API_BASE_URL + '/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });
@@ -842,7 +842,7 @@ export const gameApi = {
    */
   getAuthStatus: async (): Promise<AuthStatus> => {
     try {
-      const response = await fetch(API_BASE_URL + '/auth/me', {
+      const response = await fetch(API_BASE_URL + '/api/auth/me', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -883,7 +883,7 @@ export const gameApi = {
    * @param lon - Longitude (optional, uses cached GPS if not provided)
    */
   getWeather: async (lat?: number, lon?: number) => {
-    let url = API_BASE_URL + '/weather/location';
+    let url = API_BASE_URL + '/api/weather/location';
 
     // Add lat/lon if provided
     if (lat !== undefined && lon !== undefined) {
@@ -929,7 +929,7 @@ export const gameApi = {
    * Xem kho đồ — danh sách nông sản đã thu hoạch
    */
   getInventory: async (): Promise<InventoryResponse> => {
-    const url = API_BASE_URL + '/game/inventory';
+    const url = API_BASE_URL + '/api/game/inventory';
     console.log('[FARM-DEBUG] gameApi.getInventory():', url);
 
     const response = await fetch(url, {
@@ -960,7 +960,7 @@ export const gameApi = {
    * Bán 1 nông sản — truyền UUID của inventory record
    */
   sellInventoryItem: async (id: string): Promise<SellResult> => {
-    const url = API_BASE_URL + '/game/inventory/sell';
+    const url = API_BASE_URL + '/api/game/inventory/sell';
     console.log('[FARM-DEBUG] gameApi.sellInventoryItem():', { url, id });
 
     const response = await fetch(url, {
@@ -985,7 +985,7 @@ export const gameApi = {
    * Bán hết tất cả nông sản chưa hết hạn
    */
   sellAllInventory: async (): Promise<SellAllResult> => {
-    const url = API_BASE_URL + '/game/inventory/sell-all';
+    const url = API_BASE_URL + '/api/game/inventory/sell-all';
     console.log('[FARM-DEBUG] gameApi.sellAllInventory():', url);
 
     const response = await fetch(url, {
@@ -1016,7 +1016,7 @@ export const gameApi = {
    * Get OGN transaction history
    */
   getOgnHistory: async (limit = 50, offset = 0): Promise<OgnHistoryResult> => {
-    const url = `${API_BASE_URL}/game/ogn/history?limit=${limit}&offset=${offset}`;
+    const url = `${API_BASE_URL}/api/game/ogn/history?limit=${limit}&offset=${offset}`;
     console.log('[FARM-DEBUG] gameApi.getOgnHistory():', { url, limit, offset });
 
     const response = await fetch(url, {
@@ -1049,7 +1049,7 @@ export const gameApi = {
    * Get level info — tier progress, fees, can level up
    */
   getLevelInfo: async (): Promise<LevelInfo> => {
-    const url = API_BASE_URL + '/game/player/level-info';
+    const url = API_BASE_URL + '/api/game/player/level-info';
 
     const response = await fetch(url, {
       method: 'GET',
@@ -1074,7 +1074,7 @@ export const gameApi = {
    * Manual level-up — pay OGN fee to level up
    */
   levelUp: async (): Promise<LevelUpResult> => {
-    const url = API_BASE_URL + '/game/player/level-up';
+    const url = API_BASE_URL + '/api/game/player/level-up';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1099,7 +1099,7 @@ export const gameApi = {
    * Get daily status — XP cap, boss fights, sync caps
    */
   getDailyStatus: async (): Promise<DailyStatus> => {
-    const url = API_BASE_URL + '/game/player/daily-status';
+    const url = API_BASE_URL + '/api/game/player/daily-status';
 
     const response = await fetch(url, {
       method: 'GET',
@@ -1124,7 +1124,7 @@ export const gameApi = {
    * Get boss status — cooldown, daily fights remaining
    */
   getBossStatus: async (): Promise<BossStatus> => {
-    const url = API_BASE_URL + '/game/boss/status';
+    const url = API_BASE_URL + '/api/game/boss/status';
 
     const response = await fetch(url, {
       method: 'GET',
@@ -1151,7 +1151,7 @@ export const gameApi = {
    * Get stat info — stats, effective stats, free points, milestones, reset info
    */
   getStatInfo: async (): Promise<StatInfo> => {
-    const url = API_BASE_URL + '/game/stat/info';
+    const url = API_BASE_URL + '/api/game/stat/info';
 
     const response = await fetch(url, {
       method: 'GET',
@@ -1176,7 +1176,7 @@ export const gameApi = {
    * Allocate stat points manually
    */
   allocateStats: async (allocation: AllocateStatsRequest): Promise<AllocateStatsResponse> => {
-    const url = API_BASE_URL + '/game/stat/allocate';
+    const url = API_BASE_URL + '/api/game/stat/allocate';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1202,7 +1202,7 @@ export const gameApi = {
    * Auto-allocate stat points by preset
    */
   autoAllocateStats: async (preset: 'attack' | 'defense' | 'balance'): Promise<AllocateStatsResponse> => {
-    const url = API_BASE_URL + '/game/stat/auto-allocate';
+    const url = API_BASE_URL + '/api/game/stat/auto-allocate';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1228,7 +1228,7 @@ export const gameApi = {
    * Reset all stats — costs OGN, increases weekly
    */
   resetStats: async (): Promise<ResetStatsResponse> => {
-    const url = API_BASE_URL + '/game/stat/reset';
+    const url = API_BASE_URL + '/api/game/stat/reset';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1252,7 +1252,7 @@ export const gameApi = {
    * Update auto-allocation setting (preset + enabled)
    */
   updateAutoSetting: async (setting: AutoSettingRequest): Promise<{ success: boolean }> => {
-    const url = API_BASE_URL + '/game/stat/auto-setting';
+    const url = API_BASE_URL + '/api/game/stat/auto-setting';
 
     const response = await fetch(url, {
       method: 'PATCH',
@@ -1280,7 +1280,7 @@ export const gameApi = {
    * Get all campaign zones with progress
    */
   getCampaignZones: async (): Promise<{ zones: import('@/modules/campaign/types/campaign.types').CampaignZone[] }> => {
-    const url = API_BASE_URL + '/game/boss/campaign/zones';
+    const url = API_BASE_URL + '/api/game/boss/campaign/zones';
     console.log('[FARM-DEBUG] gameApi.getCampaignZones():', url);
 
     const response = await fetch(url, {
@@ -1309,7 +1309,7 @@ export const gameApi = {
     zone: import('@/modules/campaign/types/campaign.types').ZoneInfo;
     bosses: import('@/modules/campaign/types/campaign.types').ZoneBoss[];
   }> => {
-    const url = `${API_BASE_URL}/game/boss/campaign/zones/${zoneNumber}/bosses`;
+    const url = `${API_BASE_URL}/api/game/boss/campaign/zones/${zoneNumber}/bosses`;
     console.log('[FARM-DEBUG] gameApi.getZoneBosses():', { url, zoneNumber });
 
     const response = await fetch(url, {
@@ -1335,7 +1335,7 @@ export const gameApi = {
    * Start a campaign battle session
    */
   startCampaignBattle: async (bossId: string): Promise<{ sessionId: string }> => {
-    const url = API_BASE_URL + '/game/boss/battle/start';
+    const url = API_BASE_URL + '/api/game/boss/battle/start';
     console.log('[FARM-DEBUG] gameApi.startCampaignBattle():', { url, bossId });
 
     const response = await fetch(url, {
@@ -1362,7 +1362,7 @@ export const gameApi = {
    * Get weekly boss rotation info
    */
   getWeeklyBoss: async (): Promise<WeeklyBossInfo> => {
-    const url = API_BASE_URL + '/game/boss/weekly';
+    const url = API_BASE_URL + '/api/game/boss/weekly';
 
     const response = await fetch(url, {
       method: 'GET',
@@ -1386,7 +1386,7 @@ export const gameApi = {
   // ═══ SEED ↔ OGN CONVERSION ═══
 
   getConversionTiers: async (): Promise<ConversionStatus> => {
-    const url = API_BASE_URL + '/conversion/tiers';
+    const url = API_BASE_URL + '/api/conversion/tiers';
 
     const response = await fetch(url, {
       method: 'GET',
@@ -1408,7 +1408,7 @@ export const gameApi = {
   },
 
   convertSeedToOgn: async (tierId: number): Promise<ConversionSuccessResult> => {
-    const url = API_BASE_URL + '/conversion/seed-to-ogn';
+    const url = API_BASE_URL + '/api/conversion/seed-to-ogn';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1431,7 +1431,7 @@ export const gameApi = {
   },
 
   convertOgnToSeed: async (tierId: number): Promise<ConversionSuccessResult> => {
-    const url = API_BASE_URL + '/conversion/ogn-to-seed';
+    const url = API_BASE_URL + '/api/conversion/ogn-to-seed';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1454,7 +1454,7 @@ export const gameApi = {
   },
 
   getConversionHistory: async (page = 1, limit = 5): Promise<ConversionHistoryResult> => {
-    const url = `${API_BASE_URL}/conversion/history?page=${page}&limit=${limit}`;
+    const url = `${API_BASE_URL}/api/conversion/history?page=${page}&limit=${limit}`;
 
     const response = await fetch(url, {
       method: 'GET',

@@ -9,7 +9,7 @@ export function usePrayerOffer() {
   const queryClient = useQueryClient();
 
   return useMutation<PrayerOfferResponse, Error, PrayerOfferPayload>({
-    mutationFn: (data) => gameClient.post<PrayerOfferResponse>('/prayer/offer', data),
+    mutationFn: (data) => gameClient.post<PrayerOfferResponse>('/api/prayer/offer', data),
 
     onSuccess: (data) => {
       // Toast

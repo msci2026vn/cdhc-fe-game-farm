@@ -172,7 +172,7 @@ export default function MarketScreen() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${API_BASE_URL}/market/latest`, {
+      const res = await fetch(`${API_BASE_URL}/api/market/latest`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +191,7 @@ export default function MarketScreen() {
 
   async function checkExistingPrediction() {
     try {
-      const res = await fetch(`${API_BASE_URL}/market/predictions?status=pending&limit=1`, {
+      const res = await fetch(`${API_BASE_URL}/api/market/predictions?status=pending&limit=1`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -221,7 +221,7 @@ export default function MarketScreen() {
 
   async function fetchRatio() {
     try {
-      const res = await fetch(`${API_BASE_URL}/market/ratio`);
+      const res = await fetch(`${API_BASE_URL}/api/market/ratio`);
       if (!res.ok) return;
       const json = await res.json();
       if (json.success && json.data) setRatio(json.data);
@@ -230,7 +230,7 @@ export default function MarketScreen() {
 
   async function fetchHistory() {
     try {
-      const res = await fetch(`${API_BASE_URL}/market/predictions/history`, {
+      const res = await fetch(`${API_BASE_URL}/api/market/predictions/history`, {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -242,7 +242,7 @@ export default function MarketScreen() {
 
   async function fetchLeaderboard() {
     try {
-      const res = await fetch(`${API_BASE_URL}/market/leaderboard`);
+      const res = await fetch(`${API_BASE_URL}/api/market/leaderboard`);
       if (!res.ok) return;
       const json = await res.json();
       if (json.success && json.data?.leaderboard) setLeaderboard(json.data.leaderboard);
@@ -254,7 +254,7 @@ export default function MarketScreen() {
     try {
       setPredicting(true);
       setPredictResult(null);
-      const res = await fetch(`${API_BASE_URL}/market/predict`, {
+      const res = await fetch(`${API_BASE_URL}/api/market/predict`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
