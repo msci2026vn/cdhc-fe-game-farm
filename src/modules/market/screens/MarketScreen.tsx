@@ -4,15 +4,18 @@ import { useNavigate } from 'react-router-dom';
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MarketIndex {
   value: number;
-  direction: 'up' | 'down';
+  direction: 'up' | 'down' | 'flat';
   percentChange: number;
+  description?: string;
+  baseValue?: number;
 }
 
 interface CommodityPrice {
-  commodityId: string;
+  id: string;
   name?: string;
-  price: string;
-  percentChange: string;
+  nameVi?: string;
+  price: number;
+  percentChange: number | null;
   emoji: string;
 }
 
@@ -76,13 +79,13 @@ interface LeaderboardEntry {
 
 const BASE = 'https://sta.cdhc.vn';
 
-// Vietnamese names for each commodity ID
+// Vietnamese names + exchange for each commodity ID
 const COMMODITY_VI: Record<string, { name: string; subname: string }> = {
-  WHEAT:  { name: 'Lúa mì',  subname: 'Hàng hóa' },
-  CORN:   { name: 'Ngô',     subname: 'Hàng hóa' },
-  COFFEE: { name: 'Cà phê',  subname: 'Robusta'   },
-  COTTON: { name: 'Bông',    subname: 'Sợi bông'  },
-  SUGAR:  { name: 'Đường',   subname: 'Thô'       },
+  WHEAT:  { name: 'Lúa mì',   subname: 'Sàn CBOT' },
+  CORN:   { name: 'Ngô',      subname: 'Sàn CBOT' },
+  COFFEE: { name: 'Cà phê',   subname: 'Sàn ICE'  },
+  COTTON: { name: 'Bông vải', subname: 'Sàn ICE'  },
+  SUGAR:  { name: 'Đường',    subname: 'Sàn ICE'  },
 };
 
 // Material icon + colour per commodity
@@ -143,6 +146,7 @@ export default function MarketScreen() {
   const [history, setHistory]             = useState<{ predictions: PredictionRow[]; stats: HistoryStats } | null>(null);
   const [leaderboard, setLeaderboard]     = useState<LeaderboardEntry[]>([]);
   const [activeTab, setActiveTab]         = useState<TabId>('prices');
+  const [showGuide, setShowGuide]         = useState(false);
 
   const { h, m, s, pad, secs } = useCountdownTo18();
   const isUrgent = secs <= 3600;
@@ -410,22 +414,38 @@ export default function MarketScreen() {
         >
           <div className="bg-[#fefae0] rounded-xl p-3 border border-[#bcaaa4] flex flex-col items-center"
             style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
-            <span className="text-xs font-bold text-[#5d4037] uppercase tracking-wide mb-1">Chỉ số tổng hợp</span>
+            <span className="text-[10px] font-bold text-[#5d4037]/70 uppercase tracking-wider mb-1">
+              Xu hướng giá nông sản thế giới
+            </span>
             <div className="flex items-end gap-2">
               <span className="text-4xl font-bold text-[#5d4037]">
                 {typeof data.index.value === 'number' ? data.index.value.toFixed(2) : data.index.value}
               </span>
               <div className={`flex items-center gap-0.5 font-bold px-2 py-0.5 rounded-lg mb-1 ${isUp ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}>
                 <span className="material-symbols-outlined text-base">{isUp ? 'trending_up' : 'trending_down'}</span>
-                <span className="text-sm">{data.index.percentChange}%</span>
+                <span className="text-sm">
+                  {isUp ? 'Tăng' : 'Giảm'} {Math.abs(data.index.percentChange).toFixed(2)}%
+                </span>
               </div>
             </div>
-            <div className="w-full h-1 bg-gray-200 rounded-full mt-3 overflow-hidden">
+            <div className="w-full h-1 bg-gray-200 rounded-full mt-2 overflow-hidden">
               <div
                 className={`h-full rounded-full ${isUp ? 'bg-green-500' : 'bg-red-500'}`}
                 style={{ width: `${Math.min(Math.abs(data.index.percentChange) * 10 + 30, 90)}%` }}
               />
             </div>
+            <p className="text-[10px] text-[#5d4037]/60 mt-2 text-center leading-relaxed">
+              {(data.index as any).description || (isUp
+                ? `Giá nông sản thế giới hôm nay TĂNG so với hôm qua`
+                : `Giá nông sản thế giới hôm nay GIẢM so với hôm qua`
+              )}
+            </p>
+            <button
+              onClick={() => setShowGuide(true)}
+              className="mt-1.5 text-[11px] text-[#8c6239] font-semibold underline underline-offset-2 active:opacity-60"
+            >
+              Hướng dẫn đọc chỉ số
+            </button>
           </div>
         </div>
 
@@ -476,20 +496,21 @@ export default function MarketScreen() {
 
             <div className="bg-[#fefae0] rounded-xl p-4 border border-[#bcaaa4]"
               style={{ boxShadow: 'inset 0 0 20px rgba(139,69,19,0.1)' }}>
-              <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-2 mb-3 uppercase text-sm">
+              <h3 className="text-center font-bold text-[#5d4037] border-b-2 border-dashed border-[#8c6239]/30 pb-1 mb-1 uppercase text-sm">
                 Bảng giá hôm nay
               </h3>
+              <p className="text-center text-[10px] text-[#5d4037]/50 mb-3">Giá nông sản thế giới — cập nhật hàng ngày</p>
 
               <div className="space-y-3">
                 {data.prices.map(p => {
-                  const change   = parseFloat(p.percentChange);
+                  const change   = p.percentChange ?? 0;
                   const positive = change >= 0;
-                  const ic       = COMMODITY_ICON[p.commodityId] || DEFAULT_ICON;
-                  const vi       = COMMODITY_VI[p.commodityId];
-                  const displayName    = p.name || vi?.name    || p.commodityId;
-                  const displaySubname = vi?.subname || p.commodityId;
+                  const ic       = COMMODITY_ICON[p.id] || DEFAULT_ICON;
+                  const vi       = COMMODITY_VI[p.id];
+                  const displayName    = p.nameVi || vi?.name || p.name || p.id;
+                  const displaySubname = vi?.subname || p.id;
                   return (
-                    <div key={p.commodityId}
+                    <div key={p.id}
                       className="flex items-center justify-between bg-white/60 p-2 rounded-lg border border-[#8c6239]/10">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${ic.bg} ${ic.border}`}>
@@ -501,7 +522,7 @@ export default function MarketScreen() {
                         </div>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="font-bold text-[#5d4037]">{parseFloat(p.price).toFixed(2)}</span>
+                        <span className="font-bold text-[#5d4037]">{(typeof p.price === 'number' ? p.price : parseFloat(String(p.price))).toFixed(2)}</span>
                         <span className={`text-xs font-bold ${positive ? 'text-green-600' : 'text-red-500'}`}>
                           {positive ? '+' : ''}{change.toFixed(2)}%
                         </span>
@@ -512,7 +533,7 @@ export default function MarketScreen() {
               </div>
 
               <div className="mt-3 text-center text-[10px] text-gray-500 italic">
-                Cập nhật: vừa xong
+                Đơn vị: cents/đơn vị hàng hóa
               </div>
             </div>
           </div>
@@ -810,6 +831,96 @@ export default function MarketScreen() {
           )}
         </div>
       </div>
+
+      {/* ── Guide Modal ── */}
+      {showGuide && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowGuide(false)}>
+          <div
+            className="bg-[#fefae0] rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto p-5 border-2 border-[#8c6239] shadow-2xl"
+            onClick={e => e.stopPropagation()}
+            style={{ scrollbarWidth: 'none' }}
+          >
+            <h2 className="text-base font-bold text-[#5d4037] text-center mb-4">Hướng dẫn đọc giá nông sản</h2>
+
+            <div className="mb-4">
+              <h3 className="font-bold text-sm text-[#5d4037] mb-1">Mục đích</h3>
+              <p className="text-sm text-[#5d4037]/80 leading-relaxed">
+                Theo dõi giá nông sản thế giới giúp bà con nông dân <strong>nắm bắt xu hướng thị trường</strong>,
+                chủ động trong sản xuất và mua bán nông sản. Khi giá thế giới tăng, giá trong nước thường tăng theo
+                sau 1-2 tuần.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="font-bold text-sm text-[#5d4037] mb-1">Chỉ số xu hướng</h3>
+              <p className="text-sm text-[#5d4037]/80 leading-relaxed">
+                Chỉ số bắt đầu từ <strong>1000 điểm</strong>. Con số này phản ánh xu hướng chung của 5 mặt hàng nông sản:
+              </p>
+              <ul className="text-sm text-[#5d4037]/80 mt-1 ml-4 space-y-1">
+                <li><strong>Trên 1000</strong>: giá nông sản đang có xu hướng <span className="text-green-600 font-bold">TĂNG</span></li>
+                <li><strong>Dưới 1000</strong>: giá nông sản đang có xu hướng <span className="text-red-500 font-bold">GIẢM</span></li>
+                <li><strong>% bên cạnh</strong>: mức tăng/giảm so với hôm qua</li>
+              </ul>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="font-bold text-sm text-[#5d4037] mb-1">5 mặt hàng nông sản</h3>
+              <p className="text-sm text-[#5d4037]/80 mb-2">Giá giao dịch trên sàn quốc tế (Mỹ):</p>
+              <div className="text-sm text-[#5d4037]/80 space-y-0.5">
+                <div>🌾 <strong>Lúa mì</strong> — sàn CBOT, Chicago</div>
+                <div>🌽 <strong>Ngô</strong> — sàn CBOT, Chicago</div>
+                <div>🧶 <strong>Bông vải</strong> — sàn ICE, New York</div>
+                <div>🍬 <strong>Đường</strong> — sàn ICE, New York</div>
+                <div>☕ <strong>Cà phê</strong> — sàn ICE, New York</div>
+              </div>
+              <p className="text-[10px] text-[#5d4037]/50 mt-2">
+                Đơn vị: cents (xu Mỹ) trên mỗi đơn vị hàng hóa.
+                Số % xanh = tăng so hôm qua. Số % đỏ = giảm so hôm qua.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="font-bold text-sm text-[#5d4037] mb-1">Cách dự đoán</h3>
+              <ol className="text-sm text-[#5d4037]/80 ml-4 space-y-1 list-decimal">
+                <li>Xem giá và xu hướng hôm nay</li>
+                <li>Đoán <strong>ngày mai</strong> giá sẽ tăng hay giảm</li>
+                <li>Bấm <span className="text-green-600 font-bold">TĂNG</span> hoặc <span className="text-red-500 font-bold">GIẢM</span></li>
+                <li>Kết quả công bố lúc <strong>18:00 hàng ngày</strong></li>
+                <li>Mỗi ngày chỉ được dự đoán <strong>1 lần</strong></li>
+              </ol>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="font-bold text-sm text-[#5d4037] mb-1">Thưởng phạt</h3>
+              <div className="text-sm text-[#5d4037]/80 space-y-0.5">
+                <div>Đoán đúng: <span className="text-green-600 font-bold">+200 OGN</span></div>
+                <div>Đoán sai: <span className="text-red-500 font-bold">-150 OGN</span></div>
+                <div>Đoán đúng liên tiếp (streak):</div>
+                <div className="ml-2 text-xs text-[#5d4037]/60">3 ngày: +100 | 5 ngày: +300 | 7 ngày: +500 | 10 ngày: +1,000 | 14 ngày: +2,000</div>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="font-bold text-sm text-[#5d4037] mb-1">Mẹo cho nông dân</h3>
+              <div className="text-sm text-[#5d4037]/80 space-y-0.5">
+                <div>Giá <strong>cà phê</strong> phụ thuộc thời tiết Brazil, Việt Nam</div>
+                <div>Giá <strong>lúa mì</strong> ảnh hưởng bởi xung đột, thời tiết châu Âu</div>
+                <div><strong>Mùa thu hoạch</strong> → cung tăng → giá thường giảm</div>
+                <div><strong>Thiên tai, hạn hán</strong> → cung giảm → giá tăng mạnh</div>
+                <div>Giá thế giới tăng → giá VN thường tăng theo sau 1-2 tuần</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowGuide(false)}
+              className="w-full py-3 bg-[#8c6239] text-[#fefae0] rounded-xl font-bold text-sm border-b-4 border-[#5d4037] active:border-b-0 active:translate-y-1 transition-all"
+            >
+              Đã hiểu
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
