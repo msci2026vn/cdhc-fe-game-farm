@@ -14,7 +14,8 @@ import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import { getDominantAura } from '@/shared/components/BuildAura';
 import { audioManager } from '@/shared/audio';
-// BossSkillWarning overlay removed — NÉ button in SkillBar handles dodge now
+import { useBossSprite } from '../hooks/useBossSprite';
+import { BossSprite } from './BossSprite';
 
 // HUD components (reused from boss module)
 import {
@@ -71,6 +72,19 @@ export default function BossFightCampaign({
 
   const auraType = getDominantAura(combatStats);
 
+  // ═══ Boss sprite state management (multi-state SVG) ═══
+  const {
+    state: spriteState,
+    src: spriteSrc,
+    hasSprites,
+    triggerAttack: triggerBossAttack,
+    triggerDead: triggerBossDead,
+  } = useBossSprite({
+    spritePath: bossData.spritePath,
+    fallbackImage: bossData.image,
+    attackDuration: 900,
+  });
+
   // ═══ Preload battle sounds + BGM ═══
   useEffect(() => {
     audioManager.preloadScene('battle');
@@ -103,6 +117,20 @@ export default function BossFightCampaign({
       return () => clearTimeout(timer);
     }
   }, [result, deathPhase]);
+
+  // ═══ Trigger sprite attack on boss skill or normal attack ═══
+  useEffect(() => {
+    if (skillWarning && hasSprites) triggerBossAttack();
+  }, [skillWarning]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (bossAttackMsg && hasSprites) triggerBossAttack();
+  }, [bossAttackMsg]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ═══ Trigger sprite dead when boss HP reaches 0 ═══
+  useEffect(() => {
+    if (boss.bossHp <= 0 && hasSprites) triggerBossDead();
+  }, [boss.bossHp <= 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ Enrage alert ═══
   const enrageLevel = Math.round((enrageMultiplier - 1) * 10);
@@ -181,8 +209,8 @@ export default function BossFightCampaign({
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center text-center px-6">
           <div className="mb-4 animate-bounce drop-shadow-lg">
-            {bossData.image ? (
-              <img src={bossData.image} alt={bossData.name} className="w-24 h-24 object-contain" />
+            {spriteSrc ? (
+              <img key={spriteSrc} src={spriteSrc} alt={bossData.name} className="w-24 h-24 object-contain" draggable={false} />
             ) : (
               <span className="text-7xl">💀</span>
             )}
@@ -433,23 +461,18 @@ export default function BossFightCampaign({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <div className={`animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''}`}
-            style={{
-              filter: [
-                enrageMultiplier >= 1.3
-                  ? `drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
-                  : 'drop-shadow(0 0 20px rgba(231,76,60,0.5))',
-                activeBossBuffs.some(b => b.type === 'shield') && 'drop-shadow(0 0 15px rgba(116,185,255,0.7))',
-                activeBossBuffs.some(b => b.type === 'reflect') && 'drop-shadow(0 0 15px rgba(168,85,247,0.7))',
-              ].filter(Boolean).join(' '),
-              transition: 'filter 1s ease',
-            }}>
-            {bossData.image ? (
-              <img src={bossData.image} alt={bossData.name} className="w-40 h-40 object-contain drop-shadow-xl" />
-            ) : (
-              <span className="text-[48px]">{bossData.emoji}</span>
-            )}
-          </div>
+          <BossSprite
+            src={spriteSrc}
+            state={spriteState}
+            hasSprites={hasSprites}
+            emoji={bossData.emoji}
+            name={bossData.name}
+            enrageMultiplier={enrageMultiplier}
+            shieldBuff={activeBossBuffs.some(b => b.type === 'shield')}
+            reflectBuff={activeBossBuffs.some(b => b.type === 'reflect')}
+            skillWarning={!!skillWarning}
+            bossDead={boss.bossHp <= 0}
+          />
 
           {/* Egg */}
           {egg && (

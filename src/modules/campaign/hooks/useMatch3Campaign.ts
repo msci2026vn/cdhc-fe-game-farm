@@ -24,6 +24,8 @@ export interface CampaignBossData {
   name: string;
   emoji: string;
   image?: string;
+  /** Base path for multi-state SVG sprites (idle/attack/dead) — undefined = use single image */
+  spritePath?: string;
   hp: number;
   attack: number;
   reward: number;

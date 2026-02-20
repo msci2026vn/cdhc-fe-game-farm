@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyDead" cx="42%" cy="35%" r="58%">
+      <stop offset="0%" stop-color="#c8d8b0"/>
+      <stop offset="55%" stop-color="#7a9858"/>
+      <stop offset="100%" stop-color="#3a5820"/>
+    </radialGradient>
+    <radialGradient id="eyeDead" cx="35%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#eeeeee"/>
+      <stop offset="100%" stop-color="#cccccc"/>
+    </radialGradient>
+    <filter id="deadGray">
+      <feColorMatrix type="saturate" values="0.2"/>
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#ffdd00" flood-opacity="0.8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes fallDown {
+        0%   { transform: translateY(-30px) rotate(-8deg); opacity: 0.3; }
+        35%  { transform: translateY(8px) rotate(4deg); opacity: 1; }
+        55%  { transform: translateY(-4px) rotate(-2deg); }
+        70%  { transform: translateY(3px) rotate(1deg); }
+        85%  { transform: translateY(-1px) rotate(0deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+      }
+      @keyframes tiltDead {
+        0%,100% { transform: rotate(-15deg) translateY(0px); }
+        50%     { transform: rotate(-15deg) translateY(-2px); }
+      }
+      @keyframes starOrbit {
+        0%   { transform: rotate(0deg) translateX(28px) rotate(0deg); opacity: 1; }
+        100% { transform: rotate(360deg) translateX(28px) rotate(-360deg); opacity: 1; }
+      }
+      @keyframes starOrbit2 {
+        0%   { transform: rotate(120deg) translateX(28px) rotate(-120deg); opacity: 0.8; }
+        100% { transform: rotate(480deg) translateX(28px) rotate(-480deg); opacity: 0.8; }
+      }
+      @keyframes starOrbit3 {
+        0%   { transform: rotate(240deg) translateX(28px) rotate(-240deg); opacity: 0.6; }
+        100% { transform: rotate(600deg) translateX(28px) rotate(-600deg); opacity: 0.6; }
+      }
+      @keyframes spiralFade {
+        0%   { opacity: 0; transform: scale(0) translateY(0); }
+        20%  { opacity: 1; transform: scale(1.2) translateY(-5px); }
+        60%  { opacity: 0.6; transform: scale(1) translateY(-20px); }
+        100% { opacity: 0; transform: scale(0.5) translateY(-40px); }
+      }
+      @keyframes shadowShrink {
+        0%   { rx: 50; opacity: 0.35; }
+        100% { rx: 50; opacity: 0.35; }
+      }
+      @keyframes legFlop {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(5deg); }
+      }
+      .character { animation: tiltDead 2.5s ease-in-out infinite; transform-origin: 100px 155px; }
+      .star1 { animation: starOrbit  1.8s linear infinite; transform-origin: 100px 80px; }
+      .star2 { animation: starOrbit2 1.8s linear infinite; transform-origin: 100px 80px; }
+      .star3 { animation: starOrbit3 1.8s linear infinite; transform-origin: 100px 80px; }
+      .puff1 { animation: spiralFade 2s ease-out infinite 0s; }
+      .puff2 { animation: spiralFade 2s ease-out infinite 0.65s; }
+      .puff3 { animation: spiralFade 2s ease-out infinite 1.3s; }
+      .leg-dead { animation: legFlop 2.5s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <!-- Ground shadow — flat, big (body fallen) -->
+  <ellipse cx="108" cy="210" rx="50" ry="8" fill="#1a5000" opacity="0.3"/>
+
+  <!-- Soul puff particles floating up -->
+  <g class="puff1" transform="translate(85,95)">
+    <circle cx="0" cy="0" r="7" fill="#c8f080" opacity="0.6"/>
+  </g>
+  <g class="puff2" transform="translate(105,88)">
+    <circle cx="0" cy="0" r="5" fill="#aee060" opacity="0.5"/>
+  </g>
+  <g class="puff3" transform="translate(115,100)">
+    <circle cx="0" cy="0" r="4" fill="#88cc40" opacity="0.4"/>
+  </g>
+
+  <!-- Orbiting stars -->
+  <g class="star1" filter="url(#starGlow)">
+    <text x="100" y="80" text-anchor="middle" dominant-baseline="middle" font-size="14">⭐</text>
+  </g>
+  <g class="star2" filter="url(#starGlow)">
+    <text x="100" y="80" text-anchor="middle" dominant-baseline="middle" font-size="12">⭐</text>
+  </g>
+  <g class="star3" filter="url(#starGlow)">
+    <text x="100" y="80" text-anchor="middle" dominant-baseline="middle" font-size="10">✨</text>
+  </g>
+
+  <!-- Character — tilted/fallen -->
+  <g class="character" filter="url(#deadGray)">
+
+    <!-- Legs flopped out weakly -->
+    <g class="leg-dead">
+      <line x1="72"  y1="165" x2="44"  y2="185" stroke="#5a7838" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+      <line x1="44"  y1="185" x2="32"  y2="200" stroke="#4a6828" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    </g>
+    <line x1="128" y1="165" x2="158" y2="182" stroke="#5a7838" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="158" y1="182" x2="170" y2="198" stroke="#4a6828" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+    <line x1="68"  y1="150" x2="42"  y2="164" stroke="#5a7838" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="42"  y1="164" x2="30"  y2="176" stroke="#4a6828" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <line x1="132" y1="150" x2="158" y2="164" stroke="#5a7838" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="158" y1="164" x2="170" y2="176" stroke="#4a6828" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Abdomen -->
+    <ellipse cx="105" cy="162" rx="32" ry="24" fill="url(#bodyDead)"/>
+
+    <!-- Main body -->
+    <ellipse cx="105" cy="135" rx="42" ry="38" fill="url(#bodyDead)"/>
+    <!-- Belly (desaturated) -->
+    <ellipse cx="105" cy="137" rx="26" ry="21" fill="#d8f0b0" opacity="0.3"/>
+
+    <!-- Front legs hanging limp -->
+    <line x1="74"  y1="146" x2="52"  y2="168" stroke="#5a7838" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="52"  y1="168" x2="46"  y2="185" stroke="#4a6828" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    <line x1="136" y1="146" x2="158" y2="168" stroke="#5a7838" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="158" y1="168" x2="164" y2="185" stroke="#4a6828" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- Antennae drooping -->
+    <path d="M93,100  Q80,88 72,80"  stroke="#4a6828" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="72" cy="80" r="5" fill="#7a9838" opacity="0.7"/>
+    <path d="M117,100 Q130,88 138,80" stroke="#4a6828" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="138" cy="80" r="5" fill="#7a9838" opacity="0.7"/>
+
+    <!-- Eyes — X dead eyes -->
+    <circle cx="87"  cy="126" r="14" fill="url(#eyeDead)" opacity="0.85"/>
+    <circle cx="87"  cy="126" r="14" fill="none" stroke="#4a6828" stroke-width="1.5" opacity="0.7"/>
+    <!-- X eye left -->
+    <line x1="80" y1="119" x2="94" y2="133" stroke="#4a6828" stroke-width="3" stroke-linecap="round"/>
+    <line x1="94" y1="119" x2="80" y2="133" stroke="#4a6828" stroke-width="3" stroke-linecap="round"/>
+
+    <circle cx="123" cy="126" r="14" fill="url(#eyeDead)" opacity="0.85"/>
+    <circle cx="123" cy="126" r="14" fill="none" stroke="#4a6828" stroke-width="1.5" opacity="0.7"/>
+    <!-- X eye right -->
+    <line x1="116" y1="119" x2="130" y2="133" stroke="#4a6828" stroke-width="3" stroke-linecap="round"/>
+    <line x1="130" y1="119" x2="116" y2="133" stroke="#4a6828" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Mouth — sad/flat -->
+    <path d="M91,146 Q105,142 119,146" stroke="#4a6828" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+    <!-- Sweat drops -->
+    <ellipse cx="68" cy="118" rx="4" ry="6" fill="#88ccff" opacity="0.5" transform="rotate(-15,68,118)"/>
+    <ellipse cx="142" cy="118" rx="3" ry="5" fill="#88ccff" opacity="0.4" transform="rotate(15,142,118)"/>
+  </g>
+</svg>

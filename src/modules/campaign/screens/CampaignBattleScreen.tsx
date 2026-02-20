@@ -17,6 +17,15 @@ import type { CampaignBossData } from '../hooks/useMatch3Campaign';
 import BossFightCampaign from '../components/BossFightCampaign';
 
 /**
+ * Lookup for bosses with multi-state SVG sprites (idle/attack/dead).
+ * Key: globalBossNumber, Value: base path (without -idle/-attack/-dead.svg suffix)
+ * Bosses NOT in this map fall back to the single /assets/campaign-bosses/boss-N.svg
+ */
+const BOSS_SPRITE_PATHS: Record<number, string> = {
+  1: '/assets/bosses/ruong-lua/rep-con/boss-1',
+};
+
+/**
  * Transform a campaign ZoneBoss + static detail → CampaignBossData
  */
 function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBossData {
@@ -27,12 +36,14 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBoss
   const bossInZone = boss.bossNumber % 4 === 0 ? 4 : boss.bossNumber % 4;
   const emoji = meta?.bossEmoji[bossInZone] || boss.emoji || '👾';
   const image = `/assets/campaign-bosses/boss-${globalBossNumber}.svg`;
+  const spritePath = BOSS_SPRITE_PATHS[globalBossNumber];
 
   return {
     id: String(boss.id),
     name: boss.name,
     emoji,
     image,
+    spritePath,
     hp: boss.hp,
     attack: detail?.atk ?? boss.attack,
     reward: boss.reward,
