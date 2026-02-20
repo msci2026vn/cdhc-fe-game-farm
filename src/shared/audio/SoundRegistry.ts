@@ -121,7 +121,7 @@ export const BGM_REGISTRY: Record<string, { url: string; loop: boolean; volume: 
   farm: { url: '/audio/sfx/nhac-nen/Verdant_Harvest.mp3', loop: true, volume: 0.15 },
   shop: { url: '/audio/bgm/shop.mp3', loop: true, volume: 0.14 },
   quiz: { url: '/audio/bgm/quiz.mp3', loop: true, volume: 0.16 },
-  prayer: { url: '/audio/bgm/prayer.mp3', loop: true, volume: 0.12 },
+  prayer: { url: '/audio/sfx/nhac-nen/Celestial_Sanctuary.mp3', loop: true, volume: 0.12 },
   campaign_map: { url: '/audio/bgm/campaign-map.mp3', loop: true, volume: 0.18 },
 };
 
