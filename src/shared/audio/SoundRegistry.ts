@@ -112,7 +112,7 @@ export const SOUND_REGISTRY: Record<SoundName, SoundEntry> = {
   boss_select: { url: '/audio/sfx/campaign/boss-select.mp3', category: 'sfx', volume: 0.3 },
 };
 
-export type BgmPreset = 'battle' | 'campaign' | 'boss' | 'farm' | 'shop' | 'quiz' | 'prayer' | 'campaign_map';
+export type BgmPreset = 'battle' | 'campaign' | 'boss' | 'farm' | 'shop' | 'quiz' | 'prayer' | 'campaign_map' | 'market';
 
 export const BGM_REGISTRY: Record<string, { url: string; loop: boolean; volume: number }> = {
   battle: { url: '/audio/sfx/nhac-nen/Crimson_Onslaught.mp3', loop: true, volume: 0.25 },
@@ -123,6 +123,7 @@ export const BGM_REGISTRY: Record<string, { url: string; loop: boolean; volume: 
   quiz: { url: '/audio/bgm/quiz.mp3', loop: true, volume: 0.16 },
   prayer: { url: '/audio/sfx/nhac-nen/Celestial_Sanctuary.mp3', loop: true, volume: 0.12 },
   campaign_map: { url: '/audio/bgm/campaign-map.mp3', loop: true, volume: 0.18 },
+  market: { url: '/audio/sfx/nhac-nen/Ascent_of_the_Dawn.mp3', loop: true, volume: 0.20 },
 };
 
 /** Sounds to preload per scene — loaded in parallel at mount time */

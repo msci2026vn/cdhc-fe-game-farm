@@ -83,20 +83,20 @@ interface LeaderboardEntry {
 
 // Vietnamese names + exchange for each commodity ID
 const COMMODITY_VI: Record<string, { name: string; subname: string }> = {
-  WHEAT:  { name: 'Lúa mì',   subname: 'Sàn CBOT' },
-  CORN:   { name: 'Ngô',      subname: 'Sàn CBOT' },
-  COFFEE: { name: 'Cà phê',   subname: 'Sàn ICE'  },
-  COTTON: { name: 'Bông vải', subname: 'Sàn ICE'  },
-  SUGAR:  { name: 'Đường',    subname: 'Sàn ICE'  },
+  WHEAT: { name: 'Lúa mì', subname: 'Sàn CBOT' },
+  CORN: { name: 'Ngô', subname: 'Sàn CBOT' },
+  COFFEE: { name: 'Cà phê', subname: 'Sàn ICE' },
+  COTTON: { name: 'Bông vải', subname: 'Sàn ICE' },
+  SUGAR: { name: 'Đường', subname: 'Sàn ICE' },
 };
 
 // Material icon + colour per commodity
 const COMMODITY_ICON: Record<string, { icon: string; bg: string; border: string; text: string }> = {
-  WHEAT:  { icon: 'grain',      bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-700' },
-  CORN:   { icon: 'grain',      bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-700' },
-  COFFEE: { icon: 'coffee',     bg: 'bg-amber-100',  border: 'border-amber-300',  text: 'text-amber-800'  },
-  COTTON: { icon: 'water_drop', bg: 'bg-sky-100',    border: 'border-sky-300',    text: 'text-sky-600'    },
-  SUGAR:  { icon: 'nutrition',  bg: 'bg-orange-100', border: 'border-orange-300', text: 'text-orange-700' },
+  WHEAT: { icon: 'grain', bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-700' },
+  CORN: { icon: 'grain', bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-700' },
+  COFFEE: { icon: 'coffee', bg: 'bg-amber-100', border: 'border-amber-300', text: 'text-amber-800' },
+  COTTON: { icon: 'water_drop', bg: 'bg-sky-100', border: 'border-sky-300', text: 'text-sky-600' },
+  SUGAR: { icon: 'nutrition', bg: 'bg-orange-100', border: 'border-orange-300', text: 'text-orange-700' },
 };
 const DEFAULT_ICON = { icon: 'eco', bg: 'bg-green-100', border: 'border-green-300', text: 'text-green-700' };
 
@@ -121,9 +121,9 @@ function useCountdownTo18() {
     return () => clearInterval(id);
   }, [getSecondsLeft]);
 
-  const h  = Math.floor(secs / 3600);
-  const m  = Math.floor((secs % 3600) / 60);
-  const s  = secs % 60;
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return { h, m, s, pad, secs };
@@ -135,26 +135,26 @@ export default function MarketScreen() {
 
   // BGM
   useEffect(() => {
-    audioManager.startBgm('shop');
+    audioManager.startBgm('market');
     return () => { audioManager.stopBgm(); };
   }, []);
 
   // Core data
-  const [data, setData]                   = useState<MarketData | null>(null);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
+  const [data, setData] = useState<MarketData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Predict
-  const [predicting, setPredicting]       = useState(false);
+  const [predicting, setPredicting] = useState(false);
   const [predictResult, setPredictResult] = useState<PredictResult | null>(null);
-  const [streak, setStreak]               = useState(0);
+  const [streak, setStreak] = useState(0);
 
   // New: ratio, history, leaderboard
-  const [ratio, setRatio]                 = useState<RatioData | null>(null);
-  const [history, setHistory]             = useState<{ predictions: PredictionRow[]; stats: HistoryStats } | null>(null);
-  const [leaderboard, setLeaderboard]     = useState<LeaderboardEntry[]>([]);
-  const [activeTab, setActiveTab]         = useState<TabId>('prices');
-  const [showGuide, setShowGuide]         = useState(false);
+  const [ratio, setRatio] = useState<RatioData | null>(null);
+  const [history, setHistory] = useState<{ predictions: PredictionRow[]; stats: HistoryStats } | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<TabId>('prices');
+  const [showGuide, setShowGuide] = useState(false);
 
   const { h, m, s, pad, secs } = useCountdownTo18();
   const isUrgent = secs <= 3600;
@@ -281,7 +281,7 @@ export default function MarketScreen() {
         fetchRatio(); // refresh ratio after predict
       } else {
         const code = json?.error?.code || '';
-        const msg  = json?.error?.message || 'Không thể dự đoán';
+        const msg = json?.error?.message || 'Không thể dự đoán';
         if (code === 'ALREADY_PREDICTED' || msg.toLowerCase().includes('already') || msg.toLowerCase().includes('đã dự đoán')) {
           setPredictResult({ success: false, alreadyPredicted: true, message: '📅 Bạn đã dự đoán hôm nay rồi. Quay lại ngày mai!' });
         } else if (code === 'NOT_TRADING_DAY') {
@@ -337,7 +337,7 @@ export default function MarketScreen() {
   }
 
   // ── Main ──
-  const isUp            = data.index.direction === 'up';
+  const isUp = data.index.direction === 'up';
   const buttonsDisabled = predicting || !!predictResult?.success || !!predictResult?.alreadyPredicted;
 
   return (
@@ -511,11 +511,11 @@ export default function MarketScreen() {
 
               <div className="space-y-3">
                 {data.prices.map(p => {
-                  const change   = p.percentChange ?? 0;
+                  const change = p.percentChange ?? 0;
                   const positive = change >= 0;
-                  const ic       = COMMODITY_ICON[p.id] || DEFAULT_ICON;
-                  const vi       = COMMODITY_VI[p.id];
-                  const displayName    = p.nameVi || vi?.name || p.name || p.id;
+                  const ic = COMMODITY_ICON[p.id] || DEFAULT_ICON;
+                  const vi = COMMODITY_VI[p.id];
+                  const displayName = p.nameVi || vi?.name || p.name || p.id;
                   const displaySubname = vi?.subname || p.id;
                   return (
                     <div key={p.id}
@@ -610,12 +610,11 @@ export default function MarketScreen() {
                 <div className="space-y-2">
                   {history?.predictions?.map((p) => (
                     <div key={p.id}
-                      className={`flex items-center justify-between p-2.5 rounded-lg border ${
-                        p.status === 'won' ? 'bg-green-50 border-green-200' :
-                        p.status === 'lost' ? 'bg-red-50 border-red-200' :
-                        p.status === 'refund' ? 'bg-gray-50 border-gray-200' :
-                        'bg-yellow-50 border-yellow-200'
-                      }`}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border ${p.status === 'won' ? 'bg-green-50 border-green-200' :
+                          p.status === 'lost' ? 'bg-red-50 border-red-200' :
+                            p.status === 'refund' ? 'bg-gray-50 border-gray-200' :
+                              'bg-yellow-50 border-yellow-200'
+                        }`}
                     >
                       <div>
                         <div className="text-sm font-bold text-[#5d4037]">{p.targetDate}</div>
@@ -678,10 +677,10 @@ export default function MarketScreen() {
                   const rankColors = entry.rank === 1
                     ? 'bg-yellow-400 text-yellow-900 border-yellow-500'
                     : entry.rank === 2
-                    ? 'bg-gray-300 text-gray-700 border-gray-400'
-                    : entry.rank === 3
-                    ? 'bg-orange-300 text-orange-800 border-orange-400'
-                    : 'bg-[#f4e4bc] text-[#5d4037] border-[#8c6239]/30';
+                      ? 'bg-gray-300 text-gray-700 border-gray-400'
+                      : entry.rank === 3
+                        ? 'bg-orange-300 text-orange-800 border-orange-400'
+                        : 'bg-[#f4e4bc] text-[#5d4037] border-[#8c6239]/30';
 
                   return (
                     <div key={entry.userId}
