@@ -298,12 +298,12 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-bold text-[#5D4037]">
                             {c.direction === 'seed_to_ogn'
-                              ? `${formatOGN(c.fromAmount)} Hạt → ${c.toAmount} OGN`
-                              : `${c.fromAmount} OGN → ${formatOGN(c.toAmount)} Hạt`
+                              ? `${formatOGN(c.fromAmount)} Hạt → ${(c.toAmount / 100).toFixed(2)} OGN`
+                              : `${(c.fromAmount / 100).toFixed(2)} OGN → ${formatOGN(c.toAmount)} Hạt`
                             }
                           </p>
                           <p className="text-[8px] text-gray-400">
-                            Phí: {c.direction === 'seed_to_ogn' ? formatOGN(c.feeAmount) + ' Hạt' : c.feeAmount + ' OGN'}
+                            Phí: {c.direction === 'seed_to_ogn' ? formatOGN(c.feeAmount) + ' Hạt' : (c.feeAmount / 100).toFixed(2) + ' OGN'}
                           </p>
                         </div>
                         <span className="text-[8px] text-gray-400 font-semibold whitespace-nowrap">

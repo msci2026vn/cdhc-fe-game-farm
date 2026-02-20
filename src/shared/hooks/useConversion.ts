@@ -47,7 +47,7 @@ export function useConvert() {
       const c = data.conversion;
       const dirLabel = c.direction === 'seed_to_ogn' ? 'Hat → OGN' : 'OGN → Hat';
       const toLabel = c.direction === 'seed_to_ogn'
-        ? `${c.toAmount} OGN`
+        ? `${(c.toAmount / 100).toFixed(2)} OGN`
         : `${c.toAmount.toLocaleString('vi-VN')} Hat`;
       useUIStore.getState().addToast(
         `${dirLabel}: +${toLabel}`,
