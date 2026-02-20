@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://sta.cdhc.vn/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn/api';
 
 export const COOLDOWN = {
   WATER: 3600, // 1 hour in seconds

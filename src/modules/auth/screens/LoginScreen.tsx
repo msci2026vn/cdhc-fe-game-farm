@@ -4,6 +4,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { queryClient } from '@/shared/lib/queryClient';
 import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
 import { gameApi, resetRedirectLock } from '@/shared/api/game-api';
+import { API_BASE_URL } from '@/shared/utils/constants';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 // Google Client ID từ BE .env
@@ -27,7 +28,7 @@ function LoginScreenContent() {
       console.log('[FARM-DEBUG] LoginScreen: Sending Google ID token to BE');
 
       // Gửi Google ID token lên BE
-      const res = await fetch('https://sta.cdhc.vn/api/auth/google', {
+      const res = await fetch(API_BASE_URL + '/auth/google', {
         method: 'POST',
         credentials: 'include', // ← Nhận cookie từ BE
         headers: { 'Content-Type': 'application/json' },

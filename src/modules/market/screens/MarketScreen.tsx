@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '@/shared/utils/constants';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MarketIndex {
@@ -77,7 +78,7 @@ interface LeaderboardEntry {
   totalEarned: number;
 }
 
-const BASE = 'https://sta.cdhc.vn';
+// API_BASE_URL imported from constants
 
 // Vietnamese names + exchange for each commodity ID
 const COMMODITY_VI: Record<string, { name: string; subname: string }> = {
@@ -171,7 +172,7 @@ export default function MarketScreen() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${BASE}/api/market/latest`, {
+      const res = await fetch(`${API_BASE_URL}/market/latest`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -190,7 +191,7 @@ export default function MarketScreen() {
 
   async function checkExistingPrediction() {
     try {
-      const res = await fetch(`${BASE}/api/market/predictions?status=pending&limit=1`, {
+      const res = await fetch(`${API_BASE_URL}/market/predictions?status=pending&limit=1`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -220,7 +221,7 @@ export default function MarketScreen() {
 
   async function fetchRatio() {
     try {
-      const res = await fetch(`${BASE}/api/market/ratio`);
+      const res = await fetch(`${API_BASE_URL}/market/ratio`);
       if (!res.ok) return;
       const json = await res.json();
       if (json.success && json.data) setRatio(json.data);
@@ -229,7 +230,7 @@ export default function MarketScreen() {
 
   async function fetchHistory() {
     try {
-      const res = await fetch(`${BASE}/api/market/predictions/history`, {
+      const res = await fetch(`${API_BASE_URL}/market/predictions/history`, {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -241,7 +242,7 @@ export default function MarketScreen() {
 
   async function fetchLeaderboard() {
     try {
-      const res = await fetch(`${BASE}/api/market/leaderboard`);
+      const res = await fetch(`${API_BASE_URL}/market/leaderboard`);
       if (!res.ok) return;
       const json = await res.json();
       if (json.success && json.data?.leaderboard) setLeaderboard(json.data.leaderboard);
@@ -253,7 +254,7 @@ export default function MarketScreen() {
     try {
       setPredicting(true);
       setPredictResult(null);
-      const res = await fetch(`${BASE}/api/market/predict`, {
+      const res = await fetch(`${API_BASE_URL}/market/predict`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

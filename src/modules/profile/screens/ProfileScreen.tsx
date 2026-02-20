@@ -11,6 +11,7 @@ import { StatHelpModal } from '@/shared/components/StatHelpModal';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import { formatOGN } from '@/shared/utils/format';
 import { playSound } from '@/shared/audio';
+import { ConversionModal } from '../components/ConversionModal';
 
 type Tab = 'stats' | 'achievements';
 
@@ -21,6 +22,7 @@ export default function ProfileScreen() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetError, setResetError] = useState<{ message: string; code: string } | null>(null);
   const [helpStat, setHelpStat] = useState<'atk' | 'hp' | 'def' | 'mana' | null>(null);
+  const [showConversion, setShowConversion] = useState(false);
   const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
   const { data: statInfo } = usePlayerStats();
@@ -108,12 +110,11 @@ export default function ProfileScreen() {
           </div>
         </div>
 
-        {/* Quick stats row */}^M
+        {/* Quick stats row */}
         <div className="grid grid-cols-4 gap-1.5 mt-3">
           {[
             { val: (profile.totalHarvests ?? 0).toString(), label: 'Thu hoạch', emoji: '🌾' },
             { val: (profile.likesCount ?? 0).toString(), label: 'Lượt thích', emoji: '❤️' },
-            { val: (profile.commentsCount ?? 0).toString(), label: 'Bình luận', emoji: '💬' },
             { val: (profile.giftsCount ?? 0).toString(), label: 'Quà tặng', emoji: '🎁' },
           ].map((s) => (
             <div key={s.label} className="rounded-xl p-2 text-center glass-card">
@@ -122,6 +123,14 @@ export default function ProfileScreen() {
               <span className="text-[8px] font-semibold text-muted-foreground">{s.label}</span>
             </div>
           ))}
+          <div
+            onClick={() => { playSound('ui_tab'); setShowConversion(true); }}
+            className="rounded-xl p-2 text-center glass-card cursor-pointer hover:bg-orange-50/80 active:scale-95 transition-all border border-orange-200/50"
+          >
+            <span className="text-sm block">🔄</span>
+            <span className="font-heading text-sm font-bold block leading-tight text-orange-600">Đổi</span>
+            <span className="text-[8px] font-semibold text-orange-500">Đổi Hạt</span>
+          </div>
         </div>
       </div>
 
@@ -358,6 +367,9 @@ export default function ProfileScreen() {
           onClose={() => setHelpStat(null)}
         />
       )}
+
+      {/* Conversion Modal */}
+      <ConversionModal isOpen={showConversion} onClose={() => setShowConversion(false)} />
 
       {/* Reset Error Modal */}
       {resetError && (

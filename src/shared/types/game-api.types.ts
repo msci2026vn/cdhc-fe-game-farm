@@ -719,3 +719,60 @@ export interface AutoSettingRequest {
   preset: 'attack' | 'defense' | 'balance';
   enabled: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// SEED ↔ OGN CONVERSION
+// ═══════════════════════════════════════════════════════════════
+
+export type ConversionDirection = 'seed_to_ogn' | 'ogn_to_seed';
+
+export interface ConversionTierStatus {
+  direction: ConversionDirection;
+  tierId: number;
+  unlocked: boolean;
+  usedToday: number;
+  usedThisWeek: number;
+  remainingToday: number;
+  remainingThisWeek: number;
+  canConvert: boolean;
+}
+
+export interface ConversionStatus {
+  seedBalance: number;
+  ognBalance: number;
+  playerLevel: number;
+  systemFrozen: boolean;
+  userFrozen: boolean;
+  cooldownRemaining: number;
+  tiers: ConversionTierStatus[];
+}
+
+export interface ConversionRecord {
+  id: string;
+  direction: ConversionDirection;
+  tierId: number;
+  fromAmount: number;
+  feeAmount: number;
+  toAmount: number;
+  seedBefore: number;
+  seedAfter: number;
+  ognBefore: number;
+  ognAfter: number;
+  playerLevel: number;
+  createdAt: string;
+}
+
+export interface ConversionSuccessResult {
+  success: true;
+  conversion: ConversionRecord;
+}
+
+export interface ConversionHistoryResult {
+  conversions: ConversionRecord[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
