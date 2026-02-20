@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyDead" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#a8b898"/>
+      <stop offset="55%" stop-color="#606850"/>
+      <stop offset="100%" stop-color="#282e18"/>
+    </radialGradient>
+    <radialGradient id="wingDead" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#d8c8e8" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#806898" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#303040" stop-opacity="0.2"/>
+    </radialGradient>
+    <filter id="deadFilter">
+      <feColorMatrix type="saturate" values="0.12"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+    <style>
+      @keyframes deadSlump {
+        0%,100% { transform: rotate(-20deg) translateY(0px); }
+        50%     { transform: rotate(-20deg) translateY(-3px); }
+      }
+      @keyframes wingCrumpleL {
+        0%,100% { transform: rotate(40deg) scaleY(0.55) translateX(-8px); }
+        50%     { transform: rotate(42deg) scaleY(0.53) translateX(-8px); }
+      }
+      @keyframes wingCrumpleR {
+        0%,100% { transform: rotate(-40deg) scaleY(0.55) translateX(8px); }
+        50%     { transform: rotate(-42deg) scaleY(0.53) translateX(8px); }
+      }
+      @keyframes starFloat1 {
+        0%   { transform: rotate(0deg)   translateX(32px) rotate(0deg); }
+        100% { transform: rotate(360deg) translateX(32px) rotate(-360deg); }
+      }
+      @keyframes starFloat2 {
+        0%   { transform: rotate(120deg) translateX(32px) rotate(-120deg); }
+        100% { transform: rotate(480deg) translateX(32px) rotate(-480deg); }
+      }
+      @keyframes starFloat3 {
+        0%   { transform: rotate(240deg) translateX(32px) rotate(-240deg); }
+        100% { transform: rotate(600deg) translateX(32px) rotate(-600deg); }
+      }
+      @keyframes auraFade {
+        0%,100% { opacity: 0.12; transform: scale(1); }
+        50%     { opacity: 0.06; transform: scale(0.96); }
+      }
+      @keyframes soulDrift {
+        0%   { opacity:0; transform: scale(0.6) translateY(0) rotate(0deg); }
+        25%  { opacity:0.7; transform: scale(1) translateY(-10px) rotate(10deg); }
+        75%  { opacity:0.3; transform: scale(0.8) translateY(-35px) rotate(20deg); }
+        100% { opacity:0; transform: scale(0.4) translateY(-60px) rotate(30deg); }
+      }
+      @keyframes legLimp {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(4deg); }
+      }
+      .character { animation: deadSlump 3.2s ease-in-out infinite; transform-origin: 100px 152px; }
+      .wing-l    { animation: wingCrumpleL 3.2s ease-in-out infinite; transform-origin: 96px 122px; }
+      .wing-r    { animation: wingCrumpleR 3.2s ease-in-out infinite; transform-origin: 104px 122px; }
+      .s1 { animation: starFloat1 2.2s linear infinite; transform-origin: 100px 80px; }
+      .s2 { animation: starFloat2 2.2s linear infinite; transform-origin: 100px 80px; }
+      .s3 { animation: starFloat3 2.2s linear infinite; transform-origin: 100px 80px; }
+      .aura-dead { animation: auraFade 3.2s ease-in-out infinite; transform-origin: 100px 132px; }
+      .soul-a { animation: soulDrift 2.4s ease-out infinite 0s; }
+      .soul-b { animation: soulDrift 2.4s ease-out infinite 0.8s; }
+      .soul-c { animation: soulDrift 2.4s ease-out infinite 1.6s; }
+      .leg-d  { animation: legLimp 3.2s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <!-- Big flat shadow -->
+  <ellipse cx="108" cy="213" rx="58" ry="9" fill="#200040" opacity="0.28"/>
+
+  <!-- Faded aura remnant -->
+  <g class="aura-dead">
+    <ellipse cx="100" cy="132" rx="65" ry="58" fill="none" stroke="#6600aa" stroke-width="1.5" opacity="0.2"/>
+    <ellipse cx="100" cy="132" rx="55" ry="48" fill="#4400aa" opacity="0.07"/>
+  </g>
+
+  <!-- Soul particles drifting up -->
+  <g class="soul-a" transform="translate(82,105)">
+    <circle cx="0" cy="0" r="6" fill="#cc88ff" opacity="0.5"/>
+  </g>
+  <g class="soul-b" transform="translate(106,96)">
+    <circle cx="0" cy="0" r="5" fill="#aa66dd" opacity="0.45"/>
+  </g>
+  <g class="soul-c" transform="translate(118,108)">
+    <circle cx="0" cy="0" r="4" fill="#9955cc" opacity="0.4"/>
+  </g>
+
+  <!-- Orbiting stars -->
+  <g class="s1">
+    <text x="100" y="80" text-anchor="middle" dominant-baseline="middle" font-size="13">⭐</text>
+  </g>
+  <g class="s2">
+    <text x="100" y="80" text-anchor="middle" dominant-baseline="middle" font-size="10">💜</text>
+  </g>
+  <g class="s3">
+    <text x="100" y="80" text-anchor="middle" dominant-baseline="middle" font-size="9">✨</text>
+  </g>
+
+  <g class="character" filter="url(#deadFilter)">
+
+    <!-- Wings crumpled / folded down -->
+    <g class="wing-l">
+      <path d="M96,122 Q72,105 55,112 Q66,124 80,130 Q90,132 96,122Z" fill="url(#wingDead)"/>
+      <!-- Torn wing edge -->
+      <path d="M68,118 L62,125 L70,122 L64,130" stroke="#806898" stroke-width="0.8" fill="none" opacity="0.5"/>
+    </g>
+    <g class="wing-r">
+      <path d="M104,122 Q128,105 145,112 Q134,124 120,130 Q110,132 104,122Z" fill="url(#wingDead)"/>
+      <path d="M132,118 L138,125 L130,122 L136,130" stroke="#806898" stroke-width="0.8" fill="none" opacity="0.5"/>
+    </g>
+    <!-- Lower wings crumpled to sides -->
+    <path d="M94,136 Q70,130 58,138 Q68,145 82,142 Q90,140 94,136Z" fill="url(#wingDead)" opacity="0.5"/>
+    <path d="M106,136 Q130,130 142,138 Q132,145 118,142 Q110,140 106,136Z" fill="url(#wingDead)" opacity="0.5"/>
+
+    <!-- Legs flopped -->
+    <g class="leg-d">
+      <line x1="80" y1="168" x2="54" y2="192" stroke="#425038" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+      <line x1="54" y1="192" x2="44" y2="208" stroke="#323828" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    </g>
+    <line x1="120" y1="168" x2="148" y2="190" stroke="#425038" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="148" y1="190" x2="160" y2="206" stroke="#323828" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+    <g class="leg-d">
+      <line x1="74" y1="154" x2="48" y2="173" stroke="#425038" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="48" y1="173" x2="38" y2="188" stroke="#323828" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+    </g>
+    <line x1="126" y1="154" x2="152" y2="173" stroke="#425038" stroke-width="5" stroke-linecap="round" opacity="0.58"/>
+    <line x1="152" y1="173" x2="162" y2="188" stroke="#323828" stroke-width="4" stroke-linecap="round" opacity="0.52"/>
+    <g class="leg-d">
+      <line x1="76" y1="142" x2="52" y2="155" stroke="#425038" stroke-width="5" stroke-linecap="round" opacity="0.58"/>
+      <line x1="52" y1="155" x2="42" y2="167" stroke="#323828" stroke-width="4" stroke-linecap="round" opacity="0.52"/>
+    </g>
+    <line x1="124" y1="142" x2="150" y2="155" stroke="#425038" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+    <line x1="150" y1="155" x2="160" y2="167" stroke="#323828" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+
+    <!-- Abdomen -->
+    <ellipse cx="104" cy="167" rx="34" ry="25" fill="url(#bodyDead)"/>
+
+    <!-- Body -->
+    <ellipse cx="104" cy="134" rx="43" ry="39" fill="url(#bodyDead)"/>
+    <!-- Shoulder spikes drooping -->
+    <polygon points="70,121  56,112 64,130" fill="#505840" opacity="0.7"/>
+    <polygon points="138,121 154,112 146,130" fill="#505840" opacity="0.7"/>
+
+    <!-- Antennae wilting down -->
+    <path d="M92,100 Q82,116 76,128" stroke="#3a4830" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.65"/>
+    <circle cx="76" cy="128" r="5.5" fill="#604870" opacity="0.6"/>
+    <circle cx="76" cy="128" r="2.5" fill="#9966aa" opacity="0.5"/>
+    <path d="M108,100 Q118,116 124,128" stroke="#3a4830" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.65"/>
+    <circle cx="124" cy="128" r="5.5" fill="#604870" opacity="0.6"/>
+    <circle cx="124" cy="128" r="2.5" fill="#9966aa" opacity="0.5"/>
+
+    <!-- Eyes — X dead, faint purple glow -->
+    <circle cx="84"  cy="126" r="14" fill="#ccc8d8" opacity="0.8"/>
+    <circle cx="84"  cy="126" r="14" fill="none" stroke="#3a2858" stroke-width="1.5" opacity="0.7"/>
+    <line x1="77"  y1="119" x2="91"  y2="133" stroke="#3a2858" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="91"  y1="119" x2="77"  y2="133" stroke="#3a2858" stroke-width="3.5" stroke-linecap="round"/>
+
+    <circle cx="116" cy="126" r="14" fill="#ccc8d8" opacity="0.8"/>
+    <circle cx="116" cy="126" r="14" fill="none" stroke="#3a2858" stroke-width="1.5" opacity="0.7"/>
+    <line x1="109" y1="119" x2="123" y2="133" stroke="#3a2858" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="123" y1="119" x2="109" y2="133" stroke="#3a2858" stroke-width="3.5" stroke-linecap="round"/>
+
+    <!-- Mouth flat sad -->
+    <path d="M92,144 Q100,140 108,144" stroke="#3a4830" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- ELITE badge — dimmed -->
+    <ellipse cx="104" cy="106" rx="18" ry="7" fill="#440066" opacity="0.45"/>
+    <text x="104" y="109" text-anchor="middle" font-size="7" font-weight="bold" fill="#ccaacc" font-family="sans-serif" opacity="0.6">ELITE</text>
+
+    <!-- Sweat drops -->
+    <ellipse cx="68" cy="122" rx="3.5" ry="5.5" fill="#aa88ff" opacity="0.4" transform="rotate(-15,68,122)"/>
+    <ellipse cx="140" cy="122" rx="3"   ry="4.5" fill="#aa88ff" opacity="0.35" transform="rotate(15,140,122)"/>
+  </g>
+</svg>

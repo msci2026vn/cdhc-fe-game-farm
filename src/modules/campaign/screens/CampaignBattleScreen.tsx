@@ -15,15 +15,7 @@ import { BOSS_SKILLS } from '../data/bossSkills';
 import type { ZoneBoss } from '../types/campaign.types';
 import type { CampaignBossData } from '../hooks/useMatch3Campaign';
 import BossFightCampaign from '../components/BossFightCampaign';
-
-/**
- * Lookup for bosses with multi-state SVG sprites (idle/attack/dead).
- * Key: globalBossNumber, Value: base path (without -idle/-attack/-dead.svg suffix)
- * Bosses NOT in this map fall back to the single /assets/campaign-bosses/boss-N.svg
- */
-const BOSS_SPRITE_PATHS: Record<number, string> = {
-  1: '/assets/bosses/ruong-lua/rep-con/boss-1',
-};
+import { BOSS_SPRITE_PATHS } from '../data/bossSpritePaths';
 
 /**
  * Transform a campaign ZoneBoss + static detail → CampaignBossData

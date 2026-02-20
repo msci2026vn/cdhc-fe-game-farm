@@ -1,0 +1,249 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyG" cx="38%" cy="30%" r="62%">
+      <stop offset="0%" stop-color="#a0f050"/>
+      <stop offset="50%" stop-color="#58b018"/>
+      <stop offset="100%" stop-color="#245200"/>
+    </radialGradient>
+    <radialGradient id="wingAtk" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98"/>
+      <stop offset="40%" stop-color="#cc88ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#6600cc" stop-opacity="0.7"/>
+    </radialGradient>
+    <radialGradient id="blastG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#ee88ff"/>
+      <stop offset="100%" stop-color="#8800cc" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#200040" flood-opacity="0.3"/>
+    </filter>
+    <filter id="wingGlowAtk">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#dd44ff" flood-opacity="0.8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="blastGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feFlood flood-color="#cc00ff" flood-opacity="0.9" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="bodyAngry">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#aa00ff" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes diveBomb {
+        0%   { transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
+        20%  { transform: translateX(-10px) translateY(8px) rotate(-4deg) scale(0.9); }
+        52%  { transform: translateX(22px) translateY(-22px) rotate(8deg) scale(1.16); }
+        75%  { transform: translateX(16px) translateY(-14px) rotate(5deg) scale(1.1); }
+        100% { transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
+      }
+      @keyframes wingsFullOpen {
+        0%,100% { transform: scaleX(1) rotate(0deg); opacity: 0.9; }
+        48%,55% { transform: scaleX(1.18) rotate(-5deg); opacity: 1; }
+      }
+      @keyframes wingsFullOpenR {
+        0%,100% { transform: scaleX(1) rotate(0deg); opacity: 0.9; }
+        48%,55% { transform: scaleX(1.18) rotate(5deg); opacity: 1; }
+      }
+      @keyframes energyBlast {
+        0%,35%  { opacity:0; transform: scale(0.2); }
+        55%,80% { opacity:1; transform: scale(1); }
+        100%    { opacity:0; transform: scale(1.3); }
+      }
+      @keyframes shockRing {
+        0%   { r:8; opacity:0.9; stroke-width:3; }
+        100% { r:48; opacity:0; stroke-width:1; }
+      }
+      @keyframes speedLine {
+        0%   { opacity:0; transform:translateX(25px); }
+        28%  { opacity:1; transform:translateX(0); }
+        65%  { opacity:0.85; transform:translateX(-10px); }
+        100% { opacity:0; transform:translateX(-40px); }
+      }
+      @keyframes eyeRageAtk {
+        0%,100% { transform: scale(1); }
+        50%     { transform: scale(1.3); }
+      }
+      @keyframes antennaCharge {
+        0%,100% { transform: rotate(0deg); }
+        45%     { transform: rotate(-28deg); }
+      }
+      @keyframes legKickAtk {
+        0%,100% { transform: rotate(0deg); }
+        48%     { transform: rotate(-32deg); }
+        72%     { transform: rotate(20deg); }
+      }
+      @keyframes cryText {
+        0%,38%,100% { opacity:0; transform: scale(0.6) translateY(4px); }
+        52%,84%     { opacity:1; transform: scale(1) translateY(0); }
+      }
+      .character { animation: diveBomb 0.72s cubic-bezier(0.15,0,0.85,1) infinite; transform-origin: 100px 130px; }
+      .wing-l    { animation: wingsFullOpen  0.72s ease-in-out infinite; transform-origin: 96px 120px; }
+      .wing-r    { animation: wingsFullOpenR 0.72s ease-in-out infinite; transform-origin: 104px 120px; }
+      .wing-bl   { animation: wingsFullOpen  0.72s ease-in-out infinite 0.04s; transform-origin: 96px 136px; }
+      .wing-br   { animation: wingsFullOpenR 0.72s ease-in-out infinite 0.04s; transform-origin: 104px 136px; }
+      .blast     { animation: energyBlast 0.72s ease-in-out infinite; transform-origin: 172px 90px; }
+      .ring1     { animation: shockRing 0.72s ease-out infinite; transform-origin: 172px 90px; }
+      .ring2     { animation: shockRing 0.72s ease-out infinite 0.18s; transform-origin: 172px 90px; }
+      .sline-a   { animation: speedLine 0.72s ease-in-out infinite; }
+      .sline-b   { animation: speedLine 0.72s ease-in-out infinite 0.07s; }
+      .sline-c   { animation: speedLine 0.72s ease-in-out infinite 0.14s; }
+      .eye-rage  { animation: eyeRageAtk 0.72s ease-in-out infinite; }
+      .ant-l     { animation: antennaCharge 0.72s ease-in-out infinite; transform-origin: 90px 97px; }
+      .ant-r     { animation: antennaCharge 0.72s ease-in-out infinite 0.05s; transform-origin: 110px 97px; }
+      .leg-a     { animation: legKickAtk 0.72s ease-in-out infinite; }
+      .leg-b     { animation: legKickAtk 0.72s ease-in-out infinite 0.36s; }
+      .cry       { animation: cryText 0.72s ease-in-out infinite; transform-origin: 148px 54px; }
+    </style>
+  </defs>
+
+  <!-- Shadow -->
+  <ellipse cx="100" cy="213" rx="32" ry="5.5" fill="#200040" opacity="0.2">
+    <animate attributeName="rx" values="32;50;32" dur="0.72s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="100;110;100" dur="0.72s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Speed lines -->
+  <line class="sline-a" x1="15" y1="105" x2="68" y2="105" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+  <line class="sline-b" x1="10" y1="120" x2="65" y2="120" stroke="white" stroke-width="2"   stroke-linecap="round" opacity="0"/>
+  <line class="sline-c" x1="18" y1="135" x2="68" y2="135" stroke="#ddaaff" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+  <line class="sline-a" x1="8"  y1="92"  x2="58" y2="92"  stroke="#ddaaff" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+  <line class="sline-c" x1="14" y1="148" x2="62" y2="148" stroke="#ddaaff" stroke-width="1"   stroke-linecap="round" opacity="0"/>
+
+  <!-- Energy blast impact -->
+  <g class="blast" filter="url(#blastGlow)">
+    <circle cx="172" cy="90" r="22" fill="url(#blastG)"/>
+    <!-- Blast rays -->
+    <line x1="172" y1="90" x2="196" y2="68"  stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="172" y1="90" x2="200" y2="92"  stroke="#ee88ff" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="172" y1="90" x2="192" y2="114" stroke="#cc44ff" stroke-width="2"   stroke-linecap="round"/>
+    <line x1="172" y1="90" x2="178" y2="118" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="172" y1="90" x2="156" y2="68"  stroke="#ee88ff" stroke-width="2"   stroke-linecap="round"/>
+    <line x1="172" y1="90" x2="150" y2="86"  stroke="#cc44ff" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="198" cy="66" r="4" fill="#ffffff"/>
+    <circle cx="202" cy="94" r="3" fill="#ee88ff"/>
+    <circle cx="190" cy="116" r="3.5" fill="#cc44ff"/>
+  </g>
+  <!-- Shockwave rings -->
+  <circle class="ring1" cx="172" cy="90" r="8" fill="none" stroke="#cc44ff" stroke-width="3" opacity="0"/>
+  <circle class="ring2" cx="172" cy="90" r="8" fill="none" stroke="#ffffff" stroke-width="2" opacity="0"/>
+
+  <!-- Battle cry bubble -->
+  <g class="cry">
+    <rect x="120" y="42" width="56" height="20" rx="8" fill="#8800cc" opacity="0.95"/>
+    <polygon points="128,62 136,62 130,70" fill="#8800cc" opacity="0.95"/>
+    <text x="148" y="56" text-anchor="middle" font-size="10" font-weight="bold" fill="white" font-family="sans-serif">PHÓNG!</text>
+  </g>
+
+  <g class="character">
+
+    <!-- ── WINGS FULLY SPREAD (behind body) ── -->
+    <g class="wing-l" filter="url(#wingGlowAtk)">
+      <path d="M96,120 Q48,62 22,42 Q44,82 68,108 Q82,118 96,120Z" fill="url(#wingAtk)"/>
+      <line x1="96" y1="120" x2="28" y2="52" stroke="#cc88ff" stroke-width="1" opacity="0.7"/>
+      <line x1="88" y1="115" x2="44" y2="70" stroke="#cc88ff" stroke-width="0.8" opacity="0.5"/>
+      <line x1="80" y1="118" x2="56" y2="82" stroke="#cc88ff" stroke-width="0.8" opacity="0.4"/>
+    </g>
+    <g class="wing-r" filter="url(#wingGlowAtk)">
+      <path d="M104,120 Q152,62 178,42 Q156,82 132,108 Q118,118 104,120Z" fill="url(#wingAtk)"/>
+      <line x1="104" y1="120" x2="172" y2="52" stroke="#cc88ff" stroke-width="1" opacity="0.7"/>
+      <line x1="112" y1="115" x2="156" y2="70" stroke="#cc88ff" stroke-width="0.8" opacity="0.5"/>
+      <line x1="120" y1="118" x2="144" y2="82" stroke="#cc88ff" stroke-width="0.8" opacity="0.4"/>
+    </g>
+    <g class="wing-bl" filter="url(#wingGlowAtk)">
+      <path d="M96,136 Q60,112 40,115 Q56,128 76,134 Q88,138 96,136Z" fill="url(#wingAtk)" opacity="0.85"/>
+    </g>
+    <g class="wing-br" filter="url(#wingGlowAtk)">
+      <path d="M104,136 Q140,112 160,115 Q144,128 124,134 Q112,138 104,136Z" fill="url(#wingAtk)" opacity="0.85"/>
+    </g>
+
+    <!-- Legs kick back -->
+    <g class="leg-a">
+      <line x1="78" y1="168" x2="48" y2="194" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="48" y1="194" x2="36" y2="210" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="122" y1="168" x2="152" y2="194" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="152" y1="194" x2="164" y2="210" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-a">
+      <line x1="72" y1="152" x2="44" y2="174" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="44" y1="174" x2="34" y2="188" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="128" y1="152" x2="156" y2="174" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="156" y1="174" x2="166" y2="188" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-a">
+      <line x1="76" y1="140" x2="50" y2="152" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="50" y1="152" x2="40" y2="165" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="124" y1="140" x2="150" y2="152" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="150" y1="152" x2="160" y2="165" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <g filter="url(#shadow)">
+      <!-- Abdomen -->
+      <ellipse cx="100" cy="166" rx="34" ry="26" fill="url(#bodyG)" filter="url(#bodyAngry)"/>
+      <ellipse cx="100" cy="166" rx="34" ry="26" fill="#aa00ff" opacity="0.18"/>
+
+      <!-- Body -->
+      <ellipse cx="100" cy="132" rx="43" ry="40" fill="url(#bodyG)" filter="url(#bodyAngry)"/>
+      <ellipse cx="100" cy="132" rx="43" ry="40" fill="#aa00ff" opacity="0.2"/>
+      <!-- Body rage flush -->
+      <ellipse cx="86" cy="115" rx="13" ry="9" fill="white" opacity="0.15" transform="rotate(-18,86,115)"/>
+      <!-- Shoulder spikes flared -->
+      <polygon points="68,118  52,100 60,124" fill="#7aaa28"/>
+      <polygon points="132,118 148,100 140,124" fill="#7aaa28"/>
+
+      <!-- Antennae charged forward -->
+      <g class="ant-l">
+        <path d="M90,97 Q72,65 58,42" stroke="#2a6000" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="58" cy="42" r="7" fill="#ff00ff" filter="url(#blastGlow)"/>
+        <circle cx="58" cy="42" r="3.5" fill="white"/>
+      </g>
+      <g class="ant-r">
+        <path d="M110,97 Q128,65 142,42" stroke="#2a6000" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="142" cy="42" r="7" fill="#ff00ff" filter="url(#blastGlow)"/>
+        <circle cx="142" cy="42" r="3.5" fill="white"/>
+      </g>
+
+      <!-- Eyes — rage purple -->
+      <circle cx="82" cy="124" r="14" fill="#ffe8ff"/>
+      <circle cx="82" cy="124" r="14" fill="none" stroke="#5a0088" stroke-width="1.5"/>
+      <g class="eye-rage" style="transform-origin:82px 124px">
+        <circle cx="84" cy="126" r="10" fill="#cc00ff"/>
+        <circle cx="84" cy="126" r="6"  fill="#ff44ff"/>
+        <circle cx="86" cy="123" r="3"  fill="white" opacity="0.95"/>
+      </g>
+      <circle cx="118" cy="124" r="14" fill="#ffe8ff"/>
+      <circle cx="118" cy="124" r="14" fill="none" stroke="#5a0088" stroke-width="1.5"/>
+      <g class="eye-rage" style="transform-origin:118px 124px">
+        <circle cx="120" cy="126" r="10" fill="#cc00ff"/>
+        <circle cx="120" cy="126" r="6"  fill="#ff44ff"/>
+        <circle cx="122" cy="123" r="3"  fill="white" opacity="0.95"/>
+      </g>
+
+      <!-- Angry brows -->
+      <path d="M70,112 L92,118" stroke="#3a0060" stroke-width="3" stroke-linecap="round"/>
+      <path d="M108,118 L130,112" stroke="#3a0060" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- Mouth screaming -->
+      <ellipse cx="100" cy="144" rx="10" ry="7" fill="#2a4000"/>
+      <ellipse cx="100" cy="144" rx="7"  ry="4"  fill="#1a2800"/>
+
+      <!-- ELITE badge -->
+      <ellipse cx="100" cy="104" rx="18" ry="7" fill="#aa00cc" opacity="0.9"/>
+      <text x="100" y="107" text-anchor="middle" font-size="7" font-weight="bold" fill="#ffffff" font-family="sans-serif">ELITE</text>
+    </g>
+
+  </g>
+</svg>

@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ZoneBoss } from '../types/campaign.types';
 import type { StageState } from '../types/campaign.types';
+import { getBossImageSrc } from '../data/bossSpritePaths';
 import { playSound } from '@/shared/audio';
 
 interface BossNodeProps {
@@ -55,7 +56,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
           ) : isLocked ? (
             <span className="material-symbols-outlined text-white/60 text-3xl">lock</span>
           ) : globalBossNumber ? (
-            <img src={`/assets/campaign-bosses/boss-${globalBossNumber}.svg`} alt={boss.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+            <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-16 h-16 object-contain drop-shadow-lg" />
           ) : (
             <span className="text-5xl drop-shadow-lg">{boss.emoji}</span>
           )}

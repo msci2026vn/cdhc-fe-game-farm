@@ -1,0 +1,218 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyDead" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#aab898"/>
+      <stop offset="55%" stop-color="#586848"/>
+      <stop offset="100%" stop-color="#202c10"/>
+    </radialGradient>
+    <radialGradient id="abdDead" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#9aaa88"/>
+      <stop offset="55%" stop-color="#485838"/>
+      <stop offset="100%" stop-color="#182408"/>
+    </radialGradient>
+    <radialGradient id="crownDead" cx="30%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#d8d0a8"/>
+      <stop offset="55%" stop-color="#988848"/>
+      <stop offset="100%" stop-color="#504018"/>
+    </radialGradient>
+    <radialGradient id="eggCracked" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#e8e0c8"/>
+      <stop offset="60%" stop-color="#c8b870"/>
+      <stop offset="100%" stop-color="#987828"/>
+    </radialGradient>
+    <filter id="deadFilter">
+      <feColorMatrix type="saturate" values="0.1"/>
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#ffdd00" flood-opacity="0.8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="crownDim">
+      <feColorMatrix type="saturate" values="0.2"/>
+    </filter>
+    <style>
+      @keyframes queenSlump {
+        0%,100% { transform: rotate(-16deg) translateY(0px); }
+        50%     { transform: rotate(-16deg) translateY(-3px); }
+      }
+      @keyframes crownFall {
+        0%,100% { transform: rotate(-45deg) translate(12px, 8px); }
+        50%     { transform: rotate(-47deg) translate(12px, 9px); }
+      }
+      @keyframes starQ1 {
+        0%   { transform: rotate(0deg)   translateX(34px) rotate(0deg); }
+        100% { transform: rotate(360deg) translateX(34px) rotate(-360deg); }
+      }
+      @keyframes starQ2 {
+        0%   { transform: rotate(120deg) translateX(34px) rotate(-120deg); }
+        100% { transform: rotate(480deg) translateX(34px) rotate(-480deg); }
+      }
+      @keyframes starQ3 {
+        0%   { transform: rotate(240deg) translateX(34px) rotate(-240deg); }
+        100% { transform: rotate(600deg) translateX(34px) rotate(-600deg); }
+      }
+      @keyframes soulQ {
+        0%   { opacity:0; transform: scale(0.5) translateY(0) rotate(0deg); }
+        22%  { opacity:0.75; transform: scale(1.05) translateY(-8px) rotate(8deg); }
+        70%  { opacity:0.3; transform: scale(0.85) translateY(-36px) rotate(20deg); }
+        100% { opacity:0; transform: scale(0.4) translateY(-65px) rotate(30deg); }
+      }
+      @keyframes eggRoll {
+        0%,100% { transform: rotate(0deg) translateX(0); }
+        50%     { transform: rotate(5deg) translateX(2px); }
+      }
+      @keyframes legDeadQ {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(4deg); }
+      }
+      @keyframes auraExtinguish {
+        0%,100% { opacity: 0.08; transform: scale(1); }
+        50%     { opacity: 0.04; transform: scale(0.95); }
+      }
+
+      .character   { animation: queenSlump 3.5s ease-in-out infinite; transform-origin:100px 155px; }
+      .crown-off   { animation: crownFall 3.5s ease-in-out infinite; transform-origin:90px 85px; }
+      .s1 { animation: starQ1 2.4s linear infinite; transform-origin:100px 82px; }
+      .s2 { animation: starQ2 2.4s linear infinite; transform-origin:100px 82px; }
+      .s3 { animation: starQ3 2.4s linear infinite; transform-origin:100px 82px; }
+      .soul-a { animation: soulQ 2.8s ease-out infinite 0s; }
+      .soul-b { animation: soulQ 2.8s ease-out infinite 0.9s; }
+      .soul-c { animation: soulQ 2.8s ease-out infinite 1.8s; }
+      .egg-scatter { animation: eggRoll 3.5s ease-in-out infinite; }
+      .leg-dead-q  { animation: legDeadQ 3.5s ease-in-out infinite; }
+      .aura-out    { animation: auraExtinguish 3.5s ease-in-out infinite; transform-origin:100px 140px; }
+    </style>
+  </defs>
+
+  <!-- Very large flat shadow — big queen fallen -->
+  <ellipse cx="112" cy="214" rx="66" ry="10" fill="#1a0030" opacity="0.32"/>
+
+  <!-- Extinguished aura remnant -->
+  <g class="aura-out">
+    <ellipse cx="100" cy="140" rx="78" ry="70" fill="none" stroke="#880044" stroke-width="1.5" opacity="0.18"/>
+    <ellipse cx="100" cy="140" rx="66" ry="58" fill="#440022" opacity="0.06"/>
+  </g>
+
+  <!-- Soul particles -->
+  <g class="soul-a" transform="translate(84,108)">
+    <circle cx="0" cy="0" r="8" fill="#cc6688" opacity="0.5"/>
+  </g>
+  <g class="soul-b" transform="translate(108,98)">
+    <circle cx="0" cy="0" r="6" fill="#aa4466" opacity="0.45"/>
+  </g>
+  <g class="soul-c" transform="translate(120,114)">
+    <circle cx="0" cy="0" r="5" fill="#993355" opacity="0.4"/>
+  </g>
+
+  <!-- Stars orbiting -->
+  <g class="s1" filter="url(#starGlow)">
+    <text x="100" y="82" text-anchor="middle" dominant-baseline="middle" font-size="14">⭐</text>
+  </g>
+  <g class="s2" filter="url(#starGlow)">
+    <text x="100" y="82" text-anchor="middle" dominant-baseline="middle" font-size="11">💗</text>
+  </g>
+  <g class="s3" filter="url(#starGlow)">
+    <text x="100" y="82" text-anchor="middle" dominant-baseline="middle" font-size="9">✨</text>
+  </g>
+
+  <!-- Cracked / scattered eggs on ground -->
+  <g class="egg-scatter" transform="translate(38,190)">
+    <ellipse cx="0" cy="0" rx="10" ry="8" fill="url(#eggCracked)" opacity="0.7"/>
+    <!-- crack -->
+    <path d="M-3,-3 L1,2 L4,-1" stroke="#987828" stroke-width="1.2" fill="none" opacity="0.8"/>
+  </g>
+  <g class="egg-scatter" transform="translate(155,195) rotate(30)">
+    <ellipse cx="0" cy="0" rx="9" ry="7" fill="url(#eggCracked)" opacity="0.65"/>
+    <path d="M-2,-2 L2,2" stroke="#987828" stroke-width="1" fill="none" opacity="0.7"/>
+  </g>
+  <g class="egg-scatter" transform="translate(170,182) rotate(-15)">
+    <ellipse cx="0" cy="0" rx="8" ry="6" fill="url(#eggCracked)" opacity="0.55"/>
+  </g>
+  <g class="egg-scatter" transform="translate(28,204) rotate(20)">
+    <ellipse cx="0" cy="0" rx="7" ry="5" fill="url(#eggCracked)" opacity="0.5"/>
+    <path d="M-1,-2 L1,2 L3,-1" stroke="#987828" stroke-width="1" fill="none" opacity="0.6"/>
+  </g>
+
+  <g class="character" filter="url(#deadFilter)">
+
+    <!-- Legs flopped wide (queen is bigger, legs more spread) -->
+    <g class="leg-dead-q">
+      <line x1="80"  y1="174" x2="50"  y2="200" stroke="#3a5028" stroke-width="5.5" stroke-linecap="round" opacity="0.65"/>
+      <line x1="50"  y1="200" x2="38"  y2="215" stroke="#2a3c18" stroke-width="4.5" stroke-linecap="round" opacity="0.6"/>
+    </g>
+    <line x1="120" y1="174" x2="152" y2="198" stroke="#3a5028" stroke-width="5.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="152" y1="198" x2="164" y2="213" stroke="#2a3c18" stroke-width="4.5" stroke-linecap="round" opacity="0.55"/>
+    <g class="leg-dead-q">
+      <line x1="73"  y1="158" x2="44"  y2="178" stroke="#3a5028" stroke-width="5.5" stroke-linecap="round" opacity="0.62"/>
+      <line x1="44"  y1="178" x2="32"  y2="194" stroke="#2a3c18" stroke-width="4.5" stroke-linecap="round" opacity="0.56"/>
+    </g>
+    <line x1="127" y1="158" x2="156" y2="178" stroke="#3a5028" stroke-width="5.5" stroke-linecap="round" opacity="0.58"/>
+    <line x1="156" y1="178" x2="168" y2="194" stroke="#2a3c18" stroke-width="4.5" stroke-linecap="round" opacity="0.52"/>
+    <!-- Front legs hang limp -->
+    <line x1="76"  y1="146" x2="50"  y2="162" stroke="#3a5028" stroke-width="6" stroke-linecap="round" opacity="0.65"/>
+    <line x1="50"  y1="162" x2="40"  y2="178" stroke="#2a3c18" stroke-width="5" stroke-linecap="round" opacity="0.58"/>
+    <line x1="124" y1="146" x2="152" y2="162" stroke="#3a5028" stroke-width="6" stroke-linecap="round" opacity="0.62"/>
+    <line x1="152" y1="162" x2="164" y2="178" stroke="#2a3c18" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Abdomen — deflated, flat -->
+    <ellipse cx="106" cy="180" rx="42" ry="30" fill="url(#abdDead)"/>
+    <!-- Abdomen stripes faded -->
+    <path d="M66,175 Q106,169 146,175" stroke="#553344" stroke-width="1.5" fill="none" opacity="0.3"/>
+    <path d="M64,185 Q106,180 148,185" stroke="#553344" stroke-width="1"   fill="none" opacity="0.2"/>
+
+    <!-- Body -->
+    <ellipse cx="106" cy="136" rx="46" ry="41" fill="url(#bodyDead)"/>
+
+    <!-- Antennae drooping all the way down -->
+    <path d="M90,98  Q82,118 78,136" stroke="#384028" stroke-width="3.2" fill="none" stroke-linecap="round" opacity="0.65"/>
+    <circle cx="78"  cy="136" r="7" fill="#604858" opacity="0.6"/>
+    <circle cx="78"  cy="136" r="3" fill="#997788" opacity="0.5"/>
+    <path d="M114,98 Q122,118 126,136" stroke="#384028" stroke-width="3.2" fill="none" stroke-linecap="round" opacity="0.65"/>
+    <circle cx="126" cy="136" r="7" fill="#604858" opacity="0.6"/>
+    <circle cx="126" cy="136" r="3" fill="#997788" opacity="0.5"/>
+
+    <!-- Eyes — X large queen eyes -->
+    <circle cx="83"  cy="124" r="15" fill="#d8d0d8" opacity="0.82"/>
+    <circle cx="83"  cy="124" r="15" fill="none" stroke="#3a2838" stroke-width="1.5" opacity="0.7"/>
+    <line x1="75"  y1="116" x2="91"  y2="132" stroke="#3a2838" stroke-width="4" stroke-linecap="round"/>
+    <line x1="91"  y1="116" x2="75"  y2="132" stroke="#3a2838" stroke-width="4" stroke-linecap="round"/>
+
+    <circle cx="119" cy="124" r="15" fill="#d8d0d8" opacity="0.82"/>
+    <circle cx="119" cy="124" r="15" fill="none" stroke="#3a2838" stroke-width="1.5" opacity="0.7"/>
+    <line x1="111" y1="116" x2="127" y2="132" stroke="#3a2838" stroke-width="4" stroke-linecap="round"/>
+    <line x1="127" y1="116" x2="111" y2="132" stroke="#3a2838" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Mouth sad -->
+    <path d="M90,146 Q101,140 112,146" stroke="#2a3818" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.75"/>
+
+    <!-- Cheek tears (queen is dramatic) -->
+    <ellipse cx="66"  cy="130" rx="4"   ry="7" fill="#aaaaff" opacity="0.4" transform="rotate(-15,66,130)"/>
+    <ellipse cx="146" cy="130" rx="3.5" ry="6" fill="#aaaaff" opacity="0.35" transform="rotate(15,146,130)"/>
+    <!-- Second tear drops -->
+    <ellipse cx="64"  cy="140" rx="2.5" ry="4" fill="#aaaaff" opacity="0.3" transform="rotate(-10,64,140)"/>
+
+    <!-- BOSS badge dimmed -->
+    <ellipse cx="106" cy="106" rx="20" ry="8" fill="#440022" opacity="0.45"/>
+    <text x="106" y="110" text-anchor="middle" font-size="8" font-weight="bold" fill="#aa8899" font-family="sans-serif" letter-spacing="1" opacity="0.65">BOSS</text>
+
+    <!-- Crown — fallen off, tilted dramatically -->
+    <g class="crown-off" filter="url(#crownDim)">
+      <rect x="72" y="86" width="56" height="10" rx="5" fill="url(#crownDead)" opacity="0.75"/>
+      <polygon points="76,86  80,68  84,86"  fill="url(#crownDead)" opacity="0.75"/>
+      <polygon points="88,86  93,62  98,86"  fill="url(#crownDead)" opacity="0.75"/>
+      <polygon points="100,86 100,54 104,86" fill="url(#crownDead)" opacity="0.75"/>
+      <polygon points="102,86 107,62 112,86" fill="url(#crownDead)" opacity="0.75"/>
+      <polygon points="116,86 120,68 124,86" fill="url(#crownDead)" opacity="0.75"/>
+      <!-- Jewels dim -->
+      <circle cx="80"  cy="86" r="4.5" fill="#996688" opacity="0.6"/>
+      <circle cx="93"  cy="80" r="4"   fill="#668899" opacity="0.6"/>
+      <circle cx="100" cy="74" r="5.5" fill="#aa9944" opacity="0.65"/>
+      <circle cx="107" cy="80" r="4"   fill="#669977" opacity="0.6"/>
+      <circle cx="120" cy="86" r="4.5" fill="#996688" opacity="0.6"/>
+    </g>
+
+  </g>
+</svg>

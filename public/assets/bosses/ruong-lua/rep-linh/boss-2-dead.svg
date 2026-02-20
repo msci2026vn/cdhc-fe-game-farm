@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyDead" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#b0bea0"/>
+      <stop offset="55%" stop-color="#6a7860"/>
+      <stop offset="100%" stop-color="#303820"/>
+    </radialGradient>
+    <radialGradient id="armorDead" cx="30%" cy="25%" r="65%">
+      <stop offset="0%" stop-color="#b8c0b0"/>
+      <stop offset="50%" stop-color="#787870"/>
+      <stop offset="100%" stop-color="#383830"/>
+    </radialGradient>
+    <radialGradient id="helmetDead" cx="35%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#b0b8a8"/>
+      <stop offset="55%" stop-color="#607058"/>
+      <stop offset="100%" stop-color="#282e18"/>
+    </radialGradient>
+    <filter id="deadFilter">
+      <feColorMatrix type="saturate" values="0.15"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#ffee00" flood-opacity="0.8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes deadTilt {
+        0%,100% { transform: rotate(-18deg) translateY(0px); }
+        50%     { transform: rotate(-18deg) translateY(-2.5px); }
+      }
+      @keyframes star1 {
+        0%   { transform: rotate(0deg)   translateX(30px) rotate(0deg); }
+        100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+      }
+      @keyframes star2 {
+        0%   { transform: rotate(120deg) translateX(30px) rotate(-120deg); }
+        100% { transform: rotate(480deg) translateX(30px) rotate(-480deg); }
+      }
+      @keyframes star3 {
+        0%   { transform: rotate(240deg) translateX(30px) rotate(-240deg); }
+        100% { transform: rotate(600deg) translateX(30px) rotate(-600deg); }
+      }
+      @keyframes soulRise {
+        0%   { opacity:0; transform: scale(0.5) translateY(0); }
+        20%  { opacity:0.8; transform: scale(1.1) translateY(-6px); }
+        70%  { opacity:0.4; transform: scale(0.9) translateY(-28px); }
+        100% { opacity:0; transform: scale(0.5) translateY(-50px); }
+      }
+      @keyframes spearFall {
+        0%,100% { transform: rotate(60deg) translateY(0px); }
+        50%     { transform: rotate(62deg) translateY(2px); }
+      }
+      @keyframes legFlopDead {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(4deg); }
+      }
+      @keyframes helmetTip {
+        0%,100% { transform: rotate(-35deg) translate(8px,4px); }
+        50%     { transform: rotate(-36deg) translate(8px,5px); }
+      }
+      .character   { animation: deadTilt 3s ease-in-out infinite; transform-origin:100px 150px; }
+      .s1          { animation: star1 2s linear infinite; transform-origin:100px 72px; }
+      .s2          { animation: star2 2s linear infinite; transform-origin:100px 72px; }
+      .s3          { animation: star3 2s linear infinite; transform-origin:100px 72px; }
+      .puff-a      { animation: soulRise 2.2s ease-out infinite 0s; }
+      .puff-b      { animation: soulRise 2.2s ease-out infinite 0.7s; }
+      .puff-c      { animation: soulRise 2.2s ease-out infinite 1.4s; }
+      .spear-dead  { animation: spearFall 3s ease-in-out infinite; transform-origin:80px 185px; }
+      .shield-dead { opacity:0.5; }
+      .leg-dead    { animation: legFlopDead 3s ease-in-out infinite; }
+      .helmet-off  { animation: helmetTip 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <!-- Large flat shadow — body has fallen -->
+  <ellipse cx="112" cy="212" rx="56" ry="9" fill="#1a3000" opacity="0.32"/>
+
+  <!-- Soul puffs floating up -->
+  <g class="puff-a" transform="translate(88,95)">
+    <circle cx="0" cy="0" r="8" fill="#b0c890" opacity="0.55"/>
+  </g>
+  <g class="puff-b" transform="translate(108,88)">
+    <circle cx="0" cy="0" r="6" fill="#98b870" opacity="0.45"/>
+  </g>
+  <g class="puff-c" transform="translate(118,100)">
+    <circle cx="0" cy="0" r="4.5" fill="#88a860" opacity="0.4"/>
+  </g>
+
+  <!-- Orbiting stars -->
+  <g class="s1" filter="url(#starGlow)">
+    <text x="100" y="72" text-anchor="middle" dominant-baseline="middle" font-size="14">⭐</text>
+  </g>
+  <g class="s2" filter="url(#starGlow)">
+    <text x="100" y="72" text-anchor="middle" dominant-baseline="middle" font-size="11">⭐</text>
+  </g>
+  <g class="s3" filter="url(#starGlow)">
+    <text x="100" y="72" text-anchor="middle" dominant-baseline="middle" font-size="9">✨</text>
+  </g>
+
+  <!-- Dropped spear on ground -->
+  <g class="spear-dead">
+    <rect x="78" y="182" width="6" height="90" rx="3" fill="#907028" opacity="0.7" transform="rotate(62,81,182)"/>
+    <polygon points="65,185 72,198 56,200" fill="#a0a8b0" opacity="0.7"/>
+  </g>
+
+  <!-- Dropped shield -->
+  <g class="shield-dead" transform="translate(44,178) rotate(80)">
+    <path d="M0,-22 L16,-18 L18,8 Q8,20 0,24 Q-8,20 -18,8 L-16,-18 Z" fill="#7a9068" opacity="0.6"/>
+    <path d="M0,-8 L2,-1 L7,-1 L2.5,2.5 L4.5,8 L0,4.5 L-4.5,8 L-2.5,2.5 L-7,-1 L-2,-1 Z"
+          fill="#b0c878" opacity="0.5"/>
+  </g>
+
+  <g class="character" filter="url(#deadFilter)">
+
+    <!-- Legs flopped in defeat -->
+    <g class="leg-dead">
+      <line x1="82" y1="168" x2="55" y2="192" stroke="#4a6040" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+      <line x1="55" y1="192" x2="44" y2="208" stroke="#384830" stroke-width="4" stroke-linecap="round" opacity="0.65"/>
+    </g>
+    <line x1="118" y1="168" x2="148" y2="190" stroke="#4a6040" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="148" y1="190" x2="162" y2="206" stroke="#384830" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+
+    <g class="leg-dead">
+      <line x1="75" y1="155" x2="50" y2="172" stroke="#4a6040" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+      <line x1="50" y1="172" x2="38" y2="186" stroke="#384830" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    </g>
+    <line x1="125" y1="155" x2="150" y2="172" stroke="#4a6040" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="150" y1="172" x2="162" y2="186" stroke="#384830" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Abdomen -->
+    <ellipse cx="104" cy="166" rx="33" ry="24" fill="url(#bodyDead)"/>
+    <ellipse cx="104" cy="163" rx="22" ry="13" fill="url(#armorDead)" opacity="0.5"/>
+
+    <!-- Body -->
+    <ellipse cx="104" cy="135" rx="42" ry="39" fill="url(#bodyDead)"/>
+
+    <!-- Chest armor (dented/cracked look) -->
+    <path d="M74,120 Q104,110 130,120 L132,150 Q104,158 72,150 Z" fill="url(#armorDead)" opacity="0.8"/>
+    <circle cx="82"  cy="124" r="3" fill="#808880" opacity="0.8"/>
+    <circle cx="122" cy="124" r="3" fill="#808880" opacity="0.8"/>
+    <circle cx="104" cy="122" r="3" fill="#808880" opacity="0.8"/>
+    <!-- Crack in armor (battle damage) -->
+    <path d="M98,116 L102,128 L108,122 L110,138" stroke="#202818" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Shield arm (hanging limp) -->
+    <line x1="76" y1="143" x2="52" y2="165" stroke="#4a6040" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+    <!-- Spear arm (limp, empty) -->
+    <line x1="132" y1="140" x2="155" y2="160" stroke="#4a6040" stroke-width="6" stroke-linecap="round" opacity="0.65"/>
+
+    <!-- Antennae drooping down -->
+    <path d="M92,98 Q80,112 72,124" stroke="#384830" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="72" cy="124" r="5" fill="#5a7040" opacity="0.7"/>
+    <path d="M112,98 Q124,112 132,124" stroke="#384830" stroke-width="2.8" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="132" cy="124" r="5" fill="#5a7040" opacity="0.7"/>
+
+    <!-- Helmet — tilted / knocked askew -->
+    <g class="helmet-off">
+      <path d="M68,104 Q68,72 100,68 Q132,72 132,104 Z" fill="url(#helmetDead)"/>
+      <path d="M65,104 L135,104" stroke="#384830" stroke-width="3" stroke-linecap="round"/>
+      <path d="M68,104 L58,105 L68,108" fill="#506040" opacity="0.8"/>
+      <path d="M132,104 L142,105 L132,108" fill="#506040" opacity="0.8"/>
+      <!-- Plume drooping -->
+      <path d="M98,68 Q80,58 70,65" stroke="#882010" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <circle cx="98" cy="68" r="3" fill="#882010" opacity="0.8"/>
+      <circle cx="80" cy="90" r="2.5" fill="#808880" opacity="0.7"/>
+      <circle cx="120" cy="90" r="2.5" fill="#808880" opacity="0.7"/>
+      <circle cx="100" cy="80" r="2.5" fill="#808880" opacity="0.7"/>
+    </g>
+
+    <!-- Eyes — X (defeated) glowing faintly -->
+    <circle cx="87"  cy="104" r="7" fill="#c0c8b0" opacity="0.8"/>
+    <circle cx="113" cy="104" r="7" fill="#c0c8b0" opacity="0.8"/>
+    <!-- X eyes -->
+    <line x1="81" y1="98"  x2="93" y2="110" stroke="#384830" stroke-width="3" stroke-linecap="round"/>
+    <line x1="93" y1="98"  x2="81" y2="110" stroke="#384830" stroke-width="3" stroke-linecap="round"/>
+    <line x1="107" y1="98" x2="119" y2="110" stroke="#384830" stroke-width="3" stroke-linecap="round"/>
+    <line x1="119" y1="98" x2="107" y2="110" stroke="#384830" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Visor -->
+    <path d="M70,104 L130,104" stroke="#181e10" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Neck guard -->
+    <path d="M78,110 Q104,116 128,110 L126,120 Q104,125 80,120 Z" fill="url(#armorDead)" opacity="0.8"/>
+
+    <!-- Sweat / tears of defeat -->
+    <ellipse cx="68" cy="120" rx="3.5" ry="5.5" fill="#88aaff" opacity="0.45" transform="rotate(-18,68,120)"/>
+    <ellipse cx="138" cy="120" rx="3" ry="4.5" fill="#88aaff" opacity="0.35" transform="rotate(18,138,120)"/>
+
+  </g>
+</svg>

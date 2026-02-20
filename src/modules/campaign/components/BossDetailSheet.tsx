@@ -8,6 +8,7 @@ import { BOSS_DETAILS } from '../data/bossDetails';
 import { ARCHETYPE_INFO } from '../data/archetypes';
 import { ZONE_META } from '../data/zones';
 import { BOSS_SKILLS, getSkillDescVi } from '../data/bossSkills';
+import { getBossImageSrc } from '../data/bossSpritePaths';
 import { playSound } from '@/shared/audio';
 
 interface BossDetailSheetProps {
@@ -45,7 +46,7 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
           <div className="flex flex-col items-center gap-2 mb-6">
             {/* Visual */}
             <div className="drop-shadow-lg">
-              <img src={`/assets/campaign-bosses/boss-${globalBossNumber}.svg`} alt={boss.name} className="w-28 h-28 object-contain inline-block" />
+              <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-28 h-28 object-contain inline-block" />
             </div>
 
             {/* Tier badge */}

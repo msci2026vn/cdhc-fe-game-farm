@@ -1,0 +1,308 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyQ" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#b0ff60"/>
+      <stop offset="45%" stop-color="#60c018"/>
+      <stop offset="100%" stop-color="#245200"/>
+    </radialGradient>
+    <radialGradient id="abdomenQ" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#a0ee28"/>
+      <stop offset="50%" stop-color="#4aa010"/>
+      <stop offset="100%" stop-color="#1c4000"/>
+    </radialGradient>
+    <radialGradient id="crownG" cx="30%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#fff8b0"/>
+      <stop offset="50%" stop-color="#f0b800"/>
+      <stop offset="100%" stop-color="#a86800"/>
+    </radialGradient>
+    <radialGradient id="eggG" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#fffde0"/>
+      <stop offset="60%" stop-color="#f0d890"/>
+      <stop offset="100%" stop-color="#c8a840"/>
+    </radialGradient>
+    <radialGradient id="waveG" cx="0%" cy="50%" r="100%">
+      <stop offset="0%"   stop-color="#ff44aa" stop-opacity="0.9"/>
+      <stop offset="60%"  stop-color="#cc1166" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#880044" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="5" stdDeviation="5" flood-color="#1a0030" flood-opacity="0.35"/>
+    </filter>
+    <filter id="crownGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#ffcc00" flood-opacity="0.9" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="eggLaunch">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#ffdd44" flood-opacity="0.8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="waveGlow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#ff2288" flood-opacity="0.7" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="bodyRage">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#ff0066" flood-opacity="0.45" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes queenRise {
+        0%   { transform: translateX(0) translateY(0) scale(1) rotate(0deg); }
+        22%  { transform: translateX(-10px) translateY(6px) scale(0.92) rotate(-3deg); }
+        55%  { transform: translateX(18px) translateY(-24px) scale(1.16) rotate(4deg); }
+        76%  { transform: translateX(14px) translateY(-16px) scale(1.10) rotate(2deg); }
+        100% { transform: translateX(0) translateY(0) scale(1) rotate(0deg); }
+      }
+      /* Egg 1 — launches toward right */
+      @keyframes eggLaunch1 {
+        0%,38%  { opacity:0; transform: translate(0,0) scale(0.5); }
+        50%     { opacity:1; transform: translate(0,0) scale(1.1); }
+        72%,100%{ opacity:0; transform: translate(55px,-35px) scale(0.4) rotate(180deg); }
+      }
+      /* Egg 2 — launches toward top-right */
+      @keyframes eggLaunch2 {
+        0%,42%  { opacity:0; transform: translate(0,0) scale(0.5); }
+        54%     { opacity:1; transform: translate(0,0) scale(1.1); }
+        76%,100%{ opacity:0; transform: translate(40px,-58px) scale(0.3) rotate(220deg); }
+      }
+      /* Egg 3 — launches right-down */
+      @keyframes eggLaunch3 {
+        0%,46%  { opacity:0; transform: translate(0,0) scale(0.5); }
+        58%     { opacity:1; transform: translate(0,0) scale(1.1); }
+        80%,100%{ opacity:0; transform: translate(62px,18px) scale(0.35) rotate(140deg); }
+      }
+      /* Energy wave pulse */
+      @keyframes energyWave {
+        0%,35%  { opacity:0; transform: scaleX(0.1); }
+        55%,80% { opacity:1; transform: scaleX(1); }
+        100%    { opacity:0; transform: scaleX(1.3); }
+      }
+      @keyframes waveRing1 {
+        0%,40% { r:10; opacity:0.9; }
+        100%   { r:65; opacity:0; }
+      }
+      @keyframes waveRing2 {
+        0%,40% { r:10; opacity:0.7; }
+        100%   { r:55; opacity:0; }
+      }
+      @keyframes crownRage {
+        0%,100% { transform: rotate(0deg); filter: none; }
+        50%     { transform: rotate(-3deg); }
+      }
+      @keyframes eyeQueenRage {
+        0%,100% { transform: scale(1); }
+        50%     { transform: scale(1.3); }
+      }
+      @keyframes antRage {
+        0%,100% { transform: rotate(0deg); }
+        45%     { transform: rotate(-24deg); }
+      }
+      @keyframes legRageKick {
+        0%,100% { transform: rotate(0deg); }
+        48%     { transform: rotate(-26deg); }
+        72%     { transform: rotate(16deg); }
+      }
+      @keyframes cry {
+        0%,38%,100% { opacity:0; transform: scale(0.5) translateY(6px); }
+        52%,86%     { opacity:1; transform: scale(1) translateY(0); }
+      }
+      @keyframes speedLine {
+        0%   { opacity:0; transform:translateX(22px); }
+        28%  { opacity:1; transform:translateX(0); }
+        65%  { opacity:0.8; transform:translateX(-10px); }
+        100% { opacity:0; transform:translateX(-38px); }
+      }
+
+      .character { animation: queenRise 0.78s cubic-bezier(0.15,0,0.85,1) infinite; transform-origin:100px 138px; }
+      .egg1      { animation: eggLaunch1 0.78s ease-in-out infinite; transform-origin:118px 120px; }
+      .egg2      { animation: eggLaunch2 0.78s ease-in-out infinite; transform-origin:125px 105px; }
+      .egg3      { animation: eggLaunch3 0.78s ease-in-out infinite; transform-origin:122px 132px; }
+      .wave      { animation: energyWave 0.78s ease-out infinite; transform-origin:100px 138px; }
+      .ring1     { animation: waveRing1 0.78s ease-out infinite; }
+      .ring2     { animation: waveRing2 0.78s ease-out infinite 0.15s; }
+      .crown     { animation: crownRage 0.78s ease-in-out infinite; transform-origin:100px 88px; }
+      .eye-rage  { animation: eyeQueenRage 0.78s ease-in-out infinite; }
+      .ant-l     { animation: antRage 0.78s ease-in-out infinite; transform-origin:88px 95px; }
+      .ant-r     { animation: antRage 0.78s ease-in-out infinite 0.06s; transform-origin:112px 95px; }
+      .leg-a     { animation: legRageKick 0.78s ease-in-out infinite; }
+      .leg-b     { animation: legRageKick 0.78s ease-in-out infinite 0.39s; }
+      .cry-txt   { animation: cry 0.78s ease-in-out infinite; transform-origin:148px 52px; }
+      .sl-a      { animation: speedLine 0.78s ease-in-out infinite; }
+      .sl-b      { animation: speedLine 0.78s ease-in-out infinite 0.08s; }
+      .sl-c      { animation: speedLine 0.78s ease-in-out infinite 0.16s; }
+    </style>
+  </defs>
+
+  <!-- Shadow -->
+  <ellipse cx="100" cy="214" rx="44" ry="7" fill="#1a0030" opacity="0.2">
+    <animate attributeName="rx" values="44;60;44" dur="0.78s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="100;108;100" dur="0.78s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Speed lines -->
+  <line class="sl-a" x1="12" y1="108" x2="66" y2="108" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+  <line class="sl-b" x1="6"  y1="124" x2="62" y2="124" stroke="white" stroke-width="2"   stroke-linecap="round" opacity="0"/>
+  <line class="sl-c" x1="14" y1="140" x2="68" y2="140" stroke="#ffaacc" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+  <line class="sl-a" x1="8"  y1="92"  x2="60" y2="92"  stroke="#ffaacc" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+  <line class="sl-c" x1="10" y1="156" x2="60" y2="156" stroke="#ffaacc" stroke-width="1"   stroke-linecap="round" opacity="0"/>
+
+  <!-- Energy wave -->
+  <g class="wave">
+    <path d="M105,138 Q140,118 190,105" stroke="url(#waveG)" stroke-width="22" fill="none"
+          stroke-linecap="round" filter="url(#waveGlow)" opacity="0.85"/>
+    <path d="M105,138 Q138,138 185,130" stroke="url(#waveG)" stroke-width="16" fill="none"
+          stroke-linecap="round" opacity="0.7"/>
+    <path d="M105,138 Q140,158 188,168" stroke="url(#waveG)" stroke-width="12" fill="none"
+          stroke-linecap="round" opacity="0.5"/>
+  </g>
+  <!-- Shockwave rings from queen -->
+  <circle class="ring1" cx="105" cy="138" r="10" fill="none" stroke="#ff44aa" stroke-width="3" opacity="0"/>
+  <circle class="ring2" cx="105" cy="138" r="10" fill="none" stroke="#ffbbdd" stroke-width="2" opacity="0"/>
+
+  <!-- Launched eggs -->
+  <g class="egg1" filter="url(#eggLaunch)">
+    <ellipse cx="118" cy="120" rx="10" ry="13" fill="url(#eggG)"/>
+    <path d="M116,115 Q119,120 117,125" stroke="#c89820" stroke-width="1" fill="none" opacity="0.7"/>
+    <!-- Baby eye forming -->
+    <circle cx="120" cy="118" r="2" fill="#333" opacity="0.5"/>
+  </g>
+  <g class="egg2" filter="url(#eggLaunch)">
+    <ellipse cx="125" cy="105" rx="9" ry="12" fill="url(#eggG)" opacity="0.95"/>
+    <circle cx="127" cy="103" r="1.8" fill="#333" opacity="0.4"/>
+  </g>
+  <g class="egg3" filter="url(#eggLaunch)">
+    <ellipse cx="122" cy="132" rx="8" ry="11" fill="url(#eggG)" opacity="0.9"/>
+  </g>
+
+  <!-- Battle cry -->
+  <g class="cry-txt">
+    <rect x="118" y="38" width="68" height="22" rx="9" fill="#880033" opacity="0.95"/>
+    <polygon points="124,60 134,60 127,70" fill="#880033" opacity="0.95"/>
+    <text x="152" y="54" text-anchor="middle" font-size="10" font-weight="bold" fill="#ffccdd" font-family="sans-serif">TRIỆU HỒI!</text>
+  </g>
+
+  <g class="character">
+
+    <!-- Legs -->
+    <g class="leg-b">
+      <line x1="76"  y1="174" x2="44"  y2="202" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="44"  y1="202" x2="32"  y2="216" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-a">
+      <line x1="124" y1="174" x2="155" y2="200" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="155" y1="200" x2="165" y2="215" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="70"  y1="158" x2="40"  y2="178" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="40"  y1="178" x2="30"  y2="194" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-a">
+      <line x1="130" y1="158" x2="160" y2="178" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="160" y1="178" x2="170" y2="194" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Abdomen -->
+    <ellipse cx="100" cy="178" rx="44" ry="34" fill="url(#abdomenQ)" filter="url(#bodyRage)"/>
+    <ellipse cx="100" cy="178" rx="44" ry="34" fill="#ff0066" opacity="0.18"/>
+    <!-- Abdomen glow (summoning energy) -->
+    <ellipse cx="100" cy="178" rx="30" ry="20" fill="#ff44aa" opacity="0.22"/>
+
+    <!-- Body -->
+    <ellipse cx="100" cy="134" rx="46" ry="42" fill="url(#bodyQ)" filter="url(#bodyRage)"/>
+    <ellipse cx="100" cy="134" rx="46" ry="42" fill="#ff0066" opacity="0.2"/>
+    <ellipse cx="84"  cy="116" rx="15" ry="10" fill="white" opacity="0.15" transform="rotate(-20,84,116)"/>
+
+    <!-- Front legs thrusting -->
+    <g class="leg-a">
+      <line x1="72"  y1="146" x2="40"  y2="130" stroke="#246800" stroke-width="6" stroke-linecap="round"/>
+      <line x1="40"  y1="130" x2="26"  y2="140" stroke="#1a5000" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <!-- Right arm extended — launching eggs -->
+      <line x1="128" y1="140" x2="160" y2="110" stroke="#246800" stroke-width="6" stroke-linecap="round"/>
+      <line x1="160" y1="110" x2="175" y2="118" stroke="#1a5000" stroke-width="5" stroke-linecap="round"/>
+      <!-- Glow from hand -->
+      <circle cx="175" cy="118" r="12" fill="#ff44aa" opacity="0.35"/>
+      <circle cx="175" cy="118" r="7"  fill="#ffbbdd" opacity="0.6"/>
+    </g>
+
+    <!-- Antennae back/angry -->
+    <g class="ant-l">
+      <path d="M88,95 Q70,62 56,38" stroke="#1a5000" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <circle cx="56" cy="38" r="7" fill="#ff2288" filter="url(#waveGlow)"/>
+      <circle cx="56" cy="38" r="3.5" fill="white"/>
+    </g>
+    <g class="ant-r">
+      <path d="M112,95 Q130,62 144,38" stroke="#1a5000" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <circle cx="144" cy="38" r="7" fill="#ff2288" filter="url(#waveGlow)"/>
+      <circle cx="144" cy="38" r="3.5" fill="white"/>
+    </g>
+
+    <!-- Eyes — rage pink -->
+    <circle cx="81"  cy="122" r="15" fill="#fff0f8"/>
+    <circle cx="81"  cy="122" r="15" fill="none" stroke="#6a0030" stroke-width="1.5"/>
+    <g class="eye-rage" style="transform-origin:81px 122px">
+      <circle cx="83"  cy="124" r="11" fill="#ee0055"/>
+      <circle cx="83"  cy="124" r="7"  fill="#ff66aa"/>
+      <circle cx="85"  cy="121" r="3.5" fill="white" opacity="0.95"/>
+    </g>
+    <!-- Angry brow left -->
+    <path d="M68,110 L90,116" stroke="#500020" stroke-width="3" stroke-linecap="round"/>
+
+    <circle cx="119" cy="122" r="15" fill="#fff0f8"/>
+    <circle cx="119" cy="122" r="15" fill="none" stroke="#6a0030" stroke-width="1.5"/>
+    <g class="eye-rage" style="transform-origin:119px 122px">
+      <circle cx="121" cy="124" r="11" fill="#ee0055"/>
+      <circle cx="121" cy="124" r="7"  fill="#ff66aa"/>
+      <circle cx="123" cy="121" r="3.5" fill="white" opacity="0.95"/>
+    </g>
+    <!-- Angry brow right -->
+    <path d="M110,116 L132,110" stroke="#500020" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Screaming mouth -->
+    <ellipse cx="100" cy="144" rx="11" ry="8" fill="#2a4000"/>
+    <ellipse cx="100" cy="145" rx="7"  ry="5" fill="#1a2800"/>
+    <!-- Fangs -->
+    <path d="M94,144 L92,152" stroke="#ddaacc" stroke-width="2" stroke-linecap="round"/>
+    <path d="M106,144 L108,152" stroke="#ddaacc" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Cheek rage blush -->
+    <ellipse cx="62"  cy="130" rx="11" ry="7" fill="#ff4488" opacity="0.35"/>
+    <ellipse cx="138" cy="130" rx="11" ry="7" fill="#ff4488" opacity="0.35"/>
+
+    <!-- Crown -->
+    <g class="crown" filter="url(#crownGlow)">
+      <rect x="72" y="86" width="56" height="10" rx="5" fill="url(#crownG)"/>
+      <polygon points="76,86  80,68  84,86"  fill="url(#crownG)"/>
+      <polygon points="88,86  93,62  98,86"  fill="url(#crownG)"/>
+      <polygon points="100,86 100,54 104,86" fill="url(#crownG)"/>
+      <polygon points="102,86 107,62 112,86" fill="url(#crownG)"/>
+      <polygon points="116,86 120,68 124,86" fill="url(#crownG)"/>
+      <!-- Jewels -->
+      <circle cx="80"  cy="86" r="4.5" fill="#ff4488"/>
+      <circle cx="80"  cy="86" r="2.5" fill="#ffaacc"/>
+      <circle cx="93"  cy="80" r="4"   fill="#4488ff"/>
+      <circle cx="93"  cy="80" r="2.2" fill="#aaccff"/>
+      <circle cx="100" cy="74" r="5.5" fill="#ffdd00"/>
+      <circle cx="100" cy="74" r="3"   fill="#fffaaa"/>
+      <circle cx="107" cy="80" r="4"   fill="#44ff88"/>
+      <circle cx="107" cy="80" r="2.2" fill="#aaffcc"/>
+      <circle cx="120" cy="86" r="4.5" fill="#ff4488"/>
+      <circle cx="120" cy="86" r="2.5" fill="#ffaacc"/>
+      <!-- Crown glow rage -->
+      <path d="M72,86 Q100,80 128,86" fill="none" stroke="#ffcc00" stroke-width="1.5" opacity="0.5"/>
+    </g>
+
+    <!-- BOSS badge -->
+    <ellipse cx="100" cy="104" rx="20" ry="8" fill="#aa0044" opacity="0.9"/>
+    <text x="100" y="108" text-anchor="middle" font-size="8" font-weight="bold" fill="#ffccdd" font-family="sans-serif" letter-spacing="1">BOSS</text>
+
+  </g>
+</svg>

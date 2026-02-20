@@ -1,0 +1,351 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyQ" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#a0ee50"/>
+      <stop offset="45%" stop-color="#52b010"/>
+      <stop offset="100%" stop-color="#204800"/>
+    </radialGradient>
+    <radialGradient id="bellyQ" cx="50%" cy="55%" r="55%">
+      <stop offset="0%" stop-color="#d0ff88" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#60a820" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="abdomenQ" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#88dd20"/>
+      <stop offset="50%" stop-color="#40900a"/>
+      <stop offset="100%" stop-color="#183800"/>
+    </radialGradient>
+    <radialGradient id="crownG" cx="30%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#fff0a0"/>
+      <stop offset="50%" stop-color="#e8a800"/>
+      <stop offset="100%" stop-color="#a06000"/>
+    </radialGradient>
+    <radialGradient id="eggG" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#fffde0"/>
+      <stop offset="60%" stop-color="#f0d890"/>
+      <stop offset="100%" stop-color="#c8a840"/>
+    </radialGradient>
+    <radialGradient id="auraQ" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ff88aa" stop-opacity="0.0"/>
+      <stop offset="65%"  stop-color="#cc2266" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#880044" stop-opacity="0.45"/>
+    </radialGradient>
+    <radialGradient id="eyeQ" cx="28%" cy="25%" r="62%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ffe0ee"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#1a0030" flood-opacity="0.4"/>
+    </filter>
+    <filter id="crownGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#ffcc00" flood-opacity="0.7" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="auraGlow">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feFlood flood-color="#ff2266" flood-opacity="0.55" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="eggGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#ffdd44" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="eyeGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#ff2288" flood-opacity="0.9" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes queenFloat {
+        0%,100% { transform: translateY(0px); }
+        50%     { transform: translateY(-11px); }
+      }
+      @keyframes auraPulse {
+        0%,100% { transform: scale(1);    opacity: 0.85; }
+        50%     { transform: scale(1.10); opacity: 1; }
+      }
+      @keyframes auraRing {
+        0%,100% { transform: scale(1);   opacity: 0.4; }
+        50%     { transform: scale(1.18);opacity: 0.15; }
+      }
+      @keyframes crownGlint {
+        0%,72%,100% { opacity: 0; }
+        78%,94%     { opacity: 0.8; }
+      }
+      @keyframes crownSway {
+        0%,100% { transform: rotate(0deg); }
+        40%     { transform: rotate(2deg); }
+        70%     { transform: rotate(-1.5deg); }
+      }
+      @keyframes eyeBlink {
+        0%,86%,100% { transform: scaleY(1); }
+        91%          { transform: scaleY(0.05); }
+      }
+      @keyframes eyeGlowPulse {
+        0%,100% { transform: scale(1); }
+        50%     { transform: scale(1.12); }
+      }
+      @keyframes antennaRoyal {
+        0%,100% { transform: rotate(0deg); }
+        35%     { transform: rotate(5deg); }
+        70%     { transform: rotate(-4deg); }
+      }
+      @keyframes legRoyal {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(7deg); }
+      }
+      /* Egg sac swell */
+      @keyframes abdomenSwell {
+        0%,100% { transform: scale(1); }
+        50%     { transform: scale(1.05); }
+      }
+      /* Orbiting eggs */
+      @keyframes eggOrbit1 {
+        0%   { transform: rotate(0deg)    translateX(72px) rotate(0deg); }
+        100% { transform: rotate(360deg)  translateX(72px) rotate(-360deg); }
+      }
+      @keyframes eggOrbit2 {
+        0%   { transform: rotate(90deg)   translateX(72px) rotate(-90deg); }
+        100% { transform: rotate(450deg)  translateX(72px) rotate(-450deg); }
+      }
+      @keyframes eggOrbit3 {
+        0%   { transform: rotate(180deg)  translateX(72px) rotate(-180deg); }
+        100% { transform: rotate(540deg)  translateX(72px) rotate(-540deg); }
+      }
+      @keyframes eggOrbit4 {
+        0%   { transform: rotate(270deg)  translateX(72px) rotate(-270deg); }
+        100% { transform: rotate(630deg)  translateX(72px) rotate(-630deg); }
+      }
+      /* Pink summon sparks */
+      @keyframes sparkOrbit1 {
+        0%   { transform: rotate(45deg)   translateX(82px) rotate(-45deg);   opacity:0.9; }
+        100% { transform: rotate(405deg)  translateX(82px) rotate(-405deg);  opacity:0.9; }
+      }
+      @keyframes sparkOrbit2 {
+        0%   { transform: rotate(135deg)  translateX(82px) rotate(-135deg);  opacity:0.7; }
+        100% { transform: rotate(495deg)  translateX(82px) rotate(-495deg);  opacity:0.7; }
+      }
+      @keyframes sparkOrbit3 {
+        0%   { transform: rotate(225deg)  translateX(82px) rotate(-225deg);  opacity:0.8; }
+        100% { transform: rotate(585deg)  translateX(82px) rotate(-585deg);  opacity:0.8; }
+      }
+      @keyframes sparkOrbit4 {
+        0%   { transform: rotate(315deg)  translateX(82px) rotate(-315deg);  opacity:0.6; }
+        100% { transform: rotate(675deg)  translateX(82px) rotate(-675deg);  opacity:0.6; }
+      }
+      @keyframes breatheBody {
+        0%,100% { transform: scale(1); }
+        50%     { transform: scale(1.022); }
+      }
+
+      .character    { animation: queenFloat 2.8s ease-in-out infinite; }
+      .aura-main    { animation: auraPulse 2.8s ease-in-out infinite; transform-origin:100px 138px; }
+      .aura-ring    { animation: auraRing  2.8s ease-in-out infinite; transform-origin:100px 138px; }
+      .crown        { animation: crownSway 2.8s ease-in-out infinite; transform-origin:100px 88px; }
+      .crown-glint  { animation: crownGlint 4s ease-in-out infinite; }
+      .body-group   { animation: breatheBody 2.8s ease-in-out infinite; transform-origin:100px 138px; }
+      .abdomen      { animation: abdomenSwell 2.8s ease-in-out infinite; transform-origin:100px 172px; }
+      .eye-l        { animation: eyeBlink 5s ease-in-out infinite; transform-origin:81px 122px; }
+      .eye-r        { animation: eyeBlink 5s ease-in-out infinite 0.1s; transform-origin:119px 122px; }
+      .eye-glow-p   { animation: eyeGlowPulse 2.8s ease-in-out infinite; transform-origin:100px 122px; }
+      .ant-l        { animation: antennaRoyal 3.6s ease-in-out infinite; transform-origin:88px 95px; }
+      .ant-r        { animation: antennaRoyal 3.6s ease-in-out infinite 0.6s; transform-origin:112px 95px; }
+      .leg-a        { animation: legRoyal 1.4s ease-in-out infinite 0s; }
+      .leg-b        { animation: legRoyal 1.4s ease-in-out infinite 0.23s; }
+      .leg-c        { animation: legRoyal 1.4s ease-in-out infinite 0.46s; }
+      /* Eggs */
+      .e1 { animation: eggOrbit1 5s linear infinite; transform-origin:100px 138px; }
+      .e2 { animation: eggOrbit2 5s linear infinite; transform-origin:100px 138px; }
+      .e3 { animation: eggOrbit3 5s linear infinite; transform-origin:100px 138px; }
+      .e4 { animation: eggOrbit4 5s linear infinite; transform-origin:100px 138px; }
+      /* Sparks */
+      .sp1 { animation: sparkOrbit1 3.2s linear infinite; transform-origin:100px 138px; }
+      .sp2 { animation: sparkOrbit2 3.2s linear infinite; transform-origin:100px 138px; }
+      .sp3 { animation: sparkOrbit3 3.2s linear infinite; transform-origin:100px 138px; }
+      .sp4 { animation: sparkOrbit4 3.2s linear infinite; transform-origin:100px 138px; }
+    </style>
+  </defs>
+
+  <!-- Ground shadow — large, queen is big -->
+  <ellipse cx="100" cy="214" rx="48" ry="8" fill="#1a0030" opacity="0.3">
+    <animate attributeName="rx" values="48;34;48" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4,0,0.6,1;0.4,0,0.6,1"/>
+    <animate attributeName="opacity" values="0.3;0.12;0.3" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4,0,0.6,1;0.4,0,0.6,1"/>
+  </ellipse>
+
+  <g class="character">
+
+    <!-- ── ROYAL AURA ── -->
+    <g class="aura-ring">
+      <ellipse cx="100" cy="138" rx="82" ry="74" fill="none" stroke="#dd1166" stroke-width="1.5" opacity="0.3"/>
+      <ellipse cx="100" cy="138" rx="74" ry="66" fill="none" stroke="#ff44aa" stroke-width="1"   opacity="0.2"/>
+    </g>
+    <g class="aura-main">
+      <ellipse cx="100" cy="138" rx="72" ry="64" fill="url(#auraQ)" filter="url(#auraGlow)"/>
+    </g>
+
+    <!-- ── ORBITING EGGS (4) ── -->
+    <g class="e1" filter="url(#eggGlow)">
+      <ellipse cx="100" cy="138" rx="9" ry="12" fill="url(#eggG)"/>
+      <!-- egg crack hint -->
+      <path d="M98,134 Q101,138 99,142" stroke="#c89820" stroke-width="0.8" fill="none" opacity="0.6"/>
+    </g>
+    <g class="e2" filter="url(#eggGlow)">
+      <ellipse cx="100" cy="138" rx="8" ry="11" fill="url(#eggG)" opacity="0.92"/>
+    </g>
+    <g class="e3" filter="url(#eggGlow)">
+      <ellipse cx="100" cy="138" rx="9" ry="12" fill="url(#eggG)"/>
+      <path d="M101,134 Q99,138 101,142" stroke="#c89820" stroke-width="0.8" fill="none" opacity="0.5"/>
+    </g>
+    <g class="e4" filter="url(#eggGlow)">
+      <ellipse cx="100" cy="138" rx="7" ry="10" fill="url(#eggG)" opacity="0.88"/>
+    </g>
+
+    <!-- ── PINK SUMMON SPARKS ── -->
+    <g class="sp1"><circle cx="100" cy="138" r="3.5" fill="#ff44aa" opacity="0.9"/></g>
+    <g class="sp2"><circle cx="100" cy="138" r="3"   fill="#ff88cc" opacity="0.7"/></g>
+    <g class="sp3"><circle cx="100" cy="138" r="2.5" fill="#ffbbdd" opacity="0.8"/></g>
+    <g class="sp4"><circle cx="100" cy="138" r="2"   fill="#ffffff"  opacity="0.6"/></g>
+
+    <!-- ── LEGS (6, behind body) ── -->
+    <g class="leg-c">
+      <line x1="76"  y1="175" x2="48"  y2="198" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="48"  y1="198" x2="38"  y2="213" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-c">
+      <line x1="124" y1="175" x2="152" y2="198" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="152" y1="198" x2="162" y2="213" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="70"  y1="160" x2="42"  y2="180" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="42"  y1="180" x2="32"  y2="196" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="130" y1="160" x2="158" y2="180" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="158" y1="180" x2="168" y2="196" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+
+    <g class="body-group">
+
+      <!-- ── ABDOMEN (swollen egg sac — BOSS tier is BIG) ── -->
+      <g class="abdomen">
+        <ellipse cx="100" cy="178" rx="44" ry="34" fill="url(#abdomenQ)" filter="url(#shadow)"/>
+        <!-- Abdomen royal stripes -->
+        <path d="M58,172 Q100,165 142,172" stroke="#ff44aa" stroke-width="2.5" fill="none" opacity="0.5"/>
+        <path d="M56,182 Q100,176 144,182" stroke="#cc1155" stroke-width="2"   fill="none" opacity="0.4"/>
+        <path d="M60,192 Q100,186 140,192" stroke="#ff44aa" stroke-width="1.5" fill="none" opacity="0.3"/>
+        <!-- Egg sac glow spot -->
+        <ellipse cx="100" cy="178" rx="28" ry="18" fill="#ff66cc" opacity="0.15"/>
+        <!-- Belly highlight -->
+        <ellipse cx="88"  cy="168" rx="16" ry="10" fill="white" opacity="0.12" transform="rotate(-15,88,168)"/>
+      </g>
+
+      <!-- ── MAIN BODY (thorax) — wider than minions ── -->
+      <ellipse cx="100" cy="134" rx="46" ry="42" fill="url(#bodyQ)" filter="url(#shadow)"/>
+      <!-- Royal body highlight -->
+      <ellipse cx="84"  cy="116" rx="15" ry="10" fill="white" opacity="0.16" transform="rotate(-20,84,116)"/>
+      <!-- Pink royal marking -->
+      <path d="M100,96 L100,174" stroke="#dd1166" stroke-width="3.5" opacity="0.3"/>
+      <!-- Belly shine -->
+      <ellipse cx="100" cy="136" rx="30" ry="22" fill="url(#bellyQ)"/>
+
+      <!-- ── FRONT LEGS ── -->
+      <g class="leg-a">
+        <line x1="72"  y1="148" x2="46"  y2="160" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="46"  y1="160" x2="36"  y2="174" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+      </g>
+      <g class="leg-a">
+        <line x1="128" y1="148" x2="154" y2="160" stroke="#246800" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="154" y1="160" x2="164" y2="174" stroke="#1a5000" stroke-width="4.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- ── ANTENNAE — longer, regal ── -->
+      <g class="ant-l">
+        <path d="M88,95 Q72,65 60,42" stroke="#1a5000" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        <!-- Antenna jewel -->
+        <circle cx="60" cy="42" r="7" fill="#ff44aa" filter="url(#eyeGlow)"/>
+        <circle cx="60" cy="42" r="4" fill="#ffbbdd"/>
+        <circle cx="60" cy="42" r="2" fill="#ffffff"/>
+      </g>
+      <g class="ant-r">
+        <path d="M112,95 Q128,65 140,42" stroke="#1a5000" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        <circle cx="140" cy="42" r="7" fill="#ff44aa" filter="url(#eyeGlow)"/>
+        <circle cx="140" cy="42" r="4" fill="#ffbbdd"/>
+        <circle cx="140" cy="42" r="2" fill="#ffffff"/>
+      </g>
+
+      <!-- ── EYES — large, pink, regal ── -->
+      <g class="eye-glow-p">
+        <circle cx="81"  cy="122" r="17" fill="#ff44aa" opacity="0.18"/>
+        <circle cx="119" cy="122" r="17" fill="#ff44aa" opacity="0.18"/>
+      </g>
+      <!-- Left eye -->
+      <circle cx="81"  cy="122" r="15" fill="url(#eyeQ)"/>
+      <circle cx="81"  cy="122" r="15" fill="none" stroke="#6a0030" stroke-width="1.5"/>
+      <g class="eye-l">
+        <circle cx="83"  cy="124" r="10" fill="#cc0066"/>
+        <circle cx="83"  cy="124" r="6.5" fill="#ff44aa"/>
+        <circle cx="85"  cy="121" r="3.5" fill="white" opacity="0.95"/>
+        <circle cx="80"  cy="128" r="1.8" fill="white" opacity="0.5"/>
+      </g>
+      <!-- Right eye -->
+      <circle cx="119" cy="122" r="15" fill="url(#eyeQ)"/>
+      <circle cx="119" cy="122" r="15" fill="none" stroke="#6a0030" stroke-width="1.5"/>
+      <g class="eye-r">
+        <circle cx="121" cy="124" r="10" fill="#cc0066"/>
+        <circle cx="121" cy="124" r="6.5" fill="#ff44aa"/>
+        <circle cx="123" cy="121" r="3.5" fill="white" opacity="0.95"/>
+        <circle cx="118" cy="128" r="1.8" fill="white" opacity="0.5"/>
+      </g>
+
+      <!-- Queen smirk / regal mouth -->
+      <path d="M88,142 Q100,151 112,142" stroke="#1a4000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Small fangs -->
+      <path d="M93,142 L91,149" stroke="#ddaacc" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M107,142 L109,149" stroke="#ddaacc" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- Cheek blush (queen is feminine) -->
+      <ellipse cx="64"  cy="128" rx="10" ry="6" fill="#ff88aa" opacity="0.3"/>
+      <ellipse cx="136" cy="128" rx="10" ry="6" fill="#ff88aa" opacity="0.3"/>
+
+      <!-- ── CROWN ── -->
+      <g class="crown" filter="url(#crownGlow)">
+        <!-- Crown base band -->
+        <rect x="72" y="86" width="56" height="10" rx="5" fill="url(#crownG)"/>
+        <!-- Crown teeth (5 points) -->
+        <polygon points="76,86  80,68  84,86"  fill="url(#crownG)"/>
+        <polygon points="88,86  93,62  98,86"  fill="url(#crownG)"/>
+        <polygon points="100,86 100,58 100,86" fill="url(#crownG)"/><!-- center tallest -->
+        <path d="M100,86 L100,55" stroke="#e8a800" stroke-width="0" fill="none"/>
+        <polygon points="100,86 100,54 104,86" fill="url(#crownG)"/>
+        <polygon points="102,86 107,62 112,86" fill="url(#crownG)"/>
+        <polygon points="116,86 120,68 124,86" fill="url(#crownG)"/>
+        <!-- Crown jewels -->
+        <circle cx="80"  cy="86" r="4.5" fill="#ff4488"/>
+        <circle cx="80"  cy="86" r="2.5" fill="#ffaacc"/>
+        <circle cx="93"  cy="80" r="4"   fill="#4488ff"/>
+        <circle cx="93"  cy="80" r="2.2" fill="#aaccff"/>
+        <circle cx="100" cy="74" r="5.5" fill="#ffdd00" filter="url(#crownGlow)"/>
+        <circle cx="100" cy="74" r="3"   fill="#fffaaa"/>
+        <circle cx="107" cy="80" r="4"   fill="#44ff88"/>
+        <circle cx="107" cy="80" r="2.2" fill="#aaffcc"/>
+        <circle cx="120" cy="86" r="4.5" fill="#ff4488"/>
+        <circle cx="120" cy="86" r="2.5" fill="#ffaacc"/>
+        <!-- Crown band detail -->
+        <path d="M74,88 Q100,84 126,88" stroke="#c88000" stroke-width="1.2" fill="none" opacity="0.6"/>
+        <!-- Glint on crown -->
+        <path class="crown-glint" d="M78,82 Q85,78 90,82" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0"/>
+        <path class="crown-glint" d="M110,82 Q116,78 122,82" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0"/>
+      </g>
+
+      <!-- BOSS badge -->
+      <ellipse cx="100" cy="104" rx="20" ry="8" fill="#880033" opacity="0.88"/>
+      <text x="100" y="108" text-anchor="middle" font-size="8" font-weight="bold" fill="#ffccdd" font-family="sans-serif" letter-spacing="1">BOSS</text>
+
+    </g><!-- body-group -->
+  </g><!-- character -->
+</svg>

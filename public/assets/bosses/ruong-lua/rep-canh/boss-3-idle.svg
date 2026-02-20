@@ -1,0 +1,283 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyG" cx="38%" cy="30%" r="62%">
+      <stop offset="0%" stop-color="#90e040"/>
+      <stop offset="50%" stop-color="#48a010"/>
+      <stop offset="100%" stop-color="#204800"/>
+    </radialGradient>
+    <radialGradient id="wingL" cx="60%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#e8d0ff" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#9960cc" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#4a1888" stop-opacity="0.5"/>
+    </radialGradient>
+    <radialGradient id="wingR" cx="40%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#e8d0ff" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#9960cc" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#4a1888" stop-opacity="0.5"/>
+    </radialGradient>
+    <radialGradient id="auraG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#cc44ff" stop-opacity="0.0"/>
+      <stop offset="70%" stop-color="#9922dd" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#6600bb" stop-opacity="0.5"/>
+    </radialGradient>
+    <radialGradient id="eyeG" cx="30%" cy="28%" r="60%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eeddff"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#200040" flood-opacity="0.35"/>
+    </filter>
+    <filter id="auraGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feFlood flood-color="#bb44ff" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="wingGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#cc88ff" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="eyeGlow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#dd44ff" flood-opacity="0.9" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes eliteHover {
+        0%,100% { transform: translateY(0px); }
+        50%     { transform: translateY(-12px); }
+      }
+      @keyframes wingBeatL {
+        0%,100% { transform: rotate(-8deg) scaleY(1); }
+        45%     { transform: rotate(-40deg) scaleY(0.7); }
+      }
+      @keyframes wingBeatR {
+        0%,100% { transform: rotate(8deg) scaleY(1); }
+        45%     { transform: rotate(40deg) scaleY(0.7); }
+      }
+      @keyframes wingBeatL2 {
+        0%,100% { transform: rotate(-5deg) scaleY(1); }
+        45%     { transform: rotate(-30deg) scaleY(0.75); }
+      }
+      @keyframes wingBeatR2 {
+        0%,100% { transform: rotate(5deg) scaleY(1); }
+        45%     { transform: rotate(30deg) scaleY(0.75); }
+      }
+      @keyframes auraPulse {
+        0%,100% { transform: scale(1);    opacity: 0.7; }
+        50%     { transform: scale(1.12); opacity: 1; }
+      }
+      @keyframes auraRing {
+        0%,100% { transform: scale(1);   opacity: 0.5; }
+        50%     { transform: scale(1.2); opacity: 0.15; }
+      }
+      @keyframes eyePulse {
+        0%,100% { transform: scale(1); }
+        50%     { transform: scale(1.15); }
+      }
+      @keyframes eyeBlink {
+        0%,88%,100% { transform: scaleY(1); }
+        92%          { transform: scaleY(0.05); }
+      }
+      @keyframes antennaFloat {
+        0%,100% { transform: rotate(0deg); }
+        40%     { transform: rotate(7deg); }
+        70%     { transform: rotate(-5deg); }
+      }
+      @keyframes legFloat {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(8deg); }
+      }
+      @keyframes particleOrbit {
+        0%   { transform: rotate(0deg)   translateX(58px) rotate(0deg); }
+        100% { transform: rotate(360deg) translateX(58px) rotate(-360deg); }
+      }
+      @keyframes particleOrbit2 {
+        0%   { transform: rotate(72deg)  translateX(58px) rotate(-72deg); }
+        100% { transform: rotate(432deg) translateX(58px) rotate(-432deg); }
+      }
+      @keyframes particleOrbit3 {
+        0%   { transform: rotate(144deg) translateX(58px) rotate(-144deg); }
+        100% { transform: rotate(504deg) translateX(58px) rotate(-504deg); }
+      }
+      @keyframes particleOrbit4 {
+        0%   { transform: rotate(216deg) translateX(58px) rotate(-216deg); }
+        100% { transform: rotate(576deg) translateX(58px) rotate(-576deg); }
+      }
+      @keyframes particleOrbit5 {
+        0%   { transform: rotate(288deg) translateX(58px) rotate(-288deg); }
+        100% { transform: rotate(648deg) translateX(58px) rotate(-648deg); }
+      }
+      @keyframes shadowElite {
+        0%,100% { rx:35; ry:6; opacity:0.22; }
+        50%     { rx:24; ry:4; opacity:0.1; }
+      }
+
+      .character { animation: eliteHover 2.6s ease-in-out infinite; }
+      .wing-tl   { animation: wingBeatL 0.28s ease-in-out infinite; transform-origin: 96px 120px; }
+      .wing-tr   { animation: wingBeatR 0.28s ease-in-out infinite; transform-origin: 104px 120px; }
+      .wing-bl   { animation: wingBeatL2 0.28s ease-in-out infinite 0.04s; transform-origin: 96px 132px; }
+      .wing-br   { animation: wingBeatR2 0.28s ease-in-out infinite 0.04s; transform-origin: 104px 132px; }
+      .aura-main { animation: auraPulse 2.6s ease-in-out infinite; transform-origin: 100px 130px; }
+      .aura-ring { animation: auraRing  2.6s ease-in-out infinite; transform-origin: 100px 130px; }
+      .eye-l     { animation: eyeBlink 4.5s ease-in-out infinite; transform-origin: 82px 124px; }
+      .eye-r     { animation: eyeBlink 4.5s ease-in-out infinite 0.08s; transform-origin: 118px 124px; }
+      .eye-glow  { animation: eyePulse 2.6s ease-in-out infinite; transform-origin: 100px 124px; }
+      .ant-l     { animation: antennaFloat 3.4s ease-in-out infinite; transform-origin: 90px 97px; }
+      .ant-r     { animation: antennaFloat 3.4s ease-in-out infinite 0.5s; transform-origin: 110px 97px; }
+      .leg-a     { animation: legFloat 1.3s ease-in-out infinite 0s; }
+      .leg-b     { animation: legFloat 1.3s ease-in-out infinite 0.2s; }
+      .leg-c     { animation: legFloat 1.3s ease-in-out infinite 0.4s; }
+      .p1 { animation: particleOrbit  3.5s linear infinite; transform-origin: 100px 130px; }
+      .p2 { animation: particleOrbit2 3.5s linear infinite; transform-origin: 100px 130px; }
+      .p3 { animation: particleOrbit3 3.5s linear infinite; transform-origin: 100px 130px; }
+      .p4 { animation: particleOrbit4 3.5s linear infinite; transform-origin: 100px 130px; }
+      .p5 { animation: particleOrbit5 3.5s linear infinite; transform-origin: 100px 130px; }
+    </style>
+  </defs>
+
+  <!-- Shadow -->
+  <ellipse cx="100" cy="213" rx="35" ry="6" fill="#200040" opacity="0.22">
+    <animate attributeName="rx" values="35;24;35" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.4,0,0.6,1;0.4,0,0.6,1"/>
+    <animate attributeName="opacity" values="0.22;0.1;0.22" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.4,0,0.6,1;0.4,0,0.6,1"/>
+  </ellipse>
+
+  <g class="character">
+
+    <!-- ── RAGE AURA RINGS ── -->
+    <g class="aura-ring">
+      <ellipse cx="100" cy="130" rx="72" ry="66" fill="none" stroke="#aa22ee" stroke-width="2" opacity="0.3"/>
+      <ellipse cx="100" cy="130" rx="64" ry="58" fill="none" stroke="#cc44ff" stroke-width="1" opacity="0.2"/>
+    </g>
+    <g class="aura-main">
+      <ellipse cx="100" cy="130" rx="62" ry="56" fill="url(#auraG)" filter="url(#auraGlow)"/>
+    </g>
+
+    <!-- ── ORBITING RAGE PARTICLES ── -->
+    <g class="p1"><circle cx="100" cy="130" r="4" fill="#ee44ff" opacity="0.9"/></g>
+    <g class="p2"><circle cx="100" cy="130" r="3" fill="#cc22dd" opacity="0.8"/></g>
+    <g class="p3"><circle cx="100" cy="130" r="3.5" fill="#ff88ff" opacity="0.7"/></g>
+    <g class="p4"><circle cx="100" cy="130" r="2.5" fill="#aa00cc" opacity="0.85"/></g>
+    <g class="p5"><circle cx="100" cy="130" r="2"   fill="#ffffff" opacity="0.6"/></g>
+
+    <!-- ── WINGS (behind body) ── -->
+    <!-- Upper wings -->
+    <g class="wing-tl" filter="url(#wingGlow)">
+      <path d="M96,120 Q62,72 44,58 Q58,90 74,110 Q84,118 96,120Z" fill="url(#wingL)"/>
+      <!-- Wing veins -->
+      <line x1="96" y1="120" x2="50" y2="68" stroke="#aa66ee" stroke-width="0.8" opacity="0.6"/>
+      <line x1="90" y1="116" x2="58" y2="82" stroke="#cc88ff" stroke-width="0.6" opacity="0.4"/>
+      <line x1="85" y1="118" x2="66" y2="90" stroke="#cc88ff" stroke-width="0.6" opacity="0.4"/>
+    </g>
+    <g class="wing-tr" filter="url(#wingGlow)">
+      <path d="M104,120 Q138,72 156,58 Q142,90 126,110 Q116,118 104,120Z" fill="url(#wingR)"/>
+      <line x1="104" y1="120" x2="150" y2="68" stroke="#aa66ee" stroke-width="0.8" opacity="0.6"/>
+      <line x1="110" y1="116" x2="142" y2="82" stroke="#cc88ff" stroke-width="0.6" opacity="0.4"/>
+      <line x1="115" y1="118" x2="134" y2="90" stroke="#cc88ff" stroke-width="0.6" opacity="0.4"/>
+    </g>
+    <!-- Lower wings (smaller) -->
+    <g class="wing-bl" filter="url(#wingGlow)">
+      <path d="M96,132 Q68,108 52,108 Q62,122 78,130 Q88,134 96,132Z" fill="url(#wingL)" opacity="0.8"/>
+    </g>
+    <g class="wing-br" filter="url(#wingGlow)">
+      <path d="M104,132 Q132,108 148,108 Q138,122 122,130 Q112,134 104,132Z" fill="url(#wingR)" opacity="0.8"/>
+    </g>
+
+    <!-- ── LEGS (floating, not touching ground) ── -->
+    <g class="leg-a">
+      <line x1="78" y1="168" x2="55" y2="188" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="55" y1="188" x2="48" y2="204" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-a">
+      <line x1="122" y1="168" x2="145" y2="188" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="145" y1="188" x2="152" y2="204" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="72" y1="154" x2="46" y2="172" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="46" y1="172" x2="38" y2="187" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <line x1="128" y1="154" x2="154" y2="172" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="154" y1="172" x2="162" y2="187" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-c">
+      <line x1="76" y1="143" x2="52" y2="156" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="52" y1="156" x2="42" y2="168" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-c">
+      <line x1="124" y1="143" x2="148" y2="156" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="148" y1="156" x2="158" y2="168" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <g filter="url(#shadow)">
+      <!-- ── ABDOMEN ── -->
+      <ellipse cx="100" cy="166" rx="34" ry="26" fill="url(#bodyG)"/>
+      <!-- Abdomen stripe (elite marking) -->
+      <path d="M68,162 Q100,156 132,162" stroke="#8844cc" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M68,172 Q100,167 132,172" stroke="#8844cc" stroke-width="2" fill="none" opacity="0.4"/>
+      <!-- Abdomen glow spot -->
+      <ellipse cx="100" cy="164" rx="18" ry="10" fill="#cc44ff" opacity="0.18"/>
+
+      <!-- ── MAIN BODY ── -->
+      <ellipse cx="100" cy="132" rx="43" ry="40" fill="url(#bodyG)"/>
+      <!-- Elite body marking — purple stripe down center -->
+      <path d="M100,96 L100,168" stroke="#9922cc" stroke-width="3" opacity="0.35"/>
+      <!-- Body highlight -->
+      <ellipse cx="86" cy="115" rx="13" ry="9" fill="white" opacity="0.16" transform="rotate(-18,86,115)"/>
+      <!-- Shoulder spikes (elite) -->
+      <polygon points="68,122  56,108  62,128" fill="#6a9828"/>
+      <polygon points="68,122  58,106  66,126" fill="#8ac038" opacity="0.6"/>
+      <polygon points="132,122 144,108 138,128" fill="#6a9828"/>
+      <polygon points="132,122 142,106 134,126" fill="#8ac038" opacity="0.6"/>
+
+      <!-- ── ANTENNAE ── -->
+      <g class="ant-l">
+        <path d="M90,97 Q75,70 66,50" stroke="#2a6000" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="66" cy="50" r="6" fill="#cc44ff" filter="url(#eyeGlow)"/>
+        <circle cx="66" cy="50" r="3" fill="#ffffff"/>
+      </g>
+      <g class="ant-r">
+        <path d="M110,97 Q125,70 134,50" stroke="#2a6000" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="134" cy="50" r="6" fill="#cc44ff" filter="url(#eyeGlow)"/>
+        <circle cx="134" cy="50" r="3" fill="#ffffff"/>
+      </g>
+
+      <!-- ── EYES ── -->
+      <g class="eye-glow">
+        <!-- Left eye outer glow -->
+        <circle cx="82" cy="124" r="16" fill="#cc44ff" opacity="0.2"/>
+        <!-- Right eye outer glow -->
+        <circle cx="118" cy="124" r="16" fill="#cc44ff" opacity="0.2"/>
+      </g>
+      <!-- Left eye -->
+      <circle cx="82" cy="124" r="14" fill="url(#eyeG)"/>
+      <circle cx="82" cy="124" r="14" fill="none" stroke="#4a1888" stroke-width="1.5"/>
+      <g class="eye-l">
+        <circle cx="84" cy="126" r="9" fill="#9900cc"/>
+        <circle cx="84" cy="126" r="6" fill="#cc44ff"/>
+        <circle cx="86" cy="123" r="3" fill="white" opacity="0.9"/>
+        <circle cx="81" cy="129" r="1.5" fill="white" opacity="0.5"/>
+      </g>
+      <!-- Right eye -->
+      <circle cx="118" cy="124" r="14" fill="url(#eyeG)"/>
+      <circle cx="118" cy="124" r="14" fill="none" stroke="#4a1888" stroke-width="1.5"/>
+      <g class="eye-r">
+        <circle cx="120" cy="126" r="9" fill="#9900cc"/>
+        <circle cx="120" cy="126" r="6" fill="#cc44ff"/>
+        <circle cx="122" cy="123" r="3" fill="white" opacity="0.9"/>
+        <circle cx="117" cy="129" r="1.5" fill="white" opacity="0.5"/>
+      </g>
+
+      <!-- Smile — confident smirk -->
+      <path d="M89,142 Q100,150 111,142" stroke="#2a5000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- ELITE badge on forehead -->
+      <ellipse cx="100" cy="104" rx="18" ry="7" fill="#7700aa" opacity="0.8"/>
+      <text x="100" y="107" text-anchor="middle" font-size="7" font-weight="bold" fill="#ffffff" font-family="sans-serif" opacity="0.95">ELITE</text>
+    </g>
+
+  </g>
+</svg>

@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ZoneBoss } from '../types/campaign.types';
 import type { StageState } from '../types/campaign.types';
+import { getBossImageSrc } from '../data/bossSpritePaths';
 import { playSound } from '@/shared/audio';
 
 interface StageNodeProps {
@@ -54,7 +55,7 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
           <div className="absolute inset-0 w-20 h-20 rounded-2xl bg-yellow-400/40 campaign-ping" />
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-blue-400 to-blue-600 border-4 border-white shadow-[0_6px_0_#0D47A1] flex items-center justify-center">
             {globalBossNumber ? (
-              <img src={`/assets/campaign-bosses/boss-${globalBossNumber}.svg`} alt={boss.name} className="w-14 h-14 object-contain drop-shadow-md" />
+              <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-14 h-14 object-contain drop-shadow-md" />
             ) : (
               <span className="text-3xl drop-shadow-lg">{boss.emoji}</span>
             )}

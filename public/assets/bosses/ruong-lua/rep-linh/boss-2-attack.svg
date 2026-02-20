@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <defs>
+    <radialGradient id="bodyG" cx="38%" cy="32%" r="62%">
+      <stop offset="0%" stop-color="#8add30"/>
+      <stop offset="50%" stop-color="#4a9808"/>
+      <stop offset="100%" stop-color="#1e5000"/>
+    </radialGradient>
+    <radialGradient id="armorG" cx="30%" cy="25%" r="65%">
+      <stop offset="0%" stop-color="#d8e0c8"/>
+      <stop offset="45%" stop-color="#9aa890"/>
+      <stop offset="100%" stop-color="#485038"/>
+    </radialGradient>
+    <radialGradient id="helmetG" cx="35%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#d0d8c0"/>
+      <stop offset="50%" stop-color="#7a8a68"/>
+      <stop offset="100%" stop-color="#303820"/>
+    </radialGradient>
+    <radialGradient id="shieldG" cx="30%" cy="25%" r="65%">
+      <stop offset="0%" stop-color="#c8d0b8"/>
+      <stop offset="50%" stop-color="#789068"/>
+      <stop offset="100%" stop-color="#283818"/>
+    </radialGradient>
+    <linearGradient id="spearG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a08030"/>
+      <stop offset="100%" stop-color="#e8d080"/>
+    </linearGradient>
+    <filter id="dropShadow">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#1a3000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="spearGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#ffffaa" flood-opacity="0.8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <filter id="angryGlow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#ff4400" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+    </filter>
+    <style>
+      @keyframes soldierLunge {
+        0%   { transform: translateX(0) translateY(0) rotate(0deg) scaleX(1); }
+        25%  { transform: translateX(-12px) translateY(5px) rotate(-3deg) scaleX(0.92); }
+        55%  { transform: translateX(26px) translateY(-18px) rotate(5deg) scaleX(1.14); }
+        78%  { transform: translateX(20px) translateY(-12px) rotate(3deg) scaleX(1.08); }
+        100% { transform: translateX(0) translateY(0) rotate(0deg) scaleX(1); }
+      }
+      @keyframes spearThrust {
+        0%   { transform: rotate(-30deg) translateX(0); }
+        20%  { transform: rotate(-40deg) translateX(-8px); }
+        55%  { transform: rotate(10deg) translateX(30px); }
+        75%  { transform: rotate(5deg) translateX(22px); }
+        100% { transform: rotate(-30deg) translateX(0); }
+      }
+      @keyframes shieldRaise {
+        0%,100% { transform: translateY(0) rotate(0deg); }
+        45%,65% { transform: translateY(-8px) rotate(-8deg); }
+      }
+      @keyframes eyeRage {
+        0%,100% { transform: scaleY(1); }
+        50%     { transform: scaleY(1.25); }
+      }
+      @keyframes antennaAngry {
+        0%,100% { transform: rotate(0deg); }
+        40%     { transform: rotate(-20deg); }
+      }
+      @keyframes impactPulse {
+        0%,40%,100% { opacity:0; r:5; }
+        55%,80%     { opacity:1; r:20; }
+      }
+      @keyframes shockwave {
+        0%   { opacity:0.9; r:8; }
+        100% { opacity:0; r:40; }
+      }
+      @keyframes speedLine {
+        0%   { opacity:0; transform:translateX(20px); }
+        25%  { opacity:0.9; transform:translateX(0); }
+        65%  { opacity:0.8; transform:translateX(-8px); }
+        100% { opacity:0; transform:translateX(-35px); }
+      }
+      @keyframes battleCry {
+        0%,45%,100% { opacity:0; transform:scale(0.5); }
+        55%,85%     { opacity:1; transform:scale(1); }
+      }
+      @keyframes legKick {
+        0%,100% { transform:rotate(0deg); }
+        45%     { transform:rotate(-28deg); }
+        70%     { transform:rotate(18deg); }
+      }
+      .character   { animation: soldierLunge 0.75s cubic-bezier(0.18,0,0.82,1) infinite; transform-origin:100px 130px; }
+      .spear-group { animation: spearThrust 0.75s cubic-bezier(0.18,0,0.82,1) infinite; transform-origin:128px 138px; }
+      .shield-group{ animation: shieldRaise 0.75s ease-in-out infinite; transform-origin:52px 102px; }
+      .eye-l       { animation: eyeRage 0.75s ease-in-out infinite; transform-origin:83px 104px; }
+      .eye-r       { animation: eyeRage 0.75s ease-in-out infinite 0.04s; transform-origin:117px 104px; }
+      .ant-l       { animation: antennaAngry 0.75s ease-in-out infinite; transform-origin:90px 96px; }
+      .ant-r       { animation: antennaAngry 0.75s ease-in-out infinite 0.05s; transform-origin:110px 96px; }
+      .impact      { animation: impactPulse 0.75s ease-out infinite; }
+      .shockwave   { animation: shockwave 0.75s ease-out infinite; }
+      .speed-a     { animation: speedLine 0.75s ease-in-out infinite; }
+      .speed-b     { animation: speedLine 0.75s ease-in-out infinite 0.07s; }
+      .speed-c     { animation: speedLine 0.75s ease-in-out infinite 0.14s; }
+      .battle-cry  { animation: battleCry 0.75s ease-in-out infinite; transform-origin: 168px 68px; }
+      .leg-a       { animation: legKick 0.75s ease-in-out infinite; transform-origin:75px 148px; }
+      .leg-b       { animation: legKick 0.75s ease-in-out infinite 0.37s; transform-origin:125px 148px; }
+      .leg-c       { animation: legKick 0.75s ease-in-out infinite 0.12s; transform-origin:68px 160px; }
+      .leg-d       { animation: legKick 0.75s ease-in-out infinite 0.50s; transform-origin:132px 160px; }
+      .leg-e       { animation: legKick 0.75s ease-in-out infinite 0.25s; transform-origin:72px 172px; }
+      .leg-f       { animation: legKick 0.75s ease-in-out infinite 0.62s; transform-origin:128px 172px; }
+    </style>
+  </defs>
+
+  <!-- Shadow -->
+  <ellipse cx="100" cy="212" rx="38" ry="6" fill="#1a3000" opacity="0.2">
+    <animate attributeName="rx" values="38;55;38" dur="0.75s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="100;110;100" dur="0.75s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Speed lines -->
+  <line class="speed-a" x1="20" y1="108" x2="72" y2="108" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+  <line class="speed-b" x1="14" y1="122" x2="68" y2="122" stroke="white" stroke-width="2"   stroke-linecap="round" opacity="0"/>
+  <line class="speed-c" x1="20" y1="136" x2="70" y2="136" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+  <line class="speed-a" x1="10" y1="96"  x2="60" y2="96"  stroke="#aaccaa" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+  <line class="speed-c" x1="16" y1="150" x2="65" y2="150" stroke="#aaccaa" stroke-width="1" stroke-linecap="round" opacity="0"/>
+
+  <!-- Impact burst — spear tip -->
+  <g transform="translate(178,80)">
+    <circle class="impact" cx="0" cy="0" r="5" fill="#ffee44" opacity="0"/>
+    <circle class="shockwave" cx="0" cy="0" r="8" fill="none" stroke="#ffcc00" stroke-width="2" opacity="0"/>
+    <!-- Spark lines -->
+    <g class="battle-cry">
+      <line x1="0" y1="0" x2="20" y2="-16" stroke="#ffdd00" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="24" y2="4"  stroke="#ffaa00" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="16" y2="20" stroke="#ff8800" stroke-width="2"   stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="-8" y2="22" stroke="#ffffff" stroke-width="2"   stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="12" y2="-24" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="22" cy="-18" r="3.5" fill="#ffdd00"/>
+      <circle cx="26" cy="5"  r="2.5" fill="#ffaa00"/>
+      <circle cx="14" cy="22" r="2"   fill="#ff8800"/>
+    </g>
+  </g>
+
+  <!-- Battle cry text -->
+  <g class="battle-cry" transform="translate(145,55)">
+    <rect x="-8" y="-14" width="48" height="18" rx="6" fill="#cc1800" opacity="0.9"/>
+    <text x="16" y="-1" text-anchor="middle" font-size="10" font-weight="bold" fill="white" font-family="sans-serif">XÔNG!</text>
+  </g>
+
+  <g class="character" filter="url(#dropShadow)">
+
+    <!-- Back legs -->
+    <g class="leg-e">
+      <line x1="80" y1="170" x2="50" y2="196" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="50" y1="196" x2="38" y2="212" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-f">
+      <line x1="120" y1="170" x2="152" y2="196" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="152" y1="196" x2="165" y2="212" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-c">
+      <line x1="70" y1="155" x2="44" y2="175" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="44" y1="175" x2="34" y2="190" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g class="leg-d">
+      <line x1="130" y1="155" x2="156" y2="175" stroke="#2a6000" stroke-width="5" stroke-linecap="round"/>
+      <line x1="156" y1="175" x2="166" y2="190" stroke="#1e4800" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <!-- Abdomen -->
+    <ellipse cx="100" cy="165" rx="33" ry="25" fill="url(#bodyG)" filter="url(#angryGlow)"/>
+    <ellipse cx="100" cy="163" rx="22" ry="14" fill="url(#armorG)" opacity="0.6"/>
+
+    <!-- Body -->
+    <ellipse cx="100" cy="132" rx="42" ry="40" fill="url(#bodyG)" filter="url(#angryGlow)"/>
+    <!-- Angry red flush on body -->
+    <ellipse cx="100" cy="132" rx="42" ry="40" fill="#ff3300" opacity="0.14"/>
+
+    <!-- Chest armor -->
+    <path d="M72,118 Q100,108 128,118 L130,148 Q100,158 70,148 Z" fill="url(#armorG)" opacity="0.9"/>
+    <circle cx="80"  cy="122" r="3" fill="#909888"/>
+    <circle cx="120" cy="122" r="3" fill="#909888"/>
+    <circle cx="100" cy="120" r="3" fill="#909888"/>
+    <circle cx="80"  cy="144" r="3" fill="#909888"/>
+    <circle cx="120" cy="144" r="3" fill="#909888"/>
+    <line x1="100" y1="110" x2="100" y2="156" stroke="#506040" stroke-width="1.5" opacity="0.5"/>
+    <!-- Armor shine -->
+    <path d="M78,116 Q88,112 92,120" stroke="white" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+
+    <!-- ── SHIELD raised up (blocking) ── -->
+    <g class="shield-group" transform="translate(50,100)">
+      <path d="M0,-28 L20,-24 L22,12 Q10,28 0,32 Q-10,28 -22,12 L-20,-24 Z" fill="url(#shieldG)"/>
+      <path d="M0,-28 L20,-24 L22,12 Q10,28 0,32 Q-10,28 -22,12 L-20,-24 Z" fill="none" stroke="#405030" stroke-width="2"/>
+      <path d="M0,-8 L2.4,-1.2 L9.6,-1.2 L3.6,2.8 L5.8,9.6 L0,5.6 L-5.8,9.6 L-3.6,2.8 L-9.6,-1.2 L-2.4,-1.2 Z" fill="#c8e080" opacity="0.9"/>
+      <path d="M-10,-22 Q-4,-14 -2,-2" stroke="white" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+      <!-- Shield arm -->
+      <line x1="2" y1="2" x2="22" y2="18" stroke="#2a6000" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- Front legs -->
+    <g class="leg-a">
+      <line x1="72" y1="142" x2="48" y2="122" stroke="#2a6000" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <g class="leg-b">
+      <!-- Right arm thrusting -->
+      <line x1="128" y1="135" x2="160" y2="102" stroke="#2a6000" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="160" cy="102" r="8" fill="#7a8870"/>
+      <circle cx="160" cy="102" r="6" fill="#9aaa88"/>
+    </g>
+
+    <!-- ── SPEAR THRUST (diagonal forward) ── -->
+    <g class="spear-group" filter="url(#spearGlow)">
+      <!-- Shaft -->
+      <rect x="-4" y="0" width="6" height="100" rx="3" fill="url(#spearG)" transform="rotate(-60,0,0) translate(128,138)"/>
+      <!-- Tip -->
+      <polygon points="185,58 174,80 196,80" fill="#d8e0e8" transform="rotate(-60,185,70)"/>
+      <polygon points="185,58 180,72 190,72" fill="#f0f8ff" transform="rotate(-60,185,65)"/>
+      <!-- Tip glow -->
+      <circle cx="178" cy="80" r="10" fill="#ffff88" opacity="0.3"/>
+    </g>
+
+    <!-- Antennae swept back in charge -->
+    <g class="ant-l">
+      <path d="M90,96 Q72,65 60,42" stroke="#1e5000" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="42" r="5" fill="#ff5500"/>
+      <circle cx="60" cy="42" r="2.5" fill="#ffaa00"/>
+    </g>
+    <g class="ant-r">
+      <path d="M110,96 Q128,65 140,42" stroke="#1e5000" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <circle cx="140" cy="42" r="5" fill="#ff5500"/>
+      <circle cx="140" cy="42" r="2.5" fill="#ffaa00"/>
+    </g>
+
+    <!-- Helmet -->
+    <path d="M68,104 Q68,72 100,68 Q132,72 132,104 Z" fill="url(#helmetG)"/>
+    <path d="M65,104 L135,104" stroke="#405030" stroke-width="3" stroke-linecap="round"/>
+    <path d="M68,96 L58,105 L68,108" fill="#607050"/>
+    <path d="M132,96 L142,105 L132,108" fill="#607050"/>
+    <!-- Plume swept back in charge -->
+    <path d="M100,68 Q92,46 78,28 Q96,38 115,30 Q105,48 100,68Z" fill="#dd1010"/>
+    <!-- Helmet glow (angry) -->
+    <path d="M68,104 Q68,72 100,68 Q132,72 132,104 Z" fill="#ff3300" opacity="0.12"/>
+    <circle cx="80" cy="90" r="2.5" fill="#909888"/>
+    <circle cx="120" cy="90" r="2.5" fill="#909888"/>
+    <circle cx="100" cy="80" r="2.5" fill="#909888"/>
+
+    <!-- Eyes — red rage glow in visor -->
+    <circle cx="85"  cy="104" r="7" fill="#ff2200" opacity="0.95"/>
+    <circle cx="115" cy="104" r="7" fill="#ff2200" opacity="0.95"/>
+    <g class="eye-l">
+      <circle cx="85"  cy="104" r="5" fill="#ffaa00"/>
+      <circle cx="87"  cy="102" r="2.2" fill="white" opacity="0.95"/>
+    </g>
+    <g class="eye-r">
+      <circle cx="115" cy="104" r="5" fill="#ffaa00"/>
+      <circle cx="117" cy="102" r="2.2" fill="white" opacity="0.95"/>
+    </g>
+    <path d="M70,104 L130,104" stroke="#100800" stroke-width="4" stroke-linecap="round" opacity="0.65"/>
+
+    <!-- Neck guard -->
+    <path d="M76,108 Q100,115 124,108 L122,118 Q100,124 78,118 Z" fill="url(#armorG)" opacity="0.9"/>
+
+  </g>
+</svg>
