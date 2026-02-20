@@ -115,9 +115,9 @@ export const SOUND_REGISTRY: Record<SoundName, SoundEntry> = {
 export type BgmPreset = 'battle' | 'campaign' | 'boss' | 'farm' | 'shop' | 'quiz' | 'prayer' | 'campaign_map';
 
 export const BGM_REGISTRY: Record<string, { url: string; loop: boolean; volume: number }> = {
-  battle: { url: '/audio/bgm/battle.mp3', loop: true, volume: 0.25 },
-  campaign: { url: '/audio/bgm/campaign.mp3', loop: true, volume: 0.22 },
-  boss: { url: '/audio/bgm/boss.mp3', loop: true, volume: 0.20 },
+  battle: { url: '/audio/sfx/nhac-nen/Crimson_Onslaught.mp3', loop: true, volume: 0.25 },
+  campaign: { url: '/audio/sfx/nhac-nen/Crimson_Onslaught.mp3', loop: true, volume: 0.22 },
+  boss: { url: '/audio/sfx/nhac-nen/Crimson_Onslaught.mp3', loop: true, volume: 0.20 },
   farm: { url: '/audio/sfx/nhac-nen/Verdant_Harvest.mp3', loop: true, volume: 0.15 },
   shop: { url: '/audio/bgm/shop.mp3', loop: true, volume: 0.14 },
   quiz: { url: '/audio/bgm/quiz.mp3', loop: true, volume: 0.16 },
