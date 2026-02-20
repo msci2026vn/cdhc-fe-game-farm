@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect } from 'react';
+import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { wagmiConfig } from '@/shared/config/wagmi';
 import { queryClient } from '@/shared/lib/queryClient';
 import { AuthGuard } from '@/shared/components/AuthGuard';
 import { Toaster } from '@/components/ui/sonner';
@@ -119,27 +121,29 @@ const AuthenticatedApp = () => {
  */
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ConnectionLostOverlay />
-        <NavigateSetup />
-        <Suspense fallback={<Fallback />}>
-          <Routes>
-            {/* Public — NO AuthGuard, NO game hooks */}
-            <Route path="/login" element={<LoginScreen />} />
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <ConnectionLostOverlay />
+          <NavigateSetup />
+          <Suspense fallback={<Fallback />}>
+            <Routes>
+              {/* Public — NO AuthGuard, NO game hooks */}
+              <Route path="/login" element={<LoginScreen />} />
 
-            {/* Protected — AuthGuard first, then game hooks */}
-            <Route path="/*" element={
-              <AuthGuard>
-                <AuthenticatedApp />
-              </AuthGuard>
-            } />
-          </Routes>
-        </Suspense>
-        <Toaster />
-        <Toast />
-      </BrowserRouter>
-    </QueryClientProvider>
+              {/* Protected — AuthGuard first, then game hooks */}
+              <Route path="/*" element={
+                <AuthGuard>
+                  <AuthenticatedApp />
+                </AuthGuard>
+              } />
+            </Routes>
+          </Suspense>
+          <Toaster />
+          <Toast />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 };
 

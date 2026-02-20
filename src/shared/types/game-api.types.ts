@@ -23,6 +23,7 @@ export interface PlayerProfile {
   commentsCount: number;
   giftsCount: number;
   referralCode: string | null;
+  walletAddress?: string | null;
   createdAt: string;
   updatedAt: string;
   lastPlayedAt: string | null;
@@ -501,6 +502,7 @@ export interface AuthStatus {
     fullName?: string;    // Fallback for Google Auth
     avatarUrl?: string;   // Fallback for some APIs
     avatar?: string;      // Fallback for consistency with FriendData
+    walletAddress?: string | null;
   } | null;
 }
 

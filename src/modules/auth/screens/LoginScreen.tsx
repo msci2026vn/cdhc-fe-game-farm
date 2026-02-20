@@ -6,6 +6,7 @@ import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
 import { gameApi, resetRedirectLock } from '@/shared/api/game-api';
 import { API_BASE_URL } from '@/shared/utils/constants';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
@@ -72,10 +73,25 @@ function LoginScreenContent() {
     }
   };
 
-  // Google Login Hook is not used since BE needs idToken and library's GoogleLogin is easier
-  const handleAvalancheLogin = () => {
-    addToast('Tính năng đăng nhập ví Avalanche đang được phát triển! 🚀', 'info');
+  // Wallet auth
+  const { loginWithWallet, isLoading: walletLoading, state: walletState, clearError: clearWalletError } = useWalletAuth();
+
+  const handleAvalancheLogin = async () => {
+    try {
+      await loginWithWallet('metamask');
+      navigate('/farm', { replace: true });
+    } catch {
+      // Error already set in walletState
+    }
   };
+
+  const walletLoadingText = walletState.isConnecting
+    ? 'Kết nối ví...'
+    : walletState.isSigning
+      ? 'Chờ ký...'
+      : walletState.isVerifying
+        ? 'Xác thực...'
+        : 'Avalanche';
 
   // Determine which background elements to show
   const isNight = timeOfDay === 'night';
@@ -173,19 +189,32 @@ function LoginScreenContent() {
               <div className="worm-decoration -top-3 left-6 -rotate-12 animate-slow-crawl">🐛</div>
               <button
                 onClick={handleAvalancheLogin}
-                className="w-full btn-comic-red text-white py-4 px-4 flex items-center justify-between gap-3 relative overflow-hidden"
+                disabled={walletLoading || loading}
+                className="w-full btn-comic-red text-white py-4 px-4 flex items-center justify-between gap-3 relative overflow-hidden disabled:opacity-70"
               >
                 <div className="w-10 h-10 bg-white/20 rounded-xl border-2 border-white/40 flex items-center justify-center shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]">
-                  <span className="material-symbols-outlined text-white text-2xl drop-shadow-sm">account_balance_wallet</span>
+                  {walletLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <span className="material-symbols-outlined text-white text-2xl drop-shadow-sm">account_balance_wallet</span>
+                  )}
                 </div>
                 <div className="flex flex-col items-start flex-grow">
                   <span className="text-xs uppercase opacity-90 font-bold tracking-wider text-red-100">Login with</span>
-                  <span className="text-xl font-black leading-none tracking-wide text-white drop-shadow-sm font-heading">Avalanche</span>
+                  <span className="text-xl font-black leading-none tracking-wide text-white drop-shadow-sm font-heading">{walletLoading ? walletLoadingText : 'Avalanche'}</span>
                 </div>
                 <span className="material-symbols-outlined text-white/80 group-hover:translate-x-1 transition-transform">arrow_forward_ios</span>
               </button>
               <div className="absolute -bottom-2 -right-1 text-xl">🌱</div>
             </div>
+
+            {/* Wallet error */}
+            {walletState.error && (
+              <div className="flex items-center gap-2 p-2 bg-red-100 border-2 border-red-200 rounded-lg text-red-600 text-xs font-bold animate-shake">
+                <span className="flex-1">{walletState.error}</span>
+                <button onClick={clearWalletError} className="text-red-400 hover:text-red-600 flex-shrink-0">✕</button>
+              </div>
+            )}
 
             <div className="relative flex py-1 items-center">
               <div className="flex-grow border-t-4 border-[#A1887F] border-dashed opacity-50"></div>

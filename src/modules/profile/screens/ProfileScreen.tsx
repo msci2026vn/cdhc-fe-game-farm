@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import BottomNav from '@/shared/components/BottomNav';
-import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
+import { usePlayerProfile, useOgn, useInvalidateProfile } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { xpForNextLevel, getLevelTitle, LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import { gameApi } from '@/shared/api/game-api';
@@ -12,6 +12,7 @@ import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import { formatOGN } from '@/shared/utils/format';
 import { playSound } from '@/shared/audio';
 import { ConversionModal } from '../components/ConversionModal';
+import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 
 type Tab = 'stats' | 'achievements';
 
@@ -28,6 +29,9 @@ export default function ProfileScreen() {
   const { data: statInfo } = usePlayerStats();
   const resetStats = useResetStats();
   const ogn = useOgn(); // TanStack Query single source of truth
+  const { linkWallet, isLoading: walletLinking, state: walletState, clearError: clearWalletError } = useWalletAuth();
+  const invalidateProfile = useInvalidateProfile();
+  const [walletLinked, setWalletLinked] = useState(false);
 
   const isLoading = isProfileLoading || isAuthLoading;
 
@@ -280,8 +284,59 @@ export default function ProfileScreen() {
           </div>
         )}
 
+        {/* Wallet Link Section */}
+        <div className="mt-4 bg-white rounded-xl p-3" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+          <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
+            <span className="material-symbols-outlined text-base">account_balance_wallet</span>
+            Ví Avalanche
+          </h3>
+          <p className="text-[10px] text-muted-foreground mb-2.5">
+            Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.
+          </p>
+
+          {(profile as any).walletAddress || walletLinked ? (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold">
+              <span>✅</span>
+              <span>Ví đã liên kết:</span>
+              <code className="bg-green-100 px-1.5 py-0.5 rounded text-[10px]">
+                {((profile as any).walletAddress || '').slice(0, 6)}...{((profile as any).walletAddress || '').slice(-4)}
+              </code>
+            </div>
+          ) : (
+            <button
+              onClick={async () => {
+                try {
+                  await linkWallet();
+                  setWalletLinked(true);
+                  invalidateProfile();
+                } catch {
+                  // Error shown via walletState
+                }
+              }}
+              disabled={walletLinking}
+              className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {walletLinking ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin" />
+                  {walletState.isConnecting ? 'Kết nối ví...' : walletState.isSigning ? 'Chờ ký...' : 'Đang liên kết...'}
+                </>
+              ) : (
+                '🔗 Liên kết ví Avalanche'
+              )}
+            </button>
+          )}
+
+          {walletState.error && (
+            <div className="flex items-center gap-2 mt-2 p-2 bg-red-50 rounded-lg text-[10px] text-red-600 font-bold">
+              <span className="flex-1">{walletState.error}</span>
+              <button onClick={clearWalletError} className="text-red-400">✕</button>
+            </div>
+          )}
+        </div>
+
         {/* Logout button — bên trong vùng scroll */}
-        <div className="mt-4 mb-2">
+        <div className="mt-3 mb-2">
           <button
             onClick={async () => {
               if (loggingOut) return;
