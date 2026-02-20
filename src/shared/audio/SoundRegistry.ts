@@ -122,7 +122,7 @@ export const BGM_REGISTRY: Record<string, { url: string; loop: boolean; volume: 
   shop: { url: '/audio/bgm/shop.mp3', loop: true, volume: 0.14 },
   quiz: { url: '/audio/bgm/quiz.mp3', loop: true, volume: 0.16 },
   prayer: { url: '/audio/sfx/nhac-nen/Celestial_Sanctuary.mp3', loop: true, volume: 0.12 },
-  campaign_map: { url: '/audio/bgm/campaign-map.mp3', loop: true, volume: 0.18 },
+  campaign_map: { url: '/audio/sfx/nhac-nen/Titan_s_Ascent.mp3', loop: true, volume: 0.18 },
   market: { url: '/audio/sfx/nhac-nen/Ascent_of_the_Dawn.mp3', loop: true, volume: 0.20 },
 };
 
