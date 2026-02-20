@@ -208,11 +208,26 @@ function LoginScreenContent() {
               <div className="absolute -bottom-2 -right-1 text-xl">🌱</div>
             </div>
 
-            {/* Wallet error */}
+            {/* Wallet error + install links */}
             {walletState.error && (
-              <div className="flex items-center gap-2 p-2 bg-red-100 border-2 border-red-200 rounded-lg text-red-600 text-xs font-bold animate-shake">
-                <span className="flex-1">{walletState.error}</span>
-                <button onClick={clearWalletError} className="text-red-400 hover:text-red-600 flex-shrink-0">✕</button>
+              <div className="p-2.5 bg-red-100 border-2 border-red-200 rounded-lg animate-shake">
+                <div className="flex items-center gap-2 text-red-600 text-xs font-bold">
+                  <span className="flex-1">{walletState.error}</span>
+                  <button onClick={clearWalletError} className="text-red-400 hover:text-red-600 flex-shrink-0">✕</button>
+                </div>
+                {walletState.error.includes('Chưa cài ví') && (
+                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-red-200">
+                    <p className="text-[10px] font-bold text-orange-700">Cài ví để đăng nhập:</p>
+                    <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-orange-600 hover:text-orange-800 underline">
+                      🦊 Cài MetaMask
+                    </a>
+                    <a href="https://core.app/download/" target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-orange-600 hover:text-orange-800 underline">
+                      🔺 Cài Core Wallet (Avalanche)
+                    </a>
+                  </div>
+                )}
               </div>
             )}
 
