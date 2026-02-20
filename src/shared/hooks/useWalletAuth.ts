@@ -73,8 +73,10 @@ function toUserError(raw: string, context: 'login' | 'link'): string {
     return 'Sai mạng. Hãy chuyển ví sang Avalanche C-Chain.';
   if (raw.includes('SIWE') || raw.includes('Signature') || raw.includes('signature'))
     return 'Xác thực chữ ký thất bại. Vui lòng thử lại.';
-  if (raw.includes('already linked') || raw.includes('đã được liên kết'))
+  if (raw.includes('already linked') || raw.includes('đã được liên kết') || raw.includes('WALLET_ALREADY_LINKED'))
     return 'Ví này đã được liên kết tài khoản khác.';
+  if (raw.includes('already has a wallet') || raw.includes('USER_HAS_WALLET'))
+    return 'Tài khoản đã liên kết ví rồi.';
 
   return fallback;
 }

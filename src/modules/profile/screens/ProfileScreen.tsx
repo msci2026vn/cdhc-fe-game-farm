@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import BottomNav from '@/shared/components/BottomNav';
 import { usePlayerProfile, useOgn, useInvalidateProfile } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { xpForNextLevel, getLevelTitle, LEVEL_CONFIG } from '@/shared/stores/playerStore';
 import { gameApi } from '@/shared/api/game-api';
+import { API_BASE_URL } from '@/shared/utils/constants';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { useResetStats } from '@/shared/hooks/useResetStats';
 import { StatAllocationModal } from '@/shared/components/StatAllocationModal';
@@ -31,7 +33,20 @@ export default function ProfileScreen() {
   const ogn = useOgn(); // TanStack Query single source of truth
   const { linkWallet, isLoading: walletLinking, state: walletState, clearError: clearWalletError } = useWalletAuth();
   const invalidateProfile = useInvalidateProfile();
-  const [walletLinked, setWalletLinked] = useState(false);
+
+  // Wallet status — fallback if profile doesn't have walletAddress
+  const { data: walletStatus, refetch: refetchWalletStatus } = useQuery({
+    queryKey: ['wallet-status'],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/auth/wallet/status`, { credentials: 'include' });
+      const data = await res.json();
+      return data.success ? data.data : null;
+    },
+    staleTime: 60_000,
+  });
+
+  // Resolve walletAddress from multiple sources
+  const walletAddress = profile?.walletAddress || (auth?.user as any)?.walletAddress || walletStatus?.walletAddress || null;
 
   const isLoading = isProfileLoading || isAuthLoading;
 
@@ -291,15 +306,17 @@ export default function ProfileScreen() {
             Ví Avalanche
           </h3>
           <p className="text-[10px] text-muted-foreground mb-2.5">
-            Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.
+            {walletAddress
+              ? 'Ví đã được liên kết với tài khoản của bạn.'
+              : 'Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.'}
           </p>
 
-          {(profile as any).walletAddress || walletLinked ? (
+          {walletAddress ? (
             <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold">
               <span>✅</span>
-              <span>Ví đã liên kết:</span>
-              <code className="bg-green-100 px-1.5 py-0.5 rounded text-[10px]">
-                {((profile as any).walletAddress || '').slice(0, 6)}...{((profile as any).walletAddress || '').slice(-4)}
+              <span>Đã liên kết:</span>
+              <code className="bg-green-100 px-1.5 py-0.5 rounded text-[10px] font-mono">
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </code>
             </div>
           ) : (
@@ -307,8 +324,8 @@ export default function ProfileScreen() {
               onClick={async () => {
                 try {
                   await linkWallet();
-                  setWalletLinked(true);
                   invalidateProfile();
+                  refetchWalletStatus();
                 } catch {
                   // Error shown via walletState
                 }
