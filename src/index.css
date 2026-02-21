@@ -675,6 +675,39 @@
     transform: translateY(2px);
     border-bottom-width: 1px;
   }
+
+  .bg-nature-vibe {
+    background: linear-gradient(to bottom, #ecfdf5 0%, #d1fae5 30%, #a7f3d0 60%, #34d399 100%);
+  }
+
+  .wood-panel {
+    background: #8c6239;
+    border: 3px solid #5d4037;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-spirit {
+    background: linear-gradient(to bottom, #fcd34d, #f59e0b);
+    border: 2px solid #fff;
+    box-shadow: 0 4px 0 #b45309, 0 6px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-spirit:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #b45309, 0 3px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-wood-rustic {
+    background: #deb887;
+    border: 2px solid #8b4513;
+    box-shadow: 0 3px 0 #5d4037, 0 4px 4px rgba(0, 0, 0, 0.2);
+    color: #5d4037;
+  }
+
+  .btn-wood-rustic:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #5d4037, 0 2px 2px rgba(0, 0, 0, 0.2);
+  }
 }
 
 @layer base {
@@ -1390,5 +1423,105 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Prayer Screen Specific */
+  .halo-spin {
+    animation: spin-slow 20s linear infinite;
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .float-gentle {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-25deg);
+    animation: shimmer-anim 3s infinite;
+  }
+
+  @keyframes shimmer-anim {
+    0% {
+      left: -100%;
+    }
+
+    100% {
+      left: 200%;
+    }
+  }
+
+  .prayer-float-up {
+    animation: floatUp 8s linear infinite;
+    opacity: 0;
+  }
+
+  .prayer-float-up-delayed {
+    animation: floatUp 8s linear infinite;
+    animation-delay: 4s;
+    opacity: 0;
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(100px) scale(0.8) translateX(0);
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    25% {
+      transform: translateY(0px) scale(1) translateX(10px);
+    }
+
+    50% {
+      transform: translateY(-100px) scale(1) translateX(-10px);
+    }
+
+    75% {
+      transform: translateY(-200px) scale(0.9) translateX(5px);
+      opacity: 0.8;
+    }
+
+    100% {
+      transform: translateY(-300px) scale(0.8) translateX(0);
+      opacity: 0;
+    }
   }
 }

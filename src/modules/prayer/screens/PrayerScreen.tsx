@@ -93,99 +93,210 @@ export default function PrayerScreen() {
     }
   }, [activeTab, selectedPresetId, customText, presets, offerMutation, refetchStatus]);
 
+  const handleQuickPray = useCallback(() => {
+    if (presets && presets.length > 0) {
+      const randomPreset = presets[Math.floor(Math.random() * presets.length)];
+      offerMutation.mutate(
+        { type: 'preset', presetId: randomPreset.id },
+        {
+          onSuccess: (data) => {
+            playSound('prayer_submit');
+            setRewardData(data);
+            setShowSparkles(true);
+            setFlyText(randomPreset.text);
+            refetchStatus();
+            if (data.ognReward > 0 || data.xpReward > 0) {
+              setTimeout(() => playSound('prayer_reward'), 600);
+            }
+          },
+        }
+      );
+    }
+  }, [presets, offerMutation, refetchStatus]);
+
   const canSubmit = activeTab === 'preset'
     ? !!selectedPresetId && (status?.freeUsed ?? 0) < (status?.freeMax ?? 5)
     : customText.length >= 10 && (status?.customUsed ?? 0) < (status?.customMax ?? 3);
 
   return (
-    <div className="h-[100dvh] max-w-[430px] mx-auto relative prayer-gradient flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="safe-top sticky top-0 z-20 px-4 pt-3 pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/farm')}
-              className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:scale-95 transition-transform"
-            >
-              <span className="material-symbols-outlined text-white text-lg">arrow_back</span>
-            </button>
-            <h1 className="font-heading text-xl text-white font-bold">🙏 Cầu Nguyện</h1>
-          </div>
-          {status && (
-            <div className="text-xs text-white/60 bg-white/10 px-2 py-1 rounded-full">
-              🔥 {status.currentStreak} ngày
+    <div className="h-[100dvh] max-w-[430px] mx-auto relative bg-nature-vibe shadow-2xl flex flex-col overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-yellow-200/20 rounded-full blur-[60px] animate-pulse"></div>
+        <div className="absolute top-20 left-10 w-4 h-4 bg-white/40 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute top-40 right-10 w-6 h-6 bg-white/30 rounded-full animate-ping" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute -top-4 left-4 text-green-700/60 text-6xl rotate-180 z-0 opacity-40">
+          <span className="material-symbols-outlined">psychiatry</span>
+        </div>
+        <div className="absolute -top-6 right-8 text-green-700/60 text-7xl rotate-180 z-0 opacity-40">
+          <span className="material-symbols-outlined">psychiatry</span>
+        </div>
+        <div className="absolute inset-x-0 bottom-40 top-20 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute left-[15%] bottom-0 prayer-float-up flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full border-2 border-white shadow-md bg-orange-200 overflow-hidden shrink-0">
+              <img alt="Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgPmoDttmlb4gqJR-xIc_Z_9QiEDpfwlNd8pn-3uJLGyHP7c_GaSI1yYmr7iqBJvFYC0YPo1ipB5MpJzz7RTSIRNEphrwc57WNfv-HpfLJOurpUe1-1PZmWj2ZVB8JYWVHvf90jnguQb7mW6sQckt5G__9OAyhyp8IoT7AVjnYy4WuUgtKArsuShvA9D-1M6twgHlOCGHXzb7zkQPkZicZPytW8FLR7YjzqYleZ7IxdMH8_fgDmabV3pnAGE4iIV1UxuVmY6eACxgh" />
             </div>
-          )}
+            <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-r-xl rounded-bl-xl shadow-sm border border-yellow-200 max-w-[150px]">
+              <p className="text-[10px] text-farm-brown-dark font-medium leading-tight">"Cầu cho mùa màng bội thu!"</p>
+            </div>
+          </div>
+          <div className="absolute right-[10%] bottom-0 prayer-float-up-delayed flex flex-row-reverse items-center gap-2">
+            <div className="w-8 h-8 rounded-full border-2 border-white shadow-md bg-blue-200 overflow-hidden shrink-0">
+              <img alt="Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFcKdc5C8O4CCLY5A5RaslgPY7KgFKcxZlMfQTvwYAxOD-24qVtyfI3mm_MpT6rwKZ9aQ81nu2cXBVYDYLXRvCqIopapS43KiG0lR79H_e4lHnD1V3QrD2mtKZpVBcFwhc2JX2-iCfLmEAZZpgqoZpEcLKjIQgAcziBbEDIZub7u-u_cor_Yszi6Jk1e9HfSN4OKT0xihOkUatLhGdhMf2j2Zd2bXUQcJR6Rs2bFGrFImeZPo-4mD8Q4LwjQ7LkHuRewgeaVJJp8RX" />
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-l-xl rounded-br-xl shadow-sm border border-green-200 max-w-[150px]">
+              <p className="text-[10px] text-farm-brown-dark font-medium leading-tight">"Mong bình an cho mọi người 🙏"</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-28">
+      {/* Header */}
+      <div className="relative z-30 px-4 pt-6 pb-2 flex justify-between items-center safe-top">
+        <button
+          onClick={() => navigate('/farm')}
+          className="w-10 h-10 bg-farm-brown rounded-full border-2 border-[#5d4037] flex items-center justify-center text-white shadow-md active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div className="wood-panel px-6 py-1.5 rounded-full flex items-center gap-2 bg-[#8c6239]">
+          <span className="material-symbols-outlined text-yellow-300">spa</span>
+          <span className="text-white font-display font-bold uppercase tracking-wide text-sm drop-shadow-md">Đền Thờ Mẹ Thiên Nhiên</span>
+          <span className="material-symbols-outlined text-yellow-300">spa</span>
+        </div>
+        <button className="w-10 h-10 bg-farm-brown rounded-full border-2 border-[#5d4037] flex items-center justify-center text-white shadow-md active:scale-95 transition-transform flex-shrink-0">
+          <span className="material-symbols-outlined">help</span>
+        </button>
+      </div>
 
-        {/* Global counter */}
-        <PrayerCounter />
-
-        {/* Section tab switcher */}
-        <div className="flex gap-2 mb-4">
+      {/* Tabs */}
+      <div className="relative z-20 px-4 mt-2 mb-4">
+        <div className="bg-[#f4e4bc] p-1 rounded-xl border-2 border-[#8c6239] shadow-md flex justify-between">
           {([
-            { key: 'pray', label: '🙏 Cầu nguyện' },
-            { key: 'leaderboard', label: '🏆 BXH' },
-            { key: 'history', label: '📜 Lịch sử' },
+            { key: 'pray', label: 'Cầu Nguyện' },
+            { key: 'leaderboard', label: 'BXH' },
+            { key: 'history', label: 'Lịch Sử' },
           ] as const).map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setBottomTab(tab.key)}
-              className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all
+              onClick={() => {
+                setBottomTab(tab.key);
+                if (tab.key === 'pray') setActiveTab('preset'); // Reset actions
+              }}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all
                 ${bottomTab === tab.key
-                  ? 'bg-white/20 text-white'
-                  : 'bg-white/5 text-white/50'
+                  ? 'bg-[#2d6a4f] text-white shadow-sm border border-[#1b4332]'
+                  : 'text-[#5d4037] hover:bg-[#8c6239]/10'
                 }`}
             >
               {tab.label}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* TAB: Cau nguyen */}
+      <div className="flex-1 relative z-10 flex flex-col items-center justify-start px-4 overflow-y-auto pb-24 no-scrollbar">
         {bottomTab === 'pray' && (
           <>
-            {/* Preset / Custom tabs */}
-            <div className="flex mb-4 bg-white/10 rounded-xl p-1">
-              <button
-                onClick={() => setActiveTab('preset')}
-                className={`flex-1 py-2 text-sm rounded-lg font-medium transition-all
-                  ${activeTab === 'preset'
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/50'
-                  }`}
-              >
-                Có sẵn ({status?.freeUsed ?? 0}/{status?.freeMax ?? 5})
-              </button>
-              <button
-                onClick={() => setActiveTab('custom')}
-                className={`flex-1 py-2 text-sm rounded-lg font-medium transition-all
-                  ${activeTab === 'custom'
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/50'
-                  }`}
-              >
-                Tự viết ({status?.customUsed ?? 0}/{status?.customMax ?? 3})
-              </button>
+            {/* Center animated icon */}
+            <div className="relative w-full flex flex-col items-center mb-6 mt-4">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 border-4 border-yellow-200/30 rounded-full halo-spin -z-10"></div>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-56 h-56 border-2 border-yellow-400/20 rounded-full halo-spin -z-10" style={{ animationDirection: 'reverse' }}></div>
+
+              <div className="relative w-48 h-64 float-gentle z-10">
+                <div className="w-full h-full relative">
+                  <div className="absolute inset-0 bg-yellow-100 rounded-full blur-3xl opacity-60"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[180px] text-green-600 drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1, 'wght' 300" }}>
+                      female
+                    </span>
+                    <span className="absolute top-10 material-symbols-outlined text-[120px] text-green-500 drop-shadow-md opacity-80" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      psychology_alt
+                    </span>
+                    <div className="absolute top-2 w-24 h-12 border-t-4 border-yellow-400 rounded-full"></div>
+                  </div>
+                  <div className="absolute top-10 right-0 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                  <div className="absolute bottom-20 left-0 w-2 h-2 bg-yellow-300 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                </div>
+              </div>
+              <div className="w-40 h-12 bg-[#8c6239] rounded-[50%] border-4 border-[#5d4037] relative -mt-6 z-0 shadow-lg">
+                <div className="absolute inset-x-4 top-2 h-4 bg-[#a17a5b] rounded-[50%] opacity-50"></div>
+              </div>
             </div>
 
-            {/* Tab content: Presets */}
+            {/* Stats cards (streak, sent) */}
+            <div className="w-full max-w-xs flex justify-between gap-3 mb-6">
+              <div className="flex-1 bg-white/80 backdrop-blur border-2 border-[#e9c46a] rounded-xl p-2 flex flex-col items-center shadow-sm">
+                <div className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-orange-500">local_fire_department</span>
+                  <span className="text-lg font-display font-bold text-[#5d4037]">{status?.currentStreak || 0}</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold text-gray-500">Chuỗi ngày</span>
+              </div>
+              <div className="flex-1 bg-white/80 backdrop-blur border-2 border-[#52b788] rounded-xl p-2 flex flex-col items-center shadow-sm">
+                <div className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-green-600">public</span>
+                  <span className="text-lg font-display font-bold text-[#5d4037]">{status?.totalPrayers || 0}</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold text-gray-500">Đã gửi</span>
+              </div>
+            </div>
+
+            {/* Daily limit info */}
+            {status && (
+              <div className="text-center text-xs text-[#5d4037] mb-2 font-bold drop-shadow-sm">
+                {activeTab === 'preset'
+                  ? `Còn ${Math.max(0, status.freeMax - status.freeUsed)} lượt có sẵn hôm nay`
+                  : `Còn ${Math.max(0, status.customMax - status.customUsed)} lượt tự viết hôm nay`
+                }
+              </div>
+            )}
+
+            {/* Action buttons (Gửi nhanh, Chọn lời chúc, Viết lời chúc) */}
+            <div className="w-full max-w-xs flex flex-col gap-3 mb-6">
+              <button
+                onClick={handleQuickPray}
+                disabled={!status?.canPray || offerMutation.isPending || (status?.freeUsed ?? 0) >= (status?.freeMax ?? 5)}
+                className="group relative w-full btn-spirit h-16 rounded-2xl flex items-center justify-center gap-3 overflow-hidden shimmer transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                <span className="material-symbols-outlined text-3xl text-red-600 drop-shadow-sm group-hover:scale-110 transition-transform">favorite</span>
+                <span className="text-xl font-display font-bold text-[#78350f] uppercase tracking-wider drop-shadow-sm">
+                  {offerMutation.isPending ? 'Đang gửi...' : 'Gửi Nhanh'}
+                </span>
+                <div className="absolute right-2 top-2 bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm animate-bounce">Miễn phí</div>
+              </button>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setActiveTab('preset')}
+                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-1 transition-transform ${activeTab === 'preset' ? 'ring-2 ring-[#2d6a4f]' : 'active:scale-95'}`}
+                >
+                  <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wide">Chọn Lời Chúc</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('custom')}
+                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-1 transition-transform ${activeTab === 'custom' ? 'ring-2 ring-[#2d6a4f]' : 'active:scale-95'}`}
+                >
+                  <span className="material-symbols-outlined text-lg">edit_note</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wide">Viết Lời Chúc</span>
+                </button>
+              </div>
+            </div>
+
+            {/* The actual forms if extended */}
             {activeTab === 'preset' && (
-              <div className="mb-4">
-                {/* Category filter chips */}
+              <div className="w-full max-w-xs mb-6 animate-fade-in-up">
                 <div className="flex gap-2 overflow-x-auto pb-3 mb-3 no-scrollbar">
                   {CATEGORIES.map(cat => (
                     <button
                       key={cat.key}
                       onClick={() => setSelectedCategory(cat.key)}
-                      className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                      className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all
                         ${selectedCategory === cat.key
-                          ? 'bg-white/20 text-white'
-                          : 'bg-white/5 text-white/50'
+                          ? 'bg-[#2d6a4f] text-white shadow-sm border border-[#1b4332]'
+                          : 'bg-white/50 text-[#5d4037] border border-[#d4c5a3] hover:bg-white'
                         }`}
                     >
                       {cat.emoji} {cat.label}
@@ -193,7 +304,6 @@ export default function PrayerScreen() {
                   ))}
                 </div>
 
-                {/* Carousel or skeleton */}
                 {presets && presets.length > 0 ? (
                   <Carousel opts={{ align: 'start', loop: true, dragFree: true }}>
                     <CarouselContent className="-ml-2">
@@ -214,69 +324,92 @@ export default function PrayerScreen() {
                 ) : (
                   <div className="flex gap-2 overflow-hidden">
                     {[1, 2].map(i => (
-                      <div key={i} className="rounded-2xl p-5 min-h-[140px] basis-[85%] shrink-0 bg-white/10 border border-white/20 animate-pulse">
-                        <div className="h-4 bg-white/10 rounded w-3/4 mb-3" />
-                        <div className="h-4 bg-white/10 rounded w-full mb-2" />
-                        <div className="h-4 bg-white/10 rounded w-1/2" />
-                      </div>
+                      <div key={i} className="rounded-2xl p-5 min-h-[140px] basis-[85%] shrink-0 bg-[#8c6239]/10 animate-pulse border border-[#8c6239]/20" />
                     ))}
+                  </div>
+                )}
+
+                {selectedPresetId && (
+                  <div className="mt-4">
+                    <PrayerButton
+                      onClick={handlePray}
+                      disabled={!canSubmit || !status?.canPray}
+                      loading={offerMutation.isPending}
+                      cooldownSeconds={status?.cooldownRemaining || 0}
+                    />
                   </div>
                 )}
               </div>
             )}
 
-            {/* Tab content: Custom text */}
             {activeTab === 'custom' && (
-              <div className="mb-4">
+              <div className="w-full max-w-xs mb-6 animate-fade-in-up">
                 <PrayerInput
                   value={customText}
                   onChange={setCustomText}
                   disabled={offerMutation.isPending}
                 />
+                <div className="mt-4">
+                  <PrayerButton
+                    onClick={handlePray}
+                    disabled={!canSubmit || !status?.canPray}
+                    loading={offerMutation.isPending}
+                    cooldownSeconds={status?.cooldownRemaining || 0}
+                  />
+                </div>
               </div>
             )}
 
-            {/* Daily limit info */}
-            {status && (
-              <div className="text-center text-xs text-white/50 mb-3">
-                {activeTab === 'preset'
-                  ? `Còn ${Math.max(0, status.freeMax - status.freeUsed)} lượt có sẵn hôm nay`
-                  : `Còn ${Math.max(0, status.customMax - status.customUsed)} lượt tự viết hôm nay`
-                }
+            {/* Message from Mother Nature */}
+            <div className="w-full bg-[#fdf6e3] border-2 border-[#8c6239] rounded-xl p-4 relative shadow-[4px_4px_0_#5d4037] mb-8 shrink-0">
+              <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-[#5d4037] opacity-60"></div>
+              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#5d4037] opacity-60"></div>
+              <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-[#5d4037] opacity-60"></div>
+              <div className="absolute bottom-2 right-2 w-2 h-2 rounded-full bg-[#5d4037] opacity-60"></div>
+              <div className="flex items-start gap-3">
+                <div className="min-w-[40px] h-10 bg-green-100 rounded-full flex items-center justify-center border border-green-300">
+                  <span className="material-symbols-outlined text-green-600">format_quote</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#5d4037] mb-1">Lời nhắn từ Mẹ Thiên Nhiên</h3>
+                  <p className="text-xs text-farm-brown italic leading-relaxed">"Hãy gieo một hạt giống yêu thương hôm nay, ngày mai con sẽ gặt hái cả khu rừng hạnh phúc."</p>
+                </div>
               </div>
-            )}
-
-            {/* Prayer button */}
-            <PrayerButton
-              onClick={handlePray}
-              disabled={!canSubmit || !status?.canPray}
-              loading={offerMutation.isPending}
-              cooldownSeconds={status?.cooldownRemaining || 0}
-            />
+            </div>
           </>
         )}
 
         {/* TAB: Leaderboard */}
-        {bottomTab === 'leaderboard' && <PrayerLeaderboard />}
+        {bottomTab === 'leaderboard' && (
+          <div className="w-full mt-2 flex-1 relative overflow-auto pb-4 no-scrollbar">
+            <PrayerLeaderboard />
+          </div>
+        )}
 
         {/* TAB: History */}
-        {bottomTab === 'history' && <PrayerHistory />}
+        {bottomTab === 'history' && (
+          <div className="w-full mt-2 flex-1 relative overflow-auto pb-4 no-scrollbar">
+            <PrayerHistory />
+          </div>
+        )}
       </div>
 
-      {/* Bottom Nav */}
-      <BottomNav />
+      {/* Decorative Bottom Bar instead of BottomNav */}
+      <div className="absolute bottom-0 w-full h-16 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] bg-[#5d4037] border-t-4 border-[#3e2723] z-40 rounded-t-[2rem] shadow-[0_-5px_15px_rgba(0,0,0,0.3)] flex justify-center items-center">
+        <div className="text-[#8c6239] opacity-30 text-4xl flex gap-8">
+          <span className="material-symbols-outlined">eco</span>
+          <span className="material-symbols-outlined">eco</span>
+          <span className="material-symbols-outlined">eco</span>
+          <span className="material-symbols-outlined">eco</span>
+          <span className="material-symbols-outlined">eco</span>
+        </div>
+      </div>
 
-      {/* Toast + FlyUp */}
       <Toast />
       <PointsFlyUp />
-
-      {/* Sparkle effects */}
       <PrayerSparkles active={showSparkles} onDone={() => setShowSparkles(false)} />
-
-      {/* Text fly up */}
       <PrayerTextFly text={flyText} onDone={() => setFlyText(null)} />
 
-      {/* Reward popup */}
       {rewardData && (
         <PrayerReward
           ognReward={rewardData.ognReward}
