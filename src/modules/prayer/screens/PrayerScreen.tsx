@@ -17,6 +17,7 @@ import { PrayerTextFly } from '../components/PrayerTextFly';
 import { PrayerPresetModal } from '../components/PrayerPresetModal';
 import { PrayerCustomModal } from '../components/PrayerCustomModal';
 import { PrayerLeaderboardModal } from '../components/PrayerLeaderboardModal';
+import { FloatingPrayers } from '../components/FloatingPrayers';
 import type { PrayerOfferResponse } from '../types/prayer.types';
 import { playSound, audioManager } from '@/shared/audio';
 
@@ -133,24 +134,7 @@ export default function PrayerScreen() {
         <div className="absolute -top-6 right-8 text-green-700/60 text-7xl rotate-180 z-0 opacity-40">
           <span className="material-symbols-outlined">psychiatry</span>
         </div>
-        <div className="absolute inset-x-0 bottom-40 top-20 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute left-[15%] bottom-0 prayer-float-up flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full border-2 border-white shadow-md bg-orange-200 overflow-hidden shrink-0">
-              <img alt="Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgPmoDttmlb4gqJR-xIc_Z_9QiEDpfwlNd8pn-3uJLGyHP7c_GaSI1yYmr7iqBJvFYC0YPo1ipB5MpJzz7RTSIRNEphrwc57WNfv-HpfLJOurpUe1-1PZmWj2ZVB8JYWVHvf90jnguQb7mW6sQckt5G__9OAyhyp8IoT7AVjnYy4WuUgtKArsuShvA9D-1M6twgHlOCGHXzb7zkQPkZicZPytW8FLR7YjzqYleZ7IxdMH8_fgDmabV3pnAGE4iIV1UxuVmY6eACxgh" />
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-r-xl rounded-bl-xl shadow-sm border border-yellow-200 max-w-[150px]">
-              <p className="text-[10px] text-farm-brown-dark font-medium leading-tight">"Cầu cho mùa màng bội thu!"</p>
-            </div>
-          </div>
-          <div className="absolute right-[10%] bottom-0 prayer-float-up-delayed flex flex-row-reverse items-center gap-2">
-            <div className="w-8 h-8 rounded-full border-2 border-white shadow-md bg-blue-200 overflow-hidden shrink-0">
-              <img alt="Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFcKdc5C8O4CCLY5A5RaslgPY7KgFKcxZlMfQTvwYAxOD-24qVtyfI3mm_MpT6rwKZ9aQ81nu2cXBVYDYLXRvCqIopapS43KiG0lR79H_e4lHnD1V3QrD2mtKZpVBcFwhc2JX2-iCfLmEAZZpgqoZpEcLKjIQgAcziBbEDIZub7u-u_cor_Yszi6Jk1e9HfSN4OKT0xihOkUatLhGdhMf2j2Zd2bXUQcJR6Rs2bFGrFImeZPo-4mD8Q4LwjQ7LkHuRewgeaVJJp8RX" />
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-l-xl rounded-br-xl shadow-sm border border-green-200 max-w-[150px]">
-              <p className="text-[10px] text-farm-brown-dark font-medium leading-tight">"Mong bình an cho mọi người 🙏"</p>
-            </div>
-          </div>
-        </div>
+        <FloatingPrayers flyText={flyText} />
       </div>
 
       {/* Header */}
