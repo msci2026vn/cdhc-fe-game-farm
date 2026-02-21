@@ -9,14 +9,13 @@ import { usePrayerPresets } from '../hooks/usePrayerPresets';
 import { usePrayerOffer } from '../hooks/usePrayerOffer';
 import { PrayerCounter } from '../components/PrayerCounter';
 import { PrayerCard } from '../components/PrayerCard';
-import { PrayerInput } from '../components/PrayerInput';
-import { PrayerButton } from '../components/PrayerButton';
 import { PrayerReward } from '../components/PrayerReward';
 import { PrayerLeaderboard } from '../components/PrayerLeaderboard';
 import { PrayerHistory } from '../components/PrayerHistory';
 import { PrayerSparkles } from '../components/PrayerSparkles';
 import { PrayerTextFly } from '../components/PrayerTextFly';
 import { PrayerPresetModal } from '../components/PrayerPresetModal';
+import { PrayerCustomModal } from '../components/PrayerCustomModal';
 import type { PrayerOfferResponse } from '../types/prayer.types';
 import { playSound, audioManager } from '@/shared/audio';
 
@@ -36,10 +35,10 @@ export default function PrayerScreen() {
   const navigate = useNavigate();
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [customText, setCustomText] = useState('');
-  const [activeTab, setActiveTab] = useState<'custom' | 'none'>('none');
   const [rewardData, setRewardData] = useState<PrayerOfferResponse | null>(null);
   const [bottomTab, setBottomTab] = useState<'pray' | 'leaderboard' | 'history'>('pray');
   const [showPresetModal, setShowPresetModal] = useState(false);
+  const [showCustomModal, setShowCustomModal] = useState(false);
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
 
@@ -76,29 +75,24 @@ export default function PrayerScreen() {
     );
   }, [offerMutation, refetchStatus]);
 
-  const handlePray = useCallback(() => {
-    if (!status?.canPray) return;
-
-    if (activeTab === 'custom' && customText.length >= 10) {
-      const currentText = customText;
-      offerMutation.mutate(
-        { type: 'custom', text: customText },
-        {
-          onSuccess: (data) => {
-            playSound('prayer_submit');
-            setRewardData(data);
-            setShowSparkles(true);
-            setFlyText(currentText);
-            setCustomText('');
-            refetchStatus();
-            if (data.ognReward > 0 || data.xpReward > 0) {
-              setTimeout(() => playSound('prayer_reward'), 600);
-            }
-          },
+  const handleCustomSubmit = useCallback((text: string) => {
+    offerMutation.mutate(
+      { type: 'custom', text },
+      {
+        onSuccess: (data) => {
+          playSound('prayer_submit');
+          setRewardData(data);
+          setShowSparkles(true);
+          setFlyText(text);
+          setShowCustomModal(false);
+          refetchStatus();
+          if (data.ognReward > 0 || data.xpReward > 0) {
+            setTimeout(() => playSound('prayer_reward'), 600);
+          }
         },
-      );
-    }
-  }, [activeTab, customText, offerMutation, refetchStatus, status]);
+      },
+    );
+  }, [offerMutation, refetchStatus]);
 
   const handleQuickPray = useCallback(() => {
     if (presets && presets.length > 0) {
@@ -121,7 +115,7 @@ export default function PrayerScreen() {
     }
   }, [presets, offerMutation, refetchStatus]);
 
-  const canSubmit = customText.length >= 10 && (status?.customUsed ?? 0) < (status?.customMax ?? 3);
+
 
   return (
     <div className="h-[100dvh] max-w-[430px] mx-auto relative bg-nature-vibe shadow-2xl flex flex-col overflow-hidden">
@@ -186,7 +180,6 @@ export default function PrayerScreen() {
               key={tab.key}
               onClick={() => {
                 setBottomTab(tab.key);
-                if (tab.key === 'pray') setActiveTab('none'); // Reset actions
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all
                 ${bottomTab === tab.key
@@ -250,10 +243,7 @@ export default function PrayerScreen() {
             {/* Daily limit info */}
             {status && (
               <div className="text-center text-xs text-[#5d4037] mb-2 font-bold drop-shadow-sm">
-                {activeTab !== 'custom'
-                  ? `Còn ${Math.max(0, status.freeMax - status.freeUsed)} lượt có sẵn hôm nay`
-                  : `Còn ${Math.max(0, status.customMax - status.customUsed)} lượt tự viết hôm nay`
-                }
+                `Còn ${Math.max(0, status.freeMax - status.freeUsed)} lượt ngẫu nhiên hôm nay`
               </div>
             )}
 
@@ -281,34 +271,14 @@ export default function PrayerScreen() {
                   <span className="text-xs font-bold uppercase tracking-wide">Chọn Lời Chúc</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab(activeTab === 'custom' ? 'none' : 'custom')}
-                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-2 transition-transform ${activeTab === 'custom' ? 'ring-2 ring-[#2d6a4f]' : 'active:scale-95'}`}
+                  onClick={() => setShowCustomModal(true)}
+                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95`}
                 >
                   <span className="material-symbols-outlined text-xl">edit_note</span>
                   <span className="text-xs font-bold uppercase tracking-wide">Viết Lời Chúc</span>
                 </button>
               </div>
             </div>
-
-
-
-            {activeTab === 'custom' && (
-              <div className="w-full max-w-xs mb-6 animate-fade-in-up">
-                <PrayerInput
-                  value={customText}
-                  onChange={setCustomText}
-                  disabled={offerMutation.isPending}
-                />
-                <div className="mt-4">
-                  <PrayerButton
-                    onClick={handlePray}
-                    disabled={!canSubmit || !status?.canPray}
-                    loading={offerMutation.isPending}
-                    cooldownSeconds={status?.cooldownRemaining || 0}
-                  />
-                </div>
-              </div>
-            )}
 
             {/* Message from Mother Nature */}
             <div className="w-full bg-[#fdf6e3] border-2 border-[#8c6239] rounded-xl p-4 relative shadow-[4px_4px_0_#5d4037] mb-8 shrink-0">
@@ -375,6 +345,15 @@ export default function PrayerScreen() {
         onClose={() => setShowPresetModal(false)}
         onSelect={handleSelectPreset}
         isPending={offerMutation.isPending}
+      />
+
+      <PrayerCustomModal
+        isOpen={showCustomModal}
+        onClose={() => setShowCustomModal(false)}
+        onSubmit={handleCustomSubmit}
+        isPending={offerMutation.isPending}
+        limitUsed={status?.customUsed ?? 0}
+        limitMax={status?.customMax ?? 3}
       />
     </div>
   );

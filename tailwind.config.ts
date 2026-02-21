@@ -128,6 +128,7 @@ export default {
         "inner-glow": "inset 0 2px 4px rgba(255,255,255,0.4)",
         "leaf-shadow": "0 4px 0 #1b4332, 0 5px 10px rgba(0,0,0,0.2)",
         "glow": "0 0 15px rgba(255, 215, 0, 0.6)",
+        "parchment": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(139, 69, 19, 0.1)",
       },
       keyframes: {
         "accordion-down": {

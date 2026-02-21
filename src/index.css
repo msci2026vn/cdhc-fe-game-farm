@@ -758,6 +758,39 @@
     color: #8c6239;
     border-color: #d7c0a0;
   }
+
+  .bg-prayer-vibe {
+    background: linear-gradient(to bottom, #a8e6cf 0%, #dcedc1 100%);
+  }
+
+  .wood-frame {
+    background: #8c6239;
+    border: 4px solid #5d4037;
+    box-shadow:
+      inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+      inset -2px -2px 0 rgba(0, 0, 0, 0.2),
+      0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+
+  .wood-btn-carved {
+    background: linear-gradient(180deg, #a0522d 0%, #8b4513 100%);
+    border: 2px solid #5d4037;
+    box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .wood-btn-carved:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #3e2723, inset 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  .parchment-input {
+    background-color: #fdfbf7;
+    background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+    border: 2px dashed #deb887;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
 }
 
 @layer base {
