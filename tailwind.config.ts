@@ -76,6 +76,16 @@ export default {
           blue: "hsl(var(--farm-blue))",
           sky: "hsl(var(--farm-sky))",
         },
+        farm: {
+          "green-dark": "#2d6a4f",
+          "green-light": "#52b788",
+          brown: "#8c6239",
+          "brown-dark": "#5d4037",
+          straw: "#e9c46a",
+          sky: "#a8dadc",
+          carrot: "#e76f51",
+          paper: "#fdf6e3",
+        },
         boss: {
           dark: "hsl(var(--boss-dark))",
           mid: "hsl(var(--boss-mid))",
@@ -97,6 +107,15 @@ export default {
         sm: "calc(var(--radius) - 8px)",
         xl: "24px",
         "2xl": "32px",
+      },
+      backgroundImage: {
+        "wood-pattern": "repeating-linear-gradient(45deg, #8c6239 0, #8c6239 10px, #7a5230 10px, #7a5230 20px)",
+        "grass-gradient": "linear-gradient(180deg, #52b788 0%, #2d6a4f 100%)",
+      },
+      boxShadow: {
+        "wood-shadow": "0 4px 0 #5d4037, 0 5px 10px rgba(0,0,0,0.3)",
+        "paper-shadow": "0 2px 0 #d4c5a3, 0 3px 6px rgba(0,0,0,0.1)",
+        "inner-glow": "inset 0 2px 4px rgba(255,255,255,0.4)",
       },
       keyframes: {
         "accordion-down": {

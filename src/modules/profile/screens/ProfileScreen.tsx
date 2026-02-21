@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/shared/components/BottomNav';
 import { usePlayerProfile, useOgn, useInvalidateProfile } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -20,6 +21,7 @@ import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 type Tab = 'stats' | 'achievements';
 
 export default function ProfileScreen() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('stats');
   const [loggingOut, setLoggingOut] = useState(false);
   const [showStatModal, setShowStatModal] = useState(false);
@@ -92,271 +94,335 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <div className="h-[100dvh] max-w-[430px] mx-auto relative profile-gradient flex flex-col overflow-hidden">
-      {/* Profile header — fixed, không scroll */}
-      <div className="flex-shrink-0 relative pt-safe px-5 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-16 h-16 rounded-full avatar-ring flex-shrink-0 overflow-hidden" style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.12)' }}>
-            <div className="w-full h-full rounded-full bg-game-green-mid flex items-center justify-center text-[28px]">
-              {displayPicture ? (
-                <img
-                  src={displayPicture}
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                '🧑‍🌾'
-              )}
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="font-heading text-lg font-bold leading-tight">{displayName}</h2>
-            <span className="inline-flex items-center gap-1 bg-game-green-mid text-white px-2.5 py-0.5 rounded-xl text-[10px] font-bold mt-0.5">
-              ⭐ Lv.{level} — {title}
-            </span>
-            <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
-              🪙 {(profile.ogn || 0).toLocaleString('vi-VN')} OGN · 📅 {profile.totalHarvests || 0} lần thu hoạch
-            </p>
-          </div>
+    <div className="bg-background-light min-h-[100dvh] text-farm-brown-dark font-body overflow-hidden select-none">
+      <div className="max-w-[430px] mx-auto h-[100dvh] flex flex-col relative bg-farm-vibe shadow-2xl overflow-hidden">
+
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-green-200 rounded-full blur-[60px] opacity-40"></div>
+          <div className="absolute bottom-[-20px] right-[-20px] w-80 h-80 bg-yellow-100 rounded-full blur-[50px] opacity-60"></div>
+          <span className="material-symbols-outlined absolute top-10 right-10 text-green-800/10 text-6xl transform rotate-12">local_florist</span>
+          <span className="material-symbols-outlined absolute top-40 left-5 text-green-800/10 text-4xl transform -rotate-12">spa</span>
         </div>
 
-        {/* XP Bar */}
-        <div className="mt-3 bg-black/20 rounded-full h-4 relative overflow-hidden backdrop-blur-sm border border-white/10 mx-1">
-          <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-500"
-            style={{ width: `${(LEVEL_CONFIG.getXpInLevel(xp) / LEVEL_CONFIG.getXpForLevel(xp)) * 100}%` }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white uppercase tracking-wider shadow-sm">
-            XP {LEVEL_CONFIG.getXpInLevel(xp)} / {LEVEL_CONFIG.getXpForLevel(xp)}
-          </div>
-        </div>
-
-        {/* Quick stats row */}
-        <div className="grid grid-cols-4 gap-1.5 mt-3">
-          {[
-            { val: (profile.totalHarvests ?? 0).toString(), label: 'Thu hoạch', emoji: '🌾' },
-            { val: (profile.likesCount ?? 0).toString(), label: 'Lượt thích', emoji: '❤️' },
-            { val: (profile.giftsCount ?? 0).toString(), label: 'Quà tặng', emoji: '🎁' },
-          ].map((s) => (
-            <div key={s.label} className="rounded-xl p-2 text-center glass-card">
-              <span className="text-sm block">{s.emoji}</span>
-              <span className="font-heading text-sm font-bold block leading-tight">{s.val}</span>
-              <span className="text-[8px] font-semibold text-muted-foreground">{s.label}</span>
-            </div>
-          ))}
-          <div
-            onClick={() => { playSound('ui_tab'); setShowConversion(true); }}
-            className="rounded-xl p-2 text-center glass-card cursor-pointer hover:bg-orange-50/80 active:scale-95 transition-all border border-orange-200/50"
-          >
-            <span className="text-sm block">🔄</span>
-            <span className="font-heading text-sm font-bold block leading-tight text-orange-600">Đổi</span>
-            <span className="text-[8px] font-semibold text-orange-500">Đổi Hạt</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Tab bar — fixed, không scroll */}
-      <div className="flex-shrink-0 flex gap-1 px-5 mb-2">
-        {TABS.map((t) => (
-          <button key={t.key} onClick={() => { playSound('ui_tab'); setTab(t.key); }}
-            className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all ${tab === t.key ? 'bg-primary text-white shadow-md' : 'bg-white/60 text-muted-foreground'
-              }`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Scrollable section — chỉ phần này scroll */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-24" style={{ scrollbarWidth: 'none' }}>
-
-        {/* Stats Tab */}
-        {tab === 'stats' && (
-          <div className="space-y-2 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading text-sm font-bold flex items-center gap-2">📈 Chỉ số nhân vật</h3>
-              {(statInfo?.freePoints ?? 0) > 0 && (
-                <button
-                  onClick={() => { playSound('ui_modal_open'); setShowStatModal(true); }}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 animate-pulse active:scale-95 shadow-md"
-                >
-                  <span className="bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
-                    {statInfo!.freePoints}
-                  </span>
-                  Phân bổ ngay!
-                </button>
-              )}
-            </div>
-
-            {/* Stat bars — real data */}
-            {[
-              { key: 'atk' as const, emoji: '⚔️', name: 'Sát thương (ATK)', color: '#e74c3c', bg: 'linear-gradient(135deg, #ffe0e0, #ffb3b3)', maxVal: 2000 },
-              { key: 'hp' as const, emoji: '❤️', name: 'Máu tối đa (HP)', color: '#4eca6a', bg: 'linear-gradient(135deg, #d4f8dc, #a8e6a0)', maxVal: 5000 },
-              { key: 'def' as const, emoji: '🛡️', name: 'Giáp cơ bản (DEF)', color: '#3498db', bg: 'linear-gradient(135deg, #d4eeff, #a8d4f0)', maxVal: 1000 },
-              { key: 'mana' as const, emoji: '✨', name: 'Mana', color: '#9b59b6', bg: 'linear-gradient(135deg, #f0d4ff, #d4a8f0)', maxVal: 1500 },
-            ].map((u) => {
-              const points = statInfo?.stats?.[u.key] ?? 0;
-              const effective = statInfo?.effectiveStats?.[u.key] ?? 0;
-              const progress = Math.min(100, (effective / u.maxVal) * 100);
-              return (
-                <div key={u.key} className="bg-white rounded-xl p-2.5 flex items-center gap-2.5"
-                  style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                    style={{ background: u.bg }}>{u.emoji}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold">{u.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{effective.toLocaleString('vi-VN')} ({points} điểm)</p>
-                    <div className="h-1.5 rounded-full bg-muted mt-1 overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, background: u.color }} />
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setHelpStat(u.key)}
-                    className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-[10px] font-semibold flex items-center justify-center active:bg-gray-100 active:text-gray-600 shrink-0"
-                  >
-                    ?
-                  </button>
-                </div>
-              );
-            })}
-
-            {/* Auto preset indicator */}
-            {statInfo?.autoEnabled && statInfo.autoPreset && (
-              <div className="bg-blue-50 rounded-xl p-2 text-center">
-                <p className="text-[10px] font-bold text-blue-600">
-                  🤖 Tự động phân bổ: {statInfo.autoPreset === 'attack' ? '⚔️ Tấn công' : statInfo.autoPreset === 'defense' ? '🛡️ Phòng thủ' : '✨ Cân bằng'}
-                </p>
-              </div>
-            )}
-
-            {/* Reset button */}
-            {statInfo && (statInfo.stats.atk + statInfo.stats.hp + statInfo.stats.def + statInfo.stats.mana) > 0 && (
-              <button
-                onClick={() => { playSound('ui_modal_open'); setShowResetConfirm(true); }}
-                disabled={resetStats.isPending}
-                className="w-full py-2 rounded-xl text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all disabled:opacity-50"
-              >
-                🔄 Reset chỉ số ({formatOGN(statInfo.resetInfo.nextCost)} OGN) · {statInfo.resetInfo.weeklyCount}/3 tuần này
-              </button>
-            )}
-
-            {/* Next milestones */}
-            {statInfo?.milestones?.next && statInfo.milestones.next.length > 0 && (
-              <div className="mt-2">
-                <p className="text-[10px] font-bold text-gray-400 mb-1">💡 Mốc tiếp theo</p>
-                {statInfo.milestones.next.slice(0, 3).map((m) => (
-                  <div key={m.id} className="flex items-center gap-2 bg-gray-50 rounded-lg p-1.5 mb-1">
-                    <span className="text-sm">{m.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold">{m.name}</p>
-                      <p className="text-[9px] text-gray-400">{m.description} · Còn {m.remaining} điểm</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Unlocked milestones */}
-            {statInfo?.milestones?.unlocked && statInfo.milestones.unlocked.length > 0 && (
-              <div className="mt-2">
-                <p className="text-[10px] font-bold text-gray-400 mb-1">🏅 Đã mở khóa</p>
-                {statInfo.milestones.unlocked.map((m) => (
-                  <div key={m.id} className="flex items-center gap-2 bg-amber-50 rounded-lg p-1.5 mb-1">
-                    <span className="text-sm">{m.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold text-amber-700">{m.name}</p>
-                      <p className="text-[9px] text-amber-500">{m.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Achievements Tab */}
-        {tab === 'achievements' && (
-          <div className="space-y-2 animate-fade-in">
-            {[
-              { emoji: '🎯', name: 'Quiz Master', desc: 'Trả lời đúng 50 câu hỏi', progress: 72, total: '36/50' },
-              { emoji: '🐲', name: 'Boss Slayer', desc: 'Tiêu diệt 10 Boss', progress: Math.min(100, (profile.totalBossKills / 10) * 100), total: `${profile.totalBossKills}/10` },
-              { emoji: '❤️', name: 'Người thân thiện', desc: 'Thích 50 vườn bạn bè', progress: Math.min(100, (profile.likesCount / 50) * 100), total: `${profile.likesCount}/50` },
-              { emoji: '💬', name: 'Người bình luận', desc: 'Bình luận 30 lần', progress: Math.min(100, (profile.commentsCount / 30) * 100), total: `${profile.commentsCount}/30` },
-              { emoji: '🎁', name: 'Nhà hảo tâm', desc: 'Tặng 20 món quà', progress: Math.min(100, (profile.giftsCount / 20) * 100), total: `${profile.giftsCount}/20` },
-              { emoji: '🌾', name: 'Nông dân chăm chỉ', desc: 'Thu hoạch 100 lần', progress: Math.min(100, (profile.totalHarvests / 100) * 100), total: `${profile.totalHarvests}/100` },
-            ].map((a) => (
-              <div key={a.name} className="bg-white rounded-xl p-2.5 flex items-center gap-2.5"
-                style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #fff8dc, #ffe066)' }}>{a.emoji}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold">{a.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{a.desc}</p>
-                  <div className="h-1.5 rounded-full bg-muted mt-1 overflow-hidden">
-                    <div className="h-full rounded-full bg-game-gold-DEFAULT transition-all" style={{ width: `${a.progress}%` }} />
-                  </div>
-                </div>
-                <span className="text-[11px] font-bold text-muted-foreground whitespace-nowrap">{a.total}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Wallet Link Section */}
-        <div className="mt-4 bg-white rounded-xl p-3" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-          <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
-            <span className="material-symbols-outlined text-base">account_balance_wallet</span>
-            Ví Avalanche
-          </h3>
-          <p className="text-[10px] text-muted-foreground mb-2.5">
-            {walletAddress
-              ? 'Ví đã được liên kết với tài khoản của bạn.'
-              : 'Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.'}
-          </p>
-
-          {walletAddress ? (
-            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold">
-              <span>✅</span>
-              <span>Đã liên kết:</span>
-              <code className="bg-green-100 px-1.5 py-0.5 rounded text-[10px] font-mono">
-                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-              </code>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowWalletModal(true)}
-              className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all flex items-center justify-center gap-2"
-            >
-              🔗 Liên kết ví Avalanche
-            </button>
-          )}
-
-          {walletState.error && (
-            <div className="flex items-center gap-2 mt-2 p-2 bg-red-50 rounded-lg text-[10px] text-red-600 font-bold">
-              <span className="flex-1">{walletState.error}</span>
-              <button onClick={clearWalletError} className="text-red-400">✕</button>
-            </div>
-          )}
-        </div>
-
-        {/* Logout button — bên trong vùng scroll */}
-        <div className="mt-3 mb-2">
+        {/* Top Header */}
+        <div className="relative z-30 px-4 pt-4 flex justify-between items-center shrink-0">
           <button
-            onClick={async () => {
-              if (loggingOut) return;
-              setLoggingOut(true);
-              await gameApi.logout();
-            }}
-            disabled={loggingOut}
-            className="w-full py-2.5 rounded-xl font-heading text-sm font-bold text-red-600 bg-red-50 border border-red-200 active:bg-red-100 transition-all disabled:opacity-50"
+            onClick={() => navigate(-1)}
+            className="bg-white/80 p-2 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
           >
-            {loggingOut ? '⏳ Đang đăng xuất...' : '🚪 Đăng xuất'}
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div className="bg-farm-brown text-[#fefae0] px-4 py-1 rounded-full shadow-wood-shadow font-heading font-bold text-lg border-2 border-[#5d4037]">
+            Hồ Sơ Nông Dân
+          </div>
+          <button className="bg-white/80 p-2 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors">
+            <span className="material-symbols-outlined">settings</span>
           </button>
         </div>
+
+        {/* Profile Card */}
+        <div className="px-4 mt-6 z-10 shrink-0">
+          <div className="bg-farm-paper rounded-2xl p-4 shadow-paper-shadow border-2 border-[#d4c5a3] relative">
+            <div className="flex gap-4 items-start">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-2xl bg-[#f4e4bc] border-4 border-farm-brown shadow-md overflow-hidden flex items-center justify-center text-3xl">
+                  {displayPicture ? (
+                    <img alt="Avatar" className="w-full h-full object-cover" src={displayPicture} />
+                  ) : (
+                    '🧑‍🌾'
+                  )}
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-farm-green-dark text-white text-[10px] px-2 py-0.5 rounded-full font-bold border-2 border-white shadow-sm">
+                  Lv.{level}
+                </div>
+              </div>
+              <div className="flex-1">
+                <h1 className="font-heading font-bold text-2xl text-farm-brown-dark">{displayName}</h1>
+                <div className="text-sm font-bold text-farm-green-light mb-1">⭐ {title}</div>
+
+                {/* XP Bar */}
+                <div className="w-full h-4 bg-gray-200 rounded-full border border-gray-300 relative overflow-hidden mb-2">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500"
+                    style={{ width: `${(LEVEL_CONFIG.getXpInLevel(xp) / LEVEL_CONFIG.getXpForLevel(xp)) * 100}%` }}
+                  ></div>
+                  <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white drop-shadow-md">
+                    {LEVEL_CONFIG.getXpInLevel(xp)} / {LEVEL_CONFIG.getXpForLevel(xp)} XP
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-xs font-bold text-farm-brown-dark/80">
+                  <span className="flex items-center gap-1"><span className="text-base">🪙</span> {formatOGN(profile.ogn || 0)} OGN</span>
+                  <span className="flex items-center gap-1"><span className="text-base">📅</span> {profile.totalHarvests || 0} thu hoạch</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-[#d4c5a3]/50">
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-farm-brown-dark">{profile.totalHarvests ?? 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Thu hoạch</span>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-farm-carrot">{profile.likesCount ?? 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Lượt thích</span>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-blue-500">{profile.commentsCount ?? 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Bình luận</span>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-purple-500">{profile.giftsCount ?? 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Quà tặng</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Buttons */}
+        <div className="px-6 mt-6 flex gap-4 z-10 shrink-0">
+          <button
+            onClick={() => { playSound('ui_tab'); setTab('stats'); }}
+            className={`flex-1 py-2 rounded-xl font-bold font-heading text-sm tracking-wide transition-all ${tab === 'stats'
+              ? 'wood-btn shadow-lg'
+              : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
+              }`}
+          >
+            📊 Chỉ số
+          </button>
+          <button
+            onClick={() => { playSound('ui_tab'); setTab('achievements'); }}
+            className={`flex-1 py-2 rounded-xl font-bold font-heading text-sm tracking-wide transition-all ${tab === 'achievements'
+              ? 'wood-btn shadow-lg'
+              : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
+              }`}
+          >
+            🏆 Thành tựu
+          </button>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 pb-28 mt-4 z-10" style={{ scrollbarWidth: 'none' }}>
+
+          {tab === 'stats' && (
+            <div className="animate-fade-in space-y-4">
+              {/* Stats Block */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-heading font-bold text-farm-brown-dark text-lg flex items-center gap-2">
+                    <span className="material-symbols-outlined text-farm-green-dark">analytics</span>
+                    Chỉ số nhân vật
+                  </h3>
+                  {statInfo && (statInfo.stats.atk + statInfo.stats.hp + statInfo.stats.def + statInfo.stats.mana) > 0 && (
+                    <button
+                      onClick={() => { playSound('ui_modal_open'); setShowResetConfirm(true); }}
+                      disabled={resetStats.isPending}
+                      className="bg-farm-straw text-farm-brown-dark text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 active:scale-95 transition-transform flex items-center gap-1 disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined text-sm">restart_alt</span>
+                      Reset ({formatOGN(statInfo.resetInfo.nextCost)} OGN)
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#fefae0] p-3 rounded-xl border border-[#e9c46a] flex items-center gap-3 shadow-sm cursor-pointer hover:bg-[#fbf4d0]" onClick={() => setHelpStat('atk')}>
+                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-xl">⚔️</div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-gray-500 font-bold uppercase truncate">Tấn Công</div>
+                      <div className="text-lg font-heading font-bold text-farm-brown-dark leading-tight">{statInfo?.effectiveStats?.atk ?? 0}</div>
+                    </div>
+                  </div>
+                  <div className="bg-[#fefae0] p-3 rounded-xl border border-[#e9c46a] flex items-center gap-3 shadow-sm cursor-pointer hover:bg-[#fbf4d0]" onClick={() => setHelpStat('hp')}>
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-xl">❤️</div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-gray-500 font-bold uppercase truncate">Máu (HP)</div>
+                      <div className="text-lg font-heading font-bold text-farm-brown-dark leading-tight">{statInfo?.effectiveStats?.hp ?? 0}</div>
+                    </div>
+                  </div>
+                  <div className="bg-[#fefae0] p-3 rounded-xl border border-[#e9c46a] flex items-center gap-3 shadow-sm cursor-pointer hover:bg-[#fbf4d0]" onClick={() => setHelpStat('def')}>
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-xl">🛡️</div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-gray-500 font-bold uppercase truncate">Phòng Thủ</div>
+                      <div className="text-lg font-heading font-bold text-farm-brown-dark leading-tight">{statInfo?.effectiveStats?.def ?? 0}</div>
+                    </div>
+                  </div>
+                  <div className="bg-[#fefae0] p-3 rounded-xl border border-[#e9c46a] flex items-center gap-3 shadow-sm cursor-pointer hover:bg-[#fbf4d0]" onClick={() => setHelpStat('mana')}>
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-xl">✨</div>
+                    <div className="min-w-0">
+                      <div className="text-xs text-gray-500 font-bold uppercase truncate">Năng Lượng</div>
+                      <div className="text-lg font-heading font-bold text-farm-brown-dark leading-tight">{statInfo?.effectiveStats?.mana ?? 0}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {statInfo && statInfo.freePoints > 0 && (
+                  <button
+                    onClick={() => { playSound('ui_modal_open'); setShowStatModal(true); }}
+                    className="w-full mt-3 py-2 bg-gradient-to-r from-farm-green-light to-farm-green-dark text-white rounded-xl font-bold font-heading shadow-md animate-pulse border border-green-400"
+                  >
+                    Phân bổ {statInfo.freePoints} điểm tiềm năng!
+                  </button>
+                )}
+              </div>
+
+              {/* Next Skills Block (Static from template for aesthetic matching) */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
+                <h3 className="font-heading font-bold text-farm-brown-dark text-lg mb-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-farm-green-dark">upgrade</span>
+                  Kỹ năng tiếp theo
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-2 bg-green-50 rounded-xl border border-green-100">
+                    <div className="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center text-2xl shadow-inner border border-green-300">💚</div>
+                    <div className="flex-1">
+                      <div className="font-bold text-farm-green-dark">Tái Sinh I</div>
+                      <div className="text-xs text-gray-600">Hồi 5% HP mỗi lượt</div>
+                    </div>
+                    <span className="material-symbols-outlined text-gray-400">lock</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-orange-50 rounded-xl border border-orange-100">
+                    <div className="w-12 h-12 bg-orange-200 rounded-lg flex items-center justify-center text-2xl shadow-inner border border-orange-300">🛡️</div>
+                    <div className="flex-1">
+                      <div className="font-bold text-orange-800">Phản Đòn I</div>
+                      <div className="text-xs text-gray-600">Phản lại 10% sát thương nhận vào</div>
+                    </div>
+                    <span className="material-symbols-outlined text-gray-400">lock</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center text-2xl shadow-inner border border-blue-300">✨</div>
+                    <div className="flex-1">
+                      <div className="font-bold text-blue-800">Tiết Kiệm I</div>
+                      <div className="text-xs text-gray-600">Giảm mana khi né tránh</div>
+                    </div>
+                    <span className="material-symbols-outlined text-gray-400">lock</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Unlocked Block (Static from template for aesthetic matching) */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
+                <h3 className="font-heading font-bold text-farm-brown-dark text-lg mb-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-farm-carrot">military_tech</span>
+                  Đã mở khóa
+                </h3>
+                <div className="flex items-center gap-3 p-2 bg-[#fff8e1] rounded-xl border border-yellow-200 shadow-sm">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-lg flex items-center justify-center text-2xl shadow-md border-2 border-white">🔥</div>
+                  <div className="flex-1">
+                    <div className="font-bold text-farm-brown-dark">Chí Mạng I</div>
+                    <div className="text-xs text-gray-600">Tăng tỉ lệ bạo kích khi thu hoạch</div>
+                  </div>
+                  <span className="material-symbols-outlined text-green-600">check_circle</span>
+                </div>
+              </div>
+
+              {/* Wallet and Logout at the bottom of Stats tab */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm mb-4">
+                <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-base">account_balance_wallet</span>
+                  Ví Avalanche
+                </h3>
+                <p className="text-[10px] text-gray-600 mb-3">
+                  {walletAddress
+                    ? 'Ví đã được liên kết với tài khoản của bạn.'
+                    : 'Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.'}
+                </p>
+
+                {walletAddress ? (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-xl border border-green-200 text-xs font-bold mb-3">
+                    <span>✅</span>
+                    <span>Đã liên kết:</span>
+                    <code className="bg-white px-1.5 py-0.5 rounded border border-green-100 text-[10px] font-mono shadow-sm">
+                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                    </code>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowWalletModal(true)}
+                    className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all flex items-center justify-center gap-2 mb-3"
+                  >
+                    🔗 Liên kết ví Avalanche
+                  </button>
+                )}
+
+                <button
+                  onClick={async () => {
+                    if (loggingOut) return;
+                    setLoggingOut(true);
+                    await gameApi.logout();
+                  }}
+                  disabled={loggingOut}
+                  className="w-full py-2 rounded-xl font-heading text-sm font-bold text-red-600 bg-red-50 border border-red-200 active:bg-red-100 transition-all disabled:opacity-50"
+                >
+                  {loggingOut ? '⏳ Đang đăng xuất...' : '🚪 Đăng xuất'}
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {tab === 'achievements' && (
+            <div className="space-y-3 animate-fade-in">
+              {/* Using original dynamic data mapped to a style closer to the new template */}
+              {[
+                { emoji: '🎯', name: 'Quiz Master', desc: 'Trả lời đúng 50 câu hỏi', progress: 72, total: '36/50' },
+                { emoji: '🐲', name: 'Boss Slayer', desc: 'Tiêu diệt 10 Boss', progress: Math.min(100, (profile.totalBossKills / 10) * 100), total: `${profile.totalBossKills}/10` },
+                { emoji: '❤️', name: 'Người thân thiện', desc: 'Thích 50 vườn bạn bè', progress: Math.min(100, (profile.likesCount / 50) * 100), total: `${profile.likesCount}/50` },
+                { emoji: '💬', name: 'Người bình luận', desc: 'Bình luận 30 lần', progress: Math.min(100, (profile.commentsCount / 30) * 100), total: `${profile.commentsCount}/30` },
+                { emoji: '🎁', name: 'Nhà hảo tâm', desc: 'Tặng 20 món quà', progress: Math.min(100, (profile.giftsCount / 20) * 100), total: `${profile.giftsCount}/20` },
+                { emoji: '🌾', name: 'Nông dân chăm chỉ', desc: 'Thu hoạch 100 lần', progress: Math.min(100, (profile.totalHarvests / 100) * 100), total: `${profile.totalHarvests}/100` },
+              ].map((a) => (
+                <div key={a.name} className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50 shadow-sm flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-inner border border-yellow-200"
+                    style={{ background: 'linear-gradient(135deg, #fff8dc, #ffe066)' }}>{a.emoji}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-farm-brown-dark">{a.name}</p>
+                    <p className="text-[10px] text-gray-500">{a.desc}</p>
+                    <div className="h-1.5 rounded-full bg-gray-200 mt-1 overflow-hidden border border-gray-300">
+                      <div className="h-full rounded-full bg-farm-straw transition-all" style={{ width: `${a.progress}%` }} />
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-farm-brown-dark whitespace-nowrap">{a.total}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Custom HTML Template Bottom Navigation (Wood Theme & integrated routing) */}
+        <div className="absolute bottom-0 w-full max-w-[430px] bg-[#fdf6e3] border-t-4 border-[#8c6239] pb-safe pt-2 px-6 flex justify-around items-end z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.1)]">
+          <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 group opacity-50 hover:opacity-100 transition-opacity mb-2">
+            <span className="material-symbols-outlined text-3xl text-farm-brown-dark">home</span>
+          </button>
+
+          <button onClick={() => navigate('/inventory')} className="flex flex-col items-center gap-1 group opacity-50 hover:opacity-100 transition-opacity mb-2">
+            <span className="material-symbols-outlined text-3xl text-farm-brown-dark">backpack</span>
+          </button>
+
+          <div className="relative -top-8 shrink-0">
+            <button
+              onClick={() => navigate('/')}
+              className="w-16 h-16 rounded-full bg-farm-brown border-4 border-[#fdf6e3] shadow-wood-shadow flex items-center justify-center text-white transform hover:scale-105 active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-3xl">close</span>
+            </button>
+          </div>
+
+          <button onClick={() => navigate('/shop')} className="flex flex-col items-center gap-1 group opacity-50 hover:opacity-100 transition-opacity mb-2">
+            <span className="material-symbols-outlined text-3xl text-farm-brown-dark">storefront</span>
+          </button>
+
+          <button className="flex flex-col items-center gap-1 group mb-2">
+            <span className="material-symbols-outlined text-3xl text-farm-green-dark">person</span>
+            <div className="w-1.5 h-1.5 bg-farm-green-dark rounded-full"></div>
+          </button>
+        </div>
+
       </div>
 
-      <BottomNav />
-
-      {/* Stat Allocation Modal */}
+      {/* Modals from existing code */}
       {statInfo && (
         <StatAllocationModal
           isOpen={showStatModal}
@@ -370,27 +436,30 @@ export default function ProfileScreen() {
         />
       )}
 
-      {/* Reset Confirmation */}
       {showResetConfirm && statInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setShowResetConfirm(false)}>
-          <div className="bg-white rounded-2xl p-5 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowResetConfirm(false)}>
+          <div className="bg-farm-paper border-4 border-farm-brown rounded-2xl p-5 max-w-[320px] w-full mx-4 shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
-              <div className="text-4xl mb-2">🔄</div>
-              <h3 className="font-heading text-lg font-bold mb-1">Reset chỉ số?</h3>
-              <p className="text-sm text-gray-600 mb-3">
-                Tất cả điểm chỉ số sẽ được trả lại. Bạn có thể phân bổ lại.
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-2 border border-orange-200 shadow-inner">
+                🔄
+              </div>
+              <h3 className="font-heading text-xl font-bold mb-1 text-farm-brown-dark">Reset chỉ số?</h3>
+              <p className="text-sm text-farm-brown-dark/70 mb-3 font-medium">
+                Tất cả điểm chỉ số sẽ được trả lại. Bạn có thể phân bổ lại tiềm năng cho nhân vật.
               </p>
-              <div className="bg-orange-50 rounded-xl p-3 mb-4">
-                <p className="text-xs text-orange-700 font-bold mb-1">Chi phí reset</p>
-                <p className="text-2xl font-black text-orange-600">{formatOGN(statInfo.resetInfo.nextCost)} OGN</p>
-                <p className="text-[10px] text-orange-500 mt-1">
+
+              <div className="bg-white/60 border border-[#d4c5a3] rounded-xl p-3 mb-4 shadow-sm">
+                <p className="text-xs text-farm-brown-dark font-bold mb-1 uppercase tracking-wide">Chi phí reset</p>
+                <p className="font-heading text-2xl font-black text-farm-carrot">{formatOGN(statInfo.resetInfo.nextCost)} OGN</p>
+                <p className="text-[10px] text-orange-600 mt-1 font-bold">
                   Lần reset {statInfo.resetInfo.weeklyCount + 1}/3 tuần này
                 </p>
               </div>
+
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowResetConfirm(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-farm-brown bg-[#e9c46a]/30 active:bg-[#e9c46a]/50 transition-colors border-2 border-transparent hover:border-[#e9c46a]"
                 >
                   Hủy
                 </button>
@@ -408,16 +477,16 @@ export default function ProfileScreen() {
                     });
                   }}
                   disabled={resetStats.isPending}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 active:scale-95 shadow-lg disabled:opacity-50"
+                  className="flex-1 wood-btn py-2.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-50"
                 >
-                  {resetStats.isPending ? '...' : 'Xác nhận'}
+                  {resetStats.isPending ? '⏳ Đang xử lý...' : 'Xác nhận'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* Stat Help Modal */}
+
       {helpStat && (
         <StatHelpModal
           stat={helpStat}
@@ -426,33 +495,30 @@ export default function ProfileScreen() {
         />
       )}
 
-      {/* Conversion Modal */}
       <ConversionModal isOpen={showConversion} onClose={() => setShowConversion(false)} />
 
-      {/* Reset Error Modal */}
       {resetError && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 animate-fade-in" onClick={() => setResetError(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setResetError(null)}>
+          <div className="bg-farm-paper border-4 border-farm-brown rounded-2xl p-6 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
-              <div className="text-4xl mb-3">⚠️</div>
-              <h3 className="font-heading text-lg font-bold mb-2">Lỗi reset chỉ số</h3>
-              <p className="text-sm text-gray-600 mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-3 border border-red-200">⚠️</div>
+              <h3 className="font-heading text-xl font-bold mb-2 text-farm-brown-dark">Lỗi reset chỉ số</h3>
+              <p className="text-sm text-farm-brown-dark/80 mb-6 font-medium">
                 {resetError.code === 'INSUFFICIENT_OGN'
                   ? 'Bạn không có đủ OGN để thực hiện reset chỉ số. Vui lòng kiểm tra lại số dư.'
                   : resetError.message}
               </p>
               <button
                 onClick={() => setResetError(null)}
-                className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-gray-500 to-gray-600 active:scale-95 shadow-lg"
+                className="w-full wood-btn py-3 rounded-xl text-sm font-bold shadow-md"
               >
-                Đóng
+                Đã hiểu
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Wallet Selection Modal */}
       {showWalletModal && (
         <WalletSelectModal
           mode="link"
@@ -464,6 +530,6 @@ export default function ProfileScreen() {
           onClose={() => setShowWalletModal(false)}
         />
       )}
-    </div >
+    </div>
   );
 }
