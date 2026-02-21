@@ -16,6 +16,7 @@ import { PrayerLeaderboard } from '../components/PrayerLeaderboard';
 import { PrayerHistory } from '../components/PrayerHistory';
 import { PrayerSparkles } from '../components/PrayerSparkles';
 import { PrayerTextFly } from '../components/PrayerTextFly';
+import { PrayerPresetModal } from '../components/PrayerPresetModal';
 import type { PrayerOfferResponse } from '../types/prayer.types';
 import { playSound, audioManager } from '@/shared/audio';
 
@@ -35,10 +36,10 @@ export default function PrayerScreen() {
   const navigate = useNavigate();
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [customText, setCustomText] = useState('');
-  const [activeTab, setActiveTab] = useState<'preset' | 'custom'>('preset');
+  const [activeTab, setActiveTab] = useState<'custom' | 'none'>('none');
   const [rewardData, setRewardData] = useState<PrayerOfferResponse | null>(null);
   const [bottomTab, setBottomTab] = useState<'pray' | 'leaderboard' | 'history'>('pray');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showPresetModal, setShowPresetModal] = useState(false);
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
 
@@ -50,29 +51,35 @@ export default function PrayerScreen() {
   }, []);
 
   const { data: status, refetch: refetchStatus } = usePrayerStatus();
-  const { data: presets } = usePrayerPresets(selectedCategory === 'all' ? undefined : selectedCategory);
+  const { data: presets } = usePrayerPresets();
   const offerMutation = usePrayerOffer();
 
-  const handlePray = useCallback(() => {
-    if (activeTab === 'preset' && selectedPresetId) {
-      const currentText = presets?.find(p => p.id === selectedPresetId)?.text || '';
-      offerMutation.mutate(
-        { type: 'preset', presetId: selectedPresetId },
-        {
-          onSuccess: (data) => {
-            playSound('prayer_submit');
-            setRewardData(data);
-            setShowSparkles(true);
-            setFlyText(currentText);
-            setSelectedPresetId(null);
-            refetchStatus();
-            if (data.ognReward > 0 || data.xpReward > 0) {
-              setTimeout(() => playSound('prayer_reward'), 600);
-            }
-          },
+  const handleSelectPreset = useCallback((presetId: string, text: string) => {
+    setSelectedPresetId(presetId);
+    setCustomText('');
+
+    offerMutation.mutate(
+      { type: 'preset', presetId },
+      {
+        onSuccess: (data) => {
+          playSound('prayer_submit');
+          setRewardData(data);
+          setShowSparkles(true);
+          setFlyText(text);
+          setShowPresetModal(false);
+          refetchStatus();
+          if (data.ognReward > 0 || data.xpReward > 0) {
+            setTimeout(() => playSound('prayer_reward'), 600);
+          }
         },
-      );
-    } else if (activeTab === 'custom' && customText.length >= 10) {
+      }
+    );
+  }, [offerMutation, refetchStatus]);
+
+  const handlePray = useCallback(() => {
+    if (!status?.canPray) return;
+
+    if (activeTab === 'custom' && customText.length >= 10) {
       const currentText = customText;
       offerMutation.mutate(
         { type: 'custom', text: customText },
@@ -91,7 +98,7 @@ export default function PrayerScreen() {
         },
       );
     }
-  }, [activeTab, selectedPresetId, customText, presets, offerMutation, refetchStatus]);
+  }, [activeTab, customText, offerMutation, refetchStatus, status]);
 
   const handleQuickPray = useCallback(() => {
     if (presets && presets.length > 0) {
@@ -114,9 +121,7 @@ export default function PrayerScreen() {
     }
   }, [presets, offerMutation, refetchStatus]);
 
-  const canSubmit = activeTab === 'preset'
-    ? !!selectedPresetId && (status?.freeUsed ?? 0) < (status?.freeMax ?? 5)
-    : customText.length >= 10 && (status?.customUsed ?? 0) < (status?.customMax ?? 3);
+  const canSubmit = customText.length >= 10 && (status?.customUsed ?? 0) < (status?.customMax ?? 3);
 
   return (
     <div className="h-[100dvh] max-w-[430px] mx-auto relative bg-nature-vibe shadow-2xl flex flex-col overflow-hidden">
@@ -181,7 +186,7 @@ export default function PrayerScreen() {
               key={tab.key}
               onClick={() => {
                 setBottomTab(tab.key);
-                if (tab.key === 'pray') setActiveTab('preset'); // Reset actions
+                if (tab.key === 'pray') setActiveTab('none'); // Reset actions
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all
                 ${bottomTab === tab.key
@@ -245,7 +250,7 @@ export default function PrayerScreen() {
             {/* Daily limit info */}
             {status && (
               <div className="text-center text-xs text-[#5d4037] mb-2 font-bold drop-shadow-sm">
-                {activeTab === 'preset'
+                {activeTab !== 'custom'
                   ? `Còn ${Math.max(0, status.freeMax - status.freeUsed)} lượt có sẵn hôm nay`
                   : `Còn ${Math.max(0, status.customMax - status.customUsed)} lượt tự viết hôm nay`
                 }
@@ -269,78 +274,23 @@ export default function PrayerScreen() {
 
               <div className="flex gap-3 w-full">
                 <button
-                  onClick={() => setActiveTab('preset')}
-                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-1 transition-transform ${activeTab === 'preset' ? 'ring-2 ring-[#2d6a4f]' : 'active:scale-95'}`}
+                  onClick={() => setShowPresetModal(true)}
+                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-transform`}
                 >
-                  <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wide">Chọn Lời Chúc</span>
+                  <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                  <span className="text-xs font-bold uppercase tracking-wide">Chọn Lời Chúc</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab('custom')}
-                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-1 transition-transform ${activeTab === 'custom' ? 'ring-2 ring-[#2d6a4f]' : 'active:scale-95'}`}
+                  onClick={() => setActiveTab(activeTab === 'custom' ? 'none' : 'custom')}
+                  className={`flex-1 btn-wood-rustic h-12 rounded-xl flex items-center justify-center gap-2 transition-transform ${activeTab === 'custom' ? 'ring-2 ring-[#2d6a4f]' : 'active:scale-95'}`}
                 >
-                  <span className="material-symbols-outlined text-lg">edit_note</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wide">Viết Lời Chúc</span>
+                  <span className="material-symbols-outlined text-xl">edit_note</span>
+                  <span className="text-xs font-bold uppercase tracking-wide">Viết Lời Chúc</span>
                 </button>
               </div>
             </div>
 
-            {/* The actual forms if extended */}
-            {activeTab === 'preset' && (
-              <div className="w-full max-w-xs mb-6 animate-fade-in-up">
-                <div className="flex gap-2 overflow-x-auto pb-3 mb-3 no-scrollbar">
-                  {CATEGORIES.map(cat => (
-                    <button
-                      key={cat.key}
-                      onClick={() => setSelectedCategory(cat.key)}
-                      className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all
-                        ${selectedCategory === cat.key
-                          ? 'bg-[#2d6a4f] text-white shadow-sm border border-[#1b4332]'
-                          : 'bg-white/50 text-[#5d4037] border border-[#d4c5a3] hover:bg-white'
-                        }`}
-                    >
-                      {cat.emoji} {cat.label}
-                    </button>
-                  ))}
-                </div>
 
-                {presets && presets.length > 0 ? (
-                  <Carousel opts={{ align: 'start', loop: true, dragFree: true }}>
-                    <CarouselContent className="-ml-2">
-                      {presets.map((preset) => (
-                        <CarouselItem key={preset.id} className="pl-2 basis-[85%]">
-                          <PrayerCard
-                            text={preset.text}
-                            category={preset.category}
-                            isSelected={selectedPresetId === preset.id}
-                            onClick={() => setSelectedPresetId(
-                              selectedPresetId === preset.id ? null : preset.id
-                            )}
-                          />
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                  </Carousel>
-                ) : (
-                  <div className="flex gap-2 overflow-hidden">
-                    {[1, 2].map(i => (
-                      <div key={i} className="rounded-2xl p-5 min-h-[140px] basis-[85%] shrink-0 bg-[#8c6239]/10 animate-pulse border border-[#8c6239]/20" />
-                    ))}
-                  </div>
-                )}
-
-                {selectedPresetId && (
-                  <div className="mt-4">
-                    <PrayerButton
-                      onClick={handlePray}
-                      disabled={!canSubmit || !status?.canPray}
-                      loading={offerMutation.isPending}
-                      cooldownSeconds={status?.cooldownRemaining || 0}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
 
             {activeTab === 'custom' && (
               <div className="w-full max-w-xs mb-6 animate-fade-in-up">
@@ -419,6 +369,13 @@ export default function PrayerScreen() {
           onDone={() => setRewardData(null)}
         />
       )}
+
+      <PrayerPresetModal
+        isOpen={showPresetModal}
+        onClose={() => setShowPresetModal(false)}
+        onSelect={handleSelectPreset}
+        isPending={offerMutation.isPending}
+      />
     </div>
   );
 }

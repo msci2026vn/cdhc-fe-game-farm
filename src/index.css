@@ -708,6 +708,56 @@
     transform: translateY(2px);
     box-shadow: 0 1px 0 #5d4037, 0 2px 2px rgba(0, 0, 0, 0.2);
   }
+
+  .bg-nature-vibe-list {
+    background: linear-gradient(to bottom, #a8e6cf 0%, #dcedc1 100%);
+  }
+
+  .wood-card {
+    background: #fdf6e3;
+    border: 2px solid #8c6239;
+    box-shadow: 4px 4px 0 #5d4037;
+    position: relative;
+  }
+
+  .wood-card::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #5d4037;
+    border-radius: 14px;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .prayer-btn {
+    background: linear-gradient(180deg, #52b788 0%, #2d6a4f 100%);
+    border: 2px solid #1b4332;
+    box-shadow: 0 3px 0 #1b4332;
+    color: white;
+  }
+
+  .prayer-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #1b4332;
+  }
+
+  .tab-active {
+    background: #e9c46a;
+    color: #5d4037;
+    border-color: #5d4037;
+    font-weight: bold;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab-inactive {
+    background: #fdf6e3;
+    color: #8c6239;
+    border-color: #d7c0a0;
+  }
 }
 
 @layer base {

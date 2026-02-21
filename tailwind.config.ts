@@ -90,6 +90,10 @@ export default {
           gold: "#ffd700",
           light: "#fefee2",
         },
+        wood: {
+          light: "#d7c0a0",
+          dark: "#6d4c41",
+        },
         boss: {
           dark: "hsl(var(--boss-dark))",
           mid: "hsl(var(--boss-mid))",
@@ -116,6 +120,7 @@ export default {
         "wood-pattern": "repeating-linear-gradient(45deg, #8c6239 0, #8c6239 10px, #7a5230 10px, #7a5230 20px)",
         "grass-gradient": "linear-gradient(180deg, #52b788 0%, #2d6a4f 100%)",
         "sacred-gradient": "linear-gradient(180deg, #d9f99d 0%, #4ade80 50%, #166534 100%)",
+        "paper-texture": "url('https://www.transparenttextures.com/patterns/cream-paper.png')",
       },
       boxShadow: {
         "wood-shadow": "0 4px 0 #5d4037, 0 5px 10px rgba(0,0,0,0.3)",
