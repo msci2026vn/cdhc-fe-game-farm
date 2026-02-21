@@ -88,35 +88,41 @@ export default function BossFightM3({
   const particleId = useRef(0);
 
   // ═══ Touch: drag-to-swipe / Mouse: tap-to-select ═══
-  const [dragStart, setDragStart] = useState<{ idx: number, x: number, y: number, pointerType: string } | null>(null);
+  const dragRef = useRef<{ idx: number; x: number; y: number } | null>(null);
 
   const handlePointerDown = (idx: number, e: React.PointerEvent) => {
     if (e.pointerType === 'mouse') {
       handleTap(idx);
       return;
     }
-    setDragStart({ idx, x: e.clientX, y: e.clientY, pointerType: e.pointerType });
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    e.preventDefault();
+    dragRef.current = { idx, x: e.clientX, y: e.clientY };
   };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!dragStart) return;
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current || e.pointerType === 'mouse') return;
+    const dx = e.clientX - dragRef.current.x;
+    const dy = e.clientY - dragRef.current.y;
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (Math.max(absDx, absDy) > 30) {
+    if (Math.max(absDx, absDy) > 20) {
+      const startIdx = dragRef.current.idx;
+      dragRef.current = null;
       if (absDx > absDy) {
-        handleSwipe(dragStart.idx, dx > 0 ? 'right' : 'left');
+        handleSwipe(startIdx, dx > 0 ? 'right' : 'left');
       } else {
-        handleSwipe(dragStart.idx, dy > 0 ? 'down' : 'up');
+        handleSwipe(startIdx, dy > 0 ? 'down' : 'up');
       }
-    } else {
-      handleTap(dragStart.idx);
     }
-    setDragStart(null);
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    if (e.pointerType !== 'mouse') {
+      handleTap(dragRef.current.idx);
+    }
+    dragRef.current = null;
   };
 
   // Call API on fight end (victory or defeat)
@@ -378,7 +384,8 @@ export default function BossFightM3({
             <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${Math.min(combo, 6)}`} />
           )}
           <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${combo >= 3 && showCombo ? 'grid-combo-shake' : ''}`}
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            onPointerMove={handlePointerMove}
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', touchAction: 'none' }}>
             {grid.map((gem, i) => {
               const meta = GEM_META[gem.type];
               const isSelected = selected === i;
