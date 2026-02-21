@@ -1135,13 +1135,51 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     setTimeout(() => processMatches(newGrid, 0), 200);
   }, [grid, selected, animating, processMatches, result]);
 
+  const handleSwipe = useCallback((idx: number, direction: 'up' | 'down' | 'left' | 'right') => {
+    if (animating || result !== 'fighting' || isPausedRef.current || isStunnedRef.current) return;
+    if (lockedGemsRef.current.has(idx)) return;
+
+    let targetIdx = -1;
+    const row = Math.floor(idx / COLS);
+    const col = idx % COLS;
+
+    if (direction === 'up' && row > 0) targetIdx = idx - COLS;
+    else if (direction === 'down' && row < ROWS - 1) targetIdx = idx + COLS;
+    else if (direction === 'left' && col > 0) targetIdx = idx - 1;
+    else if (direction === 'right' && col < COLS - 1) targetIdx = idx + 1;
+
+    if (targetIdx === -1 || lockedGemsRef.current.has(targetIdx)) return;
+
+    playSound('gem_swap');
+    setAnimating(true);
+    setSelected(null);
+    const newGrid = [...grid];
+    [newGrid[idx], newGrid[targetIdx]] = [newGrid[targetIdx], newGrid[idx]];
+
+    const matched = findMatches(newGrid);
+    if (matched.size === 0) {
+      setGrid(newGrid);
+      setTimeout(() => {
+        playSound('gem_no_match');
+        const reverted = [...newGrid];
+        [reverted[idx], reverted[targetIdx]] = [reverted[targetIdx], reverted[idx]];
+        setGrid(reverted);
+        setAnimating(false);
+      }, 300);
+      return;
+    }
+
+    setGrid(newGrid);
+    setTimeout(() => processMatches(newGrid, 0), 200);
+  }, [grid, animating, processMatches, result]);
+
   // Duration tracking (pause-aware)
   const durationSeconds = Math.floor((Date.now() - fightStartTime.current - totalPausedMsRef.current) / 1000);
   const enrageMultiplier = getEnrageMultiplier(fightStartTime.current, totalPausedMsRef.current);
 
   return {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
-    handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
+    handleTap, handleSwipe, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime: fightStartTime.current,
     milestones, manaDodgeCost, manaUltCost,

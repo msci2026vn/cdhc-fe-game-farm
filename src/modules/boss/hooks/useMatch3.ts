@@ -19,9 +19,9 @@ export interface Gem { type: GemType; id: number; }
 
 const GEM_META: Record<GemType, { emoji: string; css: string }> = {
   atk: { emoji: '⚔️', css: 'gem-atk' },
-  hp:  { emoji: '💚', css: 'gem-hp' },
+  hp: { emoji: '💚', css: 'gem-hp' },
   def: { emoji: '🛡️', css: 'gem-def' },
-  star:{ emoji: '⭐', css: 'gem-star' },
+  star: { emoji: '⭐', css: 'gem-star' },
 };
 
 let nextId = 0;
@@ -118,13 +118,13 @@ const SKILL_WARNING_MS = 1500;
 // Archetype-based skill names
 const ARCHETYPE_SKILLS: Record<string, string[]> = {
   glass_cannon: ['Đòn chí mạng!', 'Song kiếm!', 'Cuồng nộ!'],
-  tank:         ['Lao đầu!', 'Đập đất!', 'Giáp gai!'],
-  healer:       ['Hồi máu!', 'Bào tử hồi!', 'Hút máu!'],
-  assassin:     ['Đa đòn!', 'Tấn công tốc!', 'Ám sát!'],
-  controller:   ['Xáo trộn!', 'Hút mana!', 'Choáng!'],
-  hybrid:       ['Hỗn hợp!', 'Toàn diện!', 'Tổng lực!'],
-  all:          ['Đế Vương giáng!', 'Thiên phạt!'],
-  none:         ['Tấn công mạnh!', 'Lửa Địa Ngục!', 'Sấm Sét!', 'Đòn Cuồng Phong!'],
+  tank: ['Lao đầu!', 'Đập đất!', 'Giáp gai!'],
+  healer: ['Hồi máu!', 'Bào tử hồi!', 'Hút máu!'],
+  assassin: ['Đa đòn!', 'Tấn công tốc!', 'Ám sát!'],
+  controller: ['Xáo trộn!', 'Hút mana!', 'Choáng!'],
+  hybrid: ['Hỗn hợp!', 'Toàn diện!', 'Tổng lực!'],
+  all: ['Đế Vương giáng!', 'Thiên phạt!'],
+  none: ['Tấn công mạnh!', 'Lửa Địa Ngục!', 'Sấm Sét!', 'Đòn Cuồng Phong!'],
 };
 
 function getBossSkillName(archetype: string): string {
@@ -563,6 +563,43 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
     setTimeout(() => processMatches(newGrid, 0), 200);
   }, [grid, selected, animating, processMatches, result]);
 
+  const handleSwipe = useCallback((idx: number, direction: 'up' | 'down' | 'left' | 'right') => {
+    if (animating || result !== 'fighting') return;
+
+    let targetIdx = -1;
+    const row = Math.floor(idx / COLS);
+    const col = idx % COLS;
+
+    if (direction === 'up' && row > 0) targetIdx = idx - COLS;
+    else if (direction === 'down' && row < ROWS - 1) targetIdx = idx + COLS;
+    else if (direction === 'left' && col > 0) targetIdx = idx - 1;
+    else if (direction === 'right' && col < COLS - 1) targetIdx = idx + 1;
+
+    if (targetIdx === -1) return;
+
+    playSound('gem_swap');
+    setAnimating(true);
+    setSelected(null);
+    const newGrid = [...grid];
+    [newGrid[idx], newGrid[targetIdx]] = [newGrid[targetIdx], newGrid[idx]];
+
+    const matched = findMatches(newGrid);
+    if (matched.size === 0) {
+      setGrid(newGrid);
+      setTimeout(() => {
+        playSound('gem_no_match');
+        const reverted = [...newGrid];
+        [reverted[idx], reverted[targetIdx]] = [reverted[targetIdx], reverted[idx]];
+        setGrid(reverted);
+        setAnimating(false);
+      }, 300);
+      return;
+    }
+
+    setGrid(newGrid);
+    setTimeout(() => processMatches(newGrid, 0), 200);
+  }, [grid, animating, processMatches, result]);
+
   // Calculate fight duration in seconds
   const durationSeconds = Math.floor((Date.now() - fightStartTime.current) / 1000);
 
@@ -571,7 +608,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
 
   return {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
-    handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
+    handleTap, handleSwipe, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime: fightStartTime.current,
     milestones, manaDodgeCost, manaUltCost,

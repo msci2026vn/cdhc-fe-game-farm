@@ -57,7 +57,7 @@ export default function BossFightCampaign({
 
   const {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
-    handleTap, GEM_META, getComboInfo, bossAttackMsg, screenShake,
+    handleTap, handleSwipe, GEM_META, getComboInfo, bossAttackMsg, screenShake,
     result, totalDmgDealt, attackWarning, handleDodge, fireUltimate, ultActive,
     durationSeconds, fightStartTime,
     milestones, manaDodgeCost, manaUltCost,
@@ -106,6 +106,34 @@ export default function BossFightCampaign({
   const rewardedRef = useRef(false);
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
   const particleId = useRef(0);
+
+  // ═══ Touch / Drag to Swipe mechanics ═══
+  const [dragStart, setDragStart] = useState<{ idx: number, x: number, y: number } | null>(null);
+
+  const handlePointerDown = (idx: number, e: React.PointerEvent) => {
+    setDragStart({ idx, x: e.clientX, y: e.clientY });
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!dragStart) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    if (Math.max(absDx, absDy) > 30) {
+      if (absDx > absDy) {
+        handleSwipe(dragStart.idx, dx > 0 ? 'right' : 'left');
+      } else {
+        handleSwipe(dragStart.idx, dy > 0 ? 'down' : 'up');
+      }
+    } else {
+      handleTap(dragStart.idx);
+    }
+    setDragStart(null);
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+  };
 
   // ═══ Death phase: dying overlay → then BattleResult ═══
   const [deathPhase, setDeathPhase] = useState<'none' | 'dying' | 'done'>('none');
@@ -355,9 +383,9 @@ export default function BossFightCampaign({
       {/* Enrage alert popup (3s then fade) */}
       {enrageAlert && (
         <div className={`absolute top-20 left-4 right-4 z-40 text-center py-2 px-4 rounded-lg pointer-events-none animate-fade-in font-heading font-bold ${enrageLevel >= 4 ? 'text-red-300 text-lg animate-pulse' :
-            enrageLevel >= 3 ? 'text-red-400' :
-              enrageLevel >= 2 ? 'text-orange-300' :
-                'text-yellow-300 text-sm'
+          enrageLevel >= 3 ? 'text-red-400' :
+            enrageLevel >= 2 ? 'text-orange-300' :
+              'text-yellow-300 text-sm'
           }`} style={{
             background: enrageLevel >= 3 ? 'rgba(139,0,0,0.85)' :
               enrageLevel >= 2 ? 'rgba(180,90,0,0.8)' :
@@ -521,8 +549,8 @@ export default function BossFightCampaign({
                     d.type === 'heal_block' ? '#a29bfe' :
                       '#fd79a8',
                   border: `1px solid ${d.type === 'burn' ? 'rgba(231,76,60,0.4)' :
-                      d.type === 'heal_block' ? 'rgba(108,92,231,0.4)' :
-                        'rgba(253,121,168,0.4)'
+                    d.type === 'heal_block' ? 'rgba(108,92,231,0.4)' :
+                      'rgba(253,121,168,0.4)'
                     }`,
                 }}>
                 {d.icon} {d.label} {d.remainingSec}s
@@ -591,7 +619,9 @@ export default function BossFightCampaign({
               const isSelected = selected === i;
               const isMatched = matchedCells.has(i);
               return (
-                <div key={gem.id} onClick={() => handleTap(i)}
+                <div key={gem.id}
+                  onPointerDown={(e) => handlePointerDown(i, e)}
+                  onPointerUp={handlePointerUp}
                   className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
