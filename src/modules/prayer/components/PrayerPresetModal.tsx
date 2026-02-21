@@ -59,7 +59,7 @@ export function PrayerPresetModal({ isOpen, onClose, onSelect, isPending }: Pray
                     </button>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-4 pt-1 no-scrollbar">
+                <div className="flex gap-2 overflow-x-auto pb-4 pt-1 custom-scrollbar px-1">
                     {CATEGORIES.map(cat => (
                         <button
                             key={cat.key}

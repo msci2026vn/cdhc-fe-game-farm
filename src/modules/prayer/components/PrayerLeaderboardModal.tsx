@@ -65,18 +65,18 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                     </div>
                 ) : (
                     <>
-                        <div className="flex items-end justify-center mb-6 pt-4 h-48 relative">
+                        <div className="flex items-end justify-center mb-6 pt-10 shrink-0 relative">
                             {/* Top 2 */}
                             {top3[1] && (
                                 <div className="flex flex-col items-center -mr-4 z-10 mb-2 transform translate-y-2">
                                     <div className="relative">
-                                        <div className="w-16 h-16 rounded-full border-4 border-gray-300 overflow-hidden shadow-lg relative z-10 bg-gray-200">
+                                        <div className="w-16 h-16 rounded-full border-4 border-gray-300 overflow-hidden shadow-lg relative z-10 bg-gray-200 flex items-center justify-center font-bold text-2xl text-gray-700">
                                             {top3[1].userName.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="absolute -top-4 -left-2 z-20">
                                             <span className="material-symbols-outlined text-gray-400 text-4xl drop-shadow-md">workspace_premium</span>
                                         </div>
-                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-300 z-20 whitespace-nowrap">Hạt Giống Nhỏ</div>
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-300 z-20 whitespace-nowrap">Tấm Lòng Vàng</div>
                                     </div>
                                     <div className="w-20 h-24 bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-lg border-x-2 border-t-2 border-gray-500 shadow-lg flex flex-col items-center justify-start pt-2 relative">
                                         <span className="text-3xl font-display font-bold text-white text-outline-light">2</span>
@@ -102,7 +102,7 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                         <div className="absolute -top-6 -right-4 z-20">
                                             <span className="material-symbols-outlined text-yellow-500 text-5xl drop-shadow-lg rotate-12">crown</span>
                                         </div>
-                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-yellow-600 text-white text-xs px-3 py-0.5 rounded-full font-bold border border-yellow-300 z-20 whitespace-nowrap shadow-md">Mẹ Thiên Nhiên</div>
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-yellow-600 text-white text-xs px-3 py-0.5 rounded-full font-bold border border-yellow-300 z-20 whitespace-nowrap shadow-md">Đại Sứ Nhân Ái</div>
                                     </div>
                                     <div className="w-24 h-32 bg-gradient-to-b from-yellow-300 to-yellow-500 rounded-t-xl border-x-2 border-t-2 border-yellow-600 shadow-xl flex flex-col items-center justify-start pt-3 relative">
                                         <span className="text-5xl font-display font-bold text-white text-outline-light">1</span>
@@ -127,7 +127,7 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                         <div className="absolute -top-4 -right-2 z-20">
                                             <span className="material-symbols-outlined text-orange-800 text-4xl drop-shadow-md">workspace_premium</span>
                                         </div>
-                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#8b4513] text-white text-[10px] px-2 py-0.5 rounded-full font-bold border border-[#cd7f32] z-20 whitespace-nowrap">Bác Nông Dân</div>
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#8b4513] text-white text-[10px] px-2 py-0.5 rounded-full font-bold border border-[#cd7f32] z-20 whitespace-nowrap">Người Gieo Hạt</div>
                                     </div>
                                     <div className="w-20 h-20 bg-gradient-to-b from-[#cd7f32] to-[#a0522d] rounded-t-lg border-x-2 border-t-2 border-[#8b4513] shadow-lg flex flex-col items-center justify-start pt-2 relative">
                                         <span className="text-3xl font-display font-bold text-white text-outline-light">3</span>
