@@ -1453,6 +1453,126 @@ export const gameApi = {
     return json;
   },
 
+  // ═══ SMART WALLET ═══
+
+  createSmartWallet: async (): Promise<{ address: string; isDeployed: boolean; alreadyExists: boolean }> => {
+    const url = API_BASE_URL + '/api/smart-wallet/create';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('createSmartWallet'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  getSmartWalletStatus: async (): Promise<{
+    hasWallet: boolean;
+    address: string | null;
+    isDeployed: boolean;
+    balance: string;
+    chainId: number;
+  }> => {
+    const url = API_BASE_URL + '/api/smart-wallet/status';
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('getSmartWalletStatus'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  prepareUserOp: async (calls: Array<{ to: string; value: string; data?: string }>): Promise<{ userOpHash: string }> => {
+    const url = API_BASE_URL + '/api/smart-wallet/prepare-op';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ calls }),
+    });
+    if (response.status === 401) { handleUnauthorized('prepareUserOp'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  submitSignedOp: async (payload: {
+    userOpHash: string;
+    assertion: { authenticatorData: string; clientDataJSON: string; signature: string };
+  }): Promise<{ txHash: string }> => {
+    const url = API_BASE_URL + '/api/smart-wallet/submit-op';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (response.status === 401) { handleUnauthorized('submitSignedOp'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  getOpReceipt: async (hash: string): Promise<{ txHash: string; status: string; blockNumber: number }> => {
+    const url = `${API_BASE_URL}/api/smart-wallet/receipt/${hash}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('getOpReceipt'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  // ═══ PASSKEY (WebAuthn) ═══
+
+  getPasskeyRegisterOptions: async (): Promise<any> => {
+    const url = API_BASE_URL + '/api/auth/passkey/register-options';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('getPasskeyRegisterOptions'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data || json;
+  },
+
+  registerPasskey: async (credential: any): Promise<any> => {
+    const url = API_BASE_URL + '/api/auth/passkey/register';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credential),
+    });
+    if (response.status === 401) { handleUnauthorized('registerPasskey'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data || json;
+  },
+
+  listPasskeys: async (): Promise<Array<{ id: string; friendlyName: string; createdAt: string }>> => {
+    const url = API_BASE_URL + '/api/auth/passkey/list';
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('listPasskeys'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data || [];
+  },
+
   getConversionHistory: async (page = 1, limit = 5): Promise<ConversionHistoryResult> => {
     const url = `${API_BASE_URL}/api/conversion/history?page=${page}&limit=${limit}`;
 

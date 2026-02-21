@@ -15,6 +15,7 @@ import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import { formatOGN } from '@/shared/utils/format';
 import { playSound } from '@/shared/audio';
 import { ConversionModal } from '../components/ConversionModal';
+import { SmartWalletCard } from '../components/SmartWalletCard';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 
@@ -317,6 +318,9 @@ export default function ProfileScreen() {
                   <span className="material-symbols-outlined text-green-600">check_circle</span>
                 </div>
               </div>
+
+              {/* Smart Wallet (Passkey + ERC-4337) */}
+              <SmartWalletCard />
 
               {/* Wallet and Logout at the bottom of Stats tab */}
               <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm mb-4">
