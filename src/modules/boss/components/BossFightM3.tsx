@@ -87,11 +87,15 @@ export default function BossFightM3({
   const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
   const particleId = useRef(0);
 
-  // ═══ Touch / Drag to Swipe mechanics ═══
-  const [dragStart, setDragStart] = useState<{ idx: number, x: number, y: number } | null>(null);
+  // ═══ Touch: drag-to-swipe / Mouse: tap-to-select ═══
+  const [dragStart, setDragStart] = useState<{ idx: number, x: number, y: number, pointerType: string } | null>(null);
 
   const handlePointerDown = (idx: number, e: React.PointerEvent) => {
-    setDragStart({ idx, x: e.clientX, y: e.clientY });
+    if (e.pointerType === 'mouse') {
+      handleTap(idx);
+      return;
+    }
+    setDragStart({ idx, x: e.clientX, y: e.clientY, pointerType: e.pointerType });
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
