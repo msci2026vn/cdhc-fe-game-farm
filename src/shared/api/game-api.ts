@@ -1534,7 +1534,7 @@ export const gameApi = {
   // ═══ PASSKEY (WebAuthn) ═══
 
   getPasskeyRegisterOptions: async (): Promise<any> => {
-    const url = API_BASE_URL + '/api/auth/passkey/register-options';
+    const url = API_BASE_URL + '/api/auth/passkey/register/options';
     const response = await fetch(url, {
       method: 'POST',
       credentials: 'include',
@@ -1543,21 +1543,22 @@ export const gameApi = {
     if (response.status === 401) { handleUnauthorized('getPasskeyRegisterOptions'); throw new Error('Session expired'); }
     if (!response.ok) { await handleApiError(response); }
     const json = await response.json();
-    return json.data || json;
+    return json.options;
   },
 
   registerPasskey: async (credential: any): Promise<any> => {
-    const url = API_BASE_URL + '/api/auth/passkey/register';
-    const response = await fetch(url, {
+    const url = API_BASE_URL + '/api/auth/passkey/register/verify';
+    const { friendlyName, ...response } = credential;
+    const res = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credential),
+      body: JSON.stringify({ response, friendlyName }),
     });
-    if (response.status === 401) { handleUnauthorized('registerPasskey'); throw new Error('Session expired'); }
-    if (!response.ok) { await handleApiError(response); }
-    const json = await response.json();
-    return json.data || json;
+    if (res.status === 401) { handleUnauthorized('registerPasskey'); throw new Error('Session expired'); }
+    if (!res.ok) { await handleApiError(res); }
+    const json = await res.json();
+    return json;
   },
 
   listPasskeys: async (): Promise<Array<{ id: string; friendlyName: string; createdAt: string }>> => {
