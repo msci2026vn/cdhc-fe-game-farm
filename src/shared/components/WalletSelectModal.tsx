@@ -1,4 +1,5 @@
 import { useWalletAuth, type WalletId } from '@/shared/hooks/useWalletAuth';
+import clsx from 'clsx';
 
 interface WalletSelectModalProps {
   mode: 'login' | 'link';
@@ -39,101 +40,164 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
       onClick={(e) => { if (e.target === e.currentTarget && !isLoading) onClose(); }}
     >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
+
+      {/* Modal Container */}
       <div
-        className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-[400px] shadow-2xl animate-slide-up overflow-hidden"
+        className="relative w-full max-w-md overflow-hidden bg-[#3d2b1f]/95 border border-white/10 rounded-xl shadow-2xl shadow-black/50 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Decorative Top Bar (Organic Style) */}
+        <div className="h-2 w-full bg-gradient-to-r from-green-600 via-[#ec5b13] to-green-600"></div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h3 className="font-heading text-base font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined text-lg">account_balance_wallet</span>
-            {mode === 'login' ? 'Chọn ví đăng nhập' : 'Chọn ví liên kết'}
-          </h3>
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#ec5b13]/20 text-[#ec5b13] border border-[#ec5b13]/30">
+              <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+            </div>
+            <h2 className="text-xl font-bold tracking-tight text-white">
+              {mode === 'login' ? 'Chọn ví đăng nhập' : 'Chọn ví liên kết'}
+            </h2>
+          </div>
           {!isLoading && (
             <button
               onClick={onClose}
-              className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors"
+              className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white"
             >
-              <span className="material-symbols-outlined text-sm">close</span>
+              <span className="material-symbols-outlined">close</span>
             </button>
           )}
         </div>
 
-        <p className="px-4 text-[11px] text-muted-foreground mb-3">
-          {mode === 'login'
-            ? 'Chọn ví để đăng nhập vào FARMVERSE qua Avalanche C-Chain.'
-            : 'Chọn ví để liên kết với tài khoản của bạn.'}
-        </p>
+        {/* Subtitle */}
+        <div className="px-6 pb-6">
+          <p className="text-slate-300 text-sm leading-relaxed">
+            {mode === 'login' ? (
+              <>Chọn ví để đăng nhập vào <span className="text-[#ec5b13] font-bold">FARMVERSE</span> qua mạng Avalanche C-Chain.</>
+            ) : (
+              <>Chọn ví để liên kết với tài khoản <span className="text-[#ec5b13] font-bold">FARMVERSE</span> của bạn.</>
+            )}
+          </p>
+        </div>
 
         {/* Loading overlay */}
         {isLoading && (
-          <div className="mx-4 mb-3 flex items-center gap-3 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
-            <div className="w-5 h-5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin flex-shrink-0" />
-            <span className="text-xs font-bold text-blue-700">{loadingText}</span>
+          <div className="mx-6 mb-4 flex items-center justify-center gap-3 px-4 py-3 bg-[#ec5b13]/10 border border-[#ec5b13]/20 rounded-xl">
+            <div className="w-5 h-5 border-2 border-[#ec5b13]/30 border-t-[#ec5b13] rounded-full animate-spin flex-shrink-0" />
+            <span className="text-sm font-bold text-[#ec5b13]">{loadingText}</span>
           </div>
         )}
 
-        {/* Wallet options */}
-        <div className="px-4 pb-2 space-y-2">
-          {detectedWallets.map((wallet) => (
-            <button
-              key={wallet.id}
-              onClick={() => handleSelect(wallet.id)}
-              disabled={isLoading || (!wallet.installed && wallet.id !== 'walletconnect')}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 active:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
-            >
-              <span className="text-2xl w-9 h-9 flex items-center justify-center flex-shrink-0">
-                {wallet.icon}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold">{wallet.name}</span>
-                  {wallet.installed && (
-                    <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">
-                      Đã cài
-                    </span>
-                  )}
+        {/* Error overlay */}
+        {state.error && (
+          <div className="mx-6 mb-4 flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <span className="flex-1 text-[11px] font-bold text-red-400">{state.error}</span>
+            <button onClick={clearError} className="text-red-400 hover:text-red-300 flex-shrink-0 text-sm p-1">
+              <span className="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+        )}
+
+        {/* Wallet Options List */}
+        <div className="px-4 pb-6 space-y-3 relative z-10">
+          {detectedWallets.map((wallet) => {
+            const isInstalled = wallet.installed || wallet.id === 'walletconnect';
+
+            return isInstalled ? (
+              <button
+                key={wallet.id}
+                onClick={() => handleSelect(wallet.id)}
+                disabled={isLoading}
+                className="w-full group flex items-center justify-between p-4 rounded-lg bg-[#2d4c1e]/40 border border-green-500/20 hover:border-[#ec5b13]/50 hover:bg-[#2d4c1e]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-left"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-lg bg-white/5 p-2 flex items-center justify-center overflow-hidden relative">
+                    {wallet.id === 'walletconnect' ? (
+                      <span className="material-symbols-outlined text-[#3b99fc] text-3xl">qr_code_scanner</span>
+                    ) : (
+                      <span className="text-2xl w-9 h-9 flex items-center justify-center flex-shrink-0">
+                        {wallet.icon}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-white font-semibold flex items-center gap-2">
+                      <span className="text-base truncate max-w-[140px] sm:max-w-[200px]">{wallet.name}</span>
+                      {wallet.installed && (
+                        <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-[10px] uppercase tracking-wider text-green-400 font-bold border border-green-500/30 flex-shrink-0">
+                          Đã cài
+                        </span>
+                      )}
+                    </div>
+                    {wallet.id === 'walletconnect' ? (
+                      <p className="text-slate-400 text-xs mt-0.5">Quét mã QR</p>
+                    ) : (
+                      <p className="text-slate-400 text-xs mt-0.5">Tiện ích trình duyệt</p>
+                    )}
+                  </div>
                 </div>
-                {!wallet.installed && wallet.id !== 'walletconnect' && (
-                  <span className="text-[10px] text-muted-foreground">Chưa cài đặt</span>
+                <span className="material-symbols-outlined text-slate-500 group-hover:text-[#ec5b13] transition-colors">chevron_right</span>
+              </button>
+            ) : (
+              <div
+                key={wallet.id}
+                className={clsx(
+                  "w-full flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 transition-all",
+                  isLoading ? "opacity-50 pointer-events-none" : ""
                 )}
-                {wallet.id === 'walletconnect' && (
-                  <span className="text-[10px] text-muted-foreground">Quét QR hoặc deep link</span>
-                )}
-              </div>
-              {wallet.installed || wallet.id === 'walletconnect' ? (
-                <span className="material-symbols-outlined text-gray-400 text-base">chevron_right</span>
-              ) : (
+              >
+                <div className="flex items-center gap-4 overflow-hidden">
+                  <div className="h-12 w-12 rounded-lg bg-white/5 p-2 flex flex-shrink-0 items-center justify-center overflow-hidden grayscale opacity-60">
+                    <span className="text-2xl w-9 h-9 flex items-center justify-center">
+                      {wallet.icon}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-slate-300 font-semibold flex items-center gap-2">
+                      <span className="text-base truncate">{wallet.name}</span>
+                      <span className="text-slate-500 text-[10px] font-normal flex-shrink-0 italic">Chưa cài đặt</span>
+                    </div>
+                    <p className="text-slate-500 text-xs mt-0.5 truncate">Dành cho Avalanche</p>
+                  </div>
+                </div>
                 <a
                   href={wallet.downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg border border-orange-200 hover:bg-orange-100 transition-colors whitespace-nowrap"
+                  className="bg-[#ec5b13] hover:bg-[#ec5b13]/80 text-white text-xs font-bold px-4 py-2 rounded-lg flex-shrink-0 ml-2 transition-colors shadow-lg shadow-[#ec5b13]/20 whitespace-nowrap"
                 >
                   Tải về
                 </a>
-              )}
-            </button>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Error */}
-        {state.error && (
-          <div className="mx-4 mb-2 flex items-center gap-2 p-2.5 bg-red-50 border border-red-200 rounded-xl">
-            <span className="flex-1 text-[11px] font-bold text-red-600">{state.error}</span>
-            <button onClick={clearError} className="text-red-400 hover:text-red-600 flex-shrink-0 text-sm">✕</button>
+        {/* Footer Info */}
+        <div className="bg-black/30 px-6 py-4 border-t border-white/5 relative z-10">
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2 text-[11px] text-slate-400 uppercase tracking-widest font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+              Mạng: Avalanche C-Chain
+            </div>
+            <div className="text-[10px] text-slate-500">
+              Bảo mật bởi SIWE (EIP-4361)
+            </div>
           </div>
-        )}
+        </div>
 
-        {/* Footer */}
-        <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50">
-          <p className="text-[10px] text-center text-muted-foreground">
-            Mạng: <span className="font-bold">Avalanche C-Chain</span> &middot; SIWE (EIP-4361)
-          </p>
+        {/* Decorative Leaf Pattern */}
+        <div className="absolute -bottom-6 -right-6 opacity-10 pointer-events-none">
+          <span className="material-symbols-outlined text-8xl text-green-400">eco</span>
+        </div>
+        <div className="absolute -top-6 -left-6 opacity-10 pointer-events-none rotate-180">
+          <span className="material-symbols-outlined text-8xl text-green-400">potted_plant</span>
         </div>
       </div>
     </div>
