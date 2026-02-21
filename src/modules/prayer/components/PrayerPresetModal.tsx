@@ -27,7 +27,7 @@ export function PrayerPresetModal({ isOpen, onClose, onSelect, isPending }: Pray
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col relative bg-nature-vibe-list shadow-2xl overflow-hidden animate-slide-up">
+        <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col bg-nature-vibe-list shadow-2xl overflow-hidden animate-slide-up">
             {/* Background Decor */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
                 <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-yellow-200 rounded-full blur-[60px]"></div>

@@ -19,7 +19,7 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
     const currentUserRank = leaderboard?.find(entry => entry.userId === profile?.id);
 
     return (
-        <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col relative bg-spiritual shadow-2xl overflow-hidden animate-slide-up">
+        <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col bg-spiritual shadow-2xl overflow-hidden animate-slide-up">
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/floral-linen.png')]"></div>
                 <span className="material-symbols-outlined absolute top-10 left-[-20px] text-green-200 text-9xl rotate-45">eco</span>

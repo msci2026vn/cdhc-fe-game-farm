@@ -24,7 +24,7 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
     const isSubmitDisabled = text.length < 10 || isPending || limitUsed >= limitMax;
 
     return (
-        <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col relative bg-prayer-vibe shadow-2xl overflow-hidden animate-slide-up">
+        <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col bg-prayer-vibe shadow-2xl overflow-hidden animate-slide-up">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-100px] left-[-100px] w-96 h-96 bg-yellow-100/40 rounded-full blur-[80px]"></div>
                 <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 bg-green-200/40 rounded-full blur-[60px]"></div>
