@@ -16,6 +16,7 @@ import { PrayerSparkles } from '../components/PrayerSparkles';
 import { PrayerTextFly } from '../components/PrayerTextFly';
 import { PrayerPresetModal } from '../components/PrayerPresetModal';
 import { PrayerCustomModal } from '../components/PrayerCustomModal';
+import { PrayerLeaderboardModal } from '../components/PrayerLeaderboardModal';
 import type { PrayerOfferResponse } from '../types/prayer.types';
 import { playSound, audioManager } from '@/shared/audio';
 
@@ -36,9 +37,10 @@ export default function PrayerScreen() {
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [customText, setCustomText] = useState('');
   const [rewardData, setRewardData] = useState<PrayerOfferResponse | null>(null);
-  const [bottomTab, setBottomTab] = useState<'pray' | 'leaderboard' | 'history'>('pray');
+  const [bottomTab, setBottomTab] = useState<'pray' | 'history'>('pray');
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showCustomModal, setShowCustomModal] = useState(false);
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
 
@@ -179,10 +181,14 @@ export default function PrayerScreen() {
             <button
               key={tab.key}
               onClick={() => {
-                setBottomTab(tab.key);
+                if (tab.key === 'leaderboard') {
+                  setShowLeaderboardModal(true);
+                } else if (tab.key === 'pray' || tab.key === 'history') {
+                  setBottomTab(tab.key as 'pray' | 'history');
+                }
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all
-                ${bottomTab === tab.key
+                ${(bottomTab as string) === tab.key && tab.key !== 'leaderboard'
                   ? 'bg-[#2d6a4f] text-white shadow-sm border border-[#1b4332]'
                   : 'text-[#5d4037] hover:bg-[#8c6239]/10'
                 }`}
@@ -299,13 +305,6 @@ export default function PrayerScreen() {
           </>
         )}
 
-        {/* TAB: Leaderboard */}
-        {bottomTab === 'leaderboard' && (
-          <div className="w-full mt-2 flex-1 relative overflow-auto pb-4 no-scrollbar">
-            <PrayerLeaderboard />
-          </div>
-        )}
-
         {/* TAB: History */}
         {bottomTab === 'history' && (
           <div className="w-full mt-2 flex-1 relative overflow-auto pb-4 no-scrollbar">
@@ -354,6 +353,11 @@ export default function PrayerScreen() {
         isPending={offerMutation.isPending}
         limitUsed={status?.customUsed ?? 0}
         limitMax={status?.customMax ?? 3}
+      />
+
+      <PrayerLeaderboardModal
+        isOpen={showLeaderboardModal}
+        onClose={() => setShowLeaderboardModal(false)}
       />
     </div>
   );

@@ -791,6 +791,61 @@
     border: 2px dashed #deb887;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
   }
+
+  .text-outline-light {
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .bg-spiritual {
+    background: linear-gradient(to bottom, #d8f3dc 0%, #b7e4c7 40%, #95d5b2 100%);
+  }
+
+  .wood-panel {
+    background: #fdf6e3;
+    border: 2px solid #8c6239;
+    box-shadow: 0 4px 0 #8c6239, 0 6px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .vine-decoration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    border: 12px solid transparent;
+    border-image: url("https://i.imgur.com/7s1H5Kz.png") 30 round;
+    /* border: 8px solid #52b788; */
+    border-radius: 24px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(140, 98, 57, 0.1);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #8c6239;
+    border-radius: 10px;
+  }
+
+  .rank-1-bg {
+    background: linear-gradient(135deg, #ffd700 0%, #fdb931 100%);
+    border-color: #b8860b;
+  }
+
+  .rank-2-bg {
+    background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+    border-color: #757575;
+  }
+
+  .rank-3-bg {
+    background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%);
+    border-color: #8b4513;
+  }
 }
 
 @layer base {
