@@ -14,6 +14,7 @@ export default {
       fontFamily: {
         heading: ["Fredoka", "sans-serif"],
         body: ["Nunito", "sans-serif"],
+        handwriting: ["Dancing Script", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -87,6 +88,9 @@ export default {
           paper: "#fdf6e3",
           cream: "#fefae0",
         },
+        ink: {
+          blue: "#2c3e50",
+        },
         spiritual: {
           purple: "#9d8189",
         },
@@ -135,6 +139,7 @@ export default {
         "glow": "0 0 15px rgba(255, 215, 0, 0.6)",
         "soft-glow": "0 0 15px rgba(255, 255, 200, 0.5)",
         "parchment": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(139, 69, 19, 0.1)",
+        "book-shadow": "5px 5px 15px rgba(0,0,0,0.4)",
       },
       keyframes: {
         "accordion-down": {

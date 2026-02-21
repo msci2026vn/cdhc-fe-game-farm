@@ -11,7 +11,7 @@ import { PrayerCounter } from '../components/PrayerCounter';
 import { PrayerCard } from '../components/PrayerCard';
 import { PrayerReward } from '../components/PrayerReward';
 import { PrayerLeaderboard } from '../components/PrayerLeaderboard';
-import { PrayerHistory } from '../components/PrayerHistory';
+import { PrayerHistoryModal } from '../components/PrayerHistoryModal';
 import { PrayerSparkles } from '../components/PrayerSparkles';
 import { PrayerTextFly } from '../components/PrayerTextFly';
 import { PrayerPresetModal } from '../components/PrayerPresetModal';
@@ -41,6 +41,7 @@ export default function PrayerScreen() {
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
 
@@ -183,12 +184,14 @@ export default function PrayerScreen() {
               onClick={() => {
                 if (tab.key === 'leaderboard') {
                   setShowLeaderboardModal(true);
-                } else if (tab.key === 'pray' || tab.key === 'history') {
-                  setBottomTab(tab.key as 'pray' | 'history');
+                } else if (tab.key === 'history') {
+                  setShowHistoryModal(true);
+                } else {
+                  setBottomTab('pray');
                 }
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all
-                ${(bottomTab as string) === tab.key && tab.key !== 'leaderboard'
+                ${(bottomTab as string) === tab.key && tab.key === 'pray'
                   ? 'bg-[#2d6a4f] text-white shadow-sm border border-[#1b4332]'
                   : 'text-[#5d4037] hover:bg-[#8c6239]/10'
                 }`}
@@ -305,12 +308,6 @@ export default function PrayerScreen() {
           </>
         )}
 
-        {/* TAB: History */}
-        {bottomTab === 'history' && (
-          <div className="w-full mt-2 flex-1 relative overflow-auto pb-4 no-scrollbar">
-            <PrayerHistory />
-          </div>
-        )}
       </div>
 
       {/* Decorative Bottom Bar instead of BottomNav */}
@@ -358,6 +355,12 @@ export default function PrayerScreen() {
       <PrayerLeaderboardModal
         isOpen={showLeaderboardModal}
         onClose={() => setShowLeaderboardModal(false)}
+      />
+
+      <PrayerHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        onWriteNew={() => setShowCustomModal(true)}
       />
     </div>
   );
