@@ -635,6 +635,46 @@
     transform: translateY(2px);
     border-bottom: 2px solid #5d4037;
   }
+
+  .popup-overlay {
+    background-color: rgba(45, 106, 79, 0.75);
+    backdrop-filter: blur(4px);
+  }
+
+  .stats-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+
+  .stats-btn-minus {
+    background-color: #fecaca;
+    color: #dc2626;
+    border: 1px solid #f87171;
+    border-bottom: 3px solid #ef4444;
+  }
+
+  .stats-btn-minus:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+  }
+
+  .stats-btn-plus {
+    background-color: #bbf7d0;
+    color: #16a34a;
+    border: 1px solid #4ade80;
+    border-bottom: 3px solid #22c55e;
+  }
+
+  .stats-btn-plus:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+  }
 }
 
 @layer base {

@@ -166,118 +166,130 @@ export function StatAllocationModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in" onClick={onClose}>
+      <div className="fixed inset-0 popup-overlay z-50 flex items-center justify-center px-4 animate-fade-in" onClick={onClose}>
         <div
-          className="bg-white rounded-2xl max-w-[380px] w-full mx-4 shadow-2xl max-h-[85dvh] flex flex-col"
+          className="bg-farm-paper w-full max-w-sm rounded-2xl border-4 border-[#8c6239] shadow-2xl overflow-hidden relative"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* 4 Corner nails */}
+          <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-[#5d4037] border border-[#a1887f] shadow-inner"></div>
+          <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-[#5d4037] border border-[#a1887f] shadow-inner"></div>
+          <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-[#5d4037] border border-[#a1887f] shadow-inner"></div>
+          <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-[#5d4037] border border-[#a1887f] shadow-inner"></div>
+
           {/* Header */}
-          <div className="p-4 pb-2 text-center flex-shrink-0">
-            <h3 className="font-heading text-lg font-bold">Phân bổ chỉ số</h3>
-            <div className="inline-flex items-center gap-1.5 mt-1 bg-amber-50 px-3 py-1 rounded-full">
-              <span className="text-sm">🎯</span>
-              <span className="text-sm font-bold text-amber-700">
-                Còn lại: <span className="text-amber-500">{remaining}</span> điểm
-              </span>
+          <div className="bg-[#8c6239] p-4 text-center border-b-4 border-[#5d4037] relative">
+            <h2 className="font-display font-bold text-xl text-[#fefae0] text-outline tracking-wider">Phân bổ chỉ số</h2>
+            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-[#fefae0] px-4 py-1 rounded-full border-2 border-[#8c6239] shadow-sm z-10 w-max">
+              <span className="text-sm font-bold text-farm-brown-dark whitespace-nowrap">🎯 Còn lại: <span className="text-farm-carrot">{remaining}</span> điểm</span>
             </div>
           </div>
 
-          {/* Stats list — scrollable */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-2" style={{ scrollbarWidth: 'none' }}>
-            <div className="space-y-2.5">
-              {STAT_META.map((stat) => {
-                const current = effectiveStats[stat.key];
-                const preview = previewEffective[stat.key];
-                const changed = pending[stat.key] > 0;
-                const milestone = nextMilestones.find((m) => m.stat === stat.key);
-                // Progress bar — normalize to a rough max for visual
-                const maxVal = stat.key === 'hp' ? 5000 : stat.key === 'atk' ? 2000 : stat.key === 'mana' ? 1500 : 1000;
-                const progressPct = Math.min(100, (preview / maxVal) * 100);
+          <div className="p-6 pt-8 space-y-4">
+            {/* Stat rows */}
+            {STAT_META.map((stat) => {
+              const current = effectiveStats[stat.key];
+              const preview = previewEffective[stat.key];
+              const changed = pending[stat.key] > 0;
+              const milestone = nextMilestones.find((m) => m.stat === stat.key);
 
-                return (
-                  <div key={stat.key} className="bg-gray-50 rounded-xl p-2.5">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0"
-                        style={{ background: stat.bg }}>
-                        {stat.emoji}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold">{stat.label}</span>
-                        <span className="text-[10px] text-gray-500 ml-1.5">
-                          {current}
-                          {changed && (
-                            <span className="text-green-600 font-bold"> → {preview} (+{pending[stat.key] * stat.perPoint})</span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleDecrement(stat.key)}
-                          disabled={pending[stat.key] <= 0 || isPending}
-                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 text-sm font-bold flex items-center justify-center active:scale-90 disabled:opacity-30 disabled:active:scale-100"
-                        >
-                          -
-                        </button>
-                        <span className="w-6 text-center text-xs font-bold text-amber-600">{pending[stat.key]}</span>
-                        <button
-                          onClick={() => handleIncrement(stat.key)}
-                          disabled={remaining <= 0 || isPending}
-                          className="w-7 h-7 rounded-lg bg-white border border-gray-200 text-sm font-bold flex items-center justify-center active:scale-90 disabled:opacity-30 disabled:active:scale-100"
-                        >
-                          +
-                        </button>
-                      </div>
+              const maxVal = stat.key === 'hp' ? 5000 : stat.key === 'atk' ? 2000 : stat.key === 'mana' ? 1500 : 1000;
+              const progressPct = Math.min(100, (preview / maxVal) * 100);
+
+              let iconBg = "bg-red-100";
+              if (stat.key === "hp") iconBg = "bg-green-100";
+              else if (stat.key === "def") iconBg = "bg-blue-100";
+              else if (stat.key === "mana") iconBg = "bg-purple-100";
+
+              return (
+                <div key={stat.key} className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between bg-white/50 p-2 rounded-xl border border-[#d4c5a3]">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full ${iconBg} flex items-center justify-center text-lg shadow-sm`}>{stat.emoji}</div>
+                      <span className="font-bold text-farm-brown-dark">{stat.label}</span>
                     </div>
-                    {/* Progress bar */}
-                    <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progressPct}%`, background: stat.color }} />
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleDecrement(stat.key)}
+                        disabled={pending[stat.key] <= 0 || isPending}
+                        className="stats-btn stats-btn-minus material-symbols-outlined text-lg disabled:opacity-50"
+                      >
+                        remove
+                      </button>
+                      <span className="font-display font-bold text-lg w-8 text-center text-farm-brown-dark">
+                        {changed ? preview : current}
+                      </span>
+                      <button
+                        onClick={() => handleIncrement(stat.key)}
+                        disabled={remaining <= 0 || isPending}
+                        className="stats-btn stats-btn-plus material-symbols-outlined text-lg disabled:opacity-50"
+                      >
+                        add
+                      </button>
                     </div>
-                    {/* Milestone hint */}
-                    {milestone && (
-                      <p className="text-[9px] text-gray-400 mt-0.5">
-                        💡 Còn {milestone.remaining} → {milestone.name}
-                      </p>
-                    )}
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Progress bar */}
+                  <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden mx-1">
+                    <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progressPct}%`, background: stat.color }} />
+                  </div>
+
+                  {/* Milestone hint */}
+                  {milestone ? (
+                    <div className="flex items-center gap-1 text-[10px] text-gray-500 font-bold ml-2">
+                      <span className="material-symbols-outlined text-sm text-yellow-500">lightbulb</span>
+                      Còn {milestone.remaining} → <span className="text-farm-brown">{milestone.name}</span>
+                    </div>
+                  ) : (
+                    <div className="h-2"></div>
+                  )}
+                </div>
+              );
+            })}
 
             {/* Presets */}
-            <div className="mt-3">
-              <p className="text-[10px] font-bold text-gray-400 text-center mb-1.5">── Nhanh ──</p>
-              <div className="flex gap-1.5">
-                {PRESETS.map((p) => (
-                  <button
-                    key={p.key}
-                    onClick={() => handlePreset(p.key)}
-                    disabled={isPending}
-                    className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${selectedPreset === p.key
-                      ? 'bg-primary text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600'
-                      }`}
-                  >
-                    {p.emoji} {p.label}
-                  </button>
-                ))}
+            <div className="mt-2">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-px bg-[#d4c5a3] flex-1"></div>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nhanh</span>
+                <div className="h-px bg-[#d4c5a3] flex-1"></div>
+              </div>
+              <div className="flex justify-between gap-2">
+                {PRESETS.map((p) => {
+                  let icon = "⚔️";
+                  if (p.key === "defense") icon = "🛡️";
+                  else if (p.key === "balance") icon = "✨";
+
+                  return (
+                    <button
+                      key={p.key}
+                      onClick={() => handlePreset(p.key)}
+                      disabled={isPending}
+                      className={`flex-1 py-1.5 border border-[#d4c5a3] rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1 ${selectedPreset === p.key
+                          ? 'bg-farm-green-light text-white border-farm-green-dark'
+                          : 'bg-[#fefae0] text-farm-brown-dark hover:bg-white'
+                        }`}
+                    >
+                      <span>{icon}</span> {p.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          {/* Footer — fixed */}
-          <div className="p-4 pt-2 flex-shrink-0 border-t border-gray-100">
-            <div className="flex gap-2">
+            {/* Footer Buttons */}
+            <div className="flex gap-3 mt-4 pt-2">
               <button
                 onClick={onClose}
                 disabled={isPending}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
+                className="flex-1 py-3 rounded-xl font-bold font-display text-farm-brown-dark bg-[#e5e7eb] border-b-4 border-[#9ca3af] active:border-b-2 active:translate-y-[2px] transition-all"
               >
                 Đóng
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={totalPending === 0 || isPending}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 active:scale-95 shadow-lg disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl font-bold font-display text-[#fefae0] bg-farm-green-light border-b-4 border-farm-green-dark active:border-b-2 active:translate-y-[2px] transition-all shadow-lg disabled:opacity-50"
               >
                 {isPending ? '...' : 'Xác nhận'}
               </button>
