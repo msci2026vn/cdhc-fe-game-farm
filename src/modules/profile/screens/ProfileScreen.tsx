@@ -15,6 +15,7 @@ import { formatOGN } from '@/shared/utils/format';
 import { playSound } from '@/shared/audio';
 import { ConversionModal } from '../components/ConversionModal';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
+import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 
 type Tab = 'stats' | 'achievements';
 
@@ -31,8 +32,9 @@ export default function ProfileScreen() {
   const { data: statInfo } = usePlayerStats();
   const resetStats = useResetStats();
   const ogn = useOgn(); // TanStack Query single source of truth
-  const { linkWallet, isLoading: walletLinking, state: walletState, clearError: clearWalletError } = useWalletAuth();
+  const { state: walletState, clearError: clearWalletError } = useWalletAuth();
   const invalidateProfile = useInvalidateProfile();
+  const [showWalletModal, setShowWalletModal] = useState(false);
 
   // Wallet status — fallback if profile doesn't have walletAddress
   const { data: walletStatus, refetch: refetchWalletStatus } = useQuery({
@@ -321,26 +323,10 @@ export default function ProfileScreen() {
             </div>
           ) : (
             <button
-              onClick={async () => {
-                try {
-                  await linkWallet();
-                  invalidateProfile();
-                  refetchWalletStatus();
-                } catch {
-                  // Error shown via walletState
-                }
-              }}
-              disabled={walletLinking}
-              className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              onClick={() => setShowWalletModal(true)}
+              className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all flex items-center justify-center gap-2"
             >
-              {walletLinking ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin" />
-                  {walletState.isConnecting ? 'Kết nối ví...' : walletState.isSigning ? 'Chờ ký...' : 'Đang liên kết...'}
-                </>
-              ) : (
-                '🔗 Liên kết ví Avalanche'
-              )}
+              🔗 Liên kết ví Avalanche
             </button>
           )}
 
@@ -464,6 +450,19 @@ export default function ProfileScreen() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Wallet Selection Modal */}
+      {showWalletModal && (
+        <WalletSelectModal
+          mode="link"
+          onSuccess={() => {
+            setShowWalletModal(false);
+            invalidateProfile();
+            refetchWalletStatus();
+          }}
+          onClose={() => setShowWalletModal(false)}
+        />
       )}
     </div >
   );

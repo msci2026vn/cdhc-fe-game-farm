@@ -6,6 +6,7 @@ import { queryClient } from '@/shared/lib/queryClient';
 import { PLAYER_PROFILE_KEY } from '@/shared/hooks/usePlayerProfile';
 import { gameApi, resetRedirectLock } from '@/shared/api/game-api';
 import { walletDebug } from '@/shared/utils/wallet-debug';
+import { WALLETCONNECT_PROJECT_ID } from '@/shared/config/wagmi';
 
 const SIWE_DOMAIN = 'cdhc.vn';
 const SIWE_URI = API_BASE_URL;
@@ -18,43 +19,64 @@ interface WalletAuthState {
   error: string | null;
 }
 
-export interface WalletInfo {
-  hasAnyWallet: boolean;
-  hasMetaMask: boolean;
-  hasCoreWallet: boolean;
-  providers: string[];
+export type WalletId = 'metamask' | 'core' | 'walletconnect';
+
+export interface DetectedWallet {
+  id: WalletId;
+  name: string;
+  icon: string;
+  installed: boolean;
+  downloadUrl: string;
 }
 
-function detectWalletProviders(): WalletInfo {
-  if (typeof window === 'undefined' || !(window as any).ethereum) {
-    return { hasAnyWallet: false, hasMetaMask: false, hasCoreWallet: false, providers: [] };
-  }
+function detectWallets(): DetectedWallet[] {
+  const eth = typeof window !== 'undefined' ? (window as any).ethereum : null;
 
-  const eth = (window as any).ethereum;
-  const providers: string[] = [];
+  let hasMetaMask = false;
+  let hasCoreWallet = false;
 
-  if (eth.isMetaMask) providers.push('MetaMask');
-  if (eth.isAvalanche || eth.isCoreWallet) providers.push('Core Wallet');
-  if (eth.isCoinbaseWallet) providers.push('Coinbase Wallet');
-  if (eth.isRabby) providers.push('Rabby');
-  if (eth.isBraveWallet) providers.push('Brave Wallet');
+  if (eth) {
+    hasMetaMask = !!eth.isMetaMask;
+    hasCoreWallet = !!eth.isAvalanche || !!eth.isCoreWallet;
 
-  // EIP-6963: Multiple injected providers
-  if (Array.isArray(eth.providers)) {
-    for (const p of eth.providers) {
-      if (p.isMetaMask && !providers.includes('MetaMask')) providers.push('MetaMask');
-      if ((p.isAvalanche || p.isCoreWallet) && !providers.includes('Core Wallet')) providers.push('Core Wallet');
+    // EIP-6963: Multiple injected providers
+    if (Array.isArray(eth.providers)) {
+      for (const p of eth.providers) {
+        if (p.isMetaMask) hasMetaMask = true;
+        if (p.isAvalanche || p.isCoreWallet) hasCoreWallet = true;
+      }
     }
   }
 
-  if (providers.length === 0 && eth) providers.push('Unknown Wallet');
+  const wallets: DetectedWallet[] = [
+    {
+      id: 'metamask',
+      name: 'MetaMask',
+      icon: '🦊',
+      installed: hasMetaMask,
+      downloadUrl: 'https://metamask.io/download/',
+    },
+    {
+      id: 'core',
+      name: 'Core Wallet',
+      icon: '🔺',
+      installed: hasCoreWallet,
+      downloadUrl: 'https://core.app/download/',
+    },
+  ];
 
-  return {
-    hasAnyWallet: providers.length > 0,
-    hasMetaMask: providers.includes('MetaMask'),
-    hasCoreWallet: providers.includes('Core Wallet'),
-    providers,
-  };
+  // Only show WalletConnect if project ID is configured
+  if (WALLETCONNECT_PROJECT_ID) {
+    wallets.push({
+      id: 'walletconnect',
+      name: 'WalletConnect',
+      icon: '🔗',
+      installed: true, // always available (QR scan)
+      downloadUrl: '',
+    });
+  }
+
+  return wallets;
 }
 
 /** Map raw error → Vietnamese user-friendly message */
@@ -94,7 +116,7 @@ export function useWalletAuth() {
     error: null,
   });
 
-  const walletInfo = useMemo(() => detectWalletProviders(), []);
+  const detectedWallets = useMemo(() => detectWallets(), []);
 
   const clearError = useCallback(() => {
     setState((s) => ({ ...s, error: null }));
@@ -102,39 +124,36 @@ export function useWalletAuth() {
 
   // Step 1: Connect wallet
   const connectWallet = useCallback(
-    async (connectorType?: 'metamask' | 'walletconnect') => {
+    async (walletId: WalletId = 'metamask') => {
       setState((s) => ({ ...s, isConnecting: true, error: null }));
 
       walletDebug.group('Connect Wallet');
-      walletDebug.log('Connector type:', connectorType);
+      walletDebug.log('Wallet ID:', walletId);
       walletDebug.log('Available connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
       walletDebug.logEnvironment();
 
       try {
-        // Check wallet installed before connecting
-        if (connectorType !== 'walletconnect') {
-          const { hasAnyWallet, providers } = detectWalletProviders();
-          walletDebug.log('Detected providers:', providers);
-          if (!hasAnyWallet) {
-            walletDebug.warn('No wallet extension found');
+        // Check wallet installed before connecting (skip for WalletConnect)
+        if (walletId !== 'walletconnect') {
+          const wallet = detectedWallets.find(w => w.id === walletId);
+          walletDebug.log('Detected wallet:', wallet);
+          if (!wallet?.installed) {
+            walletDebug.warn('Wallet not installed:', walletId);
             throw new Error('NO_WALLET_EXTENSION');
           }
         }
 
         let connector;
-        if (connectorType === 'walletconnect') {
+        if (walletId === 'walletconnect') {
           connector = connectors.find((c) => c.id === 'walletConnect');
+          if (!connector) throw new Error('NO_WALLETCONNECT');
         } else {
+          // Both MetaMask and Core Wallet use injected connector
           connector = connectors.find((c) => c.id === 'injected');
+          if (!connector) throw new Error('NO_WALLET_EXTENSION');
         }
 
-        walletDebug.log('Selected connector:', connector ? { id: connector.id, name: connector.name } : 'NONE');
-
-        if (!connector) {
-          throw new Error(
-            connectorType === 'walletconnect' ? 'NO_WALLETCONNECT' : 'NO_WALLET_EXTENSION',
-          );
-        }
+        walletDebug.log('Selected connector:', { id: connector.id, name: connector.name });
 
         const result = await connectAsync({ connector });
         walletDebug.log('Connected:', { address: result.accounts[0], chainId: result.chainId });
@@ -148,7 +167,7 @@ export function useWalletAuth() {
         setState((s) => ({ ...s, isConnecting: false }));
       }
     },
-    [connectAsync, connectors],
+    [connectAsync, connectors, detectedWallets],
   );
 
   // Step 2: Get nonce
@@ -247,16 +266,16 @@ export function useWalletAuth() {
 
   // Full login flow
   const loginWithWallet = useCallback(
-    async (connectorType?: 'metamask' | 'walletconnect') => {
+    async (walletId: WalletId = 'metamask') => {
       walletDebug.group('=== WALLET LOGIN FLOW ===');
-      walletDebug.log('Connector:', connectorType, '| Current:', { address, isConnected });
+      walletDebug.log('Wallet:', walletId, '| Current:', { address, isConnected });
 
       try {
         setState({ isConnecting: false, isSigning: false, isVerifying: false, error: null });
 
         let walletAddress = address;
         if (!isConnected || !walletAddress) {
-          walletAddress = await connectWallet(connectorType);
+          walletAddress = await connectWallet(walletId);
         }
         if (!walletAddress) throw new Error('Không kết nối được ví');
 
@@ -298,7 +317,7 @@ export function useWalletAuth() {
   );
 
   // Link wallet flow
-  const linkWallet = useCallback(async () => {
+  const linkWallet = useCallback(async (walletId: WalletId = 'metamask') => {
     walletDebug.group('=== LINK WALLET FLOW ===');
 
     try {
@@ -306,7 +325,7 @@ export function useWalletAuth() {
 
       let walletAddress = address;
       if (!isConnected || !walletAddress) {
-        walletAddress = await connectWallet();
+        walletAddress = await connectWallet(walletId);
       }
       if (!walletAddress) throw new Error('Không kết nối được ví');
 
@@ -354,7 +373,7 @@ export function useWalletAuth() {
     isLoading: state.isConnecting || state.isSigning || state.isVerifying,
     address,
     isConnected,
-    walletInfo,
+    detectedWallets,
     loginWithWallet,
     linkWallet,
     disconnect: wagmiDisconnect,
