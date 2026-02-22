@@ -165,25 +165,6 @@ export default function ProfileScreen() {
               </div>
             </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-[#d4c5a3]/50">
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-farm-brown-dark">{profile.totalHarvests ?? 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Thu hoạch</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-farm-carrot">{profile.likesCount ?? 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Lượt thích</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-blue-500">{profile.commentsCount ?? 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Bình luận</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-purple-500">{profile.giftsCount ?? 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Quà tặng</span>
-              </div>
-            </div>
           </div>
         </div>
 
