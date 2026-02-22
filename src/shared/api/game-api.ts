@@ -1571,7 +1571,7 @@ export const gameApi = {
     if (response.status === 401) { handleUnauthorized('listPasskeys'); throw new Error('Session expired'); }
     if (!response.ok) { await handleApiError(response); }
     const json = await response.json();
-    return json.data || [];
+    return json.passkeys || json.data || [];
   },
 
   getConversionHistory: async (page = 1, limit = 5): Promise<ConversionHistoryResult> => {

@@ -41,7 +41,8 @@ export function useSmartWallet() {
       const options = await gameApi.getPasskeyRegisterOptions();
 
       // Step 2: Browser WebAuthn API — user quét vân tay
-      const credential = await startRegistration(options);
+      // v13: startRegistration({ optionsJSON }) format
+      const credential = await startRegistration({ optionsJSON: options });
 
       // Step 3: Send credential to backend
       return gameApi.registerPasskey({

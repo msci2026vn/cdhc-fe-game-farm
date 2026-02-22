@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useSmartWallet } from '@/shared/hooks/useSmartWallet';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Download, Copy } from 'lucide-react';
 
 export function SmartWalletCard() {
   const {
@@ -75,8 +78,8 @@ export function SmartWalletCard() {
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {isRegisteringPasskey ? 'Đang tạo Passkey...' :
-               isCreatingWallet ? 'Đang tạo ví...' :
-               'Đang xử lý...'}
+                isCreatingWallet ? 'Đang tạo ví...' :
+                  'Đang xử lý...'}
             </>
           ) : (
             <>
@@ -101,11 +104,10 @@ export function SmartWalletCard() {
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
           Ví Thông Minh
         </h3>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-          walletStatus?.isDeployed
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${walletStatus?.isDeployed
             ? 'bg-green-100 text-green-700 border border-green-200'
             : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
-        }`}>
+          }`}>
           {walletStatus?.isDeployed ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
         </span>
       </div>
@@ -140,6 +142,85 @@ export function SmartWalletCard() {
           <p className="text-[10px] text-gray-500">Mạng</p>
           <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
         </div>
+      </div>
+
+      {/* Nút Nạp tiền */}
+      <div className="mb-3">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full h-10 rounded-xl border-[#e9c46a] text-farm-brown-dark hover:bg-[#fefae0]">
+              <Download className="mr-2 h-4 w-4" />
+              Nạp tiền vào ví
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-sm w-[95vw] rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>Nạp AVAX vào ví</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+
+              {/* Hướng dẫn */}
+              <p className="text-sm text-gray-600 border-b pb-3">
+                Gửi <strong>AVAX</strong> tới địa chỉ bên dưới. Hãy chọn đúng mạng <strong>Avalanche C-Chain</strong>.
+              </p>
+
+              {/* Address box + Copy */}
+              <div className="rounded-xl overflow-hidden bg-gray-50 border border-gray-200">
+                <div className="px-3 py-2 bg-gray-100/50 border-b border-gray-200">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Địa chỉ ví của bạn</p>
+                </div>
+                <div className="p-3 flex items-center gap-2">
+                  <code className="flex-1 text-sm font-mono break-all text-gray-900 leading-tight">
+                    {walletStatus?.address}
+                  </code>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={copyAddress}
+                    className="shrink-0 h-8 w-8 hover:bg-gray-200/50"
+                  >
+                    <Copy className={`h-4 w-4 ${copied ? 'text-green-500' : 'text-gray-500'}`} />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Mạng */}
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p className="text-sm font-bold text-amber-900 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-sm">warning</span>
+                  Chọn đúng mạng: Avalanche C-Chain
+                </p>
+                <p className="text-xs text-amber-700/80 mt-1 pl-5">
+                  Gửi sai mạng sẽ mất tiền và không thể khôi phục.
+                </p>
+              </div>
+
+              {/* Hỗ trợ từ đâu */}
+              <div>
+                <p className="text-xs text-gray-500 mb-2 font-medium">Bạn có thể gửi AVAX từ:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Binance', 'OKX', 'MEXC', 'MetaMask', 'Core Wallet'].map((name) => (
+                    <span
+                      key={name}
+                      className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-medium text-gray-600 border border-gray-200"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Số dư hiện tại */}
+              <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                <span className="text-sm font-medium text-gray-500">Số dư hiện tại</span>
+                <span className="text-base font-bold text-gray-900">
+                  {walletStatus?.balance || '0'} <span className="text-xs text-gray-500 font-normal">AVAX</span>
+                </span>
+              </div>
+
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Snowtrace link */}
