@@ -100,7 +100,7 @@ export async function sendViaSmartWallet(
   const credential = (await navigator.credentials.get({
     publicKey: {
       challenge,
-      rpId: window.location.hostname,
+      rpId: 'cdhc.vn',
       userVerification: 'required',
       timeout: 60000,
     },
