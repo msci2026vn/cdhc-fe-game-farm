@@ -66,7 +66,7 @@ export default function BossFightCampaign({
     combatStatsTracker, combatNotifs,
     skillWarning, lastPlayerDamage, enrageMultiplier, stars, maxCombo,
     currentPhase, totalPhases, showPhaseTransition, activeBossStats,
-    elapsedSeconds, pauseBattle, resumeBattle,
+    elapsedSeconds, isPaused, pauseBattle, resumeBattle,
     // Boss skills
     activeDebuffs, isStunned, skillAlert,
     activeBossBuffs, egg, lockedGems,
