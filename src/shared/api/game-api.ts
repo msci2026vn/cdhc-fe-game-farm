@@ -1669,6 +1669,81 @@ export const gameApi = {
     const json = await response.json();
     return json.data;
   },
+
+  // ═══ CUSTODIAL WALLET ═══
+
+  getCustodialWalletStatus: async (): Promise<{
+    address: string;
+    balance: string;
+    balanceWei: string;
+    chainId: number;
+    isActive: boolean;
+  } | null> => {
+    const url = API_BASE_URL + '/api/custodial-wallet/status';
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('getCustodialWalletStatus'); throw new Error('Session expired'); }
+    if (response.status === 404) return null;
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  createCustodialWallet: async (): Promise<{ address: string; isNew: boolean }> => {
+    const url = API_BASE_URL + '/api/custodial-wallet/create';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('createCustodialWallet'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  sendCustodialTransaction: async (to: string, amount: string): Promise<{ txHash: string; from: string; to: string; amount: string }> => {
+    const url = API_BASE_URL + '/api/custodial-wallet/send';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, amount }),
+    });
+    if (response.status === 401) { handleUnauthorized('sendCustodialTransaction'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  exportCustodialKey: async (): Promise<{ privateKey: string }> => {
+    const url = API_BASE_URL + '/api/custodial-wallet/export';
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('exportCustodialKey'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
+
+  payVipCustodial: async (orderId: string): Promise<{ txHash: string; from: string; to: string; amount: string; status: string }> => {
+    const url = `${API_BASE_URL}/api/vip/orders/${orderId}/pay-custodial`;
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 401) { handleUnauthorized('payVipCustodial'); throw new Error('Session expired'); }
+    if (!response.ok) { await handleApiError(response); }
+    const json = await response.json();
+    return json.data;
+  },
 };
 
 // ═══ VIP ═══

@@ -17,6 +17,7 @@ import { playSound } from '@/shared/audio';
 import { ConversionModal } from '../components/ConversionModal';
 import { VipBadge } from '../components/VipBadge';
 import { SmartWalletCard } from '../components/SmartWalletCard';
+import { CustodialWalletCard } from '../components/CustodialWalletCard';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 
@@ -323,8 +324,11 @@ export default function ProfileScreen() {
               {/* VIP Status Badge */}
               <VipBadge />
 
-              {/* Smart Wallet (Passkey + ERC-4337) */}
-              <SmartWalletCard />
+              {/* Custodial Wallet (FARMVERSE) */}
+              <CustodialWalletCard />
+
+              {/* Smart Wallet (Passkey + ERC-4337) — kept for reference */}
+              {/* <SmartWalletCard /> */}
 
               {/* Wallet and Logout at the bottom of Stats tab */}
               <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm mb-4">

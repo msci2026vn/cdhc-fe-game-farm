@@ -4,6 +4,8 @@ import type { VipPlan, VipOrder, VipVerifyResult } from '@/shared/types/game-api
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import { useVipPlans, useCreateVipOrder, useVerifyVipPayment } from '@/shared/hooks/useVipPayment';
 import { useSmartWallet } from '@/shared/hooks/useSmartWallet';
+import { useCustodialWallet } from '@/shared/hooks/useCustodialWallet';
+import { gameApi } from '@/shared/api/game-api';
 import { VipPlanCard } from './VipPlanCard';
 import {
   hasWalletExtension,
@@ -42,6 +44,8 @@ export function PurchaseFlow() {
   const createOrder = useCreateVipOrder();
   const verifyPayment = useVerifyVipPayment();
   const { walletStatus, hasWallet } = useSmartWallet();
+  const { wallet: custodialWallet, hasWallet: hasCustodialWallet } = useCustodialWallet();
+  const [isPayingCustodial, setIsPayingCustodial] = useState(false);
 
   const isLoading = isStatusLoading || isPlansLoading;
 
@@ -52,6 +56,49 @@ export function PurchaseFlow() {
     walletStatus?.address &&
     selectedPlan &&
     smartWalletBalance >= parseFloat(selectedPlan.priceAvax);
+
+  // Custodial wallet has enough balance?
+  const custodialBalance = parseFloat(custodialWallet?.balance || '0');
+  const canPayWithCustodial =
+    hasCustodialWallet &&
+    custodialWallet?.address &&
+    selectedPlan &&
+    custodialBalance >= parseFloat(selectedPlan.priceAvax);
+
+  // Custodial wallet payment handler
+  const handlePayCustodial = async () => {
+    if (!selectedPlan) return;
+    setIsPayingCustodial(true);
+    setError(null);
+
+    try {
+      // 1. Create order
+      const newOrder = await createOrder.mutateAsync(selectedPlan.id);
+      setOrder(newOrder);
+      setStep('processing');
+      setProgress(2);
+
+      // 2. Pay via custodial wallet
+      const payResult = await gameApi.payVipCustodial(newOrder.orderId);
+      setProgress(3);
+
+      // 3. Verify payment
+      const verifyResult = await verifyPayment.mutateAsync({
+        orderId: newOrder.orderId,
+        txHash: payResult.txHash,
+      });
+      setProgress(4);
+
+      setResult(verifyResult);
+      setStep('success');
+      toast.success('VIP đã kích hoạt!');
+    } catch (err: any) {
+      setError(err.message || 'Thanh toán thất bại');
+      setStep('confirm');
+    } finally {
+      setIsPayingCustodial(false);
+    }
+  };
 
   // Cleanup countdown on unmount
   useEffect(() => {
@@ -402,6 +449,35 @@ export function PurchaseFlow() {
                 <p className={`text-[10px] text-center ${canPayWithSmartWallet ? 'text-green-600' : 'text-red-500'}`}>
                   Số dư Smart Wallet: {walletStatus.balance || '0'} AVAX
                   {!canPayWithSmartWallet && ' (không đủ)'}
+                </p>
+              )}
+
+              {/* Option 1.5: Custodial Wallet (Ví FARMVERSE) */}
+              {hasCustodialWallet && custodialWallet?.address && (
+                <button
+                  onClick={handlePayCustodial}
+                  disabled={isPending || isPayingCustodial || !canPayWithCustodial}
+                  className="w-full py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-farm-green-light to-farm-green-dark hover:from-green-700 hover:to-emerald-800 active:from-green-800 active:to-emerald-900 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isPayingCustodial ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Đang thanh toán...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-base">account_balance_wallet</span>
+                      Gửi {selectedPlan.priceAvax} AVAX (Ví FARMVERSE)
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Custodial wallet balance info */}
+              {hasCustodialWallet && custodialWallet?.address && (
+                <p className={`text-[10px] text-center ${canPayWithCustodial ? 'text-green-600' : 'text-red-500'}`}>
+                  Số dư Ví FARMVERSE: {parseFloat(custodialWallet.balance || '0').toFixed(6)} AVAX
+                  {!canPayWithCustodial && ' (không đủ)'}
                 </p>
               )}
 
