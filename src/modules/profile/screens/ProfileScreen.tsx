@@ -20,10 +20,6 @@ import { SmartWalletCard } from '../components/SmartWalletCard';
 import { CustodialWalletCard } from '../components/CustodialWalletCard';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
-import { useSecurityVerify } from '@/shared/hooks/useSecurityVerify';
-import { PinInputModal } from '../components/PinInputModal';
-import { PinSetupModal } from '../components/PinSetupModal';
-import { toast } from 'sonner';
 
 type Tab = 'wallet' | 'stats' | 'achievements';
 
@@ -44,63 +40,6 @@ export default function ProfileScreen() {
   const { state: walletState, clearError: clearWalletError } = useWalletAuth();
   const invalidateProfile = useInvalidateProfile();
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const security = useSecurityVerify();
-  const [pendingTab, setPendingTab] = useState<Tab | null>(null);
-
-  const handleWalletTabClick = async () => {
-    playSound('ui_tab');
-
-    // If already on wallet tab, do nothing
-    if (tab === 'wallet') return;
-
-    const result = await security.verify();
-
-    if (result.method === 'passkey' && result.verified) {
-      setTab('wallet');
-      return;
-    }
-
-    if (result.method === 'pin') {
-      setPendingTab('wallet');
-      security.setShowPinInput(true);
-      return;
-    }
-
-    if (result.method === 'setup-pin') {
-      setPendingTab('wallet');
-      security.setShowPinSetup(true);
-      return;
-    }
-
-    // fallback if no security setup or error
-    setTab('wallet');
-  };
-
-  const handlePinSubmit = async (pin: string) => {
-    const ok = await security.verifyPin(pin);
-    if (!ok) return;
-
-    security.setShowPinInput(false);
-    if (pendingTab === 'wallet') {
-      setTab('wallet');
-      setPendingTab(null);
-    }
-  };
-
-  const handlePinSetup = async (pin: string) => {
-    try {
-      await gameApi.setWalletPin(pin);
-      security.setShowPinSetup(false);
-      toast.success('Đã cài đặt mã PIN thành công!');
-
-      if (pendingTab === 'wallet') {
-        setTab('wallet');
-        setPendingTab(null);
-      }
-    } catch (err: any) {
-      toast.error(err?.message || 'Cài đặt mã PIN thất bại');
-    }
-  };
 
   // Wallet status — fallback if profile doesn't have walletAddress
   const { data: walletStatus, refetch: refetchWalletStatus } = useQuery({
@@ -232,7 +171,7 @@ export default function ProfileScreen() {
         {/* Tab Buttons */}
         <div className="px-4 mt-6 flex gap-2 z-10 shrink-0">
           <button
-            onClick={handleWalletTabClick}
+            onClick={() => { playSound('ui_tab'); setTab('wallet'); }}
             className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all flex items-center justify-center gap-1 ${tab === 'wallet'
               ? 'wood-btn shadow-lg'
               : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
@@ -571,24 +510,6 @@ export default function ProfileScreen() {
           onClose={() => setShowWalletModal(false)}
         />
       )}
-
-      {/* PIN Modals for Wallet Tab Access */}
-      <PinInputModal
-        open={security.showPinInput}
-        onClose={() => { security.setShowPinInput(false); security.reset(); setPendingTab(null); }}
-        onSubmit={handlePinSubmit}
-        error={security.pinError}
-        attemptsRemaining={security.attemptsRemaining}
-        blocked={security.blocked}
-        isLoading={security.isVerifying}
-      />
-
-      <PinSetupModal
-        open={security.showPinSetup}
-        onClose={() => { security.setShowPinSetup(false); setPendingTab(null); }}
-        onSubmit={handlePinSetup}
-        isLoading={false}
-      />
     </div>
   );
 }
