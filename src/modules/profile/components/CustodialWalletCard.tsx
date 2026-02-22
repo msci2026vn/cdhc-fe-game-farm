@@ -272,12 +272,12 @@ export function CustodialWalletCard() {
               <span className="text-[10px] font-bold">Nap tien</span>
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
+          <DialogContent className="max-w-md w-[95vw] overflow-y-auto overflow-x-hidden max-h-[90vh] bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
             {/* Van go */}
             <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_50%,rgba(255,255,255,.05)_50%)] bg-[length:4px_100%] z-0 pointer-events-none"></div>
             <div className="absolute inset-0 opacity-10 bg-[linear-gradient(transparent_50%,rgba(0,0,0,.1)_50%)] bg-[length:100%_4px] z-0 pointer-events-none"></div>
 
-            <DialogHeader className="px-6 pt-6 pb-2 relative z-10">
+            <DialogHeader className="px-4 sm:px-6 pt-5 sm:pt-6 pb-2 relative z-10">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-inner">
                   <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain brightness-0 invert" />
@@ -285,25 +285,25 @@ export function CustodialWalletCard() {
                 <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nap AVAX vao vi</DialogTitle>
               </div>
             </DialogHeader>
-            <div className="px-6 pb-2 text-center relative z-10">
-              <p className="text-[#D4B483] text-sm leading-relaxed">
+            <div className="px-4 sm:px-6 pb-2 text-center relative z-10">
+              <p className="text-[#D4B483] text-xs sm:text-sm leading-relaxed">
                 Gui AVAX toi dia chi ben duoi. Hay chon dung mang <span className="text-white font-semibold">Avalanche C-Chain</span>.
               </p>
             </div>
-            <div className="px-6 space-y-5 pb-6 relative z-10">
-              <div className="relative rounded-2xl bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-5">
+            <div className="px-4 sm:px-6 space-y-4 sm:space-y-5 pb-5 sm:pb-6 relative z-10">
+              <div className="relative rounded-2xl bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-4 sm:p-5">
                 <div className="relative z-10 flex flex-col items-center">
                   {/* QR Code */}
-                  <div className="p-2 mb-5 rounded-[20px] bg-gradient-to-b from-white/20 to-transparent border border-white/10 shadow-lg">
-                    <div className="bg-gradient-to-br from-[#1A3A34] to-[#122A25] p-6 rounded-xl flex items-center justify-center relative overflow-hidden h-[240px] w-[240px]">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-2xl rounded-full"></div>
-                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
+                  <div className="p-2 mb-4 sm:mb-5 rounded-[20px] bg-gradient-to-b from-white/20 to-transparent border border-white/10 shadow-lg">
+                    <div className="bg-gradient-to-br from-[#1A3A34] to-[#122A25] p-4 sm:p-6 rounded-xl flex items-center justify-center relative overflow-hidden h-[180px] w-[180px] sm:h-[220px] sm:w-[220px]">
+                      <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-white/5 blur-2xl rounded-full"></div>
+                      <div className="absolute bottom-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
                       <div className="bg-white p-2 rounded relative z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                         {wallet?.address ? (
                           <QRCodeCanvas
                             id="custodial-qr-canvas"
                             value={wallet.address}
-                            size={220}
+                            size={160}
                             bgColor="#ffffff"
                             fgColor="#000000"
                             level="Q"
@@ -318,7 +318,7 @@ export function CustodialWalletCard() {
                             }}
                           />
                         ) : (
-                          <div className="w-[180px] h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Dang tai...</div>
+                          <div className="w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Dang tai...</div>
                         )}
                       </div>
                     </div>
@@ -342,7 +342,7 @@ export function CustodialWalletCard() {
                         toast.error('Co loi xay ra khi tao anh QR');
                       }
                     }}
-                    className="mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold shadow-inner"
+                    className="mb-6 sm:mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold shadow-inner"
                   >
                     <span className="material-symbols-outlined text-lg">download</span>
                     Tai anh QR
@@ -397,8 +397,8 @@ export function CustodialWalletCard() {
             </div>
 
             {/* Footer */}
-            <div className="relative z-20 bg-black/40 px-6 py-4 border-t border-[#8B5E3C]/30 backdrop-blur-sm rounded-b-[10px]">
-              <div className="flex items-center justify-between text-[#D4B483]/80 text-sm font-medium">
+            <div className="relative z-20 bg-black/40 px-4 sm:px-6 py-3 sm:py-4 border-t border-[#8B5E3C]/30 backdrop-blur-sm rounded-b-[10px]">
+              <div className="flex items-center justify-between text-[#D4B483]/80 text-xs sm:text-sm font-medium">
                 <span>So du hien tai:</span>
                 <span className="text-white font-bold flex items-center gap-1">
                   {parseFloat(wallet?.balance || '0').toFixed(6)} AVAX
@@ -414,9 +414,8 @@ export function CustodialWalletCard() {
         {/* Rut tien */}
         <button
           onClick={() => { setShowWithdraw(!showWithdraw); setShowExport(false); setExportedKey(''); }}
-          className={`flex flex-col items-center gap-1 p-3 rounded-xl border active:scale-95 transition-all min-h-[56px] ${
-            showWithdraw ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
-          }`}
+          className={`flex flex-col items-center gap-1 p-3 rounded-xl border active:scale-95 transition-all min-h-[56px] ${showWithdraw ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+            }`}
         >
           <span className="material-symbols-outlined text-lg">upload</span>
           <span className="text-[10px] font-bold">Rut tien</span>
@@ -425,9 +424,8 @@ export function CustodialWalletCard() {
         {/* Export */}
         <button
           onClick={() => { setShowExport(!showExport); setShowWithdraw(false); setExportedKey(''); }}
-          className={`flex flex-col items-center gap-1 p-3 rounded-xl border active:scale-95 transition-all min-h-[56px] ${
-            showExport ? 'bg-gray-200 border-gray-400 text-gray-700' : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
-          }`}
+          className={`flex flex-col items-center gap-1 p-3 rounded-xl border active:scale-95 transition-all min-h-[56px] ${showExport ? 'bg-gray-200 border-gray-400 text-gray-700' : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+            }`}
         >
           <span className="material-symbols-outlined text-lg">key</span>
           <span className="text-[10px] font-bold">Export</span>
