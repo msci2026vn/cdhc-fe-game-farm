@@ -272,59 +272,45 @@ export function CustodialWalletCard() {
               <span className="text-[10px] font-bold">Nap tien</span>
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md w-[95vw] overflow-y-auto overflow-x-hidden max-h-[90vh] bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
-            {/* Van go */}
-            <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_50%,rgba(255,255,255,.05)_50%)] bg-[length:4px_100%] z-0 pointer-events-none"></div>
-            <div className="absolute inset-0 opacity-10 bg-[linear-gradient(transparent_50%,rgba(0,0,0,.1)_50%)] bg-[length:100%_4px] z-0 pointer-events-none"></div>
+          <DialogContent className="max-w-md w-[340px] max-w-[95vw] overflow-hidden bg-farm-earth border border-white/10 shadow-2xl p-0 gap-0 rounded-xl">
+            {/* Top gradient line */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-green-600 via-primary to-green-600"></div>
 
-            <DialogHeader className="px-4 sm:px-6 pt-5 sm:pt-6 pb-2 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-inner">
-                  <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain brightness-0 invert" />
-                </div>
-                <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nap AVAX vao vi</DialogTitle>
-              </div>
-            </DialogHeader>
-            <div className="px-4 sm:px-6 pb-2 text-center relative z-10">
-              <p className="text-[#D4B483] text-xs sm:text-sm leading-relaxed">
-                Gui AVAX toi dia chi ben duoi. Hay chon dung mang <span className="text-white font-semibold">Avalanche C-Chain</span>.
-              </p>
+            <div className="flex items-center justify-between px-5 pt-4 pb-0">
+              <DialogTitle className="text-lg font-bold tracking-tight text-white m-0 flex items-center gap-2">
+                <span className="material-symbols-outlined text-green-400">account_balance_wallet</span>
+                Nạp AVAX
+              </DialogTitle>
+              {/* Note: Radix UI dialog automatically provides a Close button, but we wrap the content to hide its default styling in css, or just let Radix close it by clicking outside */}
             </div>
-            <div className="px-4 sm:px-6 space-y-4 sm:space-y-5 pb-5 sm:pb-6 relative z-10">
-              <div className="relative rounded-2xl bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-4 sm:p-5">
-                <div className="relative z-10 flex flex-col items-center">
-                  {/* QR Code */}
-                  <div className="p-2 mb-4 sm:mb-5 rounded-[20px] bg-gradient-to-b from-white/20 to-transparent border border-white/10 shadow-lg">
-                    <div className="bg-gradient-to-br from-[#1A3A34] to-[#122A25] p-4 sm:p-6 rounded-xl flex items-center justify-center relative overflow-hidden h-[180px] w-[180px] sm:h-[220px] sm:w-[220px]">
-                      <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-white/5 blur-2xl rounded-full"></div>
-                      <div className="absolute bottom-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
-                      <div className="bg-white p-2 rounded relative z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-                        {wallet?.address ? (
-                          <QRCodeCanvas
-                            id="custodial-qr-canvas"
-                            value={wallet.address}
-                            size={160}
-                            bgColor="#ffffff"
-                            fgColor="#000000"
-                            level="Q"
-                            includeMargin={false}
-                            imageSettings={{
-                              src: '/icons/avalanche-avax-logo.png',
-                              x: undefined,
-                              y: undefined,
-                              height: 32,
-                              width: 32,
-                              excavate: true,
-                            }}
-                          />
-                        ) : (
-                          <div className="w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Dang tai...</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Tai anh QR */}
+            <div className="px-5 py-4 space-y-4">
+              <div className="relative rounded-lg bg-[#5D3A29] border border-[#8B5E3C] shadow-inner p-3 group">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-white p-2 rounded-lg shadow-lg mb-3">
+                    {wallet?.address ? (
+                      <QRCodeCanvas
+                        id="custodial-qr-canvas"
+                        value={wallet.address}
+                        size={192} // w-48
+                        bgColor="#ffffff"
+                        fgColor="#000000"
+                        level="Q"
+                        includeMargin={false}
+                        imageSettings={{
+                          src: '/icons/avalanche-avax-logo.png',
+                          x: undefined,
+                          y: undefined,
+                          height: 32,
+                          width: 32,
+                          excavate: true,
+                        }}
+                      />
+                    ) : (
+                      <div className="w-[192px] h-[192px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Dang tai...</div>
+                    )}
+                  </div>
                   <button
                     onClick={async () => {
                       const canvas = document.getElementById('custodial-qr-canvas') as HTMLCanvasElement;
@@ -342,71 +328,49 @@ export function CustodialWalletCard() {
                         toast.error('Co loi xay ra khi tao anh QR');
                       }
                     }}
-                    className="mb-6 sm:mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold shadow-inner"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-wood-light/20 border border-[#8B5E3C] hover:bg-wood-light/40 transition-all text-[#D4B483] hover:text-white text-xs font-semibold"
                   >
-                    <span className="material-symbols-outlined text-lg">download</span>
-                    Tai anh QR
+                    <span className="material-symbols-outlined text-base">download</span>
+                    Tải mã QR
                   </button>
-
-                  {/* Dia chi */}
-                  <div className="flex w-full items-center justify-between mb-2">
-                    <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">qr_code_2</span> DIA CHI VI NHAN
-                    </label>
-                  </div>
-                  <div className="flex items-center bg-[#4A3629] rounded-lg border border-[#8B5E3C]/50 p-3 shadow-inner w-full">
-                    <code className="text-white font-mono text-xs truncate select-all flex-1">{wallet?.address}</code>
-                    <button onClick={copyAddress} className="ml-2 p-1.5 rounded bg-[#8B5E3C] hover:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29]">
-                      <span className="material-symbols-outlined text-lg leading-none">{copied ? 'check' : 'content_copy'}</span>
-                    </button>
-                  </div>
                 </div>
               </div>
 
-              {/* Warning */}
-              <div className="rounded-xl bg-[#5D3A29]/80 border border-orange-500/30 p-4 flex gap-3 items-start text-left shadow-inner">
-                <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0 text-xl">warning</span>
-                <div>
-                  <h4 className="text-orange-200 text-sm font-bold mb-1">Chon dung mang: Avalanche C-Chain</h4>
-                  <p className="text-orange-200/70 text-xs leading-snug">Gui sai mang se mat tien va khong the khoi phuc.</p>
-                </div>
+              <div className="flex items-center justify-center gap-1.5 text-xs text-orange-200/90 bg-orange-900/20 py-1.5 rounded border border-orange-500/20">
+                <span className="material-symbols-outlined text-sm text-orange-400">warning</span>
+                <span>Chỉ gửi qua mạng <strong>Avalanche C-Chain</strong></span>
               </div>
 
-              {/* Sources */}
-              <div>
-                <p className="text-[#D4B483]/70 text-xs mb-3 flex items-center gap-2 before:content-[''] before:h-px before:w-6 before:bg-[#D4B483]/10 after:content-[''] after:h-px after:flex-1 after:bg-[#D4B483]/10">
-                  Ban co the gui AVAX tu
-                </p>
-                <div className="flex justify-between gap-2">
-                  {[
-                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', icon: <span className="text-yellow-400 font-bold text-xs">BIN</span>, name: 'Binance' },
-                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', icon: <span className="text-white font-bold text-xs">OKX</span>, name: 'OKX' },
-                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', icon: <span className="text-blue-400 font-bold text-[10px]">MEXC</span>, name: 'MEXC' },
-                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29] p-[6px]', icon: <div className="w-full h-full bg-[url('https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg')] bg-contain bg-center bg-no-repeat"></div>, name: 'MetaMask' },
-                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', icon: <span className="material-symbols-outlined text-white text-base">change_history</span>, name: 'Core' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1.5 w-1/5 group cursor-pointer">
-                      <div className={`w-11 h-11 rounded-full ${item.bg} border inline-flex items-center justify-center ${item.border} transition-colors shadow-inner`}>
-                        {item.icon}
-                      </div>
-                      <span className="text-[10px] text-[#D4B483]/80 font-medium">{item.name}</span>
-                    </div>
-                  ))}
+              <div className="bg-black/30 rounded border border-[#8B5E3C]/30 p-2 flex items-center gap-2 backdrop-blur-sm">
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <span className="text-[10px] text-[#D4B483] uppercase tracking-wider font-semibold mb-0.5">Địa chỉ ví nhận</span>
+                  <code className="text-white font-mono text-xs truncate select-all">{wallet?.address}</code>
                 </div>
+                <button
+                  onClick={copyAddress}
+                  className="p-1.5 rounded bg-[#8B5E3C] hover:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29]"
+                >
+                  <span className="material-symbols-outlined text-lg leading-none">{copied ? 'check' : 'content_copy'}</span>
+                </button>
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="relative z-20 bg-black/40 px-4 sm:px-6 py-3 sm:py-4 border-t border-[#8B5E3C]/30 backdrop-blur-sm rounded-b-[10px]">
-              <div className="flex items-center justify-between text-[#D4B483]/80 text-xs sm:text-sm font-medium">
-                <span>So du hien tai:</span>
-                <span className="text-white font-bold flex items-center gap-1">
-                  {parseFloat(wallet?.balance || '0').toFixed(6)} AVAX
-                  {Number(wallet?.balance || 0) === 0 && (
-                    <span className="material-symbols-outlined text-red-500 text-base" title="Can nap them">error</span>
-                  )}
-                </span>
-              </div>
+            <div className="bg-black/40 px-5 py-3 border-t border-white/5 backdrop-blur-sm flex items-center justify-between">
+              <span className="text-slate-400 text-xs font-medium">Số dư hiện tại</span>
+              <span className="text-white text-sm font-bold flex items-center gap-1">
+                {parseFloat(wallet?.balance || '0').toFixed(6)} AVAX
+                {Number(wallet?.balance || 0) === 0 && (
+                  <span className="material-symbols-outlined text-red-500 text-base" title="Can nap them">error</span>
+                )}
+              </span>
+            </div>
+
+            {/* Decorative icons */}
+            <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none">
+              <span className="material-symbols-outlined text-8xl text-green-400">agriculture</span>
+            </div>
+            <div className="absolute top-8 -left-4 opacity-5 pointer-events-none rotate-12">
+              <span className="material-symbols-outlined text-6xl text-[#8B5E3C]">grass</span>
             </div>
           </DialogContent>
         </Dialog>
