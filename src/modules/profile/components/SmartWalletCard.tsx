@@ -90,7 +90,7 @@ export function SmartWalletCard() {
         </button>
 
         <p className="text-[9px] text-gray-400 text-center mt-2 flex items-center justify-center gap-1">
-          Miễn phí gas · <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain · ERC-4337
+          Miễn phí gas · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span> · ERC-4337
         </p>
       </div>
     );
@@ -140,7 +140,7 @@ export function SmartWalletCard() {
         </div>
         <div className="text-right flex flex-col items-end">
           <p className="text-[10px] text-gray-500 mb-0.5">Mạng</p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 bg-white/50 px-2 py-0.5 rounded-lg border border-white/20">
             <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" />
             <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
           </div>

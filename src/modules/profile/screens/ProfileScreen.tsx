@@ -326,7 +326,7 @@ export default function ProfileScreen() {
               <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm mb-4">
                 <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
                   <span className="material-symbols-outlined text-base">account_balance_wallet</span>
-                  Ví Avalanche
+                  Ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-5 h-5 ml-1 mr-1 object-contain inline-block" /> Avalanche
                 </h3>
                 <p className="text-[10px] text-gray-600 mb-3">
                   {walletAddress
@@ -347,7 +347,7 @@ export default function ProfileScreen() {
                     onClick={() => setShowWalletModal(true)}
                     className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all flex items-center justify-center gap-2 mb-3"
                   >
-                    🔗 Liên kết ví Avalanche
+                    🔗 Liên kết ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain inline-block" /> Avalanche
                   </button>
                 )}
 

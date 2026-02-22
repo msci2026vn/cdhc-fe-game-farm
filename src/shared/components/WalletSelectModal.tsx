@@ -57,8 +57,8 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-2">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#ec5b13]/20 text-[#ec5b13] border border-[#ec5b13]/30">
-              <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${mode === 'login' ? 'bg-[#ec5b13]/20 border border-[#ec5b13]/30' : 'bg-[#ec5b13]/20 border border-[#ec5b13]/30 p-1.5'}`}>
+              <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-xl font-bold tracking-tight text-white">
               {mode === 'login' ? 'Chọn ví đăng nhập' : 'Chọn ví liên kết'}
@@ -184,6 +184,7 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-2 text-[11px] text-slate-400 uppercase tracking-widest font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+              <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain" />
               Mạng: Avalanche C-Chain
             </div>
             <div className="text-[10px] text-slate-500">
