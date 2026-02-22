@@ -10,6 +10,13 @@ export interface CustodialWallet {
   isActive: boolean;
 }
 
+export interface SecurityStatus {
+  hasPin: boolean;
+  pinSetAt: string | null;
+  hasPasskey: boolean;
+  passkeyCount: number;
+}
+
 export function useCustodialWallet() {
   const queryClient = useQueryClient();
 
@@ -36,34 +43,72 @@ export function useCustodialWallet() {
     retry: 1,
   });
 
+  // ─── Query: Security status ───
+  const {
+    data: securityStatus,
+    refetch: refetchSecurity,
+  } = useQuery({
+    queryKey: ['custodial-wallet-security'],
+    queryFn: async (): Promise<SecurityStatus> => {
+      try {
+        return await gameApi.getSecurityStatus();
+      } catch {
+        return { hasPin: false, pinSetAt: null, hasPasskey: false, passkeyCount: 0 };
+      }
+    },
+    staleTime: 60_000,
+  });
+
   // ─── Mutation: Create wallet ───
   const createMutation = useMutation({
     mutationFn: () => gameApi.createCustodialWallet(),
     onSuccess: (data) => {
-      toast.success(`Tạo ví thành công! ${data.address.slice(0, 6)}...${data.address.slice(-4)}`);
+      toast.success(`Tao vi thanh cong! ${data.address.slice(0, 6)}...${data.address.slice(-4)}`);
       queryClient.invalidateQueries({ queryKey: ['custodial-wallet'] });
     },
     onError: (err: any) => {
-      toast.error(err.message || 'Không thể tạo ví');
+      toast.error(err.message || 'Khong the tao vi');
     },
   });
 
-  // ─── Mutation: Send transaction ───
+  // ─── Mutation: Send transaction (+ pin) ───
   const sendMutation = useMutation({
-    mutationFn: ({ to, amount }: { to: string; amount: string }) =>
-      gameApi.sendCustodialTransaction(to, amount),
+    mutationFn: ({ to, amount, pin }: { to: string; amount: string; pin?: string }) =>
+      gameApi.sendCustodialTransaction(to, amount, pin),
     onSuccess: (data) => {
-      toast.success(`Đã gửi ${data.amount} AVAX`);
+      toast.success(`Da gui ${data.amount} AVAX`);
       queryClient.invalidateQueries({ queryKey: ['custodial-wallet'] });
     },
     onError: (err: any) => {
-      toast.error(err.message || 'Gửi thất bại');
+      toast.error(err.message || 'Gui that bai');
     },
   });
 
-  // ─── Mutation: Export private key ───
+  // ─── Mutation: Export private key (+ pin) ───
   const exportMutation = useMutation({
-    mutationFn: () => gameApi.exportCustodialKey(),
+    mutationFn: (args?: { pin?: string }) => gameApi.exportCustodialKey(args?.pin),
+  });
+
+  // ─── Mutation: Set PIN ───
+  const setPinMutation = useMutation({
+    mutationFn: (pin: string) => gameApi.setWalletPin(pin),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custodial-wallet-security'] });
+    },
+  });
+
+  // ─── Mutation: Change PIN ───
+  const changePinMutation = useMutation({
+    mutationFn: ({ oldPin, newPin }: { oldPin: string; newPin: string }) =>
+      gameApi.changeWalletPin(oldPin, newPin),
+  });
+
+  // ─── Mutation: Reset PIN ───
+  const resetPinMutation = useMutation({
+    mutationFn: () => gameApi.resetWalletPin(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custodial-wallet-security'] });
+    },
   });
 
   return {
@@ -80,5 +125,12 @@ export function useCustodialWallet() {
     sendError: sendMutation.error,
     exportKey: exportMutation.mutateAsync,
     isExporting: exportMutation.isPending,
+    // Security
+    securityStatus,
+    refetchSecurity,
+    setPin: setPinMutation.mutateAsync,
+    isSettingPin: setPinMutation.isPending,
+    changePin: changePinMutation.mutateAsync,
+    resetPin: resetPinMutation.mutateAsync,
   };
 }

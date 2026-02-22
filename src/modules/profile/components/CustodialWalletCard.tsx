@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useCustodialWallet } from '@/shared/hooks/useCustodialWallet';
+import { useSecurityVerify } from '@/shared/hooks/useSecurityVerify';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { QRCodeCanvas } from 'qrcode.react';
-import html2canvas from 'html2canvas';
+import { PinInputModal } from './PinInputModal';
+import { PinSetupModal } from './PinSetupModal';
 
 export function CustodialWalletCard() {
   const {
@@ -16,7 +17,12 @@ export function CustodialWalletCard() {
     isSending,
     exportKey,
     isExporting,
+    securityStatus,
+    setPin: setPinApi,
+    refetchSecurity,
   } = useCustodialWallet();
+
+  const security = useSecurityVerify();
 
   const [copied, setCopied] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -24,21 +30,85 @@ export function CustodialWalletCard() {
   const [withdrawTo, setWithdrawTo] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [exportedKey, setExportedKey] = useState('');
+  const [pinAction, setPinAction] = useState<'export' | 'withdraw' | null>(null);
 
   const copyAddress = () => {
     if (wallet?.address) {
       navigator.clipboard.writeText(wallet.address);
       setCopied(true);
-      toast.success('Đã sao chép địa chỉ ví');
+      toast.success('Da sao chep dia chi vi');
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
+  // ══ Security-wrapped export ══
+  const handleExport = async () => {
+    const result = await security.verify();
+
+    if (result.method === 'passkey' && result.verified) {
+      try {
+        const data = await exportKey();
+        setExportedKey(data.privateKey);
+      } catch {
+        toast.error('Khong the export vi');
+      }
+      return;
+    }
+
+    if (result.method === 'pin') {
+      setPinAction('export');
+      security.setShowPinInput(true);
+      return;
+    }
+
+    if (result.method === 'setup-pin') {
+      setPinAction('export');
+      security.setShowPinSetup(true);
+      return;
+    }
+
+    // method === 'none' (error fetching status) -> fallback to no-pin export
+    try {
+      const data = await exportKey();
+      setExportedKey(data.privateKey);
+    } catch {
+      toast.error('Khong the export vi');
+    }
+  };
+
+  // ══ Security-wrapped withdraw ══
   const handleWithdraw = async () => {
     if (!withdrawTo || !withdrawAmount) return;
+
+    const result = await security.verify();
+
+    if (result.method === 'passkey' && result.verified) {
+      try {
+        await sendTransaction({ to: withdrawTo, amount: withdrawAmount });
+        setShowWithdraw(false);
+        setWithdrawTo('');
+        setWithdrawAmount('');
+      } catch {
+        // Error handled in mutation onError
+      }
+      return;
+    }
+
+    if (result.method === 'pin') {
+      setPinAction('withdraw');
+      security.setShowPinInput(true);
+      return;
+    }
+
+    if (result.method === 'setup-pin') {
+      setPinAction('withdraw');
+      security.setShowPinSetup(true);
+      return;
+    }
+
+    // method === 'none' -> fallback
     try {
-      const result = await sendTransaction({ to: withdrawTo, amount: withdrawAmount });
-      toast.success(`Đã gửi ${withdrawAmount} AVAX\nTX: ${result.txHash.slice(0, 10)}...`);
+      await sendTransaction({ to: withdrawTo, amount: withdrawAmount });
       setShowWithdraw(false);
       setWithdrawTo('');
       setWithdrawAmount('');
@@ -47,12 +117,65 @@ export function CustodialWalletCard() {
     }
   };
 
-  const handleExport = async () => {
+  // ══ Handler: sau khi nhap PIN dung ══
+  const handlePinSubmit = async (pin: string) => {
+    const ok = await security.verifyPin(pin);
+    if (!ok) return; // Error hien trong modal
+
+    security.setShowPinInput(false);
+
+    if (pinAction === 'export') {
+      try {
+        const data = await exportKey({ pin });
+        setExportedKey(data.privateKey);
+      } catch {
+        toast.error('Export that bai');
+      }
+    }
+
+    if (pinAction === 'withdraw') {
+      try {
+        await sendTransaction({ to: withdrawTo, amount: withdrawAmount, pin });
+        setShowWithdraw(false);
+        setWithdrawTo('');
+        setWithdrawAmount('');
+      } catch {
+        // Error handled in mutation onError
+      }
+    }
+
+    setPinAction(null);
+  };
+
+  // ══ Handler: setup PIN lan dau ══
+  const handlePinSetup = async (pin: string) => {
     try {
-      const result = await exportKey();
-      setExportedKey(result.privateKey);
-    } catch {
-      toast.error('Không thể export ví');
+      await setPinApi(pin);
+      await refetchSecurity();
+      security.setShowPinSetup(false);
+      toast.success('Da cai ma PIN thanh cong!');
+
+      // Sau setup -> tiep tuc action bang PIN vua tao
+      if (pinAction === 'export') {
+        try {
+          const data = await exportKey({ pin });
+          setExportedKey(data.privateKey);
+        } catch {
+          toast.error('Export that bai');
+        }
+      } else if (pinAction === 'withdraw') {
+        try {
+          await sendTransaction({ to: withdrawTo, amount: withdrawAmount, pin });
+          setShowWithdraw(false);
+          setWithdrawTo('');
+          setWithdrawAmount('');
+        } catch {
+          // Error handled in mutation onError
+        }
+      }
+      setPinAction(null);
+    } catch (err: any) {
+      toast.error(err?.message || 'Cai PIN that bai');
     }
   };
 
@@ -66,47 +189,47 @@ export function CustodialWalletCard() {
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <div className="flex items-center justify-center py-4">
           <div className="w-5 h-5 border-2 border-farm-green-dark/30 border-t-farm-green-dark rounded-full animate-spin" />
-          <span className="ml-2 text-sm text-farm-brown-dark/60">Đang tải ví...</span>
+          <span className="ml-2 text-sm text-farm-brown-dark/60">Dang tai vi...</span>
         </div>
       </div>
     );
   }
 
-  // ─── Chưa có wallet ───
+  // ─── Chua co wallet ───
   if (!hasWallet) {
     return (
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
-          Ví FARMVERSE
+          Vi FARMVERSE
         </h3>
         <p className="text-[10px] text-gray-600 mb-3">
-          Chưa có ví. Ví sẽ được tạo tự động khi bạn đăng nhập lại.
+          Chua co vi. Vi se duoc tao tu dong khi ban dang nhap lai.
         </p>
         <p className="text-[9px] text-gray-400 text-center flex items-center justify-center gap-1">
-          Miễn phí · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span>
+          Mien phi · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span>
         </p>
       </div>
     );
   }
 
-  // ─── Đã có wallet ───
+  // ─── Da co wallet ───
   return (
     <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-heading text-sm font-bold flex items-center gap-2">
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
-          Ví FARMVERSE
+          Vi FARMVERSE
         </h3>
-        <button onClick={() => refetch()} className="p-1 rounded-lg hover:bg-white/50 transition-colors" title="Làm mới">
+        <button onClick={() => refetch()} className="p-1 rounded-lg hover:bg-white/50 transition-colors" title="Lam moi">
           <span className="material-symbols-outlined text-sm text-gray-400 hover:text-farm-green-dark">refresh</span>
         </button>
       </div>
 
       {/* Address */}
       <div className="mb-3">
-        <p className="text-[10px] text-gray-500 mb-1">Địa chỉ ví</p>
+        <p className="text-[10px] text-gray-500 mb-1">Dia chi vi</p>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg bg-[#fefae0] px-3 py-2 text-xs text-farm-brown-dark font-mono truncate border border-[#e9c46a]">
             {wallet?.address}
@@ -125,13 +248,13 @@ export function CustodialWalletCard() {
       {/* Balance + Network */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-[10px] text-gray-500">Số dư</p>
+          <p className="text-[10px] text-gray-500">So du</p>
           <p className="text-base font-heading font-bold text-farm-brown-dark">
             {parseFloat(wallet?.balance || '0').toFixed(6)} <span className="text-xs text-gray-500">AVAX</span>
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          <p className="text-[10px] text-gray-500 mb-0.5">Mạng</p>
+          <p className="text-[10px] text-gray-500 mb-0.5">Mang</p>
           <div className="flex items-center gap-1.5 bg-white/50 px-2 py-0.5 rounded-lg border border-white/20">
             <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" />
             <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
@@ -141,16 +264,16 @@ export function CustodialWalletCard() {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-3 gap-2 mb-3">
-        {/* Nạp tiền — Dialog */}
+        {/* Nap tien — Dialog */}
         <Dialog>
           <DialogTrigger asChild>
             <button className="flex flex-col items-center gap-1 p-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 active:scale-95 transition-all min-h-[56px]">
               <span className="material-symbols-outlined text-lg">download</span>
-              <span className="text-[10px] font-bold">Nạp tiền</span>
+              <span className="text-[10px] font-bold">Nap tien</span>
             </button>
           </DialogTrigger>
           <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
-            {/* Vân gỗ */}
+            {/* Van go */}
             <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_50%,rgba(255,255,255,.05)_50%)] bg-[length:4px_100%] z-0 pointer-events-none"></div>
             <div className="absolute inset-0 opacity-10 bg-[linear-gradient(transparent_50%,rgba(0,0,0,.1)_50%)] bg-[length:100%_4px] z-0 pointer-events-none"></div>
 
@@ -159,12 +282,12 @@ export function CustodialWalletCard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-inner">
                   <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain brightness-0 invert" />
                 </div>
-                <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nạp AVAX vào ví</DialogTitle>
+                <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nap AVAX vao vi</DialogTitle>
               </div>
             </DialogHeader>
             <div className="px-6 pb-2 text-center relative z-10">
               <p className="text-[#D4B483] text-sm leading-relaxed">
-                Gửi AVAX tới địa chỉ bên dưới. Hãy chọn đúng mạng <span className="text-white font-semibold">Avalanche C-Chain</span>.
+                Gui AVAX toi dia chi ben duoi. Hay chon dung mang <span className="text-white font-semibold">Avalanche C-Chain</span>.
               </p>
             </div>
             <div className="px-6 space-y-5 pb-6 relative z-10">
@@ -195,13 +318,13 @@ export function CustodialWalletCard() {
                             }}
                           />
                         ) : (
-                          <div className="w-[180px] h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
+                          <div className="w-[180px] h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Dang tai...</div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Tải ảnh QR */}
+                  {/* Tai anh QR */}
                   <button
                     onClick={async () => {
                       const canvas = document.getElementById('custodial-qr-canvas') as HTMLCanvasElement;
@@ -214,21 +337,21 @@ export function CustodialWalletCard() {
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
                         document.body.removeChild(downloadLink);
-                        toast.success('Đã tải ảnh QR');
+                        toast.success('Da tai anh QR');
                       } catch {
-                        toast.error('Có lỗi xảy ra khi tạo ảnh QR');
+                        toast.error('Co loi xay ra khi tao anh QR');
                       }
                     }}
                     className="mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold shadow-inner"
                   >
                     <span className="material-symbols-outlined text-lg">download</span>
-                    Tải ảnh QR
+                    Tai anh QR
                   </button>
 
-                  {/* Địa chỉ */}
+                  {/* Dia chi */}
                   <div className="flex w-full items-center justify-between mb-2">
                     <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">qr_code_2</span> ĐỊA CHỈ VÍ NHẬN
+                      <span className="material-symbols-outlined text-sm">qr_code_2</span> DIA CHI VI NHAN
                     </label>
                   </div>
                   <div className="flex items-center bg-[#4A3629] rounded-lg border border-[#8B5E3C]/50 p-3 shadow-inner w-full">
@@ -244,15 +367,15 @@ export function CustodialWalletCard() {
               <div className="rounded-xl bg-[#5D3A29]/80 border border-orange-500/30 p-4 flex gap-3 items-start text-left shadow-inner">
                 <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0 text-xl">warning</span>
                 <div>
-                  <h4 className="text-orange-200 text-sm font-bold mb-1">Chọn đúng mạng: Avalanche C-Chain</h4>
-                  <p className="text-orange-200/70 text-xs leading-snug">Gửi sai mạng sẽ mất tiền và không thể khôi phục.</p>
+                  <h4 className="text-orange-200 text-sm font-bold mb-1">Chon dung mang: Avalanche C-Chain</h4>
+                  <p className="text-orange-200/70 text-xs leading-snug">Gui sai mang se mat tien va khong the khoi phuc.</p>
                 </div>
               </div>
 
               {/* Sources */}
               <div>
                 <p className="text-[#D4B483]/70 text-xs mb-3 flex items-center gap-2 before:content-[''] before:h-px before:w-6 before:bg-[#D4B483]/10 after:content-[''] after:h-px after:flex-1 after:bg-[#D4B483]/10">
-                  Bạn có thể gửi AVAX từ
+                  Ban co the gui AVAX tu
                 </p>
                 <div className="flex justify-between gap-2">
                   {[
@@ -276,11 +399,11 @@ export function CustodialWalletCard() {
             {/* Footer */}
             <div className="relative z-20 bg-black/40 px-6 py-4 border-t border-[#8B5E3C]/30 backdrop-blur-sm rounded-b-[10px]">
               <div className="flex items-center justify-between text-[#D4B483]/80 text-sm font-medium">
-                <span>Số dư hiện tại:</span>
+                <span>So du hien tai:</span>
                 <span className="text-white font-bold flex items-center gap-1">
                   {parseFloat(wallet?.balance || '0').toFixed(6)} AVAX
                   {Number(wallet?.balance || 0) === 0 && (
-                    <span className="material-symbols-outlined text-red-500 text-base" title="Cần nạp thêm">error</span>
+                    <span className="material-symbols-outlined text-red-500 text-base" title="Can nap them">error</span>
                   )}
                 </span>
               </div>
@@ -288,7 +411,7 @@ export function CustodialWalletCard() {
           </DialogContent>
         </Dialog>
 
-        {/* Rút tiền */}
+        {/* Rut tien */}
         <button
           onClick={() => { setShowWithdraw(!showWithdraw); setShowExport(false); setExportedKey(''); }}
           className={`flex flex-col items-center gap-1 p-3 rounded-xl border active:scale-95 transition-all min-h-[56px] ${
@@ -296,7 +419,7 @@ export function CustodialWalletCard() {
           }`}
         >
           <span className="material-symbols-outlined text-lg">upload</span>
-          <span className="text-[10px] font-bold">Rút tiền</span>
+          <span className="text-[10px] font-bold">Rut tien</span>
         </button>
 
         {/* Export */}
@@ -314,17 +437,17 @@ export function CustodialWalletCard() {
       {/* WITHDRAW PANEL */}
       {showWithdraw && (
         <div className="border-t border-[#e9c46a]/30 pt-3 space-y-3 animate-fade-in">
-          <p className="text-xs text-gray-600 font-bold">Rút AVAX ra ví ngoài</p>
+          <p className="text-xs text-gray-600 font-bold">Rut AVAX ra vi ngoai</p>
           <input
             type="text"
-            placeholder="Địa chỉ nhận (0x...)"
+            placeholder="Dia chi nhan (0x...)"
             value={withdrawTo}
             onChange={(e) => setWithdrawTo(e.target.value)}
             className="w-full px-3 py-3 border border-[#e9c46a] rounded-xl text-xs font-mono bg-[#fefae0] focus:outline-none focus:ring-2 focus:ring-farm-green-dark/50"
           />
           <input
             type="number"
-            placeholder="Số lượng AVAX"
+            placeholder="So luong AVAX"
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}
             step="0.001"
@@ -333,22 +456,22 @@ export function CustodialWalletCard() {
           />
           <button
             onClick={handleWithdraw}
-            disabled={isSending || !withdrawTo || !withdrawAmount}
+            disabled={isSending || !withdrawTo || !withdrawAmount || security.isVerifying}
             className="w-full py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-blue-500 to-blue-600 active:scale-[0.98] transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isSending ? (
+            {isSending || security.isVerifying ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Đang gửi...
+                {security.isVerifying ? 'Dang xac nhan...' : 'Dang gui...'}
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-base">send</span>
-                Xác nhận rút tiền
+                Xac nhan rut tien
               </>
             )}
           </button>
-          <p className="text-[9px] text-gray-400 text-center">Phí gas sẽ được trừ từ số dư ví</p>
+          <p className="text-[9px] text-gray-400 text-center">Phi gas se duoc tru tu so du vi</p>
         </div>
       )}
 
@@ -360,36 +483,36 @@ export function CustodialWalletCard() {
               <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2 items-start">
                 <span className="material-symbols-outlined text-red-500 text-base mt-0.5 shrink-0">warning</span>
                 <p className="text-xs text-red-600 leading-relaxed">
-                  Private key cho phép toàn quyền truy cập ví. <strong>KHÔNG chia sẻ với ai.</strong>
+                  Private key cho phep toan quyen truy cap vi. <strong>KHONG chia se voi ai.</strong>
                 </p>
               </div>
               <button
                 onClick={handleExport}
-                disabled={isExporting}
+                disabled={isExporting || security.isVerifying}
                 className="w-full py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-red-500 to-red-600 active:scale-[0.98] transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isExporting ? (
+                {isExporting || security.isVerifying ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Đang lấy...
+                    {security.isVerifying ? 'Dang xac nhan...' : 'Dang lay...'}
                   </>
                 ) : (
                   <>
                     <span className="material-symbols-outlined text-base">visibility</span>
-                    Hiện Private Key
+                    Hien Private Key
                   </>
                 )}
               </button>
             </>
           ) : (
             <>
-              <p className="text-xs text-gray-600">Import vào MetaMask hoặc Trust Wallet:</p>
+              <p className="text-xs text-gray-600">Import vao MetaMask hoac Trust Wallet:</p>
               <div className="bg-red-50 p-3 rounded-xl break-all text-[10px] font-mono border border-red-200 select-all">
                 {exportedKey}
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => { navigator.clipboard.writeText(exportedKey); toast.success('Đã copy Private Key'); }}
+                  onClick={() => { navigator.clipboard.writeText(exportedKey); toast.success('Da copy Private Key'); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-farm-brown bg-[#fefae0] border border-[#e9c46a] active:scale-95 transition-all flex items-center justify-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">content_copy</span>
@@ -399,13 +522,40 @@ export function CustodialWalletCard() {
                   onClick={() => { setExportedKey(''); setShowExport(false); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 border border-gray-200 active:scale-95 transition-all"
                 >
-                  Ẩn
+                  An
                 </button>
               </div>
             </>
           )}
         </div>
       )}
+
+      {/* Security Status */}
+      <div className="border-t border-[#e9c46a]/30 pt-3 mt-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-500 text-xs flex items-center gap-1">
+            <span className="material-symbols-outlined text-sm">shield</span>
+            Bao mat vi
+          </span>
+          <div className="flex gap-2">
+            {securityStatus?.hasPin && (
+              <span className="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                PIN
+              </span>
+            )}
+            {securityStatus?.hasPasskey && (
+              <span className="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                Van tay
+              </span>
+            )}
+            {!securityStatus?.hasPin && !securityStatus?.hasPasskey && (
+              <span className="text-orange-500 text-[10px] font-bold bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">
+                Chua cai dat
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Snowtrace link */}
       {snowtraceUrl && (
@@ -416,9 +566,27 @@ export function CustodialWalletCard() {
           className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-bold mt-3"
         >
           <span className="material-symbols-outlined text-sm">open_in_new</span>
-          Xem trên Snowtrace
+          Xem tren Snowtrace
         </a>
       )}
+
+      {/* PIN Modals */}
+      <PinInputModal
+        open={security.showPinInput}
+        onClose={() => { security.setShowPinInput(false); security.reset(); setPinAction(null); }}
+        onSubmit={handlePinSubmit}
+        error={security.pinError}
+        attemptsRemaining={security.attemptsRemaining}
+        blocked={security.blocked}
+        isLoading={security.isVerifying}
+      />
+
+      <PinSetupModal
+        open={security.showPinSetup}
+        onClose={() => { security.setShowPinSetup(false); setPinAction(null); }}
+        onSubmit={handlePinSetup}
+        isLoading={false}
+      />
     </div>
   );
 }
