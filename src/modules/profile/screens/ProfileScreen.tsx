@@ -207,7 +207,7 @@ export default function ProfileScreen() {
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 pb-28 mt-4 z-10" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex-1 overflow-y-auto px-4 pb-6 mt-4 z-10" style={{ scrollbarWidth: 'none' }}>
 
           {tab === 'stats' && (
             <div className="animate-fade-in space-y-4">
@@ -403,34 +403,7 @@ export default function ProfileScreen() {
           )}
         </div>
 
-        {/* Custom HTML Template Bottom Navigation (Wood Theme & integrated routing) */}
-        <div className="absolute bottom-0 w-full max-w-[430px] bg-[#fdf6e3] border-t-4 border-[#8c6239] pb-safe pt-2 px-6 flex justify-around items-end z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.1)]">
-          <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 group opacity-50 hover:opacity-100 transition-opacity mb-2">
-            <span className="material-symbols-outlined text-3xl text-farm-brown-dark">home</span>
-          </button>
 
-          <button onClick={() => navigate('/inventory')} className="flex flex-col items-center gap-1 group opacity-50 hover:opacity-100 transition-opacity mb-2">
-            <span className="material-symbols-outlined text-3xl text-farm-brown-dark">backpack</span>
-          </button>
-
-          <div className="relative -top-8 shrink-0">
-            <button
-              onClick={() => navigate('/')}
-              className="w-16 h-16 rounded-full bg-farm-brown border-4 border-[#fdf6e3] shadow-wood-shadow flex items-center justify-center text-white transform hover:scale-105 active:scale-95 transition-all"
-            >
-              <span className="material-symbols-outlined text-3xl">close</span>
-            </button>
-          </div>
-
-          <button onClick={() => navigate('/shop')} className="flex flex-col items-center gap-1 group opacity-50 hover:opacity-100 transition-opacity mb-2">
-            <span className="material-symbols-outlined text-3xl text-farm-brown-dark">storefront</span>
-          </button>
-
-          <button className="flex flex-col items-center gap-1 group mb-2">
-            <span className="material-symbols-outlined text-3xl text-farm-green-dark">person</span>
-            <div className="w-1.5 h-1.5 bg-farm-green-dark rounded-full"></div>
-          </button>
-        </div>
 
       </div>
 
