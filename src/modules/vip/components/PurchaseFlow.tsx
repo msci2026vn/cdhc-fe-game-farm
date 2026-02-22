@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { VipPlan, VipOrder, VipVerifyResult } from '@/shared/types/game-api.types';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import { useVipPlans, useCreateVipOrder, useVerifyVipPayment } from '@/shared/hooks/useVipPayment';
 import { useSmartWallet } from '@/shared/hooks/useSmartWallet';
 import { VipPlanCard } from './VipPlanCard';
-import { hasWalletExtension, sendViaWalletExtension, sendViaSmartWallet } from '../utils/sendAvaxPayment';
+import {
+  hasWalletExtension,
+  sendViaWalletExtension,
+  prepareSmartWalletOp,
+  signAndSubmitSmartWalletOp,
+} from '../utils/sendAvaxPayment';
 
-type Step = 'select' | 'confirm' | 'processing' | 'success';
+type Step = 'select' | 'confirm' | 'signing' | 'processing' | 'success';
+
+function formatCountdown(seconds: number) {
+  const min = Math.floor(seconds / 60);
+  const sec = seconds % 60;
+  return `${min}:${sec.toString().padStart(2, '0')}`;
+}
 
 export function PurchaseFlow() {
   const [step, setStep] = useState<Step>('select');
@@ -18,6 +29,13 @@ export function PurchaseFlow() {
   const [error, setError] = useState<string | null>(null);
   const [manualMode, setManualMode] = useState(false);
   const [manualTxHash, setManualTxHash] = useState('');
+
+  // Smart wallet countdown state
+  const [userOpHash, setUserOpHash] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const expiresAtRef = useRef<number>(0);
 
   const { plans, isVip, tier, isLoading: isStatusLoading } = useVipStatus();
   const { isLoading: isPlansLoading } = useVipPlans();
@@ -35,6 +53,38 @@ export function PurchaseFlow() {
     selectedPlan &&
     smartWalletBalance >= parseFloat(selectedPlan.priceAvax);
 
+  // Cleanup countdown on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
+
+  const stopCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    setCountdown(null);
+  }, []);
+
+  const startCountdown = useCallback((expiresAtMs: number) => {
+    stopCountdown();
+    expiresAtRef.current = expiresAtMs;
+
+    const tick = () => {
+      const remaining = Math.max(0, Math.floor((expiresAtRef.current - Date.now()) / 1000));
+      setCountdown(remaining);
+      if (remaining <= 0) {
+        if (countdownRef.current) clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
+
+    tick(); // immediate first tick
+    countdownRef.current = setInterval(tick, 1000);
+  }, [stopCountdown]);
+
   // Step 1: Select plan
   const handleSelectPlan = (planId: string) => {
     const plan = plans.find((p) => p.id === planId);
@@ -44,7 +94,96 @@ export function PurchaseFlow() {
     setStep('confirm');
   };
 
-  // Generic purchase handler (shared logic)
+  // Smart Wallet: Prepare UserOp + start countdown
+  const handlePrepareSmartWallet = async () => {
+    if (!selectedPlan) return;
+    setIsPreparing(true);
+    setError(null);
+
+    try {
+      // 1. Create order
+      const newOrder = await createOrder.mutateAsync(selectedPlan.id);
+      setOrder(newOrder);
+
+      // 2. Prepare UserOp
+      const prepResult = await prepareSmartWalletOp(
+        newOrder.receiverAddress,
+        newOrder.amountAvax
+      );
+
+      setUserOpHash(prepResult.userOpHash);
+      startCountdown(prepResult.expiresAt);
+      setStep('signing');
+    } catch (err: any) {
+      setError(err.message || 'Không thể tạo giao dịch');
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  // Smart Wallet: Re-prepare (when expired)
+  const handleRePrepare = async () => {
+    if (!order) return;
+    setIsPreparing(true);
+    setError(null);
+
+    try {
+      const prepResult = await prepareSmartWalletOp(
+        order.receiverAddress,
+        order.amountAvax
+      );
+
+      setUserOpHash(prepResult.userOpHash);
+      startCountdown(prepResult.expiresAt);
+      toast.success('Giao dịch đã được tạo lại');
+    } catch (err: any) {
+      setError(err.message || 'Không thể tạo lại giao dịch');
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  // Smart Wallet: Sign with passkey + submit
+  const handleSignAndSubmit = async () => {
+    if (!userOpHash || !order) return;
+    setStep('processing');
+    setProgress(2);
+    setError(null);
+    stopCountdown();
+
+    try {
+      const txHash = await signAndSubmitSmartWalletOp(userOpHash);
+      setProgress(3);
+
+      // Verify payment
+      const verifyResult = await verifyPayment.mutateAsync({
+        orderId: order.orderId,
+        txHash,
+      });
+      setProgress(4);
+
+      setResult(verifyResult);
+      setStep('success');
+      toast.success('VIP đã kích hoạt!');
+    } catch (err: any) {
+      const msg = err.message || '';
+      if (msg.includes('hủy') || msg.includes('denied') || msg.includes('User rejected')) {
+        setError('Bạn đã hủy xác thực vân tay');
+        setStep('signing'); // Go back to signing step, countdown still valid
+        startCountdown(expiresAtRef.current); // Resume countdown
+      } else if (msg.includes('hết hạn') || msg.includes('EXPIRED') || msg.includes('expired')) {
+        setError('Giao dịch đã hết hạn. Bấm "Tạo lại" để thử lại.');
+        setStep('signing');
+        setCountdown(0);
+      } else {
+        setError(msg || 'Lỗi Smart Wallet');
+        setStep('signing');
+        startCountdown(expiresAtRef.current);
+      }
+    }
+  };
+
+  // Generic purchase handler (for MetaMask/Core only)
   const executePurchase = async (
     sendFn: (to: string, amount: string) => Promise<string>,
     label: string
@@ -87,9 +226,6 @@ export function PurchaseFlow() {
   };
 
   // Payment handlers
-  const handlePurchaseWithSmartWallet = () =>
-    executePurchase(sendViaSmartWallet, 'Smart Wallet');
-
   const handlePurchaseWithExtension = () =>
     executePurchase(sendViaWalletExtension, 'MetaMask/Core');
 
@@ -135,6 +271,7 @@ export function PurchaseFlow() {
   };
 
   const handleReset = () => {
+    stopCountdown();
     setStep('select');
     setSelectedPlan(null);
     setOrder(null);
@@ -143,6 +280,7 @@ export function PurchaseFlow() {
     setError(null);
     setManualMode(false);
     setManualTxHash('');
+    setUserOpHash(null);
   };
 
   // ─── Step 1: SELECT PLAN ───
@@ -179,7 +317,7 @@ export function PurchaseFlow() {
 
   // ─── Step 2: CONFIRM ───
   if (step === 'confirm' && selectedPlan) {
-    const isPending = createOrder.isPending || verifyPayment.isPending;
+    const isPending = createOrder.isPending || verifyPayment.isPending || isPreparing;
 
     return (
       <div className="space-y-4">
@@ -241,14 +379,14 @@ export function PurchaseFlow() {
               {/* Option 1: Smart Wallet (highest priority) */}
               {hasWallet && walletStatus?.address && (
                 <button
-                  onClick={handlePurchaseWithSmartWallet}
+                  onClick={handlePrepareSmartWallet}
                   disabled={isPending || !canPayWithSmartWallet}
                   className="w-full py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isPending ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Đang xử lý...
+                      Đang chuẩn bị...
                     </>
                   ) : (
                     <>
@@ -345,6 +483,84 @@ export function PurchaseFlow() {
               </button>
             </div>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Step 2.5: SIGNING (Smart Wallet — countdown + fingerprint) ───
+  if (step === 'signing' && selectedPlan) {
+    const isExpired = countdown !== null && countdown <= 0;
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-white rounded-2xl border-2 border-green-200 p-5 shadow-sm">
+          <h3 className="font-heading font-bold text-lg text-farm-brown-dark mb-2">
+            Xác thực thanh toán
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Gửi {order?.amountAvax || selectedPlan.priceAvax} AVAX qua Smart Wallet
+          </p>
+
+          {/* Countdown timer */}
+          {countdown !== null && (
+            <div className={`text-center p-3 rounded-xl mb-4 ${
+              isExpired
+                ? 'bg-red-50 border border-red-200'
+                : countdown < 60
+                  ? 'bg-amber-50 border border-amber-200'
+                  : 'bg-gray-50 border border-gray-200'
+            }`}>
+              {isExpired ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-red-600">Giao dịch đã hết hạn</p>
+                  <button
+                    onClick={handleRePrepare}
+                    disabled={isPreparing}
+                    className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {isPreparing ? 'Đang tạo lại...' : 'Tạo lại giao dịch'}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-[10px] text-gray-500 mb-1">Thời gian còn lại</p>
+                  <p className={`text-2xl font-mono font-bold ${
+                    countdown < 60 ? 'text-red-600' : 'text-farm-brown-dark'
+                  }`}>
+                    {formatCountdown(countdown)}
+                  </p>
+                  {countdown < 60 && (
+                    <p className="text-[10px] text-red-500 mt-1">Sắp hết hạn!</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          {/* Sign button */}
+          {!isExpired && (
+            <button
+              onClick={handleSignAndSubmit}
+              className="w-full py-3.5 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-xl">fingerprint</span>
+              Xác thực vân tay để gửi
+            </button>
+          )}
+
+          <button
+            onClick={handleReset}
+            className="w-full py-2 mt-2 text-sm text-gray-500 hover:text-gray-700"
+          >
+            Hủy
+          </button>
         </div>
       </div>
     );

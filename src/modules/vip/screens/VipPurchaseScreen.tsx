@@ -2,6 +2,25 @@ import { useNavigate } from 'react-router-dom';
 import { PurchaseFlow } from '../components/PurchaseFlow';
 import { useVipOrders } from '@/shared/hooks/useVipPayment';
 
+function formatRelativeTime(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = Date.now();
+  const diff = now - date.getTime();
+
+  if (diff < 60_000) return 'Vừa xong';
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} phút trước`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} giờ trước`;
+  if (diff < 7 * 86_400_000) return `${Math.floor(diff / 86_400_000)} ngày trước`;
+
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default function VipPurchaseScreen() {
   const navigate = useNavigate();
   const { data: orders } = useVipOrders();
@@ -53,17 +72,17 @@ export default function VipPurchaseScreen() {
                   return (
                   <div
                     key={id || idx}
-                    className="bg-white/60 rounded-xl p-3 border border-white/50 shadow-sm flex items-center justify-between"
+                    className="bg-white/60 rounded-xl p-3 border border-white/50 shadow-sm"
                   >
-                    <div>
-                      <p className="text-sm font-bold text-farm-brown-dark">
-                        {order.amountAvax || '?'} AVAX
-                      </p>
-                      <p className="text-[10px] text-gray-500">
-                        {id ? `${id.slice(0, 8)}...` : '—'}
-                      </p>
-                    </div>
-                    <div className="text-right">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-bold text-farm-brown-dark">
+                          {order.amountAvax || '?'} AVAX
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-mono">
+                          {id ? `${id.slice(0, 8)}...` : '—'}
+                        </p>
+                      </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         order.status === 'confirmed'
                           ? 'bg-green-100 text-green-700'
@@ -77,14 +96,21 @@ export default function VipPurchaseScreen() {
                          order.status === 'pending' ? 'Đang chờ' :
                          order.status === 'expired' ? 'Hết hạn' : 'Thất bại'}
                       </span>
-                      {order.explorerUrl && (
+                    </div>
+
+                    {/* Time + Snowtrace link */}
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-[10px] text-gray-400">
+                        {order.createdAt ? formatRelativeTime(order.createdAt) : '—'}
+                      </span>
+                      {order.explorerUrl && order.status === 'confirmed' && (
                         <a
                           href={order.explorerUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-[10px] text-blue-500 hover:underline mt-0.5"
+                          className="text-[10px] text-blue-500 hover:underline"
                         >
-                          Snowtrace
+                          Xem trên Snowtrace
                         </a>
                       )}
                     </div>

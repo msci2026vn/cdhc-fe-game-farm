@@ -1491,7 +1491,7 @@ export const gameApi = {
     return json.data;
   },
 
-  prepareUserOp: async (calls: Array<{ to: string; value: string; data?: string }>): Promise<{ userOpHash: string }> => {
+  prepareUserOp: async (calls: Array<{ to: string; value: string; data?: string }>): Promise<{ userOpHash: string; expiresAt: number; expiresIn: number }> => {
     const url = API_BASE_URL + '/api/smart-wallet/prepare-op';
     const response = await fetch(url, {
       method: 'POST',

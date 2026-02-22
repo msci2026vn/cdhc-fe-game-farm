@@ -430,6 +430,7 @@ export interface VipOrderStatus {
   txHash: string | null;
   receiverAddress: string;
   expiresAt: string;
+  createdAt: string;
   confirmedAt: string | null;
   explorerUrl: string | null;
 }

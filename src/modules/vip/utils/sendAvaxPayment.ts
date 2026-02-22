@@ -82,19 +82,36 @@ export async function sendViaWalletExtension(
 
 // ─── Smart Wallet (Passkey + ERC-4337) ───
 
-export async function sendViaSmartWallet(
+export interface PrepareResult {
+  userOpHash: string;
+  expiresAt: number;
+  expiresIn: number;
+}
+
+/** Step 1: Prepare UserOperation — returns hash + expiry info for countdown */
+export async function prepareSmartWalletOp(
   toAddress: string,
   amountAvax: string
-): Promise<string> {
-  // 1. Prepare UserOperation
-  const { userOpHash } = await gameApi.prepareUserOp([
+): Promise<PrepareResult> {
+  const result = await gameApi.prepareUserOp([
     {
       to: toAddress,
       value: parseEther(amountAvax).toString(),
     },
   ]);
 
-  // 2. Sign with passkey (WebAuthn assertion)
+  return {
+    userOpHash: result.userOpHash,
+    expiresAt: result.expiresAt,
+    expiresIn: result.expiresIn,
+  };
+}
+
+/** Step 2: Sign with passkey + submit to bundler */
+export async function signAndSubmitSmartWalletOp(
+  userOpHash: string
+): Promise<string> {
+  // Sign with passkey (WebAuthn assertion)
   const challenge = hexToUint8Array(userOpHash);
 
   const credential = (await navigator.credentials.get({
@@ -118,13 +135,22 @@ export async function sendViaSmartWallet(
     signature: bufferToBase64url(response.signature),
   };
 
-  // 3. Submit signed UserOp
+  // Submit signed UserOp
   const { txHash } = await gameApi.submitSignedOp({
     userOpHash,
     assertion,
   });
 
   return txHash;
+}
+
+/** All-in-one (kept for backward compat) */
+export async function sendViaSmartWallet(
+  toAddress: string,
+  amountAvax: string
+): Promise<string> {
+  const { userOpHash } = await prepareSmartWalletOp(toAddress, amountAvax);
+  return signAndSubmitSmartWalletOp(userOpHash);
 }
 
 declare global {
