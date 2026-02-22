@@ -213,17 +213,128 @@ export function SmartWalletCard() {
 
                   <button
                     onClick={() => {
-                      const canvas = document.getElementById("qr-code-canvas") as HTMLCanvasElement;
-                      if (canvas) {
+                      const sourceCanvas = document.getElementById("qr-code-canvas") as HTMLCanvasElement;
+                      if (!sourceCanvas) {
+                        toast.error('Không tìm thấy mã QR để tải về');
+                        return;
+                      }
+
+                      // Tạo canvas mới để vẽ thẻ VIP
+                      const canvas = document.createElement("canvas");
+                      const ctx = canvas.getContext("2d");
+                      if (!ctx) return;
+
+                      // Kích thước thẻ (Tỷ lệ Portrait đẹp cỡ thẻ tín dụng / poster)
+                      const width = 800;
+                      const height = 1100;
+                      canvas.width = width;
+                      canvas.height = height;
+
+                      // 1. Vẽ nền (Gradient Dark)
+                      const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+                      bgGradient.addColorStop(0, "#1c1c1c");
+                      bgGradient.addColorStop(1, "#0a0a0a");
+                      ctx.fillStyle = bgGradient;
+                      ctx.fillRect(0, 0, width, height);
+
+                      // 2. Vẽ khung viền VIP (Gold Border)
+                      const borderGradient = ctx.createLinearGradient(0, 0, width, height);
+                      borderGradient.addColorStop(0, "#E6C27A"); // Gold light
+                      borderGradient.addColorStop(0.5, "#B38728"); // Gold dark
+                      borderGradient.addColorStop(1, "#FCEABB"); // Gold pale
+
+                      ctx.lineWidth = 12;
+                      ctx.strokeStyle = borderGradient;
+                      ctx.strokeRect(30, 30, width - 60, height - 60);
+
+                      // Vẽ thêm viền mảnh bên trong
+                      ctx.lineWidth = 2;
+                      ctx.strokeRect(45, 45, width - 90, height - 90);
+
+                      // 3. Render Header Text
+                      ctx.textAlign = "center";
+                      ctx.fillStyle = "#E6C27A";
+
+                      // Chữ ORGANIC KINGDOM
+                      ctx.font = "bold 54px Arial, sans-serif";
+                      ctx.letterSpacing = "4px";
+                      ctx.fillText("ORGANIC KINGDOM", width / 2, 140);
+
+                      // Phụ đề
+                      ctx.font = "italic 28px Arial, sans-serif";
+                      ctx.fillStyle = "#A0A0A0";
+                      ctx.letterSpacing = "2px";
+                      ctx.fillText("VIP Player Access", width / 2, 190);
+
+                      // 4. Vẽ Logo AVAX lên trên QR
+                      const drawRemaining = () => {
+                        // Vẽ chữ Deposit AVAX
+                        ctx.font = "bold 44px Arial, sans-serif";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.letterSpacing = "1px";
+                        ctx.fillText("DEPOSIT AVAX", width / 2, 330);
+
+                        // 5. Vẽ QR Code (Sao chép từ sourceCanvas)
+                        const qrSize = 460;
+                        const qrX = (width - qrSize) / 2;
+                        const qrY = 380;
+
+                        // Nền trắng cho QR
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
+
+                        // Khung bọc QR
+                        ctx.lineWidth = 4;
+                        ctx.strokeStyle = borderGradient;
+                        ctx.strokeRect(qrX - 25, qrY - 25, qrSize + 50, qrSize + 50);
+
+                        ctx.drawImage(sourceCanvas, qrX, qrY, qrSize, qrSize);
+
+                        // 6. Vẽ thông tin ví
+                        ctx.fillStyle = "#E6C27A";
+                        ctx.font = "bold 24px Arial, sans-serif";
+                        ctx.letterSpacing = "2px";
+                        ctx.fillText("YOUR WALLET ADDRESS", width / 2, qrY + qrSize + 70);
+
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "30px monospace";
+                        ctx.letterSpacing = "0px";
+                        const address = walletStatus?.address || "";
+                        // Rút gọn bớt nếu quá dài hoặc in đủ tuỳ ý. Ở đây in đủ.
+                        ctx.fillText(address, width / 2, qrY + qrSize + 120);
+
+                        // 7. Vẽ Warning Footer
+                        ctx.fillStyle = "#ff4444";
+                        ctx.font = "bold 26px Arial, sans-serif";
+                        ctx.fillText("WARNING", width / 2, qrY + qrSize + 200);
+
+                        ctx.fillStyle = "#A0A0A0";
+                        ctx.font = "22px Arial, sans-serif";
+                        ctx.fillText("Send ONLY Avalanche C-Chain tokens to this address.", width / 2, qrY + qrSize + 240);
+                        ctx.fillText("Sending other tokens may result in permanent loss.", width / 2, qrY + qrSize + 270);
+
+                        // 8. Xuất file
                         const pngUrl = canvas.toDataURL("image/png");
                         const downloadLink = document.createElement("a");
                         downloadLink.href = pngUrl;
-                        downloadLink.download = "avax-wallet-qr.png";
+                        downloadLink.download = "organic-kingdom-vip-deposit.png";
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
                         document.body.removeChild(downloadLink);
-                      } else {
-                        toast.error('Không tìm thấy mã QR để tải về');
+                        toast.success("Đã tải ảnh QR VIP");
+                      };
+
+                      // Load logo AVAX trước khi vẽ tiếp
+                      const avaxLogo = new Image();
+                      avaxLogo.src = "/icons/avalanche-avax-logo.png";
+                      avaxLogo.onload = () => {
+                        // Vẽ logo phía trên dòng Deposit
+                        ctx.drawImage(avaxLogo, width / 2 - 40, 220, 80, 80);
+                        drawRemaining();
+                      };
+                      avaxLogo.onerror = () => {
+                        // Nếu lỗi load logo vẫn vẽ phần còn lại
+                        drawRemaining();
                       }
                     }}
                     className="mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold group-hover:border-[#D4B483]/50 shadow-inner"
