@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCustodialWallet } from '@/shared/hooks/useCustodialWallet';
 import { useSecurityVerify } from '@/shared/hooks/useSecurityVerify';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { QRCodeCanvas } from 'qrcode.react';
 import { PinInputModal } from './PinInputModal';
 import { PinSetupModal } from './PinSetupModal';
@@ -47,7 +47,7 @@ export function CustodialWalletCard() {
 
     if (result.method === 'passkey' && result.verified) {
       try {
-        const data = await exportKey();
+        const data = await exportKey({});
         setExportedKey(data.privateKey);
       } catch {
         toast.error('Khong the export vi');
@@ -69,7 +69,7 @@ export function CustodialWalletCard() {
 
     // method === 'none' (error fetching status) -> fallback to no-pin export
     try {
-      const data = await exportKey();
+      const data = await exportKey({});
       setExportedKey(data.privateKey);
     } catch {
       toast.error('Khong the export vi');
@@ -272,21 +272,29 @@ export function CustodialWalletCard() {
               <span className="text-[10px] font-bold">Nap tien</span>
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md w-[340px] max-w-[95vw] overflow-hidden bg-farm-earth border border-white/10 shadow-2xl p-0 gap-0 rounded-xl">
+          <DialogContent className="!w-full !max-w-[340px] !p-0 !gap-0 !rounded-xl !bg-[#3d2b1f] border !border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden">
             {/* Top gradient line */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-green-600 via-primary to-green-600"></div>
+            <div className="h-1.5 w-full bg-gradient-to-r from-green-600 via-[#ec5b13] to-green-600"></div>
 
             <div className="flex items-center justify-between px-5 pt-4 pb-0">
               <DialogTitle className="text-lg font-bold tracking-tight text-white m-0 flex items-center gap-2">
                 <span className="material-symbols-outlined text-green-400">account_balance_wallet</span>
                 Nạp AVAX
               </DialogTitle>
-              {/* Note: Radix UI dialog automatically provides a Close button, but we wrap the content to hide its default styling in css, or just let Radix close it by clicking outside */}
+              {/* Custom Close Button */}
+              <DialogClose asChild>
+                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white">
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </DialogClose>
             </div>
 
             <div className="px-5 py-4 space-y-4">
               <div className="relative rounded-lg bg-[#5D3A29] border border-[#8B5E3C] shadow-inner p-3 group">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none"></div>
+                <div
+                  className="absolute inset-0 opacity-10 pointer-events-none"
+                  style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/wood-pattern.png')" }}
+                ></div>
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="bg-white p-2 rounded-lg shadow-lg mb-3">
                     {wallet?.address ? (
@@ -328,7 +336,7 @@ export function CustodialWalletCard() {
                         toast.error('Co loi xay ra khi tao anh QR');
                       }
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-wood-light/20 border border-[#8B5E3C] hover:bg-wood-light/40 transition-all text-[#D4B483] hover:text-white text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8B5E3C]/20 border border-[#8B5E3C] hover:bg-[#8B5E3C]/40 transition-all text-[#D4B483] hover:text-white text-xs font-semibold"
                   >
                     <span className="material-symbols-outlined text-base">download</span>
                     Tải mã QR
@@ -367,11 +375,14 @@ export function CustodialWalletCard() {
 
             {/* Decorative icons */}
             <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none">
-              <span className="material-symbols-outlined text-8xl text-green-400">agriculture</span>
+              <span className="material-symbols-outlined text-[8rem] text-green-400 leading-none">agriculture</span>
             </div>
             <div className="absolute top-8 -left-4 opacity-5 pointer-events-none rotate-12">
-              <span className="material-symbols-outlined text-6xl text-[#8B5E3C]">grass</span>
+              <span className="material-symbols-outlined text-[6rem] text-[#8B5E3C] leading-none">grass</span>
             </div>
+
+            {/* Radix default close override (Visually hide it since we use our own) */}
+            <DialogClose className="hidden" />
           </DialogContent>
         </Dialog>
 
