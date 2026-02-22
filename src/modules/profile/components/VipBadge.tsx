@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { useVipStatus } from '../../../shared/hooks/useVipStatus';
 
 export function VipBadge() {
+    const navigate = useNavigate();
     const { isVip, tier, ognMultiplier, daysRemaining, isLoading } = useVipStatus();
 
     if (isLoading) {
@@ -27,9 +29,12 @@ export function VipBadge() {
                         Free
                     </span>
                 </div>
-                <p className="text-xs text-stone-400 mt-2">
-                    Nâng cấp VIP để nhận OGN x10 và giao rau tận nhà mỗi tháng!
-                </p>
+                <button
+                    onClick={() => navigate('/vip/purchase')}
+                    className="w-full mt-3 py-2 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 active:bg-green-800 transition-all shadow-md active:scale-[0.98]"
+                >
+                    Nâng cấp VIP
+                </button>
             </div>
         );
     }
@@ -74,6 +79,14 @@ export function VipBadge() {
                     {config.label}
                 </span>
             </div>
+            {daysRemaining <= 7 && (
+                <button
+                    onClick={() => navigate('/vip/purchase')}
+                    className="w-full mt-3 py-2 rounded-xl text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 hover:bg-amber-200 transition-all active:scale-[0.98]"
+                >
+                    Gia hạn VIP
+                </button>
+            )}
         </div>
     );
 }

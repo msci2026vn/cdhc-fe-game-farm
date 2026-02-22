@@ -43,6 +43,7 @@ const CampaignZoneScreen = lazyWithRetry(() => import('@/modules/campaign/screen
 const CampaignBattleScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignBattleScreen'));
 const PrayerScreen = lazyWithRetry(() => import('@/modules/prayer/screens/PrayerScreen'));
 const MarketScreen = lazyWithRetry(() => import('@/modules/market/screens/MarketScreen'));
+const VipPurchaseScreen = lazyWithRetry(() => import('@/modules/vip/screens/VipPurchaseScreen'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -107,6 +108,7 @@ const AuthenticatedApp = () => {
         <Route path="/campaign/:zoneNumber" element={<CampaignZoneScreen />} />
         <Route path="/prayer" element={<PrayerScreen />} />
         <Route path="/market" element={<MarketScreen />} />
+        <Route path="/vip/purchase" element={<VipPurchaseScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

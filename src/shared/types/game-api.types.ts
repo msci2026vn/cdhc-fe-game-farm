@@ -383,14 +383,55 @@ export type WeatherCondition = 'sunny' | 'cloudy' | 'rain' | 'storm' | 'snow' | 
 export interface VipPlan {
   id: string;
   name: string;
+  nameEn: string;
   tier: 'standard' | 'premium';
-  priceUsd: number;
-  priceVnd: number;
-  priceAvax: number | null;
+  priceUsd?: number;
+  priceVnd?: number;
+  priceAvax: string;
   durationDays: number;
   ognMultiplier: number;
   deliveriesPerMonth: number;
   features: string[];
+  receiverAddress: string;
+  chainId: number;
+}
+
+export interface VipOrder {
+  orderId: string;
+  planId: string;
+  planName: string;
+  amountAvax: string;
+  receiverAddress: string;
+  expiresAt: string;
+  status: 'pending' | 'confirmed' | 'expired' | 'failed';
+  alreadyExists?: boolean;
+  chainId: number;
+  explorerUrl: string;
+}
+
+export interface VipVerifyResult {
+  status: 'confirmed' | 'already_confirmed';
+  orderId: string;
+  txHash: string;
+  blockNumber: number;
+  amountAvax: string;
+  subscription: {
+    id: string;
+    tier: string;
+    expiresAt: string;
+  };
+  explorerUrl: string;
+}
+
+export interface VipOrderStatus {
+  orderId: string;
+  status: string;
+  amountAvax: string;
+  txHash: string | null;
+  receiverAddress: string;
+  expiresAt: string;
+  confirmedAt: string | null;
+  explorerUrl: string | null;
 }
 
 export interface VipStatus {

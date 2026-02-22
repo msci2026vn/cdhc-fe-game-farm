@@ -107,6 +107,9 @@ import type {
   // VIP
   VipPlan,
   VipStatus,
+  VipOrder,
+  VipVerifyResult,
+  VipOrderStatus,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -1575,6 +1578,76 @@ export const gameApi = {
     return json.passkeys || json.data || [];
   },
 
+  // ═══ VIP PAYMENT (Phase 2) ═══
+
+  createVipOrder: async (planId: string): Promise<VipOrder> => {
+    const url = API_BASE_URL + '/api/vip/orders';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId }),
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('createVipOrder');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  verifyVipPayment: async (orderId: string, txHash: string): Promise<VipVerifyResult> => {
+    const url = `${API_BASE_URL}/api/vip/orders/${orderId}/verify`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ txHash }),
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('verifyVipPayment');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  getVipOrders: async (): Promise<VipOrderStatus[]> => {
+    const url = API_BASE_URL + '/api/vip/orders';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getVipOrders');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
   getConversionHistory: async (page = 1, limit = 5): Promise<ConversionHistoryResult> => {
     const url = `${API_BASE_URL}/api/conversion/history?page=${page}&limit=${limit}`;
 
@@ -1781,4 +1854,7 @@ export type {
   ConversionStatus,
   ConversionSuccessResult,
   ConversionHistoryResult,
+  VipOrder,
+  VipVerifyResult,
+  VipOrderStatus,
 };
