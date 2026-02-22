@@ -104,6 +104,9 @@ import type {
   ConversionStatus,
   ConversionSuccessResult,
   ConversionHistoryResult,
+  // VIP
+  VipPlan,
+  VipStatus,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -812,8 +815,6 @@ export const gameApi = {
       return {
         success: true,
         message: result.data.message,
-        userId: result.data.userId,
-        email: result.data.email,
       };
     } catch (error) {
       return { success: false, message: String(error) };
@@ -924,7 +925,7 @@ export const gameApi = {
   // ═══════════════════════════════════════════════════════════════
   // INVENTORY — Kho đồ (MỚI)
   // ═════════════════════════════════════════════════════════════════
-  
+
   /**
    * Xem kho đồ — danh sách nông sản đã thu hoạch
    */
@@ -1595,6 +1596,57 @@ export const gameApi = {
     const json = await response.json();
     return json.data;
   },
+};
+
+// ═══ VIP ═══
+/**
+ * Get VIP Status
+ */
+export const getVipStatus = async (): Promise<VipStatus> => {
+  const url = API_BASE_URL + '/api/vip/status';
+  console.log('[FARM-DEBUG] gameApi.getVipStatus():', url);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized('getVipStatus');
+    throw new Error('Session expired');
+  }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    console.error('[FARM-DEBUG] gameApi.getVipStatus() ERROR:', error);
+    throw new Error(error?.error?.message || `Failed to fetch VIP status: ${response.status}`);
+  }
+
+  const json = await response.json();
+  return json.data;
+};
+
+/**
+ * Get VIP Plans
+ */
+export const getVipPlans = async (): Promise<VipPlan[]> => {
+  const url = API_BASE_URL + '/api/vip/plans';
+  console.log('[FARM-DEBUG] gameApi.getVipPlans():', url);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    console.error('[FARM-DEBUG] gameApi.getVipPlans() ERROR:', error);
+    throw new Error(error?.error?.message || `Failed to fetch VIP plans: ${response.status}`);
+  }
+
+  const json = await response.json();
+  return json.data;
 };
 
 export type {

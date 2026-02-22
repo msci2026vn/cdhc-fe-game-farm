@@ -379,6 +379,34 @@ export interface SyncResult {
 // ═══════════════════════════════════════════════════════════════
 
 export type WeatherCondition = 'sunny' | 'cloudy' | 'rain' | 'storm' | 'snow' | 'wind' | 'cold' | 'hot';
+
+export interface VipPlan {
+  id: string;
+  name: string;
+  tier: 'standard' | 'premium';
+  priceUsd: number;
+  priceVnd: number;
+  priceAvax: number | null;
+  durationDays: number;
+  ognMultiplier: number;
+  deliveriesPerMonth: number;
+  features: string[];
+}
+
+export interface VipStatus {
+  isVip: boolean;
+  tier: 'free' | 'standard' | 'premium';
+  ognMultiplier: number;
+  expiresAt: string | null;
+  daysRemaining: number;
+  deliveriesPerMonth: number;
+  subscription: {
+    id: string;
+    startsAt: string;
+    expiresAt: string;
+  } | null;
+}
+
 export type TimeOfDay = 'dawn' | 'day' | 'dusk' | 'night';
 
 export interface WeatherData {
@@ -648,7 +676,7 @@ export interface OgnHistoryResult {
   total: number;
 }
 
-export interface OgnHistoryResponse extends ApiResponse<OgnHistoryResult> {}
+export interface OgnHistoryResponse extends ApiResponse<OgnHistoryResult> { }
 
 // ═══════════════════════════════════════════════════════════════
 // STAT SYSTEM (Phase 2)
