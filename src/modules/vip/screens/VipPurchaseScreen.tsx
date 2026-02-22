@@ -48,17 +48,19 @@ export default function VipPurchaseScreen() {
               </div>
 
               <div className="space-y-2">
-                {orders.map((order) => (
+                {orders.map((order, idx) => {
+                  const id = order.orderId || (order as any).id || '';
+                  return (
                   <div
-                    key={order.orderId}
+                    key={id || idx}
                     className="bg-white/60 rounded-xl p-3 border border-white/50 shadow-sm flex items-center justify-between"
                   >
                     <div>
                       <p className="text-sm font-bold text-farm-brown-dark">
-                        {order.amountAvax} AVAX
+                        {order.amountAvax || '?'} AVAX
                       </p>
                       <p className="text-[10px] text-gray-500">
-                        {order.orderId.slice(0, 8)}...
+                        {id ? `${id.slice(0, 8)}...` : '—'}
                       </p>
                     </div>
                     <div className="text-right">
@@ -87,7 +89,8 @@ export default function VipPurchaseScreen() {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

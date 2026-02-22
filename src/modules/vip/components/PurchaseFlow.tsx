@@ -3,8 +3,9 @@ import { toast } from 'sonner';
 import type { VipPlan, VipOrder, VipVerifyResult } from '@/shared/types/game-api.types';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import { useVipPlans, useCreateVipOrder, useVerifyVipPayment } from '@/shared/hooks/useVipPayment';
+import { useSmartWallet } from '@/shared/hooks/useSmartWallet';
 import { VipPlanCard } from './VipPlanCard';
-import { hasWalletExtension, sendViaWalletExtension } from '../utils/sendAvaxPayment';
+import { hasWalletExtension, sendViaWalletExtension, sendViaSmartWallet } from '../utils/sendAvaxPayment';
 
 type Step = 'select' | 'confirm' | 'processing' | 'success';
 
@@ -22,8 +23,17 @@ export function PurchaseFlow() {
   const { isLoading: isPlansLoading } = useVipPlans();
   const createOrder = useCreateVipOrder();
   const verifyPayment = useVerifyVipPayment();
+  const { walletStatus, hasWallet } = useSmartWallet();
 
   const isLoading = isStatusLoading || isPlansLoading;
+
+  // Smart wallet has enough balance?
+  const smartWalletBalance = parseFloat(walletStatus?.balance || '0');
+  const canPayWithSmartWallet =
+    hasWallet &&
+    walletStatus?.address &&
+    selectedPlan &&
+    smartWalletBalance >= parseFloat(selectedPlan.priceAvax);
 
   // Step 1: Select plan
   const handleSelectPlan = (planId: string) => {
@@ -34,8 +44,11 @@ export function PurchaseFlow() {
     setStep('confirm');
   };
 
-  // Step 2→3: Confirm and process payment
-  const handlePurchaseWithWallet = async () => {
+  // Generic purchase handler (shared logic)
+  const executePurchase = async (
+    sendFn: (to: string, amount: string) => Promise<string>,
+    label: string
+  ) => {
     if (!selectedPlan) return;
     setStep('processing');
     setProgress(1);
@@ -47,11 +60,8 @@ export function PurchaseFlow() {
       setOrder(newOrder);
       setProgress(2);
 
-      // 2. Send AVAX via wallet extension
-      const txHash = await sendViaWalletExtension(
-        newOrder.receiverAddress,
-        newOrder.amountAvax
-      );
+      // 2. Send AVAX
+      const txHash = await sendFn(newOrder.receiverAddress, newOrder.amountAvax);
       setProgress(3);
 
       // 3. Verify payment
@@ -66,15 +76,22 @@ export function PurchaseFlow() {
       setStep('success');
       toast.success('VIP đã kích hoạt!');
     } catch (err: any) {
-      if (err.message?.includes('User rejected') || err.message?.includes('denied')) {
+      const msg = err.message || '';
+      if (msg.includes('User rejected') || msg.includes('denied') || msg.includes('hủy')) {
         setError('Bạn đã hủy giao dịch');
-        setStep('confirm');
       } else {
-        setError(err.message || 'Có lỗi xảy ra');
-        setStep('confirm');
+        setError(msg || `Lỗi ${label}`);
       }
+      setStep('confirm');
     }
   };
+
+  // Payment handlers
+  const handlePurchaseWithSmartWallet = () =>
+    executePurchase(sendViaSmartWallet, 'Smart Wallet');
+
+  const handlePurchaseWithExtension = () =>
+    executePurchase(sendViaWalletExtension, 'MetaMask/Core');
 
   // Manual flow: create order first
   const handleStartManual = async () => {
@@ -130,30 +147,40 @@ export function PurchaseFlow() {
 
   // ─── Step 1: SELECT PLAN ───
   if (step === 'select') {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center py-8">
+          <div className="w-8 h-8 border-3 border-green-200 border-t-green-600 rounded-full animate-spin" />
+        </div>
+      );
+    }
+
+    if (!plans || plans.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-500 text-sm">
+          Không có gói VIP nào.
+        </div>
+      );
+    }
+
     return (
-      <div className="space-y-4">
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-3 border-green-200 border-t-green-600 rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {plans.map((plan) => (
-              <VipPlanCard
-                key={plan.id}
-                plan={plan}
-                onSelect={handleSelectPlan}
-                isCurrentPlan={isVip && tier === plan.tier}
-              />
-            ))}
-          </div>
-        )}
+      <div className="grid gap-4">
+        {plans.map((plan) => (
+          <VipPlanCard
+            key={plan.id}
+            plan={plan}
+            onSelect={handleSelectPlan}
+            isCurrentPlan={isVip && tier === plan.tier}
+          />
+        ))}
       </div>
     );
   }
 
   // ─── Step 2: CONFIRM ───
   if (step === 'confirm' && selectedPlan) {
+    const isPending = createOrder.isPending || verifyPayment.isPending;
+
     return (
       <div className="space-y-4">
         <div className="bg-white rounded-2xl border-2 border-green-200 p-5 shadow-sm">
@@ -179,17 +206,19 @@ export function PurchaseFlow() {
               <p className="text-xs text-gray-500 mb-1">Gửi đến:</p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 font-mono text-xs bg-gray-100 px-3 py-2 rounded-lg truncate">
-                  {selectedPlan.receiverAddress}
+                  {selectedPlan.receiverAddress || '...'}
                 </code>
-                <button
-                  onClick={() => copyToClipboard(selectedPlan.receiverAddress)}
-                  className="shrink-0 p-2 rounded-lg bg-gray-100 active:bg-gray-200 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-sm">content_copy</span>
-                </button>
+                {selectedPlan.receiverAddress && (
+                  <button
+                    onClick={() => copyToClipboard(selectedPlan.receiverAddress)}
+                    className="shrink-0 p-2 rounded-lg bg-gray-100 active:bg-gray-200 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm">content_copy</span>
+                  </button>
+                )}
               </div>
               <p className="text-[10px] text-gray-400 mt-1">
-                Avalanche C-Chain ({selectedPlan.chainId})
+                Avalanche C-Chain ({selectedPlan.chainId || 43114})
               </p>
             </div>
           </div>
@@ -209,13 +238,43 @@ export function PurchaseFlow() {
           {/* Payment methods */}
           {!manualMode ? (
             <div className="mt-4 space-y-2">
+              {/* Option 1: Smart Wallet (highest priority) */}
+              {hasWallet && walletStatus?.address && (
+                <button
+                  onClick={handlePurchaseWithSmartWallet}
+                  disabled={isPending || !canPayWithSmartWallet}
+                  className="w-full py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isPending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-base">fingerprint</span>
+                      Gửi {selectedPlan.priceAvax} AVAX (Smart Wallet)
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Smart wallet balance info */}
+              {hasWallet && walletStatus?.address && (
+                <p className={`text-[10px] text-center ${canPayWithSmartWallet ? 'text-green-600' : 'text-red-500'}`}>
+                  Số dư Smart Wallet: {walletStatus.balance || '0'} AVAX
+                  {!canPayWithSmartWallet && ' (không đủ)'}
+                </p>
+              )}
+
+              {/* Option 2: MetaMask/Core */}
               {hasWalletExtension() && (
                 <button
-                  onClick={handlePurchaseWithWallet}
-                  disabled={createOrder.isPending}
+                  onClick={handlePurchaseWithExtension}
+                  disabled={isPending}
                   className="w-full py-3 rounded-xl text-white font-bold text-sm bg-green-600 hover:bg-green-700 active:bg-green-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {createOrder.isPending ? (
+                  {isPending ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Đang xử lý...
@@ -229,12 +288,13 @@ export function PurchaseFlow() {
                 </button>
               )}
 
+              {/* Option 3: Manual (always available) */}
               <button
                 onClick={handleStartManual}
-                disabled={createOrder.isPending}
+                disabled={isPending}
                 className="w-full py-3 rounded-xl font-bold text-sm border-2 border-green-200 text-green-700 bg-green-50 hover:bg-green-100 active:bg-green-200 transition-all active:scale-[0.98] disabled:opacity-50"
               >
-                {createOrder.isPending ? 'Đang tạo đơn...' : 'Gửi từ ví khác (Copy địa chỉ)'}
+                {isPending ? 'Đang tạo đơn...' : 'Gửi từ ví khác (Copy địa chỉ)'}
               </button>
 
               <button
@@ -275,7 +335,10 @@ export function PurchaseFlow() {
               </button>
 
               <button
-                onClick={() => { setManualMode(false); setManualTxHash(''); }}
+                onClick={() => {
+                  setManualMode(false);
+                  setManualTxHash('');
+                }}
                 className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
               >
                 Quay lại
@@ -315,7 +378,9 @@ export function PurchaseFlow() {
               ) : (
                 <span className="material-symbols-outlined text-gray-300">radio_button_unchecked</span>
               )}
-              <span className={`text-sm ${s.done ? 'text-green-700 font-bold' : i === progress ? 'text-farm-brown-dark font-medium animate-pulse' : 'text-gray-400'}`}>
+              <span
+                className={`text-sm ${s.done ? 'text-green-700 font-bold' : i === progress ? 'text-farm-brown-dark font-medium animate-pulse' : 'text-gray-400'}`}
+              >
                 {s.label}
               </span>
             </div>
@@ -334,9 +399,7 @@ export function PurchaseFlow() {
     return (
       <div className="bg-green-50 rounded-2xl border-2 border-green-200 p-6 shadow-sm text-center">
         <div className="text-4xl mb-3">🎉</div>
-        <h3 className="font-heading font-bold text-xl text-green-800 mb-2">
-          Chúc mừng!
-        </h3>
+        <h3 className="font-heading font-bold text-xl text-green-800 mb-2">Chúc mừng!</h3>
         <p className="text-sm text-green-700 mb-4">
           VIP <strong>{selectedPlan?.name}</strong> đã kích hoạt!
         </p>
@@ -359,20 +422,22 @@ export function PurchaseFlow() {
             <span className="font-bold text-green-700">x{selectedPlan?.ognMultiplier}</span>
           </div>
 
-          <div className="border-t border-gray-100 pt-2">
-            <p className="text-xs text-gray-500 mb-1">TX Hash:</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 font-mono text-[10px] bg-gray-100 px-2 py-1.5 rounded truncate">
-                {result.txHash}
-              </code>
-              <button
-                onClick={() => copyToClipboard(result.txHash)}
-                className="shrink-0 p-1.5 rounded bg-gray-100"
-              >
-                <span className="material-symbols-outlined text-xs">content_copy</span>
-              </button>
+          {result.txHash && (
+            <div className="border-t border-gray-100 pt-2">
+              <p className="text-xs text-gray-500 mb-1">TX Hash:</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 font-mono text-[10px] bg-gray-100 px-2 py-1.5 rounded truncate">
+                  {result.txHash}
+                </code>
+                <button
+                  onClick={() => copyToClipboard(result.txHash)}
+                  className="shrink-0 p-1.5 rounded bg-gray-100"
+                >
+                  <span className="material-symbols-outlined text-xs">content_copy</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {result.explorerUrl && (
