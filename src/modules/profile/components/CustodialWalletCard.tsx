@@ -272,116 +272,111 @@ export function CustodialWalletCard() {
               <span className="text-[10px] font-bold">Nap tien</span>
             </button>
           </DialogTrigger>
-          <DialogContent className="!w-full !max-w-[340px] !p-0 !gap-0 !rounded-xl !bg-[#3d2b1f] border !border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden">
+          <DialogContent className="!w-[calc(100vw-24px)] !max-w-[380px] !p-0 !gap-0 !rounded-2xl !bg-[#3d2b1f] border !border-white/10 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.7)] overflow-hidden">
             {/* Top gradient line */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-green-600 via-[#ec5b13] to-green-600"></div>
+            <div className="h-1 w-full bg-gradient-to-r from-green-600 via-[#ec5b13] to-green-600 flex-shrink-0" />
 
-            <div className="flex items-center justify-between px-5 pt-4 pb-0">
-              <DialogTitle className="text-lg font-bold tracking-tight text-white m-0 flex items-center gap-2">
-                <span className="material-symbols-outlined text-green-400">account_balance_wallet</span>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2 flex-shrink-0">
+              <DialogTitle className="text-base font-bold tracking-tight text-white m-0 flex items-center gap-2">
+                <span className="material-symbols-outlined text-base text-green-400">account_balance_wallet</span>
                 Nạp AVAX
               </DialogTitle>
-              {/* Custom Close Button */}
               <DialogClose asChild>
-                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white">
+                <button className="flex h-9 w-9 items-center justify-center rounded-full active:bg-white/10 transition-colors text-white/70">
                   <span className="material-symbols-outlined text-xl">close</span>
                 </button>
               </DialogClose>
             </div>
 
-            <div className="px-5 py-4 space-y-4">
-              <div className="relative rounded-lg bg-[#5D3A29] border border-[#8B5E3C] shadow-inner p-3 group">
-                <div
-                  className="absolute inset-0 opacity-10 pointer-events-none"
-                  style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/wood-pattern.png')" }}
-                ></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-white p-2 rounded-lg shadow-lg mb-3">
-                    {wallet?.address ? (
-                      <QRCodeCanvas
-                        id="custodial-qr-canvas"
-                        value={wallet.address}
-                        size={192} // w-48
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                        level="Q"
-                        includeMargin={false}
-                        imageSettings={{
-                          src: '/icons/avalanche-avax-logo.png',
-                          x: undefined,
-                          y: undefined,
-                          height: 32,
-                          width: 32,
-                          excavate: true,
-                        }}
-                      />
-                    ) : (
-                      <div className="w-[192px] h-[192px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Dang tai...</div>
-                    )}
+            {/* Scrollable body */}
+            <div className="overflow-y-auto overscroll-contain" style={{ maxHeight: 'min(520px, calc(85dvh - 120px))' }}>
+              <div className="px-4 pb-4 space-y-3">
+                {/* QR Code block */}
+                <div className="rounded-xl bg-[#5D3A29] border border-[#8B5E3C]/60 p-3">
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="bg-white p-2.5 rounded-xl shadow-lg">
+                      {wallet?.address ? (
+                        <QRCodeCanvas
+                          id="custodial-qr-canvas"
+                          value={wallet.address}
+                          size={160}
+                          bgColor="#ffffff"
+                          fgColor="#000000"
+                          level="Q"
+                          includeMargin={false}
+                          imageSettings={{
+                            src: '/icons/avalanche-avax-logo.png',
+                            x: undefined,
+                            y: undefined,
+                            height: 28,
+                            width: 28,
+                            excavate: true,
+                          }}
+                        />
+                      ) : (
+                        <div className="w-40 h-40 bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs rounded-lg">Đang tải...</div>
+                      )}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const canvas = document.getElementById('custodial-qr-canvas') as HTMLCanvasElement;
+                        if (!canvas) return;
+                        try {
+                          const pngUrl = canvas.toDataURL('image/png');
+                          const downloadLink = document.createElement('a');
+                          downloadLink.href = pngUrl;
+                          downloadLink.download = 'farmverse-wallet-qr.png';
+                          document.body.appendChild(downloadLink);
+                          downloadLink.click();
+                          document.body.removeChild(downloadLink);
+                          toast.success('Đã tải ảnh QR');
+                        } catch {
+                          toast.error('Có lỗi khi tạo ảnh QR');
+                        }
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#8B5E3C]/30 border border-[#8B5E3C] active:bg-[#8B5E3C]/60 transition-all text-[#D4B483] text-xs font-semibold min-h-[36px]"
+                    >
+                      <span className="material-symbols-outlined text-sm">download</span>
+                      Tải mã QR
+                    </button>
+                  </div>
+                </div>
+
+                {/* Warning */}
+                <div className="flex items-center justify-center gap-1.5 text-xs text-orange-200/90 bg-orange-900/25 py-2 px-3 rounded-xl border border-orange-500/25">
+                  <span className="material-symbols-outlined text-sm text-orange-400 flex-shrink-0">warning</span>
+                  <span>Chỉ gửi qua mạng <strong>Avalanche C-Chain</strong></span>
+                </div>
+
+                {/* Address */}
+                <div className="bg-black/30 rounded-xl border border-[#8B5E3C]/40 p-3 flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] text-[#D4B483] uppercase tracking-wider font-semibold block mb-1">Địa chỉ ví nhận</span>
+                    <code className="text-white font-mono text-[11px] break-all leading-relaxed select-all">{wallet?.address}</code>
                   </div>
                   <button
-                    onClick={async () => {
-                      const canvas = document.getElementById('custodial-qr-canvas') as HTMLCanvasElement;
-                      if (!canvas) return;
-                      try {
-                        const pngUrl = canvas.toDataURL('image/png');
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = pngUrl;
-                        downloadLink.download = 'farmverse-wallet-qr.png';
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
-                        toast.success('Da tai anh QR');
-                      } catch {
-                        toast.error('Co loi xay ra khi tao anh QR');
-                      }
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8B5E3C]/20 border border-[#8B5E3C] hover:bg-[#8B5E3C]/40 transition-all text-[#D4B483] hover:text-white text-xs font-semibold"
+                    onClick={copyAddress}
+                    className="p-2.5 rounded-xl bg-[#8B5E3C] active:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29] min-h-[40px] min-w-[40px] flex items-center justify-center"
                   >
-                    <span className="material-symbols-outlined text-base">download</span>
-                    Tải mã QR
+                    <span className="material-symbols-outlined text-base leading-none">{copied ? 'check' : 'content_copy'}</span>
                   </button>
                 </div>
               </div>
-
-              <div className="flex items-center justify-center gap-1.5 text-xs text-orange-200/90 bg-orange-900/20 py-1.5 rounded border border-orange-500/20">
-                <span className="material-symbols-outlined text-sm text-orange-400">warning</span>
-                <span>Chỉ gửi qua mạng <strong>Avalanche C-Chain</strong></span>
-              </div>
-
-              <div className="bg-black/30 rounded border border-[#8B5E3C]/30 p-2 flex items-center gap-2 backdrop-blur-sm">
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <span className="text-[10px] text-[#D4B483] uppercase tracking-wider font-semibold mb-0.5">Địa chỉ ví nhận</span>
-                  <code className="text-white font-mono text-xs truncate select-all">{wallet?.address}</code>
-                </div>
-                <button
-                  onClick={copyAddress}
-                  className="p-1.5 rounded bg-[#8B5E3C] hover:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29]"
-                >
-                  <span className="material-symbols-outlined text-lg leading-none">{copied ? 'check' : 'content_copy'}</span>
-                </button>
-              </div>
             </div>
 
-            <div className="bg-black/40 px-5 py-3 border-t border-white/5 backdrop-blur-sm flex items-center justify-between">
+            {/* Footer: balance */}
+            <div className="bg-black/40 px-4 py-3 border-t border-white/5 flex items-center justify-between flex-shrink-0">
               <span className="text-slate-400 text-xs font-medium">Số dư hiện tại</span>
-              <span className="text-white text-sm font-bold flex items-center gap-1">
+              <span className="text-white text-sm font-bold flex items-center gap-1.5">
                 {parseFloat(wallet?.balance || '0').toFixed(6)} AVAX
                 {Number(wallet?.balance || 0) === 0 && (
-                  <span className="material-symbols-outlined text-red-500 text-base" title="Can nap them">error</span>
+                  <span className="material-symbols-outlined text-red-400 text-base" title="Cần nạp thêm">error</span>
                 )}
               </span>
             </div>
 
-            {/* Decorative icons */}
-            <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none">
-              <span className="material-symbols-outlined text-[8rem] text-green-400 leading-none">agriculture</span>
-            </div>
-            <div className="absolute top-8 -left-4 opacity-5 pointer-events-none rotate-12">
-              <span className="material-symbols-outlined text-[6rem] text-[#8B5E3C] leading-none">grass</span>
-            </div>
-
-            {/* Radix default close override (Visually hide it since we use our own) */}
+            {/* Radix default close override */}
             <DialogClose className="hidden" />
           </DialogContent>
         </Dialog>
