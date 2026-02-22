@@ -11,6 +11,7 @@ import FriendsList from '@/modules/friends/components/FriendsList';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
+import RwaDashboardModal from '@/modules/rwa/components/RwaDashboardModal';
 import type { FriendData } from '@/shared/types/game-api.types';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
@@ -129,6 +130,7 @@ export default function FarmingScreen() {
   const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showRwaModal, setShowRwaModal] = useState(false);
   const [isMuted, setIsMuted] = useState(audioManager.muted);
 
   const toggleMute = () => {
@@ -497,7 +499,23 @@ export default function FarmingScreen() {
             </div>
           </div>
 
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between mt-1">
+            {/* RWA Smart Farm Button - NEW */}
+            <div className="flex flex-col gap-2 relative w-fit z-20 shrink-0">
+              <button
+                onClick={() => setShowRwaModal(true)}
+                className="bg-gradient-to-br from-green-500 to-green-700 p-2 py-1.5 rounded-xl flex items-center gap-2 shadow-lg border-2 border-green-300 transform -rotate-2 active:scale-95 transition-all w-32 justify-between"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-green-100 text-[18px]">grass</span>
+                  <span className="text-[10px] font-black text-white uppercase tracking-wider leading-[1.1] text-left">Nông trại<br />RWA</span>
+                </div>
+                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white text-[12px]">chevron_right</span>
+                </div>
+              </button>
+            </div>
+
             {/* Wood Signs for Stats */}
             <div className="flex flex-col gap-2 relative z-20 w-fit">
               <div
@@ -769,6 +787,7 @@ export default function FarmingScreen() {
       <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
       <Leaderboard open={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
       {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
+      <RwaDashboardModal open={showRwaModal} onClose={() => setShowRwaModal(false)} />
     </div>
   );
 }
