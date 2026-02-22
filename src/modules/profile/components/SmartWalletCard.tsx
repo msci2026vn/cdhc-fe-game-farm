@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Download, Copy } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 export function SmartWalletCard() {
   const {
@@ -157,55 +157,67 @@ export function SmartWalletCard() {
               Nạp tiền vào ví
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-farm-earth/95 border-white/10 shadow-2xl p-0 gap-0">
-            <div className="h-2 w-full bg-gradient-to-r from-green-600 via-primary to-green-600"></div>
-            <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none z-0"></div>
+            <DialogHeader className="px-6 pt-6 pb-2 relative z-10">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600/20 text-green-400 border border-green-500/30">
-                  <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-inner">
+                  <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain brightness-0 invert" />
                 </div>
                 <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nạp AVAX vào ví</DialogTitle>
               </div>
             </DialogHeader>
-            <div className="px-6 pb-2 text-center">
-              <p className="text-slate-300 text-sm leading-relaxed">
+            <div className="px-6 pb-2 text-center relative z-10">
+              <p className="text-[#D4B483] text-sm leading-relaxed">
                 Gửi AVAX tới địa chỉ bên dưới. Hãy chọn đúng mạng <span className="text-white font-semibold">Avalanche C-Chain</span>.
               </p>
             </div>
-            <div className="px-6 space-y-5 pb-6">
+            <div className="px-6 space-y-5 pb-6 relative z-10">
               <div className="relative rounded-lg bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-4 group">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none rounded-lg"></div>
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none rounded-lg z-0"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-white p-2 rounded-lg mb-3 shadow-lg">
+                  <div className="bg-white p-2 rounded-xl mb-4 shadow-lg">
                     {walletStatus?.address ? (
-                      <QRCodeSVG
+                      <QRCodeCanvas
+                        id="qr-code-canvas"
                         value={walletStatus.address}
-                        size={140}
+                        size={220}
                         bgColor={"#ffffff"}
                         fgColor={"#000000"}
-                        level={"L"}
+                        level={"Q"}
                         includeMargin={false}
                         imageSettings={{
                           src: "/icons/avalanche-avax-logo.png",
                           x: undefined,
                           y: undefined,
-                          height: 24,
-                          width: 24,
+                          height: 32,
+                          width: 32,
                           excavate: true,
                         }}
                       />
                     ) : (
-                      <div className="w-32 h-32 md:w-[140px] md:h-[140px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
+                      <div className="w-[220px] h-[220px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
                     )}
                   </div>
 
                   <button
                     onClick={() => {
-                      toast.success('Tính năng lưu ảnh QR đang được phát triển');
+                      const canvas = document.getElementById("qr-code-canvas") as HTMLCanvasElement;
+                      if (canvas) {
+                        const pngUrl = canvas.toDataURL("image/png");
+                        const downloadLink = document.createElement("a");
+                        downloadLink.href = pngUrl;
+                        downloadLink.download = "avax-wallet-qr.png";
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                      } else {
+                        toast.error('Không tìm thấy mã QR để tải về');
+                      }
                     }}
-                    className="mb-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-wood-light/20 border border-[#8B5E3C] hover:bg-wood-light/40 transition-all text-[#D4B483] hover:text-white text-xs font-semibold group-hover:border-yellow-500/30"
+                    className="mb-5 flex items-center gap-2 px-6 py-2 rounded-full bg-black/20 border border-[#8B5E3C] hover:bg-black/40 transition-all text-[#D4B483] hover:text-white text-sm font-semibold group-hover:border-yellow-500/30"
                   >
-                    <span className="material-symbols-outlined text-sm">download</span>
+                    <span className="material-symbols-outlined text-lg">download</span>
                     Tải ảnh QR
                   </button>
 
@@ -221,7 +233,7 @@ export function SmartWalletCard() {
                 </div>
               </div>
 
-              <div className="rounded-lg bg-orange-900/30 border border-orange-500/30 p-3 flex gap-3 items-start text-left">
+              <div className="rounded-lg bg-[#5D3A29]/80 border border-orange-500/30 p-3 flex gap-3 items-start text-left shadow-inner">
                 <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0">warning</span>
                 <div>
                   <h4 className="text-orange-200 text-sm font-bold mb-1">Chọn đúng mạng: Avalanche C-Chain</h4>
@@ -230,30 +242,30 @@ export function SmartWalletCard() {
               </div>
 
               <div>
-                <p className="text-slate-400 text-xs mb-3 flex items-center gap-2 before:content-[''] before:h-px before:w-6 before:bg-white/10 after:content-[''] after:h-px after:flex-1 after:bg-white/10">
+                <p className="text-[#D4B483]/70 text-xs mb-3 flex items-center gap-2 before:content-[''] before:h-px before:w-6 before:bg-[#D4B483]/10 after:content-[''] after:h-px after:flex-1 after:bg-[#D4B483]/10">
                   Bạn có thể gửi AVAX từ
                 </p>
                 <div className="flex justify-between gap-2">
                   {[
-                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-yellow-500/50', icon: <span className="text-yellow-400 font-bold text-xs">BIN</span>, name: 'Binance' },
-                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-white/50', icon: <span className="text-white font-bold text-xs">OKX</span>, name: 'OKX' },
-                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-blue-400/50', icon: <span className="text-blue-400 font-bold text-[10px]">MEXC</span>, name: 'MEXC' },
-                    { bg: 'bg-slate-800', border: 'border-slate-700 p-1.5', hoverBorder: 'group-hover:border-orange-500/50', icon: <div className="w-full h-full bg-[url('https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg')] bg-contain bg-center bg-no-repeat"></div>, name: 'MetaMask' },
-                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-red-500/50', icon: <span className="material-symbols-outlined text-white text-base">change_history</span>, name: 'Core' }
+                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', hoverBorder: 'group-hover:border-yellow-500/50', icon: <span className="text-yellow-400 font-bold text-xs">BIN</span>, name: 'Binance' },
+                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', hoverBorder: 'group-hover:border-white/50', icon: <span className="text-white font-bold text-xs">OKX</span>, name: 'OKX' },
+                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', hoverBorder: 'group-hover:border-blue-400/50', icon: <span className="text-blue-400 font-bold text-[10px]">MEXC</span>, name: 'MEXC' },
+                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29] p-[6px]', hoverBorder: 'group-hover:border-orange-500/50', icon: <div className="w-full h-full bg-[url('https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg')] bg-contain bg-center bg-no-repeat"></div>, name: 'MetaMask' },
+                    { bg: 'bg-[#2A1F18]', border: 'border-[#5D3A29]', hoverBorder: 'group-hover:border-red-500/50', icon: <span className="material-symbols-outlined text-white text-base">change_history</span>, name: 'Core' }
                   ].map((item, i) => (
                     <div key={i} className="flex flex-col items-center gap-1.5 w-1/5 group cursor-pointer">
-                      <div className={`w-10 h-10 rounded-full ${item.bg} border ${item.border} flex items-center justify-center ${item.hoverBorder} transition-colors`}>
+                      <div className={`w-11 h-11 rounded-full ${item.bg} border inline-flex items-center justify-center ${item.border} ${item.hoverBorder} transition-colors shadow-inner`}>
                         {item.icon}
                       </div>
-                      <span className="text-[10px] text-slate-400 group-hover:text-slate-300">{item.name}</span>
+                      <span className="text-[10px] text-[#D4B483]/80 group-hover:text-[#D4B483] font-medium">{item.name}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="relative z-20 bg-black/30 px-6 py-4 border-t border-white/5 backdrop-blur-sm">
-              <div className="flex items-center justify-between text-slate-400 text-sm font-medium">
+            <div className="relative z-20 bg-black/40 px-6 py-4 border-t border-[#8B5E3C]/30 backdrop-blur-sm rounded-b-[10px]">
+              <div className="flex items-center justify-between text-[#D4B483]/80 text-sm font-medium">
                 <span>Số dư hiện tại:</span>
                 <span className="text-white font-bold flex items-center gap-1">
                   {walletStatus?.balance || '0'} AVAX
