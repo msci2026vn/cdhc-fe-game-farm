@@ -16,6 +16,8 @@ import { getDominantAura } from '@/shared/components/BuildAura';
 import { audioManager } from '@/shared/audio';
 import { useBossSprite } from '../hooks/useBossSprite';
 import { BossSprite } from './BossSprite';
+import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
+import { useVipStatus } from '@/shared/hooks/useVipStatus';
 
 // HUD components (reused from boss module)
 import {
@@ -71,6 +73,16 @@ export default function BossFightCampaign({
   } = useMatch3Campaign(bossData, combatStats);
 
   const auraType = getDominantAura(combatStats);
+
+  // ═══ Auto-play (VIP only) ═══
+  const { isVip } = useVipStatus();
+  const { autoEnabled, toggleAuto } = useAutoPlay({
+    grid, animating, result,
+    handleSwipe, handleDodge, fireUltimate,
+    ultCharge: boss.ultCharge,
+    skillWarning, isVip,
+    lockedGems, isStunned, isPaused,
+  });
 
   // ═══ Boss sprite state management (multi-state SVG) ═══
   const {
@@ -663,17 +675,34 @@ export default function BossFightCampaign({
           )}
         </div>
 
-        <SkillBar
-          mana={boss.mana}
-          maxMana={boss.maxMana}
-          dodgeCost={manaDodgeCost}
-          ultCost={manaUltCost}
-          ultCharge={boss.ultCharge}
-          ultCooldown={boss.ultCooldown}
-          isDodgeWindow={!!skillWarning}
-          onDodge={handleDodge}
-          onUlt={fireUltimate}
-        />
+        <div className="flex items-center gap-1.5">
+          <div className="flex-1">
+            <SkillBar
+              mana={boss.mana}
+              maxMana={boss.maxMana}
+              dodgeCost={manaDodgeCost}
+              ultCost={manaUltCost}
+              ultCharge={boss.ultCharge}
+              ultCooldown={boss.ultCooldown}
+              isDodgeWindow={!!skillWarning}
+              onDodge={handleDodge}
+              onUlt={fireUltimate}
+            />
+          </div>
+          {isVip && (
+            <button
+              onClick={toggleAuto}
+              className={`flex-shrink-0 px-3 py-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 flex items-center gap-1 ${
+                autoEnabled
+                  ? 'bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.5)]'
+                  : 'bg-white/10 text-white/60 border border-white/10'
+              }`}
+            >
+              <span className="text-sm">👑</span>
+              AUTO
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

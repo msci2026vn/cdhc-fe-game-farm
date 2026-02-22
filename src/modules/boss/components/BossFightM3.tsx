@@ -10,6 +10,8 @@ import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import { getDominantAura } from '@/shared/components/BuildAura';
 import { audioManager } from '@/shared/audio';
 import BossSkillWarning from './BossSkillWarning';
+import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
+import { useVipStatus } from '@/shared/hooks/useVipStatus';
 
 // HUD components
 import {
@@ -66,6 +68,15 @@ export default function BossFightM3({
   } = useMatch3(bossInfo, combatStats, turnLimit);
 
   const auraType = getDominantAura(combatStats);
+
+  // ═══ Auto-play (VIP only) ═══
+  const { isVip } = useVipStatus();
+  const { autoEnabled, toggleAuto } = useAutoPlay({
+    grid, animating, result,
+    handleSwipe, handleDodge, fireUltimate,
+    ultCharge: boss.ultCharge,
+    skillWarning, isVip,
+  });
 
   // ═══ Preload battle sounds + BGM ═══
   useEffect(() => {
@@ -406,18 +417,35 @@ export default function BossFightM3({
           </div>
         </div>
 
-        {/* Skill bar: Dodge + ULT charge + ULT button */}
-        <SkillBar
-          mana={boss.mana}
-          maxMana={boss.maxMana}
-          dodgeCost={manaDodgeCost}
-          ultCost={manaUltCost}
-          ultCharge={boss.ultCharge}
-          ultCooldown={boss.ultCooldown}
-          isDodgeWindow={!!skillWarning}
-          onDodge={handleDodge}
-          onUlt={fireUltimate}
-        />
+        {/* Skill bar: Dodge + ULT charge + ULT button + Auto */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex-1">
+            <SkillBar
+              mana={boss.mana}
+              maxMana={boss.maxMana}
+              dodgeCost={manaDodgeCost}
+              ultCost={manaUltCost}
+              ultCharge={boss.ultCharge}
+              ultCooldown={boss.ultCooldown}
+              isDodgeWindow={!!skillWarning}
+              onDodge={handleDodge}
+              onUlt={fireUltimate}
+            />
+          </div>
+          {isVip && (
+            <button
+              onClick={toggleAuto}
+              className={`flex-shrink-0 px-3 py-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 flex items-center gap-1 ${
+                autoEnabled
+                  ? 'bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.5)]'
+                  : 'bg-white/10 text-white/60 border border-white/10'
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm">👑</span>
+              AUTO
+            </button>
+          )}
+        </div>
       </div>
 
     </div>
