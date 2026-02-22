@@ -89,8 +89,8 @@ export function SmartWalletCard() {
           )}
         </button>
 
-        <p className="text-[9px] text-gray-400 text-center mt-2">
-          Miễn phí gas · Avalanche C-Chain · ERC-4337
+        <p className="text-[9px] text-gray-400 text-center mt-2 flex items-center justify-center gap-1">
+          Miễn phí gas · <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain · ERC-4337
         </p>
       </div>
     );
@@ -105,8 +105,8 @@ export function SmartWalletCard() {
           Ví Thông Minh
         </h3>
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${walletStatus?.isDeployed
-            ? 'bg-green-100 text-green-700 border border-green-200'
-            : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+          ? 'bg-green-100 text-green-700 border border-green-200'
+          : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
           }`}>
           {walletStatus?.isDeployed ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
         </span>
@@ -138,9 +138,12 @@ export function SmartWalletCard() {
             {walletStatus?.balance || '0'} <span className="text-xs text-gray-500">AVAX</span>
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] text-gray-500">Mạng</p>
-          <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
+        <div className="text-right flex flex-col items-end">
+          <p className="text-[10px] text-gray-500 mb-0.5">Mạng</p>
+          <div className="flex items-center gap-1.5">
+            <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" />
+            <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
+          </div>
         </div>
       </div>
 
@@ -153,71 +156,85 @@ export function SmartWalletCard() {
               Nạp tiền vào ví
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-sm w-[95vw] rounded-2xl">
-            <DialogHeader>
-              <DialogTitle>Nạp AVAX vào ví</DialogTitle>
+          <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-farm-earth/95 border-white/10 shadow-2xl p-0 gap-0">
+            <div className="h-2 w-full bg-gradient-to-r from-green-600 via-primary to-green-600"></div>
+            <DialogHeader className="px-6 pt-6 pb-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600/20 text-green-400 border border-green-500/30">
+                  <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain" />
+                </div>
+                <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nạp AVAX vào ví</DialogTitle>
+              </div>
             </DialogHeader>
-            <div className="space-y-4">
-
-              {/* Hướng dẫn */}
-              <p className="text-sm text-gray-600 border-b pb-3">
-                Gửi <strong>AVAX</strong> tới địa chỉ bên dưới. Hãy chọn đúng mạng <strong>Avalanche C-Chain</strong>.
+            <div className="px-6 pb-4">
+              <p className="text-slate-300 text-sm leading-relaxed text-left">
+                Gửi AVAX tới địa chỉ bên dưới. Hãy chọn đúng mạng <span className="text-white font-semibold">Avalanche C-Chain</span>.
               </p>
-
-              {/* Address box + Copy */}
-              <div className="rounded-xl overflow-hidden bg-gray-50 border border-gray-200">
-                <div className="px-3 py-2 bg-gray-100/50 border-b border-gray-200">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Địa chỉ ví của bạn</p>
-                </div>
-                <div className="p-3 flex items-center gap-2">
-                  <code className="flex-1 text-sm font-mono break-all text-gray-900 leading-tight">
-                    {walletStatus?.address}
-                  </code>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={copyAddress}
-                    className="shrink-0 h-8 w-8 hover:bg-gray-200/50"
-                  >
-                    <Copy className={`h-4 w-4 ${copied ? 'text-green-500' : 'text-gray-500'}`} />
-                  </Button>
+            </div>
+            <div className="px-6 space-y-5 pb-6">
+              <div className="relative rounded-lg bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-4 group">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none rounded-lg"></div>
+                <div className="relative z-10">
+                  <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold mb-2 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">qr_code_2</span> Địa chỉ ví nhận
+                  </label>
+                  <div className="flex items-center bg-black/30 rounded border border-[#8B5E3C]/30 p-2.5 backdrop-blur-sm">
+                    <code className="text-white font-mono text-sm truncate select-all flex-1">{walletStatus?.address}</code>
+                    <button onClick={copyAddress} className="ml-2 p-1.5 rounded bg-[#8B5E3C] hover:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29]">
+                      <span className="material-symbols-outlined text-lg leading-none">{copied ? 'check' : 'content_copy'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Mạng */}
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-                <p className="text-sm font-bold text-amber-900 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-sm">warning</span>
-                  Chọn đúng mạng: Avalanche C-Chain
-                </p>
-                <p className="text-xs text-amber-700/80 mt-1 pl-5">
-                  Gửi sai mạng sẽ mất tiền và không thể khôi phục.
-                </p>
+              <div className="rounded-lg bg-orange-900/30 border border-orange-500/30 p-3 flex gap-3 items-start text-left">
+                <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0">warning</span>
+                <div>
+                  <h4 className="text-orange-200 text-sm font-bold mb-1">Chọn đúng mạng: Avalanche C-Chain</h4>
+                  <p className="text-orange-200/70 text-xs leading-snug">Gửi sai mạng sẽ mất tiền và không thể khôi phục.</p>
+                </div>
               </div>
 
-              {/* Hỗ trợ từ đâu */}
               <div>
-                <p className="text-xs text-gray-500 mb-2 font-medium">Bạn có thể gửi AVAX từ:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {['Binance', 'OKX', 'MEXC', 'MetaMask', 'Core Wallet'].map((name) => (
-                    <span
-                      key={name}
-                      className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-medium text-gray-600 border border-gray-200"
-                    >
-                      {name}
-                    </span>
+                <p className="text-slate-400 text-xs mb-3 flex items-center gap-2 before:content-[''] before:h-px before:w-6 before:bg-white/10 after:content-[''] after:h-px after:flex-1 after:bg-white/10">
+                  Bạn có thể gửi AVAX từ
+                </p>
+                <div className="flex justify-between gap-2">
+                  {[
+                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-yellow-500/50', icon: <span className="text-yellow-400 font-bold text-xs">BIN</span>, name: 'Binance' },
+                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-white/50', icon: <span className="text-white font-bold text-xs">OKX</span>, name: 'OKX' },
+                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-blue-400/50', icon: <span className="text-blue-400 font-bold text-[10px]">MEXC</span>, name: 'MEXC' },
+                    { bg: 'bg-slate-800', border: 'border-slate-700 p-1.5', hoverBorder: 'group-hover:border-orange-500/50', icon: <div className="w-full h-full bg-[url('https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg')] bg-contain bg-center bg-no-repeat"></div>, name: 'MetaMask' },
+                    { bg: 'bg-slate-800', border: 'border-slate-700', hoverBorder: 'group-hover:border-red-500/50', icon: <span className="material-symbols-outlined text-white text-base">change_history</span>, name: 'Core' }
+                  ].map((item, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5 w-1/5 group cursor-pointer">
+                      <div className={`w-10 h-10 rounded-full ${item.bg} border ${item.border} flex items-center justify-center ${item.hoverBorder} transition-colors`}>
+                        {item.icon}
+                      </div>
+                      <span className="text-[10px] text-slate-400 group-hover:text-slate-300">{item.name}</span>
+                    </div>
                   ))}
                 </div>
               </div>
+            </div>
 
-              {/* Số dư hiện tại */}
-              <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                <span className="text-sm font-medium text-gray-500">Số dư hiện tại</span>
-                <span className="text-base font-bold text-gray-900">
-                  {walletStatus?.balance || '0'} <span className="text-xs text-gray-500 font-normal">AVAX</span>
+            <div className="relative z-20 bg-black/30 px-6 py-4 border-t border-white/5 backdrop-blur-sm">
+              <div className="flex items-center justify-between text-slate-400 text-sm font-medium">
+                <span>Số dư hiện tại:</span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  {walletStatus?.balance || '0'} AVAX
+                  {Number(walletStatus?.balance || 0) === 0 && (
+                    <span className="material-symbols-outlined text-red-500 text-base" title="Cần nạp thêm">error</span>
+                  )}
                 </span>
               </div>
+            </div>
 
+            <div className="absolute -bottom-6 -right-6 opacity-5 pointer-events-none z-0">
+              <span className="material-symbols-outlined text-9xl text-green-400">agriculture</span>
+            </div>
+            <div className="absolute top-10 -left-6 opacity-5 pointer-events-none rotate-12 z-0">
+              <span className="material-symbols-outlined text-8xl text-wood-light">grass</span>
             </div>
           </DialogContent>
         </Dialog>
