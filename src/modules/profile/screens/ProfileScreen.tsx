@@ -26,7 +26,6 @@ type Tab = 'wallet' | 'stats' | 'achievements';
 export default function ProfileScreen() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('stats');
-  const [loggingOut, setLoggingOut] = useState(false);
   const [showStatModal, setShowStatModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetError, setResetError] = useState<{ message: string; code: string } | null>(null);
@@ -235,18 +234,6 @@ export default function ProfileScreen() {
                     🔗 Liên kết ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain inline-block" /> Avalanche
                   </button>
                 )}
-
-                <button
-                  onClick={async () => {
-                    if (loggingOut) return;
-                    setLoggingOut(true);
-                    await gameApi.logout();
-                  }}
-                  disabled={loggingOut}
-                  className="w-full py-2 rounded-xl font-heading text-sm font-bold text-red-600 bg-red-50 border border-red-200 active:bg-red-100 transition-all disabled:opacity-50 mt-2"
-                >
-                  {loggingOut ? '⏳ Đang đăng xuất...' : '🚪 Đăng xuất'}
-                </button>
               </div>
             </div>
           )}

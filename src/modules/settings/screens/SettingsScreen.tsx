@@ -15,6 +15,7 @@ export default function SettingsScreen() {
     const [showChangePin, setShowChangePin] = useState(false);
     const [pinError, setPinError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
 
     // Fetch security status
     const { data: securityStatus, isLoading } = useQuery({
@@ -227,6 +228,22 @@ export default function SettingsScreen() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Section: Logout */}
+                <div className="pt-2 px-4 pb-6 mt-auto shrink-0 z-10 w-full mb-8">
+                    <button
+                        onClick={async () => {
+                            if (loggingOut) return;
+                            setLoggingOut(true);
+                            await gameApi.logout();
+                        }}
+                        disabled={loggingOut}
+                        className="w-full py-3 rounded-xl font-heading text-base font-bold text-red-600 bg-red-50 border border-red-200 active:scale-[0.98] active:bg-red-100 transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-lg">logout</span>
+                        {loggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                    </button>
                 </div>
 
             </div>
