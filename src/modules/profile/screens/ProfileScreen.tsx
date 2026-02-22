@@ -119,7 +119,10 @@ export default function ProfileScreen() {
           <div className="bg-farm-brown text-[#fefae0] px-4 py-1 rounded-full shadow-wood-shadow font-heading font-bold text-lg border-2 border-[#5d4037]">
             Hồ Sơ Nông Dân
           </div>
-          <button className="bg-white/80 p-2 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors">
+          <button
+            onClick={() => navigate('/settings')}
+            className="bg-white/80 p-2 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
+          >
             <span className="material-symbols-outlined">settings</span>
           </button>
         </div>
