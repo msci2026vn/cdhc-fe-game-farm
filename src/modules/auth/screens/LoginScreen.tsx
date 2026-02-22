@@ -175,8 +175,8 @@ function LoginScreenContent() {
                 disabled={loading}
                 className="w-full btn-comic-red text-white py-4 px-4 flex items-center justify-between gap-3 relative overflow-hidden disabled:opacity-70"
               >
-                <div className="w-10 h-10 bg-white/20 rounded-xl border-2 border-white/40 flex items-center justify-center p-1 shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]">
-                  <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-full h-full object-contain filter brightness-0 invert" />
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5 shadow-sm">
+                  <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex flex-col items-start flex-grow">
                   <span className="text-xs uppercase opacity-90 font-bold tracking-wider text-red-100">Login with</span>
