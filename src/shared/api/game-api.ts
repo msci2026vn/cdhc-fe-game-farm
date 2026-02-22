@@ -1649,6 +1649,99 @@ export const getVipPlans = async (): Promise<VipPlan[]> => {
   return json.data;
 };
 
+// ═══ Phase 5: Blockchain + IoT Types ═══
+
+export interface BlockchainStats {
+  rootCount: number;
+  totalReadingsOnChain: number;
+  deployerBalance: string;
+  contractAddress: string;
+  chainId: number;
+  explorerUrl: string;
+}
+
+export interface BlockchainLog {
+  id: string;
+  merkleRoot: string;
+  readingCount: number;
+  txHash: string | null;
+  blockNumber: number | null;
+  gasUsed: string | null;
+  chainId: number;
+  contractAddress: string | null;
+  status: 'pending' | 'submitted' | 'confirmed' | 'failed';
+  errorMessage: string | null;
+  batchedAt: string;
+  submittedAt: string | null;
+  confirmedAt: string | null;
+  explorerUrl: string | null;
+}
+
+export interface SensorReading {
+  id: string;
+  deviceId: string;
+  temperature: string | null;
+  humidity: string | null;
+  lightLevel: string | null;
+  soilPh: string | null;
+  soilMoisture: string | null;
+  dataHash: string | null;
+  blockchainBatchId: string | null;
+  recordedAt: string;
+  indicators?: {
+    temperature: 'good' | 'warning' | 'danger';
+    humidity: 'good' | 'warning' | 'danger';
+    soilPh: 'good' | 'warning' | 'danger';
+  };
+}
+
+export interface IoTDevice {
+  id: string;
+  name: string;
+  type: string;
+  location: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+// ═══ Phase 5: Blockchain + IoT API Functions ═══
+
+export const getBlockchainStats = async (): Promise<BlockchainStats> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/blockchain/stats`);
+  if (!res.ok) throw new Error(`Failed to fetch blockchain stats: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getBlockchainLogs = async (limit = 20): Promise<BlockchainLog[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/blockchain/logs?limit=${limit}`);
+  if (!res.ok) throw new Error(`Failed to fetch blockchain logs: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getSensorLatest = async (deviceId?: string): Promise<SensorReading | null> => {
+  const params = deviceId ? `?deviceId=${deviceId}` : '';
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/latest${params}`);
+  if (!res.ok) throw new Error(`Failed to fetch sensor latest: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getSensorHistory = async (deviceId = 'mock-sensor-001', hours = 24): Promise<SensorReading[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/history?deviceId=${deviceId}&hours=${hours}`);
+  if (!res.ok) throw new Error(`Failed to fetch sensor history: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getIoTDevices = async (): Promise<IoTDevice[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/devices`);
+  if (!res.ok) throw new Error(`Failed to fetch IoT devices: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
 export type {
   PlayerProfile,
   FarmPlotData,
