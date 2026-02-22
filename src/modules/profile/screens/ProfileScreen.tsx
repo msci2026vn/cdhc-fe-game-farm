@@ -21,7 +21,7 @@ import { CustodialWalletCard } from '../components/CustodialWalletCard';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 
-type Tab = 'stats' | 'achievements';
+type Tab = 'wallet' | 'stats' | 'achievements';
 
 export default function ProfileScreen() {
   const navigate = useNavigate();
@@ -32,7 +32,6 @@ export default function ProfileScreen() {
   const [resetError, setResetError] = useState<{ message: string; code: string } | null>(null);
   const [helpStat, setHelpStat] = useState<'atk' | 'hp' | 'def' | 'mana' | null>(null);
   const [showConversion, setShowConversion] = useState(false);
-  const [showWalletInfo, setShowWalletInfo] = useState(false);
   const { data: profile, isLoading: isProfileLoading, error } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
   const { data: statInfo } = usePlayerStats();
@@ -170,10 +169,19 @@ export default function ProfileScreen() {
         </div>
 
         {/* Tab Buttons */}
-        <div className="px-6 mt-6 flex gap-4 z-10 shrink-0">
+        <div className="px-4 mt-6 flex gap-2 z-10 shrink-0">
+          <button
+            onClick={() => { playSound('ui_tab'); setTab('wallet'); }}
+            className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all flex items-center justify-center gap-1 ${tab === 'wallet'
+              ? 'wood-btn shadow-lg'
+              : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
+              }`}
+          >
+            <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" /> Ví Avax
+          </button>
           <button
             onClick={() => { playSound('ui_tab'); setTab('stats'); }}
-            className={`flex-1 py-2 rounded-xl font-bold font-heading text-sm tracking-wide transition-all ${tab === 'stats'
+            className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all ${tab === 'stats'
               ? 'wood-btn shadow-lg'
               : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
               }`}
@@ -182,7 +190,7 @@ export default function ProfileScreen() {
           </button>
           <button
             onClick={() => { playSound('ui_tab'); setTab('achievements'); }}
-            className={`flex-1 py-2 rounded-xl font-bold font-heading text-sm tracking-wide transition-all ${tab === 'achievements'
+            className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all ${tab === 'achievements'
               ? 'wood-btn shadow-lg'
               : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
               }`}
@@ -194,25 +202,57 @@ export default function ProfileScreen() {
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto px-4 pb-6 mt-4 z-10" style={{ scrollbarWidth: 'none' }}>
 
+          {tab === 'wallet' && (
+            <div className="animate-fade-in space-y-4">
+              {/* Custodial Wallet (FARMVERSE) */}
+              <CustodialWalletCard />
+
+              {/* Wallet and Logout */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm mb-4">
+                <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-base">account_balance_wallet</span>
+                  Ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-5 h-5 ml-1 mr-1 object-contain inline-block" /> Avalanche
+                </h3>
+                <p className="text-[10px] text-gray-600 mb-3">
+                  {walletAddress
+                    ? 'Ví đã được liên kết với tài khoản của bạn.'
+                    : 'Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.'}
+                </p>
+
+                {walletAddress ? (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-xl border border-green-200 text-xs font-bold mb-3">
+                    <span>✅</span>
+                    <span>Đã liên kết:</span>
+                    <code className="bg-white px-1.5 py-0.5 rounded border border-green-100 text-[10px] font-mono shadow-sm">
+                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                    </code>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setShowWalletModal(true); }}
+                    className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all flex items-center justify-center gap-2 mb-3"
+                  >
+                    🔗 Liên kết ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain inline-block" /> Avalanche
+                  </button>
+                )}
+
+                <button
+                  onClick={async () => {
+                    if (loggingOut) return;
+                    setLoggingOut(true);
+                    await gameApi.logout();
+                  }}
+                  disabled={loggingOut}
+                  className="w-full py-2 rounded-xl font-heading text-sm font-bold text-red-600 bg-red-50 border border-red-200 active:bg-red-100 transition-all disabled:opacity-50 mt-2"
+                >
+                  {loggingOut ? '⏳ Đang đăng xuất...' : '🚪 Đăng xuất'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {tab === 'stats' && (
             <div className="animate-fade-in space-y-4">
-
-              {/* Wallet Info Button */}
-              <button
-                onClick={() => { playSound('ui_modal_open'); setShowWalletInfo(true); }}
-                className="w-full bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
-                    <span className="material-symbols-outlined text-blue-500">account_balance_wallet</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-heading font-bold text-farm-brown-dark text-lg">Ví Avalanche</div>
-                    <div className="text-[10px] text-gray-500">Quản lý tài sản on-chain</div>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-gray-400">chevron_right</span>
-              </button>
 
               {/* Stats Block */}
               <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
@@ -454,69 +494,6 @@ export default function ProfileScreen() {
               >
                 Đã hiểu
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showWalletInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowWalletInfo(false)}>
-          <div className="bg-background-light border-4 border-farm-brown rounded-2xl p-5 w-full max-w-[400px] mx-4 shadow-2xl relative max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-heading font-bold text-xl text-farm-brown-dark flex items-center gap-2">
-                <span className="material-symbols-outlined text-blue-500">account_balance_wallet</span>
-                Quản lý Ví
-              </h3>
-              <button onClick={() => setShowWalletInfo(false)} className="text-gray-400 hover:text-gray-600">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Custodial Wallet (FARMVERSE) */}
-              <CustodialWalletCard />
-
-              {/* Wallet and Logout */}
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
-                  <span className="material-symbols-outlined text-base">account_balance_wallet</span>
-                  Ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-5 h-5 ml-1 mr-1 object-contain inline-block" /> Avalanche
-                </h3>
-                <p className="text-[10px] text-gray-600 mb-3">
-                  {walletAddress
-                    ? 'Ví đã được liên kết với tài khoản của bạn.'
-                    : 'Liên kết ví để nhận phần thưởng on-chain và giao dịch OGN token.'}
-                </p>
-
-                {walletAddress ? (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-xl border border-green-200 text-xs font-bold mb-3">
-                    <span>✅</span>
-                    <span>Đã liên kết:</span>
-                    <code className="bg-white px-1.5 py-0.5 rounded border border-green-100 text-[10px] font-mono shadow-sm">
-                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                    </code>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => { setShowWalletInfo(false); setShowWalletModal(true); }}
-                    className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 active:bg-orange-100 transition-all flex items-center justify-center gap-2 mb-3"
-                  >
-                    🔗 Liên kết ví <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain inline-block" /> Avalanche
-                  </button>
-                )}
-
-                <button
-                  onClick={async () => {
-                    if (loggingOut) return;
-                    setLoggingOut(true);
-                    await gameApi.logout();
-                  }}
-                  disabled={loggingOut}
-                  className="w-full py-2 rounded-xl font-heading text-sm font-bold text-red-600 bg-red-50 border border-red-200 active:bg-red-100 transition-all disabled:opacity-50 mt-2"
-                >
-                  {loggingOut ? '⏳ Đang đăng xuất...' : '🚪 Đăng xuất'}
-                </button>
-              </div>
             </div>
           </div>
         </div>
