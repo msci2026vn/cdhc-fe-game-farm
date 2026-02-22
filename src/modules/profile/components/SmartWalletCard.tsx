@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Download, Copy } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export function SmartWalletCard() {
   const {
@@ -166,19 +167,52 @@ export function SmartWalletCard() {
                 <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nạp AVAX vào ví</DialogTitle>
               </div>
             </DialogHeader>
-            <div className="px-6 pb-4">
-              <p className="text-slate-300 text-sm leading-relaxed text-left">
+            <div className="px-6 pb-2 text-center">
+              <p className="text-slate-300 text-sm leading-relaxed">
                 Gửi AVAX tới địa chỉ bên dưới. Hãy chọn đúng mạng <span className="text-white font-semibold">Avalanche C-Chain</span>.
               </p>
             </div>
             <div className="px-6 space-y-5 pb-6">
               <div className="relative rounded-lg bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-4 group">
                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none rounded-lg"></div>
-                <div className="relative z-10">
-                  <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold mb-2 flex items-center gap-1">
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-white p-2 rounded-lg mb-3 shadow-lg">
+                    {walletStatus?.address ? (
+                      <QRCodeSVG
+                        value={walletStatus.address}
+                        size={140}
+                        bgColor={"#ffffff"}
+                        fgColor={"#000000"}
+                        level={"L"}
+                        includeMargin={false}
+                        imageSettings={{
+                          src: "/icons/avalanche-avax-logo.png",
+                          x: undefined,
+                          y: undefined,
+                          height: 24,
+                          width: 24,
+                          excavate: true,
+                        }}
+                      />
+                    ) : (
+                      <div className="w-32 h-32 md:w-[140px] md:h-[140px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      toast.success('Tính năng lưu ảnh QR đang được phát triển');
+                    }}
+                    className="mb-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-wood-light/20 border border-[#8B5E3C] hover:bg-wood-light/40 transition-all text-[#D4B483] hover:text-white text-xs font-semibold group-hover:border-yellow-500/30"
+                  >
+                    <span className="material-symbols-outlined text-sm">download</span>
+                    Tải ảnh QR
+                  </button>
+
+                  <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold mb-2 flex items-center gap-1 w-full justify-start">
                     <span className="material-symbols-outlined text-sm">qr_code_2</span> Địa chỉ ví nhận
                   </label>
-                  <div className="flex items-center bg-black/30 rounded border border-[#8B5E3C]/30 p-2.5 backdrop-blur-sm">
+                  <div className="flex items-center bg-black/30 rounded border border-[#8B5E3C]/30 p-2.5 backdrop-blur-sm w-full">
                     <code className="text-white font-mono text-sm truncate select-all flex-1">{walletStatus?.address}</code>
                     <button onClick={copyAddress} className="ml-2 p-1.5 rounded bg-[#8B5E3C] hover:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29]">
                       <span className="material-symbols-outlined text-lg leading-none">{copied ? 'check' : 'content_copy'}</span>
