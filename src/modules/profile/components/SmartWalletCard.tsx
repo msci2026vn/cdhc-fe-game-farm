@@ -158,7 +158,10 @@ export function SmartWalletCard() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
-            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none z-0"></div>
+            {/* Tạo nền vân gỗ thuần CSS */}
+            <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_50%,rgba(255,255,255,.05)_50%)] bg-[length:4px_100%] z-0 pointer-events-none"></div>
+            <div className="absolute inset-0 opacity-10 bg-[linear-gradient(transparent_50%,rgba(0,0,0,.1)_50%)] bg-[length:100%_4px] z-0 pointer-events-none"></div>
+
             <DialogHeader className="px-6 pt-6 pb-2 relative z-10">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-inner">
@@ -173,31 +176,39 @@ export function SmartWalletCard() {
               </p>
             </div>
             <div className="px-6 space-y-5 pb-6 relative z-10">
-              <div className="relative rounded-lg bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-4 group">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none rounded-lg z-0"></div>
+              <div className="relative rounded-2xl bg-[#5D3A29] border-2 border-[#8B5E3C] shadow-inner p-5 group">
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-white p-2 rounded-xl mb-4 shadow-lg">
-                    {walletStatus?.address ? (
-                      <QRCodeCanvas
-                        id="qr-code-canvas"
-                        value={walletStatus.address}
-                        size={220}
-                        bgColor={"#ffffff"}
-                        fgColor={"#000000"}
-                        level={"Q"}
-                        includeMargin={false}
-                        imageSettings={{
-                          src: "/icons/avalanche-avax-logo.png",
-                          x: undefined,
-                          y: undefined,
-                          height: 32,
-                          width: 32,
-                          excavate: true,
-                        }}
-                      />
-                    ) : (
-                      <div className="w-[220px] h-[220px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
-                    )}
+                  {/* Khung viền bọc QR */}
+                  <div className="p-2 mb-5 rounded-[20px] bg-gradient-to-b from-white/20 to-transparent border border-white/10 shadow-lg">
+                    <div className="bg-gradient-to-br from-[#1A3A34] to-[#122A25] p-6 rounded-xl flex items-center justify-center relative overflow-hidden h-[240px] w-[240px]">
+                      {/* Hiệu ứng ánh sáng nghệ thuật sau lưng QR */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-2xl rounded-full"></div>
+                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
+
+                      <div className="bg-white p-2 rounded relative z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                        {walletStatus?.address ? (
+                          <QRCodeCanvas
+                            id="qr-code-canvas"
+                            value={walletStatus.address}
+                            size={220}
+                            bgColor={"#ffffff"}
+                            fgColor={"#000000"}
+                            level={"Q"}
+                            includeMargin={false}
+                            imageSettings={{
+                              src: "/icons/avalanche-avax-logo.png",
+                              x: undefined,
+                              y: undefined,
+                              height: 32,
+                              width: 32,
+                              excavate: true,
+                            }}
+                          />
+                        ) : (
+                          <div className="w-[180px] h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <button
@@ -215,17 +226,19 @@ export function SmartWalletCard() {
                         toast.error('Không tìm thấy mã QR để tải về');
                       }
                     }}
-                    className="mb-5 flex items-center gap-2 px-6 py-2 rounded-full bg-black/20 border border-[#8B5E3C] hover:bg-black/40 transition-all text-[#D4B483] hover:text-white text-sm font-semibold group-hover:border-yellow-500/30"
+                    className="mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold group-hover:border-[#D4B483]/50 shadow-inner"
                   >
                     <span className="material-symbols-outlined text-lg">download</span>
                     Tải ảnh QR
                   </button>
 
-                  <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold mb-2 flex items-center gap-1 w-full justify-start">
-                    <span className="material-symbols-outlined text-sm">qr_code_2</span> Địa chỉ ví nhận
-                  </label>
-                  <div className="flex items-center bg-black/30 rounded border border-[#8B5E3C]/30 p-2.5 backdrop-blur-sm w-full">
-                    <code className="text-white font-mono text-sm truncate select-all flex-1">{walletStatus?.address}</code>
+                  <div className="flex w-full items-center justify-between mb-2">
+                    <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">qr_code_2</span> ĐỊA CHỈ VÍ NHẬN
+                    </label>
+                  </div>
+                  <div className="flex items-center bg-[#4A3629] rounded-lg border border-[#8B5E3C]/50 p-3 shadow-inner w-full">
+                    <code className="text-white font-mono text-xs truncate select-all flex-1">{walletStatus?.address}</code>
                     <button onClick={copyAddress} className="ml-2 p-1.5 rounded bg-[#8B5E3C] hover:bg-[#A67C52] text-white transition-colors flex-shrink-0 shadow-sm border border-[#5D3A29]">
                       <span className="material-symbols-outlined text-lg leading-none">{copied ? 'check' : 'content_copy'}</span>
                     </button>
@@ -233,8 +246,8 @@ export function SmartWalletCard() {
                 </div>
               </div>
 
-              <div className="rounded-lg bg-[#5D3A29]/80 border border-orange-500/30 p-3 flex gap-3 items-start text-left shadow-inner">
-                <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0">warning</span>
+              <div className="rounded-xl bg-[#5D3A29]/80 border border-orange-500/30 p-4 flex gap-3 items-start text-left shadow-inner">
+                <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0 text-xl">warning</span>
                 <div>
                   <h4 className="text-orange-200 text-sm font-bold mb-1">Chọn đúng mạng: Avalanche C-Chain</h4>
                   <p className="text-orange-200/70 text-xs leading-snug">Gửi sai mạng sẽ mất tiền và không thể khôi phục.</p>
