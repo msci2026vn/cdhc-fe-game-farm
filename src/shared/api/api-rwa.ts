@@ -1,0 +1,130 @@
+// ═══════════════════════════════════════════════════════════════
+// API RWA — Blockchain, Sensors, IoT, Delivery/Garden
+// ═══════════════════════════════════════════════════════════════
+
+import { handleUnauthorized, handleApiError, API_BASE_URL } from './api-utils';
+import type { MyGardenData, GardenSummary, DeliveryHistoryMonth } from '../types/game-api.types';
+
+// ═══ Phase 5: Blockchain + IoT Types ═══
+
+export interface BlockchainStats {
+  rootCount: number;
+  totalReadingsOnChain: number;
+  deployerBalance: string;
+  contractAddress: string;
+  chainId: number;
+  explorerUrl: string;
+}
+
+export interface BlockchainLog {
+  id: string;
+  merkleRoot: string;
+  readingCount: number;
+  txHash: string | null;
+  blockNumber: number | null;
+  gasUsed: string | null;
+  chainId: number;
+  contractAddress: string | null;
+  status: 'pending' | 'submitted' | 'confirmed' | 'failed';
+  errorMessage: string | null;
+  batchedAt: string;
+  submittedAt: string | null;
+  confirmedAt: string | null;
+  explorerUrl: string | null;
+}
+
+export interface SensorReading {
+  id: string;
+  deviceId: string;
+  temperature: string | null;
+  humidity: string | null;
+  lightLevel: string | null;
+  soilPh: string | null;
+  soilMoisture: string | null;
+  dataHash: string | null;
+  blockchainBatchId: string | null;
+  recordedAt: string;
+  indicators?: {
+    temperature: 'good' | 'warning' | 'danger';
+    humidity: 'good' | 'warning' | 'danger';
+    soilPh: 'good' | 'warning' | 'danger';
+  };
+}
+
+export interface IoTDevice {
+  id: string;
+  name: string;
+  type: string;
+  location: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+// ═══ Phase 5: Blockchain + IoT API Functions ═══
+
+export const getBlockchainStats = async (): Promise<BlockchainStats> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/blockchain/stats`);
+  if (!res.ok) throw new Error(`Failed to fetch blockchain stats: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getBlockchainLogs = async (limit = 20): Promise<BlockchainLog[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/blockchain/logs?limit=${limit}`);
+  if (!res.ok) throw new Error(`Failed to fetch blockchain logs: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getSensorLatest = async (deviceId?: string): Promise<SensorReading | null> => {
+  const params = deviceId ? `?deviceId=${deviceId}` : '';
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/latest${params}`);
+  if (!res.ok) throw new Error(`Failed to fetch sensor latest: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getSensorHistory = async (deviceId = 'mock-sensor-001', hours = 24): Promise<SensorReading[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/history?deviceId=${deviceId}&hours=${hours}`);
+  if (!res.ok) throw new Error(`Failed to fetch sensor history: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+export const getIoTDevices = async (): Promise<IoTDevice[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/devices`);
+  if (!res.ok) throw new Error(`Failed to fetch IoT devices: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+};
+
+// ═══ Phase 4: Delivery / My Garden ═══
+
+export const getMyGarden = async (month?: string): Promise<MyGardenData> => {
+  const url = month
+    ? `${API_BASE_URL}/api/rwa/my-garden?month=${month}`
+    : `${API_BASE_URL}/api/rwa/my-garden`;
+  const res = await fetch(url, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getMyGarden'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getGardenSummary = async (): Promise<GardenSummary> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/my-garden/summary`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getGardenSummary'); throw new Error('Session expired'); }
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getDeliveryHistory = async (): Promise<DeliveryHistoryMonth[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery-history`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getDeliveryHistory'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
