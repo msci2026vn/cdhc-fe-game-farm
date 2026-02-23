@@ -175,6 +175,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         onClose={() => setClaimModal({ isOpen: false, slotId: null, week: 0 })}
         slotId={claimModal.slotId}
         weekNumber={claimModal.week}
+        lastRecipientInfo={garden.lastRecipientInfo}
       />
 
       {/* QR Scanner Modal */}

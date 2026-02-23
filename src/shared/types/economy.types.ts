@@ -314,6 +314,7 @@ export interface MyGardenData {
   vipTier: string;
   deliveriesPerMonth: number;
   slots: DeliverySlot[];
+  lastRecipientInfo: RecipientInfo | null;
 }
 
 export interface GardenSummary {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import type { ClaimSlotResult } from '@/shared/types/game-api.types';
+import type { ClaimSlotResult, RecipientInfo } from '@/shared/types/game-api.types';
 import { useClaimSlot } from '@/shared/hooks/useMyGarden';
 import { useUIStore } from '@/shared/stores/uiStore';
 
@@ -9,6 +9,7 @@ interface OtpClaimModalProps {
   onClose: () => void;
   slotId: string | null;
   weekNumber: number;
+  lastRecipientInfo?: RecipientInfo | null;
 }
 
 const PHONE_REGEX = /^(0|\+84)[0-9]{9,10}$/;
@@ -21,29 +22,36 @@ function formatExpiry(iso: string) {
   });
 }
 
-export default function OtpClaimModal({ open, onClose, slotId, weekNumber }: OtpClaimModalProps) {
+export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastRecipientInfo }: OtpClaimModalProps) {
   const claimMutation = useClaimSlot();
 
-  const [step, setStep] = useState<'form' | 'result'>('form');
+  const [step, setStep] = useState<'review' | 'form' | 'result'>(
+    lastRecipientInfo ? 'review' : 'form',
+  );
   const [result, setResult] = useState<ClaimSlotResult | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Review note — luôn editable
+  const [reviewNote, setReviewNote] = useState(lastRecipientInfo?.note || '');
+
   // Form fields
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [note, setNote] = useState('');
+  const [name, setName] = useState(lastRecipientInfo?.name || '');
+  const [phone, setPhone] = useState(lastRecipientInfo?.phone || '');
+  const [address, setAddress] = useState(lastRecipientInfo?.address || '');
+  const [note, setNote] = useState(lastRecipientInfo?.note || '');
 
   // Validation errors
   const [errors, setErrors] = useState<{ name?: string; phone?: string; address?: string }>({});
 
   const resetForm = () => {
-    setStep('form');
+    const hasLast = !!lastRecipientInfo;
+    setStep(hasLast ? 'review' : 'form');
     setResult(null);
-    setName('');
-    setPhone('');
-    setAddress('');
-    setNote('');
+    setReviewNote(lastRecipientInfo?.note || '');
+    setName(lastRecipientInfo?.name || '');
+    setPhone(lastRecipientInfo?.phone || '');
+    setAddress(lastRecipientInfo?.address || '');
+    setNote(lastRecipientInfo?.note || '');
     setErrors({});
     setCopied(false);
   };
@@ -63,6 +71,37 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber }: Otp
     return Object.keys(e).length === 0;
   };
 
+  // "Xác nhận" từ review → data cũ + note MỚI
+  const handleQuickSubmit = () => {
+    if (!slotId || !lastRecipientInfo) return;
+
+    claimMutation.mutate(
+      {
+        slotId,
+        recipientName: lastRecipientInfo.name,
+        recipientPhone: lastRecipientInfo.phone,
+        recipientAddress: lastRecipientInfo.address,
+        recipientNote: reviewNote.trim() || undefined,
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          setStep('result');
+        },
+      },
+    );
+  };
+
+  // "Chỉnh sửa" → form pre-fill (giữ note đang gõ)
+  const handleEdit = () => {
+    setName(lastRecipientInfo?.name || '');
+    setPhone(lastRecipientInfo?.phone || '');
+    setAddress(lastRecipientInfo?.address || '');
+    setNote(reviewNote); // giữ note đang gõ ở review
+    setStep('form');
+  };
+
+  // Submit từ form
   const handleSubmit = () => {
     if (!slotId || !validate()) return;
 
@@ -101,14 +140,93 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber }: Otp
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-green-800 flex items-center justify-center gap-2">
-            <span>📦</span> {step === 'form' ? `Nhận quà Tuần ${weekNumber}` : 'Đã đăng ký nhận quà!'}
+            <span>📦</span> {step === 'result' ? 'Đã đăng ký nhận quà!' : `Nhận quà Tuần ${weekNumber}`}
           </DialogTitle>
         </div>
 
         <div className="px-5 pb-5 space-y-4">
-          {/* ═══ STEP 1: FORM ═══ */}
+          {/* ═══ STEP: REVIEW (lần 2+) ═══ */}
+          {step === 'review' && lastRecipientInfo && (
+            <>
+              {/* Read-only recipient info */}
+              <div>
+                <label className="text-sm font-semibold text-stone-700 mb-1.5 block">Thông tin giao hàng:</label>
+                <div className="bg-white/80 border border-stone-200 rounded-xl p-3 space-y-1.5">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-stone-400">👤</span>
+                    <span className="font-medium text-stone-700">{lastRecipientInfo.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-stone-400">📞</span>
+                    <span className="text-stone-600">{lastRecipientInfo.phone}</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm">
+                    <span className="text-stone-400 mt-0.5">📍</span>
+                    <span className="text-stone-600">{lastRecipientInfo.address}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Edit link */}
+              <button
+                type="button"
+                onClick={handleEdit}
+                className="text-xs font-medium text-green-600 hover:text-green-700 flex items-center gap-1 -mt-1"
+              >
+                <span>✏️</span> Chỉnh sửa thông tin
+              </button>
+
+              {/* Note — LUÔN EDITABLE */}
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-stone-600">Ghi chú cho lần giao này:</label>
+                <textarea
+                  value={reviewNote}
+                  onChange={(e) => setReviewNote(e.target.value)}
+                  placeholder="VD: Nhận sau 18h, gửi bảo vệ, cổng B..."
+                  maxLength={200}
+                  rows={2}
+                  className="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all resize-none"
+                />
+                <p className="text-[11px] text-stone-400">💡 VD: giờ nhận, cổng vào, gửi bảo vệ...</p>
+              </div>
+
+              {/* Quick submit */}
+              <button
+                onClick={handleQuickSubmit}
+                disabled={claimMutation.isPending}
+                className="w-full py-3 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
+              >
+                {claimMutation.isPending ? (
+                  <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'Xác nhận nhận quà'
+                )}
+              </button>
+
+              {/* Cancel */}
+              <button
+                onClick={handleClose}
+                className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
+              >
+                Hủy
+              </button>
+            </>
+          )}
+
+          {/* ═══ STEP: FORM ═══ */}
           {step === 'form' && (
             <>
+              {/* Back to review link (nếu có lastRecipientInfo) */}
+              {lastRecipientInfo && (
+                <button
+                  type="button"
+                  onClick={() => setStep('review')}
+                  className="text-xs font-medium text-stone-500 hover:text-stone-700 flex items-center gap-1 -mt-1"
+                >
+                  ← Quay lại
+                </button>
+              )}
+
               {/* Name */}
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-stone-700">Họ tên người nhận *</label>
@@ -184,7 +302,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber }: Otp
             </>
           )}
 
-          {/* ═══ STEP 2: RESULT ═══ */}
+          {/* ═══ STEP: RESULT ═══ */}
           {step === 'result' && result && (
             <>
               {/* OTP display */}
