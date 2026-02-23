@@ -3,14 +3,7 @@
 // Lightweight: CSS-only effects, no extra DOM for particles
 // ═══════════════════════════════════════════════════════════════
 
-const COMBO_VFX: Record<string, { emoji: string; particles: string[]; size: string }> = {
-  'COMBO': { emoji: '💥', particles: ['✨', '💫'], size: 'text-base' },
-  'SUPER': { emoji: '🌟', particles: ['⚡', '💛', '✨'], size: 'text-lg' },
-  'MEGA': { emoji: '🔥', particles: ['💥', '🔥', '💢'], size: 'text-xl' },
-  'ULTRA': { emoji: '💜', particles: ['💎', '💠', '🌀', '✨'], size: 'text-2xl' },
-  'LEGENDARY': { emoji: '👑', particles: ['🌈', '💎', '⭐', '👑'], size: 'text-2xl' },
-  '🔥 GODLIKE': { emoji: '☄️', particles: ['🔥', '💀', '⚡', '💥', '☄️'], size: 'text-3xl' },
-};
+import { COMBO_VFX } from '@/shared/match3/combat.config';
 
 interface ComboDisplayProps {
   combo: number;

@@ -4,11 +4,10 @@
 // Weekly boss uses original BossFightM3 — UNTOUCHED
 // ═══════════════════════════════════════════════════════════════
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useMatch3Campaign, CampaignBossData } from '../hooks/useMatch3Campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { useBossComplete } from '@/shared/hooks/useBossComplete';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
@@ -19,11 +18,27 @@ import { BossSprite } from './BossSprite';
 import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 
+// Shared match-3 components & hooks
+import { useGemPointer, useComboParticles } from '@/shared/match3';
+import UltimateFlash from '@/shared/match3/UltimateFlash';
+import BossAttackFlash from '@/shared/match3/BossAttackFlash';
+import ComboParticles from '@/shared/match3/ComboParticles';
+
+// Local extracted hooks
+import { useDeathAnimation } from './hooks/useDeathAnimation';
+import { useEnrageAlert } from './hooks/useEnrageAlert';
+import { useBattleEnd } from './hooks/useBattleEnd';
+
+// Local extracted components
+import DeathOverlay from './DeathOverlay';
+import { SkillWarningGlow, PhaseTransitionOverlay, DamageVignette, EnrageAlertBanner } from './SkillWarningOverlay';
+import { BossStatsBadges, BossBuffsBadges } from './BossStatsDisplay';
+
 // HUD components (reused from boss module)
 import {
   BossHPBar, PlayerHPBar, ManaBar, SkillBar, BattleTopBar,
-  ComboDisplay, COMBO_VFX, DamagePopupLayer,
-  BossRageOverlay, BattleResult, PhaseTransition,
+  ComboDisplay, DamagePopupLayer,
+  BossRageOverlay, BattleResult,
 } from '@/modules/boss/components/hud';
 
 interface Props {
@@ -105,68 +120,27 @@ export default function BossFightCampaign({
     return () => { audioManager.stopBgm(); };
   }, []);
 
-  // Stop BGM when battle ends
   useEffect(() => {
     if (result !== 'fighting') {
       audioManager.stopBgm();
     }
   }, [result]);
 
-  const bossComplete = useBossComplete();
   const { data: auth } = useAuth();
   const level = useLevel();
-  const rewardedRef = useRef(false);
-  const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
-  const particleId = useRef(0);
 
-  // ═══ Touch: drag-to-swipe / Mouse: tap-to-select ═══
-  const dragRef = useRef<{ idx: number; x: number; y: number } | null>(null);
+  // ═══ Shared hooks: pointer gestures + combo particles ═══
+  const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
+  const comboParticles = useComboParticles(combo, showCombo);
 
-  const handlePointerDown = (idx: number, e: React.PointerEvent) => {
-    if (e.pointerType === 'mouse') {
-      handleTap(idx);
-      return;
-    }
-    e.preventDefault();
-    dragRef.current = { idx, x: e.clientX, y: e.clientY };
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragRef.current || e.pointerType === 'mouse') return;
-    const dx = e.clientX - dragRef.current.x;
-    const dy = e.clientY - dragRef.current.y;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
-
-    if (Math.max(absDx, absDy) > 20) {
-      const startIdx = dragRef.current.idx;
-      dragRef.current = null;
-      if (absDx > absDy) {
-        handleSwipe(startIdx, dx > 0 ? 'right' : 'left');
-      } else {
-        handleSwipe(startIdx, dy > 0 ? 'down' : 'up');
-      }
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!dragRef.current) return;
-    if (e.pointerType !== 'mouse') {
-      handleTap(dragRef.current.idx);
-    }
-    dragRef.current = null;
-  };
-
-  // ═══ Death phase: dying overlay → then BattleResult ═══
-  const [deathPhase, setDeathPhase] = useState<'none' | 'dying' | 'done'>('none');
-
-  useEffect(() => {
-    if (result === 'defeat' && deathPhase === 'none') {
-      setDeathPhase('dying');
-      const timer = setTimeout(() => setDeathPhase('done'), 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [result, deathPhase]);
+  // ═══ Local extracted hooks ═══
+  const { deathPhase, setDeathPhase } = useDeathAnimation(result);
+  const { enrageLevel, enrageAlert } = useEnrageAlert(enrageMultiplier, result);
+  const bossComplete = useBattleEnd({
+    result, boss, campaignBossId,
+    totalDmgDealt, durationSeconds, stars,
+    maxCombo, combatStatsTracker,
+  });
 
   // ═══ Trigger sprite attack on boss skill or normal attack ═══
   useEffect(() => {
@@ -182,66 +156,6 @@ export default function BossFightCampaign({
     if (boss.bossHp <= 0 && hasSprites) triggerBossDead();
   }, [boss.bossHp <= 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ═══ Enrage alert ═══
-  const enrageLevel = Math.round((enrageMultiplier - 1) * 10);
-  const prevEnrageLevelRef = useRef(0);
-  const [enrageAlert, setEnrageAlert] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (result !== 'fighting') return;
-    if (enrageLevel > prevEnrageLevelRef.current && enrageLevel > 0) {
-      prevEnrageLevelRef.current = enrageLevel;
-      const alerts: Record<number, string> = {
-        1: '⚡ Boss tức giận! +10%',
-        2: '🔥 Boss cuồng nộ! +20%',
-        3: '💀 Boss điên cuồng! +30%',
-      };
-      setEnrageAlert(alerts[enrageLevel] || `☠️ RẤT NGUY HIỂM! +${enrageLevel * 10}%`);
-      const timer = setTimeout(() => setEnrageAlert(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [enrageLevel, result]);
-
-  // Call API on fight end
-  useEffect(() => {
-    if (result !== 'fighting' && !rewardedRef.current) {
-      rewardedRef.current = true;
-      const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
-      bossComplete.mutate({
-        bossId: campaignBossId,
-        won: result === 'victory',
-        totalDamage: totalDmgDealt,
-        durationSeconds,
-        stars: result === 'victory' ? stars : 0,
-        playerHpPercent: playerHpPct,
-        maxCombo,
-        dodgeCount: combatStatsTracker.dodgeCount,
-        isCampaign: true,
-      });
-    }
-  }, [result, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, boss.playerHp, boss.playerMaxHp]);
-
-  // Spawn combo particles
-  useEffect(() => {
-    if (!showCombo || combo < 2) return;
-    const comboInfo = getComboInfo(combo);
-    const vfx = COMBO_VFX[comboInfo.label];
-    if (!vfx) return;
-
-    const particles = vfx.particles.flatMap((char) =>
-      Array.from({ length: 2 }, () => ({
-        id: particleId.current++,
-        char,
-        x: 20 + Math.random() * 60,
-        y: 10 + Math.random() * 30,
-      }))
-    );
-    setComboParticles(prev => [...prev, ...particles]);
-    setTimeout(() => {
-      setComboParticles(prev => prev.filter(p => !particles.some(np => np.id === p.id)));
-    }, 1200);
-  }, [combo, showCombo]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
@@ -250,36 +164,12 @@ export default function BossFightCampaign({
   // ═══ Death overlay (shown before BattleResult on defeat) ═══
   if (result === 'defeat' && deathPhase === 'dying') {
     return (
-      <div className="h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col items-center justify-center overflow-hidden">
-        {/* Red vignette */}
-        <div className="absolute inset-0"
-          style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(139,0,0,0.5) 100%)' }} />
-        <div className="absolute inset-0 bg-black/60 animate-fade-in" />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center text-center px-6">
-          <div className="mb-4 animate-bounce drop-shadow-lg">
-            {spriteSrc ? (
-              <img key={spriteSrc} src={spriteSrc} alt={bossData.name} className="w-24 h-24 object-contain" draggable={false} />
-            ) : (
-              <span className="text-7xl">💀</span>
-            )}
-          </div>
-          <h1 className="text-3xl font-heading font-bold text-red-400 mb-2">
-            Bạn đã gục!
-          </h1>
-          <p className="text-gray-400 mb-8 text-sm">
-            {bossData.emoji} {bossData.name} đã đánh bại bạn
-          </p>
-          <button
-            onClick={() => setDeathPhase('done')}
-            className="px-8 py-3 bg-gray-700 text-white rounded-xl text-lg font-heading font-bold hover:bg-gray-600 transition active:scale-95"
-            style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
-          >
-            Xem kết quả
-          </button>
-        </div>
-      </div>
+      <DeathOverlay
+        spriteSrc={spriteSrc}
+        bossName={bossData.name}
+        bossEmoji={bossData.emoji}
+        onSkip={() => setDeathPhase('done')}
+      />
     );
   }
 
@@ -317,72 +207,19 @@ export default function BossFightCampaign({
   return (
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
       {/* Ultimate fullscreen flash */}
-      {ultActive && (
-        <div className="absolute inset-0 z-50 pointer-events-none">
-          <div className="absolute inset-0 animate-ult-flash" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
-            <div className="text-7xl mb-2 text-center animate-boss-idle">⚡</div>
-            <div className="px-8 py-4 rounded-2xl font-heading text-2xl font-bold text-white text-center"
-              style={{ background: 'linear-gradient(135deg, #6c5ce7, #e056fd, #a29bfe)', boxShadow: '0 0 80px rgba(108,92,231,0.9)' }}>
-              ⚡ ULTIMATE! ⚡
-            </div>
-          </div>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span key={i} className="absolute animate-sparkle-up text-2xl pointer-events-none"
-              style={{ left: `${10 + Math.random() * 80}%`, top: `${20 + Math.random() * 50}%`, animationDelay: `${i * 0.1}s` }}>
-              {['⚡', '💜', '✨', '💎'][i % 4]}
-            </span>
-          ))}
-        </div>
-      )}
+      {ultActive && <UltimateFlash />}
 
       {/* Boss attack flash */}
-      {bossAttackMsg && !ultActive && (
-        <div className="absolute inset-0 z-50 pointer-events-none">
-          <div className={`absolute inset-0 ${bossAttackMsg.emoji === '💨' ? '' : 'animate-boss-atk-flash'}`}
-            style={{ background: bossAttackMsg.emoji === '💨' ? 'rgba(85,239,196,0.1)' : 'transparent' }} />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="px-6 py-3 rounded-2xl font-heading font-bold text-white text-center animate-scale-in"
-              style={{
-                background: bossAttackMsg.emoji === '💨' ? 'rgba(85,239,196,0.9)' : 'rgba(231,76,60,0.95)',
-                boxShadow: bossAttackMsg.emoji === '💨' ? '0 0 30px rgba(85,239,196,0.5)' : '0 0 50px rgba(231,76,60,0.7)',
-              }}>
-              <span className="text-4xl block mb-1 animate-boss-idle">{bossAttackMsg.emoji}</span>
-              <span className="text-sm">{bossAttackMsg.text}</span>
-            </div>
-          </div>
-          {bossAttackMsg.emoji !== '💨' && Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="absolute animate-sparkle-up text-xl pointer-events-none"
-              style={{ left: `${15 + Math.random() * 70}%`, top: `${30 + Math.random() * 40}%`, animationDelay: `${i * 0.05}s` }}>
-              {['💥', '🔥', '⚡', '💢'][i % 4]}
-            </span>
-          ))}
-        </div>
-      )}
+      {bossAttackMsg && !ultActive && <BossAttackFlash text={bossAttackMsg.text} emoji={bossAttackMsg.emoji} />}
 
       {/* Combo particles */}
-      {comboParticles.map(p => (
-        <span key={p.id} className="absolute z-30 animate-sparkle-up pointer-events-none text-xl"
-          style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-          {p.char}
-        </span>
-      ))}
+      <ComboParticles particles={comboParticles} />
 
-      {/* Skill warning — screen edge glow (does NOT block interaction) */}
-      {skillWarning && (
-        <div className="absolute inset-0 pointer-events-none z-30 animate-pulse"
-          style={{ boxShadow: 'inset 0 0 60px rgba(231,76,60,0.3), inset 0 0 120px rgba(231,76,60,0.15)' }} />
-      )}
+      {/* Skill warning — screen edge glow */}
+      <SkillWarningGlow skillWarning={skillWarning} />
 
       {/* Phase transition overlay */}
-      {showPhaseTransition && (
-        <PhaseTransition
-          phase={showPhaseTransition.phaseNumber}
-          archetypeLabel={showPhaseTransition.name}
-          archetypeIcon={showPhaseTransition.icon}
-          description={showPhaseTransition.description}
-        />
-      )}
+      <PhaseTransitionOverlay phase={showPhaseTransition} />
 
       {/* Combat notifications */}
       {combatNotifs.length > 0 && (
@@ -397,31 +234,15 @@ export default function BossFightCampaign({
       )}
 
       {/* Red vignette flash when player takes damage */}
-      {screenShake && !ultActive && (
-        <div className="absolute inset-0 pointer-events-none z-40 animate-fade-in"
-          style={{ boxShadow: 'inset 0 0 80px rgba(231,76,60,0.25), inset 0 0 40px rgba(231,76,60,0.15)' }} />
-      )}
+      <DamageVignette screenShake={screenShake} ultActive={ultActive} />
 
-      {/* Enrage alert popup (3s then fade) */}
-      {enrageAlert && (
-        <div className={`absolute top-20 left-4 right-4 z-40 text-center py-2 px-4 rounded-lg pointer-events-none animate-fade-in font-heading font-bold ${enrageLevel >= 4 ? 'text-red-300 text-lg animate-pulse' :
-          enrageLevel >= 3 ? 'text-red-400' :
-            enrageLevel >= 2 ? 'text-orange-300' :
-              'text-yellow-300 text-sm'
-          }`} style={{
-            background: enrageLevel >= 3 ? 'rgba(139,0,0,0.85)' :
-              enrageLevel >= 2 ? 'rgba(180,90,0,0.8)' :
-                'rgba(120,100,0,0.75)',
-            boxShadow: enrageLevel >= 3 ? '0 0 20px rgba(231,76,60,0.4)' : 'none',
-          }}>
-          {enrageAlert}
-        </div>
-      )}
+      {/* Enrage alert popup */}
+      <EnrageAlertBanner enrageAlert={enrageAlert} enrageLevel={enrageLevel} />
 
       {/* Boss rage overlay */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossData.emoji} />
 
-      {/* Top half: Boss arena — ultra-compact for mobile */}
+      {/* Top half: Boss arena */}
       <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
@@ -452,7 +273,7 @@ export default function BossFightCampaign({
           </div>
         )}
 
-        {/* Boss HP bar — with DEF and heal indicators */}
+        {/* Boss HP bar */}
         <BossHPBar
           name={bossData.name}
           emoji={bossData.emoji}
@@ -465,49 +286,11 @@ export default function BossFightCampaign({
           healPerTurn={activeBossStats.healPercent}
         />
 
-        {/* Campaign-specific boss info badges (dynamic from active phase) */}
-        {(activeBossStats.def > 0 || activeBossStats.freq > 1 || enrageLevel > 0) && (
-          <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
-            {activeBossStats.def > 0 && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                style={{ background: 'rgba(116,185,255,0.2)', color: '#74b9ff', border: '1px solid rgba(116,185,255,0.3)' }}>
-                🛡️ DEF {activeBossStats.def}
-              </span>
-            )}
-            {activeBossStats.freq > 1 && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                style={{ background: 'rgba(253,121,168,0.2)', color: '#fd79a8', border: '1px solid rgba(253,121,168,0.3)' }}>
-                ⚡ x{activeBossStats.freq} đòn
-              </span>
-            )}
-            {enrageLevel > 0 && (
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${enrageLevel >= 3 ? 'animate-pulse' : ''}`}
-                style={{
-                  background: enrageLevel >= 3 ? 'rgba(231,76,60,0.3)' : enrageLevel >= 2 ? 'rgba(243,156,18,0.2)' : 'rgba(253,203,110,0.2)',
-                  color: enrageLevel >= 3 ? '#ff6b6b' : enrageLevel >= 2 ? '#f39c12' : '#fdcb6e',
-                  border: `1px solid ${enrageLevel >= 3 ? 'rgba(231,76,60,0.4)' : enrageLevel >= 2 ? 'rgba(243,156,18,0.3)' : 'rgba(253,203,110,0.3)'}`,
-                }}>
-                {enrageLevel >= 3 ? '💀' : enrageLevel >= 2 ? '🔥' : '⚡'} +{enrageLevel * 10}% ATK
-              </span>
-            )}
-          </div>
-        )}
+        {/* Boss stats badges */}
+        <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={enrageLevel} />
 
-        {/* Boss buffs (shield/reflect) */}
-        {activeBossBuffs.length > 0 && (
-          <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
-            {activeBossBuffs.map((b, i) => (
-              <span key={`${b.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
-                style={{
-                  background: b.type === 'shield' ? 'rgba(116,185,255,0.3)' : 'rgba(108,92,231,0.3)',
-                  color: b.type === 'shield' ? '#74b9ff' : '#a29bfe',
-                  border: `1px solid ${b.type === 'shield' ? 'rgba(116,185,255,0.4)' : 'rgba(108,92,231,0.4)'}`,
-                }}>
-                {b.icon} {b.label} {b.remainingSec}s
-              </span>
-            ))}
-          </div>
-        )}
+        {/* Boss buffs */}
+        <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
@@ -554,11 +337,11 @@ export default function BossFightCampaign({
         </div>
       </div>
 
-      {/* Bottom half: Match-3 + Skills — max space for grid */}
+      {/* Bottom half: Match-3 + Skills */}
       <div className="flex-[1_1_70%] rounded-t-2xl px-3 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
 
-        {/* Debuff bar (Phase 1 boss skills) */}
+        {/* Debuff bar */}
         {activeDebuffs.length > 0 && (
           <div className="flex gap-1.5 mb-1 flex-wrap">
             {activeDebuffs.map((d, i) => (
@@ -609,7 +392,7 @@ export default function BossFightCampaign({
           ultCost={manaUltCost}
         />
 
-        {/* Skill warning inline text (does NOT block gem grid) */}
+        {/* Skill warning inline text */}
         {skillWarning && (
           <div className="text-center py-1 pointer-events-none animate-pulse">
             <span className="bg-red-900/80 text-red-300 px-4 py-1 rounded-full text-sm font-bold">
@@ -630,7 +413,6 @@ export default function BossFightCampaign({
 
         {/* Gem grid + Stun overlay */}
         <div className="relative flex-1">
-          {/* Combo flash overlay */}
           {showCombo && combo >= 2 && (
             <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${Math.min(combo, 6)}`} />
           )}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
@@ -13,10 +13,16 @@ import BossSkillWarning from './BossSkillWarning';
 import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 
+// Shared match-3 components & hooks
+import { useGemPointer, useComboParticles } from '@/shared/match3';
+import UltimateFlash from '@/shared/match3/UltimateFlash';
+import BossAttackFlash from '@/shared/match3/BossAttackFlash';
+import ComboParticles from '@/shared/match3/ComboParticles';
+
 // HUD components
 import {
   BossHPBar, PlayerHPBar, ManaBar, SkillBar, BattleTopBar,
-  ComboDisplay, COMBO_VFX, DamagePopupLayer,
+  ComboDisplay, DamagePopupLayer,
   BossRageOverlay, BattleResult,
 } from './hud';
 
@@ -95,46 +101,10 @@ export default function BossFightM3({
   const { data: auth } = useAuth();
   const level = useLevel();
   const rewardedRef = useRef(false);
-  const [comboParticles, setComboParticles] = useState<{ id: number; char: string; x: number; y: number }[]>([]);
-  const particleId = useRef(0);
 
-  // ═══ Touch: drag-to-swipe / Mouse: tap-to-select ═══
-  const dragRef = useRef<{ idx: number; x: number; y: number } | null>(null);
-
-  const handlePointerDown = (idx: number, e: React.PointerEvent) => {
-    if (e.pointerType === 'mouse') {
-      handleTap(idx);
-      return;
-    }
-    e.preventDefault();
-    dragRef.current = { idx, x: e.clientX, y: e.clientY };
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragRef.current || e.pointerType === 'mouse') return;
-    const dx = e.clientX - dragRef.current.x;
-    const dy = e.clientY - dragRef.current.y;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
-
-    if (Math.max(absDx, absDy) > 20) {
-      const startIdx = dragRef.current.idx;
-      dragRef.current = null;
-      if (absDx > absDy) {
-        handleSwipe(startIdx, dx > 0 ? 'right' : 'left');
-      } else {
-        handleSwipe(startIdx, dy > 0 ? 'down' : 'up');
-      }
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!dragRef.current) return;
-    if (e.pointerType !== 'mouse') {
-      handleTap(dragRef.current.idx);
-    }
-    dragRef.current = null;
-  };
+  // ═══ Shared hooks: pointer gestures + combo particles ═══
+  const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
+  const comboParticles = useComboParticles(combo, showCombo);
 
   // Call API on fight end (victory or defeat)
   useEffect(() => {
@@ -155,27 +125,6 @@ export default function BossFightM3({
     }
   }, [result, bossInfo.id, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, isCampaign, boss.playerHp, boss.playerMaxHp]);
 
-  // Spawn combo particles
-  useEffect(() => {
-    if (!showCombo || combo < 2) return;
-    const comboInfo = getComboInfo(combo);
-    const vfx = COMBO_VFX[comboInfo.label];
-    if (!vfx) return;
-
-    const particles = vfx.particles.flatMap((char) =>
-      Array.from({ length: 2 }, () => ({
-        id: particleId.current++,
-        char,
-        x: 20 + Math.random() * 60,
-        y: 10 + Math.random() * 30,
-      }))
-    );
-    setComboParticles(prev => [...prev, ...particles]);
-    setTimeout(() => {
-      setComboParticles(prev => prev.filter(p => !particles.some(np => np.id === p.id)));
-    }, 1200);
-  }, [combo, showCombo]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
@@ -183,8 +132,6 @@ export default function BossFightM3({
 
   // Determine max turns: campaign turnLimit or default 99
   const maxTurns = turnLimit > 0 ? turnLimit : 99;
-
-  // Turn limit defeat is now handled inside useMatch3
 
   // Victory / Defeat screen using BattleResult component
   if (result !== 'fighting') {
@@ -220,56 +167,13 @@ export default function BossFightM3({
   return (
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
       {/* Ultimate fullscreen flash */}
-      {ultActive && (
-        <div className="absolute inset-0 z-50 pointer-events-none">
-          <div className="absolute inset-0 animate-ult-flash" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
-            <div className="text-7xl mb-2 text-center animate-boss-idle">⚡</div>
-            <div className="px-8 py-4 rounded-2xl font-heading text-2xl font-bold text-white text-center"
-              style={{ background: 'linear-gradient(135deg, #6c5ce7, #e056fd, #a29bfe)', boxShadow: '0 0 80px rgba(108,92,231,0.9)' }}>
-              ⚡ ULTIMATE! ⚡
-            </div>
-          </div>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span key={i} className="absolute animate-sparkle-up text-2xl pointer-events-none"
-              style={{ left: `${10 + Math.random() * 80}%`, top: `${20 + Math.random() * 50}%`, animationDelay: `${i * 0.1}s` }}>
-              {['⚡', '💜', '✨', '💎'][i % 4]}
-            </span>
-          ))}
-        </div>
-      )}
+      {ultActive && <UltimateFlash />}
 
       {/* Boss attack flash with animation */}
-      {bossAttackMsg && !ultActive && (
-        <div className="absolute inset-0 z-50 pointer-events-none">
-          <div className={`absolute inset-0 ${bossAttackMsg.emoji === '💨' ? '' : 'animate-boss-atk-flash'}`}
-            style={{ background: bossAttackMsg.emoji === '💨' ? 'rgba(85,239,196,0.1)' : 'transparent' }} />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="px-6 py-3 rounded-2xl font-heading font-bold text-white text-center animate-scale-in"
-              style={{
-                background: bossAttackMsg.emoji === '💨' ? 'rgba(85,239,196,0.9)' : 'rgba(231,76,60,0.95)',
-                boxShadow: bossAttackMsg.emoji === '💨' ? '0 0 30px rgba(85,239,196,0.5)' : '0 0 50px rgba(231,76,60,0.7)',
-              }}>
-              <span className="text-4xl block mb-1 animate-boss-idle">{bossAttackMsg.emoji}</span>
-              <span className="text-sm">{bossAttackMsg.text}</span>
-            </div>
-          </div>
-          {bossAttackMsg.emoji !== '💨' && Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="absolute animate-sparkle-up text-xl pointer-events-none"
-              style={{ left: `${15 + Math.random() * 70}%`, top: `${30 + Math.random() * 40}%`, animationDelay: `${i * 0.05}s` }}>
-              {['💥', '🔥', '⚡', '💢'][i % 4]}
-            </span>
-          ))}
-        </div>
-      )}
+      {bossAttackMsg && !ultActive && <BossAttackFlash text={bossAttackMsg.text} emoji={bossAttackMsg.emoji} />}
 
       {/* Combo particles */}
-      {comboParticles.map(p => (
-        <span key={p.id} className="absolute z-30 animate-sparkle-up pointer-events-none text-xl"
-          style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-          {p.char}
-        </span>
-      ))}
+      <ComboParticles particles={comboParticles} />
 
       {/* Skill warning overlay — only for skill attacks (25% chance) */}
       {skillWarning && (
