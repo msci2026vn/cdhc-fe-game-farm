@@ -41,6 +41,50 @@ function LoginScreenContent() {
       console.log('[FARM-DEBUG] LoginScreen: Response status =', res.status);
       console.log('[FARM-DEBUG] LoginScreen: Response data =', data);
 
+      if (res.ok && data.success && data.needRegister) {
+        // ═══ NEW USER — Auto-register as community ═══
+        console.log('[FARM-DEBUG] LoginScreen: New user detected, auto-registering as community...');
+        const googleUser = data.googleUser;
+
+        const regRes = await fetch(API_BASE_URL + '/api/auth/google/register', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            idToken,
+            role: 'community',
+            orgType: 'individual',
+            profile: {
+              fullName: googleUser?.name || 'Người chơi',
+              province: 'Chưa cập nhật',
+              ward: 'Chưa cập nhật',
+              interests: ['organic_farming'],
+            },
+            isLegacyUser: data.isLegacyUser || false,
+          }),
+        });
+
+        const regData = await regRes.json();
+        console.log('[FARM-DEBUG] LoginScreen: Register response =', regData);
+
+        if (regRes.ok && regData.success) {
+          console.log('[FARM-DEBUG] LoginScreen: ✅ Auto-register successful → entering game...');
+          resetRedirectLock();
+          try {
+            await queryClient.prefetchQuery({
+              queryKey: PLAYER_PROFILE_KEY,
+              queryFn: () => gameApi.getProfile(),
+            });
+          } catch (prefetchError) {
+            console.warn('[FARM-DEBUG] LoginScreen: Profile prefetch failed (non-blocking):', prefetchError);
+          }
+          navigate('/farm', { replace: true });
+        } else {
+          setError(regData.error?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+        }
+        return;
+      }
+
       if (res.ok && data.success) {
         console.log('[FARM-DEBUG] LoginScreen: ✅ Login successful → prefetching profile...');
 
@@ -59,15 +103,15 @@ function LoginScreenContent() {
 
         navigate('/farm', { replace: true });
       } else if (data.error?.code === 'NOT_APPROVED') {
-        setError('⏳ Tài khoản đang chờ duyệt. Vui lòng liên hệ admin.');
+        setError('Tài khoản đang chờ duyệt. Vui lòng liên hệ admin.');
       } else if (data.error?.code === 'ALREADY_PENDING') {
-        setError('⏳ Tài khoản đang chờ phê duyệt.');
+        setError('Tài khoản đang chờ phê duyệt.');
       } else {
-        setError(data.error?.message || '❌ Đăng nhập thất bại');
+        setError(data.error?.message || 'Đăng nhập thất bại');
       }
     } catch (err) {
       console.error('[FARM-DEBUG] LoginScreen: ❌ Exception:', err);
-      setError('❌ Lỗi kết nối. Vui lòng thử lại.');
+      setError('Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }

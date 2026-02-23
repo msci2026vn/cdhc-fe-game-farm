@@ -47,6 +47,8 @@ export interface PrayerHistoryItem {
 export interface PrayerLeaderboardEntry {
   userId: string;
   userName: string;
+  picture?: string | null;
+  avatarUrl?: string | null;
   totalPrayers: number;
   currentStreak: number;
   rank: number;
