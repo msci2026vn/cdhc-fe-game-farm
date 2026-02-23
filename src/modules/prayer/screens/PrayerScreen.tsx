@@ -194,20 +194,19 @@ export default function PrayerScreen() {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 border-4 border-yellow-200/30 rounded-full halo-spin -z-10"></div>
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-56 h-56 border-2 border-yellow-400/20 rounded-full halo-spin -z-10" style={{ animationDirection: 'reverse' }}></div>
 
-              <div className="relative w-48 h-64 float-gentle z-10">
+              <div className="relative w-52 h-72 float-gentle z-10">
                 <div className="w-full h-full relative">
-                  <div className="absolute inset-0 bg-yellow-100 rounded-full blur-3xl opacity-60"></div>
+                  <div className="absolute inset-0 bg-yellow-100 rounded-full blur-3xl opacity-40"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[180px] text-green-600 drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1, 'wght' 300" }}>
-                      female
-                    </span>
-                    <span className="absolute top-10 material-symbols-outlined text-[120px] text-green-500 drop-shadow-md opacity-80" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      psychology_alt
-                    </span>
-                    <div className="absolute top-2 w-24 h-12 border-t-4 border-yellow-400 rounded-full"></div>
+                    <img
+                      src="/assets/pray/me-thien-nhien.png"
+                      alt="Mẹ Thiên Nhiên"
+                      className="w-full h-full object-contain drop-shadow-2xl"
+                    />
                   </div>
-                  <div className="absolute top-10 right-0 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
-                  <div className="absolute bottom-20 left-0 w-2 h-2 bg-yellow-300 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-6 right-2 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                  <div className="absolute bottom-16 left-2 w-2 h-2 bg-yellow-300 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-1/3 left-0 w-2 h-2 bg-green-300 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
                 </div>
               </div>
               <div className="w-40 h-12 bg-[#8c6239] rounded-[50%] border-4 border-[#5d4037] relative -mt-6 z-0 shadow-lg">
