@@ -71,10 +71,10 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                 <div className="flex flex-col items-center -mr-4 z-10 mb-2 transform translate-y-2">
                                     <div className="relative">
                                         <div className="w-16 h-16 rounded-full border-4 border-gray-300 overflow-hidden shadow-lg relative z-10 bg-gray-200 flex items-center justify-center font-bold text-2xl text-gray-700">
-                                            {top3[1].picture || top3[1].avatarUrl ? (
-                                                <img src={top3[1].picture || top3[1].avatarUrl || ''} alt={top3[1].userName} className="w-full h-full object-cover" />
+                                            {top3[1].gmailAvatar || top3[1].picture || top3[1].avatarUrl ? (
+                                                <img src={top3[1].gmailAvatar || top3[1].picture || top3[1].avatarUrl || ''} alt={top3[1].gmailName || top3[1].userName} className="w-full h-full object-cover" />
                                             ) : (
-                                                top3[1].userName.charAt(0).toUpperCase()
+                                                (top3[1].gmailName || top3[1].userName).charAt(0).toUpperCase()
                                             )}
                                         </div>
                                         <div className="absolute -top-4 -left-2 z-20">
@@ -101,10 +101,10 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                     <div className="relative">
                                         <div className="absolute -inset-1 bg-yellow-400 rounded-full blur opacity-75 animate-pulse"></div>
                                         <div className="w-20 h-20 rounded-full border-4 border-yellow-400 overflow-hidden shadow-xl relative z-10 bg-yellow-100 flex items-center justify-center font-bold text-2xl text-yellow-600">
-                                            {top3[0].picture || top3[0].avatarUrl ? (
-                                                <img src={top3[0].picture || top3[0].avatarUrl || ''} alt={top3[0].userName} className="w-full h-full object-cover" />
+                                            {top3[0].gmailAvatar || top3[0].picture || top3[0].avatarUrl ? (
+                                                <img src={top3[0].gmailAvatar || top3[0].picture || top3[0].avatarUrl || ''} alt={top3[0].gmailName || top3[0].userName} className="w-full h-full object-cover" />
                                             ) : (
-                                                top3[0].userName.charAt(0).toUpperCase()
+                                                (top3[0].gmailName || top3[0].userName).charAt(0).toUpperCase()
                                             )}
                                         </div>
                                         <div className="absolute -top-6 -right-4 z-20">
@@ -130,10 +130,10 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                 <div className="flex flex-col items-center -ml-4 z-10 mb-2 transform translate-y-4">
                                     <div className="relative">
                                         <div className="w-16 h-16 rounded-full border-4 border-orange-700 overflow-hidden shadow-lg relative z-10 bg-orange-100 flex items-center justify-center font-bold text-xl text-orange-600">
-                                            {top3[2].picture || top3[2].avatarUrl ? (
-                                                <img src={top3[2].picture || top3[2].avatarUrl || ''} alt={top3[2].userName} className="w-full h-full object-cover" />
+                                            {top3[2].gmailAvatar || top3[2].picture || top3[2].avatarUrl ? (
+                                                <img src={top3[2].gmailAvatar || top3[2].picture || top3[2].avatarUrl || ''} alt={top3[2].gmailName || top3[2].userName} className="w-full h-full object-cover" />
                                             ) : (
-                                                top3[2].userName.charAt(0).toUpperCase()
+                                                (top3[2].gmailName || top3[2].userName).charAt(0).toUpperCase()
                                             )}
                                         </div>
                                         <div className="absolute -top-4 -right-2 z-20">
@@ -166,10 +166,10 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                         <div className="w-8 flex justify-center text-farm-brown-dark font-display font-bold text-lg">{currentUserRank.rank}</div>
                                         <div className="relative mx-3">
                                             <div className="w-12 h-12 rounded-full border-2 border-green-600 overflow-hidden bg-green-200 flex items-center justify-center font-bold text-sm text-green-700">
-                                                {profile?.picture ? (
-                                                    <img src={profile.picture} alt={profile.name || ''} className="w-full h-full object-cover" />
+                                                {profile?.picture || (profile as any)?.gmailAvatar ? (
+                                                    <img src={profile.picture || (profile as any)?.gmailAvatar} alt={profile.name || (profile as any)?.gmailName || ''} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    profile?.name ? profile.name.charAt(0).toUpperCase() : '?'
+                                                    (profile?.name || (profile as any)?.gmailName) ? (profile?.name || (profile as any)?.gmailName).charAt(0).toUpperCase() : '?'
                                                 )}
                                             </div>
                                             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border border-white">
@@ -177,7 +177,7 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                             </div>
                                         </div>
                                         <div className="flex-1">
-                                            <div className="text-green-800 font-bold text-sm">Tôi ({profile?.name})</div>
+                                            <div className="text-green-800 font-bold text-sm">Tôi ({(profile as any)?.gmailName || profile?.name})</div>
                                         </div>
                                         <div className="flex items-center gap-1 bg-white px-3 py-1 rounded-full border border-green-200 shadow-sm">
                                             <span className="material-symbols-outlined text-pink-500 text-sm">favorite</span>
@@ -195,15 +195,15 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                             <div className="w-8 flex justify-center text-farm-brown font-display font-bold text-lg">{entry.rank}</div>
                                             <div className="relative mx-3">
                                                 <div className="w-10 h-10 rounded-full border-2 border-farm-brown-dark/30 overflow-hidden bg-orange-50 flex items-center justify-center font-bold text-sm text-farm-brown">
-                                                    {entry.picture || entry.avatarUrl ? (
-                                                        <img src={entry.picture || entry.avatarUrl || ''} alt={entry.userName} className="w-full h-full object-cover" />
+                                                    {entry.gmailAvatar || entry.picture || entry.avatarUrl ? (
+                                                        <img src={entry.gmailAvatar || entry.picture || entry.avatarUrl || ''} alt={entry.gmailName || entry.userName} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        entry.userName.charAt(0).toUpperCase()
+                                                        (entry.gmailName || entry.userName).charAt(0).toUpperCase()
                                                     )}
                                                 </div>
                                             </div>
                                             <div className="flex-1">
-                                                <div className="text-farm-brown-dark font-bold text-sm">{entry.userName}</div>
+                                                <div className="text-farm-brown-dark font-bold text-sm">{entry.gmailName || entry.userName}</div>
                                                 {entry.currentStreak > 0 && <div className="text-[10px] text-orange-500 font-bold">Chuỗi: {entry.currentStreak} ngày</div>}
                                             </div>
                                             <div className="flex items-center gap-1">

@@ -49,6 +49,8 @@ export interface PrayerLeaderboardEntry {
   userName: string;
   picture?: string | null;
   avatarUrl?: string | null;
+  gmailAvatar?: string | null;
+  gmailName?: string | null;
   totalPrayers: number;
   currentStreak: number;
   rank: number;
