@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import meThienNhienImg from '@/assets/pray/me-thien-nhien.png';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
@@ -199,7 +200,7 @@ export default function PrayerScreen() {
                   <div className="absolute inset-0 bg-yellow-100 rounded-full blur-3xl opacity-40"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img
-                      src="/assets/pray/me-thien-nhien.png"
+                      src={meThienNhienImg}
                       alt="Mẹ Thiên Nhiên"
                       className="w-full h-full object-contain drop-shadow-2xl"
                     />
