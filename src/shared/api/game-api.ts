@@ -53,6 +53,7 @@ export {
   getSensorHourly,
   getSensorDates,
   getIoTDevices,
+  getCameraStreamInfo,
   getMyGarden,
   getGardenSummary,
   getDeliveryHistory,
@@ -73,6 +74,7 @@ export type {
   SensorHourlyRecord,
   SensorHourlyData,
   IoTDevice,
+  CameraStreamInfo,
 } from './api-rwa';
 
 export type {

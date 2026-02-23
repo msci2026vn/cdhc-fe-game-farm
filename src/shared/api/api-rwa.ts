@@ -149,6 +149,28 @@ export const getIoTDevices = async (): Promise<IoTDevice[]> => {
   return json.data;
 };
 
+// ═══ Phase 8: Camera Livestream ═══
+
+export interface CameraStreamInfo {
+  id: string;
+  name: string;
+  location: string;
+  webrtcUrl: string;
+  hlsUrl: string | null;
+  description: string;
+  resolution: string;
+}
+
+export const getCameraStreamInfo = async (deviceId?: string): Promise<CameraStreamInfo> => {
+  const params = deviceId ? `?deviceId=${deviceId}` : '';
+  const res = await fetch(`${API_BASE_URL}/api/rwa/camera/stream-info${params}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getCameraStreamInfo'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
 // ═══ Phase 4: Delivery / My Garden ═══
 
 export const getMyGarden = async (month?: string): Promise<MyGardenData> => {

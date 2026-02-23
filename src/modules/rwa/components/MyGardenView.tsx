@@ -8,6 +8,7 @@ import ManualVerifyModal from './ManualVerifyModal';
 import BlockchainProofModal from './BlockchainProofModal';
 import DeliveryDetailModal from './DeliveryDetailModal';
 import SensorTimeline from './SensorTimeline';
+import CameraLiveView from './CameraLiveView';
 
 function formatMonthYear(my: string) {
   const [year, month] = my.split('-');
@@ -115,6 +116,11 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         {/* Sensor Timeline (VIP only — data from hourly API) */}
         <div className="px-4 mt-4">
           <SensorTimeline />
+        </div>
+
+        {/* Camera Livestream (Phase 8 — VIP only) */}
+        <div className="px-4 mt-4">
+          <CameraLiveView />
         </div>
 
         {/* Delivery slots grid */}
