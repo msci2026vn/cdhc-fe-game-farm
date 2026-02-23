@@ -4,18 +4,20 @@ import { useCameraStream } from '@/shared/hooks/useCamera';
 export default function CameraLiveView() {
   const { data: stream, isLoading, error } = useCameraStream();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [useHls, setUseHls] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Check stream online status periodically
+  const streamUrl = stream?.hlsUrl || stream?.webrtcUrl;
+
+  // Check stream online status
   useEffect(() => {
-    if (!stream?.webrtcUrl) return;
+    if (!streamUrl) return;
 
     let mounted = true;
     const check = async () => {
       try {
-        await fetch(stream.webrtcUrl, { method: 'HEAD', mode: 'no-cors' });
+        await fetch(streamUrl, { method: 'HEAD', mode: 'no-cors' });
         if (mounted) setIsOnline(true);
       } catch {
         if (mounted) setIsOnline(false);
@@ -25,7 +27,22 @@ export default function CameraLiveView() {
     check();
     const interval = setInterval(check, 30_000);
     return () => { mounted = false; clearInterval(interval); };
-  }, [stream?.webrtcUrl]);
+  }, [streamUrl]);
+
+  // Auto-retry video on error
+  useEffect(() => {
+    if (!hasError || !videoRef.current || !streamUrl) return;
+
+    const timer = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.src = streamUrl + '?t=' + Date.now();
+        videoRef.current.load();
+        setHasError(false);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [hasError, streamUrl]);
 
   if (isLoading) {
     return (
@@ -59,30 +76,30 @@ export default function CameraLiveView() {
       {!isCollapsed && (
         <div className="px-4 pb-4">
           {/* Video player */}
-          {isOnline ? (
-            !useHls ? (
-              <iframe
-                ref={iframeRef}
-                src={stream.webrtcUrl}
-                className="w-full aspect-video rounded-lg border border-stone-200 bg-black"
-                allow="autoplay"
-                allowFullScreen
-                onError={() => setUseHls(true)}
-              />
-            ) : stream.hlsUrl ? (
-              <video
-                src={stream.hlsUrl}
-                className="w-full aspect-video rounded-lg border border-stone-200 bg-black"
-                autoPlay
-                muted
-                playsInline
-                controls
-              />
-            ) : (
-              <OfflinePlaceholder />
-            )
+          {isOnline && !hasError ? (
+            <video
+              ref={videoRef}
+              src={streamUrl}
+              autoPlay
+              muted
+              playsInline
+              controls
+              className="w-full aspect-video rounded-lg border border-stone-200 bg-black object-contain"
+              onError={() => setHasError(true)}
+              onPlaying={() => setHasError(false)}
+            />
           ) : (
-            <OfflinePlaceholder />
+            <div className="w-full aspect-video rounded-lg bg-stone-800 flex items-center justify-center border border-stone-700">
+              <div className="text-center text-stone-400">
+                <span className="text-3xl block mb-1">📹</span>
+                <p className="text-sm font-medium">
+                  {hasError ? 'Dang ket noi lai...' : 'Camera dang offline'}
+                </p>
+                <p className="text-xs mt-0.5 text-stone-500">
+                  {hasError ? 'Tu dong thu lai sau 5s' : 'Vui long thu lai sau'}
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Info bar */}
@@ -96,30 +113,8 @@ export default function CameraLiveView() {
           <div className="text-[11px] text-stone-400 mt-1">
             {stream.name} · {stream.resolution}
           </div>
-
-          {/* Toggle WebRTC/HLS */}
-          {isOnline && stream.hlsUrl && (
-            <button
-              onClick={() => setUseHls(!useHls)}
-              className="mt-2 text-[11px] text-green-600 underline underline-offset-2"
-            >
-              {useHls ? 'Chuyen WebRTC (nhanh hon)' : 'Chuyen HLS (on dinh hon)'}
-            </button>
-          )}
         </div>
       )}
-    </div>
-  );
-}
-
-function OfflinePlaceholder() {
-  return (
-    <div className="w-full aspect-video rounded-lg bg-stone-800 flex items-center justify-center border border-stone-700">
-      <div className="text-center text-stone-400">
-        <span className="text-3xl block mb-1">📹</span>
-        <p className="text-sm font-medium">Camera dang offline</p>
-        <p className="text-xs mt-0.5 text-stone-500">Vui long thu lai sau</p>
-      </div>
     </div>
   );
 }
