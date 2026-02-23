@@ -5,7 +5,8 @@
 import { handleUnauthorized, handleApiError, API_BASE_URL } from './api-utils';
 import type {
   MyGardenData, GardenSummary, DeliveryHistoryMonth,
-  ClaimSlotResult, VerifyOtpResult, SlotQrData, DeliveryProof,
+  ClaimSlotRequest, ClaimSlotResult, ScanClaimRequest, ScanClaimResult,
+  VerifyOtpResult, SlotQrData, DeliveryProof,
 } from '../types/game-api.types';
 
 // ═══ Phase 5: Blockchain + IoT Types ═══
@@ -132,12 +133,14 @@ export const getDeliveryHistory = async (): Promise<DeliveryHistoryMonth[]> => {
   return json.data;
 };
 
-// ═══ Phase 6C: Delivery OTP + Verify ═══
+// ═══ Phase 6C/6F: Delivery OTP + Verify ═══
 
-export const claimDeliverySlot = async (slotId: string): Promise<ClaimSlotResult> => {
+export const claimDeliverySlot = async (slotId: string, data: ClaimSlotRequest): Promise<ClaimSlotResult> => {
   const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/claim/${slotId}`, {
     method: 'POST',
     credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
   if (res.status === 401) { handleUnauthorized('claimDeliverySlot'); throw new Error('Session expired'); }
   if (!res.ok) { await handleApiError(res); }
@@ -145,14 +148,27 @@ export const claimDeliverySlot = async (slotId: string): Promise<ClaimSlotResult
   return json.data;
 };
 
-export const verifyDeliveryOtp = async (slotId: string, otpCode: string): Promise<VerifyOtpResult> => {
+export const scanClaimDelivery = async (data: ScanClaimRequest): Promise<ScanClaimResult> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/scan-claim`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (res.status === 401) { handleUnauthorized('scanClaimDelivery'); throw new Error('Session expired'); }
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const manualVerifyDelivery = async (slotId: string, otpCode: string): Promise<VerifyOtpResult> => {
   const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/verify-otp`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ slotId, otpCode }),
   });
-  if (res.status === 401) { handleUnauthorized('verifyDeliveryOtp'); throw new Error('Session expired'); }
+  if (res.status === 401) { handleUnauthorized('manualVerifyDelivery'); throw new Error('Session expired'); }
   if (!res.ok) { await handleApiError(res); }
   const json = await res.json();
   return json.data;

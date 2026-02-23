@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import type { DeliverySlot, DeliverySlotStatus } from '@/shared/types/game-api.types';
-import { useUIStore } from '@/shared/stores/uiStore';
 
 const STATUS_CONFIG: Record<DeliverySlotStatus, {
   icon: string;
@@ -12,7 +10,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
 }> = {
   available: {
     icon: '🎁',
-    label: 'San sang nhan rau',
+    label: 'Sẵn sàng nhận rau',
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
     textColor: 'text-green-700',
@@ -20,7 +18,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   claimed: {
     icon: '📦',
-    label: 'Cho giao hang',
+    label: 'Chờ giao hàng',
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-200',
     textColor: 'text-amber-700',
@@ -28,7 +26,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   shipped: {
     icon: '🚚',
-    label: 'Dang giao hang',
+    label: 'Đang giao hàng',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     textColor: 'text-blue-700',
@@ -36,7 +34,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   delivered: {
     icon: '✅',
-    label: 'Da nhan',
+    label: 'Đã nhận',
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-200',
     textColor: 'text-gray-600',
@@ -44,7 +42,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   expired: {
     icon: '❌',
-    label: 'Het han',
+    label: 'Hết hạn',
     bgColor: 'bg-red-50',
     borderColor: 'border-red-100',
     textColor: 'text-red-400',
@@ -62,27 +60,16 @@ interface DeliverySlotCardProps {
   slot: DeliverySlot;
   index: number;
   onClaim?: (slotId: string) => void;
-  onViewQr?: (slotId: string) => void;
+  onScan?: (slotId: string) => void;
+  onManualVerify?: (slotId: string) => void;
   onViewBlockchain?: (slotId: string) => void;
   isClaiming?: boolean;
 }
 
 export default function DeliverySlotCard({
-  slot, index, onClaim, onViewQr, onViewBlockchain, isClaiming,
+  slot, index, onClaim, onScan, onManualVerify, onViewBlockchain, isClaiming,
 }: DeliverySlotCardProps) {
   const config = STATUS_CONFIG[slot.status] ?? STATUS_CONFIG.available;
-  const [otpCopied, setOtpCopied] = useState(false);
-
-  const handleCopyOtp = async () => {
-    if (!slot.otpCode) return;
-    try {
-      await navigator.clipboard.writeText(slot.otpCode);
-      setOtpCopied(true);
-      useUIStore.getState().addToast('Da copy ma OTP', 'success');
-      setTimeout(() => setOtpCopied(false), 2000);
-    } catch { /* ignore */ }
-  };
-
   const hasBlockchain = !!slot.blockchainTx;
 
   return (
@@ -91,7 +78,7 @@ export default function DeliverySlotCard({
       <div className={`${config.iconBg} w-10 h-10 rounded-full flex items-center justify-center`}>
         <span className="text-xl">{config.icon}</span>
       </div>
-      <p className="text-sm font-bold text-stone-700">Tuan {index + 1}</p>
+      <p className="text-sm font-bold text-stone-700">Tuần {index + 1}</p>
       <p className={`text-xs font-medium ${config.textColor} text-center`}>{config.label}</p>
 
       {/* === AVAILABLE: Claim button === */}
@@ -104,47 +91,55 @@ export default function DeliverySlotCard({
           {isClaiming ? (
             <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
           ) : (
-            <>🎁 Nhan hang</>
+            <>🎁 Nhận quà</>
           )}
         </button>
       )}
 
-      {/* === CLAIMED: OTP display === */}
-      {slot.status === 'claimed' && slot.otpCode && (
+      {/* === CLAIMED: Recipient info + Scan/Manual buttons === */}
+      {slot.status === 'claimed' && (
         <div className="w-full space-y-1.5">
-          <p className="text-[10px] text-amber-600 text-center font-medium">Ma nhan hang:</p>
-          <div className="bg-white border border-amber-200 rounded-lg py-1.5 px-2">
-            <p className="text-center text-lg font-mono font-bold text-amber-800 tracking-[0.3em]">
-              {slot.otpCode}
-            </p>
-          </div>
-          <div className="flex gap-1.5">
-            <button
-              onClick={handleCopyOtp}
-              className="flex-1 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 text-[10px] font-semibold rounded-lg border border-amber-200 transition-colors"
-            >
-              {otpCopied ? '✓ Da copy' : '📋 Copy'}
-            </button>
-            {onViewQr && (
-              <button
-                onClick={() => onViewQr(slot.id)}
-                className="flex-1 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 text-[10px] font-semibold rounded-lg border border-amber-200 transition-colors"
-              >
-                📱 QR
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+          {/* Recipient name + address */}
+          {slot.recipientName && (
+            <div className="space-y-0.5">
+              <p className="text-[10px] text-amber-700 flex items-center gap-1 truncate">
+                <span>👤</span> {slot.recipientName}
+              </p>
+              {slot.recipientAddress && (
+                <p className="text-[10px] text-stone-500 truncate">
+                  📍 {slot.recipientAddress}
+                </p>
+              )}
+            </div>
+          )}
 
-      {/* CLAIMED but no OTP yet (fallback) */}
-      {slot.status === 'claimed' && !slot.otpCode && onViewQr && (
-        <button
-          onClick={() => onViewQr(slot.id)}
-          className="w-full mt-1 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 text-[10px] font-semibold rounded-lg border border-amber-200 transition-colors"
-        >
-          📱 Xem ma OTP
-        </button>
+          {/* OTP code (compact) */}
+          {slot.otpCode && (
+            <p className="text-center text-xs font-mono font-bold text-amber-800 bg-white border border-amber-200 rounded-lg py-1">
+              Mã: {slot.otpCode}
+            </p>
+          )}
+
+          {/* Scan button */}
+          {onScan && (
+            <button
+              onClick={() => onScan(slot.id)}
+              className="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+            >
+              📷 Scan nhận hàng
+            </button>
+          )}
+
+          {/* Manual verify button */}
+          {onManualVerify && (
+            <button
+              onClick={() => onManualVerify(slot.id)}
+              className="w-full py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 text-[10px] font-semibold rounded-lg border border-amber-200 transition-colors flex items-center justify-center gap-1"
+            >
+              ✏️ Nhập mã thủ công
+            </button>
+          )}
+        </div>
       )}
 
       {/* === DELIVERED: Show date + blockchain status === */}
@@ -170,13 +165,13 @@ export default function DeliverySlotCard({
             </div>
           ) : (
             <div className="text-center">
-              <p className="text-[10px] text-amber-500 font-medium">⏳ Blockchain: Dang cho</p>
+              <p className="text-[10px] text-amber-500 font-medium">⏳ Blockchain: Đang chờ</p>
               {onViewBlockchain && (
                 <button
                   onClick={() => onViewBlockchain(slot.id)}
                   className="w-full mt-1 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-500 text-[10px] font-semibold rounded-lg border border-stone-200 transition-colors"
                 >
-                  📱 Xem nguon goc
+                  📱 Xem nguồn gốc
                 </button>
               )}
             </div>
@@ -188,8 +183,6 @@ export default function DeliverySlotCard({
       {slot.status === 'shipped' && slot.claimedAt && (
         <p className="text-[10px] text-blue-400">{formatDate(slot.claimedAt)}</p>
       )}
-
-      {/* === EXPIRED: just the greyed state (already shown above) === */}
     </div>
   );
 }

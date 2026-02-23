@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ClaimSlotRequest, ScanClaimRequest } from '../types/game-api.types';
 import {
   getMyGarden, getGardenSummary, getDeliveryHistory,
-  claimDeliverySlot, verifyDeliveryOtp, getSlotQr, getDeliveryProof,
+  claimDeliverySlot, scanClaimDelivery, manualVerifyDelivery,
+  getSlotQr, getDeliveryProof,
 } from '../api/game-api';
 import { useUIStore } from '../stores/uiStore';
 
@@ -42,13 +44,14 @@ export function useDeliveryHistory(enabled = true) {
   });
 }
 
-// ═══ Phase 6C: Delivery OTP + Verify hooks ═══
+// ═══ Phase 6F: Delivery claim + scan + manual verify hooks ═══
 
-/** Claim slot → nhận OTP */
+/** Claim slot → gửi form nhận quà → nhận OTP */
 export function useClaimSlot() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (slotId: string) => claimDeliverySlot(slotId),
+    mutationFn: ({ slotId, ...data }: { slotId: string } & ClaimSlotRequest) =>
+      claimDeliverySlot(slotId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rwa', 'my-garden'] });
       queryClient.invalidateQueries({ queryKey: ['rwa', 'garden-summary'] });
@@ -59,15 +62,32 @@ export function useClaimSlot() {
   });
 }
 
-/** Verify OTP (shipper dùng) */
-export function useVerifyOtp() {
+/** Scan QR → gọi scan-claim API */
+export function useScanClaim() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ScanClaimRequest) => scanClaimDelivery(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rwa', 'my-garden'] });
+      queryClient.invalidateQueries({ queryKey: ['rwa', 'garden-summary'] });
+      useUIStore.getState().addToast('Nhận hàng thành công! +50 XP', 'success', '✅', 4000);
+    },
+    onError: (error: Error) => {
+      useUIStore.getState().addToast(error.message || 'Xác nhận thất bại', 'error');
+    },
+  });
+}
+
+/** Manual verify → user tự nhập mã 6 số */
+export function useManualVerify() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ slotId, otpCode }: { slotId: string; otpCode: string }) =>
-      verifyDeliveryOtp(slotId, otpCode),
+      manualVerifyDelivery(slotId, otpCode),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rwa', 'my-garden'] });
-      useUIStore.getState().addToast('Giao hàng thành công!', 'success', '✅', 4000);
+      queryClient.invalidateQueries({ queryKey: ['rwa', 'garden-summary'] });
+      useUIStore.getState().addToast('Nhận hàng thành công! +50 XP', 'success', '✅', 4000);
     },
     onError: (error: Error) => {
       useUIStore.getState().addToast(error.message || 'Xác nhận thất bại', 'error');

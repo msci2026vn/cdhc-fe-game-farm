@@ -300,6 +300,10 @@ export interface DeliverySlot {
   blockchainTx: string | null;
   otpCode?: string | null;
   otpExpiresAt?: string | null;
+  recipientName?: string | null;
+  recipientPhone?: string | null;
+  recipientAddress?: string | null;
+  recipientNote?: string | null;
 }
 
 export interface MyGardenData {
@@ -329,29 +333,61 @@ export interface DeliveryHistoryMonth {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Phase 6C: Delivery OTP + Verify + Blockchain Proof
+// Phase 6C/6F: Delivery OTP + Verify + Blockchain Proof
 // ═══════════════════════════════════════════════════════════════
 
 export interface BatchInfo {
   batchId: string;
-  productName: string;
-  farmName: string;
+  product: string;
+  farm: string;
   harvestDate: string;
-  weight?: string;
-  certifications?: string[];
+}
+
+export interface RecipientInfo {
+  name: string;
+  phone: string;
+  address: string;
+  note?: string;
+}
+
+export interface ClaimSlotRequest {
+  recipientName: string;
+  recipientPhone: string;
+  recipientAddress: string;
+  recipientNote?: string;
 }
 
 export interface ClaimSlotResult {
+  slotId: string;
   otpCode: string;
-  qrDataUrl: string;
   batchInfo: BatchInfo;
+  recipientInfo: RecipientInfo;
   expiresAt: string;
+  message: string;
+  isExisting?: boolean;
+}
+
+export interface ScanClaimRequest {
+  slotId: string;
+  otpCode: string;
+  secretToken: string;
+}
+
+export interface ScanClaimResult {
+  success: boolean;
+  slotId: string;
+  deliveredAt: string;
+  deliveryHash: string;
+  blockchainStatus: string;
+  message: string;
 }
 
 export interface VerifyOtpResult {
   success: boolean;
   deliveryHash: string;
   blockchainStatus: 'pending' | 'submitted' | 'confirmed';
+  claimMethod?: string;
+  message?: string;
 }
 
 export interface SlotQrData {
@@ -364,21 +400,26 @@ export interface SlotQrData {
 
 export interface DeliveryProof {
   status: 'not_delivered' | 'pending_blockchain' | 'verified';
+  isVerified?: boolean;
+  verifiedAt?: string;
   deliveryData?: {
     slotId: string;
     slotNumber: number;
+    monthYear: string;
     deliveredAt: string;
-    productName: string;
-    farmName: string;
+    product: string;
+    farm: string;
     harvestDate: string;
-    recipientHash: string;
+    recipientId?: string;
   };
+  deliveryHash?: string;
   blockchain?: {
     txHash: string;
     explorerUrl: string;
-    merkleRoot: string;
-    blockNumber: number;
-    confirmedAt: string;
+    deliveryHash: string;
+    merkleProof: string[];
+    merkleIndex: number;
     dataIntegrity: boolean;
+    onChainVerified: boolean;
   };
 }

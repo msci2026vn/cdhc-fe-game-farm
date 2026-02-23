@@ -105,26 +105,18 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
                     </div>
                   </div>
 
-                  {/* Merkle Root */}
+                  {/* Delivery Hash */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-stone-500">Merkle Root:</span>
+                    <span className="text-xs text-stone-500">Delivery Hash:</span>
                     <span className="text-xs font-mono text-stone-600">
-                      {truncateHash(proof.blockchain.merkleRoot)}
-                    </span>
-                  </div>
-
-                  {/* Block */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-stone-500">Block:</span>
-                    <span className="text-xs font-semibold text-stone-700">
-                      #{proof.blockchain.blockNumber.toLocaleString()}
+                      {truncateHash(proof.blockchain.deliveryHash)}
                     </span>
                   </div>
 
                   {/* Data integrity */}
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-stone-500">Data Integrity:</span>
-                    <span className="text-xs font-semibold text-green-600">
+                    <span className={`text-xs font-semibold ${proof.blockchain.dataIntegrity ? 'text-green-600' : 'text-red-600'}`}>
                       {proof.blockchain.dataIntegrity ? '✅ Verified' : '❌ Failed'}
                     </span>
                   </div>
@@ -132,7 +124,9 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
                   {/* On-Chain */}
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-stone-500">On-Chain:</span>
-                    <span className="text-xs font-semibold text-green-600">✅ Confirmed</span>
+                    <span className={`text-xs font-semibold ${proof.blockchain.onChainVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                      {proof.blockchain.onChainVerified ? '✅ Confirmed' : '⏳ Pending'}
+                    </span>
                   </div>
 
                   {/* Snowtrace link */}
@@ -184,16 +178,18 @@ function DeliveryInfo({ data, weekNumber }: {
       </div>
       <div className="flex items-center gap-2 text-sm">
         <span>🌿</span>
-        <span className="text-stone-600">{data.productName}</span>
+        <span className="text-stone-600">{data.product}</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
         <span>🏡</span>
-        <span className="text-stone-600">{data.farmName}</span>
+        <span className="text-stone-600">{data.farm}</span>
       </div>
-      <div className="flex items-center gap-2 text-sm">
-        <span>👤</span>
-        <span className="text-stone-600 font-mono text-xs">{data.recipientHash}</span>
-      </div>
+      {data.recipientId && (
+        <div className="flex items-center gap-2 text-sm">
+          <span>👤</span>
+          <span className="text-stone-600 font-mono text-xs">{data.recipientId}</span>
+        </div>
+      )}
     </div>
   );
 }

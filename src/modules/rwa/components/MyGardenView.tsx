@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MyGardenData, DeliveryHistoryMonth, ClaimSlotResult } from '@/shared/types/game-api.types';
-import { useClaimSlot, useSlotQr } from '@/shared/hooks/useMyGarden';
+import type { MyGardenData, DeliveryHistoryMonth } from '@/shared/types/game-api.types';
 import DeliverySlotCard from './DeliverySlotCard';
 import OtpClaimModal from './OtpClaimModal';
+import QrScannerModal from './QrScannerModal';
+import ManualVerifyModal from './ManualVerifyModal';
 import BlockchainProofModal from './BlockchainProofModal';
 
 function formatMonthYear(my: string) {
   const [year, month] = my.split('-');
-  return `Thang ${month}/${year}`;
+  return `Tháng ${month}/${year}`;
 }
 
 function tierLabel(tier: string) {
@@ -26,62 +27,46 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
   const navigate = useNavigate();
   const [showHistory, setShowHistory] = useState(false);
 
-  // Claim slot
-  const claimMutation = useClaimSlot();
-  const [claimingSlotId, setClaimingSlotId] = useState<string | null>(null);
-  const [claimResult, setClaimResult] = useState<ClaimSlotResult | null>(null);
-  const [claimWeek, setClaimWeek] = useState(0);
-  const [showOtpModal, setShowOtpModal] = useState(false);
+  // Claim modal (form → OTP result)
+  const [claimModal, setClaimModal] = useState<{ isOpen: boolean; slotId: string | null; week: number }>({
+    isOpen: false, slotId: null, week: 0,
+  });
 
-  // View QR (for already-claimed slots)
-  const [qrSlotId, setQrSlotId] = useState<string | null>(null);
-  const [qrWeek, setQrWeek] = useState(0);
-  const { data: qrData } = useSlotQr(qrSlotId);
-  const [showQrModal, setShowQrModal] = useState(false);
+  // QR Scanner modal
+  const [scannerModal, setScannerModal] = useState<{ isOpen: boolean; slotId: string | null }>({
+    isOpen: false, slotId: null,
+  });
 
-  // Blockchain proof
-  const [proofSlotId, setProofSlotId] = useState<string | null>(null);
-  const [proofWeek, setProofWeek] = useState(0);
-  const [showProofModal, setShowProofModal] = useState(false);
+  // Manual verify modal
+  const [manualModal, setManualModal] = useState<{ isOpen: boolean; slotId: string | null }>({
+    isOpen: false, slotId: null,
+  });
 
-  const handleClaim = (slotId: string) => {
-    const slotIndex = garden.slots.findIndex(s => s.id === slotId);
-    setClaimingSlotId(slotId);
-    setClaimWeek(slotIndex + 1);
+  // Blockchain proof modal
+  const [proofModal, setProofModal] = useState<{ isOpen: boolean; slotId: string | null; week: number }>({
+    isOpen: false, slotId: null, week: 0,
+  });
 
-    claimMutation.mutate(slotId, {
-      onSuccess: (data) => {
-        setClaimResult(data);
-        setShowOtpModal(true);
-        setClaimingSlotId(null);
-      },
-      onError: () => {
-        setClaimingSlotId(null);
-      },
-    });
+  const getSlotWeek = (slotId: string) => {
+    const idx = garden.slots.findIndex(s => s.id === slotId);
+    return idx + 1;
   };
 
-  const handleViewQr = (slotId: string) => {
-    const slotIndex = garden.slots.findIndex(s => s.id === slotId);
-    setQrSlotId(slotId);
-    setQrWeek(slotIndex + 1);
-    setShowQrModal(true);
+  const handleClaim = (slotId: string) => {
+    setClaimModal({ isOpen: true, slotId, week: getSlotWeek(slotId) });
+  };
+
+  const handleScan = (slotId: string) => {
+    setScannerModal({ isOpen: true, slotId });
+  };
+
+  const handleManualVerify = (slotId: string) => {
+    setManualModal({ isOpen: true, slotId });
   };
 
   const handleViewBlockchain = (slotId: string) => {
-    const slotIndex = garden.slots.findIndex(s => s.id === slotId);
-    setProofSlotId(slotId);
-    setProofWeek(slotIndex + 1);
-    setShowProofModal(true);
+    setProofModal({ isOpen: true, slotId, week: getSlotWeek(slotId) });
   };
-
-  // Convert QR query data to ClaimSlotResult format for the modal
-  const qrAsClaimResult: ClaimSlotResult | null = qrData ? {
-    otpCode: qrData.otpCode,
-    qrDataUrl: qrData.qrDataUrl,
-    batchInfo: qrData.batchInfo,
-    expiresAt: qrData.expiresAt,
-  } : null;
 
   return (
     <div className="bg-gradient-to-b from-green-50 via-[#fefae0] to-[#f4f1de] min-h-[100dvh] text-stone-800 font-body select-none">
@@ -97,7 +82,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           </button>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-green-800 flex items-center gap-1.5">
-              <span>🌿</span> Vuon Cua Toi
+              <span>🌿</span> Vườn Của Tôi
             </h1>
           </div>
         </div>
@@ -111,7 +96,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
             {tierLabel(garden.vipTier)}
           </span>
           <span className="px-2.5 py-1 bg-green-100 rounded-full text-xs font-bold text-green-700 border border-green-200">
-            {garden.availableSlots}/{garden.totalSlots} san sang
+            {garden.availableSlots}/{garden.totalSlots} sẵn sàng
           </span>
         </div>
 
@@ -123,9 +108,9 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
               slot={slot}
               index={i}
               onClaim={handleClaim}
-              onViewQr={handleViewQr}
+              onScan={handleScan}
+              onManualVerify={handleManualVerify}
               onViewBlockchain={handleViewBlockchain}
-              isClaiming={claimingSlotId === slot.id}
             />
           ))}
         </div>
@@ -135,7 +120,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           <div className="bg-white/60 border border-green-200 rounded-xl p-3 flex items-start gap-2">
             <span className="text-lg leading-none mt-0.5">ℹ️</span>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Bam "Nhan hang" de lay ma OTP. Doc ma cho shipper khi nhan rau. Rau huu co duoc giao tu nong trai CDHC moi tuan.
+              Bấm "Nhận quà" để điền thông tin giao hàng. Khi nhận thùng rau, bấm "Scan nhận hàng" hoặc nhập mã 6 số để xác nhận.
             </p>
           </div>
         </div>
@@ -148,7 +133,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           >
             <div className="h-px flex-1 bg-stone-300/50" />
             <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">
-              Lich su nhan rau
+              Lịch sử nhận rau
             </span>
             <span className="material-symbols-outlined text-stone-400 text-sm">
               {showHistory ? 'expand_less' : 'expand_more'}
@@ -172,49 +157,48 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
                       {formatMonthYear(m.monthYear)}
                     </span>
                     <span className="text-xs font-bold text-stone-500">
-                      {m.deliveredSlots}/{m.totalSlots} da nhan
+                      {m.deliveredSlots}/{m.totalSlots} đã nhận
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-center text-xs text-stone-400 py-3">Chua co lich su</p>
+                <p className="text-center text-xs text-stone-400 py-3">Chưa có lịch sử</p>
               )}
             </div>
           )}
         </div>
       </div>
 
-      {/* OTP Claim Modal — after fresh claim */}
+      {/* Claim Modal (form → OTP result) */}
       <OtpClaimModal
-        open={showOtpModal}
-        onClose={() => {
-          setShowOtpModal(false);
-          setClaimResult(null);
-        }}
-        weekNumber={claimWeek}
-        data={claimResult}
+        open={claimModal.isOpen}
+        onClose={() => setClaimModal({ isOpen: false, slotId: null, week: 0 })}
+        slotId={claimModal.slotId}
+        weekNumber={claimModal.week}
       />
 
-      {/* OTP View Modal — for already-claimed slots */}
-      <OtpClaimModal
-        open={showQrModal}
-        onClose={() => {
-          setShowQrModal(false);
-          setQrSlotId(null);
-        }}
-        weekNumber={qrWeek}
-        data={qrAsClaimResult}
+      {/* QR Scanner Modal */}
+      <QrScannerModal
+        open={scannerModal.isOpen}
+        onClose={() => setScannerModal({ isOpen: false, slotId: null })}
+        slotId={scannerModal.slotId}
+        onSuccess={() => setScannerModal({ isOpen: false, slotId: null })}
+      />
+
+      {/* Manual Verify Modal */}
+      <ManualVerifyModal
+        open={manualModal.isOpen}
+        onClose={() => setManualModal({ isOpen: false, slotId: null })}
+        slotId={manualModal.slotId}
+        onSuccess={() => setManualModal({ isOpen: false, slotId: null })}
       />
 
       {/* Blockchain Proof Modal */}
       <BlockchainProofModal
-        open={showProofModal}
-        onClose={() => {
-          setShowProofModal(false);
-          setProofSlotId(null);
-        }}
-        slotId={proofSlotId}
-        weekNumber={proofWeek}
+        open={proofModal.isOpen}
+        onClose={() => setProofModal({ isOpen: false, slotId: null, week: 0 })}
+        slotId={proofModal.slotId}
+        weekNumber={proofModal.week}
       />
     </div>
   );

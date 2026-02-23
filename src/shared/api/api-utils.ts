@@ -64,10 +64,13 @@ export async function handleApiError(response: Response): Promise<never> {
   }
 
   const errorData = await response.json().catch(() => ({}));
-  const err = new Error(errorData?.error?.message || `API Error: ${response.status}`);
+  const errMsg = typeof errorData?.error === 'string'
+    ? errorData.error
+    : errorData?.error?.message || errorData?.message || `API Error: ${response.status}`;
+  const err = new Error(errMsg);
   (err as any).status = response.status;
-  (err as any).code = errorData?.error?.code || 'UNKNOWN';
-  (err as any).cooldownRemaining = errorData?.error?.cooldownRemaining;
+  (err as any).code = typeof errorData?.error === 'object' ? errorData?.error?.code : 'UNKNOWN';
+  (err as any).cooldownRemaining = typeof errorData?.error === 'object' ? errorData?.error?.cooldownRemaining : undefined;
 
   console.log('[FARM-DEBUG] handleApiError()', JSON.stringify({
     status: response.status,
