@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usePrayerLeaderboard } from '../hooks/usePrayerLeaderboard';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 export interface PrayerLeaderboardModalProps {
     isOpen: boolean;
@@ -99,12 +100,22 @@ const PODIUM_DATA_ORDER = [1, 0, 2];
 export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardModalProps) {
     const { data: leaderboard, isLoading } = usePrayerLeaderboard(50);
     const { data: profile } = usePlayerProfile();
+    const { data: auth } = useAuth();
 
     if (!isOpen) return null;
 
     const top3 = leaderboard?.slice(0, 3) || [];
     const rest = leaderboard?.slice(3) || [];
     const currentUserRank = leaderboard?.find(e => e.userId === profile?.userId);
+
+    // Ảnh đại diện của user hiện tại — ưu tiên như FarmHeader
+    const myPicture =
+        auth?.user?.picture ||
+        (auth?.user as any)?.avatar ||
+        (auth?.user as any)?.avatarUrl ||
+        profile?.picture ||
+        null;
+    const myName = auth?.user?.name || (auth?.user as any)?.fullName || profile?.name || '?';
 
     return (
         <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col bg-spiritual shadow-2xl overflow-hidden animate-slide-up">
@@ -183,11 +194,11 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                             )}
                                             <div className={`${col.avatarSize} rounded-full border-4 ${col.border} overflow-hidden shadow-xl relative z-10 flex-shrink-0`}>
                                                 <Avatar
-                                                    picture={entry.picture}
-                                                    gmailAvatar={entry.gmailAvatar}
-                                                    avatarUrl={entry.avatarUrl}
-                                                    name={entry.userName}
-                                                    gmailName={entry.gmailName}
+                                                    picture={isMe ? myPicture : (entry.picture ?? null)}
+                                                    gmailAvatar={isMe ? null : (entry.gmailAvatar ?? null)}
+                                                    avatarUrl={isMe ? null : (entry.avatarUrl ?? null)}
+                                                    name={isMe ? myName : entry.userName}
+                                                    gmailName={isMe ? null : (entry.gmailName ?? null)}
                                                     sizeClass={col.avatarSize}
                                                     textClass={col.avatarText}
                                                 />
@@ -252,10 +263,8 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                             <div className="relative flex-shrink-0">
                                                 <div className="w-11 h-11 rounded-full border-2 border-green-500 overflow-hidden">
                                                     <Avatar
-                                                        picture={profile?.picture}
-                                                        gmailAvatar={(profile as any)?.gmailAvatar}
-                                                        name={profile?.name}
-                                                        gmailName={(profile as any)?.gmailName}
+                                                        picture={myPicture}
+                                                        name={myName}
                                                         sizeClass="w-11 h-11"
                                                         textClass="text-sm"
                                                     />
@@ -266,7 +275,7 @@ export function PrayerLeaderboardModal({ isOpen, onClose }: PrayerLeaderboardMod
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-bold text-sm text-green-800 truncate">
-                                                    {(profile as any)?.gmailName || profile?.name}
+                                                    {myName}
                                                     <span className="ml-1 text-green-500 font-normal text-xs">(Bạn)</span>
                                                 </p>
                                                 {currentUserRank.currentStreak > 0 && (
