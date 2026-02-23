@@ -848,3 +848,44 @@ export interface ConversionHistoryResult {
     totalPages: number;
   };
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 4: Delivery Slots (My Garden)
+// ═══════════════════════════════════════════════════════════════
+
+export type DeliverySlotStatus = 'available' | 'claimed' | 'shipped' | 'delivered' | 'expired';
+
+export interface DeliverySlot {
+  id: string;
+  slotNumber: number;
+  status: DeliverySlotStatus;
+  claimedAt: string | null;
+  deliveredAt: string | null;
+  blockchainTx: string | null;
+}
+
+export interface MyGardenData {
+  monthYear: string;
+  totalSlots: number;
+  availableSlots: number;
+  claimedSlots: number;
+  vipTier: string;
+  deliveriesPerMonth: number;
+  slots: DeliverySlot[];
+}
+
+export interface GardenSummary {
+  isVip: boolean;
+  tier?: string;
+  monthYear?: string;
+  totalSlots: number;
+  availableSlots: number;
+  claimedSlots?: number;
+}
+
+export interface DeliveryHistoryMonth {
+  monthYear: string;
+  totalSlots: number;
+  deliveredSlots: number;
+  slots: DeliverySlot[];
+}

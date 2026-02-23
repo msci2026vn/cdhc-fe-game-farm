@@ -45,6 +45,7 @@ const PrayerScreen = lazyWithRetry(() => import('@/modules/prayer/screens/Prayer
 const MarketScreen = lazyWithRetry(() => import('@/modules/market/screens/MarketScreen'));
 const VipPurchaseScreen = lazyWithRetry(() => import('@/modules/vip/screens/VipPurchaseScreen'));
 const SettingsScreen = lazyWithRetry(() => import('@/modules/settings/screens/SettingsScreen'));
+const MyGardenScreen = lazyWithRetry(() => import('@/modules/rwa/screens/MyGardenScreen'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -110,6 +111,7 @@ const AuthenticatedApp = () => {
         <Route path="/prayer" element={<PrayerScreen />} />
         <Route path="/market" element={<MarketScreen />} />
         <Route path="/vip/purchase" element={<VipPurchaseScreen />} />
+        <Route path="/rwa/my-garden" element={<MyGardenScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

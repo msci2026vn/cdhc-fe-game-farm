@@ -79,14 +79,22 @@ export function VipBadge() {
                     {config.label}
                 </span>
             </div>
-            {daysRemaining <= 7 && (
+            <div className="flex gap-2 mt-3">
                 <button
-                    onClick={() => navigate('/vip/purchase')}
-                    className="w-full mt-3 py-2 rounded-xl text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 hover:bg-amber-200 transition-all active:scale-[0.98]"
+                    onClick={() => navigate('/rwa/my-garden')}
+                    className="flex-1 py-2 rounded-xl text-xs font-bold text-green-700 bg-green-100 border border-green-300 hover:bg-green-200 transition-all active:scale-[0.98] flex items-center justify-center gap-1"
                 >
-                    Gia hạn VIP
+                    <span>🌿</span> Vườn Của Tôi
                 </button>
-            )}
+                {daysRemaining <= 7 && (
+                    <button
+                        onClick={() => navigate('/vip/purchase')}
+                        className="flex-1 py-2 rounded-xl text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 hover:bg-amber-200 transition-all active:scale-[0.98]"
+                    >
+                        Gia hạn VIP
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

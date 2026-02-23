@@ -110,6 +110,12 @@ import type {
   VipOrder,
   VipVerifyResult,
   VipOrderStatus,
+  // Phase 4: Delivery
+  MyGardenData,
+  GardenSummary,
+  DeliveryHistoryMonth,
+  DeliverySlotStatus,
+  DeliverySlot,
 } from '../types/game-api.types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -1991,6 +1997,37 @@ export const getIoTDevices = async (): Promise<IoTDevice[]> => {
   return json.data;
 };
 
+// ═══ Phase 4: Delivery / My Garden ═══
+
+export const getMyGarden = async (month?: string): Promise<MyGardenData> => {
+  const url = month
+    ? `${API_BASE_URL}/api/rwa/my-garden?month=${month}`
+    : `${API_BASE_URL}/api/rwa/my-garden`;
+  const res = await fetch(url, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getMyGarden'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getGardenSummary = async (): Promise<GardenSummary> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/my-garden/summary`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getGardenSummary'); throw new Error('Session expired'); }
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getDeliveryHistory = async (): Promise<DeliveryHistoryMonth[]> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery-history`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getDeliveryHistory'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
 export type {
   PlayerProfile,
   FarmPlotData,
@@ -2033,4 +2070,9 @@ export type {
   VipOrder,
   VipVerifyResult,
   VipOrderStatus,
+  MyGardenData,
+  GardenSummary,
+  DeliveryHistoryMonth,
+  DeliverySlotStatus,
+  DeliverySlot,
 };
