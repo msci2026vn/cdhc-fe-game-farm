@@ -82,17 +82,64 @@ export const getBlockchainLogs = async (limit = 20): Promise<BlockchainLog[]> =>
 
 export const getSensorLatest = async (deviceId?: string): Promise<SensorReading | null> => {
   const params = deviceId ? `?deviceId=${deviceId}` : '';
-  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/latest${params}`);
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/latest${params}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getSensorLatest'); throw new Error('Session expired'); }
   if (!res.ok) throw new Error(`Failed to fetch sensor latest: ${res.status}`);
   const json = await res.json();
   return json.data;
 };
 
 export const getSensorHistory = async (deviceId = 'mock-sensor-001', hours = 24): Promise<SensorReading[]> => {
-  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/history?deviceId=${deviceId}&hours=${hours}`);
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/history?deviceId=${deviceId}&hours=${hours}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getSensorHistory'); throw new Error('Session expired'); }
   if (!res.ok) throw new Error(`Failed to fetch sensor history: ${res.status}`);
   const json = await res.json();
   return json.data;
+};
+
+// ═══ Phase 7A: Hourly Aggregation + Available Dates ═══
+
+export interface SensorHourlyRecord {
+  hour: number;
+  time: string;
+  avgTemperature: number | null;
+  avgHumidity: number | null;
+  avgLightLevel: number | null;
+  avgSoilPh: number | null;
+  avgSoilMoisture: number | null;
+  readingCount: number;
+  indicators: {
+    temperature: 'good' | 'warning' | 'danger';
+    humidity: 'good' | 'warning' | 'danger';
+    soilPh: 'good' | 'warning' | 'danger';
+  } | null;
+}
+
+export interface SensorHourlyData {
+  date: string;
+  deviceId: string;
+  hours: (SensorHourlyRecord | null)[];
+}
+
+export const getSensorHourly = async (date: string, deviceId?: string): Promise<SensorHourlyData> => {
+  const params = new URLSearchParams({ date });
+  if (deviceId) params.set('deviceId', deviceId);
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/hourly?${params}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getSensorHourly'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getSensorDates = async (deviceId?: string): Promise<string[]> => {
+  const params = deviceId ? `?deviceId=${deviceId}` : '';
+  const res = await fetch(`${API_BASE_URL}/api/rwa/sensors/dates${params}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getSensorDates'); throw new Error('Session expired'); }
+  if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data.dates;
 };
 
 export const getIoTDevices = async (): Promise<IoTDevice[]> => {

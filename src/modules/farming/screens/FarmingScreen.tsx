@@ -11,7 +11,6 @@ import FriendsList from '@/modules/friends/components/FriendsList';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import FriendGarden from '@/modules/friends/components/FriendGarden';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
-import RwaDashboardModal from '@/modules/rwa/components/RwaDashboardModal';
 import type { FriendData } from '@/shared/types/game-api.types';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
 import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
@@ -130,7 +129,7 @@ export default function FarmingScreen() {
   const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [showRwaModal, setShowRwaModal] = useState(false);
+
   const [isMuted, setIsMuted] = useState(audioManager.muted);
 
   const toggleMute = () => {
@@ -503,7 +502,7 @@ export default function FarmingScreen() {
             {/* RWA Smart Farm Button - NEW */}
             <div className="flex flex-col gap-2 relative w-fit z-20 shrink-0">
               <button
-                onClick={() => setShowRwaModal(true)}
+                onClick={() => navigate('/rwa/my-garden')}
                 className="bg-gradient-to-br from-green-500 to-green-700 p-2 py-1.5 rounded-xl flex items-center gap-2 shadow-lg border-2 border-green-300 transform -rotate-2 active:scale-95 transition-all w-32 justify-between"
               >
                 <div className="flex items-center gap-1.5">
@@ -800,7 +799,6 @@ export default function FarmingScreen() {
       <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
       <Leaderboard open={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
       {visitingFriend && <FriendGarden friend={visitingFriend} onBack={() => setVisitingFriend(null)} />}
-      <RwaDashboardModal open={showRwaModal} onClose={() => setShowRwaModal(false)} />
     </div>
   );
 }

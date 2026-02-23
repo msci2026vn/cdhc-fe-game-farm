@@ -7,6 +7,7 @@ import QrScannerModal from './QrScannerModal';
 import ManualVerifyModal from './ManualVerifyModal';
 import BlockchainProofModal from './BlockchainProofModal';
 import DeliveryDetailModal from './DeliveryDetailModal';
+import SensorTimeline from './SensorTimeline';
 
 function formatMonthYear(my: string) {
   const [year, month] = my.split('-');
@@ -109,6 +110,11 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           <span className="px-2.5 py-1 bg-green-100 rounded-full text-xs font-bold text-green-700 border border-green-200">
             {garden.availableSlots}/{garden.totalSlots} sẵn sàng
           </span>
+        </div>
+
+        {/* Sensor Timeline (VIP only — data from hourly API) */}
+        <div className="px-4 mt-4">
+          <SensorTimeline />
         </div>
 
         {/* Delivery slots grid */}

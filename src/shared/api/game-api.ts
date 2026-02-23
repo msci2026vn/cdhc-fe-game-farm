@@ -50,6 +50,8 @@ export {
   getBlockchainLogs,
   getSensorLatest,
   getSensorHistory,
+  getSensorHourly,
+  getSensorDates,
   getIoTDevices,
   getMyGarden,
   getGardenSummary,
@@ -68,6 +70,8 @@ export type {
   BlockchainStats,
   BlockchainLog,
   SensorReading,
+  SensorHourlyRecord,
+  SensorHourlyData,
   IoTDevice,
 } from './api-rwa';
 
