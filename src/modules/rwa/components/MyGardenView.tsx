@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MyGardenData, DeliveryHistoryMonth } from '@/shared/types/game-api.types';
+import type { MyGardenData, DeliveryHistoryMonth, DeliverySlot } from '@/shared/types/game-api.types';
 import DeliverySlotCard from './DeliverySlotCard';
 import OtpClaimModal from './OtpClaimModal';
 import QrScannerModal from './QrScannerModal';
 import ManualVerifyModal from './ManualVerifyModal';
 import BlockchainProofModal from './BlockchainProofModal';
+import DeliveryDetailModal from './DeliveryDetailModal';
 
 function formatMonthYear(my: string) {
   const [year, month] = my.split('-');
@@ -47,6 +48,11 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
     isOpen: false, slotId: null, week: 0,
   });
 
+  // Delivery detail modal
+  const [detailModal, setDetailModal] = useState<{ isOpen: boolean; slot: DeliverySlot | null; week: number }>({
+    isOpen: false, slot: null, week: 0,
+  });
+
   const getSlotWeek = (slotId: string) => {
     const idx = garden.slots.findIndex(s => s.id === slotId);
     return idx + 1;
@@ -66,6 +72,11 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
 
   const handleViewBlockchain = (slotId: string) => {
     setProofModal({ isOpen: true, slotId, week: getSlotWeek(slotId) });
+  };
+
+  const handleViewDetail = (slot: DeliverySlot) => {
+    const week = garden.slots.findIndex(s => s.id === slot.id) + 1;
+    setDetailModal({ isOpen: true, slot, week });
   };
 
   return (
@@ -111,6 +122,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
               onScan={handleScan}
               onManualVerify={handleManualVerify}
               onViewBlockchain={handleViewBlockchain}
+              onViewDetail={handleViewDetail}
             />
           ))}
         </div>
@@ -183,7 +195,6 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         open={scannerModal.isOpen}
         onClose={() => setScannerModal({ isOpen: false, slotId: null })}
         slotId={scannerModal.slotId}
-        onSuccess={() => setScannerModal({ isOpen: false, slotId: null })}
       />
 
       {/* Manual Verify Modal */}
@@ -191,7 +202,6 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         open={manualModal.isOpen}
         onClose={() => setManualModal({ isOpen: false, slotId: null })}
         slotId={manualModal.slotId}
-        onSuccess={() => setManualModal({ isOpen: false, slotId: null })}
       />
 
       {/* Blockchain Proof Modal */}
@@ -200,6 +210,14 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         onClose={() => setProofModal({ isOpen: false, slotId: null, week: 0 })}
         slotId={proofModal.slotId}
         weekNumber={proofModal.week}
+      />
+
+      {/* Delivery Detail Modal */}
+      <DeliveryDetailModal
+        open={detailModal.isOpen}
+        onClose={() => setDetailModal({ isOpen: false, slot: null, week: 0 })}
+        slot={detailModal.slot}
+        weekNumber={detailModal.week}
       />
     </div>
   );

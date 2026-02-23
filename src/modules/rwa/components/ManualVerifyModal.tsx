@@ -6,10 +6,9 @@ interface ManualVerifyModalProps {
   open: boolean;
   onClose: () => void;
   slotId: string | null;
-  onSuccess: () => void;
 }
 
-export default function ManualVerifyModal({ open, onClose, slotId, onSuccess }: ManualVerifyModalProps) {
+export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerifyModalProps) {
   const verifyMutation = useManualVerify();
 
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
@@ -76,10 +75,7 @@ export default function ManualVerifyModal({ open, onClose, slotId, onSuccess }: 
       {
         onSuccess: () => {
           setSuccess(true);
-          setTimeout(() => {
-            onSuccess();
-            handleClose();
-          }, 1500);
+          // User clicks "Đóng" to close — no auto-close to avoid race condition
         },
         onError: (err: Error) => {
           setError(err.message || 'Xác nhận thất bại');
@@ -101,10 +97,16 @@ export default function ManualVerifyModal({ open, onClose, slotId, onSuccess }: 
         <div className="px-5 pb-5 space-y-4">
           {success ? (
             /* Success state */
-            <div className="text-center py-6 space-y-2">
+            <div className="text-center py-6 space-y-3">
               <span className="text-4xl">✅</span>
               <p className="text-base font-bold text-green-700">Nhận hàng thành công!</p>
               <p className="text-sm text-green-600">+50 XP</p>
+              <button
+                onClick={handleClose}
+                className="w-full py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-xl transition-colors mt-2"
+              >
+                Đóng
+              </button>
             </div>
           ) : (
             <>

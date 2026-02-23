@@ -7,12 +7,11 @@ interface QrScannerModalProps {
   open: boolean;
   onClose: () => void;
   slotId: string | null;
-  onSuccess: () => void;
 }
 
 type Phase = 'scanning' | 'success' | 'error';
 
-export default function QrScannerModal({ open, onClose, slotId, onSuccess }: QrScannerModalProps) {
+export default function QrScannerModal({ open, onClose, slotId }: QrScannerModalProps) {
   const scanClaim = useScanClaim();
   const [phase, setPhase] = useState<Phase>('scanning');
   const [error, setError] = useState('');
@@ -96,10 +95,7 @@ export default function QrScannerModal({ open, onClose, slotId, onSuccess }: QrS
       {
         onSuccess: () => {
           setPhase('success');
-          setTimeout(() => {
-            onSuccess();
-            onClose();
-          }, 1500);
+          // User clicks "Đóng" to close — no auto-close to avoid race condition
         },
         onError: (err: Error) => {
           setPhase('error');
@@ -109,11 +105,14 @@ export default function QrScannerModal({ open, onClose, slotId, onSuccess }: QrS
     );
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (scannerRef.current) {
-      scannerRef.current.stop().catch(() => {});
+      try { await scannerRef.current.stop(); } catch { /* already stopped */ }
       scannerRef.current = null;
     }
+    setPhase('scanning');
+    setError('');
+    processedRef.current = false;
     onClose();
   };
 
@@ -149,10 +148,16 @@ export default function QrScannerModal({ open, onClose, slotId, onSuccess }: QrS
 
           {/* Success */}
           {phase === 'success' && (
-            <div className="text-center py-6 space-y-2">
+            <div className="text-center py-6 space-y-3">
               <span className="text-4xl">✅</span>
               <p className="text-base font-bold text-green-700">Nhận hàng thành công!</p>
               <p className="text-sm text-green-600">+50 XP</p>
+              <button
+                onClick={handleClose}
+                className="w-full py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-xl transition-colors mt-2"
+              >
+                Đóng
+              </button>
             </div>
           )}
 

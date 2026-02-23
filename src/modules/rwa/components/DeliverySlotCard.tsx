@@ -50,10 +50,11 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
 };
 
-function formatDate(dateStr: string | null) {
+function formatDate(dateStr: string | null | undefined) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
-  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')} ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+  if (isNaN(d.getTime())) return null;
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')} ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
 interface DeliverySlotCardProps {
@@ -63,11 +64,12 @@ interface DeliverySlotCardProps {
   onScan?: (slotId: string) => void;
   onManualVerify?: (slotId: string) => void;
   onViewBlockchain?: (slotId: string) => void;
+  onViewDetail?: (slot: DeliverySlot) => void;
   isClaiming?: boolean;
 }
 
 export default function DeliverySlotCard({
-  slot, index, onClaim, onScan, onManualVerify, onViewBlockchain, isClaiming,
+  slot, index, onClaim, onScan, onManualVerify, onViewBlockchain, onViewDetail, isClaiming,
 }: DeliverySlotCardProps) {
   const config = STATUS_CONFIG[slot.status] ?? STATUS_CONFIG.available;
   const hasBlockchain = !!slot.blockchainTx;
@@ -142,39 +144,43 @@ export default function DeliverySlotCard({
         </div>
       )}
 
-      {/* === DELIVERED: Show date + blockchain status === */}
+      {/* === DELIVERED: Show date + recipient + blockchain status === */}
       {slot.status === 'delivered' && (
         <div className="w-full space-y-1.5">
-          {slot.deliveredAt && (
-            <p className="text-[10px] text-stone-500 text-center">
-              ✅ {formatDate(slot.deliveredAt)}
+          {/* Delivery time */}
+          <p className="text-[10px] text-stone-500 text-center">
+            {formatDate(slot.deliveredAt) ?? 'Đã nhận'}
+          </p>
+
+          {/* Recipient name */}
+          {slot.recipientName && (
+            <p className="text-[10px] text-stone-600 flex items-center gap-1 truncate">
+              <span>👤</span> {slot.recipientName}
             </p>
           )}
 
+          {/* Recipient address (truncate 1 line) */}
+          {slot.recipientAddress && (
+            <p className="text-[10px] text-stone-400 truncate">
+              📍 {slot.recipientAddress}
+            </p>
+          )}
+
+          {/* Blockchain status */}
           {hasBlockchain ? (
-            <div className="text-center">
-              <p className="text-[10px] text-green-600 font-semibold">🔗 Blockchain: Verified ✅</p>
-              {onViewBlockchain && (
-                <button
-                  onClick={() => onViewBlockchain(slot.id)}
-                  className="w-full mt-1 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-semibold rounded-lg border border-blue-200 transition-colors"
-                >
-                  Xem Snowtrace →
-                </button>
-              )}
-            </div>
+            <p className="text-[10px] text-green-600 font-semibold text-center">🔗 Đã ghi on-chain ✅</p>
           ) : (
-            <div className="text-center">
-              <p className="text-[10px] text-amber-500 font-medium">⏳ Blockchain: Đang chờ</p>
-              {onViewBlockchain && (
-                <button
-                  onClick={() => onViewBlockchain(slot.id)}
-                  className="w-full mt-1 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-500 text-[10px] font-semibold rounded-lg border border-stone-200 transition-colors"
-                >
-                  📱 Xem nguồn gốc
-                </button>
-              )}
-            </div>
+            <p className="text-[10px] text-amber-500 font-medium text-center">⏳ Đang chờ ghi blockchain</p>
+          )}
+
+          {/* View detail button */}
+          {onViewDetail && (
+            <button
+              onClick={() => onViewDetail(slot)}
+              className="w-full py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 text-[10px] font-semibold rounded-lg border border-stone-200 transition-colors flex items-center justify-center gap-1"
+            >
+              📋 Xem chi tiết
+            </button>
           )}
         </div>
       )}
