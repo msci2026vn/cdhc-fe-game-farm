@@ -54,6 +54,10 @@ export {
   getMyGarden,
   getGardenSummary,
   getDeliveryHistory,
+  claimDeliverySlot,
+  verifyDeliveryOtp,
+  getSlotQr,
+  getDeliveryProof,
 } from './api-rwa';
 
 // ═══════════════════════════════════════════════════════════════
@@ -113,4 +117,9 @@ export type {
   DeliveryHistoryMonth,
   DeliverySlotStatus,
   DeliverySlot,
+  ClaimSlotResult,
+  VerifyOtpResult,
+  SlotQrData,
+  DeliveryProof,
+  BatchInfo,
 } from '../types/game-api.types';

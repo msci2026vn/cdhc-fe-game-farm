@@ -298,6 +298,8 @@ export interface DeliverySlot {
   claimedAt: string | null;
   deliveredAt: string | null;
   blockchainTx: string | null;
+  otpCode?: string | null;
+  otpExpiresAt?: string | null;
 }
 
 export interface MyGardenData {
@@ -324,4 +326,59 @@ export interface DeliveryHistoryMonth {
   totalSlots: number;
   deliveredSlots: number;
   slots: DeliverySlot[];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Phase 6C: Delivery OTP + Verify + Blockchain Proof
+// ═══════════════════════════════════════════════════════════════
+
+export interface BatchInfo {
+  batchId: string;
+  productName: string;
+  farmName: string;
+  harvestDate: string;
+  weight?: string;
+  certifications?: string[];
+}
+
+export interface ClaimSlotResult {
+  otpCode: string;
+  qrDataUrl: string;
+  batchInfo: BatchInfo;
+  expiresAt: string;
+}
+
+export interface VerifyOtpResult {
+  success: boolean;
+  deliveryHash: string;
+  blockchainStatus: 'pending' | 'submitted' | 'confirmed';
+}
+
+export interface SlotQrData {
+  otpCode: string;
+  qrDataUrl: string;
+  batchInfo: BatchInfo;
+  isVerified: boolean;
+  expiresAt: string;
+}
+
+export interface DeliveryProof {
+  status: 'not_delivered' | 'pending_blockchain' | 'verified';
+  deliveryData?: {
+    slotId: string;
+    slotNumber: number;
+    deliveredAt: string;
+    productName: string;
+    farmName: string;
+    harvestDate: string;
+    recipientHash: string;
+  };
+  blockchain?: {
+    txHash: string;
+    explorerUrl: string;
+    merkleRoot: string;
+    blockNumber: number;
+    confirmedAt: string;
+    dataIntegrity: boolean;
+  };
 }

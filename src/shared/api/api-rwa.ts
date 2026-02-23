@@ -3,7 +3,10 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { handleUnauthorized, handleApiError, API_BASE_URL } from './api-utils';
-import type { MyGardenData, GardenSummary, DeliveryHistoryMonth } from '../types/game-api.types';
+import type {
+  MyGardenData, GardenSummary, DeliveryHistoryMonth,
+  ClaimSlotResult, VerifyOtpResult, SlotQrData, DeliveryProof,
+} from '../types/game-api.types';
 
 // ═══ Phase 5: Blockchain + IoT Types ═══
 
@@ -124,6 +127,48 @@ export const getDeliveryHistory = async (): Promise<DeliveryHistoryMonth[]> => {
   const res = await fetch(`${API_BASE_URL}/api/rwa/delivery-history`, { credentials: 'include' });
   if (res.status === 401) { handleUnauthorized('getDeliveryHistory'); throw new Error('Session expired'); }
   if (res.status === 403) throw new Error('VIP_REQUIRED');
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+// ═══ Phase 6C: Delivery OTP + Verify ═══
+
+export const claimDeliverySlot = async (slotId: string): Promise<ClaimSlotResult> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/claim/${slotId}`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (res.status === 401) { handleUnauthorized('claimDeliverySlot'); throw new Error('Session expired'); }
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const verifyDeliveryOtp = async (slotId: string, otpCode: string): Promise<VerifyOtpResult> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/verify-otp`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slotId, otpCode }),
+  });
+  if (res.status === 401) { handleUnauthorized('verifyDeliveryOtp'); throw new Error('Session expired'); }
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getSlotQr = async (slotId: string): Promise<SlotQrData> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/qr/${slotId}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getSlotQr'); throw new Error('Session expired'); }
+  if (!res.ok) { await handleApiError(res); }
+  const json = await res.json();
+  return json.data;
+};
+
+export const getDeliveryProof = async (slotId: string): Promise<DeliveryProof> => {
+  const res = await fetch(`${API_BASE_URL}/api/rwa/delivery/verify/${slotId}`, { credentials: 'include' });
+  if (res.status === 401) { handleUnauthorized('getDeliveryProof'); throw new Error('Session expired'); }
   if (!res.ok) { await handleApiError(res); }
   const json = await res.json();
   return json.data;
