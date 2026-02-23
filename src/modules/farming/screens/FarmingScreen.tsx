@@ -514,6 +514,19 @@ export default function FarmingScreen() {
                   <span className="material-symbols-outlined text-white text-[12px]">chevron_right</span>
                 </div>
               </button>
+
+              <button
+                onClick={() => navigate('/rwa/my-garden')}
+                className="bg-gradient-to-br from-blue-500 to-blue-700 p-2 py-1.5 rounded-xl flex items-center gap-2 shadow-lg border-2 border-blue-300 transform rotate-1 active:scale-95 transition-all w-32 justify-between"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-blue-100 text-[18px]">yard</span>
+                  <span className="text-[10px] font-black text-white uppercase tracking-wider leading-[1.1] text-left">My<br />Garden</span>
+                </div>
+                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white text-[12px]">chevron_right</span>
+                </div>
+              </button>
             </div>
 
             {/* Wood Signs for Stats */}
