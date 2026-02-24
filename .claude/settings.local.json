@@ -21,7 +21,12 @@
       "Bash(copy \"D:\\\\du-an\\\\cdhc\\\\cdhc-game-vite\\\\public\\\\icons\\\\icon-192x192.png\" \"D:\\\\du-an\\\\cdhc\\\\cdhc-game-vite\\\\public\\\\favicon.ico\" /Y)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm)",
+      "Bash(where:*)"
     ]
   }
 }

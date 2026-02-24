@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCameraStream } from '@/shared/hooks/useCamera';
 
-export default function CameraLiveView() {
-  const { data: stream, isLoading, error } = useCameraStream();
+const CameraLiveView = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(true); // default true, video sẽ tự detect
   const [retryCount, setRetryCount] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { data: streamInfo, isLoading, error } = useCameraStream();
 
-  // Auto-retry video khi offline
+  // Auto-retry video khi lỗi
   useEffect(() => {
-    if (!isOnline && stream && videoRef.current) {
+    if (!isOnline && streamInfo && videoRef.current) {
       const timer = setTimeout(() => {
-        if (videoRef.current) {
-          const url = stream.hlsUrl || stream.webrtcUrl;
+        if (videoRef.current && streamInfo) {
+          const url = streamInfo.hlsUrl || streamInfo.webrtcUrl;
           videoRef.current.src = url + '?retry=' + Date.now();
           videoRef.current.load();
           setRetryCount(prev => prev + 1);
@@ -21,42 +21,43 @@ export default function CameraLiveView() {
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [isOnline, retryCount, stream]);
+  }, [isOnline, retryCount, streamInfo]);
 
+  // Loading skeleton
   if (isLoading) {
     return (
-      <div className="bg-white/60 border border-stone-200 rounded-xl p-4 animate-pulse">
-        <div className="h-4 w-32 bg-stone-200 rounded mb-3" />
-        <div className="aspect-video bg-stone-200 rounded-lg" />
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+        <div className="animate-pulse">
+          <div className="h-5 bg-gray-200 rounded w-32 mb-3" />
+          <div className="aspect-video bg-gray-200 rounded-xl" />
+        </div>
       </div>
     );
   }
 
-  // No camera configured or API error — hide section silently
-  if (error || !stream) return null;
+  // No camera hoặc lỗi API → ẩn hoàn toàn
+  if (error || !streamInfo) return null;
 
-  const streamUrl = stream.hlsUrl || stream.webrtcUrl;
+  const streamUrl = streamInfo.hlsUrl || streamInfo.webrtcUrl;
 
   return (
-    <div className="bg-white/60 border border-green-200 rounded-xl overflow-hidden">
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
       {/* Header */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="w-full flex items-center justify-between px-4 py-3"
+        className="flex items-center justify-between w-full mb-3"
       >
         <div className="flex items-center gap-2">
-          <span className="text-base">📹</span>
-          <span className="text-sm font-bold text-green-800">Camera Vuon</span>
-          <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+          <span className="text-lg">📹</span>
+          <span className="font-semibold text-gray-800">Camera Vườn</span>
+          <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
         </div>
-        <span className="material-symbols-outlined text-stone-400 text-lg">
-          {isCollapsed ? 'expand_more' : 'expand_less'}
-        </span>
+        <span className="text-gray-400 text-sm">{isCollapsed ? '▼' : '▲'}</span>
       </button>
 
       {!isCollapsed && (
-        <div className="px-4 pb-4">
-          {/* Video HLS player */}
+        <>
+          {/* Video Player */}
           <div className="relative">
             <video
               ref={videoRef}
@@ -65,36 +66,38 @@ export default function CameraLiveView() {
               muted
               playsInline
               controls
-              className={`w-full aspect-video rounded-lg border border-stone-200 bg-black object-contain ${!isOnline ? 'hidden' : ''}`}
+              className={`w-full aspect-video rounded-xl bg-black object-contain ${!isOnline ? 'hidden' : ''}`}
               onPlaying={() => { setIsOnline(true); setRetryCount(0); }}
               onError={() => setIsOnline(false)}
             />
 
             {/* Offline placeholder */}
             {!isOnline && (
-              <div className="w-full aspect-video rounded-lg bg-stone-800 flex items-center justify-center border border-stone-700">
-                <div className="text-center text-stone-400">
-                  <span className="text-3xl block mb-1">📹</span>
-                  <p className="text-sm font-medium">Camera dang offline</p>
-                  <p className="text-xs mt-0.5 text-stone-500">Dang thu ket noi lai...</p>
+              <div className="w-full aspect-video rounded-xl bg-gray-800 flex items-center justify-center">
+                <div className="text-center text-gray-400">
+                  <span className="text-4xl block mb-2">📹</span>
+                  <p className="text-sm font-medium">Camera đang offline</p>
+                  <p className="text-xs mt-1">Đang thử kết nối lại...</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Info bar */}
-          <div className="flex items-center gap-2 mt-2.5 text-xs">
-            <span className={isOnline ? 'text-green-600 font-semibold' : 'text-red-500 font-semibold'}>
-              {isOnline ? 'Dang phat truc tiep' : 'Offline'}
+          {/* Info */}
+          <div className="mt-2 flex items-center gap-2 text-sm">
+            <span className={isOnline ? 'text-green-600' : 'text-red-500'}>
+              {isOnline ? 'Đang phát trực tiếp' : 'Offline'}
             </span>
-            <span className="text-stone-300">|</span>
-            <span className="text-stone-500">{stream.location}</span>
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-500">{streamInfo.location}</span>
           </div>
-          <div className="text-[11px] text-stone-400 mt-1">
-            {stream.name} · {stream.resolution}
+          <div className="text-xs text-gray-400 mt-1">
+            {streamInfo.name} · {streamInfo.resolution}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
-}
+};
+
+export default CameraLiveView;
