@@ -104,7 +104,7 @@ export function useTransformedFarmPlots() {
     [data?.plots]
   );
 
-  const totalSlots = data?.totalSlots ?? 6;
+  const totalSlots = data?.totalSlots ?? 1; // Free user default = 1 slot
 
   return {
     ...rest,

@@ -25,6 +25,7 @@ import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { useWeather } from '@/shared/hooks/useWeather';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
+import type { FarmPlot } from '@/shared/hooks/useFarmPlots';
 import { useGrowthTimer } from '@/shared/hooks/useGrowthTimer';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -37,10 +38,13 @@ import {
 } from '@/shared/utils/error-handler';
 import { playSound, audioManager } from '@/shared/audio';
 
+// Max possible slots across all VIP tiers (for UI display)
+const MAX_DISPLAY_SLOTS = 3;
+
 export default function FarmingScreen() {
   const navigate = useNavigate();
-  // API data (Step 12)
-  const { data: plots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
+  // API data (Step 12) — totalSlots is dynamic based on VIP tier (Phase 7)
+  const { data: plots, totalSlots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
   const { data: profile } = usePlayerProfile();
   const { data: auth } = useAuth();
   const ogn = useOgn(); // TanStack Query single source of truth
@@ -121,6 +125,7 @@ export default function FarmingScreen() {
   const showFlyUp = useUIStore((s) => s.showFlyUp);
 
   const [activePlotIndex, setActivePlotIndex] = useState(0);
+  const [plantSlotIndex, setPlantSlotIndex] = useState(0); // Phase 7: which slot to plant into
   const [showPlantModal, setShowPlantModal] = useState(false);
   const [showPlantPicker, setShowPlantPicker] = useState(false); // NEW: Plant picker modal
   const [showBugGame, setShowBugGame] = useState(false);
@@ -147,6 +152,19 @@ export default function FarmingScreen() {
     () => plots[activePlotIndex] || null,
     [plots, activePlotIndex]
   );
+
+  // Phase 7: Build slot grid — always show up to MAX_DISPLAY_SLOTS
+  const plotBySlot = useMemo(
+    () => new Map(plots.map((p) => [p.slotIndex, p])),
+    [plots]
+  );
+  const slotGrid = useMemo(() => {
+    return Array.from({ length: MAX_DISPLAY_SLOTS }, (_, i) => ({
+      index: i,
+      plot: plotBySlot.get(i) ?? null,
+      unlocked: i < totalSlots,
+    }));
+  }, [plotBySlot, totalSlots]);
 
   const cooldownSeconds = activePlot ? getCooldown(activePlot.id) : 0;
   const { remaining, isActive, start } = useCooldown(cooldownSeconds);
@@ -322,23 +340,31 @@ export default function FarmingScreen() {
     addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
   }, [plantSeedZustand, addToast, plots.length]);
 
-  // ─── NEW: Handle empty slot click (Step 13) ───
-  const handleEmptySlotClick = useCallback(() => {
-    const slotIndex = plots.length;
+  // ─── Phase 7: Handle slot click (empty or locked) ───
+  const handleSlotClick = useCallback((slotIndex: number, unlocked: boolean) => {
+    if (!unlocked) {
+      navigate('/vip/purchase');
+      return;
+    }
     console.log('[FARM-DEBUG] FarmingScreen — EMPTY SLOT CLICKED:', slotIndex);
+    setPlantSlotIndex(slotIndex);
     setShowPlantPicker(true);
-  }, [plots.length]);
+  }, [navigate]);
 
-  // ─── NEW: Handle plant selection from picker (Step 13) ───
+  // ─── Handle empty slot click (legacy compat for "Plant First Seed" button) ───
+  const handleEmptySlotClick = useCallback(() => {
+    handleSlotClick(0, true);
+  }, [handleSlotClick]);
+
+  // ─── Handle plant selection from picker (uses plantSlotIndex) ───
   const handleSelectPlantFromPicker = useCallback((plantTypeId: string) => {
-    const slotIndex = plots.length;
-    console.log('[FARM-DEBUG] FarmingScreen — PLANT SELECTED:', { slot: slotIndex, type: plantTypeId });
+    console.log('[FARM-DEBUG] FarmingScreen — PLANT SELECTED:', { slot: plantSlotIndex, type: plantTypeId });
 
     plantMutation.mutate(
-      { slotIndex, plantTypeId },
+      { slotIndex: plantSlotIndex, plantTypeId },
       {
         onSuccess: (data) => {
-          console.log('[FARM-DEBUG] FarmingScreen — ✅ PLANT SUCCESS:', JSON.stringify(data));
+          console.log('[FARM-DEBUG] FarmingScreen — PLANT SUCCESS:', JSON.stringify(data));
           playSound('plant_seed');
           setShowPlantPicker(false);
           showPlantSuccess(
@@ -346,20 +372,20 @@ export default function FarmingScreen() {
             data.plantType?.emoji || '🌱'
           );
 
-          // FIX: Set activePlotIndex to the newly planted plot slot
-          // This ensures the UI shows the newly planted tree
+          // Set activePlotIndex to the newly planted plot
           if (data.plot) {
-            console.log('[FARM-DEBUG] FarmingScreen — Setting activePlotIndex to slot:', data.plot.slotIndex);
-            setActivePlotIndex(data.plot.slotIndex);
+            // Find the index in the plots array after refetch
+            const newIndex = plots.findIndex((p) => p.slotIndex === data.plot.slotIndex);
+            setActivePlotIndex(newIndex >= 0 ? newIndex : plots.length);
           }
         },
         onError: (error) => {
-          console.error('[FARM-DEBUG] FarmingScreen — ❌ PLANT ERROR:', error.message);
+          console.error('[FARM-DEBUG] FarmingScreen — PLANT ERROR:', error.message);
           handleGameError(error, 'plant');
         },
       }
     );
-  }, [plantMutation, plots.length, addToast]);
+  }, [plantMutation, plantSlotIndex, plots]);
 
   // Loading state
   if (plotsLoading) {
@@ -568,7 +594,79 @@ export default function FarmingScreen() {
           </div>
         </header>
 
-        {/* Central Farm Content */}
+        {/* ═══ Phase 7: Farm Slot Grid ═══ */}
+        <div className="px-6 mt-2 z-30 relative">
+          <div className="flex gap-3 justify-center">
+            {slotGrid.map((slot) => {
+              const growth = slot.plot ? growthMap.get(slot.plot.id) : undefined;
+              const isSelected = slot.plot && plots.indexOf(slot.plot) === activePlotIndex;
+
+              if (!slot.unlocked) {
+                // LOCKED slot — VIP upsell
+                return (
+                  <button
+                    key={slot.index}
+                    onClick={() => handleSlotClick(slot.index, false)}
+                    className="flex-1 max-w-[110px] aspect-square rounded-2xl bg-gray-800/30 backdrop-blur-sm border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1 transition-transform active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-white/40 text-2xl">lock</span>
+                    <span className="text-[9px] font-bold text-white/40 uppercase">VIP</span>
+                  </button>
+                );
+              }
+
+              if (!slot.plot) {
+                // EMPTY unlocked slot — can plant
+                return (
+                  <button
+                    key={slot.index}
+                    onClick={() => handleSlotClick(slot.index, true)}
+                    className="flex-1 max-w-[110px] aspect-square rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-dashed border-green-400/50 flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 hover:bg-white/30"
+                  >
+                    <span className="material-symbols-outlined text-green-600 text-3xl">add_circle</span>
+                    <span className="text-[10px] font-bold text-green-700">Trồng cây</span>
+                  </button>
+                );
+              }
+
+              // PLANTED slot — show mini plant card
+              return (
+                <button
+                  key={slot.index}
+                  onClick={() => {
+                    const idx = plots.indexOf(slot.plot!);
+                    if (idx >= 0) setActivePlotIndex(idx);
+                  }}
+                  className={`flex-1 max-w-[110px] aspect-square rounded-2xl backdrop-blur-sm border-2 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
+                    isSelected
+                      ? 'bg-white/60 border-green-400 shadow-lg ring-2 ring-green-300'
+                      : 'bg-white/30 border-white/30 hover:bg-white/40'
+                  }`}
+                >
+                  <span className={`text-3xl ${slot.plot.isDead ? 'grayscale' : ''}`}>
+                    {slot.plot.isDead ? '🥀' : slot.plot.plantType.emoji}
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-700 truncate max-w-full px-1">
+                    {slot.plot.plantType.name}
+                  </span>
+                  {!slot.plot.isDead && growth && (
+                    <div className="w-3/4 h-1.5 bg-gray-200/50 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${growth.isReady ? 'bg-yellow-400' : 'bg-green-400'}`}
+                        style={{ width: `${Math.max(5, growth.percent)}%` }}
+                      />
+                    </div>
+                  )}
+                  {slot.plot.isDead && (
+                    <span className="text-[8px] text-red-500 font-bold">Héo</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Central Farm Content — Detail View */}
         <div className="flex-grow flex flex-col items-center justify-center relative px-8 pb-10">
           {activePlot ? (
             <>
@@ -589,7 +687,7 @@ export default function FarmingScreen() {
               </div>
 
               {/* Plant Visualization */}
-              <div className="relative w-full flex flex-col items-center justify-end h-[350px] z-20">
+              <div className="relative w-full flex flex-col items-center justify-end h-[300px] z-20">
                 {/* Water splash effect */}
                 {showWaterEffect && (
                   <div className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center">
@@ -620,7 +718,7 @@ export default function FarmingScreen() {
               </div>
 
               {/* Progress UI */}
-              <div className="w-full max-w-[260px] space-y-2 mt-6 bg-white/60 backdrop-blur-md p-4 rounded-3xl shadow-xl border border-white/50 z-30">
+              <div className="w-full max-w-[260px] space-y-2 mt-4 bg-white/60 backdrop-blur-md p-4 rounded-3xl shadow-xl border border-white/50 z-30">
                 <div className="flex justify-between text-[11px] font-black text-gray-700 uppercase tracking-widest mb-1">
                   <span>Growth</span>
                   <span>{STAGE_LABELS[stage]} ({growthPct}%)</span>
@@ -637,24 +735,15 @@ export default function FarmingScreen() {
                   </div>
                 </div>
               </div>
-
-              {/* Plot dots for switching */}
-              {plots.length > 1 && (
-                <div className="flex gap-3 mt-6 z-40">
-                  {plots.map((_, i) => (
-                    <button key={i} onClick={() => setActivePlotIndex(i)}
-                      className={`w-3 h-3 rounded-full border-2 border-white shadow-md transition-all ${i === activePlotIndex ? 'bg-green-600 scale-125' : 'bg-white/50'}`} />
-                  ))}
-                </div>
-              )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center p-10 bg-white/40 backdrop-blur-md rounded-[40px] border border-white/50 shadow-xl">
               <span className="text-8xl mb-4 animate-bounce">🌱</span>
-              <p className="font-heading font-black text-2xl text-amber-900">No Plants Yet!</p>
+              <p className="font-heading font-black text-2xl text-amber-900">Chưa có cây!</p>
+              <p className="text-sm text-amber-700/60 mt-1 mb-4">Chọn ô trống phía trên để trồng</p>
               <button onClick={handleEmptySlotClick}
-                className="mt-6 px-8 py-3 rounded-2xl btn-green text-white font-heading font-bold text-lg shadow-lg active:scale-95 transition-all">
-                Plant First Seed
+                className="px-8 py-3 rounded-2xl btn-green text-white font-heading font-bold text-lg shadow-lg active:scale-95 transition-all">
+                Trồng cây đầu tiên
               </button>
             </div>
           )}
