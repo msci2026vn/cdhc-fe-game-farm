@@ -110,62 +110,62 @@ export default function ProfileScreen() {
         </div>
 
         {/* Top Header */}
-        <div className="relative z-30 px-4 pt-4 flex justify-between items-center shrink-0">
+        <div className="relative z-30 px-3 pt-2 flex justify-between items-center shrink-0">
           <button
             onClick={() => navigate(-1)}
-            className="bg-white/80 p-2 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
+            className="bg-white/80 p-1.5 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
           >
-            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
-          <div className="bg-farm-brown text-[#fefae0] px-4 py-1 rounded-full shadow-wood-shadow font-heading font-bold text-lg border-2 border-[#5d4037]">
+          <div className="bg-farm-brown text-[#fefae0] px-4 py-0.5 rounded-full shadow-wood-shadow font-heading font-bold text-base border-2 border-[#5d4037]">
             Hồ Sơ Nông Dân
           </div>
           <button
             onClick={() => navigate('/settings')}
-            className="bg-white/80 p-2 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
+            className="bg-white/80 p-1.5 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
           >
-            <span className="material-symbols-outlined">settings</span>
+            <span className="material-symbols-outlined text-[20px]">settings</span>
           </button>
         </div>
 
         {/* Profile Card */}
-        <div className="px-4 mt-3 z-10 shrink-0">
-          <div className="bg-farm-paper rounded-2xl p-3 shadow-paper-shadow border-2 border-[#d4c5a3] relative">
-            <div className="flex gap-3 items-start">
+        <div className="px-3 mt-2 z-10 shrink-0">
+          <div className="bg-farm-paper rounded-2xl p-2.5 shadow-sm border-2 border-[#d4c5a3] relative">
+            <div className="flex gap-2.5 items-center">
               <div className="relative shrink-0">
-                <div className={`w-[72px] h-[72px] rounded-2xl bg-[#f4e4bc] border-[3px] shadow-sm overflow-hidden flex items-center justify-center text-2xl ${isVip ? 'border-[#FDB931] shadow-[0_2px_12px_rgba(253,185,49,0.7)]' : 'border-farm-brown'}`}>
+                <div className={`w-[60px] h-[60px] rounded-2xl bg-[#f4e4bc] border-[3px] shadow-sm overflow-hidden flex items-center justify-center text-xl ${isVip ? 'border-[#FDB931] shadow-[0_2px_12px_rgba(253,185,49,0.7)]' : 'border-farm-brown'}`}>
                   {displayPicture ? (
                     <img alt="Avatar" className="w-full h-full object-cover" src={displayPicture} />
                   ) : (
                     '🧑‍🌾'
                   )}
                 </div>
-                <div className="absolute -bottom-2 right-0 bg-farm-green-dark text-white text-[9px] px-2 py-0.5 rounded-full font-bold border-2 border-white shadow-sm">
+                <div className="absolute -bottom-1.5 -right-1 bg-farm-green-dark text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold border-2 border-white shadow-sm">
                   Lv.{level}
                 </div>
                 {isVip && (
-                  <div className="absolute -top-3 -left-4 bg-gold-gradient text-white text-xs px-2.5 py-1 rounded-xl font-black border-2 border-white shadow-[0_0_15px_rgba(255,215,0,0.9)] flex items-center gap-1 z-10 -rotate-[12deg] animate-pulse">
-                    <span className="material-symbols-outlined text-sm fill-current text-white drop-shadow-md">crown</span>
-                    <span className="drop-shadow-md tracking-widest text-white">VIP</span>
+                  <div className="absolute -top-3 -left-3 bg-white text-[#FDB931] text-[13px] px-2 py-0.5 rounded-lg font-black border-[2.5px] border-[#FDB931] shadow-[0_0_15px_rgba(253,185,49,0.9)] flex items-center gap-0.5 z-10 -rotate-[12deg] animate-pulse">
+                    <span className="material-symbols-outlined text-[15px] fill-current">crown</span>
+                    <span className="tracking-widest">VIP</span>
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h1 className="font-heading font-bold text-[18px] text-farm-brown-dark truncate pr-1">{displayName}</h1>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <h1 className="font-heading font-bold text-[16px] leading-tight text-farm-brown-dark truncate">{displayName}</h1>
                   {!isVip && (
-                    <div className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded text-[9px] font-bold border border-gray-300 shadow-sm shrink-0">
+                    <div className="bg-gray-200 text-gray-600 px-1 py-0.5 rounded text-[8px] font-bold border border-gray-300 shadow-sm shrink-0">
                       FREE
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="text-xs font-bold text-farm-green-light truncate">⭐ {title}</div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="text-[11px] font-bold text-farm-green-light truncate">⭐ {title}</div>
                   {(!isVip || daysRemaining <= 7) && (
                     <button
                       onClick={() => navigate('/vip/purchase')}
-                      className="bg-farm-carrot text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm hover:bg-orange-600 active:scale-95 transition-transform animate-bounce shrink-0 ml-auto mr-1"
+                      className="bg-farm-carrot text-white text-[8px] px-2 py-0.5 rounded-full font-bold shadow-sm hover:bg-orange-600 active:scale-95 transition-transform animate-bounce shrink-0 ml-auto"
                     >
                       {isVip ? 'GIA HẠN' : 'NÂNG CẤP'}
                     </button>
@@ -173,19 +173,19 @@ export default function ProfileScreen() {
                 </div>
 
                 {/* XP Bar */}
-                <div className="w-full h-4 bg-gray-200 rounded-full border border-gray-300 relative overflow-hidden mb-2">
+                <div className="w-full h-3.5 bg-gray-200 rounded-full border border-gray-300 relative overflow-hidden mb-1.5">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500"
                     style={{ width: `${(LEVEL_CONFIG.getXpInLevel(xp) / LEVEL_CONFIG.getXpForLevel(xp)) * 100}%` }}
                   ></div>
-                  <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white drop-shadow-md">
+                  <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white drop-shadow-md">
                     {LEVEL_CONFIG.getXpInLevel(xp)} / {LEVEL_CONFIG.getXpForLevel(xp)} XP
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs font-bold text-farm-brown-dark/80">
-                  <span className="flex items-center gap-1"><span className="text-base">🪙</span> {formatOGN(profile.ogn || 0)} OGN</span>
-                  <span className="flex items-center gap-1"><span className="text-base">📅</span> {profile.totalHarvests || 0} thu hoạch</span>
+                <div className="flex justify-between items-center text-[10px] font-bold text-farm-brown-dark/80">
+                  <span className="flex items-center gap-1"><span className="text-[13px]">🪙</span> {formatOGN(profile.ogn || 0)}</span>
+                  <span className="flex items-center gap-1"><span className="text-[13px]">📅</span> {profile.totalHarvests || 0}</span>
                 </div>
               </div>
             </div>
@@ -194,20 +194,20 @@ export default function ProfileScreen() {
         </div>
 
         {/* Tab Buttons */}
-        <div className="px-4 mt-4 flex gap-2 z-10 shrink-0">
+        <div className="px-3 mt-3 flex gap-2 z-10 shrink-0">
           <button
             onClick={() => { playSound('ui_tab'); setTab('wallet'); }}
-            className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all flex items-center justify-center gap-1 ${tab === 'wallet'
-              ? 'wood-btn shadow-lg'
+            className={`flex-1 py-1.5 rounded-xl font-bold font-heading text-[12px] tracking-wide transition-all flex items-center justify-center gap-1 ${tab === 'wallet'
+              ? 'wood-btn shadow-md'
               : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
               }`}
           >
-            <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" /> Ví Avax
+            <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain" /> Ví Avax
           </button>
           <button
             onClick={() => { playSound('ui_tab'); setTab('stats'); }}
-            className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all ${tab === 'stats'
-              ? 'wood-btn shadow-lg'
+            className={`flex-1 py-1.5 rounded-xl font-bold font-heading text-[12px] tracking-wide transition-all ${tab === 'stats'
+              ? 'wood-btn shadow-md'
               : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
               }`}
           >
@@ -215,8 +215,8 @@ export default function ProfileScreen() {
           </button>
           <button
             onClick={() => { playSound('ui_tab'); setTab('achievements'); }}
-            className={`flex-1 py-2 rounded-xl font-bold font-heading text-[13px] tracking-wide transition-all ${tab === 'achievements'
-              ? 'wood-btn shadow-lg'
+            className={`flex-1 py-1.5 rounded-xl font-bold font-heading text-[12px] tracking-wide transition-all ${tab === 'achievements'
+              ? 'wood-btn shadow-md'
               : 'bg-white/60 border-2 border-transparent hover:border-farm-brown/30 text-farm-brown-dark'
               }`}
           >
