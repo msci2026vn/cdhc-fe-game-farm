@@ -20,6 +20,7 @@ import { SmartWalletCard } from '../components/SmartWalletCard';
 import { CustodialWalletCard } from '../components/CustodialWalletCard';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
+import { useVipStatus } from '@/shared/hooks/useVipStatus';
 
 type Tab = 'wallet' | 'stats' | 'achievements';
 
@@ -39,6 +40,7 @@ export default function ProfileScreen() {
   const { state: walletState, clearError: clearWalletError } = useWalletAuth();
   const invalidateProfile = useInvalidateProfile();
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const { isVip, tier, daysRemaining } = useVipStatus();
 
   // Wallet status — fallback if profile doesn't have walletAddress
   const { data: walletStatus, refetch: refetchWalletStatus } = useQuery({
@@ -143,8 +145,30 @@ export default function ProfileScreen() {
                 </div>
               </div>
               <div className="flex-1">
-                <h1 className="font-heading font-bold text-2xl text-farm-brown-dark">{displayName}</h1>
-                <div className="text-sm font-bold text-farm-green-light mb-1">⭐ {title}</div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h1 className="font-heading font-bold text-2xl text-farm-brown-dark line-clamp-1">{displayName}</h1>
+                  {!isVip ? (
+                    <div className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded text-[10px] font-bold border border-gray-300 shadow-sm shrink-0">
+                      FREE
+                    </div>
+                  ) : (
+                    <div className="bg-gold-gradient text-white px-2 py-0.5 rounded-full text-[10px] font-bold border border-yellow-200 shadow-gold-glow flex items-center gap-1 animate-pulse shrink-0">
+                      <span className="material-symbols-outlined text-[12px] fill-current">crown</span> {tier === 'premium' ? 'VIP Premium' : 'VIP'}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="text-sm font-bold text-farm-green-light">⭐ {title}</div>
+                  {(!isVip || daysRemaining <= 7) && (
+                    <button
+                      onClick={() => navigate('/vip/purchase')}
+                      className="bg-farm-carrot text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm hover:bg-orange-600 active:scale-95 transition-transform animate-bounce shrink-0"
+                    >
+                      {isVip ? 'GIA HẠN VIP' : 'NÂNG CẤP VIP'}
+                    </button>
+                  )}
+                </div>
 
                 {/* XP Bar */}
                 <div className="w-full h-4 bg-gray-200 rounded-full border border-gray-300 relative overflow-hidden mb-2">
@@ -164,6 +188,24 @@ export default function ProfileScreen() {
               </div>
             </div>
 
+            <div className="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-[#d4c5a3]/50">
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-farm-brown-dark">{profile.totalHarvests || 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Thu hoạch</span>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-farm-carrot">{profile.likesCount || 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Lượt thích</span>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-blue-500">{profile.commentsCount || 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Bình luận</span>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-heading font-bold text-lg text-purple-500">{profile.giftsCount || 0}</span>
+                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Quà tặng</span>
+              </div>
+            </div>
           </div>
         </div>
 
