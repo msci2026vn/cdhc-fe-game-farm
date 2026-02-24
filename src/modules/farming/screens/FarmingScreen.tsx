@@ -29,6 +29,7 @@ import type { FarmPlot } from '@/shared/hooks/useFarmPlots';
 import { useGrowthTimer } from '@/shared/hooks/useGrowthTimer';
 import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import {
   handleGameError,
   showPlantSuccess,
@@ -48,6 +49,7 @@ export default function FarmingScreen() {
   const { data: profile } = usePlayerProfile();
   const { data: auth } = useAuth();
   const ogn = useOgn(); // TanStack Query single source of truth
+  const { isVip } = useVipStatus();
 
   // Weather data (Step 31 — GPS/Weather Integration)
   const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useWeather();
@@ -470,7 +472,7 @@ export default function FarmingScreen() {
             {/* User Profile Glass UI */}
             <div className="flex items-center gap-2.5 glass-ui-v2 p-1 pr-3.5 rounded-full flex-shrink-0">
               <div className="relative group cursor-pointer" onClick={() => navigate('/profile')}>
-                <div className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-game-green-mid flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-full border-2 shadow-sm overflow-hidden bg-game-green-mid flex items-center justify-center ${isVip ? 'border-[#FDB931]' : 'border-white'}`}>
                   {(auth?.user?.picture || profile?.picture) ? (
                     <img
                       alt={auth?.user?.name || profile?.name}
@@ -481,6 +483,12 @@ export default function FarmingScreen() {
                     <span className="text-xl">🧑‍🌾</span>
                   )}
                 </div>
+                {isVip && (
+                  <div className="absolute -top-1.5 -left-2 bg-white text-[#FDB931] text-[8px] px-1 py-0.5 rounded-full font-black border-[1.5px] border-[#FDB931] shadow-[0_0_8px_rgba(253,185,49,0.8)] flex items-center gap-0.5 z-10 -rotate-[15deg] animate-pulse">
+                    <span className="material-symbols-outlined text-[10px] fill-current">crown</span>
+                    <span className="tracking-widest">VIP</span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col translate-y-[-1px]">
                 <h1 className="font-black text-[12px] text-gray-800 leading-none mb-1.5">
@@ -637,11 +645,10 @@ export default function FarmingScreen() {
                     const idx = plots.indexOf(slot.plot!);
                     if (idx >= 0) setActivePlotIndex(idx);
                   }}
-                  className={`flex-1 max-w-[110px] aspect-square rounded-2xl backdrop-blur-sm border-2 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
-                    isSelected
+                  className={`flex-1 max-w-[110px] aspect-square rounded-2xl backdrop-blur-sm border-2 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${isSelected
                       ? 'bg-white/60 border-green-400 shadow-lg ring-2 ring-green-300'
                       : 'bg-white/30 border-white/30 hover:bg-white/40'
-                  }`}
+                    }`}
                 >
                   <span className={`text-3xl ${slot.plot.isDead ? 'grayscale' : ''}`}>
                     {slot.plot.isDead ? '🥀' : slot.plot.plantType.emoji}
