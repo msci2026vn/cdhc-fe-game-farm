@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSmartWallet } from '@/shared/hooks/useSmartWallet';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -19,6 +20,7 @@ export function SmartWalletCard() {
     isCreatingWallet,
   } = useSmartWallet();
 
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   const copyAddress = () => {
@@ -150,7 +152,7 @@ export function SmartWalletCard() {
       </div>
 
       {/* Nút Nạp tiền */}
-      <div className="mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" className="w-full h-10 rounded-xl border-[#e9c46a] text-farm-brown-dark hover:bg-[#fefae0]">
@@ -316,6 +318,16 @@ export function SmartWalletCard() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Nút Nạp Visa */}
+        <Button
+          variant="outline"
+          onClick={() => navigate('/farmverse/topup')}
+          className="w-full h-10 rounded-xl border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100"
+        >
+          <span className="material-symbols-outlined mr-2 text-[18px]">credit_card</span>
+          Nạp thẻ Visa
+        </Button>
       </div>
 
       {/* Snowtrace link */}

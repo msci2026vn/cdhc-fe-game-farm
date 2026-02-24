@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCustodialWallet } from '@/shared/hooks/useCustodialWallet';
 import { useSecurityVerify } from '@/shared/hooks/useSecurityVerify';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ export function CustodialWalletCard() {
   } = useCustodialWallet();
 
   const security = useSecurityVerify();
+  const navigate = useNavigate();
 
   const [copied, setCopied] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -263,7 +265,7 @@ export function CustodialWalletCard() {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-3 gap-2 mb-3">
+      <div className="grid grid-cols-4 gap-2 mb-3">
         {/* Nap tien — Dialog */}
         <Dialog>
           <DialogTrigger asChild>
@@ -380,6 +382,15 @@ export function CustodialWalletCard() {
             <DialogClose className="hidden" />
           </DialogContent>
         </Dialog>
+
+        {/* Nạp thẻ (Visa) */}
+        <button
+          onClick={() => navigate('/farmverse/topup')}
+          className="flex flex-col items-center gap-1 p-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 active:scale-95 transition-all min-h-[56px]"
+        >
+          <span className="material-symbols-outlined text-lg">credit_card</span>
+          <span className="text-[10px] font-bold whitespace-nowrap">Nạp Visa</span>
+        </button>
 
         {/* Rut tien */}
         <button
