@@ -133,27 +133,28 @@ export default function ProfileScreen() {
           <div className="bg-farm-paper rounded-2xl p-4 shadow-paper-shadow border-2 border-[#d4c5a3] relative">
             <div className="flex gap-4 items-start">
               <div className="relative">
-                <div className="w-20 h-20 rounded-2xl bg-[#f4e4bc] border-4 border-farm-brown shadow-md overflow-hidden flex items-center justify-center text-3xl">
+                <div className={`w-20 h-20 rounded-2xl bg-[#f4e4bc] border-4 shadow-md overflow-hidden flex items-center justify-center text-3xl ${isVip ? 'border-[#FDB931] shadow-[0_2px_10px_rgba(253,185,49,0.6)]' : 'border-farm-brown'}`}>
                   {displayPicture ? (
                     <img alt="Avatar" className="w-full h-full object-cover" src={displayPicture} />
                   ) : (
                     '🧑‍🌾'
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-farm-green-dark text-white text-[10px] px-2 py-0.5 rounded-full font-bold border-2 border-white shadow-sm">
+                <div className="absolute -bottom-2 right-0 bg-farm-green-dark text-white text-[10px] px-2 py-0.5 rounded-full font-bold border-2 border-white shadow-sm">
                   Lv.{level}
                 </div>
+                {isVip && (
+                  <div className="absolute -top-2 -left-3 bg-gold-gradient text-white text-[9px] px-2 py-0.5 rounded-md font-bold border border-white shadow-gold-glow flex items-center gap-1 z-10 -rotate-[10deg] animate-pulse">
+                    <span className="material-symbols-outlined text-[10px] fill-current">crown</span>VIP
+                  </div>
+                )}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h1 className="font-heading font-bold text-2xl text-farm-brown-dark line-clamp-1">{displayName}</h1>
-                  {!isVip ? (
+                  <h1 className="font-heading font-bold text-[19px] text-farm-brown-dark truncate">{displayName}</h1>
+                  {!isVip && (
                     <div className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded text-[10px] font-bold border border-gray-300 shadow-sm shrink-0">
                       FREE
-                    </div>
-                  ) : (
-                    <div className="bg-gold-gradient text-white px-2 py-0.5 rounded-full text-[10px] font-bold border border-yellow-200 shadow-gold-glow flex items-center gap-1 animate-pulse shrink-0">
-                      <span className="material-symbols-outlined text-[12px] fill-current">crown</span> {tier === 'premium' ? 'VIP Premium' : 'VIP'}
                     </div>
                   )}
                 </div>
@@ -188,24 +189,6 @@ export default function ProfileScreen() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-[#d4c5a3]/50">
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-farm-brown-dark">{profile.totalHarvests || 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Thu hoạch</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-farm-carrot">{profile.likesCount || 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Lượt thích</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-blue-500">{profile.commentsCount || 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Bình luận</span>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="font-heading font-bold text-lg text-purple-500">{profile.giftsCount || 0}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold text-center">Quà tặng</span>
-              </div>
-            </div>
           </div>
         </div>
 
