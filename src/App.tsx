@@ -46,6 +46,9 @@ const MarketScreen = lazyWithRetry(() => import('@/modules/market/screens/Market
 const VipPurchaseScreen = lazyWithRetry(() => import('@/modules/vip/screens/VipPurchaseScreen'));
 const SettingsScreen = lazyWithRetry(() => import('@/modules/settings/screens/SettingsScreen'));
 const MyGardenScreen = lazyWithRetry(() => import('@/modules/rwa/screens/MyGardenScreen'));
+const TopupPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupPage'));
+const TopupSuccessPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupSuccessPage'));
+const TopupCancelPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupCancelPage'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -113,6 +116,9 @@ const AuthenticatedApp = () => {
         <Route path="/vip/purchase" element={<VipPurchaseScreen />} />
         <Route path="/rwa/my-garden" element={<MyGardenScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
+        <Route path="/farmverse/topup" element={<TopupPage />} />
+        <Route path="/farmverse/topup/success" element={<TopupSuccessPage />} />
+        <Route path="/farmverse/topup/cancel" element={<TopupCancelPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
