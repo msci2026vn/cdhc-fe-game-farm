@@ -82,8 +82,8 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
   };
 
   return (
-    <div className="bg-gradient-to-b from-green-50 via-[#fefae0] to-[#f4f1de] min-h-[100dvh] text-stone-800 font-body select-none">
-      <div className="max-w-[430px] mx-auto min-h-[100dvh] relative">
+    <div className="bg-gradient-to-b from-green-50 via-[#fefae0] to-[#f4f1de] h-[100dvh] overflow-y-auto overflow-x-hidden text-stone-800 font-body select-none" style={{ scrollbarWidth: 'none' }}>
+      <div className="max-w-[430px] mx-auto min-h-full relative pb-4">
 
         {/* Header */}
         <div className="relative z-10 px-4 pt-4 flex items-center gap-3">

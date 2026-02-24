@@ -4,8 +4,8 @@ export default function LockedGardenView() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-gradient-to-b from-gray-100 via-stone-50 to-stone-100 min-h-[100dvh] text-stone-800 font-body select-none">
-      <div className="max-w-[430px] mx-auto min-h-[100dvh] relative flex flex-col">
+    <div className="bg-gradient-to-b from-gray-100 via-stone-50 to-stone-100 h-[100dvh] overflow-y-auto overflow-x-hidden text-stone-800 font-body select-none" style={{ scrollbarWidth: 'none' }}>
+      <div className="max-w-[430px] mx-auto min-h-[100dvh] relative flex flex-col pb-4">
 
         {/* Header */}
         <div className="relative z-10 px-4 pt-4 flex items-center gap-3">
