@@ -3,25 +3,32 @@ import { useCameraStream } from '@/shared/hooks/useCamera';
 
 const CameraLiveView = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isOnline, setIsOnline] = useState(true); // default true, video sẽ tự detect
-  const [retryCount, setRetryCount] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const { data: streamInfo, isLoading, error } = useCameraStream();
 
-  // Auto-retry video khi lỗi
+  // Check stream availability via GET (not HEAD)
   useEffect(() => {
-    if (!isOnline && streamInfo && videoRef.current) {
-      const timer = setTimeout(() => {
-        if (videoRef.current && streamInfo) {
-          const url = streamInfo.hlsUrl || streamInfo.webrtcUrl;
-          videoRef.current.src = url + '?retry=' + Date.now();
-          videoRef.current.load();
-          setRetryCount(prev => prev + 1);
-        }
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOnline, retryCount, streamInfo]);
+    if (!streamInfo) return;
+    const streamUrl = streamInfo.hlsUrl || streamInfo.webrtcUrl;
+
+    const checkStream = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        await fetch(streamUrl, { mode: 'no-cors', signal: controller.signal });
+        clearTimeout(timeoutId);
+        setIsOnline(true);
+      } catch {
+        setIsOnline(false);
+      }
+    };
+
+    checkStream();
+    const interval = setInterval(checkStream, 30000);
+    return () => clearInterval(interval);
+  }, [streamInfo]);
 
   // Loading skeleton
   if (isLoading) {
@@ -35,7 +42,7 @@ const CameraLiveView = () => {
     );
   }
 
-  // No camera hoặc lỗi API → ẩn hoàn toàn
+  // No camera
   if (error || !streamInfo) return null;
 
   const streamUrl = streamInfo.hlsUrl || streamInfo.webrtcUrl;
@@ -57,23 +64,27 @@ const CameraLiveView = () => {
 
       {!isCollapsed && (
         <>
-          {/* Video Player */}
-          <div className="relative">
-            <video
-              ref={videoRef}
-              src={streamUrl}
-              autoPlay
-              muted
-              playsInline
-              controls
-              className={`w-full aspect-video rounded-xl bg-black object-contain ${!isOnline ? 'hidden' : ''}`}
-              onPlaying={() => { setIsOnline(true); setRetryCount(0); }}
-              onError={() => setIsOnline(false)}
-            />
-
-            {/* Offline placeholder */}
-            {!isOnline && (
-              <div className="w-full aspect-video rounded-xl bg-gray-800 flex items-center justify-center">
+          {/* Player — iframe mediamtx built-in HLS player */}
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
+            {isOnline ? (
+              <>
+                <iframe
+                  ref={iframeRef}
+                  src={streamUrl}
+                  className="w-full h-full border-0"
+                  allow="autoplay"
+                  allowFullScreen
+                  onLoad={() => setIframeLoaded(true)}
+                />
+                {/* Loading spinner while iframe loads */}
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500" />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <span className="text-4xl block mb-2">📹</span>
                   <p className="text-sm font-medium">Camera đang offline</p>
