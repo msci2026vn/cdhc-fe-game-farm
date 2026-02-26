@@ -44,11 +44,11 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
       onClick={(e) => { if (e.target === e.currentTarget && !isLoading) onClose(); }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
 
       {/* Modal Container */}
       <div
-        className="relative w-[92vw] max-w-[420px] overflow-hidden shadow-2xl shadow-black/50 animate-slide-up bg-[length:100%_100%] bg-center bg-no-repeat rounded-[24px]"
+        className="relative w-[92vw] max-w-[420px] drop-shadow-2xl animate-slide-up bg-[length:100%_100%] bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/assets/login/login-khung-vi.png')", minHeight: '440px' }}
         onClick={(e) => e.stopPropagation()}
       >
