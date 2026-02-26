@@ -27,6 +27,7 @@ export interface DetectedWallet {
   icon: string;
   installed: boolean;
   downloadUrl: string;
+  isDeepLink?: boolean;
 }
 
 function detectWallets(): DetectedWallet[] {
@@ -48,13 +49,20 @@ function detectWallets(): DetectedWallet[] {
     }
   }
 
+  const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isMetaMaskDeepLink = isMobile && !hasMetaMask && typeof window !== 'undefined';
+  const metamaskUrl = isMetaMaskDeepLink
+    ? `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`
+    : 'https://metamask.io/download/';
+
   const wallets: DetectedWallet[] = [
     {
       id: 'metamask',
       name: 'MetaMask',
       icon: '🦊',
       installed: hasMetaMask,
-      downloadUrl: 'https://metamask.io/download/',
+      downloadUrl: metamaskUrl,
+      isDeepLink: isMetaMaskDeepLink,
     },
     {
       id: 'core',

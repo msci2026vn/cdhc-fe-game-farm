@@ -158,9 +158,13 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
                   <div className="min-w-0">
                     <div className="text-slate-300 font-semibold flex items-center gap-2">
                       <span className="text-base truncate">{wallet.name}</span>
-                      <span className="text-slate-500 text-[10px] font-normal flex-shrink-0 italic">Chưa cài đặt</span>
+                      {!wallet.isDeepLink && (
+                        <span className="text-slate-500 text-[10px] font-normal flex-shrink-0 italic">Chưa cài đặt</span>
+                      )}
                     </div>
-                    <p className="text-slate-500 text-xs mt-0.5 truncate">Dành cho Avalanche</p>
+                    <p className="text-slate-500 text-xs mt-0.5 truncate">
+                      {wallet.isDeepLink ? 'Mở trong ứng dụng' : 'Dành cho Avalanche'}
+                    </p>
                   </div>
                 </div>
                 <a
@@ -170,7 +174,7 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
                   onClick={(e) => e.stopPropagation()}
                   className="bg-[#ec5b13] hover:bg-[#ec5b13]/80 text-white text-xs font-bold px-4 py-2 rounded-lg flex-shrink-0 ml-2 transition-colors shadow-lg shadow-[#ec5b13]/20 whitespace-nowrap"
                 >
-                  Tải về
+                  {wallet.isDeepLink ? 'Mở App' : 'Tải về'}
                 </a>
               </div>
             );
