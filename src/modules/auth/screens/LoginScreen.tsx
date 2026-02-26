@@ -11,6 +11,53 @@ import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
 
+const Particles = () => {
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+      <style>
+        {`
+          @keyframes particle-rain {
+            0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.9; }
+            90% { opacity: 0.9; }
+            100% { transform: translate3d(var(--drift), 110vh, 0) rotate(360deg); opacity: 0; }
+          }
+          .particle-leaf {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #a9f36a;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 4px rgba(118, 255, 3, 0.4), inset 0 0 4px #fff;
+            animation: particle-rain linear infinite;
+            will-change: transform, opacity;
+          }
+        `}
+      </style>
+      {[...Array(15)].map((_, i) => {
+        const left = Math.random() * 100;
+        const duration = Math.random() * 5 + 6;
+        const delay = Math.random() * -10;
+        const scale = Math.random() * 0.5 + 0.5;
+        const drift = (Math.random() - 0.5) * 20;
+        return (
+          <div
+            key={i}
+            className="particle-leaf"
+            style={{
+              left: left + '%',
+              animationDuration: duration + 's',
+              animationDelay: delay + 's',
+              transform: 'scale(' + scale + ')',
+              '--drift': drift + 'vw',
+            } as React.CSSProperties}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 function LoginScreenContent() {
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
@@ -124,6 +171,7 @@ function LoginScreenContent() {
         className="relative w-full h-[100dvh] max-w-[430px] flex flex-col items-center justify-center overflow-hidden shadow-2xl bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/assets/login/anh-nen.png')" }}
       >
+        <Particles />
         <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[11vh]" style={{ scrollbarWidth: 'none' }}>
           {/* Title Section */}
           <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0 px-2 mt-4">
