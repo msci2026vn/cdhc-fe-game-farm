@@ -124,7 +124,7 @@ function LoginScreenContent() {
         className="relative w-full h-[100dvh] max-w-[430px] flex flex-col items-center justify-center overflow-hidden shadow-2xl bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/assets/login/anh-nen.png')" }}
       >
-        <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[6vh]" style={{ scrollbarWidth: 'none' }}>
+        <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[20vh]" style={{ scrollbarWidth: 'none' }}>
           {/* Title Section */}
           <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0">
             <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">
