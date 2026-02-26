@@ -48,12 +48,10 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
 
       {/* Modal Container */}
       <div
-        className="relative w-full max-w-md overflow-hidden bg-[#3d2b1f]/95 border border-white/10 rounded-xl shadow-2xl shadow-black/50 animate-slide-up"
+        className="relative w-[92vw] max-w-[420px] overflow-hidden shadow-2xl shadow-black/50 animate-slide-up bg-[length:100%_100%] bg-center bg-no-repeat rounded-[24px]"
+        style={{ backgroundImage: "url('/assets/login/login-khung-vi.png')", minHeight: '440px' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Decorative Top Bar (Organic Style) */}
-        <div className="h-2 w-full bg-gradient-to-r from-green-600 via-[#ec5b13] to-green-600"></div>
-
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-2">
           <div className="flex items-center gap-3">
