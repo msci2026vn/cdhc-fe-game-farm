@@ -337,6 +337,18 @@ export default {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(168,85,247,0.3)" },
           "50%": { boxShadow: "0 0 20px 10px rgba(168,85,247,0.5)" },
         },
+        "button-vibrate": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-2px) translateY(1px) rotate(-1deg)" },
+          "40%": { transform: "translateX(2px) translateY(-1px) rotate(1deg)" },
+          "60%": { transform: "translateX(-1px) translateY(1px) rotate(0deg)" },
+          "80%": { transform: "translateX(1px) translateY(-1px) rotate(1deg)" },
+        },
+        "button-pop": {
+          "0%": { transform: "scale(0.95)" },
+          "40%": { transform: "scale(1.02)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -379,6 +391,8 @@ export default {
         "dodge-pulse": "dodge-pulse 0.4s ease-in-out infinite",
         "prayer-ascend": "prayer-ascend 1s ease-out forwards",
         "prayer-glow": "prayer-glow 2s ease-in-out infinite",
+        "button-vibrate": "button-vibrate 0.3s ease-in-out infinite",
+        "button-pop": "button-pop 0.25s ease-out forwards",
       },
     },
   },

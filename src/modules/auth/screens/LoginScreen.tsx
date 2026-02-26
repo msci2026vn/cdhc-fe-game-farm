@@ -149,7 +149,7 @@ function LoginScreenContent() {
                 <button
                   onClick={() => setShowWalletModal(true)}
                   disabled={loading}
-                  className="w-full hover:brightness-110 active:scale-95 transition-all disabled:opacity-70 focus:outline-none"
+                  className="w-full hover:animate-button-vibrate hover:brightness-110 active:animate-button-pop active:scale-95 transition-all disabled:opacity-70 focus:outline-none"
                 >
                   <img src="/assets/login/button-avalan.png" alt="Login with Avalanche" className="w-full h-auto object-contain drop-shadow-sm" />
                 </button>
@@ -172,8 +172,8 @@ function LoginScreenContent() {
                   />
                 </div>
 
-                <div className={`w-full transition-all relative z-10 ${loading ? 'opacity-70 cursor-wait' : 'hover:brightness-110 active:scale-95 cursor-pointer'}`}>
-                  <img src="/assets/login/button-google.png" alt="Login with Google" className="w-full h-auto object-contain drop-shadow-sm" />
+                <div className={`w-full transition-all relative z-10 ${loading ? 'opacity-70 cursor-wait' : 'hover:animate-button-vibrate hover:brightness-110 active:animate-button-pop active:scale-95 cursor-pointer'}`}>
+                  <img src="/assets/login/btn-g.png" alt="Login with Google" className="w-full h-auto object-contain drop-shadow-sm" />
                 </div>
               </div>
             </div>
