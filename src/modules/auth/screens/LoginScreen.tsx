@@ -126,16 +126,14 @@ function LoginScreenContent() {
       >
         <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[11vh]" style={{ scrollbarWidth: 'none' }}>
           {/* Title Section */}
-          <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0">
-            <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">
-              <span className="honey-text block">Organic</span>
-              <span className="block text-6xl md:text-7xl mt-1 honey-text-green">
-                Kingdom
-              </span>
-            </h1>
-            <div className="honey-drop w-3 h-6 top-[65%] right-[25%]" style={{ background: '#FFB300' }}></div>
-            <div className="absolute top-0 -right-4 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-ladybug-title">🐞</div>
-            <div className="absolute bottom-0 -left-6 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-bee-title">🐝</div>
+          <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0 px-2 mt-4">
+            <img
+              src="/assets/login/login-logo.png"
+              alt="Organic Kingdom Logo"
+              className="w-[90%] max-w-[340px] h-auto object-contain relative z-20 animate-logo-pulse drop-shadow-xl"
+            />
+            <div className="absolute top-0 -right-2 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-ladybug-title">🐞</div>
+            <div className="absolute bottom-2 -left-2 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-bee-title">🐝</div>
           </div>
 
           <div className="flex-grow"></div>
