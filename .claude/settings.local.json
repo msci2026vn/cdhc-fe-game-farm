@@ -26,7 +26,8 @@
       "Bash(node:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(where npm)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(wc:*)"
     ]
   }
 }

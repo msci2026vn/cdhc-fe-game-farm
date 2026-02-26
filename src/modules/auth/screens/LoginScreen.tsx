@@ -7,6 +7,7 @@ import { gameApi, resetRedirectLock } from '@/shared/api/game-api';
 import { API_BASE_URL } from '@/shared/utils/constants';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
+import { LanguageSwitcher } from '@/modules/language';
 
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
@@ -253,6 +254,9 @@ function LoginScreenContent() {
         <Particles />
         <FallingLeaves />
         <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[11vh]" style={{ scrollbarWidth: 'none' }}>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher className="absolute top-4 left-4 z-50" />
 
           {/* Mute/Unmute Toggle */}
           <button
