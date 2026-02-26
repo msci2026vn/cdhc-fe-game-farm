@@ -124,9 +124,9 @@ function LoginScreenContent() {
         className="relative w-full h-[100dvh] max-w-[430px] flex flex-col items-center justify-center overflow-hidden shadow-2xl bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/assets/login/anh-nen.png')" }}
       >
-        <div className="relative z-10 w-full px-4 flex flex-col items-center gap-6 mb-10 overflow-y-auto max-h-full" style={{ scrollbarWidth: 'none' }}>
+        <div className="relative z-10 w-full h-full px-4 flex flex-col items-center justify-between pt-10 pb-[15vh]" style={{ scrollbarWidth: 'none' }}>
           {/* Title Section */}
-          <div className="relative w-full flex flex-col items-center justify-center pt-8 pb-4">
+          <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0">
             <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">
               <span className="honey-text block">Organic</span>
               <span className="block text-6xl md:text-7xl mt-1 honey-text-green">
@@ -139,9 +139,9 @@ function LoginScreenContent() {
           </div>
 
           {/* Login Container (Invisible Wrapper for Layout) */}
-          <div className="w-full max-w-[340px] flex flex-col gap-3 relative mt-6 px-2">
+          <div className="w-full max-w-[280px] flex flex-col items-center gap-4 relative">
 
-            <div className="space-y-3 relative w-full flex flex-col items-center">
+            <div className="space-y-4 relative w-full flex flex-col items-center">
               {/* Avalanche Login Button */}
               <div className="relative group w-full flex justify-center">
                 <button
