@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { queryClient } from '@/shared/lib/queryClient';
@@ -63,6 +63,35 @@ function LoginScreenContent() {
   const addToast = useUIStore((s) => s.addToast);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Default to muted to avoid browser autoplay blocks
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Audio setup
+  useEffect(() => {
+    audioRef.current = new Audio('/audio/login/nhac-nen.mp3');
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.5;
+
+    // Attempt auto-play (browsers often block this until user interacts)
+    audioRef.current.play().catch(e => console.log('Autoplay prevented by browser:', e));
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.play().catch(e => console.log('Play prevented:', e));
+      }
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
 
   // No API call needed on login screen
 
@@ -173,6 +202,17 @@ function LoginScreenContent() {
       >
         <Particles />
         <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[11vh]" style={{ scrollbarWidth: 'none' }}>
+
+          {/* Mute/Unmute Toggle */}
+          <button
+            onClick={toggleMute}
+            className="absolute top-4 right-4 z-50 w-10 h-10 bg-[#DEB887] border-2 border-[#8B4513] rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+          >
+            <span className="material-symbols-outlined text-[#4A2D1F] text-[20px]">
+              {isMuted ? 'volume_off' : 'volume_up'}
+            </span>
+          </button>
+
           {/* Title Section */}
           <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0 px-2 mt-4">
             <img
