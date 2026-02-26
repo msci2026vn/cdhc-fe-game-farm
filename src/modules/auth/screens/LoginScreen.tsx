@@ -124,7 +124,7 @@ function LoginScreenContent() {
         className="relative w-full h-[100dvh] max-w-[430px] flex flex-col items-center justify-center overflow-hidden shadow-2xl bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/assets/login/anh-nen.png')" }}
       >
-        <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[12vh]" style={{ scrollbarWidth: 'none' }}>
+        <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[6vh]" style={{ scrollbarWidth: 'none' }}>
           {/* Title Section */}
           <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0">
             <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">
@@ -140,7 +140,7 @@ function LoginScreenContent() {
 
           <div className="flex-grow"></div>
 
-          {/* Login Container (Buttons and Footer grouped for board layout) */}
+          {/* Login Container (Buttons positioned into the wooden board) */}
           <div className="w-full max-w-[280px] flex flex-col items-center gap-7 relative">
 
             <div className="relative w-full flex flex-col items-center gap-5">
@@ -156,33 +156,30 @@ function LoginScreenContent() {
               </div>
 
               {/* Google Login Button */}
-              <div className="relative group w-full flex justify-center">
+              <div className="relative group w-full flex justify-center cursor-pointer">
 
                 {/* Robust invisible overlay for GoogleLogin */}
-                <div className="absolute inset-0 z-30 opacity-[0.01] overflow-hidden scale-[2] origin-center cursor-pointer">
-                  <GoogleLogin
-                    onSuccess={(res) => {
-                      if (res.credential) handleAuthSuccess(res.credential);
-                    }}
-                    onError={() => {
-                      // FedCM/silent sign-in failure is expected — don't show error
-                      console.warn('[LoginScreen] GoogleLogin onError — user needs to click manually');
-                    }}
-                    width="400"
-                  />
+                <div className="absolute inset-0 z-30 opacity-[0.01] flex items-center justify-center overflow-hidden rounded-2xl">
+                  <div className="w-full h-full flex items-center justify-center transform scale-y-[2] scale-x-[1.3]">
+                    <GoogleLogin
+                      onSuccess={(res) => {
+                        if (res.credential) handleAuthSuccess(res.credential);
+                      }}
+                      onError={() => {
+                        // FedCM/silent sign-in failure is expected — don't show error
+                        console.warn('[LoginScreen] GoogleLogin onError — user needs to click manually');
+                      }}
+                      width="350"
+                      size="large"
+                      shape="pill"
+                    />
+                  </div>
                 </div>
 
-                <div className={`w-full transition-all relative z-10 ${loading ? 'opacity-70 cursor-wait' : 'hover:animate-button-vibrate hover:brightness-110 active:animate-button-pop active:scale-95 cursor-pointer'}`}>
+                <div className={`w-full transition-all relative z-10 pointer-events-none ${loading ? 'opacity-70 cursor-wait' : 'group-hover:animate-button-vibrate group-hover:brightness-110 group-active:animate-button-pop group-active:scale-95'}`}>
                   <img src="/assets/login/btn-g.png" alt="Login with Google" className="w-full h-auto object-contain drop-shadow-sm" />
                 </div>
               </div>
-            </div>
-            {/* Footer info */}
-            <div className="text-center flex items-center justify-center gap-2 bg-[#A5D6A7] px-6 py-2.5 rounded-full border-2 border-[#81C784] shadow-sm">
-              <div className="w-5 h-5 bg-[#2E7D32] rounded-full flex items-center justify-center">
-                <span className="material-symbols-outlined text-white text-[12px] font-bold">spa</span>
-              </div>
-              <span className="text-[10px] font-black text-[#1B5E20] uppercase tracking-widest font-heading">Powered by Avalanche</span>
             </div>
           </div>
 
