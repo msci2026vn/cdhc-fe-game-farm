@@ -58,6 +58,56 @@ const Particles = () => {
   );
 };
 
+const FallingLeaves = () => {
+  return (
+    <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none select-none">
+      <style>
+        {`
+          @keyframes leaf-fall {
+            0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translate3d(var(--drift), 110vh, 0) rotate(var(--rot)); opacity: 0; }
+          }
+          .animate-leaf {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: leaf-fall linear infinite;
+            will-change: transform, opacity;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+          }
+        `}
+      </style>
+      {[...Array(8)].map((_, i) => {
+        const left = Math.random() * 100;
+        const duration = Math.random() * 8 + 8; // 8-16s
+        const delay = Math.random() * -15;
+        const scale = Math.random() * 0.6 + 0.6;
+        const drift = (Math.random() * 40 + 20) * (Math.random() > 0.5 ? 1 : -1); // 20-60vw
+        const rotation = Math.random() * 720 - 360;
+        const emojis = ['🍃', '🌿', '🍂', '🍁'];
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        return (
+          <div
+            key={i}
+            className="animate-leaf"
+            style={{
+              left: left + '%',
+              animationDuration: duration + 's',
+              animationDelay: delay + 's',
+              transform: 'scale(' + scale + ')',
+              '--drift': drift + 'vw',
+              '--rot': rotation + 'deg',
+            } as React.CSSProperties}
+          >
+            {emoji}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 function LoginScreenContent() {
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
@@ -201,6 +251,7 @@ function LoginScreenContent() {
         style={{ backgroundImage: "url('/assets/login/anh-nen.png')" }}
       >
         <Particles />
+        <FallingLeaves />
         <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[11vh]" style={{ scrollbarWidth: 'none' }}>
 
           {/* Mute/Unmute Toggle */}
