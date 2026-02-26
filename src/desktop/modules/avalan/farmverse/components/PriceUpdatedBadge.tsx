@@ -23,7 +23,7 @@ export function PriceUpdatedBadge({ updatedAt, stale, avaxPriceUsd }: PriceUpdat
       ) : (
         <Clock className="w-3.5 h-3.5" />
       )}
-      <span>1 AVAX = ${avaxPriceUsd.toFixed(2)} · Cập nhật {timeText}</span>
+      <span>1 AVAX = ${(avaxPriceUsd ?? 0).toFixed(2)} · Cập nhật {timeText}</span>
     </div>
   );
 }

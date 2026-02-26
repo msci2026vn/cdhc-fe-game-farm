@@ -40,10 +40,10 @@ export function PackageCard({ pkg, onSelect, loading, selectedId }: PackageCardP
       {/* Prices */}
       <div className="text-center space-y-1 mb-5">
         <p className="text-sm text-gray-600">
-          ≈ <span className="font-semibold">${pkg.priceUsd.toFixed(2)}</span> USD
+          ≈ <span className="font-semibold">${(pkg.priceUsd ?? 0).toFixed(2)}</span> USD
         </p>
         <p className="text-sm text-gray-600">
-          ≈ <span className="font-semibold">{pkg.priceVnd.toLocaleString('vi-VN')}</span>đ
+          ≈ <span className="font-semibold">{(pkg.priceVnd ?? 0).toLocaleString('vi-VN')}</span>đ
         </p>
       </div>
 
