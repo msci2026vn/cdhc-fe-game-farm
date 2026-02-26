@@ -206,11 +206,9 @@ function LoginScreenContent() {
           {/* Mute/Unmute Toggle */}
           <button
             onClick={toggleMute}
-            className="absolute top-4 right-4 z-50 w-10 h-10 bg-[#DEB887] border-2 border-[#8B4513] rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            className={`absolute top-4 right-4 z-50 w-12 h-12 flex items-center justify-center hover:scale-105 active:scale-95 transition-all drop-shadow-md ${isMuted ? 'opacity-60 grayscale' : 'opacity-100'}`}
           >
-            <span className="material-symbols-outlined text-[#4A2D1F] text-[20px]">
-              {isMuted ? 'volume_off' : 'volume_up'}
-            </span>
+            <img src="/assets/login/login-loa.png" alt="Toggle Sound" className="w-full h-full object-contain" />
           </button>
 
           {/* Title Section */}
