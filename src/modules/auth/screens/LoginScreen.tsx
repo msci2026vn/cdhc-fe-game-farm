@@ -124,7 +124,7 @@ function LoginScreenContent() {
         className="relative w-full h-[100dvh] max-w-[430px] flex flex-col items-center justify-center overflow-hidden shadow-2xl bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/assets/login/anh-nen.png')" }}
       >
-        <div className="relative z-10 w-full h-full px-4 flex flex-col items-center justify-between pt-10 pb-[15vh]" style={{ scrollbarWidth: 'none' }}>
+        <div className="relative z-10 w-full h-[100dvh] px-4 flex flex-col items-center pt-[8vh] pb-[12vh]" style={{ scrollbarWidth: 'none' }}>
           {/* Title Section */}
           <div className="relative w-full flex flex-col items-center justify-center flex-shrink-0">
             <h1 className="font-heading text-5xl md:text-6xl text-center leading-[0.9] tracking-tight relative z-20">
@@ -138,10 +138,12 @@ function LoginScreenContent() {
             <div className="absolute bottom-0 -left-6 z-10 text-5xl drop-shadow-lg transform hover:scale-110 transition-transform cursor-pointer animate-bee-title">🐝</div>
           </div>
 
-          {/* Login Container (Invisible Wrapper for Layout) */}
-          <div className="w-full max-w-[280px] flex flex-col items-center gap-4 relative">
+          <div className="flex-grow"></div>
 
-            <div className="space-y-4 relative w-full flex flex-col items-center">
+          {/* Login Container (Buttons and Footer grouped for board layout) */}
+          <div className="w-full max-w-[280px] flex flex-col items-center gap-7 relative">
+
+            <div className="relative w-full flex flex-col items-center gap-5">
               {/* Avalanche Login Button */}
               <div className="relative group w-full flex justify-center">
                 <button
@@ -175,35 +177,27 @@ function LoginScreenContent() {
                 </div>
               </div>
             </div>
-
-            {/* Error message */}
-            {error && (
-              <div className="mt-2 p-2 bg-red-100 border-2 border-red-200 rounded-lg text-red-600 text-xs text-center font-bold animate-shake">
-                {error}
+            {/* Footer info */}
+            <div className="text-center flex items-center justify-center gap-2 bg-[#A5D6A7] px-6 py-2.5 rounded-full border-2 border-[#81C784] shadow-sm">
+              <div className="w-5 h-5 bg-[#2E7D32] rounded-full flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-[12px] font-bold">spa</span>
               </div>
-            )}
-          </div>
-
-          {/* Footer info */}
-          <div className="text-center mt-2 flex items-center justify-center gap-2 bg-[#A5D6A7] px-6 py-2.5 rounded-full border-2 border-[#81C784] shadow-sm">
-            <div className="w-5 h-5 bg-[#2E7D32] rounded-full flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-[12px] font-bold">spa</span>
+              <span className="text-[10px] font-black text-[#1B5E20] uppercase tracking-widest font-heading">Powered by Avalanche</span>
             </div>
-            <span className="text-[10px] font-black text-[#1B5E20] uppercase tracking-widest font-heading">Powered by Avalanche</span>
           </div>
-        </div>
 
-        {/* Wallet Selection Modal */}
-        {showWalletModal && (
-          <WalletSelectModal
-            mode="login"
-            onSuccess={() => {
-              setShowWalletModal(false);
-              navigate('/farm', { replace: true });
-            }}
-            onClose={() => setShowWalletModal(false)}
-          />
-        )}
+          {/* Wallet Selection Modal */}
+          {showWalletModal && (
+            <WalletSelectModal
+              mode="login"
+              onSuccess={() => {
+                setShowWalletModal(false);
+                navigate('/farm', { replace: true });
+              }}
+              onClose={() => setShowWalletModal(false)}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
