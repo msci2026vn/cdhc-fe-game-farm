@@ -1,16 +1,14 @@
-import { Loader2, Zap } from 'lucide-react';
+import { Check } from 'lucide-react';
 import type { TopupPackage } from '../types/payment.types';
 
 interface PackageCardProps {
   pkg: TopupPackage;
   onSelect: (packageId: string) => void;
-  loading?: boolean;
   selectedId?: string;
 }
 
-export function PackageCard({ pkg, onSelect, loading, selectedId }: PackageCardProps) {
+export function PackageCard({ pkg, onSelect, selectedId }: PackageCardProps) {
   const isSelected = selectedId === pkg.id;
-  const isLoading = loading && isSelected;
 
   return (
     <div
@@ -22,8 +20,15 @@ export function PackageCard({ pkg, onSelect, loading, selectedId }: PackageCardP
           : 'border-gray-200 bg-white hover:border-green-300'
         }
       `}
-      onClick={() => !loading && onSelect(pkg.id)}
+      onClick={() => onSelect(pkg.id)}
     >
+      {/* Selected indicator */}
+      {isSelected && (
+        <div className="absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+          <Check className="w-4 h-4 text-white" />
+        </div>
+      )}
+
       {/* Emoji + Name */}
       <div className="text-center mb-4">
         <span className="text-4xl">{pkg.emoji}</span>
@@ -38,7 +43,7 @@ export function PackageCard({ pkg, onSelect, loading, selectedId }: PackageCardP
       </div>
 
       {/* Prices */}
-      <div className="text-center space-y-1 mb-5">
+      <div className="text-center space-y-1">
         <p className="text-sm text-gray-600">
           ≈ <span className="font-semibold">${(pkg.priceUsd ?? 0).toFixed(2)}</span> USD
         </p>
@@ -46,31 +51,6 @@ export function PackageCard({ pkg, onSelect, loading, selectedId }: PackageCardP
           ≈ <span className="font-semibold">{(pkg.priceVnd ?? 0).toLocaleString('vi-VN')}</span>đ
         </p>
       </div>
-
-      {/* Button */}
-      <button
-        disabled={loading}
-        className={`
-          w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all
-          flex items-center justify-center gap-2
-          ${isLoading
-            ? 'bg-gray-300 text-gray-500 cursor-wait'
-            : 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
-          }
-        `}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Đang xử lý...
-          </>
-        ) : (
-          <>
-            <Zap className="w-4 h-4" />
-            Nạp {pkg.avaxAmount} AVAX
-          </>
-        )}
-      </button>
     </div>
   );
 }

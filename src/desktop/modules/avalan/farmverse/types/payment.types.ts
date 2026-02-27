@@ -1,3 +1,6 @@
+// === Payment Method ===
+export type PaymentMethod = 'stripe' | 'paypal';
+
 // === API Response Types ===
 
 export interface TopupPackage {
