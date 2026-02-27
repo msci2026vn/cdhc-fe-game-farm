@@ -46,6 +46,7 @@ export default function PrayerScreen() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
+  const [lastCustomSuccess, setLastCustomSuccess] = useState(false);
 
   // Preload prayer sounds + start BGM
   useEffect(() => {
@@ -81,6 +82,7 @@ export default function PrayerScreen() {
   }, [offerMutation, refetchStatus]);
 
   const handleCustomSubmit = useCallback((text: string) => {
+    setLastCustomSuccess(false);
     offerMutation.mutate(
       { type: 'custom', text },
       {
@@ -89,6 +91,7 @@ export default function PrayerScreen() {
           setRewardData(data);
           setShowSparkles(true);
           setFlyText(text);
+          setLastCustomSuccess(true);
           setShowCustomModal(false);
           refetchStatus();
           if (data.ognReward > 0 || data.xpReward > 0) {
@@ -334,6 +337,9 @@ export default function PrayerScreen() {
         isPending={offerMutation.isPending}
         limitUsed={status?.customUsed ?? 0}
         limitMax={status?.customMax ?? 3}
+        cooldownRemaining={status?.cooldownRemaining ?? 0}
+        canPray={status?.canPray ?? true}
+        lastSubmitSuccess={lastCustomSuccess}
       />
 
       <PrayerLeaderboardModal

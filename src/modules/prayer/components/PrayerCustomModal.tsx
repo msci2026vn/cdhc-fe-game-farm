@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export interface PrayerCustomModalProps {
     isOpen: boolean;
@@ -7,21 +7,49 @@ export interface PrayerCustomModalProps {
     isPending: boolean;
     limitUsed: number;
     limitMax: number;
+    cooldownRemaining: number;
+    canPray: boolean;
+    lastSubmitSuccess: boolean;
 }
 
-export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitUsed, limitMax }: PrayerCustomModalProps) {
+export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitUsed, limitMax, cooldownRemaining, canPray, lastSubmitSuccess }: PrayerCustomModalProps) {
     const [text, setText] = useState('');
+    const [cooldown, setCooldown] = useState(0);
+    const cooldownRef = useRef<ReturnType<typeof setInterval>>();
+
+    // Sync cooldown from server (+2s buffer for network lag)
+    useEffect(() => {
+        if (cooldownRemaining > 0) setCooldown(cooldownRemaining + 2);
+    }, [cooldownRemaining]);
+
+    // Countdown timer
+    useEffect(() => {
+        if (cooldown <= 0) return;
+        const id = setInterval(() => {
+            setCooldown(prev => {
+                if (prev <= 1) { clearInterval(id); return 0; }
+                return prev - 1;
+            });
+        }, 1000);
+        cooldownRef.current = id;
+        return () => clearInterval(id);
+    }, [cooldown > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Clear text only on successful submission
+    useEffect(() => {
+        if (lastSubmitSuccess) setText('');
+    }, [lastSubmitSuccess]);
 
     if (!isOpen) return null;
 
+    const inCooldown = cooldown > 0;
     const handleSubmit = () => {
-        if (text.length >= 10 && !isPending && limitUsed < limitMax) {
+        if (text.length >= 10 && !isPending && limitUsed < limitMax && !inCooldown) {
             onSubmit(text);
-            setText(''); // Reset input upon successful trigger
         }
     };
 
-    const isSubmitDisabled = text.length < 10 || isPending || limitUsed >= limitMax;
+    const isSubmitDisabled = text.length < 10 || isPending || limitUsed >= limitMax || inCooldown;
 
     return (
         <div className="fixed inset-0 z-50 max-w-md mx-auto h-[100dvh] flex flex-col bg-prayer-vibe shadow-2xl overflow-hidden animate-slide-up">
@@ -76,7 +104,7 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
                             <textarea
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
-                                maxLength={200}
+                                maxLength={500}
                                 className="w-full h-full parchment-input rounded-lg p-4 text-farm-brown-dark text-lg font-display leading-relaxed resize-none placeholder-farm-brown/40 focus:outline-none focus:border-[#8b4513]"
                                 placeholder="Viết những lời cầu nguyện chân thành nhất gửi tới Mẹ Thiên Nhiên..."
                             />
@@ -86,7 +114,7 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
                         </div>
 
                         <div className="w-full border-t-2 border-dashed border-farm-brown/20 pt-4 flex justify-between items-center text-xs text-farm-brown/70">
-                            <span>{text.length}/200 từ</span>
+                            <span>{text.length}/500 ký tự</span>
                             <div className="flex gap-1">
                                 {(text.length < 10) && <span className="text-red-400">Tối thiểu 10 ký tự</span>}
                             </div>
@@ -110,7 +138,7 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
                         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <span className="material-symbols-outlined text-[#fefae0] text-2xl group-active:scale-90 transition-transform">send</span>
                         <span className="text-[#fefae0] text-xl font-display font-bold uppercase tracking-wider text-shadow-sm">
-                            {isPending ? 'Đang gửi...' : 'Gửi Đi'}
+                            {isPending ? 'Đang gửi...' : inCooldown ? `Chờ ${cooldown}s` : 'Gửi Đi'}
                         </span>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
                     </button>
