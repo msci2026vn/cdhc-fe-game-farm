@@ -33,7 +33,7 @@ export default function TopupPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-green-50 to-white">
+    <div className="h-[100dvh] overflow-y-auto bg-gradient-to-b from-green-50 to-white pb-6">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
@@ -122,11 +122,10 @@ export default function TopupPage() {
               {/* PayPal */}
               <button
                 onClick={() => setPaymentMethod('paypal')}
-                className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
-                  paymentMethod === 'paypal'
+                className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${paymentMethod === 'paypal'
                     ? 'border-blue-500 bg-blue-50 shadow-sm'
                     : 'border-gray-200 bg-white hover:border-blue-300'
-                }`}
+                  }`}
               >
                 <span className="text-xl">🟡</span>
                 <span className="font-semibold text-gray-800 text-sm">PayPal</span>
@@ -143,11 +142,10 @@ export default function TopupPage() {
               {/* Stripe */}
               <button
                 onClick={() => setPaymentMethod('stripe')}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
-                  paymentMethod === 'stripe'
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${paymentMethod === 'stripe'
                     ? 'border-purple-500 bg-purple-50 shadow-sm'
                     : 'border-gray-200 bg-white hover:border-purple-300'
-                }`}
+                  }`}
               >
                 <CreditCard className="w-6 h-6 text-purple-600" />
                 <span className="font-semibold text-gray-800 text-sm">Stripe</span>
@@ -165,13 +163,12 @@ export default function TopupPage() {
             <button
               onClick={handleCheckout}
               disabled={!selectedId || checkout.isPending}
-              className={`w-full py-3.5 px-5 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 ${
-                !selectedId
+              className={`w-full py-3.5 px-5 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 ${!selectedId
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : checkout.isPending
                     ? 'bg-gray-300 text-gray-500 cursor-wait'
                     : 'bg-green-600 text-white hover:bg-green-700 active:scale-[0.98] shadow-lg shadow-green-200'
-              }`}
+                }`}
             >
               {checkout.isPending ? (
                 <>
