@@ -39,7 +39,7 @@ export interface BossCompleteResult {
   bossProgress: {
     kills: number;
     totalDamage: number;
-  };
+  } | null;
   // Campaign combat sync (Prompt 12)
   stars?: number;
   isFirstClear?: boolean;

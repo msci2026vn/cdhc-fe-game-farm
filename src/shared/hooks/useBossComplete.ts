@@ -45,22 +45,35 @@ export function useBossComplete() {
         },
         onError: (error) => {
             console.error('[FARM-DEBUG] useBossComplete.onError:', error);
-            const code = (error as any)?.code;
-            if (code === 'CAMPAIGN_DAILY_LIMIT') {
-              useUIStore.getState().addToast(
-                'Hết lượt đánh hôm nay! Quay lại ngày mai',
-                'warning',
-                '🌅'
-              );
-            } else if (code === 'CAMPAIGN_COOLDOWN') {
-              useUIStore.getState().addToast(
-                'Đợi chút rồi đánh tiếp nhé!',
-                'warning',
-                '⏱️'
-              );
+            const code = (error as any)?.code || '';
+
+            const ERROR_MAP: Record<string, { msg: string; type: 'warning' | 'error'; icon?: string }> = {
+              // Rate limiting / Cooldown
+              CONCURRENT_BATTLE:    { msg: 'Trận đấu trước chưa xong. Thử lại sau vài giây.', type: 'warning', icon: '⏳' },
+              RATE_LIMIT_EXCEEDED:  { msg: 'Thao tác quá nhanh. Đợi vài giây rồi thử lại.', type: 'warning', icon: '⏳' },
+              BOSS_COOLDOWN:        { msg: 'Boss đang hồi phục. Vui lòng đợi hết thời gian chờ.', type: 'warning', icon: '⏱️' },
+              BOSS_DAILY_LIMIT:     { msg: 'Đã hết lượt đánh boss hôm nay. Quay lại ngày mai!', type: 'warning', icon: '🌅' },
+              CAMPAIGN_DAILY_LIMIT: { msg: 'Hết lượt campaign hôm nay! Quay lại ngày mai.', type: 'warning', icon: '🌅' },
+              CAMPAIGN_COOLDOWN:    { msg: 'Đợi chút rồi đánh tiếp nhé!', type: 'warning', icon: '⏱️' },
+              DAILY_WIN_LIMIT:      { msg: 'Đã đạt giới hạn chiến thắng hôm nay!', type: 'warning', icon: '🏆' },
+              // Not found
+              BOSS_NOT_FOUND:       { msg: 'Boss không tồn tại. Vui lòng tải lại trang.', type: 'error' },
+              PLAYER_NOT_FOUND:     { msg: 'Chưa tạo nhân vật. Vui lòng đăng nhập lại.', type: 'error' },
+              // Validation / Anti-cheat
+              LEVEL_TOO_LOW:        { msg: 'Level chưa đủ để đánh boss này.', type: 'error' },
+              INVALID_BATTLE:       { msg: 'Dữ liệu trận đấu không hợp lệ. Thử lại nhé.', type: 'error' },
+              SUSPICIOUS_ACTIVITY:  { msg: 'Phát hiện hoạt động bất thường. Thử lại nhé.', type: 'error' },
+              VALIDATION_ERROR:     { msg: 'Dữ liệu gửi lên không đúng định dạng.', type: 'error' },
+              // System
+              BOSS_COMPLETE_ERROR:  { msg: 'Lỗi hệ thống. Vui lòng thử lại sau.', type: 'error' },
+            };
+
+            const matched = ERROR_MAP[code];
+            if (matched) {
+              useUIStore.getState().addToast(matched.msg, matched.type, matched.icon);
             } else {
               useUIStore.getState().addToast(
-                'Không thể hoàn thành trận đấu.',
+                'Không thể hoàn thành trận đấu. Vui lòng thử lại.',
                 'error'
               );
             }

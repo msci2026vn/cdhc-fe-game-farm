@@ -178,6 +178,49 @@ export default function BossFightCampaign({
     const won = result === 'victory';
     const serverData = bossComplete.data;
 
+    // API still processing — show loading spinner
+    if (bossComplete.isPending) {
+      return (
+        <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
+          <div className="text-center animate-fade-in">
+            <div className="text-[64px] mb-3">{won ? '🏆' : '💀'}</div>
+            <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-white/70 font-heading font-bold text-sm">Đang ghi nhận kết quả...</p>
+          </div>
+        </div>
+      );
+    }
+
+    // API failed — show error with retry
+    if (bossComplete.isError && !serverData) {
+      return (
+        <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden px-6">
+          <div className="text-center animate-fade-in">
+            <div className="text-[56px] mb-3">{won ? '🏆' : '💀'}</div>
+            <p className="text-white font-heading font-bold text-lg mb-1">
+              {won ? 'Chiến thắng!' : 'Thất bại!'}
+            </p>
+            <p className="text-white/50 text-xs mb-4">
+              Kết quả chưa được ghi nhận do lỗi kết nối.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={onBack}
+                className="px-5 py-2.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
+                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                Về Map
+              </button>
+              <button
+                onClick={onRetry}
+                className="px-5 py-2.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform btn-green">
+                Đánh lại
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <BattleResult
         won={won}
