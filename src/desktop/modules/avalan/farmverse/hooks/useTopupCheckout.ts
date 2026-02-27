@@ -25,12 +25,12 @@ export function useTopupCheckout() {
       return json.data;
     },
     onSuccess: (data) => {
-      toast.info('Dang chuyen den trang thanh toan...');
+      toast.info('Đang chuyển đến trang thanh toán...');
       window.location.href = data.sessionUrl;
     },
     onError: (error: Error) => {
       if (error.message === 'Session expired') return;
-      toast.error(`Loi: ${error.message}`);
+      toast.error(`Lỗi: ${error.message}`);
     },
   });
 }

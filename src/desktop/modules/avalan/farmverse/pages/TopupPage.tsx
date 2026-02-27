@@ -9,12 +9,12 @@ import { useState } from 'react';
 import type { PaymentMethod } from '../types/payment.types';
 
 const statusMap: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Cho thanh toan', color: 'text-yellow-600 bg-yellow-50' },
-  paid: { label: 'Da thanh toan', color: 'text-blue-600 bg-blue-50' },
-  transferring: { label: 'Dang chuyen AVAX', color: 'text-purple-600 bg-purple-50' },
-  completed: { label: 'Hoan thanh', color: 'text-green-600 bg-green-50' },
-  failed: { label: 'That bai', color: 'text-red-600 bg-red-50' },
-  expired: { label: 'Het han', color: 'text-gray-500 bg-gray-50' },
+  pending: { label: 'Chờ thanh toán', color: 'text-yellow-600 bg-yellow-50' },
+  paid: { label: 'Đã thanh toán', color: 'text-blue-600 bg-blue-50' },
+  transferring: { label: 'Đang chuyển AVAX', color: 'text-purple-600 bg-purple-50' },
+  completed: { label: 'Hoàn thành', color: 'text-green-600 bg-green-50' },
+  failed: { label: 'Thất bại', color: 'text-red-600 bg-red-50' },
+  expired: { label: 'Hết hạn', color: 'text-gray-500 bg-gray-50' },
 };
 
 export default function TopupPage() {
@@ -36,36 +36,36 @@ export default function TopupPage() {
     <div className="min-h-[100dvh] bg-gradient-to-b from-green-50 to-white">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Quay lai</span>
+            <span className="text-sm font-medium">Quay lại</span>
           </button>
           <div className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-green-600" />
-            <span className="font-bold text-green-700">Nap AVAX</span>
+            <span className="font-bold text-green-700">Nạp AVAX</span>
           </div>
           <button
             onClick={() => refetch()}
             className="text-gray-400 hover:text-gray-600 transition-colors"
-            title="Cap nhat gia"
+            title="Cập nhật giá"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-md mx-auto px-4 py-4">
         {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Nap AVAX vao vi FARMVERSE
+        <div className="text-center mb-5">
+          <h1 className="text-xl font-bold text-gray-800 mb-1">
+            Nạp AVAX vào ví FARMVERSE
           </h1>
-          <p className="text-gray-500 text-sm">
-            Chon goi nap phu hop · Thanh toan bang PayPal hoac the quoc te
+          <p className="text-gray-500 text-xs">
+            Chọn gói nạp phù hợp · Thanh toán bằng PayPal hoặc thẻ quốc tế
           </p>
 
           {data && (
@@ -83,26 +83,26 @@ export default function TopupPage() {
         {isLoading && (
           <div className="text-center py-16">
             <RefreshCw className="w-8 h-8 text-green-500 animate-spin mx-auto mb-3" />
-            <p className="text-gray-500">Dang tai gia...</p>
+            <p className="text-gray-500">Đang tải giá...</p>
           </div>
         )}
 
         {/* Error state */}
         {error && (
           <div className="text-center py-16">
-            <p className="text-red-500 mb-3">Khong the tai gia. Thu lai?</p>
+            <p className="text-red-500 mb-3">Không thể tải giá. Thử lại?</p>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
             >
-              Thu lai
+              Thử lại
             </button>
           </div>
         )}
 
         {/* Package grid */}
         {data && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-3 mb-6">
             {data.packages.map((pkg) => (
               <PackageCard
                 key={pkg.id}
@@ -116,26 +116,26 @@ export default function TopupPage() {
 
         {/* Payment method selector */}
         {data && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Thanh toan bang:</h3>
+          <div className="mb-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Thanh toán bằng:</h3>
             <div className="grid grid-cols-2 gap-3">
               {/* PayPal */}
               <button
                 onClick={() => setPaymentMethod('paypal')}
-                className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
                   paymentMethod === 'paypal'
                     ? 'border-blue-500 bg-blue-50 shadow-sm'
                     : 'border-gray-200 bg-white hover:border-blue-300'
                 }`}
               >
-                <span className="text-2xl">🟡</span>
+                <span className="text-xl">🟡</span>
                 <span className="font-semibold text-gray-800 text-sm">PayPal</span>
-                <span className="text-xs text-gray-500 text-center">
+                <span className="text-[11px] text-gray-500 text-center">
                   Visa, Mastercard, PayPal
                 </span>
                 {paymentMethod === 'paypal' && (
-                  <span className="absolute top-2 right-2 text-[10px] font-bold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">
-                    Khuyen nghi
+                  <span className="absolute top-1.5 right-1.5 text-[9px] font-bold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                    Khuyến nghị
                   </span>
                 )}
               </button>
@@ -143,15 +143,15 @@ export default function TopupPage() {
               {/* Stripe */}
               <button
                 onClick={() => setPaymentMethod('stripe')}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
                   paymentMethod === 'stripe'
                     ? 'border-purple-500 bg-purple-50 shadow-sm'
                     : 'border-gray-200 bg-white hover:border-purple-300'
                 }`}
               >
-                <CreditCard className="w-7 h-7 text-purple-600" />
+                <CreditCard className="w-6 h-6 text-purple-600" />
                 <span className="font-semibold text-gray-800 text-sm">Stripe</span>
-                <span className="text-xs text-gray-500 text-center">
+                <span className="text-[11px] text-gray-500 text-center">
                   Visa, Mastercard, JCB
                 </span>
               </button>
@@ -161,11 +161,11 @@ export default function TopupPage() {
 
         {/* Checkout button */}
         {data && (
-          <div className="mb-10">
+          <div className="mb-8">
             <button
               onClick={handleCheckout}
               disabled={!selectedId || checkout.isPending}
-              className={`w-full py-4 px-6 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 ${
+              className={`w-full py-3.5 px-5 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 ${
                 !selectedId
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : checkout.isPending
@@ -176,35 +176,35 @@ export default function TopupPage() {
               {checkout.isPending ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Dang xu ly...
+                  Đang xử lý...
                 </>
               ) : selectedPkg ? (
                 <>
                   <Zap className="w-5 h-5" />
-                  Nap {selectedPkg.avaxAmount} AVAX
+                  Nạp {selectedPkg.avaxAmount} AVAX — ${(selectedPkg.priceUsd ?? 0).toFixed(2)}
                 </>
               ) : (
-                'Chon goi nap de tiep tuc'
+                'Chọn gói nạp để tiếp tục'
               )}
             </button>
           </div>
         )}
 
         {/* Info box */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
-          <h3 className="font-semibold text-blue-800 text-sm mb-2">Luu y</h3>
-          <ul className="text-xs text-blue-700 space-y-1">
-            <li>* Ho tro thanh toan qua PayPal (Visa, Mastercard, PayPal) va Stripe (Visa, Mastercard, JCB)</li>
-            <li>* AVAX se duoc chuyen vao vi FARMVERSE trong vong 1-2 phut</li>
-            <li>* Gia AVAX cap nhat moi 5 phut tu Chainlink Oracle</li>
-            <li>* Dung AVAX de mua VIP, vat pham, va cac dich vu trong game</li>
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-6">
+          <h3 className="font-semibold text-blue-800 text-xs mb-1.5">Lưu ý</h3>
+          <ul className="text-[11px] text-blue-700 space-y-0.5">
+            <li>· Hỗ trợ thanh toán qua PayPal (Visa, Mastercard, PayPal) và Stripe (Visa, Mastercard, JCB)</li>
+            <li>· AVAX sẽ được chuyển vào ví FARMVERSE trong vòng 1-2 phút</li>
+            <li>· Giá AVAX cập nhật mỗi 5 phút từ Chainlink Oracle</li>
+            <li>· Dùng AVAX để mua VIP, vật phẩm, và các dịch vụ trong game</li>
           </ul>
         </div>
 
         {/* Transaction history */}
         {history.data && history.data.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Lich su nap</h2>
+            <h2 className="text-base font-bold text-gray-800 mb-3">Lịch sử nạp</h2>
             <div className="space-y-2">
               {history.data.slice(0, 5).map((order) => {
                 const st = statusMap[order.status] || statusMap.pending;

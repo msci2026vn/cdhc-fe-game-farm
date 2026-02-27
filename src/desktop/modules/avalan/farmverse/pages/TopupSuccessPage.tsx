@@ -29,11 +29,11 @@ export default function TopupSuccessPage() {
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-8">
             <Loader2 className="w-16 h-16 text-blue-500 animate-spin mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Dang xac nhan thanh toan...
+            <h1 className="text-xl font-bold text-gray-800 mb-2">
+              Đang xác nhận thanh toán...
             </h1>
-            <p className="text-gray-500">
-              Vui long doi trong giay lat. Dang xu ly thanh toan PayPal cua ban.
+            <p className="text-gray-500 text-sm">
+              Vui lòng đợi trong giây lát. Đang xử lý thanh toán PayPal của bạn.
             </p>
           </div>
         </div>
@@ -48,11 +48,11 @@ export default function TopupSuccessPage() {
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-2xl shadow-lg border border-red-100 p-8">
             <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Co loi xay ra
+            <h1 className="text-xl font-bold text-gray-800 mb-2">
+              Có lỗi xảy ra
             </h1>
-            <p className="text-gray-500 mb-4">
-              Khong the xac nhan thanh toan. Vui long lien he ho tro.
+            <p className="text-gray-500 text-sm mb-4">
+              Không thể xác nhận thanh toán. Vui lòng liên hệ hỗ trợ.
             </p>
             <p className="text-xs text-red-400 mb-6">
               {capture.error?.message}
@@ -66,14 +66,14 @@ export default function TopupSuccessPage() {
                 }}
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors"
               >
-                Thu lai
+                Thử lại
               </button>
               <button
                 onClick={() => navigate('/farmverse/topup')}
                 className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Quay lai trang nap
+                Quay lại trang nạp
               </button>
             </div>
           </div>
@@ -89,13 +89,13 @@ export default function TopupSuccessPage() {
         <div className="bg-white rounded-2xl shadow-lg border border-green-100 p-8">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
 
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Nap thanh cong!
+          <h1 className="text-xl font-bold text-gray-800 mb-2">
+            Nạp thành công!
           </h1>
 
-          <p className="text-gray-500 mb-6">
-            Thanh toan da duoc xac nhan. AVAX dang duoc chuyen vao vi FARMVERSE cua ban.
-            Qua trinh thuong mat 1-2 phut.
+          <p className="text-gray-500 text-sm mb-6">
+            Thanh toán đã được xác nhận. AVAX đang được chuyển vào ví FARMVERSE của bạn.
+            Quá trình thường mất 1-2 phút.
           </p>
 
           {capture.isSuccess && capture.data && (
@@ -112,20 +112,20 @@ export default function TopupSuccessPage() {
               className="w-full py-3 px-4 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Quay lai trang nap
+              Quay lại trang nạp
             </button>
 
             <button
               onClick={() => navigate('/farm')}
               className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-colors"
             >
-              Ve trang chu
+              Về trang chủ
             </button>
           </div>
 
           {sessionId && (
             <p className="text-xs text-gray-400 mt-4">
-              Ma giao dich: {sessionId.slice(0, 20)}...
+              Mã giao dịch: {sessionId.slice(0, 20)}...
             </p>
           )}
 
