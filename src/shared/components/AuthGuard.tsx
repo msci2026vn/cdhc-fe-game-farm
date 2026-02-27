@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef, useId } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gameApi } from '@/shared/api/game-api';
+import { handleUnauthorized } from '@/shared/api/api-utils';
 
 type AuthState = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -11,11 +12,10 @@ interface AuthGuardProps {
 /**
  * AuthGuard - Check authentication status
  *
- * FIX Step 13: Prevent re-mount loop by:
- * 1. Check auth ONLY ONCE per session using useRef
- * 2. Do NOT re-check on route change
- * 3. Do NOT use useMemo on children (causes re-mount)
- * 4. Stable key using useId to prevent React from unmounting
+ * 1. Check auth ONCE on mount using useRef
+ * 2. Re-check on visibilitychange (user returns to tab)
+ * 3. Do NOT re-check on route change
+ * 4. Do NOT use useMemo on children (causes re-mount)
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const [authState, setAuthState] = useState<AuthState>('loading');
@@ -29,12 +29,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     // Skip if we already checked auth - CRITICAL FIX
     if (hasCheckedAuth.current) {
-      // console.log('[FARM-DEBUG] AuthGuard: Already checked, skipping (hasCheckedAuth = true)');
       return;
     }
 
     const checkAuth = async () => {
-      console.log('[FARM-DEBUG] AuthGuard: 🔍 Checking auth (FIRST TIME ONLY)');
+      console.log('[FARM-DEBUG] AuthGuard: Checking auth (FIRST TIME ONLY)');
 
       try {
         const result = await gameApi.ping();
@@ -45,19 +44,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
         hasCheckedAuth.current = true;
 
         if (result.success) {
-          console.log('[FARM-DEBUG] AuthGuard: ✅ Authenticated');
           setAuthState('authenticated');
         } else {
-          console.log('[FARM-DEBUG] AuthGuard: ❌ Unauthenticated');
           setAuthState('unauthenticated');
 
           if (location.pathname !== '/login') {
-            console.log('[FARM-DEBUG] AuthGuard: Redirecting to /login');
             navigate('/login', { replace: true });
           }
         }
       } catch (error) {
-        console.error('[FARM-DEBUG] AuthGuard: ❌ Auth check failed:', error);
+        console.error('[FARM-DEBUG] AuthGuard: Auth check failed:', error);
         authResultRef.current = { isAuthenticated: false };
         hasCheckedAuth.current = true;
         setAuthState('unauthenticated');
@@ -70,6 +66,28 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     checkAuth();
   }, []); // Empty deps - ONLY run on mount, NOT on location change!
+
+  // Re-check auth when user returns to the tab (e.g. after being away 15+ min)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (authState !== 'authenticated') return;
+
+      // Lightweight auth check — ping the server
+      gameApi.ping().then((result) => {
+        if (!result.success) {
+          console.warn('[FARM-DEBUG] AuthGuard: Session expired while tab was hidden');
+          handleUnauthorized('Tab focus re-check');
+        }
+      }).catch(() => {
+        // Network error — don't logout, just log
+        console.warn('[FARM-DEBUG] AuthGuard: Network check failed on tab focus');
+      });
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [authState]);
 
   // Show loading spinner while checking auth
   if (authState === 'loading') {

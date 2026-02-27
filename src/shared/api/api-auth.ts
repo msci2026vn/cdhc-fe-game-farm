@@ -48,7 +48,7 @@ export const authApi = {
   },
 
   /**
-   * Logout — xóa session cookie phía server, redirect về /login
+   * Logout — xóa session cookie phía server, clear local data, redirect về /login
    */
   logout: async (): Promise<void> => {
     try {
@@ -59,6 +59,14 @@ export const authApi = {
     } catch (error) {
       console.warn('[GameAPI] logout request failed:', error);
     }
+
+    // Clear farmverse localStorage data to prevent stale data on next login
+    try {
+      Object.keys(localStorage)
+        .filter(key => key.startsWith('farmverse_'))
+        .forEach(key => localStorage.removeItem(key));
+    } catch (_) { /* ignore */ }
+
     // Dù API thành công hay thất bại, luôn redirect về login
     window.location.href = '/login';
   },

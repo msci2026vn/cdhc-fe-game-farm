@@ -313,6 +313,9 @@ export function useWalletAuth() {
         walletDebug.error('Login failed (user):', userMsg);
         walletDebug.groupEnd();
 
+        // Always reset redirect lock on login failure to prevent stuck state
+        resetRedirectLock();
+
         setState((s) => ({ ...s, error: userMsg }));
 
         if (rawMsg.includes('User rejected') || rawMsg.includes('denied') || rawMsg === 'NO_WALLET_EXTENSION') {

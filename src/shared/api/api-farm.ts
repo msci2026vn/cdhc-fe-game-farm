@@ -23,7 +23,7 @@ export const farmApi = {
     console.log('[FARM-DEBUG] gameApi.getPlots: Response status =', response.status);
 
     if (response.status === 401) {
-      handleUnauthorized('getPlots');
+      await handleUnauthorized('getPlots');
       throw new Error('Session expired');
     }
 

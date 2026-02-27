@@ -192,9 +192,9 @@ function LoginScreenContent() {
         const regData = await regRes.json();
         console.log('[FARM-DEBUG] LoginScreen: Register response =', regData);
 
+        resetRedirectLock(); // Always reset lock after any login attempt
         if (regRes.ok && regData.success) {
           console.log('[FARM-DEBUG] LoginScreen: ✅ Auto-register successful → entering game...');
-          resetRedirectLock();
           try {
             await queryClient.prefetchQuery({
               queryKey: PLAYER_PROFILE_KEY,
@@ -210,11 +210,11 @@ function LoginScreenContent() {
         return;
       }
 
+      // Always reset redirect lock after any login attempt
+      resetRedirectLock();
+
       if (res.ok && data.success) {
         console.log('[FARM-DEBUG] LoginScreen: ✅ Login successful → prefetching profile...');
-
-        // Reset the 401 redirect lock so future session expiries can trigger redirect again
-        resetRedirectLock();
 
         try {
           await queryClient.prefetchQuery({
