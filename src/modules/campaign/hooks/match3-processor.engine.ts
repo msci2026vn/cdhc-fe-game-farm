@@ -121,10 +121,10 @@ export function processCampaignMatchesImpl(
         }
       }
 
-      // 2. Shield blocks remaining damage
+      // 2. Boss shield: 80% damage reduction (not full block)
       if (activeBossBuffsRef.current.some(b => b.type === 'shield') && actualDmg > 0) {
-        addPopup('🛡️ Bất tử!', '#74b9ff');
-        actualDmg = 0;
+        actualDmg = Math.floor(actualDmg * 0.2);
+        addPopup('🛡️ Giảm 80%!', '#74b9ff');
       }
 
       // 3. Apply damage to boss
@@ -146,7 +146,7 @@ export function processCampaignMatchesImpl(
       playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
       const isArmorBrokenMatch = activeDebuffsRef.current.some(d => d.type === 'armor_break');
       const shieldAmt = isArmorBrokenMatch ? 0 : Math.round(defCount * shieldGainPerGem * comboInfo.mult);
-      shield = shield + shieldAmt;
+      shield = Math.min(shield + shieldAmt, prev.playerMaxHp);
 
       if (healAmt > 0) setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + healAmt }));
       if (shieldAmt > 0) setCombatStatsTracker(s => ({ ...s, totalShieldGained: s.totalShieldGained + shieldAmt }));

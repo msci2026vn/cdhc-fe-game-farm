@@ -4,8 +4,9 @@
 // Weekly boss uses original BossFightM3 — UNTOUCHED
 // ═══════════════════════════════════════════════════════════════
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMatch3Campaign, CampaignBossData } from '../hooks/useMatch3Campaign';
+import { campaignApi } from '@/shared/api/api-campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
@@ -111,6 +112,16 @@ export default function BossFightCampaign({
     fallbackImage: bossData.image,
     attackDuration: 900,
   });
+
+  // ═══ Start battle session on BE (anti-cheat) ═══
+  const battleSessionStarted = useRef(false);
+  useEffect(() => {
+    if (battleSessionStarted.current) return;
+    battleSessionStarted.current = true;
+    campaignApi.startCampaignBattle(campaignBossId).catch(err => {
+      console.error('[BATTLE] Failed to start battle session:', err);
+    });
+  }, [campaignBossId]);
 
   // ═══ Preload battle sounds + BGM ═══
   useEffect(() => {

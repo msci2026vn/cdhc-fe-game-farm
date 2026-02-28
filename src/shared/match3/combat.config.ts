@@ -30,7 +30,7 @@ export const COMBO_VFX: Record<string, { emoji: string; particles: string[]; siz
 // Boss attack timing
 export const BOSS_ATK_INTERVAL = 4000;
 export const BOSS_SKILL_CHANCE = 0.25;
-export const SKILL_DMG_MULT = 2.5;
+export const SKILL_DMG_MULT = 2.0;
 export const SKILL_WARNING_MS = 1500;
 
 // Archetype-based skill names
@@ -50,10 +50,11 @@ export function getBossSkillName(archetype: string): string {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// Enrage: boss gets stronger over time (+10% ATK every 30s)
+// Enrage: boss gets stronger over time (+10% ATK every 30s, cap ×2.0)
+export const ENRAGE_CAP = 2.0;
 export function getEnrageMultiplier(startTime: number, pausedMs: number = 0): number {
   const elapsed = (Date.now() - startTime - pausedMs) / 1000;
-  return 1 + Math.floor(elapsed / 30) * 0.10;
+  return Math.min(1 + Math.floor(elapsed / 30) * 0.10, ENRAGE_CAP);
 }
 
 // Boss DEF reduction (diminishing returns)

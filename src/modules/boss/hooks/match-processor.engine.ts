@@ -99,7 +99,7 @@ export function processMatchesImpl(
       const healAmt = Math.round(hpCount * hpHealPerGem * comboInfo.mult);
       playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
       const shieldAmt = Math.round(defCount * shieldGainPerGem * comboInfo.mult);
-      shield = shield + shieldAmt;
+      shield = Math.min(shield + shieldAmt, prev.playerMaxHp);
 
       if (healAmt > 0) setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + healAmt }));
       if (shieldAmt > 0) setCombatStatsTracker(s => ({ ...s, totalShieldGained: s.totalShieldGained + shieldAmt }));

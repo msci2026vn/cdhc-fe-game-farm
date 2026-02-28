@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMatch3 } from '../hooks/useMatch3';
 import { BossInfo } from '../data/bosses';
+import { campaignApi } from '@/shared/api/api-campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
@@ -83,6 +84,17 @@ export default function BossFightM3({
     ultCharge: boss.ultCharge,
     skillWarning, isVip,
   });
+
+  // ═══ Start battle session on BE (anti-cheat) ═══
+  const battleSessionStarted = useRef(false);
+  useEffect(() => {
+    if (battleSessionStarted.current) return;
+    battleSessionStarted.current = true;
+    const bossIdForSession = campaignBossId || bossInfo.id;
+    campaignApi.startCampaignBattle(bossIdForSession).catch(err => {
+      console.error('[BATTLE] Failed to start battle session:', err);
+    });
+  }, [campaignBossId, bossInfo.id]);
 
   // ═══ Preload battle sounds + BGM ═══
   useEffect(() => {
