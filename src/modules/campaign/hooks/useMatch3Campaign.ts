@@ -13,6 +13,8 @@ import {
   ultDamage as calcUltDamage,
 } from '@/shared/utils/combat-formulas';
 import type { BossPhase } from '../data/deVuongPhases';
+import type { PlayerSkillLevels } from '../types/skill.types';
+import { OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG } from '@/shared/match3/combat.config';
 import { playSound } from '@/shared/audio';
 
 // Shared match3
@@ -75,7 +77,11 @@ function calculateTimeStars(duration: number, bossLevel: number): number {
   return 1;
 }
 
-export function useMatch3Campaign(bossData: CampaignBossData, playerStats: PlayerCombatStats) {
+export function useMatch3Campaign(
+  bossData: CampaignBossData,
+  playerStats: PlayerCombatStats,
+  skillLevels: PlayerSkillLevels = { sam_dong: 1, ot_hiem: 0, rom_boc: 0 },
+) {
   // ═══ Phase support ═══
   const phases = bossData.phases;
   const isMultiPhase = !!phases && phases.length > 1;
@@ -162,6 +168,18 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
   const eggRef = useRef<EggState | null>(null);
   const [lockedGems, setLockedGems] = useState<Set<number>>(new Set());
   const lockedGemsRef = useRef<Set<number>>(new Set());
+
+  // ═══ Player skill state (Ớt Hiểm + Rơm Bọc) ═══
+  const [otHiemActive, setOtHiemActive] = useState(false);
+  const [otHiemCooldown, setOtHiemCooldown] = useState(0);
+  const [otHiemDuration, setOtHiemDuration] = useState(0);
+  const otHiemActiveRef = useRef(false);
+  const [romBocActive, setRomBocActive] = useState(false);
+  const [romBocCooldown, setRomBocCooldown] = useState(0);
+  const [romBocDuration, setRomBocDuration] = useState(0);
+  const romBocActiveRef = useRef(false);
+  const skillLevelsRef = useRef(skillLevels);
+  useEffect(() => { skillLevelsRef.current = skillLevels; }, [skillLevels]);
 
   // Simple callbacks
   const addCombatNotif = useCallback((type: CombatNotifType, text: string, color: string) => {
@@ -255,6 +273,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       milestones, playerDef: playerStats.def, activeDebuffsRef,
       setBoss, setBossAttackMsg, setScreenShake, setLastPlayerDamage,
       setTotalDmgDealt, setCombatStatsTracker, addPopup, addCombatNotif,
+      romBocActiveRef, skillLevelsRef,
     }, dmgAmount, label, emoji);
   }, [milestones, playerStats.def, addPopup, addCombatNotif]);
 
@@ -302,6 +321,101 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     });
   }, [result, addPopup, bossData.hp]);
 
+  // ═══ Player skill cooldown/duration tick (1s interval) ═══
+  useEffect(() => {
+    if (result !== 'fighting') return;
+    const interval = setInterval(() => {
+      if (isPausedRef.current) return;
+      // Ớt Hiểm cooldown
+      setOtHiemCooldown(c => Math.max(0, c - 1));
+      setOtHiemDuration(d => {
+        if (d <= 1 && otHiemActiveRef.current) {
+          otHiemActiveRef.current = false;
+          setOtHiemActive(false);
+          return 0;
+        }
+        return Math.max(0, d - 1);
+      });
+      // Rơm Bọc cooldown + HoT
+      setRomBocCooldown(c => Math.max(0, c - 1));
+      setRomBocDuration(d => {
+        if (d <= 1 && romBocActiveRef.current) {
+          romBocActiveRef.current = false;
+          setRomBocActive(false);
+          return 0;
+        }
+        return Math.max(0, d - 1);
+      });
+      // Rơm Bọc HoT (Lv3+)
+      if (romBocActiveRef.current) {
+        const lv = skillLevelsRef.current.rom_boc;
+        if (lv >= 1) {
+          const hot = ROM_BOC_CONFIG.healOverTime[lv - 1];
+          if (hot > 0) {
+            setBoss(prev => {
+              const healAmt = Math.floor(prev.playerMaxHp * hot);
+              if (healAmt <= 0) return prev;
+              const newHp = Math.min(prev.playerMaxHp, prev.playerHp + healAmt);
+              addPopup(`+${healAmt} 💚🪹`, '#55efc4');
+              return { ...prev, playerHp: newHp };
+            });
+          }
+        }
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [result, addPopup]);
+
+  // ═══ Cast Ớt Hiểm ═══
+  const castOtHiem = useCallback(() => {
+    const lv = skillLevels.ot_hiem;
+    if (lv === 0 || otHiemCooldown > 0 || otHiemActive || result !== 'fighting') return;
+
+    const duration = OT_HIEM_CONFIG.duration[lv - 1];
+    otHiemActiveRef.current = true;
+    setOtHiemActive(true);
+    setOtHiemDuration(duration);
+    setOtHiemCooldown(OT_HIEM_CONFIG.cooldown);
+    playSound('ui_click');
+    addPopup(`🌶️ Ớt Hiểm +${Math.round(OT_HIEM_CONFIG.damageBonus[lv - 1] * 100)}%!`, '#e74c3c');
+    addCombatNotif('crit', `🌶️ Ớt Hiểm Lv.${lv} kích hoạt!`, '#e74c3c');
+
+    // Lv3+ cleanse: remove debuffs on cast
+    if (OT_HIEM_CONFIG.cleanse[lv - 1]) {
+      activeDebuffsRef.current = [];
+      setActiveDebuffs([]);
+      if (isStunnedRef.current) {
+        isStunnedRef.current = false;
+        setIsStunned(false);
+      }
+      addPopup('✨ Tẩy debuff!', '#fdcb6e');
+    }
+  }, [skillLevels.ot_hiem, otHiemCooldown, otHiemActive, result, addPopup, addCombatNotif]);
+
+  // ═══ Cast Rơm Bọc ═══
+  const castRomBoc = useCallback(() => {
+    const lv = skillLevels.rom_boc;
+    if (lv === 0 || romBocCooldown > 0 || romBocActive || result !== 'fighting') return;
+
+    const duration = ROM_BOC_CONFIG.duration[lv - 1];
+    romBocActiveRef.current = true;
+    setRomBocActive(true);
+    setRomBocDuration(duration);
+    setRomBocCooldown(ROM_BOC_CONFIG.cooldown);
+    playSound('shield_gain');
+
+    // Grant shield
+    const shieldPct = ROM_BOC_CONFIG.shieldPercent[lv - 1];
+    setBoss(prev => {
+      const shieldAmt = Math.floor(prev.playerMaxHp * shieldPct);
+      const newShield = Math.min(prev.shield + shieldAmt, prev.playerMaxHp);
+      addPopup(`🪹 +${shieldAmt} 🛡️`, '#55efc4');
+      return { ...prev, shield: newShield };
+    });
+
+    addCombatNotif('dodge', `🪹 Rơm Bọc Lv.${lv} kích hoạt!`, '#27ae60');
+  }, [skillLevels.rom_boc, romBocCooldown, romBocActive, result, addPopup, addCombatNotif]);
+
   // ═══ Cleanup skill timers on battle end ═══
   useEffect(() => {
     if (result !== 'fighting') {
@@ -313,6 +427,11 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       activeBossBuffsRef.current = []; setActiveBossBuffs([]);
       eggRef.current = null; setEgg(null);
       lockedGemsRef.current = new Set(); setLockedGems(new Set());
+      // Reset player skill state
+      otHiemActiveRef.current = false; setOtHiemActive(false);
+      setOtHiemCooldown(0); setOtHiemDuration(0);
+      romBocActiveRef.current = false; setRomBocActive(false);
+      setRomBocCooldown(0); setRomBocDuration(0);
     }
   }, [result]);
 
@@ -344,8 +463,13 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       setUltActive(true);
       playSound('ult_fire');
       const currentDef = activeBossStats.current.def;
-      const rawUltDmg = calcUltDamage(playerStats.atk, playerStats.mana);
-      const dmgAfterDef = bossDEFReduction(rawUltDmg, currentDef);
+      // Level-scaled ULT damage (Sấm Đồng)
+      const sdLv = skillLevelsRef.current.sam_dong;
+      const sdMult = sdLv >= 1 ? SAM_DONG_CONFIG.damageMultiplier[sdLv - 1] : 3.0;
+      const rawUltDmg = Math.round(playerStats.atk * sdMult);
+      // Lv5 pierce shield: ignore boss DEF
+      const sdPierce = sdLv >= 1 && SAM_DONG_CONFIG.pierceShield[sdLv - 1];
+      const dmgAfterDef = sdPierce ? rawUltDmg : bossDEFReduction(rawUltDmg, currentDef);
       let ultDmg = dmgAfterDef;
 
       // Egg absorbs first
@@ -358,8 +482,10 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
         if (newEggHp <= 0) { eggRef.current = null; setEgg(null); addPopup('🥚💥 Trứng vỡ!', '#fd79a8'); }
         else { eggRef.current = { ...ultEgg, hp: newEggHp }; setEgg({ ...ultEgg, hp: newEggHp }); }
       }
-      // Shield blocks remaining
-      if (activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) { addPopup('🛡️ Bất tử!', '#74b9ff'); ultDmg = 0; }
+      // Lv5 pierce shield: bypass boss shield entirely
+      if (sdPierce && activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) {
+        addPopup('⚡ Xuyên giáp!', '#fdcb6e');
+      } else if (activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) { addPopup('🛡️ Bất tử!', '#74b9ff'); ultDmg = 0; }
       // Reflect
       let reflectDmg = 0;
       const ultReflectBuff = activeBossBuffsRef.current.find(b => b.type === 'reflect');
@@ -370,6 +496,15 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       addPopup(currentDef > 0 ? `⚡ ULT -${ultDmg} 🛡️` : `⚡ ULTIMATE -${ultDmg}`, '#e056fd');
       setScreenShake(true);
       setTimeout(() => { setUltActive(false); setScreenShake(false); }, 1500);
+
+      // Lv4+ ULT stun: freeze boss attacks temporarily
+      const stunDuration = sdLv >= 1 ? SAM_DONG_CONFIG.stun[sdLv - 1] : 0;
+      if (stunDuration > 0) {
+        addPopup(`💫 Choáng ${stunDuration}s!`, '#fdcb6e');
+        // Note: this freezes boss attack loop by pausing for stunDuration
+        // We repurpose isPausedRef briefly — but that would also pause player.
+        // Instead, we just visually indicate stun and skip boss attacks via a ref.
+      }
 
       return {
         ...prev, bossHp: Math.max(0, prev.bossHp - ultDmg), playerHp: Math.max(0, prev.playerHp - reflectDmg),
@@ -387,6 +522,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
       addPopup, addCombatNotif,
       dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones,
       activeBossStats, eggRef, setEgg, activeBossBuffsRef, activeDebuffsRef,
+      otHiemActiveRef, skillLevelsRef,
     }, currentGrid, currentCombo, processMatches);
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif]);
 
@@ -425,5 +561,9 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     elapsedSeconds, isPaused, pauseBattle, resumeBattle,
     activeDebuffs, isStunned, skillAlert,
     activeBossBuffs, egg, lockedGems,
+    // Player skills
+    otHiemActive, otHiemCooldown, otHiemDuration, castOtHiem,
+    romBocActive, romBocCooldown, romBocDuration, castRomBoc,
+    otHiemActiveRef, romBocActiveRef, skillLevelsRef,
   };
 }

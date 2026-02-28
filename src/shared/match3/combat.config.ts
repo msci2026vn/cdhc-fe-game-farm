@@ -64,3 +64,35 @@ export function bossDEFReduction(rawDamage: number, bossDef: number): number {
   const reduction = bossDef / (bossDef + 500);
   return Math.max(1, Math.round(rawDamage * (1 - reduction)));
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Player skill configs — 3 skills × 5 levels
+// ═══════════════════════════════════════════════════════════════
+
+/** Ớt Hiểm — damage boost active skill */
+export const OT_HIEM_CONFIG = {
+  duration:     [6, 7, 8, 9, 10],              // seconds
+  damageBonus:  [0.20, 0.30, 0.40, 0.50, 0.60], // +20-60%
+  cooldown:     20,                              // seconds (all levels)
+  critBonus:    [0, 0, 0, 0.15, 0.20],           // Lv4+ crit chance
+  defBypass:    [0, 0, 0, 0, 0.50],              // Lv5 bypass 50% DEF
+  cleanse:      [false, false, true, true, true], // Lv3+ remove debuffs
+};
+
+/** Rơm Bọc — shield + damage reduction active skill */
+export const ROM_BOC_CONFIG = {
+  duration:         [4, 5, 5, 6, 7],              // seconds
+  shieldPercent:    [0.10, 0.15, 0.20, 0.25, 0.30], // % maxHP shield
+  damageReduction:  [0.15, 0.20, 0.25, 0.30, 0.35], // incoming damage reduction
+  cooldown:         25,                              // seconds
+  healOverTime:     [0, 0, 0.02, 0.02, 0.03],       // Lv3+ % maxHP/sec
+  reflect:          [0, 0, 0, 0.05, 0.08],           // Lv4+ reflect damage
+  debuffImmune:     [false, false, false, false, true], // Lv5
+};
+
+/** Sấm Đồng — ULT level scaling */
+export const SAM_DONG_CONFIG = {
+  damageMultiplier: [3.0, 3.5, 4.0, 4.5, 5.0],
+  stun:             [0, 0, 0, 1.5, 2.0],            // Lv4+ stun seconds
+  pierceShield:     [false, false, false, false, true], // Lv5
+};

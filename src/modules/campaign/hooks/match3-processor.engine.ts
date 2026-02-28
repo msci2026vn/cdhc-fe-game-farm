@@ -8,6 +8,8 @@ import { findMatches, applyGravity } from '@/shared/match3/board.utils';
 import { getComboInfo, bossDEFReduction } from '@/shared/match3/combat.config';
 import type { BossState, CombatStats, CombatNotifType, ActiveDebuff, ActiveBossBuff, EggState } from '@/shared/match3/combat.types';
 import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
+import { OT_HIEM_CONFIG } from '@/shared/match3/combat.config';
+import type { PlayerSkillLevels } from '../types/skill.types';
 import { playSound, AudioManager } from '@/shared/audio';
 
 export interface CampaignProcessorDeps {
@@ -34,6 +36,9 @@ export interface CampaignProcessorDeps {
   setEgg: Dispatch<SetStateAction<EggState | null>>;
   activeBossBuffsRef: MutableRefObject<ActiveBossBuff[]>;
   activeDebuffsRef: MutableRefObject<ActiveDebuff[]>;
+  // Player skill refs
+  otHiemActiveRef: MutableRefObject<boolean>;
+  skillLevelsRef: MutableRefObject<PlayerSkillLevels>;
 }
 
 export function processCampaignMatchesImpl(
@@ -48,6 +53,7 @@ export function processCampaignMatchesImpl(
     addPopup, addCombatNotif,
     dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones,
     activeBossStats, eggRef, setEgg, activeBossBuffsRef, activeDebuffsRef,
+    otHiemActiveRef, skillLevelsRef,
   } = deps;
 
   const matched = findMatches(currentGrid);
@@ -99,8 +105,35 @@ export function processCampaignMatchesImpl(
         addCombatNotif('crit', `CRIT! x${milestones.critMultiplier}`, '#ff6b6b');
       }
 
+      // ═══ Ớt Hiểm damage boost ═══
+      if (otHiemActiveRef.current && totalDmg > 0) {
+        const ohLv = skillLevelsRef.current.ot_hiem;
+        if (ohLv >= 1) {
+          const bonus = OT_HIEM_CONFIG.damageBonus[ohLv - 1];
+          totalDmg = Math.round(totalDmg * (1 + bonus));
+          // Lv4+ extra crit chance
+          const extraCrit = OT_HIEM_CONFIG.critBonus[ohLv - 1];
+          if (extraCrit > 0 && !isCrit && Math.random() < extraCrit) {
+            totalDmg = Math.round(totalDmg * 1.5);
+            isCrit = true;
+            playSound('damage_crit');
+            setCombatStatsTracker(s => ({ ...s, critCount: s.critCount + 1 }));
+            addCombatNotif('crit', '🌶️ CRIT!', '#e74c3c');
+          }
+        }
+      }
+
       // ═══ DAMAGE PIPELINE: DEF → Egg → Shield → Boss → Reflect ═══
-      const currentDef = activeBossStats.current.def;
+      // Lv5 Ớt Hiểm: bypass 50% boss DEF
+      let effectiveDef = activeBossStats.current.def;
+      if (otHiemActiveRef.current && totalDmg > 0) {
+        const ohLv = skillLevelsRef.current.ot_hiem;
+        if (ohLv >= 1) {
+          const bypass = OT_HIEM_CONFIG.defBypass[ohLv - 1];
+          if (bypass > 0) effectiveDef = Math.round(effectiveDef * (1 - bypass));
+        }
+      }
+      const currentDef = effectiveDef;
       const dmgAfterDef = bossDEFReduction(totalDmg, currentDef);
       let actualDmg = dmgAfterDef;
 

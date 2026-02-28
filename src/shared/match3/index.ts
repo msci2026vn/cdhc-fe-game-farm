@@ -15,6 +15,7 @@ export {
   BOSS_ATK_INTERVAL, BOSS_SKILL_CHANCE, SKILL_DMG_MULT, SKILL_WARNING_MS,
   ARCHETYPE_SKILLS, getBossSkillName,
   getEnrageMultiplier, bossDEFReduction,
+  OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG,
 } from './combat.config';
 
 // Combat types
