@@ -46,6 +46,7 @@ const FragmentInventoryScreen = lazyWithRetry(() => import('@/modules/campaign/s
 const RecipeCraftScreen = lazyWithRetry(() => import('@/modules/campaign/screens/RecipeCraftScreen'));
 const MissionScreen = lazyWithRetry(() => import('@/modules/campaign/screens/MissionScreen'));
 const AchievementsHubScreen = lazyWithRetry(() => import('@/modules/campaign/screens/AchievementsHubScreen'));
+const MainMenuScreen = lazyWithRetry(() => import('@/modules/home/screens/MainMenuScreen'));
 const PrayerScreen = lazyWithRetry(() => import('@/modules/prayer/screens/PrayerScreen'));
 const MarketScreen = lazyWithRetry(() => import('@/modules/market/screens/MarketScreen'));
 const VipPurchaseScreen = lazyWithRetry(() => import('@/modules/vip/screens/VipPurchaseScreen'));
@@ -104,7 +105,7 @@ const AuthenticatedApp = () => {
     <>
       <LevelUpOverlay />
       <Routes>
-        <Route path="/" element={<Navigate to="/farm" replace />} />
+        <Route path="/" element={<MainMenuScreen />} />
         <Route path="/farm" element={<FarmingScreen />} />
         <Route path="/boss" element={<BossScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />

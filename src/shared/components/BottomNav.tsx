@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { playSound } from '@/shared/audio';
 
 const tabs = [
+  { to: '/', icon: 'home', label: 'Menu' },
   { to: '/farm', icon: 'spa', label: 'Nông trại' },
   { to: '/shop', icon: 'storefront', label: 'Cửa hàng' },
   { to: '/inventory', icon: 'inventory_2', label: 'Kho đồ' },
@@ -20,15 +21,15 @@ export default function BottomNav() {
       <div className="absolute top-1/2 left-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner" />
       <div className="absolute top-1/2 right-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner" />
 
-      <div className="relative flex justify-between items-center px-4 py-3">
+      <div className="relative flex justify-between items-center px-3 py-3">
         {tabs.map((tab) => {
-          const isActive = location.pathname === tab.to;
+          const isActive = location.pathname === tab.to || (tab.to === '/farm' && location.pathname === '/farm');
 
           return (
             <button
               key={tab.to}
               onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
-              className={`flex flex-col items-center gap-1 w-12 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'
+              className={`flex flex-col items-center gap-1 w-10 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'
                 }`}
             >
               {isActive ? (

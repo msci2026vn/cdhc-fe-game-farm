@@ -69,10 +69,10 @@ export default function CampaignMapScreen() {
           <p className="text-red-300 font-heading font-bold mb-2">Lỗi tải bản đồ</p>
           <p className="text-white/40 text-xs mb-4">{String(error)}</p>
           <button
-            onClick={() => navigate('/farm')}
+            onClick={() => navigate('/')}
             className="btn-gold px-6 py-2 rounded-xl font-heading font-bold text-sm text-white"
           >
-            Về nông trại
+            Về menu chính
           </button>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function CampaignMapScreen() {
         title="Campaign"
         stars={totalStars}
         maxStars={maxStars}
-        backTo="/farm"
+        backTo="/"
       />
 
       {/* Scrollable map area */}
@@ -201,10 +201,10 @@ function CampaignBottomNav() {
   const navigate = useNavigate();
 
   const tabs = [
-    { icon: 'map', label: 'Map', to: '/campaign', active: true },
-    { icon: 'sports_esports', label: 'Heroes', to: '/profile' },
-    { icon: 'storefront', label: 'Shop', to: '/shop' },
-    { icon: 'spa', label: 'Farm', to: '/farm' },
+    { icon: 'home', label: 'Menu', to: '/', active: false },
+    { icon: 'map', label: 'Bản Đồ', to: '/campaign', active: true },
+    { icon: 'bolt', label: 'Kỹ Năng', to: '/campaign/skills', active: false },
+    { icon: 'spa', label: 'Farm', to: '/farm', active: false },
   ];
 
   return (

@@ -112,7 +112,7 @@ export default function ProfileScreen() {
         {/* Top Header */}
         <div className="relative z-30 px-3 pt-2 flex justify-between items-center shrink-0">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => { playSound('ui_back'); navigate('/'); }}
             className="bg-white/80 p-1.5 rounded-xl shadow-paper-shadow text-farm-brown-dark hover:bg-white transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>

@@ -123,7 +123,7 @@ export default function SettingsScreen() {
                 {/* Top Header */}
                 <div className="relative z-30 px-4 pt-4 pb-2 flex justify-between items-center shrink-0 border-b-2 border-farm-brown/10 bg-white/40">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate('/')}
                         className="bg-white/80 p-2 rounded-xl shadow-sm text-farm-brown-dark hover:bg-white transition-colors border border-farm-brown/20"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>

@@ -191,11 +191,11 @@ function ZoneBottomNav() {
   const navigate = useNavigate();
 
   const tabs = [
-    { icon: 'map', label: 'Map', to: '/campaign' },
-    { icon: 'bolt', label: 'Skills', to: '/campaign/skills' },
-    { icon: 'science', label: 'C.Thuc', to: '/campaign/recipes' },
-    { icon: 'assignment', label: 'N.Vu', to: '/campaign/missions' },
-    { icon: 'emoji_events', label: 'T.Tuu', to: '/campaign/achievements' },
+    { icon: 'map', label: 'Bản Đồ', to: '/campaign' },
+    { icon: 'bolt', label: 'Kỹ Năng', to: '/campaign/skills' },
+    { icon: 'science', label: 'C.Thức', to: '/campaign/recipes' },
+    { icon: 'assignment', label: 'N.Vụ', to: '/campaign/missions' },
+    { icon: 'emoji_events', label: 'T.Tựu', to: '/campaign/achievements' },
   ];
 
   return (
