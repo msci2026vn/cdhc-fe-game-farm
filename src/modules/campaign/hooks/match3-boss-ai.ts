@@ -75,7 +75,7 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
       const freq = Math.max(1, activeBossStats.current.freq);
       for (let i = 0; i < freq; i++) {
         const hitTimeout = setTimeout(() => {
-          const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.3)));
+          const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.2)));
           const hitLabel = freq > 1 ? `Đòn ${i + 1}/${freq}!` : 'Boss tấn công!';
           applyBossDamageRef.current(normalDmg, hitLabel, '💥');
         }, i * MULTI_HIT_DELAY);

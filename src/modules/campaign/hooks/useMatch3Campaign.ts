@@ -97,7 +97,7 @@ export function useMatch3Campaign(bossData: CampaignBossData, playerStats: Playe
     star: starGemDamage(playerStats.atk),
   }), [playerStats.atk]);
   const hpHealPerGem = useMemo(() => hpPerGem(playerStats.hp), [playerStats.hp]);
-  const shieldGainPerGem = useMemo(() => shieldPerGem(playerStats.def), [playerStats.def]);
+  const shieldGainPerGem = useMemo(() => shieldPerGem(playerStats.def, playerStats.hp), [playerStats.def, playerStats.hp]);
   const manaRegen = useMemo(() => manaRegenPerTurn(playerStats.mana), [playerStats.mana]);
   const manaDodgeCost = useMemo(() => dodgeCost(milestones.dodgeCostReduced), [milestones.dodgeCostReduced]);
   const manaUltCost = useMemo(() => ultCost(milestones.ultCostReduced), [milestones.ultCostReduced]);

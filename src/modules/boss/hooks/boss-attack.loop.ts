@@ -62,7 +62,7 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
     } else {
       // ══ NORMAL ATTACK: instant, no warning, no dodge ══
       playSound('boss_attack');
-      const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.3)));
+      const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.2)));
       applyBossDamageToPlayer(normalDmg, 'Boss tấn công!', '💥');
     }
   }, BOSS_ATK_INTERVAL);

@@ -9,12 +9,12 @@ export interface PlayerCombatStats {
 
 /** Damage per sword gem */
 export function atkGemDamage(atk: number): number {
-  return 30 + atk * 0.5;
+  return 40 + atk * 0.6;
 }
 
 /** Damage per star gem */
 export function starGemDamage(atk: number): number {
-  return 20 + atk * 0.2;
+  return 25 + atk * 0.3;
 }
 
 // === HP & SHIELD ===
@@ -31,19 +31,19 @@ export function startingShield(def: number): number {
 
 /** HP healed per HP gem */
 export function hpPerGem(hp: number): number {
-  return 20 + hp * 0.02;
+  return 25 + hp * 0.04;
 }
 
 /** Shield gained per DEF gem */
-export function shieldPerGem(def: number): number {
-  return 15 + def * 0.03;
+export function shieldPerGem(def: number, maxHp: number): number {
+  return 20 + def * 0.02 + maxHp * 0.01;
 }
 
 // === BOSS DAMAGE REDUCTION ===
 
-/** DEF damage reduction ratio (cap 50%) */
+/** DEF damage reduction ratio (diminishing returns) */
 export function damageReduction(def: number): number {
-  return Math.min(def * 0.0003, 0.5);
+  return def / (def + 500);
 }
 
 /** Actual boss damage after DEF reduction */
