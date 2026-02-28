@@ -194,8 +194,8 @@ function ZoneBottomNav() {
     { icon: 'map', label: 'Map', to: '/campaign' },
     { icon: 'bolt', label: 'Skills', to: '/campaign/skills' },
     { icon: 'deployed_code', label: 'Manh', to: '/campaign/fragments' },
-    { icon: 'storefront', label: 'Shop', to: '/shop' },
-    { icon: 'spa', label: 'Farm', to: '/farm' },
+    { icon: 'science', label: 'C.Thuc', to: '/campaign/recipes' },
+    { icon: 'assignment', label: 'N.Vu', to: '/campaign/missions' },
   ];
 
   return (
