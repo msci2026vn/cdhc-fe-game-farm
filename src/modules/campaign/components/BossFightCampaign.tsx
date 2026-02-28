@@ -4,7 +4,7 @@
 // Weekly boss uses original BossFightM3 — UNTOUCHED
 // ═══════════════════════════════════════════════════════════════
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMatch3Campaign, CampaignBossData } from '../hooks/useMatch3Campaign';
 import { campaignApi } from '@/shared/api/api-campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
@@ -18,6 +18,13 @@ import { useBossSprite } from '../hooks/useBossSprite';
 import { BossSprite } from './BossSprite';
 import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
+import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
+import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
+import CampaignSkillButton from './CampaignSkillButton';
+import BuffIndicator from './BuffIndicator';
+import type { BuffInfo } from './BuffIndicator';
+import DropAnimation from './DropAnimation';
+import type { DropResult } from '../types/fragment.types';
 
 // Shared match-3 components & hooks
 import { useGemPointer, useComboParticles } from '@/shared/match3';
@@ -73,6 +80,8 @@ export default function BossFightCampaign({
     mana: STAT_CONFIG.BASE.MANA,
   };
 
+  const skillLevels = useSkillLevels();
+
   const {
     grid, selected, animating, matchedCells, combo, showCombo, boss, popups,
     handleTap, handleSwipe, GEM_META, getComboInfo, bossAttackMsg, screenShake,
@@ -86,7 +95,10 @@ export default function BossFightCampaign({
     // Boss skills
     activeDebuffs, isStunned, skillAlert,
     activeBossBuffs, egg, lockedGems,
-  } = useMatch3Campaign(bossData, combatStats);
+    // Player skills
+    otHiemActive, otHiemCooldown, otHiemDuration, castOtHiem,
+    romBocActive, romBocCooldown, romBocDuration, castRomBoc,
+  } = useMatch3Campaign(bossData, combatStats, skillLevels);
 
   const auraType = getDominantAura(combatStats);
 
@@ -153,6 +165,10 @@ export default function BossFightCampaign({
     maxCombo, combatStatsTracker,
   });
 
+  // ═══ Fragment drop animation state ═══
+  const [showDropAnim, setShowDropAnim] = useState(true);
+  const dropData: DropResult | undefined = bossComplete.data?.drop as DropResult | undefined;
+
   // ═══ Trigger sprite attack on boss skill or normal attack ═══
   useEffect(() => {
     if (skillWarning && hasSprites) triggerBossAttack();
@@ -171,6 +187,37 @@ export default function BossFightCampaign({
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
   const comboInfo = getComboInfo(combo);
+
+  // ═══ Build active buffs list for BuffIndicator ═══
+  const activeBuffs: BuffInfo[] = [];
+  if (otHiemActive) {
+    const ohLv = skillLevels.ot_hiem;
+    activeBuffs.push({
+      icon: '🌶️', name: 'Ớt Hiểm',
+      remainingSeconds: otHiemDuration,
+      totalSeconds: OT_HIEM_CONFIG.duration[ohLv - 1] || 6,
+      description: `+${Math.round(OT_HIEM_CONFIG.damageBonus[(ohLv || 1) - 1] * 100)}%`,
+      type: 'buff', color: '#e74c3c',
+    });
+  }
+  if (romBocActive) {
+    const rbLv = skillLevels.rom_boc;
+    activeBuffs.push({
+      icon: '🪹', name: 'Rơm Bọc',
+      remainingSeconds: romBocDuration,
+      totalSeconds: ROM_BOC_CONFIG.duration[rbLv - 1] || 4,
+      description: `-${Math.round(ROM_BOC_CONFIG.damageReduction[(rbLv || 1) - 1] * 100)}%`,
+      type: 'buff', color: '#27ae60',
+    });
+  }
+  if (enrageMultiplier > 1) {
+    activeBuffs.push({
+      icon: '😡', name: 'Boss Enrage',
+      remainingSeconds: 0, totalSeconds: 0,
+      description: `×${enrageMultiplier.toFixed(1)}`,
+      type: 'debuff', color: '#e74c3c',
+    });
+  }
 
   // ═══ Death overlay (shown before BattleResult on defeat) ═══
   if (result === 'defeat' && deathPhase === 'dying') {
@@ -228,6 +275,19 @@ export default function BossFightCampaign({
               </button>
             </div>
           </div>
+        </div>
+      );
+    }
+
+    // Show drop animation before BattleResult (if drop data exists)
+    if (won && dropData && showDropAnim) {
+      return (
+        <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
+          <DropAnimation
+            drop={dropData}
+            isVisible={showDropAnim}
+            onClose={() => setShowDropAnim(false)}
+          />
         </div>
       );
     }
@@ -470,9 +530,22 @@ export default function BossFightCampaign({
           {showCombo && combo >= 2 && (
             <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${Math.min(combo, 6)}`} />
           )}
-          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 3 && showCombo ? 'grid-combo-shake' : ''}`}
+          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 3 && showCombo ? 'grid-combo-shake' : ''} transition-all duration-300`}
             onPointerMove={handlePointerMove}
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', touchAction: 'none' }}>
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: otHiemActive
+                ? '2px solid rgba(231,76,60,0.6)'
+                : romBocActive
+                  ? '2px solid rgba(39,174,96,0.6)'
+                  : '1px solid rgba(255,255,255,0.06)',
+              boxShadow: otHiemActive
+                ? '0 0 20px rgba(231,76,60,0.3), inset 0 0 10px rgba(231,76,60,0.1)'
+                : romBocActive
+                  ? '0 0 20px rgba(39,174,96,0.3), inset 0 0 10px rgba(39,174,96,0.1)'
+                  : 'none',
+              touchAction: 'none',
+            }}>
             {grid.map((gem, i) => {
               const meta = GEM_META[gem.type];
               const isSelected = selected === i;
@@ -511,7 +584,33 @@ export default function BossFightCampaign({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        {/* Active buffs indicator */}
+        <BuffIndicator buffs={activeBuffs} />
+
+        {/* Player skill buttons row */}
+        <div className="flex items-center gap-1 mt-0.5">
+          <CampaignSkillButton
+            skillId="ot_hiem"
+            emoji="🌶️"
+            label="Ớt"
+            level={skillLevels.ot_hiem}
+            isActive={otHiemActive}
+            cooldownRemaining={otHiemCooldown}
+            cooldownTotal={OT_HIEM_CONFIG.cooldown}
+            durationRemaining={otHiemDuration}
+            onCast={castOtHiem}
+          />
+          <CampaignSkillButton
+            skillId="rom_boc"
+            emoji="🪹"
+            label="Rơm"
+            level={skillLevels.rom_boc}
+            isActive={romBocActive}
+            cooldownRemaining={romBocCooldown}
+            cooldownTotal={ROM_BOC_CONFIG.cooldown}
+            durationRemaining={romBocDuration}
+            onCast={castRomBoc}
+          />
           <div className="flex-1">
             <SkillBar
               mana={boss.mana}

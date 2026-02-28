@@ -41,6 +41,8 @@ const OgnHistoryScreen = lazyWithRetry(() => import('@/modules/profile/screens/O
 const CampaignMapScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignMapScreen'));
 const CampaignZoneScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignZoneScreen'));
 const CampaignBattleScreen = lazyWithRetry(() => import('@/modules/campaign/screens/CampaignBattleScreen'));
+const SkillUpgradeScreen = lazyWithRetry(() => import('@/modules/campaign/screens/SkillUpgradeScreen'));
+const FragmentInventoryScreen = lazyWithRetry(() => import('@/modules/campaign/screens/FragmentInventoryScreen'));
 const PrayerScreen = lazyWithRetry(() => import('@/modules/prayer/screens/PrayerScreen'));
 const MarketScreen = lazyWithRetry(() => import('@/modules/market/screens/MarketScreen'));
 const VipPurchaseScreen = lazyWithRetry(() => import('@/modules/vip/screens/VipPurchaseScreen'));
@@ -110,6 +112,8 @@ const AuthenticatedApp = () => {
         <Route path="/ogn-history" element={<OgnHistoryScreen />} />
         <Route path="/campaign" element={<CampaignMapScreen />} />
         <Route path="/campaign/battle/:bossId" element={<CampaignBattleScreen />} />
+        <Route path="/campaign/skills" element={<SkillUpgradeScreen />} />
+        <Route path="/campaign/fragments" element={<FragmentInventoryScreen />} />
         <Route path="/campaign/:zoneNumber" element={<CampaignZoneScreen />} />
         <Route path="/prayer" element={<PrayerScreen />} />
         <Route path="/market" element={<MarketScreen />} />

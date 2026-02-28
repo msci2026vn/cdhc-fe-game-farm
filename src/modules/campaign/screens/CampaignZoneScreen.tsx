@@ -192,7 +192,8 @@ function ZoneBottomNav() {
 
   const tabs = [
     { icon: 'map', label: 'Map', to: '/campaign' },
-    { icon: 'sports_esports', label: 'Heroes', to: '/profile' },
+    { icon: 'bolt', label: 'Skills', to: '/campaign/skills' },
+    { icon: 'deployed_code', label: 'Manh', to: '/campaign/fragments' },
     { icon: 'storefront', label: 'Shop', to: '/shop' },
     { icon: 'spa', label: 'Farm', to: '/farm' },
   ];

@@ -7,6 +7,8 @@ import type { Dispatch, SetStateAction, MutableRefObject } from 'react';
 import { actualBossDamage } from '@/shared/utils/combat-formulas';
 import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
 import type { BossState, CombatStats, CombatNotifType, ActiveDebuff } from '@/shared/match3/combat.types';
+import { ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
+import type { PlayerSkillLevels } from '../types/skill.types';
 
 export interface CampaignDamageDeps {
   milestones: ActiveMilestones;
@@ -20,6 +22,9 @@ export interface CampaignDamageDeps {
   setCombatStatsTracker: Dispatch<SetStateAction<CombatStats>>;
   addPopup: (text: string, color: string) => void;
   addCombatNotif: (type: CombatNotifType, text: string, color: string) => void;
+  // Player skill refs
+  romBocActiveRef: MutableRefObject<boolean>;
+  skillLevelsRef: MutableRefObject<PlayerSkillLevels>;
 }
 
 export function applyCampaignBossDamageImpl(
@@ -32,6 +37,7 @@ export function applyCampaignBossDamageImpl(
     milestones, playerDef, activeDebuffsRef,
     setBoss, setBossAttackMsg, setScreenShake, setLastPlayerDamage,
     setTotalDmgDealt, setCombatStatsTracker, addPopup, addCombatNotif,
+    romBocActiveRef, skillLevelsRef,
   } = deps;
 
   setBoss(prev => {
@@ -48,7 +54,27 @@ export function applyCampaignBossDamageImpl(
 
     // Apply player DEF damage reduction (armor_break → DEF 0)
     const isArmorBroken = activeDebuffsRef.current.some(d => d.type === 'armor_break');
-    const reducedDmg = actualBossDamage(dmgAmount, isArmorBroken ? 0 : playerDef);
+    let reducedDmg = actualBossDamage(dmgAmount, isArmorBroken ? 0 : playerDef);
+
+    // Rơm Bọc: damage reduction + Lv5 debuff immunity
+    if (romBocActiveRef.current) {
+      const rbLv = skillLevelsRef.current.rom_boc;
+      if (rbLv >= 1) {
+        const dr = ROM_BOC_CONFIG.damageReduction[rbLv - 1];
+        reducedDmg = Math.floor(reducedDmg * (1 - dr));
+        // Lv4+ reflect damage back to boss
+        const reflectPct = ROM_BOC_CONFIG.reflect[rbLv - 1];
+        if (reflectPct > 0) {
+          const reflectCap = Math.floor(prev.playerMaxHp * 0.10);
+          const reflectDmg = Math.min(Math.floor(dmgAmount * reflectPct), reflectCap);
+          if (reflectDmg > 0) {
+            setTotalDmgDealt(d => d + reflectDmg);
+            addPopup(`🪹🔄 -${reflectDmg}`, '#55efc4');
+          }
+          // Apply reflect damage to boss in the same setBoss call below
+        }
+      }
+    }
 
     let shieldLeft = prev.shield;
     let hpDmg = reducedDmg;
@@ -67,11 +93,26 @@ export function applyCampaignBossDamageImpl(
       return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
     }
 
-    // Reflect milestone
+    // Rơm Bọc reflect: Lv4+ reflect damage to boss
     let newBossHp = prev.bossHp;
+    if (romBocActiveRef.current) {
+      const rbLv = skillLevelsRef.current.rom_boc;
+      if (rbLv >= 1) {
+        const reflectPct = ROM_BOC_CONFIG.reflect[rbLv - 1];
+        if (reflectPct > 0) {
+          const reflectCap = Math.floor(prev.playerMaxHp * 0.10);
+          const reflectDmg = Math.min(Math.floor(dmgAmount * reflectPct), reflectCap);
+          if (reflectDmg > 0) {
+            newBossHp = Math.max(0, newBossHp - reflectDmg);
+          }
+        }
+      }
+    }
+
+    // Reflect milestone
     if (milestones.reflectPercent > 0 && reducedDmg > 0) {
       const reflectDmg = Math.floor(reducedDmg * milestones.reflectPercent);
-      newBossHp = Math.max(0, prev.bossHp - reflectDmg);
+      newBossHp = Math.max(0, newBossHp - reflectDmg);
       if (reflectDmg > 0) {
         setTotalDmgDealt(d => d + reflectDmg);
         setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));

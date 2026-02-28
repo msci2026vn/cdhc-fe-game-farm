@@ -55,6 +55,18 @@ export interface BossCompleteResult {
     firstClearBonus: number;
   };
   remainingBattles?: number;
+  // Fragment drop (Prompt 6)
+  drop?: {
+    dropped: boolean;
+    fragment?: {
+      fragmentKey: string;
+      name: string;
+      tier: 'common' | 'rare' | 'legendary';
+      zoneNumber: number;
+    };
+    pityCounter: number;
+    guaranteedIn: number;
+  };
 }
 
 // ═══ QUIZ ═══
