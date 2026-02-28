@@ -20,7 +20,7 @@ export interface CampaignInputDeps {
   setSelected: Dispatch<SetStateAction<number | null>>;
   setAnimating: Dispatch<SetStateAction<boolean>>;
   setGrid: Dispatch<SetStateAction<Gem[]>>;
-  processMatches: (grid: Gem[], combo: number) => void;
+  processMatches: (grid: Gem[], combo: number, swapPair?: [number, number]) => void;
 }
 
 export function handleCampaignTapImpl(deps: CampaignInputDeps, idx: number): void {
@@ -57,7 +57,7 @@ export function handleCampaignTapImpl(deps: CampaignInputDeps, idx: number): voi
   }
 
   setGrid(newGrid);
-  setTimeout(() => processMatches(newGrid, 0), 200);
+  setTimeout(() => processMatches(newGrid, 0, [selected, idx]), 200);
 }
 
 export function handleCampaignSwipeImpl(
@@ -105,5 +105,5 @@ export function handleCampaignSwipeImpl(
   }
 
   setGrid(newGrid);
-  setTimeout(() => processMatches(newGrid, 0), 200);
+  setTimeout(() => processMatches(newGrid, 0, [idx, targetIdx]), 200);
 }

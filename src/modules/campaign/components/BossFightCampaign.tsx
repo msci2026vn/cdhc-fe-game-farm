@@ -98,6 +98,8 @@ export default function BossFightCampaign({
     // Player skills
     otHiemActive, otHiemCooldown, otHiemDuration, castOtHiem,
     romBocActive, romBocCooldown, romBocDuration, castRomBoc,
+    // Animation
+    spawningGems,
   } = useMatch3Campaign(bossData, combatStats, skillLevels);
 
   const auraType = getDominantAura(combatStats);
@@ -550,17 +552,24 @@ export default function BossFightCampaign({
               const meta = GEM_META[gem.type];
               const isSelected = selected === i;
               const isMatched = matchedCells.has(i);
+              const sp = gem.special;
               return (
                 <div key={gem.id}
                   onPointerDown={(e) => handlePointerDown(i, e)}
                   onPointerUp={handlePointerUp}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                  className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200
+                    ${sp === 'rainbow' ? 'gem-rainbow' : meta.css}
+                    ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
+                    ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}
+                    ${sp === 'bomb' ? 'gem-special-bomb' : ''}
+                    ${sp === 'rainbow' ? 'gem-special-rainbow' : ''}
+                    ${spawningGems.has(gem.id) ? 'gem-special-spawn' : ''}
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}
                     ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
                   `}>
-                  {meta.emoji}
+                  {sp === 'rainbow' ? '🌈' : meta.emoji}
                   {lockedGems.has(i) && (
                     <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">🔒</span>
                   )}

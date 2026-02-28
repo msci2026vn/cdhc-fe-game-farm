@@ -96,3 +96,13 @@ export const SAM_DONG_CONFIG = {
   stun:             [0, 0, 0, 1.5, 2.0],            // Lv4+ stun seconds
   pierceShield:     [false, false, false, false, true], // Lv5
 };
+
+// Animation timing — centralised constants for match3 cascade loop
+export const ANIM_TIMING = {
+  MATCH_RESOLVE_MS: 350,    // time to show matched cells before removing
+  CASCADE_BASE_MS: 300,     // base delay between cascade steps
+  CASCADE_DECAY: 0.90,      // each step 10% faster
+  CASCADE_MIN_MS: 150,      // floor delay
+  MAX_CASCADE: 50,          // safety cap to prevent infinite loops
+  SPAWN_ANIM_MS: 400,       // spawn animation duration for special gems
+} as const;

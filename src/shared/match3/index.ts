@@ -5,9 +5,10 @@
 // Board utilities
 export {
   COLS, ROWS, GEM_TYPES, GEM_META,
-  randomGem, createGrid, findMatches, applyGravity, areAdjacent,
+  randomGem, createGrid, findMatches, findMatchGroups, applyGravity, areAdjacent,
+  triggerStriped, triggerBomb, triggerRainbow, collectTriggeredCells,
 } from './board.utils';
-export type { GemType, Gem } from './board.utils';
+export type { GemType, Gem, SpecialGemType, MatchPattern, MatchGroup } from './board.utils';
 
 // Combat config
 export {
@@ -16,6 +17,7 @@ export {
   ARCHETYPE_SKILLS, getBossSkillName,
   getEnrageMultiplier, bossDEFReduction,
   OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG,
+  ANIM_TIMING,
 } from './combat.config';
 
 // Combat types

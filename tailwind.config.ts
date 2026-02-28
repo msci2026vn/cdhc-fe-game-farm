@@ -349,6 +349,12 @@ export default {
           "40%": { transform: "scale(1.02)" },
           "100%": { transform: "scale(1)" },
         },
+        "gem-spawn": {
+          "0%": { transform: "scale(0)", opacity: "0" },
+          "50%": { transform: "scale(1.3)", opacity: "1", filter: "brightness(1.5)" },
+          "70%": { transform: "scale(0.9)" },
+          "100%": { transform: "scale(1)", filter: "brightness(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -393,6 +399,7 @@ export default {
         "prayer-glow": "prayer-glow 2s ease-in-out infinite",
         "button-vibrate": "button-vibrate 0.3s ease-in-out infinite",
         "button-pop": "button-pop 0.25s ease-out forwards",
+        "gem-spawn": "gem-spawn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
       },
     },
   },

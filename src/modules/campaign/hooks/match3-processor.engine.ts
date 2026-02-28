@@ -1,11 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // Campaign match processor — DEF → Egg → Shield → Boss → Reflect
+// Supports special gems: striped, bomb, rainbow + chain reactions
 // ═══════════════════════════════════════════════════════════════
 
 import type { Dispatch, SetStateAction, MutableRefObject } from 'react';
 import type { GemType, Gem } from '@/shared/match3/board.utils';
-import { findMatches, applyGravity } from '@/shared/match3/board.utils';
-import { getComboInfo, bossDEFReduction } from '@/shared/match3/combat.config';
+import { findMatches, findMatchGroups, applyGravity, collectTriggeredCells } from '@/shared/match3/board.utils';
+import { getComboInfo, bossDEFReduction, ANIM_TIMING } from '@/shared/match3/combat.config';
 import type { BossState, CombatStats, CombatNotifType, ActiveDebuff, ActiveBossBuff, EggState } from '@/shared/match3/combat.types';
 import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
 import { OT_HIEM_CONFIG } from '@/shared/match3/combat.config';
@@ -39,13 +40,18 @@ export interface CampaignProcessorDeps {
   // Player skill refs
   otHiemActiveRef: MutableRefObject<boolean>;
   skillLevelsRef: MutableRefObject<PlayerSkillLevels>;
+  // Optional animation deps
+  setSpawningGems?: Dispatch<SetStateAction<Set<number>>>;
+  setScreenShake?: Dispatch<SetStateAction<boolean>>;
 }
 
 export function processCampaignMatchesImpl(
   deps: CampaignProcessorDeps,
   currentGrid: Gem[],
   currentCombo: number,
-  recurse: (grid: Gem[], combo: number) => void,
+  recurse: (grid: Gem[], combo: number, cascadeDepth: number) => void,
+  swapPair?: [number, number],
+  cascadeDepth: number = 0,
 ): void {
   const {
     setBoss, setMatchedCells, setCombo, setShowCombo, comboRef, maxComboRef,
@@ -56,14 +62,25 @@ export function processCampaignMatchesImpl(
     otHiemActiveRef, skillLevelsRef,
   } = deps;
 
-  const matched = findMatches(currentGrid);
-  if (matched.size === 0) {
+  // Safety cap: prevent infinite cascade loops
+  if (cascadeDepth >= ANIM_TIMING.MAX_CASCADE) {
+    setAnimating(false);
+    return;
+  }
+
+  // Use basic findMatches for quick empty check
+  const basicMatched = findMatches(currentGrid);
+  if (basicMatched.size === 0) {
     if (currentCombo > 1) setTimeout(() => setShowCombo(false), 1500);
     else setShowCombo(false);
     comboRef.current = 0;
     setAnimating(false);
     return;
   }
+
+  // Advanced match detection with pattern classification
+  const swapPos = swapPair?.[1];
+  const groups = findMatchGroups(currentGrid, swapPos);
   const newCombo = currentCombo + 1;
   comboRef.current = newCombo;
   if (newCombo > maxComboRef.current) maxComboRef.current = newCombo;
@@ -71,14 +88,54 @@ export function processCampaignMatchesImpl(
   if (newCombo >= 2) setShowCombo(true);
   const comboInfo = getComboInfo(newCombo);
 
-  // Audio: combo sounds or basic gem_match
+  // Audio
   const comboSfx = AudioManager.comboSound(newCombo);
   if (comboSfx) playSound(comboSfx);
   else playSound('gem_match');
 
+  // Collect all matched positions from groups
+  const matchedPositions = new Set<number>();
+  for (const g of groups) for (const p of g.positions) matchedPositions.add(p);
+
+  // Compute swap context for rainbow targeting (clear swapped gem's type, not most common)
+  let swapContext: { pos: number; targetType: GemType } | undefined;
+  if (swapPair) {
+    const [posA, posB] = swapPair;
+    if (currentGrid[posA]?.special === 'rainbow' && currentGrid[posB])
+      swapContext = { pos: posA, targetType: currentGrid[posB].type };
+    else if (currentGrid[posB]?.special === 'rainbow' && currentGrid[posA])
+      swapContext = { pos: posB, targetType: currentGrid[posA].type };
+  }
+
+  // Collect triggered cells from special gems (chain reactions)
+  const allRemove = collectTriggeredCells(currentGrid, matchedPositions, swapContext);
+
+  // Determine spawn positions (special gems to CREATE — excluded from removal)
+  const spawnEntries: { pos: number; special: NonNullable<Gem['special']>; type: GemType }[] = [];
+  for (const g of groups) {
+    if (g.specialSpawn) {
+      spawnEntries.push({ pos: g.specialSpawn.pos, special: g.specialSpawn.special, type: g.type });
+    }
+  }
+  // Remove spawn positions from the removal set (they'll become special gems)
+  for (const entry of spawnEntries) allRemove.delete(entry.pos);
+
+  // Tally ALL gems that will be removed (matched + triggered, excluding spawn positions)
   const tally: Partial<Record<GemType, number>> = {};
-  matched.forEach(idx => { const t = currentGrid[idx].type; tally[t] = (tally[t] || 0) + 1; });
-  setMatchedCells(new Set(matched));
+  allRemove.forEach(idx => {
+    const g = currentGrid[idx];
+    if (g) { tally[g.type] = (tally[g.type] || 0) + 1; }
+  });
+
+  // Show special gem trigger popups
+  const triggeredCount = allRemove.size - matchedPositions.size;
+  if (triggeredCount > 0) {
+    addPopup(`+${triggeredCount} triggered!`, '#e056fd');
+    playSound('gem_match');
+  }
+
+  // Show all removed cells as matched (for animation)
+  setMatchedCells(new Set(allRemove));
 
   setTimeout(() => {
     setBoss(prev => {
@@ -111,7 +168,6 @@ export function processCampaignMatchesImpl(
         if (ohLv >= 1) {
           const bonus = OT_HIEM_CONFIG.damageBonus[ohLv - 1];
           totalDmg = Math.round(totalDmg * (1 + bonus));
-          // Lv4+ extra crit chance
           const extraCrit = OT_HIEM_CONFIG.critBonus[ohLv - 1];
           if (extraCrit > 0 && !isCrit && Math.random() < extraCrit) {
             totalDmg = Math.round(totalDmg * 1.5);
@@ -124,7 +180,6 @@ export function processCampaignMatchesImpl(
       }
 
       // ═══ DAMAGE PIPELINE: DEF → Egg → Shield → Boss → Reflect ═══
-      // Lv5 Ớt Hiểm: bypass 50% boss DEF
       let effectiveDef = activeBossStats.current.def;
       if (otHiemActiveRef.current && totalDmg > 0) {
         const ohLv = skillLevelsRef.current.ot_hiem;
@@ -154,7 +209,7 @@ export function processCampaignMatchesImpl(
         }
       }
 
-      // 2. Boss shield: 80% damage reduction (not full block)
+      // 2. Boss shield: 80% damage reduction
       if (activeBossBuffsRef.current.some(b => b.type === 'shield') && actualDmg > 0) {
         actualDmg = Math.floor(actualDmg * 0.2);
         addPopup('🛡️ Giảm 80%!', '#74b9ff');
@@ -163,7 +218,7 @@ export function processCampaignMatchesImpl(
       // 3. Apply damage to boss
       bossHp = Math.max(0, bossHp - actualDmg);
 
-      // 4. Reflect: % of DEF-reduced damage back to player
+      // 4. Reflect
       const reflectBuff = activeBossBuffsRef.current.find(b => b.type === 'reflect');
       if (reflectBuff && dmgAfterDef > 0) {
         const reflectDmg = Math.round(dmgAfterDef * 0.3);
@@ -173,7 +228,7 @@ export function processCampaignMatchesImpl(
         }
       }
 
-      // Stat-based heal & shield (check debuffs)
+      // Heal & shield
       const isHealBlocked = activeDebuffsRef.current.some(d => d.type === 'heal_block');
       const healAmt = isHealBlocked ? 0 : Math.round(hpCount * hpHealPerGem * comboInfo.mult);
       playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
@@ -184,10 +239,7 @@ export function processCampaignMatchesImpl(
       if (healAmt > 0) setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + healAmt }));
       if (shieldAmt > 0) setCombatStatsTracker(s => ({ ...s, totalShieldGained: s.totalShieldGained + shieldAmt }));
 
-      // Mana regen per turn
       mana = Math.min(prev.maxMana, mana + manaRegen);
-
-      // ULT charge
       ultCharge = Math.min(100, ultCharge + starCount * 8 + atkCount * 3 + (newCombo >= 2 ? 5 : 0));
 
       // HP regen milestone
@@ -223,10 +275,40 @@ export function processCampaignMatchesImpl(
       return { ...prev, bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown, lastCrit: isCrit };
     });
 
-    const cleared = currentGrid.map((g, i) => matched.has(i) ? null : g) as (Gem | null)[];
-    const fallen = applyGravity(cleared as Gem[]);
+    // Build new grid: remove matched+triggered cells, place special gems at spawn positions
+    const newGrid = currentGrid.map((g, i) => {
+      // Spawn special gem at this position
+      const spawn = spawnEntries.find(s => s.pos === i);
+      if (spawn) return { ...g, special: spawn.special } as Gem;
+      // Remove if in allRemove
+      if (allRemove.has(i)) return null;
+      return g;
+    }) as (Gem | null)[];
+
+    const fallen = applyGravity(newGrid as Gem[]);
     setGrid(fallen);
     setMatchedCells(new Set());
-    setTimeout(() => recurse(fallen, newCombo), 300);
-  }, 350);
+
+    // Spawn animation for newly created special gems
+    if (spawnEntries.length > 0 && deps.setSpawningGems) {
+      const spawnedIds = new Set(spawnEntries.map(e => currentGrid[e.pos]?.id).filter((id): id is number => id != null));
+      deps.setSpawningGems(spawnedIds);
+      setTimeout(() => deps.setSpawningGems!(new Set()), ANIM_TIMING.SPAWN_ANIM_MS);
+    }
+
+    // Screen shake for bomb/rainbow triggers
+    if (deps.setScreenShake) {
+      const triggeredSpecials = [...matchedPositions].filter(i => currentGrid[i]?.special).map(i => currentGrid[i]!.special);
+      if (triggeredSpecials.includes('rainbow') || triggeredSpecials.includes('bomb')) {
+        deps.setScreenShake(true);
+        const dur = triggeredSpecials.includes('rainbow') ? 500 : 350;
+        setTimeout(() => deps.setScreenShake!(false), dur);
+      }
+    }
+
+    // Dynamic cascade acceleration: each step gets 10% faster (floor 150ms)
+    const cascadeDelay = Math.max(ANIM_TIMING.CASCADE_MIN_MS,
+      Math.round(ANIM_TIMING.CASCADE_BASE_MS * Math.pow(ANIM_TIMING.CASCADE_DECAY, cascadeDepth)));
+    setTimeout(() => recurse(fallen, newCombo, cascadeDepth + 1), cascadeDelay);
+  }, ANIM_TIMING.MATCH_RESOLVE_MS);
 }

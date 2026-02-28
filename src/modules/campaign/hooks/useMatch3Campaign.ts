@@ -28,7 +28,7 @@ import type {
 } from '@/shared/match3/combat.types';
 
 // Re-export for backward compatibility
-export type { GemType, Gem } from '@/shared/match3/board.utils';
+export type { GemType, Gem, SpecialGemType } from '@/shared/match3/board.utils';
 export type {
   BossState, DamagePopup, FightResult, BossAttackWarning, SkillWarning,
   CombatStats, CombatNotifType, CombatNotif,
@@ -109,6 +109,7 @@ export function useMatch3Campaign(
   const manaUltCost = useMemo(() => ultCost(milestones.ultCostReduced), [milestones.ultCostReduced]);
 
   // State
+  const [spawningGems, setSpawningGems] = useState<Set<number>>(new Set());
   const [grid, setGrid] = useState<Gem[]>(createGrid);
   const [selected, setSelected] = useState<number | null>(null);
   const [animating, setAnimating] = useState(false);
@@ -515,7 +516,7 @@ export function useMatch3Campaign(
   }, [boss.ultCharge, result, addPopup, milestones, manaUltCost, playerStats]);
 
   // ═══ Wire: processMatches ═══
-  const processMatches = useCallback((currentGrid: Gem[], currentCombo: number) => {
+  const processMatches = useCallback((currentGrid: Gem[], currentCombo: number, swapPair?: [number, number], cascadeDepth: number = 0) => {
     processCampaignMatchesImpl({
       setBoss, setMatchedCells, setCombo, setShowCombo, comboRef, maxComboRef,
       setAnimating, setGrid, setTotalDmgDealt, setCombatStatsTracker,
@@ -523,7 +524,10 @@ export function useMatch3Campaign(
       dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones,
       activeBossStats, eggRef, setEgg, activeBossBuffsRef, activeDebuffsRef,
       otHiemActiveRef, skillLevelsRef,
-    }, currentGrid, currentCombo, processMatches);
+      setSpawningGems, setScreenShake,
+    }, currentGrid, currentCombo,
+      (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
+      swapPair, cascadeDepth);
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif]);
 
   // ═══ Wire: handleTap / handleSwipe ═══
@@ -565,5 +569,6 @@ export function useMatch3Campaign(
     otHiemActive, otHiemCooldown, otHiemDuration, castOtHiem,
     romBocActive, romBocCooldown, romBocDuration, castRomBoc,
     otHiemActiveRef, romBocActiveRef, skillLevelsRef,
+    spawningGems,
   };
 }
