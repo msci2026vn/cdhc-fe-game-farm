@@ -45,6 +45,7 @@ const SkillUpgradeScreen = lazyWithRetry(() => import('@/modules/campaign/screen
 const FragmentInventoryScreen = lazyWithRetry(() => import('@/modules/campaign/screens/FragmentInventoryScreen'));
 const RecipeCraftScreen = lazyWithRetry(() => import('@/modules/campaign/screens/RecipeCraftScreen'));
 const MissionScreen = lazyWithRetry(() => import('@/modules/campaign/screens/MissionScreen'));
+const AchievementsHubScreen = lazyWithRetry(() => import('@/modules/campaign/screens/AchievementsHubScreen'));
 const PrayerScreen = lazyWithRetry(() => import('@/modules/prayer/screens/PrayerScreen'));
 const MarketScreen = lazyWithRetry(() => import('@/modules/market/screens/MarketScreen'));
 const VipPurchaseScreen = lazyWithRetry(() => import('@/modules/vip/screens/VipPurchaseScreen'));
@@ -118,6 +119,7 @@ const AuthenticatedApp = () => {
         <Route path="/campaign/fragments" element={<FragmentInventoryScreen />} />
         <Route path="/campaign/recipes" element={<RecipeCraftScreen />} />
         <Route path="/campaign/missions" element={<MissionScreen />} />
+        <Route path="/campaign/achievements" element={<AchievementsHubScreen />} />
         <Route path="/campaign/:zoneNumber" element={<CampaignZoneScreen />} />
         <Route path="/prayer" element={<PrayerScreen />} />
         <Route path="/market" element={<MarketScreen />} />

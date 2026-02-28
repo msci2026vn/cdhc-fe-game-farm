@@ -193,9 +193,9 @@ function ZoneBottomNav() {
   const tabs = [
     { icon: 'map', label: 'Map', to: '/campaign' },
     { icon: 'bolt', label: 'Skills', to: '/campaign/skills' },
-    { icon: 'deployed_code', label: 'Manh', to: '/campaign/fragments' },
     { icon: 'science', label: 'C.Thuc', to: '/campaign/recipes' },
     { icon: 'assignment', label: 'N.Vu', to: '/campaign/missions' },
+    { icon: 'emoji_events', label: 'T.Tuu', to: '/campaign/achievements' },
   ];
 
   return (
