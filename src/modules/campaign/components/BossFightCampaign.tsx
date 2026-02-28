@@ -54,6 +54,7 @@ interface Props {
   onBack: () => void;
   campaignBossId: string;
   zoneName?: string;
+  zoneNumber?: number;
   archetype: string;
   archetypeIcon?: string;
   archetypeTip?: string;
@@ -62,7 +63,7 @@ interface Props {
 
 export default function BossFightCampaign({
   boss: bossData, onBack,
-  campaignBossId, zoneName,
+  campaignBossId, zoneName, zoneNumber = 1,
   archetype, archetypeIcon, archetypeTip,
   onRetry,
 }: Props) {
@@ -100,7 +101,7 @@ export default function BossFightCampaign({
     romBocActive, romBocCooldown, romBocDuration, castRomBoc,
     // Animation
     spawningGems,
-  } = useMatch3Campaign(bossData, combatStats, skillLevels);
+  } = useMatch3Campaign(bossData, combatStats, skillLevels, zoneNumber);
 
   const auraType = getDominantAura(combatStats);
 
@@ -529,10 +530,10 @@ export default function BossFightCampaign({
 
         {/* Gem grid + Stun overlay */}
         <div className="relative flex-1">
-          {showCombo && combo >= 2 && (
-            <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${Math.min(combo, 6)}`} />
+          {showCombo && combo >= 3 && (
+            <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
           )}
-          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 3 && showCombo ? 'grid-combo-shake' : ''} transition-all duration-300`}
+          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''} transition-all duration-300`}
             onPointerMove={handlePointerMove}
             style={{
               background: 'rgba(255,255,255,0.04)',

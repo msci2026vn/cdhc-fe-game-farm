@@ -3,32 +3,52 @@
 // ═══════════════════════════════════════════════════════════════
 
 export const COMBO_TIERS = [
-  { min: 2, mult: 1.5, label: 'COMBO', color: '#a29bfe' },
-  { min: 3, mult: 2.0, label: 'SUPER', color: '#fdcb6e' },
-  { min: 4, mult: 2.5, label: 'MEGA', color: '#ff6b6b' },
-  { min: 5, mult: 3.0, label: 'ULTRA', color: '#fd79a8' },
-  { min: 6, mult: 4.0, label: 'LEGENDARY', color: '#e056fd' },
-  { min: 8, mult: 5.0, label: '🔥 GODLIKE', color: '#f0932b' },
-];
+  { min: 0,  mult: 1.0, label: '',          color: '',        shake: false, emoji: '' },
+  { min: 3,  mult: 1.0, label: 'NICE',      color: '#22c55e', shake: false, emoji: '👍' },
+  { min: 5,  mult: 1.1, label: 'GREAT',     color: '#3b82f6', shake: false, emoji: '🔥' },
+  { min: 8,  mult: 1.2, label: 'EXCELLENT', color: '#a855f7', shake: false, emoji: '⚡' },
+  { min: 12, mult: 1.3, label: 'AMAZING',   color: '#f59e0b', shake: true,  emoji: '💥' },
+  { min: 20, mult: 1.5, label: 'EPIC',      color: '#ef4444', shake: true,  emoji: '🌟' },
+  { min: 30, mult: 1.8, label: 'LEGENDARY', color: '#fbbf24', shake: true,  emoji: '👑' },
+  { min: 50, mult: 2.0, label: 'MYTHIC',    color: '#ff00ff', shake: true,  emoji: '🏆' },
+] as const;
 
+export type ComboTier = (typeof COMBO_TIERS)[number];
+
+export function getComboTier(combo: number): ComboTier {
+  for (let i = COMBO_TIERS.length - 1; i >= 0; i--) {
+    if (combo >= COMBO_TIERS[i].min) return COMBO_TIERS[i];
+  }
+  return COMBO_TIERS[0];
+}
+
+/** Backward compat alias */
 export function getComboInfo(combo: number) {
-  let tier = { mult: 1, label: '', color: '#fff' };
-  for (const t of COMBO_TIERS) { if (combo >= t.min) tier = t; }
-  return tier;
+  return getComboTier(combo);
 }
 
 // Combo VFX config (used by ComboDisplay + combo particle effects)
 export const COMBO_VFX: Record<string, { emoji: string; particles: string[]; size: string }> = {
-  'COMBO': { emoji: '💥', particles: ['✨', '💫'], size: 'text-base' },
-  'SUPER': { emoji: '🌟', particles: ['⚡', '💛', '✨'], size: 'text-lg' },
-  'MEGA': { emoji: '🔥', particles: ['💥', '🔥', '💢'], size: 'text-xl' },
-  'ULTRA': { emoji: '💜', particles: ['💎', '💠', '🌀', '✨'], size: 'text-2xl' },
-  'LEGENDARY': { emoji: '👑', particles: ['🌈', '💎', '⭐', '👑'], size: 'text-2xl' },
-  '🔥 GODLIKE': { emoji: '☄️', particles: ['🔥', '💀', '⚡', '💥', '☄️'], size: 'text-3xl' },
+  'NICE':      { emoji: '👍', particles: ['✨', '💫'], size: 'text-sm' },
+  'GREAT':     { emoji: '🔥', particles: ['⚡', '💛', '✨'], size: 'text-base' },
+  'EXCELLENT': { emoji: '⚡', particles: ['💥', '⚡', '💢'], size: 'text-lg' },
+  'AMAZING':   { emoji: '💥', particles: ['💎', '💠', '🌀', '✨'], size: 'text-xl' },
+  'EPIC':      { emoji: '🌟', particles: ['🌈', '💎', '⭐', '🌟'], size: 'text-2xl' },
+  'LEGENDARY': { emoji: '👑', particles: ['👑', '💎', '⭐', '🌈', '✨'], size: 'text-2xl' },
+  'MYTHIC':    { emoji: '🏆', particles: ['🔥', '💀', '⚡', '💥', '☄️', '🏆'], size: 'text-3xl' },
 };
 
-// Boss attack timing
-export const BOSS_ATK_INTERVAL = 4000;
+// Boss attack timing — zone-scaled intervals
+export const BOSS_ATK_INTERVAL = 4000; // fallback default
+export const BOSS_ATTACK_INTERVALS: Record<number, number> = {
+  1: 5000,  2: 5000,  3: 5000,   // Zone 1-3: 5s — newbie friendly
+  4: 4000,  5: 4000,  6: 4000,   // Zone 4-6: 4s — moderate pressure
+  7: 3500,  8: 3500,             // Zone 7-8: 3.5s — fast reflexes
+  9: 3000,  10: 3000,            // Zone 9-10: 3s — hardcore
+};
+export function getBossAttackInterval(zone: number): number {
+  return BOSS_ATTACK_INTERVALS[zone] ?? BOSS_ATK_INTERVAL;
+}
 export const BOSS_SKILL_CHANCE = 0.25;
 export const SKILL_DMG_MULT = 2.0;
 export const SKILL_WARNING_MS = 1500;
@@ -105,4 +125,6 @@ export const ANIM_TIMING = {
   CASCADE_MIN_MS: 150,      // floor delay
   MAX_CASCADE: 50,          // safety cap to prevent infinite loops
   SPAWN_ANIM_MS: 400,       // spawn animation duration for special gems
+  SHAKE_BOMB_MS: 350,       // screen shake duration for bomb trigger
+  SHAKE_RAINBOW_MS: 500,    // screen shake duration for rainbow trigger
 } as const;

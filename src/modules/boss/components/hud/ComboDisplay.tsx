@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// ComboDisplay — Candy-crush style combo multiplier badge
-// Lightweight: CSS-only effects, no extra DOM for particles
+// ComboDisplay — Tier-aware combo badge with escalating VFX
+// 8 tiers: NICE → GREAT → EXCELLENT → AMAZING → EPIC → LEGENDARY → MYTHIC
 // ═══════════════════════════════════════════════════════════════
 
 import { COMBO_VFX } from '@/shared/match3/combat.config';
@@ -13,17 +13,66 @@ interface ComboDisplayProps {
   color: string;
 }
 
+// Tier → CSS animation class
+const TIER_ANIM: Record<string, string> = {
+  'NICE':      'combo-tier-nice',
+  'GREAT':     'combo-tier-great',
+  'EXCELLENT': 'combo-tier-excellent',
+  'AMAZING':   'combo-tier-amazing',
+  'EPIC':      'combo-tier-epic',
+  'LEGENDARY': 'combo-tier-legendary',
+  'MYTHIC':    'combo-tier-mythic',
+};
+
+// Tier → background gradient
+const TIER_BG: Record<string, string> = {
+  'NICE':      'linear-gradient(135deg, #16a34a, #22c55e)',
+  'GREAT':     'linear-gradient(135deg, #2563eb, #3b82f6)',
+  'EXCELLENT': 'linear-gradient(135deg, #7c3aed, #a855f7)',
+  'AMAZING':   'linear-gradient(135deg, #d97706, #f59e0b)',
+  'EPIC':      'linear-gradient(135deg, #b91c1c, #ef4444)',
+  'LEGENDARY': 'linear-gradient(135deg, #b45309, #fbbf24, #f59e0b)',
+  'MYTHIC':    'linear-gradient(135deg, #c026d3, #ff00ff, #e879f9)',
+};
+
+// Tier → glow intensity
+const TIER_GLOW: Record<string, number> = {
+  'NICE': 15, 'GREAT': 20, 'EXCELLENT': 30,
+  'AMAZING': 40, 'EPIC': 50, 'LEGENDARY': 60, 'MYTHIC': 80,
+};
+
 export default function ComboDisplay({ combo, show, label, mult, color }: ComboDisplayProps) {
   if (!show || combo < 2) return null;
 
   const vfx = COMBO_VFX[label];
-  const isHigh = combo >= 5;
-  const isGodlike = combo >= 8;
+  const tierAnim = TIER_ANIM[label] || '';
+  const tierBg = TIER_BG[label] || 'linear-gradient(135deg, #6c5ce7, #a29bfe)';
+  const glowSize = TIER_GLOW[label] || 15;
+  const isHighTier = combo >= 12; // AMAZING+
+  const isLegendary = combo >= 30;
+  const isMythic = combo >= 50;
+
+  // For low combos (2) without a tier label — simple display
+  if (!label) {
+    return (
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 animate-combo-burst pointer-events-none z-20">
+        <div className="relative px-4 py-1.5 rounded-full font-heading font-bold text-white text-center"
+          style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 0 15px rgba(108,92,231,0.5)' }}>
+          <span className="text-base">x{combo}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Display text — spaced letters for LEGENDARY+
+  const displayLabel = isLegendary ? label.split('').join(' ') : label;
+  const bonusPct = mult > 1 ? `+${Math.round((mult - 1) * 100)}%` : '';
 
   return (
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 animate-combo-burst pointer-events-none z-20">
-      {/* Expanding ring behind badge (high combos only) */}
-      {isHigh && (
+    <div className={`absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none z-20 ${tierAnim}`}
+      key={`combo-${combo}-${label}`}>
+      {/* Expanding ring behind badge (high tiers) */}
+      {isHighTier && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="combo-ring-burst" style={{ borderColor: color }} />
         </div>
@@ -33,30 +82,33 @@ export default function ComboDisplay({ combo, show, label, mult, color }: ComboD
       <div
         className={`
           relative px-5 py-2 rounded-full font-heading font-bold text-white text-center
-          ${isGodlike ? 'combo-badge-godlike' : isHigh ? 'combo-badge-high' : ''}
+          ${isMythic ? 'combo-badge-mythic' : isLegendary ? 'combo-badge-legendary' : isHighTier ? 'combo-badge-high' : ''}
         `}
         style={{
-          background: isGodlike ? 'linear-gradient(135deg, #f0932b, #e74c3c, #e056fd)' :
-            combo >= 6 ? 'linear-gradient(135deg, #e056fd, #f0932b)' :
-              combo >= 5 ? 'linear-gradient(135deg, #fd79a8, #e056fd)' :
-                combo >= 4 ? 'linear-gradient(135deg, #e74c3c, #fd79a8)' :
-                  combo >= 3 ? 'linear-gradient(135deg, #f39c12, #e74c3c)' :
-                    'linear-gradient(135deg, #6c5ce7, #a29bfe)',
-          boxShadow: `0 0 ${isGodlike ? 60 : isHigh ? 40 : 20}px ${color}80`,
-          border: combo >= 6 ? '2px solid rgba(255,255,255,0.5)' : 'none',
+          background: tierBg,
+          boxShadow: `0 0 ${glowSize}px ${color}80`,
+          border: isHighTier ? '2px solid rgba(255,255,255,0.5)' : 'none',
         }}
       >
-        {/* Inner glow overlay for high combos */}
-        {isHigh && (
+        {/* Inner glow overlay */}
+        {isHighTier && (
           <div className="absolute inset-0 rounded-full combo-inner-glow" />
         )}
 
-        <span className={`relative z-10 ${vfx?.size || 'text-lg'}`}>
-          {vfx?.emoji || '💥'} {label} x{combo}
+        <span className={`relative z-10 ${vfx?.size || 'text-base'} ${isMythic ? 'combo-text-mythic' : ''}`}
+          style={isMythic ? {} : { textShadow: `0 2px 4px rgba(0,0,0,0.5)` }}>
+          {vfx?.emoji || '💥'} {displayLabel} x{combo}
         </span>
-        <span className="relative z-10 block text-[10px] text-white/80 font-semibold tracking-wider">
-          DMG ×{mult}
-        </span>
+        {bonusPct && (
+          <span className="relative z-10 block text-[10px] text-white/80 font-semibold tracking-wider">
+            {bonusPct} damage
+          </span>
+        )}
+        {mult > 1 && (
+          <span className="relative z-10 block text-[9px] text-white/60 font-semibold">
+            DMG x{mult}
+          </span>
+        )}
       </div>
     </div>
   );

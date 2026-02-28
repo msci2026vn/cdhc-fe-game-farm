@@ -113,6 +113,7 @@ export default function CampaignBattleScreen() {
       onBack={() => navigate(`/campaign/${zoneNumber}`)}
       campaignBossId={bossId!}
       zoneName={zoneName || undefined}
+      zoneNumber={zoneNumber}
       archetype={targetBoss.archetype}
       archetypeIcon={archInfo.icon}
       archetypeTip={archInfo.tipVi}

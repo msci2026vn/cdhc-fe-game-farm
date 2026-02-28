@@ -6,7 +6,7 @@
 import type { Dispatch, SetStateAction, MutableRefObject } from 'react';
 import type { GemType, Gem } from '@/shared/match3/board.utils';
 import { findMatches, findMatchGroups, applyGravity, collectTriggeredCells } from '@/shared/match3/board.utils';
-import { getComboInfo, bossDEFReduction, ANIM_TIMING } from '@/shared/match3/combat.config';
+import { getComboInfo, getComboTier, bossDEFReduction, ANIM_TIMING } from '@/shared/match3/combat.config';
 import type { BossState, CombatStats, CombatNotifType, ActiveDebuff, ActiveBossBuff, EggState } from '@/shared/match3/combat.types';
 import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
 import { OT_HIEM_CONFIG } from '@/shared/match3/combat.config';
@@ -43,6 +43,8 @@ export interface CampaignProcessorDeps {
   // Optional animation deps
   setSpawningGems?: Dispatch<SetStateAction<Set<number>>>;
   setScreenShake?: Dispatch<SetStateAction<boolean>>;
+  // Unmount guard — skip setState after component unmounts
+  mountedRef: MutableRefObject<boolean>;
 }
 
 export function processCampaignMatchesImpl(
@@ -71,7 +73,7 @@ export function processCampaignMatchesImpl(
   // Use basic findMatches for quick empty check
   const basicMatched = findMatches(currentGrid);
   if (basicMatched.size === 0) {
-    if (currentCombo > 1) setTimeout(() => setShowCombo(false), 1500);
+    if (currentCombo > 1) setTimeout(() => { if (!deps.mountedRef.current) return; setShowCombo(false); }, 1500);
     else setShowCombo(false);
     comboRef.current = 0;
     setAnimating(false);
@@ -87,6 +89,16 @@ export function processCampaignMatchesImpl(
   setCombo(newCombo);
   if (newCombo >= 2) setShowCombo(true);
   const comboInfo = getComboInfo(newCombo);
+
+  // Tier-up screen shake: when combo crosses into a new tier with shake=true
+  if (deps.setScreenShake && currentCombo > 0) {
+    const prevTier = getComboTier(currentCombo);
+    const newTier = getComboTier(newCombo);
+    if (newTier.min > prevTier.min && newTier.shake) {
+      deps.setScreenShake(true);
+      setTimeout(() => { if (!deps.mountedRef.current) return; deps.setScreenShake!(false); }, 300);
+    }
+  }
 
   // Audio
   const comboSfx = AudioManager.comboSound(newCombo);
@@ -138,6 +150,7 @@ export function processCampaignMatchesImpl(
   setMatchedCells(new Set(allRemove));
 
   setTimeout(() => {
+    if (!deps.mountedRef.current) return;
     setBoss(prev => {
       let { bossHp, playerHp, shield, ultCharge, mana, turnCount, ultCooldown } = prev;
       const atkCount = tally.atk || 0;
@@ -293,7 +306,7 @@ export function processCampaignMatchesImpl(
     if (spawnEntries.length > 0 && deps.setSpawningGems) {
       const spawnedIds = new Set(spawnEntries.map(e => currentGrid[e.pos]?.id).filter((id): id is number => id != null));
       deps.setSpawningGems(spawnedIds);
-      setTimeout(() => deps.setSpawningGems!(new Set()), ANIM_TIMING.SPAWN_ANIM_MS);
+      setTimeout(() => { if (!deps.mountedRef.current) return; deps.setSpawningGems!(new Set()); }, ANIM_TIMING.SPAWN_ANIM_MS);
     }
 
     // Screen shake for bomb/rainbow triggers
@@ -301,14 +314,14 @@ export function processCampaignMatchesImpl(
       const triggeredSpecials = [...matchedPositions].filter(i => currentGrid[i]?.special).map(i => currentGrid[i]!.special);
       if (triggeredSpecials.includes('rainbow') || triggeredSpecials.includes('bomb')) {
         deps.setScreenShake(true);
-        const dur = triggeredSpecials.includes('rainbow') ? 500 : 350;
-        setTimeout(() => deps.setScreenShake!(false), dur);
+        const dur = triggeredSpecials.includes('rainbow') ? ANIM_TIMING.SHAKE_RAINBOW_MS : ANIM_TIMING.SHAKE_BOMB_MS;
+        setTimeout(() => { if (!deps.mountedRef.current) return; deps.setScreenShake!(false); }, dur);
       }
     }
 
     // Dynamic cascade acceleration: each step gets 10% faster (floor 150ms)
     const cascadeDelay = Math.max(ANIM_TIMING.CASCADE_MIN_MS,
       Math.round(ANIM_TIMING.CASCADE_BASE_MS * Math.pow(ANIM_TIMING.CASCADE_DECAY, cascadeDepth)));
-    setTimeout(() => recurse(fallen, newCombo, cascadeDepth + 1), cascadeDelay);
+    setTimeout(() => { if (!deps.mountedRef.current) return; recurse(fallen, newCombo, cascadeDepth + 1); }, cascadeDelay);
   }, ANIM_TIMING.MATCH_RESOLVE_MS);
 }

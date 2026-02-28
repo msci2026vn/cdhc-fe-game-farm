@@ -81,6 +81,7 @@ export function useMatch3Campaign(
   bossData: CampaignBossData,
   playerStats: PlayerCombatStats,
   skillLevels: PlayerSkillLevels = { sam_dong: 1, ot_hiem: 0, rom_boc: 0 },
+  zoneNumber: number = 1,
 ) {
   // ═══ Phase support ═══
   const phases = bossData.phases;
@@ -109,6 +110,10 @@ export function useMatch3Campaign(
   const manaUltCost = useMemo(() => ultCost(milestones.ultCostReduced), [milestones.ultCostReduced]);
 
   // State
+  // Unmount guard for setTimeout cleanup
+  const mountedRef = useRef(true);
+  useEffect(() => { return () => { mountedRef.current = false; }; }, []);
+
   const [spawningGems, setSpawningGems] = useState<Set<number>>(new Set());
   const [grid, setGrid] = useState<Gem[]>(createGrid);
   const [selected, setSelected] = useState<number | null>(null);
@@ -286,11 +291,12 @@ export function useMatch3Campaign(
     if (result !== 'fighting') return;
     return setupCampaignBossAttackLoop({
       archetype: bossData.archetype || 'none',
+      zoneNumber,
       isPausedRef, fightStartTime, totalPausedMsRef, activeBossStats,
       dodgedRef, pendingHitsRef, applyBossDamageRef,
       setAttackWarning, setSkillWarning, setBossAttackMsg,
     });
-  }, [bossData.archetype, result]);
+  }, [bossData.archetype, result, zoneNumber]);
 
   // ═══ Wire: boss heal timer ═══
   useEffect(() => {
@@ -525,6 +531,7 @@ export function useMatch3Campaign(
       activeBossStats, eggRef, setEgg, activeBossBuffsRef, activeDebuffsRef,
       otHiemActiveRef, skillLevelsRef,
       setSpawningGems, setScreenShake,
+      mountedRef,
     }, currentGrid, currentCombo,
       (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
       swapPair, cascadeDepth);

@@ -8,8 +8,8 @@ import type {
   ActiveDebuff, ActiveBossBuff, EggState, CombatStats,
 } from '@/shared/match3/combat.types';
 import {
-  BOSS_ATK_INTERVAL, BOSS_SKILL_CHANCE, SKILL_DMG_MULT, SKILL_WARNING_MS,
-  getBossSkillName, getEnrageMultiplier,
+  BOSS_SKILL_CHANCE, SKILL_DMG_MULT, SKILL_WARNING_MS,
+  getBossSkillName, getEnrageMultiplier, getBossAttackInterval,
 } from '@/shared/match3/combat.config';
 import { playSound } from '@/shared/audio';
 import type { BossSkill } from '../data/bossSkills';
@@ -20,6 +20,7 @@ const MULTI_HIT_DELAY = 300;
 // ═══ Boss attack loop deps ═══
 export interface BossAttackLoopDeps {
   archetype: string;
+  zoneNumber: number;
   isPausedRef: MutableRefObject<boolean>;
   fightStartTime: MutableRefObject<number>;
   totalPausedMsRef: MutableRefObject<number>;
@@ -34,11 +35,12 @@ export interface BossAttackLoopDeps {
 
 export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => void {
   const {
-    archetype, isPausedRef, fightStartTime, totalPausedMsRef,
+    archetype, zoneNumber, isPausedRef, fightStartTime, totalPausedMsRef,
     activeBossStats, dodgedRef, pendingHitsRef, applyBossDamageRef,
     setAttackWarning, setSkillWarning, setBossAttackMsg,
   } = deps;
 
+  const attackMs = getBossAttackInterval(zoneNumber);
   const interval = setInterval(() => {
     if (isPausedRef.current) return;
     const enrageMult = getEnrageMultiplier(fightStartTime.current, totalPausedMsRef.current);
@@ -82,7 +84,7 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
         pendingHitsRef.current.push(hitTimeout);
       }
     }
-  }, BOSS_ATK_INTERVAL);
+  }, attackMs);
 
   return () => {
     clearInterval(interval);

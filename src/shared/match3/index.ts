@@ -12,13 +12,15 @@ export type { GemType, Gem, SpecialGemType, MatchPattern, MatchGroup } from './b
 
 // Combat config
 export {
-  COMBO_TIERS, getComboInfo, COMBO_VFX,
-  BOSS_ATK_INTERVAL, BOSS_SKILL_CHANCE, SKILL_DMG_MULT, SKILL_WARNING_MS,
+  COMBO_TIERS, getComboInfo, getComboTier, COMBO_VFX,
+  BOSS_ATK_INTERVAL, BOSS_ATTACK_INTERVALS, getBossAttackInterval,
+  BOSS_SKILL_CHANCE, SKILL_DMG_MULT, SKILL_WARNING_MS,
   ARCHETYPE_SKILLS, getBossSkillName,
   getEnrageMultiplier, bossDEFReduction,
   OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG,
   ANIM_TIMING,
 } from './combat.config';
+export type { ComboTier } from './combat.config';
 
 // Combat types
 export type {
