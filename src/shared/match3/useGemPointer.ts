@@ -26,7 +26,7 @@ export function useGemPointer(
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (Math.max(absDx, absDy) > 20) {
+    if (Math.max(absDx, absDy) > 12) {
       const startIdx = dragRef.current.idx;
       dragRef.current = null;
       if (absDx > absDy) {

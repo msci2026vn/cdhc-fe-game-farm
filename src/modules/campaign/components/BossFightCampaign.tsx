@@ -533,7 +533,7 @@ export default function BossFightCampaign({
           {showCombo && combo >= 3 && (
             <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
           )}
-          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''} transition-all duration-300`}
+          <div className={`grid grid-cols-8 gap-0.5 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''} transition-all duration-300`}
             onPointerMove={handlePointerMove}
             style={{
               background: 'rgba(255,255,255,0.04)',
@@ -558,7 +558,7 @@ export default function BossFightCampaign({
                 <div key={gem.id}
                   onPointerDown={(e) => handlePointerDown(i, e)}
                   onPointerUp={handlePointerUp}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200
+                  className={`aspect-square rounded-md flex items-center justify-center text-[16px] cursor-pointer relative gem-shine transition-all duration-200
                     ${sp === 'rainbow' ? 'gem-rainbow' : meta.css}
                     ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
                     ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}
@@ -572,7 +572,7 @@ export default function BossFightCampaign({
                   `}>
                   {sp === 'rainbow' ? '🌈' : meta.emoji}
                   {lockedGems.has(i) && (
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">🔒</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[8px] pointer-events-none">🔒</span>
                   )}
                 </div>
               );

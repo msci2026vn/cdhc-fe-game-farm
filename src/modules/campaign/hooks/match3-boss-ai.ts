@@ -11,6 +11,7 @@ import {
   BOSS_SKILL_CHANCE, SKILL_DMG_MULT, SKILL_WARNING_MS,
   getBossSkillName, getEnrageMultiplier, getBossAttackInterval,
 } from '@/shared/match3/combat.config';
+import { ROWS, COLS } from '@/shared/match3/board.utils';
 import { playSound } from '@/shared/audio';
 import type { BossSkill } from '../data/bossSkills';
 
@@ -255,7 +256,7 @@ export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
       }
       case 'gem_lock': {
         const available: number[] = [];
-        for (let gi = 0; gi < 36; gi++) {
+        for (let gi = 0; gi < ROWS * COLS; gi++) {
           if (!lockedGemsRef.current.has(gi)) available.push(gi);
         }
         const count = Math.min(skill.value, available.length);

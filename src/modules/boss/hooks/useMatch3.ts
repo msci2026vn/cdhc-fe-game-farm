@@ -31,6 +31,7 @@ import { processMatchesImpl } from './match-processor.engine';
 import { setupBossAttackLoop } from './boss-attack.loop';
 import { handleTapImpl, handleSwipeImpl } from './input-handlers';
 import { handleDodgeImpl, fireUltimateImpl } from './combat-effects';
+import { BOARD_8X8_BOSS_HP_MULT } from '@/shared/match3/combat.config';
 
 // Stars by time (boss-weekly specific formula)
 function calculateTimeStars(duration: number, bossLevel: number): number {
@@ -63,8 +64,9 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
   const [combo, setCombo] = useState(0);
   const [showCombo, setShowCombo] = useState(false);
   const comboRef = useRef(0);
+  const scaledBossHp = Math.round(bossInfo.hp * BOARD_8X8_BOSS_HP_MULT);
   const [boss, setBoss] = useState<BossState>({
-    bossHp: bossInfo.hp, bossMaxHp: bossInfo.hp,
+    bossHp: scaledBossHp, bossMaxHp: scaledBossHp,
     playerHp: maxPlayerHp(playerStats.hp),
     playerMaxHp: maxPlayerHp(playerStats.hp),
     shield: startingShield(playerStats.def),

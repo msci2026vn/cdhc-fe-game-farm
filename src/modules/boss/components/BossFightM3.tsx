@@ -310,7 +310,7 @@ export default function BossFightM3({
           {showCombo && combo >= 2 && (
             <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${Math.min(combo, 6)}`} />
           )}
-          <div className={`grid grid-cols-6 gap-1 p-1 rounded-lg h-full ${combo >= 3 && showCombo ? 'grid-combo-shake' : ''}`}
+          <div className={`grid grid-cols-8 gap-0.5 p-1 rounded-lg h-full ${combo >= 3 && showCombo ? 'grid-combo-shake' : ''}`}
             onPointerMove={handlePointerMove}
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', touchAction: 'none' }}>
             {grid.map((gem, i) => {
@@ -321,7 +321,7 @@ export default function BossFightM3({
                 <div key={gem.id}
                   onPointerDown={(e) => handlePointerDown(i, e)}
                   onPointerUp={handlePointerUp}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-[20px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                  className={`aspect-square rounded-md flex items-center justify-center text-[16px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}

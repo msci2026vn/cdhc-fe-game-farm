@@ -18,7 +18,7 @@ export {
   ARCHETYPE_SKILLS, getBossSkillName,
   getEnrageMultiplier, bossDEFReduction,
   OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG,
-  ANIM_TIMING,
+  ANIM_TIMING, BOARD_8X8_BOSS_HP_MULT,
 } from './combat.config';
 export type { ComboTier } from './combat.config';
 

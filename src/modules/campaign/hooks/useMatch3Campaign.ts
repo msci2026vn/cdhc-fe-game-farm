@@ -14,7 +14,7 @@ import {
 } from '@/shared/utils/combat-formulas';
 import type { BossPhase } from '../data/deVuongPhases';
 import type { PlayerSkillLevels } from '../types/skill.types';
-import { OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG } from '@/shared/match3/combat.config';
+import { OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG, BOARD_8X8_BOSS_HP_MULT } from '@/shared/match3/combat.config';
 import { playSound } from '@/shared/audio';
 
 // Shared match3
@@ -122,8 +122,9 @@ export function useMatch3Campaign(
   const [combo, setCombo] = useState(0);
   const [showCombo, setShowCombo] = useState(false);
   const comboRef = useRef(0);
+  const scaledBossHp = Math.round(bossData.hp * BOARD_8X8_BOSS_HP_MULT);
   const [boss, setBoss] = useState<BossState>({
-    bossHp: bossData.hp, bossMaxHp: bossData.hp,
+    bossHp: scaledBossHp, bossMaxHp: scaledBossHp,
     playerHp: maxPlayerHp(playerStats.hp), playerMaxHp: maxPlayerHp(playerStats.hp),
     shield: startingShield(playerStats.def), ultCharge: 0,
     mana: playerStats.mana, maxMana: playerStats.mana,
@@ -167,7 +168,7 @@ export function useMatch3Campaign(
   const [skillAlert, setSkillAlert] = useState<{ icon: string; text: string } | null>(null);
   const skillCooldownsRef = useRef<Record<string, number>>({});
   const skillTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const bossHpRef = useRef(bossData.hp);
+  const bossHpRef = useRef(scaledBossHp);
   const [activeBossBuffs, setActiveBossBuffs] = useState<ActiveBossBuff[]>([]);
   const activeBossBuffsRef = useRef<ActiveBossBuff[]>([]);
   const [egg, setEgg] = useState<EggState | null>(null);
@@ -311,12 +312,12 @@ export function useMatch3Campaign(
   useEffect(() => {
     if (result !== 'fighting') return;
     return setupBossSkillsInterval({
-      bossName: bossData.name, bossMaxHp: bossData.hp, skills: bossData.skills,
+      bossName: bossData.name, bossMaxHp: scaledBossHp, skills: bossData.skills,
       isPausedRef, bossHpRef, skillCooldownsRef, skillTimersRef,
       activeDebuffsRef, activeBossBuffsRef, eggRef, lockedGemsRef, isStunnedRef,
       setActiveDebuffs, setActiveBossBuffs, setEgg, setLockedGems, setIsStunned, setSkillAlert,
     });
-  }, [result, bossData.skills, bossData.hp, bossData.name]);
+  }, [result, bossData.skills, scaledBossHp, bossData.name]);
 
   // ═══ Wire: debuff/buff/egg ticker ═══
   useEffect(() => {

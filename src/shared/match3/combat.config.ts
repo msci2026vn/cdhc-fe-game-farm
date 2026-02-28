@@ -117,6 +117,10 @@ export const SAM_DONG_CONFIG = {
   pierceShield:     [false, false, false, false, true], // Lv5
 };
 
+// Board 8×8 rebalance — more cells = more matches = higher DPS
+// Compensate by increasing boss HP 25%
+export const BOARD_8X8_BOSS_HP_MULT = 1.25;
+
 // Animation timing — centralised constants for match3 cascade loop
 export const ANIM_TIMING = {
   MATCH_RESOLVE_MS: 350,    // time to show matched cells before removing

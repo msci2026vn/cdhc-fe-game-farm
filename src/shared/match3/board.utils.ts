@@ -2,8 +2,8 @@
 // Board utilities — shared grid logic for match-3 combat
 // ═══════════════════════════════════════════════════════════════
 
-export const COLS = 6;
-export const ROWS = 6;
+export const COLS = 8;
+export const ROWS = 8;
 export const GEM_TYPES = ['atk', 'hp', 'def', 'star'] as const;
 export type GemType = (typeof GEM_TYPES)[number];
 
