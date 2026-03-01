@@ -1,6 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
 // Auto-play skill manager — decides when to use dodge/ULT/buffs
 // Called BEFORE gem swap each tick: skill action > gem swap
+//
+// Skill availability by level:
+//   Lv1-2: dodge ALL warnings + ULT when ready (simple)
+//   Lv3-4: selective dodge + smart ULT + auto Ot Hiem/Rom Boc
+//   Lv5:   full skills + optimized timing
 // ═══════════════════════════════════════════════════════════════
 
 import { dodgeCost, ultCost } from '../utils/combat-formulas';
@@ -68,20 +73,34 @@ function calcUltManaCost(state: SkillManagerState): number {
 
 export function getSkillDecision(state: SkillManagerState): SkillDecision | null {
   // ─── PRIORITY 1: DODGE ───
-  if (state.skillWarning && state.vipLevel >= 3) {
+  // ALL levels can dodge. Lv1-2 dodge every warning (simple).
+  // Lv3+ has smart exception to skip dodge in low-value situations.
+  if (state.skillWarning) {
     const manaCost = calcDodgeManaCost(state.playerMANA_stat);
     const isFree = state.dodgesUsedThisBattle < state.dodgeFreeLimit;
     const ognCost = isFree ? 0 : 5;
 
     if (state.currentMana >= manaCost) {
-      // Exception: skip dodge to save mana for ULT against weak bosses
-      const estDmg = state.bossATK * 2.0 * state.enrageMultiplier;
-      const canSurviveHit = estDmg < state.playerHP * 0.25;
-      const manaShort = state.currentMana < manaCost + 80;
-      const ultNear = state.ultCharge >= 85;
-      const weakBoss = state.bossATK <= 200;
+      // Lv3+: smart exception — skip dodge to save mana for ULT against weak bosses
+      if (state.vipLevel >= 3) {
+        const estDmg = state.bossATK * 2.0 * state.enrageMultiplier;
+        const canSurviveHit = estDmg < state.playerHP * 0.25;
+        const manaShort = state.currentMana < manaCost + 80;
+        const ultNear = state.ultCharge >= 85;
+        const weakBoss = state.bossATK <= 200;
 
-      if (!(manaShort && ultNear && canSurviveHit && weakBoss)) {
+        if (manaShort && ultNear && canSurviveHit && weakBoss) {
+          // Smart skip: save mana for ULT
+        } else {
+          return {
+            action: 'dodge',
+            reason: isFree ? 'Free dodge skill attack' : `Paid dodge (${ognCost} OGN)`,
+            manaCost,
+            ognCost,
+          };
+        }
+      } else {
+        // Lv1-2: always dodge when warning + enough mana (simple mode)
         return {
           action: 'dodge',
           reason: isFree ? 'Free dodge skill attack' : `Paid dodge (${ognCost} OGN)`,
@@ -92,9 +111,9 @@ export function getSkillDecision(state: SkillManagerState): SkillDecision | null
     }
   }
 
-  // ─── PRIORITY 2: ROM BOC (emergency shield) ───
+  // ─── PRIORITY 2: ROM BOC (emergency shield) — Lv3+ ───
   if (
-    state.vipLevel >= 5 &&
+    state.vipLevel >= 3 &&
     !state.romBocActive &&
     !state.romBocOnCooldown
   ) {
@@ -117,35 +136,44 @@ export function getSkillDecision(state: SkillManagerState): SkillDecision | null
   }
 
   // ─── PRIORITY 3: SAM DONG (ULT) ───
-  if (state.ultCharge >= 100 && state.vipLevel >= 3) {
+  // ALL levels can ULT. Lv1-2 fire immediately when ready.
+  // Lv3+ has smart guards (don't fire into shield, save for De Vuong phase 4).
+  if (state.ultCharge >= 100) {
     const manaCost = calcUltManaCost(state);
 
     if (state.currentMana >= manaCost) {
       const bossHpPct = state.bossMaxHP > 0 ? state.bossHP / state.bossMaxHP : 1;
       const bossShielded = state.activeBossBuffs.has('shield');
 
-      // Don't fire: boss shielded (80% reduction), overkill, or save for De Vuong phase 4
-      const dontFire =
-        bossShielded ||
-        bossHpPct < 0.03 ||
-        (state.isDeVuong && state.deVuongPhase === 3 && bossHpPct > 0.26);
+      if (state.vipLevel >= 3) {
+        // Lv3+: smart ULT timing
+        const dontFire =
+          bossShielded ||
+          bossHpPct < 0.03 ||
+          (state.isDeVuong && state.deVuongPhase === 3 && bossHpPct > 0.26);
 
-      if (!dontFire) {
-        const reason =
-          state.otHiemActive ? 'ULT + OtHiem combo burst'
-          : state.isDeVuong && state.deVuongPhase === 4 ? 'De Vuong phase 4 rush ULT'
-          : bossHpPct <= 0.15 ? 'ULT finishing blow'
-          : state.bossDEF >= 200 && state.samDongLevel >= 5 ? 'ULT pierce high DEF'
-          : manaCost === 0 ? 'Free ULT (SuperMana)'
-          : 'ULT burst damage';
-        return { action: 'samDong', reason, manaCost, ognCost: 0 };
+        if (!dontFire) {
+          const reason =
+            state.otHiemActive ? 'ULT + OtHiem combo burst'
+            : state.isDeVuong && state.deVuongPhase === 4 ? 'De Vuong phase 4 rush ULT'
+            : bossHpPct <= 0.15 ? 'ULT finishing blow'
+            : state.bossDEF >= 200 && state.samDongLevel >= 5 ? 'ULT pierce high DEF'
+            : manaCost === 0 ? 'Free ULT (SuperMana)'
+            : 'ULT burst damage';
+          return { action: 'samDong', reason, manaCost, ognCost: 0 };
+        }
+      } else {
+        // Lv1-2: simple ULT — fire when ready, skip only if boss shielded
+        if (!bossShielded) {
+          return { action: 'samDong', reason: 'ULT ready — fire!', manaCost, ognCost: 0 };
+        }
       }
     }
   }
 
-  // ─── PRIORITY 4: OT HIEM (DPS buff) ───
+  // ─── PRIORITY 4: OT HIEM (DPS buff) — Lv3+ ───
   if (
-    state.vipLevel >= 5 &&
+    state.vipLevel >= 3 &&
     !state.otHiemActive &&
     !state.otHiemOnCooldown
   ) {
@@ -167,7 +195,7 @@ export function getSkillDecision(state: SkillManagerState): SkillDecision | null
 // ═══ shouldAutoDodge — quick check for controller ═══
 
 export function shouldAutoDodge(state: SkillManagerState): boolean {
-  if (!state.skillWarning || state.vipLevel < 3) return false;
+  if (!state.skillWarning) return false;
   return state.currentMana >= calcDodgeManaCost(state.playerMANA_stat);
 }
 

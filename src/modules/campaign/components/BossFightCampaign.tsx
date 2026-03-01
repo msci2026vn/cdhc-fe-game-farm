@@ -643,6 +643,17 @@ export default function BossFightCampaign({
           </div>
         )}
 
+        {/* Auto-play toggle — above the grid */}
+        <div className="flex justify-end mb-0.5">
+          <AutoPlayToggle
+            isActive={autoPlay.isActive}
+            onToggle={autoPlay.toggle}
+            vipLevel={autoPlay.vipLevel}
+            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+            currentSituation={autoPlay.currentSituation}
+          />
+        </div>
+
         {/* Gem grid + Stun overlay */}
         <div className="relative flex-1">
           {showCombo && combo >= 3 && (
@@ -750,13 +761,6 @@ export default function BossFightCampaign({
               onUlt={fireUltimate}
             />
           </div>
-          <AutoPlayToggle
-            isActive={autoPlay.isActive}
-            onToggle={autoPlay.toggle}
-            vipLevel={autoPlay.vipLevel}
-            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-            currentSituation={autoPlay.currentSituation}
-          />
         </div>
       </div>
     </div>

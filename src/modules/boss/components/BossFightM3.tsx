@@ -383,6 +383,17 @@ export default function BossFightM3({
           ultCost={manaUltCost}
         />
 
+        {/* Auto-play toggle — above the grid */}
+        <div className="flex justify-end mb-0.5">
+          <AutoPlayToggle
+            isActive={autoPlay.isActive}
+            onToggle={autoPlay.toggle}
+            vipLevel={autoPlay.vipLevel}
+            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+            currentSituation={autoPlay.currentSituation}
+          />
+        </div>
+
         {/* Gem grid — compact for mobile */}
         <div className="relative flex-1">
           {/* Combo flash overlay */}
@@ -413,29 +424,18 @@ export default function BossFightM3({
           </div>
         </div>
 
-        {/* Skill bar: Dodge + ULT charge + ULT button + Auto */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex-1">
-            <SkillBar
-              mana={boss.mana}
-              maxMana={boss.maxMana}
-              dodgeCost={manaDodgeCost}
-              ultCost={manaUltCost}
-              ultCharge={boss.ultCharge}
-              ultCooldown={boss.ultCooldown}
-              isDodgeWindow={!!skillWarning}
-              onDodge={handleDodge}
-              onUlt={fireUltimate}
-            />
-          </div>
-          <AutoPlayToggle
-            isActive={autoPlay.isActive}
-            onToggle={autoPlay.toggle}
-            vipLevel={autoPlay.vipLevel}
-            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-            currentSituation={autoPlay.currentSituation}
-          />
-        </div>
+        {/* Skill bar: Dodge + ULT charge + ULT button */}
+        <SkillBar
+          mana={boss.mana}
+          maxMana={boss.maxMana}
+          dodgeCost={manaDodgeCost}
+          ultCost={manaUltCost}
+          ultCharge={boss.ultCharge}
+          ultCooldown={boss.ultCooldown}
+          isDodgeWindow={!!skillWarning}
+          onDodge={handleDodge}
+          onUlt={fireUltimate}
+        />
       </div>
 
     </div>
