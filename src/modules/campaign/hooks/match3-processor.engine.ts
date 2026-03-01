@@ -46,6 +46,7 @@ export interface CampaignProcessorDeps {
   // Unmount guard — skip setState after component unmounts
   mountedRef: MutableRefObject<boolean>;
   addBlastVfx?: (type: 'row' | 'col', index: number) => void;
+  addParticleBurst?: (index: number, color: string) => void;
 }
 
 export function processCampaignMatchesImpl(
@@ -144,6 +145,17 @@ export function processCampaignMatchesImpl(
       if (deps.addBlastVfx) {
         if (g.special === 'striped_h') deps.addBlastVfx('row', Math.floor(idx / 8));
         else if (g.special === 'striped_v') deps.addBlastVfx('col', idx % 8);
+      }
+
+      // Trigger Particle Burst
+      if (deps.addParticleBurst) {
+        let color = '#ffffff';
+        if (g.special === 'rainbow') color = '#a855f7'; // Purple
+        else if (g.type === 'atk') color = '#ef4444'; // Red (Chu Tước/Sword)
+        else if (g.type === 'def') color = '#3b82f6'; // Blue (Thanh Long/Shield)
+        else if (g.type === 'hp') color = '#22c55e'; // Green (Bạch Hổ/Heart)
+        else if (g.type === 'star') color = '#eab308'; // Yellow (Huyền Vũ/Star)
+        deps.addParticleBurst(idx, color);
       }
     }
   });

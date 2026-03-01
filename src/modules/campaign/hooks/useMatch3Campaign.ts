@@ -24,7 +24,7 @@ import { GEM_META, getComboInfo, getEnrageMultiplier, bossDEFReduction } from '@
 import type {
   BossState, DamagePopup, FightResult, SkillWarning, BossAttackWarning,
   CombatStats, CombatNotif, CombatNotifType,
-  ActiveDebuff, ActiveBossBuff, EggState, BlastVfx
+  ActiveDebuff, ActiveBossBuff, EggState, BlastVfx, BurstData
 } from '@/shared/match3/combat.types';
 
 // Re-export for backward compatibility
@@ -146,6 +146,8 @@ export function useMatch3Campaign(
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [blastVfxs, setBlastVfxs] = useState<BlastVfx[]>([]);
   const blastId = useRef(0);
+  const [particleBursts, setParticleBursts] = useState<BurstData[]>([]);
+  const burstId = useRef(0);
   const fightStartTime = useRef(Date.now());
   const maxComboRef = useRef(0);
   const [stars, setStars] = useState(0);
@@ -210,6 +212,11 @@ export function useMatch3Campaign(
     setBlastVfxs(prev => [...prev, { id, type, index, expiresAt: Date.now() + 400 }]);
   }, []);
 
+  const addParticleBurst = useCallback((index: number, color: string) => {
+    const id = burstId.current++;
+    setParticleBursts(prev => [...prev, { id, index, color, expiresAt: Date.now() + 1000 }]);
+  }, []);
+
   // ═══ GC Ticker for Popups, Notifs, and Blasts ═══
   useEffect(() => {
     const gcInterval = setInterval(() => {
@@ -225,6 +232,11 @@ export function useMatch3Campaign(
         return next.length !== prev.length ? next : prev;
       });
       setBlastVfxs(prev => {
+        if (prev.length === 0) return prev;
+        const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
+        return next.length !== prev.length ? next : prev;
+      });
+      setParticleBursts(prev => {
         if (prev.length === 0) return prev;
         const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
         return next.length !== prev.length ? next : prev;
@@ -564,10 +576,11 @@ export function useMatch3Campaign(
       setSpawningGems, setScreenShake,
       mountedRef,
       addBlastVfx,
+      addParticleBurst,
     }, currentGrid, currentCombo,
       (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
       swapPair, cascadeDepth);
-  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx]);
+  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx, addParticleBurst]);
 
   const handleTap = useCallback((idx: number) => {
     setHintedGems([]); // Clear hints on interaction
@@ -631,5 +644,6 @@ export function useMatch3Campaign(
     spawningGems,
     blastVfxs,
     hintedGems,
+    particleBursts,
   };
 }
