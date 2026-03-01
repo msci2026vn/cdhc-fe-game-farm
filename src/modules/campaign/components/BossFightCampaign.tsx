@@ -95,6 +95,8 @@ export default function BossFightCampaign({
     romBocActive, romBocCooldown, romBocDuration, castRomBoc,
     // Animation
     spawningGems,
+    blastVfxs,
+    hintedGems,
   } = useMatch3Campaign(bossData, combatStats, skillLevels, zoneNumber);
 
   // ═══ Auto-play (Lv1 free for all, Lv2+ via purchase/rent) ═══
@@ -121,7 +123,7 @@ export default function BossFightCampaign({
   const enrageRef = useRef(enrageMultiplier); enrageRef.current = enrageMultiplier;
   const deVuongPhaseRef = useRef(currentPhase); deVuongPhaseRef.current = currentPhase;
 
-  const isDeVuong = bossData.id === 40 || (totalPhases ?? 0) >= 4;
+  const isDeVuong = Number(bossData.id) === 40 || (totalPhases ?? 0) >= 4;
 
   const autoPlay = useAutoPlayController({
     gridRef,
@@ -383,6 +385,7 @@ export default function BossFightCampaign({
           handlePointerDown={handlePointerDown} handlePointerMove={handlePointerMove} handlePointerUp={handlePointerUp}
           combo={combo} showCombo={showCombo} otHiemActive={otHiemActive} romBocActive={romBocActive}
           GEM_META={GEM_META}
+          blastVfxs={blastVfxs} hintedGems={hintedGems}
         />
 
         {/* Player HUD & Controls */}

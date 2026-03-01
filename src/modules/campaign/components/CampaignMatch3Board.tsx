@@ -13,7 +13,7 @@ interface Props {
     animating: boolean;
     handlePointerDown: (index: number, e: any) => void;
     handlePointerMove: (e: any) => void;
-    handlePointerUp: () => void;
+    handlePointerUp: (e?: any) => void;
     combo: number;
     showCombo: boolean;
     otHiemActive: boolean;
