@@ -24,12 +24,17 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
   const [ghostHp, setGhostHp] = useState(hpPct);
   const prevHp = useRef(hpPct);
   const [isHealing, setIsHealing] = useState(false);
+  const [isFlashingDamage, setIsFlashingDamage] = useState(false);
 
   useEffect(() => {
     if (hpPct < prevHp.current) {
       // HP dropped — keep ghost at old value, then drain after delay
       setGhostHp(prevHp.current);
-      const timer = setTimeout(() => setGhostHp(hpPct), 400);
+      setIsFlashingDamage(true);
+      const timer = setTimeout(() => {
+        setGhostHp(hpPct);
+        setIsFlashingDamage(false);
+      }, 400);
       prevHp.current = hpPct;
       return () => clearTimeout(timer);
     }
@@ -48,11 +53,11 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
     <div className={`flex gap-1.5 mb-0.5 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''} ${isHealing ? 'animate-heal-pulse' : ''}`}>
       {/* HP */}
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between text-[8px] font-bold mb-px" style={{ color: '#55efc4' }}>
-          <span>❤️ HP</span>
-          <span>{hp.toLocaleString()}/{maxHp.toLocaleString()}</span>
+        <div className={`flex justify-between text-[8px] font-bold mb-px`}>
+          <span style={{ color: '#55efc4' }}>❤️ HP</span>
+          <span style={{ color: isFlashingDamage ? '#ff6b6b' : '#55efc4' }}>{hp.toLocaleString()}/{maxHp.toLocaleString()}</span>
         </div>
-        <div className={`h-2.5 rounded-md overflow-hidden relative ${isCritical ? 'hp-bar-critical' : ''}`}
+        <div className={`h-2.5 rounded-md overflow-hidden relative ${isCritical ? 'hp-bar-critical' : ''} ${isFlashingDamage ? 'animate-hp-damage-flash' : ''}`}
           style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.06)' }}>
 
           {/* Ghost bar (damage drain effect — red, fades behind real HP) */}

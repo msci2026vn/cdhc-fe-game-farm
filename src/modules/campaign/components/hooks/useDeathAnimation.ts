@@ -11,9 +11,16 @@ export function useDeathAnimation(result: FightResult) {
   const [deathPhase, setDeathPhase] = useState<DeathPhase>('none');
 
   useEffect(() => {
-    if (result === 'defeat' && deathPhase === 'none') {
+    if ((result === 'defeat' || result === 'victory') && deathPhase === 'none') {
       setDeathPhase('dying');
-      const timer = setTimeout(() => setDeathPhase('done'), 2500);
+
+      const delay = result === 'victory' ? 2000 : 2500;
+
+      if (result === 'victory' && 'vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100, 50, 300]);
+      }
+
+      const timer = setTimeout(() => setDeathPhase('done'), delay);
       return () => clearTimeout(timer);
     }
   }, [result, deathPhase]);

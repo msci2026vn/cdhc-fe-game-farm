@@ -288,7 +288,7 @@ export default function BossFightCampaign({
   }
 
   // Victory / Defeat summary screen
-  if (result === 'victory' || (result === 'defeat' && deathPhase === 'done')) {
+  if ((result === 'victory' || result === 'defeat') && deathPhase === 'done') {
     return (
       <CampaignBattleResultHandler
         won={result === 'victory'}
@@ -325,7 +325,11 @@ export default function BossFightCampaign({
   }
 
   return (
-    <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
+    <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''} ${result === 'victory' && deathPhase === 'dying' ? 'animate-screen-shake-violent' : ''}`}>
+      {/* Victory Boss Death Flash */}
+      {result === 'victory' && deathPhase === 'dying' && (
+        <div className="absolute inset-0 z-[60] bg-white pointer-events-none animate-ult-flash" style={{ mixBlendMode: 'overlay' }} />
+      )}
       {/* Ultimate fullscreen flash */}
       {ultActive && <UltimateFlash />}
 
