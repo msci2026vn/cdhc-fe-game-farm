@@ -14,6 +14,7 @@ import Toast from '@/shared/components/Toast';
 import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
 import { audioManager } from '@/shared/audio';
 import ErrorBoundary from '@/shared/components/ErrorBoundary';
+import { AppDisplayPrompt } from '@/components/AppDisplayPrompt';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
@@ -146,6 +147,7 @@ const AuthenticatedApp = () => {
 const App = () => {
   return (
     <ErrorBoundary>
+      <AppDisplayPrompt />
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>

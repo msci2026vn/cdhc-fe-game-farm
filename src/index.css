@@ -27,6 +27,7 @@
 @import './styles/modules/game-components.css';
 @import './styles/modules/campaign.css';
 @import './styles/modules/prayer.css';
+@import './styles/modules/pwa-prompt.css';
 
 /* 6. Shared utilities & animations */
 @import './styles/utilities.css';
