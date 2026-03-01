@@ -13,7 +13,7 @@ export interface BossState {
   ultCooldown: number;
 }
 
-export interface DamagePopup { id: number; text: string; color: string; x: number; y: number; }
+export interface DamagePopup { id: number; text: string; color: string; x: number; y: number; expiresAt?: number; }
 
 export interface ActiveDebuff {
   type: string;
@@ -70,4 +70,5 @@ export interface CombatNotif {
   type: CombatNotifType;
   text: string;
   color: string;
+  expiresAt?: number;
 }

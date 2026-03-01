@@ -191,16 +191,32 @@ export function useMatch3Campaign(
   // Simple callbacks
   const addCombatNotif = useCallback((type: CombatNotifType, text: string, color: string) => {
     const id = notifIdRef.current++;
-    setCombatNotifs(prev => [...prev, { id, type, text, color }]);
-    setTimeout(() => setCombatNotifs(prev => prev.filter(n => n.id !== id)), 2000);
+    setCombatNotifs(prev => [...prev, { id, type, text, color, expiresAt: Date.now() + 2000 }]);
   }, []);
 
   const addPopup = useCallback((text: string, color: string) => {
     const id = popupId.current++;
     const x = 20 + Math.random() * 60;
     const y = 15 + Math.random() * 40;
-    setPopups(prev => [...prev, { id, text, color, x, y }]);
-    setTimeout(() => setPopups(prev => prev.filter(p => p.id !== id)), 1400);
+    setPopups(prev => [...prev, { id, text, color, x, y, expiresAt: Date.now() + 1400 }]);
+  }, []);
+
+  // ═══ GC Ticker for Popups and Notifs ═══
+  useEffect(() => {
+    const gcInterval = setInterval(() => {
+      const now = Date.now();
+      setPopups(prev => {
+        if (prev.length === 0) return prev;
+        const next = prev.filter(p => !p.expiresAt || p.expiresAt > now);
+        return next.length !== prev.length ? next : prev;
+      });
+      setCombatNotifs(prev => {
+        if (prev.length === 0) return prev;
+        const next = prev.filter(n => !n.expiresAt || n.expiresAt > now);
+        return next.length !== prev.length ? next : prev;
+      });
+    }, 500);
+    return () => clearInterval(gcInterval);
   }, []);
 
   // ═══ Elapsed seconds timer ═══
