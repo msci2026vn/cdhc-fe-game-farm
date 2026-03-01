@@ -186,12 +186,16 @@ export default function BossFightCampaign({
   // ═══ Start battle session on BE (anti-cheat) ═══
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [battleSessionId, setBattleSessionId] = useState<string | undefined>(undefined);
   const battleSessionStarted = useRef(false);
   useEffect(() => {
     if (battleSessionStarted.current) return;
     battleSessionStarted.current = true;
     campaignApi.startCampaignBattle(campaignBossId)
-      .then(() => setSessionReady(true))
+      .then((res) => {
+        setBattleSessionId(res?.sessionId);
+        setSessionReady(true);
+      })
       .catch(err => {
         console.error('[BATTLE] Failed to start battle session:', err);
         setSessionError(err.message || 'Không thể bắt đầu trận đấu');
@@ -226,6 +230,7 @@ export default function BossFightCampaign({
     result, boss, campaignBossId,
     totalDmgDealt, durationSeconds, stars,
     maxCombo, combatStatsTracker,
+    battleSessionId,
   });
 
   // Self-learning (Lv5 only)

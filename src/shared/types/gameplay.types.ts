@@ -28,6 +28,8 @@ export interface BossFightInput {
   maxCombo?: number;
   dodgeCount?: number;
   isCampaign?: boolean;
+  // Unique session ID from /boss/battle/start — prevents race condition on retry
+  battleSessionId?: string;
 }
 
 export interface BossCompleteResult {

@@ -70,7 +70,7 @@ export const campaignApi = {
       throw new Error('Invalid bossId');
     }
     const url = API_BASE_URL + '/api/game/boss/battle/start';
-    console.log('[FARM-DEBUG] gameApi.startCampaignBattle():', { url, bossId: numericBossId });
+    console.log('[FARM-DEBUG] gameApi.startCampaignBattle() — START:', { url, bossId: numericBossId });
 
     const response = await fetch(url, {
       method: 'POST',
@@ -88,8 +88,10 @@ export const campaignApi = {
       await handleApiError(response);
     }
 
+    // Backend returns { success, sessionId, boss, player } — no data wrapper
     const json = await response.json();
-    return json.data;
+    console.log('[FARM-DEBUG] gameApi.startCampaignBattle() — OK:', { sessionId: json.sessionId });
+    return { sessionId: json.sessionId };
   },
 
   /**

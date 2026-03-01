@@ -15,13 +15,14 @@ interface BattleEndParams {
   stars: number;
   maxCombo: number;
   combatStatsTracker: CombatStats;
+  battleSessionId?: string;
 }
 
 export function useBattleEnd(params: BattleEndParams) {
   const {
     result, boss, campaignBossId,
     totalDmgDealt, durationSeconds, stars,
-    maxCombo, combatStatsTracker,
+    maxCombo, combatStatsTracker, battleSessionId,
   } = params;
 
   const bossComplete = useBossComplete();
@@ -41,9 +42,10 @@ export function useBattleEnd(params: BattleEndParams) {
         maxCombo,
         dodgeCount: combatStatsTracker.dodgeCount,
         isCampaign: true,
+        battleSessionId,
       });
     }
-  }, [result, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, boss.playerHp, boss.playerMaxHp]);
+  }, [result, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, boss.playerHp, boss.playerMaxHp, battleSessionId]);
 
   return bossComplete;
 }

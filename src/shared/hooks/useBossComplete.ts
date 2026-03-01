@@ -58,6 +58,8 @@ export function useBossComplete() {
               CAMPAIGN_DAILY_LIMIT: { msg: 'Hết lượt campaign hôm nay! Quay lại ngày mai.', type: 'warning', icon: '🌅' },
               CAMPAIGN_COOLDOWN:    { msg: 'Đợi chút rồi đánh tiếp nhé!', type: 'warning', icon: '⏱️' },
               DAILY_WIN_LIMIT:      { msg: 'Đã đạt giới hạn chiến thắng hôm nay!', type: 'warning', icon: '🏆' },
+              // Session
+              NO_ACTIVE_SESSION:    { msg: 'Phiên trận đấu hết hạn. Thử đánh lại nhé.', type: 'warning', icon: '⏳' },
               // Not found
               BOSS_NOT_FOUND:       { msg: 'Boss không tồn tại. Vui lòng tải lại trang.', type: 'error' },
               PLAYER_NOT_FOUND:     { msg: 'Chưa tạo nhân vật. Vui lòng đăng nhập lại.', type: 'error' },
