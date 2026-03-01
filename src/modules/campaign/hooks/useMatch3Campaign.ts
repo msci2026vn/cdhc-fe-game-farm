@@ -263,8 +263,7 @@ export function useMatch3Campaign(
       });
       setFloatingTexts(prev => {
         if (prev.length === 0) return prev;
-        // Float texts live for ~1.5s
-        const next = prev.filter(t => t.id > floatingTextId.current - 20); // rough retention
+        const next = prev.filter(t => !t.expiresAt || t.expiresAt > now);
         return next.length !== prev.length ? next : prev;
       });
     }, 500);

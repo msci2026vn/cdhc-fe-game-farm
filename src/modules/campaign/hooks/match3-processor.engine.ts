@@ -170,13 +170,6 @@ export function processCampaignMatchesImpl(
         else if (g.type === 'hp') {
           color = '#22c55e'; // Green (Heal)
           burstType = 'heal';
-          // Math out approximate position on screen for the text
-          // assuming an 8x8 grid centered
-          const col = idx % 8;
-          const row = Math.floor(idx / 8);
-          const x = (col / 8) * 100 + 6.25;
-          const y = (row / 8) * 100 + 6.25;
-          if (deps.addFloatingText) deps.addFloatingText(`+${deps.hpHealPerGem} HP`, x, y, color);
         }
         else if (g.type === 'star') { color = '#eab308'; } // Yellow (Star)
 
