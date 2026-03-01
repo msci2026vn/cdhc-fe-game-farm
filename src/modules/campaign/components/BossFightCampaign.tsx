@@ -108,7 +108,7 @@ export default function BossFightCampaign({
 
   const auraType = getDominantAura(combatStats);
 
-  // ═══ Auto-play (VIP only) ═══
+  // ═══ Auto-play (Lv1 free for all, Lv2+ VIP) ═══
   const { isVip } = useVipStatus();
   const { autoPlayLevel } = useAutoPlayLevel();
   const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
@@ -750,15 +750,13 @@ export default function BossFightCampaign({
               onUlt={fireUltimate}
             />
           </div>
-          {isVip && (
-            <AutoPlayToggle
-              isActive={autoPlay.isActive}
-              onToggle={autoPlay.toggle}
-              vipLevel={autoPlay.vipLevel}
-              dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-              currentSituation={autoPlay.currentSituation}
-            />
-          )}
+          <AutoPlayToggle
+            isActive={autoPlay.isActive}
+            onToggle={autoPlay.toggle}
+            vipLevel={autoPlay.vipLevel}
+            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+            currentSituation={autoPlay.currentSituation}
+          />
         </div>
       </div>
     </div>
