@@ -19,7 +19,7 @@ import { playSound } from '@/shared/audio';
 
 // Shared match3
 import type { Gem } from '@/shared/match3/board.utils';
-import { createGrid } from '@/shared/match3/board.utils';
+import { createGrid, findPossibleMove } from '@/shared/match3/board.utils';
 import { GEM_META, getComboInfo, getEnrageMultiplier, bossDEFReduction } from '@/shared/match3';
 import type {
   BossState, DamagePopup, FightResult, SkillWarning, BossAttackWarning,
@@ -142,6 +142,8 @@ export function useMatch3Campaign(
   });
   const [combatNotifs, setCombatNotifs] = useState<CombatNotif[]>([]);
   const notifIdRef = useRef(0);
+  const [hintedGems, setHintedGems] = useState<number[]>([]);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [blastVfxs, setBlastVfxs] = useState<BlastVfx[]>([]);
   const blastId = useRef(0);
   const fightStartTime = useRef(Date.now());
@@ -561,15 +563,14 @@ export function useMatch3Campaign(
       otHiemActiveRef, skillLevelsRef,
       setSpawningGems, setScreenShake,
       mountedRef,
-      addCombatNotif,
       addBlastVfx,
     }, currentGrid, currentCombo,
       (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
       swapPair, cascadeDepth);
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx]);
 
-  // ═══ Wire: handleTap / handleSwipe ═══
   const handleTap = useCallback((idx: number) => {
+    setHintedGems([]); // Clear hints on interaction
     handleCampaignTapImpl({
       grid, selected, animating, result,
       isPausedRef, isStunnedRef, lockedGemsRef,
@@ -578,12 +579,32 @@ export function useMatch3Campaign(
   }, [grid, selected, animating, processMatches, result]);
 
   const handleSwipe = useCallback((idx: number, direction: 'up' | 'down' | 'left' | 'right') => {
+    setHintedGems([]); // Clear hints on interaction
     handleCampaignSwipeImpl({
       grid, animating, result,
       isPausedRef, isStunnedRef, lockedGemsRef,
       setSelected, setAnimating, setGrid, processMatches,
     }, idx, direction);
   }, [grid, animating, processMatches, result]);
+
+  // ═══ Idle Hint Logic ═══
+  useEffect(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
+    // Only set hint timer if we are in active play, not paused, not animating, and no current hints
+    if (result === 'fighting' && !isPaused && !animating && hintedGems.length === 0) {
+      idleTimerRef.current = setTimeout(() => {
+        const hint = findPossibleMove(grid);
+        if (hint) {
+          setHintedGems(hint);
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [grid, result, isPaused, animating, hintedGems.length]);
 
   // Computed values
   const durationSeconds = Math.floor((Date.now() - fightStartTime.current - totalPausedMsRef.current) / 1000);
@@ -609,5 +630,6 @@ export function useMatch3Campaign(
     otHiemActiveRef, romBocActiveRef, skillLevelsRef,
     spawningGems,
     blastVfxs,
+    hintedGems,
   };
 }

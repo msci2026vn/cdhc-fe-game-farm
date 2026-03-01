@@ -20,12 +20,13 @@ interface Props {
     romBocActive: boolean;
     GEM_META: any;
     blastVfxs?: BlastVfx[];
+    hintedGems?: number[];
 }
 
 export default function CampaignMatch3Board({
     grid, selected, matchedCells, spawningGems, lockedGems, highlightedGem,
     isStunned, animating, handlePointerDown, handlePointerMove, handlePointerUp,
-    combo, showCombo, otHiemActive, romBocActive, GEM_META, blastVfxs = []
+    combo, showCombo, otHiemActive, romBocActive, GEM_META, blastVfxs = [], hintedGems = []
 }: Props) {
     return (
         <div className="relative flex-1">
@@ -52,6 +53,7 @@ export default function CampaignMatch3Board({
                     const meta = GEM_META[gem.type];
                     const isSelected = selected === i;
                     const isMatched = matchedCells.has(i);
+                    const isHinted = hintedGems.includes(i);
                     const sp = gem.special;
                     return (
                         <div key={gem.id}
@@ -69,6 +71,7 @@ export default function CampaignMatch3Board({
                 ${animating && !isMatched ? 'pointer-events-none' : ''}
                 ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
                 ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
+                ${isHinted && !animating ? 'animate-gem-hint z-20 shadow-lg glow-pulse-intense ring-2 ring-white ring-opacity-50' : ''}
               `}>
                             {sp === 'rainbow' ? '🌈' : meta.emoji}
                             {lockedGems.has(i) && (

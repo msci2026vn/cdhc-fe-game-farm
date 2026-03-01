@@ -249,6 +249,11 @@ export default {
           "50%": { transform: "rotate(180deg) scale(1.2)", opacity: "0.8" },
           "100%": { transform: "rotate(360deg) scale(0)", opacity: "0" },
         },
+        "gem-hint": {
+          "0%, 100%": { transform: "translateY(0) scale(1)" },
+          "50%": { transform: "translateY(-12px) scale(1.05)" },
+          "70%": { transform: "translateY(2px) scale(0.95)" },
+        },
         "bug-wiggle": {
           "0%, 100%": { transform: "rotate(-8deg) scale(1)" },
           "25%": { transform: "rotate(8deg) scale(1.1)" },
@@ -400,6 +405,7 @@ export default {
         "button-vibrate": "button-vibrate 0.3s ease-in-out infinite",
         "button-pop": "button-pop 0.25s ease-out forwards",
         "gem-spawn": "gem-spawn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "gem-hint": "gem-hint 1.5s ease-in-out infinite",
       },
     },
   },

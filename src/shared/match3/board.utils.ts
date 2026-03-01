@@ -273,3 +273,46 @@ export function areAdjacent(a: number, b: number): boolean {
   const br = Math.floor(b / COLS), bc = b % COLS;
   return (Math.abs(ar - br) + Math.abs(ac - bc)) === 1;
 }
+
+// ═══ Idle Hints logic ═══
+
+/**
+ * Sweeps the board horizontally and vertically to find the first valid move.
+ * Returns the indices of the matched gems if a move is found, otherwise null.
+ */
+export function findPossibleMove(grid: Gem[]): number[] | null {
+  // We use a simplified check: swap, check findMatches, return the match set if > 0
+  const trySwap = (idx1: number, idx2: number): number[] | null => {
+    // Clone grid just enough to swap
+    const tempGrid = [...grid];
+    const temp = tempGrid[idx1];
+    tempGrid[idx1] = tempGrid[idx2];
+    tempGrid[idx2] = temp;
+
+    const matches = findMatches(tempGrid);
+    if (matches.size >= 3) {
+      return Array.from(matches);
+    }
+    return null;
+  };
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const idx = r * COLS + c;
+
+      // Try swapping right
+      if (c < COLS - 1) {
+        const match = trySwap(idx, idx + 1);
+        if (match) return match;
+      }
+
+      // Try swapping down
+      if (r < ROWS - 1) {
+        const match = trySwap(idx, idx + COLS);
+        if (match) return match;
+      }
+    }
+  }
+
+  return null;
+}
