@@ -4,7 +4,7 @@
 // Weekly boss uses original BossFightM3 — UNTOUCHED
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMatch3Campaign, CampaignBossData } from '../hooks/useMatch3Campaign';
 import { campaignApi } from '@/shared/api/api-campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
@@ -12,23 +12,13 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
-import { getDominantAura } from '@/shared/components/BuildAura';
 import { audioManager } from '@/shared/audio';
 import { useBossSprite } from '../hooks/useBossSprite';
-import { BossSprite } from './BossSprite';
 import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
 import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner';
-import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
-import ExpiryBanner from '@/shared/components/ExpiryBanner';
-// useVipStatus removed — auto-play level is based on purchase, not VIP
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
-import CampaignSkillButton from './CampaignSkillButton';
-import BuffIndicator from './BuffIndicator';
-import type { BuffInfo } from './BuffIndicator';
-import DropAnimation from './DropAnimation';
-import type { DropResult } from '../types/fragment.types';
 
 // Shared match-3 components & hooks
 import { useGemPointer, useComboParticles } from '@/shared/match3';
@@ -44,14 +34,14 @@ import { useBattleEnd } from './hooks/useBattleEnd';
 // Local extracted components
 import DeathOverlay from './DeathOverlay';
 import { SkillWarningGlow, PhaseTransitionOverlay, DamageVignette, EnrageAlertBanner } from './SkillWarningOverlay';
-import { BossStatsBadges, BossBuffsBadges } from './BossStatsDisplay';
+import { BossRageOverlay } from '@/modules/boss/components/hud';
 
-// HUD components (reused from boss module)
-import {
-  BossHPBar, PlayerHPBar, ManaBar, SkillBar, BattleTopBar,
-  ComboDisplay, DamagePopupLayer,
-  BossRageOverlay, BattleResult,
-} from '@/modules/boss/components/hud';
+// Refactored sub-components
+import CampaignBattleResultHandler from './CampaignBattleResultHandler';
+import CampaignSessionLoader from './CampaignSessionLoader';
+import CampaignArenaTop from './CampaignArenaTop';
+import CampaignMatch3Board from './CampaignMatch3Board';
+import CampaignPlayerHUD from './CampaignPlayerHUD';
 
 interface Props {
   boss: CampaignBossData;
@@ -106,8 +96,6 @@ export default function BossFightCampaign({
     // Animation
     spawningGems,
   } = useMatch3Campaign(bossData, combatStats, skillLevels, zoneNumber);
-
-  const auraType = getDominantAura(combatStats);
 
   // ═══ Auto-play (Lv1 free for all, Lv2+ via purchase/rent) ═══
   const { effectiveLevel, daysUntilExpiry } = useAutoPlayLevel();
@@ -189,6 +177,7 @@ export default function BossFightCampaign({
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [battleSessionId, setBattleSessionId] = useState<string | undefined>(undefined);
   const battleSessionStarted = useRef(false);
+
   useEffect(() => {
     if (battleSessionStarted.current) return;
     battleSessionStarted.current = true;
@@ -197,7 +186,7 @@ export default function BossFightCampaign({
         setBattleSessionId(res?.sessionId);
         setSessionReady(true);
       })
-      .catch(err => {
+      .catch((err: any) => {
         console.error('[BATTLE] Failed to start battle session:', err);
         setSessionError(err.message || 'Không thể bắt đầu trận đấu');
       });
@@ -262,7 +251,6 @@ export default function BossFightCampaign({
 
   // ═══ Fragment drop animation state ═══
   const [showDropAnim, setShowDropAnim] = useState(true);
-  const dropData: DropResult | undefined = bossComplete.data?.drop as DropResult | undefined;
 
   // ═══ Trigger sprite attack on boss skill or normal attack ═══
   useEffect(() => {
@@ -283,37 +271,6 @@ export default function BossFightCampaign({
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
   const comboInfo = getComboInfo(combo);
 
-  // ═══ Build active buffs list for BuffIndicator ═══
-  const activeBuffs: BuffInfo[] = [];
-  if (otHiemActive) {
-    const ohLv = skillLevels.ot_hiem;
-    activeBuffs.push({
-      icon: '🌶️', name: 'Ớt Hiểm',
-      remainingSeconds: otHiemDuration,
-      totalSeconds: OT_HIEM_CONFIG.duration[ohLv - 1] || 6,
-      description: `+${Math.round(OT_HIEM_CONFIG.damageBonus[(ohLv || 1) - 1] * 100)}%`,
-      type: 'buff', color: '#e74c3c',
-    });
-  }
-  if (romBocActive) {
-    const rbLv = skillLevels.rom_boc;
-    activeBuffs.push({
-      icon: '🪹', name: 'Rơm Bọc',
-      remainingSeconds: romBocDuration,
-      totalSeconds: ROM_BOC_CONFIG.duration[rbLv - 1] || 4,
-      description: `-${Math.round(ROM_BOC_CONFIG.damageReduction[(rbLv || 1) - 1] * 100)}%`,
-      type: 'buff', color: '#27ae60',
-    });
-  }
-  if (enrageMultiplier > 1) {
-    activeBuffs.push({
-      icon: '😡', name: 'Boss Enrage',
-      remainingSeconds: 0, totalSeconds: 0,
-      description: `×${enrageMultiplier.toFixed(1)}`,
-      type: 'debuff', color: '#e74c3c',
-    });
-  }
-
   // ═══ Death overlay (shown before BattleResult on defeat) ═══
   if (result === 'defeat' && deathPhase === 'dying') {
     return (
@@ -328,119 +285,38 @@ export default function BossFightCampaign({
 
   // Victory / Defeat summary screen
   if (result === 'victory' || (result === 'defeat' && deathPhase === 'done')) {
-    const won = result === 'victory';
-    const serverData = bossComplete.data;
-
-    // API still processing — show loading spinner
-    if (bossComplete.isPending) {
-      return (
-        <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
-          <div className="text-center animate-fade-in">
-            <div className="text-[64px] mb-3">{won ? '🏆' : '💀'}</div>
-            <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-white/70 font-heading font-bold text-sm">Đang ghi nhận kết quả...</p>
-          </div>
-        </div>
-      );
-    }
-
-    // API failed — show error with retry
-    if (bossComplete.isError && !serverData) {
-      return (
-        <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden px-6">
-          <div className="text-center animate-fade-in">
-            <div className="text-[56px] mb-3">{won ? '🏆' : '💀'}</div>
-            <p className="text-white font-heading font-bold text-lg mb-1">
-              {won ? 'Chiến thắng!' : 'Thất bại!'}
-            </p>
-            <p className="text-white/50 text-xs mb-4">
-              Kết quả chưa được ghi nhận do lỗi kết nối.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={onBack}
-                className="px-5 py-2.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
-                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                Về Map
-              </button>
-              <button
-                onClick={onRetry}
-                className="px-5 py-2.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform btn-green">
-                Đánh lại
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Show drop animation before BattleResult (if drop data exists)
-    if (won && dropData && showDropAnim) {
-      return (
-        <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
-          <DropAnimation
-            drop={dropData}
-            isVisible={showDropAnim}
-            onClose={() => setShowDropAnim(false)}
-          />
-        </div>
-      );
-    }
-
     return (
-      <BattleResult
-        won={won}
-        bossName={bossData.name}
-        bossEmoji={bossData.emoji}
+      <CampaignBattleResultHandler
+        won={result === 'victory'}
+        bossComplete={bossComplete}
+        dropData={bossComplete.data?.drop}
+        showDropAnim={showDropAnim}
+        setShowDropAnim={setShowDropAnim}
+        bossData={bossData}
         totalDmgDealt={totalDmgDealt}
-        serverData={serverData}
-        combatStats={combatStatsTracker}
-        playerLevel={level}
-        isCampaign={true}
+        combatStatsTracker={combatStatsTracker}
+        level={level}
         playerHpPct={playerHpPct}
-        turnUsed={boss.turnCount}
-        turnMax={0}
+        bossTurnCount={boss.turnCount}
         archetype={archetype}
         archetypeTip={archetypeTip}
         onBack={onBack}
         onRetry={onRetry}
-        leveledUp={serverData?.leveledUp}
-        newLevel={serverData?.newLevel}
-        combatStars={stars}
+        stars={stars}
         durationSeconds={durationSeconds}
         maxCombo={maxCombo}
       />
     );
   }
 
-  // ═══ Session error — block board render ═══
-  if (sessionError) {
+  // Session Loading or Error states
+  if (sessionError || !sessionReady) {
     return (
-      <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-6 overflow-hidden">
-        <div className="text-center animate-fade-in">
-          <div className="text-[56px] mb-3">⚔️</div>
-          <h2 className="font-heading text-xl font-bold text-red-400 mb-2">Không thể vào trận</h2>
-          <p className="text-white/70 text-sm mb-6">{sessionError}</p>
-          <button
-            onClick={onBack}
-            className="px-6 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
-            style={{ background: 'linear-gradient(135deg, hsl(35,80%,45%), hsl(35,90%,55%))', boxShadow: '0 4px 15px rgba(200,150,50,0.3)' }}>
-            ← Quay lại Map
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ═══ Session loading — wait for BE ═══
-  if (!sessionReady) {
-    return (
-      <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
-        <div className="text-center animate-fade-in">
-          <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-white/70 font-heading font-bold text-sm">Đang chuẩn bị trận đấu...</p>
-        </div>
-      </div>
+      <CampaignSessionLoader
+        sessionError={sessionError}
+        sessionReady={sessionReady}
+        onBack={onBack}
+      />
     );
   }
 
@@ -464,7 +340,7 @@ export default function BossFightCampaign({
       {/* Combat notifications */}
       {combatNotifs.length > 0 && (
         <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
-          {combatNotifs.slice(-3).map(n => (
+          {combatNotifs.slice(-3).map((n: any) => (
             <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
               style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
               {n.text}
@@ -482,299 +358,44 @@ export default function BossFightCampaign({
       {/* Boss rage overlay */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossData.emoji} />
 
-      {/* Top half: Boss arena */}
-      <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden">
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
-        }} />
-
-        {/* Top bar */}
-        <BattleTopBar
-          turn={boss.turnCount}
-          maxTurns={0}
-          level={level}
-          atk={combatStats.atk}
-          def={combatStats.def}
-          onRetreat={onBack}
-          isCampaign={true}
-          elapsedSeconds={elapsedSeconds}
-          enrageLevel={enrageLevel}
-          onPause={pauseBattle}
-          onResume={resumeBattle}
-        />
-
-        {/* Zone label */}
-        {zoneName && (
-          <div className="z-10 mb-1">
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded"
-              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
-              📍 {zoneName}
-            </span>
-          </div>
-        )}
-
-        {/* Boss HP bar */}
-        <BossHPBar
-          name={bossData.name}
-          emoji={bossData.emoji}
-          hp={boss.bossHp}
-          maxHp={boss.bossMaxHp}
-          archetype={archetype}
-          archetypeIcon={archetypeIcon}
-          phase={currentPhase}
-          totalPhases={totalPhases}
-          healPerTurn={activeBossStats.healPercent}
-        />
-
-        {/* Boss stats badges */}
-        <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={enrageLevel} />
-
-        {/* Boss buffs */}
-        <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
-
-        {/* Boss sprite + damage popups + combo */}
-        <div className="flex-1 flex items-center justify-center relative z-10">
-          <BossSprite
-            src={spriteSrc}
-            state={spriteState}
-            hasSprites={hasSprites}
-            emoji={bossData.emoji}
-            name={bossData.name}
-            enrageMultiplier={enrageMultiplier}
-            shieldBuff={activeBossBuffs.some(b => b.type === 'shield')}
-            reflectBuff={activeBossBuffs.some(b => b.type === 'reflect')}
-            skillWarning={!!skillWarning}
-            bossDead={boss.bossHp <= 0}
-          />
-
-          {/* Egg */}
-          {egg && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center animate-scale-in">
-              <span className={`text-4xl ${egg.countdown <= 3 ? 'animate-pulse' : 'animate-boss-idle'}`}>🥚</span>
-              <div className="w-12 h-1.5 rounded-full bg-gray-700 mt-1 overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.round((egg.hp / egg.maxHp) * 100)}%`,
-                    background: egg.hp / egg.maxHp > 0.5 ? '#27ae60' : egg.hp / egg.maxHp > 0.25 ? '#f39c12' : '#e74c3c',
-                  }} />
-              </div>
-              <span className="text-[9px] font-bold text-white mt-0.5">{egg.hp}/{egg.maxHp}</span>
-              {egg.countdown <= 3 && (
-                <span className="text-[8px] font-bold text-red-400 animate-pulse">SẮP NỞ!</span>
-              )}
-            </div>
-          )}
-
-          <DamagePopupLayer popups={popups} />
-
-          <ComboDisplay
-            combo={combo}
-            show={showCombo}
-            label={comboInfo.label}
-            mult={comboInfo.mult}
-            color={comboInfo.color}
-          />
-        </div>
-      </div>
+      {/* Top half: Boss arena UI component */}
+      <CampaignArenaTop
+        boss={boss} bossData={bossData} level={level} combatStats={combatStats}
+        onBack={onBack} elapsedSeconds={elapsedSeconds} enrageLevel={enrageLevel}
+        pauseBattle={pauseBattle} resumeBattle={resumeBattle} zoneName={zoneName}
+        archetype={archetype} archetypeIcon={archetypeIcon}
+        currentPhase={currentPhase} totalPhases={totalPhases}
+        activeBossStats={activeBossStats} activeBossBuffs={activeBossBuffs}
+        spriteSrc={spriteSrc} spriteState={spriteState} hasSprites={hasSprites}
+        enrageMultiplier={enrageMultiplier} skillWarning={!!skillWarning}
+        egg={egg} popups={popups} combo={combo} showCombo={showCombo} comboInfo={comboInfo}
+      />
 
       {/* Bottom half: Match-3 + Skills */}
       <div className="flex-[1_1_70%] rounded-t-2xl px-3 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col"
         style={{ background: 'rgba(0,0,0,0.3)' }}>
 
-        {/* Debuff bar */}
-        {activeDebuffs.length > 0 && (
-          <div className="flex gap-1.5 mb-1 flex-wrap">
-            {activeDebuffs.map((d, i) => (
-              <span key={`${d.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
-                style={{
-                  background: d.type === 'burn' ? 'rgba(231,76,60,0.3)' :
-                    d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' :
-                      'rgba(253,121,168,0.3)',
-                  color: d.type === 'burn' ? '#ff6b6b' :
-                    d.type === 'heal_block' ? '#a29bfe' :
-                      '#fd79a8',
-                  border: `1px solid ${d.type === 'burn' ? 'rgba(231,76,60,0.4)' :
-                    d.type === 'heal_block' ? 'rgba(108,92,231,0.4)' :
-                      'rgba(253,121,168,0.4)'
-                    }`,
-                }}>
-                {d.icon} {d.label} {d.remainingSec}s
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Player damage popup near HP bar */}
-        <div className={`relative ${activeDebuffs.some(d => d.type === 'burn') ? 'ring-1 ring-orange-500/50' : ''}`}
-          style={activeDebuffs.some(d => d.type === 'burn') ? { boxShadow: '0 0 12px rgba(231,76,60,0.3), inset 0 0 8px rgba(231,76,60,0.15)' } : {}}>
-          <PlayerHPBar
-            hp={boss.playerHp}
-            maxHp={boss.playerMaxHp}
-            shield={boss.shield}
-            maxShield={shieldMax}
-            def={combatStats.def}
-            isHit={!!lastPlayerDamage}
-          />
-          {lastPlayerDamage > 0 && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-damage-float">
-              <span className="font-heading text-xl font-bold text-red-500"
-                style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
-                -{lastPlayerDamage}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <ManaBar
-          mana={boss.mana}
-          maxMana={boss.maxMana}
-          dodgeCost={manaDodgeCost}
-          ultCost={manaUltCost}
+        {/* Match-3 Board */}
+        <CampaignMatch3Board
+          grid={grid} selected={selected} matchedCells={matchedCells}
+          spawningGems={spawningGems} lockedGems={lockedGems} highlightedGem={highlightedGem}
+          isStunned={isStunned} animating={animating}
+          handlePointerDown={handlePointerDown} handlePointerMove={handlePointerMove} handlePointerUp={handlePointerUp}
+          combo={combo} showCombo={showCombo} otHiemActive={otHiemActive} romBocActive={romBocActive}
+          GEM_META={GEM_META}
         />
 
-        {/* Skill warning inline text */}
-        {skillWarning && (
-          <div className="text-center py-1 pointer-events-none animate-pulse">
-            <span className="bg-red-900/80 text-red-300 px-4 py-1 rounded-full text-sm font-bold">
-              ⚡ Đòn mạnh đang đến!
-            </span>
-          </div>
-        )}
-
-        {/* Boss skill alert banner */}
-        {skillAlert && (
-          <div className="text-center py-1 animate-fade-in">
-            <span className="px-4 py-1.5 rounded-full text-xs font-bold text-purple-200"
-              style={{ background: 'rgba(108,92,231,0.85)', boxShadow: '0 0 15px rgba(108,92,231,0.3)' }}>
-              {skillAlert.icon} {skillAlert.text}
-            </span>
-          </div>
-        )}
-
-        {/* Auto-play toggle + expiry warning */}
-        <div className="flex flex-col gap-1 mb-0.5">
-          {daysUntilExpiry !== null && daysUntilExpiry <= 2 && (
-            <ExpiryBanner daysLeft={daysUntilExpiry} />
-          )}
-          <div className="flex justify-end">
-            <AutoPlayToggle
-              isActive={autoPlay.isActive}
-              onToggle={autoPlay.toggle}
-              vipLevel={autoPlay.vipLevel}
-              dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-              currentSituation={autoPlay.currentSituation}
-            />
-          </div>
-        </div>
-
-        {/* Gem grid + Stun overlay */}
-        <div className="relative flex-1">
-          {showCombo && combo >= 3 && (
-            <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
-          )}
-          <div className={`grid grid-cols-8 gap-0.5 p-1 rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''} transition-all duration-300`}
-            onPointerMove={handlePointerMove}
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: otHiemActive
-                ? '2px solid rgba(231,76,60,0.6)'
-                : romBocActive
-                  ? '2px solid rgba(39,174,96,0.6)'
-                  : '1px solid rgba(255,255,255,0.06)',
-              boxShadow: otHiemActive
-                ? '0 0 20px rgba(231,76,60,0.3), inset 0 0 10px rgba(231,76,60,0.1)'
-                : romBocActive
-                  ? '0 0 20px rgba(39,174,96,0.3), inset 0 0 10px rgba(39,174,96,0.1)'
-                  : 'none',
-              touchAction: 'none',
-            }}>
-            {grid.map((gem, i) => {
-              const meta = GEM_META[gem.type];
-              const isSelected = selected === i;
-              const isMatched = matchedCells.has(i);
-              const sp = gem.special;
-              return (
-                <div key={gem.id}
-                  onPointerDown={(e) => handlePointerDown(i, e)}
-                  onPointerUp={handlePointerUp}
-                  className={`aspect-square rounded-md flex items-center justify-center text-[16px] cursor-pointer relative gem-shine transition-all duration-200
-                    ${sp === 'rainbow' ? 'gem-rainbow' : meta.css}
-                    ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
-                    ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}
-                    ${sp === 'bomb' ? 'gem-special-bomb' : ''}
-                    ${sp === 'rainbow' ? 'gem-special-rainbow' : ''}
-                    ${spawningGems.has(gem.id) ? 'gem-special-spawn' : ''}
-                    ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
-                    ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
-                    ${animating && !isMatched ? 'pointer-events-none' : ''}
-                    ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
-                    ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
-                  `}>
-                  {sp === 'rainbow' ? '🌈' : meta.emoji}
-                  {lockedGems.has(i) && (
-                    <span className="absolute inset-0 flex items-center justify-center text-[8px] pointer-events-none">🔒</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Stun overlay */}
-          {isStunned && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
-              <div className="text-center animate-scale-in">
-                <span className="text-5xl block" style={{ animation: 'spin 1s linear infinite' }}>💫</span>
-                <span className="text-white font-heading font-bold text-xl block mt-2"
-                  style={{ textShadow: '0 0 20px rgba(253,203,110,0.8)' }}>
-                  CHOÁNG!
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Active buffs indicator */}
-        <BuffIndicator buffs={activeBuffs} />
-
-        {/* Player skill buttons row */}
-        <div className="flex items-center gap-1 mt-0.5">
-          <CampaignSkillButton
-            skillId="ot_hiem"
-            emoji="🌶️"
-            label="Ớt"
-            level={skillLevels.ot_hiem}
-            isActive={otHiemActive}
-            cooldownRemaining={otHiemCooldown}
-            cooldownTotal={OT_HIEM_CONFIG.cooldown}
-            durationRemaining={otHiemDuration}
-            onCast={castOtHiem}
-          />
-          <CampaignSkillButton
-            skillId="rom_boc"
-            emoji="🪹"
-            label="Rơm"
-            level={skillLevels.rom_boc}
-            isActive={romBocActive}
-            cooldownRemaining={romBocCooldown}
-            cooldownTotal={ROM_BOC_CONFIG.cooldown}
-            durationRemaining={romBocDuration}
-            onCast={castRomBoc}
-          />
-          <div className="flex-1">
-            <SkillBar
-              mana={boss.mana}
-              maxMana={boss.maxMana}
-              dodgeCost={manaDodgeCost}
-              ultCost={manaUltCost}
-              ultCharge={boss.ultCharge}
-              ultCooldown={boss.ultCooldown}
-              isDodgeWindow={!!skillWarning}
-              onDodge={handleDodge}
-              onUlt={fireUltimate}
-            />
-          </div>
-        </div>
+        {/* Player HUD & Controls */}
+        <CampaignPlayerHUD
+          activeDebuffs={activeDebuffs} boss={boss} shieldMax={shieldMax}
+          combatStats={combatStats} lastPlayerDamage={lastPlayerDamage}
+          manaDodgeCost={manaDodgeCost} manaUltCost={manaUltCost}
+          skillWarning={!!skillWarning} skillAlert={skillAlert} daysUntilExpiry={daysUntilExpiry}
+          autoPlay={autoPlay} skillLevels={skillLevels}
+          otHiemActive={otHiemActive} otHiemCooldown={otHiemCooldown} OT_HIEM_CONFIG={OT_HIEM_CONFIG} otHiemDuration={otHiemDuration} castOtHiem={castOtHiem}
+          romBocActive={romBocActive} romBocCooldown={romBocCooldown} ROM_BOC_CONFIG={ROM_BOC_CONFIG} romBocDuration={romBocDuration} castRomBoc={castRomBoc}
+          handleDodge={handleDodge} fireUltimate={fireUltimate}
+        />
       </div>
     </div>
   );
