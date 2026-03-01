@@ -21,7 +21,10 @@
 @import './styles/modules/dashboard.css';
 @import './styles/modules/language-switcher.css';
 @import './styles/modules/buttons-cards.css';
-@import './styles/modules/gems-combat.css';
+@import './styles/modules/combat-gems.css';
+@import './styles/modules/combat-hud.css';
+@import './styles/modules/game-backgrounds.css';
+@import './styles/modules/game-components.css';
 @import './styles/modules/campaign.css';
 @import './styles/modules/prayer.css';
 
