@@ -1,31 +1,84 @@
 @layer components {
+
   /* Gem types */
-  .gem-atk { background: linear-gradient(135deg, #e74c3c, #c0392b); box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3); }
-  .gem-hp { background: linear-gradient(135deg, #2ecc71, #27ae60); box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3); }
-  .gem-def { background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3); }
-  .gem-star { background: linear-gradient(135deg, #f39c12, #e67e22); box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3); }
+  .gem-atk {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+  }
+
+  .gem-hp {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+  }
+
+  .gem-def {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+  }
+
+  .gem-star {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+  }
+
   .gem-shine::after {
-    content: ''; position: absolute; top: 2px; left: 2px; right: 2px; height: 40%;
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    height: 40%;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
-    border-radius: 8px 8px 50% 50%; pointer-events: none;
+    border-radius: 8px 8px 50% 50%;
+    pointer-events: none;
   }
 
   /* ═══ Gem Match Explosion Ring ═══ */
   .gem-match-burst::before {
-    content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid currentColor;
-    animation: match-ring 0.5s ease-out forwards; pointer-events: none; z-index: 20;
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: match-ring 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 20;
   }
+
   .gem-match-burst::after {
-    content: ''; position: absolute; inset: -2px; border-radius: 10px;
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, transparent 70%);
-    animation: match-flash 0.4s ease-out forwards; pointer-events: none; z-index: 19;
+    animation: match-flash 0.4s ease-out forwards;
+    pointer-events: none;
+    z-index: 19;
   }
-  .gem-atk.gem-match-burst { color: #ff6b6b; }
-  .gem-hp.gem-match-burst { color: #55efc4; }
-  .gem-def.gem-match-burst { color: #74b9ff; }
-  .gem-star.gem-match-burst { color: #fdcb6e; }
-  .gem-mana.gem-match-burst { color: #a29bfe; }
-  .gem-heal.gem-match-burst { color: #55efc4; }
+
+  .gem-atk.gem-match-burst {
+    color: #ff6b6b;
+  }
+
+  .gem-hp.gem-match-burst {
+    color: #55efc4;
+  }
+
+  .gem-def.gem-match-burst {
+    color: #74b9ff;
+  }
+
+  .gem-star.gem-match-burst {
+    color: #fdcb6e;
+  }
+
+  .gem-mana.gem-match-burst {
+    color: #a29bfe;
+  }
+
+  .gem-heal.gem-match-burst {
+    color: #55efc4;
+  }
 
   /* ═══ Special gem visuals ═══ */
   .gem-rainbow {
@@ -33,119 +86,424 @@
     box-shadow: 0 3px 12px rgba(255, 255, 255, 0.5), 0 0 8px rgba(200, 160, 255, 0.4);
     animation: rainbow-glow 2s linear infinite;
   }
+
   @keyframes rainbow-glow {
-    0% { filter: hue-rotate(0deg) brightness(1.05); }
-    50% { filter: hue-rotate(180deg) brightness(1.15); }
-    100% { filter: hue-rotate(360deg) brightness(1.05); }
+    0% {
+      filter: hue-rotate(0deg) brightness(1.05);
+    }
+
+    50% {
+      filter: hue-rotate(180deg) brightness(1.15);
+    }
+
+    100% {
+      filter: hue-rotate(360deg) brightness(1.05);
+    }
   }
+
   .gem-special-striped-h::before {
-    content: ''; position: absolute; inset: 3px; border-radius: 6px;
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 6px;
     background: repeating-linear-gradient(0deg, transparent, transparent 25%, rgba(255, 255, 255, 0.45) 25%, rgba(255, 255, 255, 0.45) 30%, transparent 30%);
-    pointer-events: none; z-index: 2;
+    pointer-events: none;
+    z-index: 2;
   }
+
   .gem-special-striped-v::before {
-    content: ''; position: absolute; inset: 3px; border-radius: 6px;
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 6px;
     background: repeating-linear-gradient(90deg, transparent, transparent 25%, rgba(255, 255, 255, 0.45) 25%, rgba(255, 255, 255, 0.45) 30%, transparent 30%);
-    pointer-events: none; z-index: 2;
+    pointer-events: none;
+    z-index: 2;
   }
+
   .gem-special-bomb {
     box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 200, 50, 0.5) !important;
     animation: bomb-pulse 1.2s ease-in-out infinite;
   }
+
   @keyframes bomb-pulse {
-    0%, 100% { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 200, 50, 0.4); }
-    50% { box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 200, 50, 0.7); }
+
+    0%,
+    100% {
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 200, 50, 0.4);
+    }
+
+    50% {
+      box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 200, 50, 0.7);
+    }
   }
+
   .gem-special-rainbow {
     animation: rainbow-glow 2s linear infinite;
   }
+
   .gem-special-spawn {
     animation: gem-spawn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     z-index: 10;
   }
+
   .gem-special-spawn::after {
-    content: ''; position: absolute; inset: -6px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
-    animation: match-flash 0.5s ease-out forwards; pointer-events: none; z-index: 25;
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+    animation: match-flash 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 25;
   }
+
   .gem-landed {
     animation: gem-land 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
+
   .grid-combo-shake {
     animation: grid-shake 0.35s ease-out;
   }
+
   .combo-flash-overlay {
-    position: absolute; inset: 0; border-radius: 8px; pointer-events: none; z-index: 15;
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 15;
     animation: match-flash 0.5s ease-out forwards;
   }
-  .combo-flash-2 { background: radial-gradient(circle, rgba(162, 155, 254, 0.3) 0%, transparent 70%); }
-  .combo-flash-3 { background: radial-gradient(circle, rgba(253, 203, 110, 0.4) 0%, transparent 70%); }
-  .combo-flash-4 { background: radial-gradient(circle, rgba(255, 107, 107, 0.4) 0%, transparent 70%); }
-  .combo-flash-5 { background: radial-gradient(circle, rgba(253, 121, 168, 0.5) 0%, transparent 70%); }
-  .combo-flash-6 { background: radial-gradient(circle, rgba(224, 86, 253, 0.5) 0%, transparent 70%); }
-  .combo-ring-burst {
-    width: 120px; height: 120px; border-radius: 50%; border: 3px solid currentColor;
-    animation: match-ring 0.6s ease-out forwards; pointer-events: none;
+
+  .combo-flash-2 {
+    background: radial-gradient(circle, rgba(162, 155, 254, 0.3) 0%, transparent 70%);
   }
-  .combo-badge-high { animation: combo-badge-pulse 0.6s ease-in-out; }
-  .combo-badge-godlike { animation: combo-badge-godlike 0.8s ease-in-out; }
+
+  .combo-flash-3 {
+    background: radial-gradient(circle, rgba(253, 203, 110, 0.4) 0%, transparent 70%);
+  }
+
+  .combo-flash-4 {
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.4) 0%, transparent 70%);
+  }
+
+  .combo-flash-5 {
+    background: radial-gradient(circle, rgba(253, 121, 168, 0.5) 0%, transparent 70%);
+  }
+
+  .combo-flash-6 {
+    background: radial-gradient(circle, rgba(224, 86, 253, 0.5) 0%, transparent 70%);
+  }
+
+  .combo-ring-burst {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    animation: match-ring 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+
+  .combo-badge-high {
+    animation: combo-badge-pulse 0.6s ease-in-out;
+  }
+
+  .combo-badge-godlike {
+    animation: combo-badge-godlike 0.8s ease-in-out;
+  }
+
   .combo-inner-glow {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
-    background-size: 200% 200%; animation: combo-shimmer 0.8s ease-out; pointer-events: none;
+    background-size: 200% 200%;
+    animation: combo-shimmer 0.8s ease-out;
+    pointer-events: none;
   }
+
   @keyframes combo-badge-pulse {
-    0% { transform: scale(0.8); }
-    40% { transform: scale(1.15); }
-    70% { transform: scale(0.95); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(0.8);
+    }
+
+    40% {
+      transform: scale(1.15);
+    }
+
+    70% {
+      transform: scale(0.95);
+    }
+
+    100% {
+      transform: scale(1);
+    }
   }
+
   @keyframes combo-badge-godlike {
-    0% { transform: scale(0.5); filter: brightness(2); }
-    30% { transform: scale(1.25); filter: brightness(1.5); }
-    60% { transform: scale(0.95); filter: brightness(1); }
-    100% { transform: scale(1); filter: brightness(1); }
+    0% {
+      transform: scale(0.5);
+      filter: brightness(2);
+    }
+
+    30% {
+      transform: scale(1.25);
+      filter: brightness(1.5);
+    }
+
+    60% {
+      transform: scale(0.95);
+      filter: brightness(1);
+    }
+
+    100% {
+      transform: scale(1);
+      filter: brightness(1);
+    }
   }
+
   @keyframes combo-shimmer {
-    0% { background-position: -100% -100%; opacity: 0; }
-    30% { opacity: 1; }
-    100% { background-position: 100% 100%; opacity: 0; }
+    0% {
+      background-position: -100% -100%;
+      opacity: 0;
+    }
+
+    30% {
+      opacity: 1;
+    }
+
+    100% {
+      background-position: 100% 100%;
+      opacity: 0;
+    }
   }
-  .combo-tier-nice { animation: combo-nice 0.4s ease-out forwards; }
-  .combo-tier-great { animation: combo-great 0.5s ease-out forwards; }
-  .combo-tier-excellent { animation: combo-excellent 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-  .combo-tier-amazing { animation: combo-amazing 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-  .combo-tier-epic { animation: combo-epic 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-  .combo-tier-legendary { animation: combo-legendary 0.7s ease-out forwards; }
-  .combo-tier-mythic { animation: combo-mythic 0.6s ease-out forwards; }
 
-  @keyframes combo-nice { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 100% { opacity: 1; transform: translateX(-50%) translateY(0); } }
-  @keyframes combo-great { 0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.8); } 60% { transform: translateX(-50%) translateY(-5px) scale(1.1); } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
-  @keyframes combo-excellent { 0% { transform: translateX(-50%) scale(0.5); opacity: 0; } 50% { transform: translateX(-50%) scale(1.3); } 70% { transform: translateX(-50%) scale(0.95); } 100% { transform: translateX(-50%) scale(1); opacity: 1; } }
-  @keyframes combo-amazing { 0% { transform: translateX(-50%) scale(0.3) rotate(-5deg); opacity: 0; } 40% { transform: translateX(-50%) scale(1.2) rotate(2deg); opacity: 1; } 60% { transform: translateX(-50%) scale(0.9) rotate(-1deg); } 80% { transform: translateX(-50%) scale(1.05) rotate(0); } 100% { transform: translateX(-50%) scale(1) rotate(0); } }
-  @keyframes combo-epic { 0% { transform: translateX(-50%) scale(2) translateY(-20px); opacity: 0; filter: blur(4px); } 40% { transform: translateX(-50%) scale(0.9) translateY(3px); opacity: 1; filter: blur(0); } 60% { transform: translateX(-50%) scale(1.15) translateY(-2px); } 100% { transform: translateX(-50%) scale(1) translateY(0); } }
-  @keyframes combo-legendary { 0% { transform: translateX(-50%) scale(0) rotate(-5deg); opacity: 0; } 30% { transform: translateX(-50%) scale(1.5) rotate(2deg); opacity: 1; } 50% { transform: translateX(-50%) scale(0.9) rotate(-1deg); } 70% { transform: translateX(-50%) scale(1.1) rotate(0.5deg); } 100% { transform: translateX(-50%) scale(1) rotate(0deg); } }
-  @keyframes combo-mythic { 0% { transform: translateX(-50%) scale(3); opacity: 0; filter: blur(10px); } 40% { transform: translateX(-50%) scale(0.8); opacity: 1; filter: blur(0); } 60% { transform: translateX(-50%) scale(1.2); } 100% { transform: translateX(-50%) scale(1); } }
+  .combo-tier-nice {
+    animation: combo-nice 0.4s ease-out forwards;
+  }
 
-  .combo-badge-legendary { animation: combo-legendary-glow 1.5s ease-in-out infinite; }
-  @keyframes combo-legendary-glow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+  .combo-tier-great {
+    animation: combo-great 0.5s ease-out forwards;
+  }
 
-  .combo-badge-mythic { animation: combo-badge-godlike 0.8s ease-in-out, combo-mythic-pulse 1.2s ease-in-out infinite 0.8s; }
-  @keyframes combo-mythic-pulse { 0%, 100% { filter: brightness(1) hue-rotate(0deg); } 50% { filter: brightness(1.4) hue-rotate(30deg); } }
+  .combo-tier-excellent {
+    animation: combo-excellent 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .combo-tier-amazing {
+    animation: combo-amazing 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .combo-tier-epic {
+    animation: combo-epic 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .combo-tier-legendary {
+    animation: combo-legendary 0.7s ease-out forwards;
+  }
+
+  .combo-tier-mythic {
+    animation: combo-mythic 0.6s ease-out forwards;
+  }
+
+  @keyframes combo-nice {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes combo-great {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px) scale(0.8);
+    }
+
+    60% {
+      transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+  }
+
+  @keyframes combo-excellent {
+    0% {
+      transform: translateX(-50%) scale(0.5);
+      opacity: 0;
+    }
+
+    50% {
+      transform: translateX(-50%) scale(1.3);
+    }
+
+    70% {
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    100% {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes combo-amazing {
+    0% {
+      transform: translateX(-50%) scale(0.3) rotate(-5deg);
+      opacity: 0;
+    }
+
+    40% {
+      transform: translateX(-50%) scale(1.2) rotate(2deg);
+      opacity: 1;
+    }
+
+    60% {
+      transform: translateX(-50%) scale(0.9) rotate(-1deg);
+    }
+
+    80% {
+      transform: translateX(-50%) scale(1.05) rotate(0);
+    }
+
+    100% {
+      transform: translateX(-50%) scale(1) rotate(0);
+    }
+  }
+
+  @keyframes combo-epic {
+    0% {
+      transform: translateX(-50%) scale(2) translateY(-20px);
+      opacity: 0;
+      filter: blur(4px);
+    }
+
+    40% {
+      transform: translateX(-50%) scale(0.9) translateY(3px);
+      opacity: 1;
+      filter: blur(0);
+    }
+
+    60% {
+      transform: translateX(-50%) scale(1.15) translateY(-2px);
+    }
+
+    100% {
+      transform: translateX(-50%) scale(1) translateY(0);
+    }
+  }
+
+  @keyframes combo-legendary {
+    0% {
+      transform: translateX(-50%) scale(0) rotate(-5deg);
+      opacity: 0;
+    }
+
+    30% {
+      transform: translateX(-50%) scale(1.5) rotate(2deg);
+      opacity: 1;
+    }
+
+    50% {
+      transform: translateX(-50%) scale(0.9) rotate(-1deg);
+    }
+
+    70% {
+      transform: translateX(-50%) scale(1.1) rotate(0.5deg);
+    }
+
+    100% {
+      transform: translateX(-50%) scale(1) rotate(0deg);
+    }
+  }
+
+  @keyframes combo-mythic {
+    0% {
+      transform: translateX(-50%) scale(3);
+      opacity: 0;
+      filter: blur(10px);
+    }
+
+    40% {
+      transform: translateX(-50%) scale(0.8);
+      opacity: 1;
+      filter: blur(0);
+    }
+
+    60% {
+      transform: translateX(-50%) scale(1.2);
+    }
+
+    100% {
+      transform: translateX(-50%) scale(1);
+    }
+  }
+
+  .combo-badge-legendary {
+    animation: combo-legendary-glow 1.5s ease-in-out infinite;
+  }
+
+  @keyframes combo-legendary-glow {
+
+    0%,
+    100% {
+      filter: brightness(1);
+    }
+
+    50% {
+      filter: brightness(1.3);
+    }
+  }
+
+  .combo-badge-mythic {
+    animation: combo-badge-godlike 0.8s ease-in-out, combo-mythic-pulse 1.2s ease-in-out infinite 0.8s;
+  }
+
+  @keyframes combo-mythic-pulse {
+
+    0%,
+    100% {
+      filter: brightness(1) hue-rotate(0deg);
+    }
+
+    50% {
+      filter: brightness(1.4) hue-rotate(30deg);
+    }
+  }
 
   .combo-text-mythic {
     background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000);
     background-size: 200% 100%;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: combo-rainbow-text 2s linear infinite;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
-  @keyframes combo-rainbow-text { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-  
+
+  @keyframes combo-rainbow-text {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    100% {
+      background-position: 200% 50%;
+    }
+  }
+
   .gem-shine,
   .gem-match-burst,
-  .gem-landed {
+  .gem-landed,
+  .gem-special-spawn,
+  .combo-flash-overlay,
+  .combo-ring-burst {
+    will-change: transform, opacity;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    transform: translateZ(0);
   }
 }
