@@ -15,6 +15,7 @@ import type { PlayerRecipe, ActiveFarmBuff } from '../types/recipe.types';
 import { MAX_BUFF_SLOTS } from '../types/recipe.types';
 import { playSound } from '@/shared/audio';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
+import { toast } from 'sonner';
 
 type TabKey = 'craft' | 'inventory' | 'buffs';
 type TierFilter = 'all' | FragmentTier;
@@ -92,6 +93,7 @@ export default function RecipeCraftScreen() {
       }
     } catch {
       playSound('damage_dealt');
+      toast.error('Thao tac that bai. Vui long thu lai.');
     } finally {
       setCraftingKey(null);
     }

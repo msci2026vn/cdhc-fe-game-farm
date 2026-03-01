@@ -77,6 +77,9 @@ export default function PrayerScreen() {
             setTimeout(() => playSound('prayer_reward'), 600);
           }
         },
+        onError: () => {
+          import('sonner').then(({ toast }) => toast.error('Gui loi cau nguyen that bai. Vui long thu lai.'));
+        },
       }
     );
   }, [offerMutation, refetchStatus]);
@@ -98,6 +101,9 @@ export default function PrayerScreen() {
             setTimeout(() => playSound('prayer_reward'), 600);
           }
         },
+        onError: () => {
+          import('sonner').then(({ toast }) => toast.error('Gui loi cau nguyen that bai. Vui long thu lai.'));
+        },
       },
     );
   }, [offerMutation, refetchStatus]);
@@ -117,6 +123,9 @@ export default function PrayerScreen() {
             if (data.ognReward > 0 || data.xpReward > 0) {
               setTimeout(() => playSound('prayer_reward'), 600);
             }
+          },
+          onError: () => {
+            import('sonner').then(({ toast }) => toast.error('Gui loi cau nguyen that bai. Vui long thu lai.'));
           },
         }
       );

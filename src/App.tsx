@@ -13,6 +13,7 @@ import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
 import Toast from '@/shared/components/Toast';
 import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
 import { audioManager } from '@/shared/audio';
+import ErrorBoundary from '@/shared/components/ErrorBoundary';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
@@ -144,29 +145,31 @@ const AuthenticatedApp = () => {
  */
 const App = () => {
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <ConnectionLostOverlay />
-          <NavigateSetup />
-          <Suspense fallback={<Fallback />}>
-            <Routes>
-              {/* Public — NO AuthGuard, NO game hooks */}
-              <Route path="/login" element={<LoginScreen />} />
+    <ErrorBoundary>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <ConnectionLostOverlay />
+            <NavigateSetup />
+            <Suspense fallback={<Fallback />}>
+              <Routes>
+                {/* Public — NO AuthGuard, NO game hooks */}
+                <Route path="/login" element={<LoginScreen />} />
 
-              {/* Protected — AuthGuard first, then game hooks */}
-              <Route path="/*" element={
-                <AuthGuard>
-                  <AuthenticatedApp />
-                </AuthGuard>
-              } />
-            </Routes>
-          </Suspense>
-          <Toaster />
-          <Toast />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </WagmiProvider>
+                {/* Protected — AuthGuard first, then game hooks */}
+                <Route path="/*" element={
+                  <AuthGuard>
+                    <AuthenticatedApp />
+                  </AuthGuard>
+                } />
+              </Routes>
+            </Suspense>
+            <Toaster />
+            <Toast />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ErrorBoundary>
   );
 };
 

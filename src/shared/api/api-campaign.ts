@@ -64,15 +64,19 @@ export const campaignApi = {
   /**
    * Start a campaign battle session
    */
-  startCampaignBattle: async (bossId: string): Promise<{ sessionId: string }> => {
+  startCampaignBattle: async (bossId: string | number): Promise<{ sessionId: string }> => {
+    const numericBossId = Number(bossId);
+    if (isNaN(numericBossId) || numericBossId <= 0) {
+      throw new Error('Invalid bossId');
+    }
     const url = API_BASE_URL + '/api/game/boss/battle/start';
-    console.log('[FARM-DEBUG] gameApi.startCampaignBattle():', { url, bossId });
+    console.log('[FARM-DEBUG] gameApi.startCampaignBattle():', { url, bossId: numericBossId });
 
     const response = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bossId }),
+      body: JSON.stringify({ bossId: numericBossId }),
     });
 
     if (response.status === 401) {

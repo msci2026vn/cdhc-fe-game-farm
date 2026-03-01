@@ -9,6 +9,7 @@ import { useDailyMissions, useWeeklyMissions, useClaimMission, useClaimAllMissio
 import MissionCard from '../components/MissionCard';
 import type { PlayerMission } from '../types/mission.types';
 import { playSound } from '@/shared/audio';
+import { toast } from 'sonner';
 
 type TabKey = 'daily' | 'weekly';
 
@@ -58,6 +59,7 @@ export default function MissionScreen() {
       playSound('coin_collect');
     } catch {
       playSound('damage_dealt');
+      toast.error('Nhan thuong that bai. Vui long thu lai.');
     } finally {
       setClaimingId(null);
     }
@@ -70,6 +72,7 @@ export default function MissionScreen() {
       playSound('level_up');
     } catch {
       playSound('damage_dealt');
+      toast.error('Nhan thuong that bai. Vui long thu lai.');
     }
   };
 

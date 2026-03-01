@@ -8,7 +8,7 @@ import type { FriendData } from '@/shared/types/game-api.types';
 import { playSound, audioManager } from '@/shared/audio';
 
 export default function FriendsScreen() {
-    const { data: friendsData, isLoading } = useFriends();
+    const { data: friendsData, isLoading, isError } = useFriends();
     const friends = friendsData?.friends || [];
 
     const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
@@ -69,6 +69,12 @@ export default function FriendsScreen() {
                     <div className="text-center py-10 space-y-3">
                         <div className="w-12 h-12 border-4 border-green-500/30 border-t-green-600 rounded-full animate-spin mx-auto" />
                         <p className="text-sm font-bold text-green-700">Đang tải danh sách...</p>
+                    </div>
+                ) : isError ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <span className="text-5xl mb-3">😿</span>
+                        <h3 className="font-heading text-lg font-bold text-red-700 mb-2">Khong tai duoc du lieu</h3>
+                        <p className="text-sm text-gray-500">Vui long thu lai sau</p>
                     </div>
                 ) : friends.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">

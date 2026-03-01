@@ -21,7 +21,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 
 export default function FragmentInventoryScreen() {
   const navigate = useNavigate();
-  const { data: fragments, isLoading } = usePlayerFragments();
+  const { data: fragments, isLoading, isError } = usePlayerFragments();
   const [activeTier, setActiveTier] = useState<FilterTab>('all');
 
   const filtered = activeTier === 'all'
@@ -88,6 +88,15 @@ export default function FragmentInventoryScreen() {
           <div className="flex flex-col items-center justify-center h-60">
             <div className="w-10 h-10 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-3" />
             <p className="text-white/40 text-sm">Dang tai...</p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {isError && !isLoading && (
+          <div className="flex flex-col items-center justify-center h-60 text-center">
+            <span className="text-4xl mb-3">😿</span>
+            <p className="text-white/50 font-medium">Khong tai duoc du lieu</p>
+            <p className="text-white/30 text-sm mt-1">Vui long thu lai sau</p>
           </div>
         )}
 
