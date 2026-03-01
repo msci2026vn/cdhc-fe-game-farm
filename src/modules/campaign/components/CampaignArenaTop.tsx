@@ -100,6 +100,7 @@ export default function CampaignArenaTop({
                     enrageMultiplier={enrageMultiplier}
                     shieldBuff={activeBossBuffs.some((b: any) => b.type === 'shield')}
                     reflectBuff={activeBossBuffs.some((b: any) => b.type === 'reflect')}
+                    isBurning={activeBossBuffs.some((b: { type: string; }) => b.type === 'burn') || activeBossStats.burnActive}
                     skillWarning={!!skillWarning}
                     bossDead={boss.bossHp <= 0}
                 />

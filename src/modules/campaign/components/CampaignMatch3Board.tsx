@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 import { BlastVfx, BurstData } from '@/shared/match3/combat.types';
 import { ParticleOverlay } from './ParticleOverlay';
+import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
 
 interface Props {
     grid: any[];
@@ -24,16 +25,19 @@ interface Props {
     blastVfxs?: BlastVfx[];
     hintedGems?: number[];
     particleBursts?: BurstData[];
+    floatingTexts?: FloatingTextData[];
 }
 
 export default function CampaignMatch3Board({
     grid, selected, matchedCells, spawningGems, lockedGems, highlightedGem,
     isStunned, animating, handlePointerDown, handlePointerMove, handlePointerUp,
-    combo, showCombo, otHiemActive, romBocActive, GEM_META, blastVfxs = [], hintedGems = [], particleBursts = []
+    combo, showCombo, otHiemActive, romBocActive, GEM_META,
+    blastVfxs = [], hintedGems = [], particleBursts = [], floatingTexts = []
 }: Props) {
     return (
         <div className="relative flex-1">
             <ParticleOverlay bursts={particleBursts} />
+            <FloatingCombatText data={floatingTexts} />
             {showCombo && combo >= 3 && (
                 <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
             )}

@@ -98,6 +98,7 @@ export default function BossFightCampaign({
     blastVfxs,
     hintedGems,
     particleBursts,
+    floatingTexts,
   } = useMatch3Campaign(bossData, combatStats, skillLevels, zoneNumber);
 
   // ═══ Auto-play (Lv1 free for all, Lv2+ via purchase/rent) ═══
@@ -386,7 +387,7 @@ export default function BossFightCampaign({
           handlePointerDown={handlePointerDown} handlePointerMove={handlePointerMove} handlePointerUp={handlePointerUp}
           combo={combo} showCombo={showCombo} otHiemActive={otHiemActive} romBocActive={romBocActive}
           GEM_META={GEM_META}
-          blastVfxs={blastVfxs} hintedGems={hintedGems} particleBursts={particleBursts}
+          blastVfxs={blastVfxs} hintedGems={hintedGems} particleBursts={particleBursts} floatingTexts={floatingTexts}
         />
 
         {/* Player HUD & Controls */}

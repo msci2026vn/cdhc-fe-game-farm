@@ -43,10 +43,10 @@ export interface CampaignProcessorDeps {
   // Optional animation deps
   setSpawningGems?: Dispatch<SetStateAction<Set<number>>>;
   setScreenShake?: Dispatch<SetStateAction<boolean>>;
-  // Unmount guard — skip setState after component unmounts
   mountedRef: MutableRefObject<boolean>;
   addBlastVfx?: (type: 'row' | 'col', index: number) => void;
-  addParticleBurst?: (index: number, color: string) => void;
+  addParticleBurst?: (index: number, color: string, type?: 'burst' | 'fire' | 'heal') => void;
+  addFloatingText?: (text: string, x: number, y: number, color: string) => void;
 }
 
 export function processCampaignMatchesImpl(
@@ -150,12 +150,29 @@ export function processCampaignMatchesImpl(
       // Trigger Particle Burst
       if (deps.addParticleBurst) {
         let color = '#ffffff';
-        if (g.special === 'rainbow') color = '#a855f7'; // Purple
-        else if (g.type === 'atk') color = '#ef4444'; // Red (Chu Tước/Sword)
-        else if (g.type === 'def') color = '#3b82f6'; // Blue (Thanh Long/Shield)
-        else if (g.type === 'hp') color = '#22c55e'; // Green (Bạch Hổ/Heart)
-        else if (g.type === 'star') color = '#eab308'; // Yellow (Huyền Vũ/Star)
-        deps.addParticleBurst(idx, color);
+        let burstType: 'burst' | 'fire' | 'heal' = 'burst';
+        let floatingText = '';
+
+        if (g.special === 'rainbow') { color = '#a855f7'; } // Purple
+        else if (g.type === 'atk') {
+          color = '#ef4444'; // Red (Fire)
+          burstType = 'fire';
+        }
+        else if (g.type === 'def') { color = '#3b82f6'; } // Blue (Shield)
+        else if (g.type === 'hp') {
+          color = '#22c55e'; // Green (Heal)
+          burstType = 'heal';
+          // Math out approximate position on screen for the text
+          // assuming an 8x8 grid centered
+          const col = idx % 8;
+          const row = Math.floor(idx / 8);
+          const x = (col / 8) * 100 + 6.25;
+          const y = (row / 8) * 100 + 6.25;
+          if (deps.addFloatingText) deps.addFloatingText(`+${deps.hpHealPerGem} HP`, x, y, color);
+        }
+        else if (g.type === 'star') { color = '#eab308'; } // Yellow (Star)
+
+        deps.addParticleBurst(idx, color, burstType);
       }
     }
   });

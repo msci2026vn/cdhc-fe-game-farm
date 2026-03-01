@@ -17,6 +17,7 @@ interface BossSpriteProps {
   reflectBuff: boolean;
   skillWarning: boolean;
   bossDead: boolean;
+  isBurning?: boolean;
   className?: string;
 }
 
@@ -31,6 +32,7 @@ export function BossSprite({
   reflectBuff,
   skillWarning,
   bossDead,
+  isBurning = false,
   className = '',
 }: BossSpriteProps) {
   // Build CSS filter from external buff/rage states
@@ -48,8 +50,8 @@ export function BossSprite({
 
   // For bosses WITHOUT multi-state sprites, keep old CSS animation classes
   const wrapperClasses = hasSprites
-    ? '' // SVG has internal idle animation; attack/dead handled by src swap
-    : `animate-boss-idle ${bossDead ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''}`;
+    ? (isBurning ? 'animate-fire-flicker' : '') // SVG has internal idle animation; attack/dead handled by src swap
+    : `animate-boss-idle ${bossDead ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''} ${isBurning ? 'animate-fire-flicker' : ''}`;
 
   return (
     <div

@@ -23,6 +23,7 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
   // Trailing "ghost" HP bar — shows where HP was before damage
   const [ghostHp, setGhostHp] = useState(hpPct);
   const prevHp = useRef(hpPct);
+  const [isHealing, setIsHealing] = useState(false);
 
   useEffect(() => {
     if (hpPct < prevHp.current) {
@@ -32,13 +33,19 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
       prevHp.current = hpPct;
       return () => clearTimeout(timer);
     }
-    // HP healed — snap ghost immediately
+    if (hpPct > prevHp.current) {
+      // HP Healed
+      setIsHealing(true);
+      setTimeout(() => setIsHealing(false), 500); // match heal-pulse duration
+    }
+
+    // HP healed or normal sync — snap ghost immediately
     setGhostHp(hpPct);
     prevHp.current = hpPct;
   }, [hpPct]);
 
   return (
-    <div className={`flex gap-1.5 mb-0.5 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''}`}>
+    <div className={`flex gap-1.5 mb-0.5 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''} ${isHealing ? 'animate-heal-pulse' : ''}`}>
       {/* HP */}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between text-[8px] font-bold mb-px" style={{ color: '#55efc4' }}>

@@ -359,6 +359,21 @@ export default {
           "70%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)", filter: "brightness(1)" },
         },
+        "combat-float-up": {
+          "0%": { transform: "translateY(0) scale(0.8)", opacity: "0" },
+          "20%": { transform: "translateY(-10px) scale(1)", opacity: "1" },
+          "70%": { transform: "translateY(-40px) scale(1)", opacity: "1" },
+          "100%": { transform: "translateY(-60px) scale(0.9)", opacity: "0" },
+        },
+        "fire-flicker": {
+          "0%": { filter: "drop-shadow(0 0 4px #ff2200) drop-shadow(0 0 10px #ff4400)" },
+          "100%": { filter: "drop-shadow(0 0 8px #ff6600) drop-shadow(0 0 20px #ffaa00)" },
+        },
+        "heal-pulse": {
+          "0%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.8)" },
+          "50%": { boxShadow: "0 0 20px 8px rgba(34, 197, 94, 0.6)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -405,6 +420,9 @@ export default {
         "button-pop": "button-pop 0.25s ease-out forwards",
         "gem-spawn": "gem-spawn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         "gem-hint": "gem-hint 2s ease-in-out infinite",
+        "combat-float-up": "combat-float-up 1.2s ease-out forwards",
+        "fire-flicker": "fire-flicker 0.1s infinite alternate",
+        "heal-pulse": "heal-pulse 0.5s ease-out",
       },
     },
   },

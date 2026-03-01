@@ -10,6 +10,7 @@ interface Particle {
     color: string;
     life: number;
     maxLife: number;
+    type: 'burst' | 'fire' | 'heal';
 }
 
 interface Props {
@@ -48,19 +49,33 @@ export function ParticleOverlay({ bursts }: Props) {
                 const cx = (col + 0.5) * (width / 8);
                 const cy = (row + 0.5) * (height / 8);
 
-                const particleCount = 15 + Math.random() * 8; // 15-23 particles per gem
+                const particleCount = b.type === 'burst' ? 15 + Math.random() * 8 : b.type === 'fire' ? 12 : 8; // Fewer particles for fire/heal
+
                 for (let i = 0; i < particleCount; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 8;
+                    let speed = 2 + Math.random() * 8;
+                    let vx = Math.cos(angle) * speed;
+                    let vy = Math.sin(angle) * speed;
+
+                    // Custom fire/heal initialization
+                    if (b.type === 'fire') {
+                        vx = (Math.random() - 0.5) * 4;
+                        vy = -(2 + Math.random() * 3); // upward
+                    } else if (b.type === 'heal') {
+                        vx = (Math.random() - 0.5) * 3;
+                        vy = -(1 + Math.random() * 2); // upward slowly
+                    }
+
                     particlesRef.current.push({
                         x: cx,
                         y: cy,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        radius: 2 + Math.random() * 4,
+                        vx,
+                        vy,
+                        radius: b.type === 'burst' ? 2 + Math.random() * 4 : 3 + Math.random() * 5,
                         color: b.color,
                         life: 0,
-                        maxLife: 30 + Math.random() * 20, // 30-50 frames
+                        maxLife: b.type === 'burst' ? 30 + Math.random() * 20 : 40 + Math.random() * 30,
+                        type: b.type,
                     });
                 }
             }
@@ -102,10 +117,19 @@ export function ParticleOverlay({ bursts }: Props) {
                     continue;
                 }
 
-                // Physics update
-                p.vx *= 0.90; // high friction
-                p.vy *= 0.90; // high friction
-                p.vy += 0.45; // gravity pull
+                // Physics update depends on type
+                if (p.type === 'burst') {
+                    p.vx *= 0.90; // high friction
+                    p.vy *= 0.90; // high friction
+                    p.vy += 0.45; // gravity pull down
+                } else if (p.type === 'fire') {
+                    p.vx *= 0.95; // some drift
+                    p.vy += -0.05; // gravity pull UP
+                } else if (p.type === 'heal') {
+                    p.vx *= 0.97; // smooth drift
+                    p.vy += -0.02; // slow rise
+                }
+
                 p.x += p.vx;
                 p.y += p.vy;
 
