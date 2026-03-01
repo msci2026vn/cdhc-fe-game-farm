@@ -88,13 +88,15 @@ export function handleGameError(error: any, context?: string): string {
     return ERROR_MESSAGES.NETWORK_ERROR;
   }
 
-  // ─── 429: Cooldown ───
-  if (status === 429 || code === 'COOLDOWN_ACTIVE') {
-    const remaining = error?.cooldownRemaining;
+  // ─── 429: Cooldown / Rate limit ───
+  if (status === 429 || code === 'COOLDOWN_ACTIVE' || code === 'CAMPAIGN_COOLDOWN'
+    || code === 'BOSS_COOLDOWN' || code === 'RATE_LIMITED' || code === 'RATE_LIMIT_EXCEEDED'
+    || code === 'CONCURRENT_BATTLE' || code === 'DAILY_WIN_LIMIT' || code === 'BOSS_DAILY_LIMIT') {
+    const remaining = error?.cooldownRemaining || error?.remainingSeconds;
     const cooldownMsg = remaining
-      ? `⏳ Đang chờ tưới. Còn ${formatCooldown(remaining)}`
-      : ERROR_MESSAGES.COOLDOWN_ACTIVE;
-    console.log('[FARM-DEBUG] handleGameError() — cooldown:', cooldownMsg);
+      ? `Vui lòng chờ ${formatCooldown(remaining)}`
+      : error?.message || 'Thao tác quá nhanh, vui lòng thử lại sau';
+    console.log('[FARM-DEBUG] handleGameError() — cooldown/rate:', cooldownMsg);
     toast(cooldownMsg, { icon: '⏳', duration: 3000 });
     return cooldownMsg;
   }

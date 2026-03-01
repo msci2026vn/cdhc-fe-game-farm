@@ -139,11 +139,32 @@ export default function BattleResult({
           </div>
         )}
 
-        {/* Remaining battles indicator */}
-        {isCampaign && serverData?.remainingBattles !== undefined && (
-          <div className="text-center text-[10px] text-white/40 mb-1">
-            Còn {serverData.remainingBattles}/20 trận hôm nay
+        {/* Reduced reward warning */}
+        {isCampaign && serverData?.isReducedReward && (
+          <div className="rounded-xl p-2.5 mb-2"
+            style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.2)' }}>
+            <div className="text-[10px] text-red-300/80 font-bold mb-0.5">
+              ⚡ Hết lượt full reward ({serverData.dailyFightsUsed ?? '?'}/{serverData.dailyFightsMax ?? serverData.dailyBattlesMax ?? 20})
+            </div>
+            <div className="flex items-center gap-3 text-[11px]">
+              <span className="text-white/60">XP ×{Math.round((serverData.xpMultiplier ?? 0.5) * 100)}%</span>
+              <span className="text-white/60">OGN ×{Math.round((serverData.ognMultiplier ?? 0) * 100)}%</span>
+            </div>
           </div>
+        )}
+
+        {/* Remaining battles indicator */}
+        {isCampaign && !serverData?.isReducedReward && serverData?.remainingBattles !== undefined && (
+          <div className="text-center text-[10px] text-white/40 mb-1">
+            Còn {serverData.remainingBattles}/{serverData.dailyFightsMax ?? serverData.dailyBattlesMax ?? 20} trận thưởng đầy đủ hôm nay
+          </div>
+        )}
+
+        {/* Server adjusted result */}
+        {serverData?.wasAdjusted && (
+          <p className="text-center text-[10px] text-orange-400/60 mb-1">
+            * Kết quả đã được server xác nhận
+          </p>
         )}
 
         {/* DMG row */}

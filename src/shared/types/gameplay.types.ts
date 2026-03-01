@@ -55,6 +55,15 @@ export interface BossCompleteResult {
     firstClearBonus: number;
   };
   remainingBattles?: number;
+  // Reward reduction (after daily threshold)
+  isReducedReward?: boolean;
+  xpMultiplier?: number;
+  ognMultiplier?: number;
+  dailyFightsUsed?: number;
+  dailyFightsMax?: number;
+  dailyBattlesMax?: number;
+  // Damage verification
+  wasAdjusted?: boolean;
   // Fragment drop (Prompt 6)
   drop?: {
     dropped: boolean;
