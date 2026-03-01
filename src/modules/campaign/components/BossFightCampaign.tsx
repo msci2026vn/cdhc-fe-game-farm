@@ -20,6 +20,7 @@ import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
 import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner';
 import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
+import ExpiryBanner from '@/shared/components/ExpiryBanner';
 // useVipStatus removed — auto-play level is based on purchase, not VIP
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
@@ -108,8 +109,8 @@ export default function BossFightCampaign({
 
   const auraType = getDominantAura(combatStats);
 
-  // ═══ Auto-play (Lv1 free for all, Lv2+ VIP) ═══
-  const { autoPlayLevel } = useAutoPlayLevel();
+  // ═══ Auto-play (Lv1 free for all, Lv2+ via purchase/rent) ═══
+  const { effectiveLevel, daysUntilExpiry } = useAutoPlayLevel();
   const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
 
   // Create refs from state for auto-play controller
@@ -167,8 +168,8 @@ export default function BossFightCampaign({
     result: resultRef,
   });
 
-  // Sync auto-play level (purchased in shop, independent of VIP subscription)
-  useEffect(() => { autoPlay.setVipLevel(autoPlayLevel); }, [autoPlayLevel]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Sync auto-play level from API (effectiveLevel = max of purchased/rented)
+  useEffect(() => { autoPlay.setVipLevel(effectiveLevel); }, [effectiveLevel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ Boss sprite state management (multi-state SVG) ═══
   const {
@@ -231,6 +232,9 @@ export default function BossFightCampaign({
     totalDmgDealt, durationSeconds, stars,
     maxCombo, combatStatsTracker,
     battleSessionId,
+    autoAILevel: effectiveLevel,
+    isAutoPlayActive: autoPlay.isActive,
+    getBattleLog: autoPlay.getBattleLog,
   });
 
   // Self-learning (Lv5 only)
@@ -647,15 +651,20 @@ export default function BossFightCampaign({
           </div>
         )}
 
-        {/* Auto-play toggle — above the grid */}
-        <div className="flex justify-end mb-0.5">
-          <AutoPlayToggle
-            isActive={autoPlay.isActive}
-            onToggle={autoPlay.toggle}
-            vipLevel={autoPlay.vipLevel}
-            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-            currentSituation={autoPlay.currentSituation}
-          />
+        {/* Auto-play toggle + expiry warning */}
+        <div className="flex flex-col gap-1 mb-0.5">
+          {daysUntilExpiry !== null && daysUntilExpiry <= 2 && (
+            <ExpiryBanner daysLeft={daysUntilExpiry} />
+          )}
+          <div className="flex justify-end">
+            <AutoPlayToggle
+              isActive={autoPlay.isActive}
+              onToggle={autoPlay.toggle}
+              vipLevel={autoPlay.vipLevel}
+              dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+              currentSituation={autoPlay.currentSituation}
+            />
+          </div>
         </div>
 
         {/* Gem grid + Stun overlay */}

@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Gem } from '../match3/board.utils';
 import type { BossState, ActiveDebuff, ActiveBossBuff, EggState, SkillWarning } from '../match3/combat.types';
 import type { ValidSwap } from './auto-simulator';
+import type { BattleLog, BattleLogTurn } from '../types/gameplay.types';
 import { simulateSwap, findAllValidSwaps, quickSimulate } from './auto-simulator';
 import { scoreMove, scoreMoveQuick, selectSituation, type ScorerGameState } from './auto-scorer';
 import { getSkillDecision, type SkillManagerState, type SkillDecision } from './auto-skill-manager';
@@ -102,6 +103,20 @@ export interface UseAutoPlayControllerReturn {
   tickCount: number;
   gemsUsed: { atk: number; hp: number; def: number; star: number };
   ultsUsed: number;
+  // B4 — battle log data for completeBoss
+  getBattleLog: () => BattleLog;
+}
+
+// ═══ Dominant gem type from quick sim ═══
+
+function dominantGemType(counts: { atk: number; hp: number; def: number; star: number }): string | undefined {
+  const { atk, hp, def, star } = counts;
+  const max = Math.max(atk, hp, def, star);
+  if (max === 0) return undefined;
+  if (max === star) return 'star';
+  if (max === atk) return 'atk';
+  if (max === hp) return 'hp';
+  return 'def';
 }
 
 // ═══ Direction from posA → posB ═══
@@ -127,6 +142,10 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
 
   const gemsUsedRef = useRef({ atk: 0, hp: 0, def: 0, star: 0 });
   const ultsUsedRef = useRef(0);
+
+  // B4 — battle log refs
+  const turnLogRef = useRef<BattleLogTurn[]>([]);
+  const situationsRef = useRef<Set<string>>(new Set());
 
   // Refs to avoid stale closures in setInterval
   const isActiveRef = useRef(false);
@@ -164,6 +183,8 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
       setLastScore(0);
       gemsUsedRef.current = { atk: 0, hp: 0, def: 0, star: 0 };
       ultsUsedRef.current = 0;
+      turnLogRef.current = [];
+      situationsRef.current = new Set();
     }
   }, []);
 
@@ -359,7 +380,22 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
       const skillState = buildSkillState();
       const decision = getSkillDecision(skillState);
 
+      // Track situation always (for situationsEncountered)
+      situationsRef.current.add(situation);
+
       if (decision !== null) {
+        // Log skill action (Lv4-5 only)
+        if (vipLevelRef.current >= 4) {
+          const actionMap: Record<string, BattleLogTurn['action']> = {
+            dodge: 'dodge', samDong: 'ult', otHiem: 'skill', romBoc: 'skill',
+          };
+          turnLogRef.current.push({
+            turn: tickCount,
+            situation,
+            scoreBefore: lastScore,
+            action: actionMap[decision.action] ?? 'skill',
+          });
+        }
         executeSkill(decision);
         setTickCount(prev => prev + 1);
         return; // Don't swap gems this tick
@@ -380,6 +416,17 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
           g.hp += quickSim.gemCounts.hp;
           g.def += quickSim.gemCounts.def;
           g.star += quickSim.gemCounts.star;
+
+          // Log swap turn (Lv4-5 only — valuable ML data)
+          if (vipLevelRef.current >= 4) {
+            turnLogRef.current.push({
+              turn: tickCount,
+              situation,
+              scoreBefore: lastScore,
+              action: 'swap',
+              gemType: dominantGemType(quickSim.gemCounts),
+            });
+          }
         }
 
         onHighlightRef.current?.(bestSwap.posA);
@@ -396,6 +443,13 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
     return () => clearInterval(intervalId);
   }, [isActive, vipLevel]);
 
+  // ═══ getBattleLog — call on battle end to collect ML data ═══
+  const getBattleLog = useCallback((): BattleLog => ({
+    gemsUsed: { ...gemsUsedRef.current },
+    situationsEncountered: Array.from(situationsRef.current),
+    turns: vipLevelRef.current >= 4 ? [...turnLogRef.current] : undefined,
+  }), []);
+
   // ═══ RETURN ═══
   const freeDodges = vipTiers[vipLevelRef.current]?.freeDodges ?? dodgeFreeDefault;
 
@@ -411,5 +465,6 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
     tickCount,
     gemsUsed: gemsUsedRef.current,
     ultsUsed: ultsUsedRef.current,
+    getBattleLog,
   };
 }

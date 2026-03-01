@@ -17,6 +17,20 @@ export interface BossInfo {
   unlockLevel: number;
 }
 
+export interface BattleLogTurn {
+  turn: number;
+  situation: string;
+  scoreBefore: number;
+  action: 'swap' | 'dodge' | 'ult' | 'skill';
+  gemType?: string;
+}
+
+export interface BattleLog {
+  gemsUsed: { atk: number; hp: number; def: number; star: number };
+  situationsEncountered: string[];
+  turns?: BattleLogTurn[];  // Only Lv4-5
+}
+
 export interface BossFightInput {
   bossId: string;
   won: boolean;
@@ -30,6 +44,10 @@ export interface BossFightInput {
   isCampaign?: boolean;
   // Unique session ID from /boss/battle/start — prevents race condition on retry
   battleSessionId?: string;
+  // Auto-play tracking (B4)
+  ultsUsed?: number;
+  autoAILevel?: number;
+  battleLog?: BattleLog;
 }
 
 export interface BossCompleteResult {

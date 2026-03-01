@@ -5,6 +5,7 @@
 import { useEffect, useRef } from 'react';
 import { useBossComplete } from '@/shared/hooks/useBossComplete';
 import type { FightResult, BossState, CombatStats } from '@/shared/match3/combat.types';
+import type { BattleLog } from '@/shared/types/gameplay.types';
 
 interface BattleEndParams {
   result: FightResult;
@@ -16,6 +17,10 @@ interface BattleEndParams {
   maxCombo: number;
   combatStatsTracker: CombatStats;
   battleSessionId?: string;
+  // Auto-play tracking (B4)
+  autoAILevel?: number;
+  isAutoPlayActive?: boolean;
+  getBattleLog?: () => BattleLog;
 }
 
 export function useBattleEnd(params: BattleEndParams) {
@@ -23,6 +28,7 @@ export function useBattleEnd(params: BattleEndParams) {
     result, boss, campaignBossId,
     totalDmgDealt, durationSeconds, stars,
     maxCombo, combatStatsTracker, battleSessionId,
+    autoAILevel, isAutoPlayActive, getBattleLog,
   } = params;
 
   const bossComplete = useBossComplete();
@@ -43,9 +49,11 @@ export function useBattleEnd(params: BattleEndParams) {
         dodgeCount: combatStatsTracker.dodgeCount,
         isCampaign: true,
         battleSessionId,
+        autoAILevel,
+        battleLog: isAutoPlayActive && getBattleLog ? getBattleLog() : undefined,
       });
     }
-  }, [result, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, boss.playerHp, boss.playerMaxHp, battleSessionId]);
+  }, [result, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, boss.playerHp, boss.playerMaxHp, battleSessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return bossComplete;
 }
