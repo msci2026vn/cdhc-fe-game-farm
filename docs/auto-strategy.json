@@ -1,0 +1,673 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "FARMVERSE Auto-Play Strategy — Generated from full code scan (FE + BE + DB)",
+    "generated": "2026-03-01",
+    "scanSources": {
+      "frontend": "/mnt/d/du-an/cdhc/cdhc-game-vite/src/",
+      "backend": "cdhc-test MCP → /home/cdhc/apps/cdhc-be/",
+      "database": "PostgreSQL via bun -e (boss_zones, bosses, campaign_progress, player_skills, boss_battles)"
+    }
+  },
+
+  "boardConfig": {
+    "gridSize": "8x8",
+    "totalCells": 64,
+    "gemTypes": ["atk", "hp", "def", "star"],
+    "gemMeta": {
+      "atk": { "emoji": "⚔️", "css": "gem-atk", "role": "Deal damage to boss" },
+      "hp": { "emoji": "💚", "css": "gem-hp", "role": "Heal player HP" },
+      "def": { "emoji": "🛡️", "css": "gem-def", "role": "Add shield" },
+      "star": { "emoji": "⭐", "css": "gem-star", "role": "Charge ULT + deal minor damage" }
+    },
+    "minMatch": 3,
+    "specialGemRules": {
+      "match4h": { "creates": "striped_h", "spawnPos": "position[1]", "effect": "Clear entire row (8 gems)" },
+      "match4v": { "creates": "striped_v", "spawnPos": "position[1]", "effect": "Clear entire column (8 gems)" },
+      "match5": { "creates": "rainbow", "spawnPos": "middle or swapped position", "effect": "Clear ALL gems of target type" },
+      "L_shape": { "creates": "bomb", "spawnPos": "intersection point", "effect": "Clear 3x3 area (up to 9 gems)" },
+      "T_shape": { "creates": "bomb", "spawnPos": "intersection point", "effect": "Clear 3x3 area (up to 9 gems)" },
+      "match5_combined_LT": { "creates": "rainbow", "note": "Rainbow overrides bomb for 5+ combined L/T" }
+    },
+    "chainReaction": {
+      "maxCascade": 50,
+      "method": "BFS queue — triggered special gems queue more triggers",
+      "rainbowTargetType": "swapped gem type OR most common type on board, fallback 'atk'"
+    }
+  },
+
+  "animTiming": {
+    "MATCH_RESOLVE_MS": 350,
+    "CASCADE_BASE_MS": 300,
+    "CASCADE_DECAY": 0.90,
+    "CASCADE_MIN_MS": 150,
+    "SPAWN_ANIM_MS": 400,
+    "SHAKE_BOMB_MS": 350,
+    "SHAKE_RAINBOW_MS": 500,
+    "_cascadeFormula": "delay = max(150, round(300 * 0.90^depth))"
+  },
+
+  "damageFormulas": {
+    "atkGemDamage": "40 + ATK * 0.6",
+    "starGemDamage": "25 + ATK * 0.3",
+    "baseDmg": "(atkCount * atkGemDamage) + (starCount * starGemDamage)",
+    "totalDmg": "round(baseDmg * comboMultiplier)",
+    "critDmg": "totalDmg * 2.0 (if random < critChance)",
+    "bossDEFReduction": "max(1, round(rawDmg * (1 - bossDEF/(bossDEF+500))))",
+    "hpPerGem": "25 + HP_stat * 0.04",
+    "shieldPerGem": "20 + DEF_stat * 0.02 + maxHP * 0.01",
+    "startingShield": "floor(DEF_stat * 0.5)",
+    "manaRegenPerTurn": "floor(8 + MANA_stat / 25)",
+    "ultDamage_boss": "floor(ATK * 3 + MANA * 0.5)",
+    "ultDamage_campaign": "round(ATK * SAM_DONG_MULT[level-1])",
+    "bossAttackDmg": "bossATK * enrageMult + floor(random * bossATK * 0.2)",
+    "bossSkillDmg": "round(bossATK * 2.0 * enrageMult)",
+    "defReductionExamples": {
+      "DEF_0": "0% reduction",
+      "DEF_100": "17% reduction",
+      "DEF_250": "33% reduction",
+      "DEF_450": "47% reduction",
+      "DEF_500": "50% reduction",
+      "DEF_1000": "67% reduction"
+    },
+    "campaignDamagePipeline": [
+      "1. Raw damage (base * combo * crit * otHiem bonus)",
+      "2. Boss DEF reduction (diminishing returns)",
+      "3. Egg absorption (egg HP pool absorbs first)",
+      "4. Boss Shield buff (80% damage reduction)",
+      "5. Boss HP loss",
+      "6. Reflect damage (30% of post-DEF dmg back to player)"
+    ]
+  },
+
+  "comboTiers": [
+    { "minCombo": 0, "mult": 1.0, "label": "", "emoji": "" },
+    { "minCombo": 3, "mult": 1.0, "label": "NICE", "emoji": "👍" },
+    { "minCombo": 5, "mult": 1.1, "label": "GREAT", "emoji": "🔥" },
+    { "minCombo": 8, "mult": 1.2, "label": "EXCELLENT", "emoji": "⚡" },
+    { "minCombo": 12, "mult": 1.3, "label": "AMAZING", "emoji": "💥" },
+    { "minCombo": 20, "mult": 1.5, "label": "EPIC", "emoji": "🌟" },
+    { "minCombo": 30, "mult": 1.8, "label": "LEGENDARY", "emoji": "👑" },
+    { "minCombo": 50, "mult": 2.0, "label": "MYTHIC", "emoji": "🏆" }
+  ],
+
+  "enrageSystem": {
+    "formula": "min(1 + floor(elapsedSec / 30) * 0.10, 2.0)",
+    "ratePerStep": "+10% ATK every 30 seconds",
+    "cap": 2.0,
+    "pauseAware": true
+  },
+
+  "bossAttackIntervals": {
+    "zone1-3": 5000,
+    "zone4-6": 4000,
+    "zone7-8": 3500,
+    "zone9-10": 3000,
+    "_unit": "ms",
+    "skillChance": 0.25,
+    "skillDamageMult": 2.0,
+    "skillWarningMs": 1500,
+    "multiHitDelay": 300,
+    "bossHealInterval": 5000
+  },
+
+  "playerMilestones": {
+    "critChance": [
+      { "threshold": "ATK >= 800", "value": 0.15 },
+      { "threshold": "ATK >= 300", "value": 0.10 },
+      { "threshold": "ATK < 300", "value": 0 }
+    ],
+    "critMultiplier": 2.0,
+    "hasDestroy": { "threshold": "ATK >= 2000", "effect": "match-5 bonus" },
+    "regenPercent": [
+      { "threshold": "HP >= 5000", "value": 0.08, "interval": "every 5 turns" },
+      { "threshold": "HP >= 1500", "value": 0.05, "interval": "every 5 turns" }
+    ],
+    "hasImmortal": { "threshold": "HP >= 15000", "effect": "Revive once at 20% maxHP" },
+    "reflectPercent": [
+      { "threshold": "DEF >= 600", "value": 0.20 },
+      { "threshold": "DEF >= 200", "value": 0.10 }
+    ],
+    "hasFort": { "threshold": "DEF >= 1500", "effect": "Immune every 10 turns" },
+    "dodgeCostReduced": { "threshold": "Mana >= 250", "cost": 25, "default": 30 },
+    "ultCostReduced": { "threshold": "Mana >= 800", "cost": 65, "default": 80 },
+    "hasSuperMana": { "threshold": "Mana >= 3000", "effect": "Free ULT, 8-turn cooldown" }
+  },
+
+  "ultSystem": {
+    "chargePerTurn": {
+      "perStarGem": 8,
+      "perAtkGem": 3,
+      "comboBonus": 5,
+      "comboThreshold": 2,
+      "maxCharge": 100
+    },
+    "manaCost_boss": { "default": 80, "reduced": 65 },
+    "manaCost_campaign": "depends on SAM_DONG skill level (Lv1: 80 → Lv5: 60)",
+    "damage_boss": "floor(ATK * 3 + MANA * 0.5)",
+    "damage_campaign": {
+      "lv1": "ATK * 3.0",
+      "lv2": "ATK * 3.5",
+      "lv3": "ATK * 4.0",
+      "lv4": "ATK * 4.5 + stun 1.5s",
+      "lv5": "ATK * 5.0 + stun 2.0s + pierces shield/DEF"
+    },
+    "cooldown_superMana": 8
+  },
+
+  "playerSkills": {
+    "sam_dong": {
+      "name": "Sấm Đồng",
+      "emoji": "⚡",
+      "type": "ultimate",
+      "unlockCondition": "Free from start",
+      "levels": {
+        "1": { "damageMultiplier": 3.0, "stun": 0, "pierceShield": false },
+        "2": { "damageMultiplier": 3.5, "stun": 0, "pierceShield": false },
+        "3": { "damageMultiplier": 4.0, "stun": 0, "pierceShield": false },
+        "4": { "damageMultiplier": 4.5, "stun": 1.5, "pierceShield": false },
+        "5": { "damageMultiplier": 5.0, "stun": 2.0, "pierceShield": true }
+      }
+    },
+    "ot_hiem": {
+      "name": "Ớt Hiểm",
+      "emoji": "🌶️",
+      "type": "damage_boost",
+      "unlockCondition": "Clear Boss #4",
+      "cooldown": 20,
+      "levels": {
+        "1": { "duration": 6, "damageBonus": 0.20, "critBonus": 0, "defBypass": 0, "cleanse": false },
+        "2": { "duration": 7, "damageBonus": 0.30, "critBonus": 0, "defBypass": 0, "cleanse": false },
+        "3": { "duration": 8, "damageBonus": 0.40, "critBonus": 0, "defBypass": 0, "cleanse": true },
+        "4": { "duration": 9, "damageBonus": 0.50, "critBonus": 0.15, "defBypass": 0, "cleanse": true },
+        "5": { "duration": 10, "damageBonus": 0.60, "critBonus": 0.20, "defBypass": 0.50, "cleanse": true }
+      }
+    },
+    "rom_boc": {
+      "name": "Rơm Bọc",
+      "emoji": "🪹",
+      "type": "defense_shield",
+      "unlockCondition": "Clear Boss #8",
+      "cooldown": 25,
+      "levels": {
+        "1": { "duration": 4, "shieldPercent": 0.10, "damageReduction": 0.15, "healOverTime": 0, "reflect": 0, "debuffImmune": false },
+        "2": { "duration": 5, "shieldPercent": 0.15, "damageReduction": 0.20, "healOverTime": 0, "reflect": 0, "debuffImmune": false },
+        "3": { "duration": 5, "shieldPercent": 0.20, "damageReduction": 0.25, "healOverTime": 0.02, "reflect": 0, "debuffImmune": false },
+        "4": { "duration": 6, "shieldPercent": 0.25, "damageReduction": 0.30, "healOverTime": 0.02, "reflect": 0.05, "debuffImmune": false },
+        "5": { "duration": 7, "shieldPercent": 0.30, "damageReduction": 0.35, "healOverTime": 0.03, "reflect": 0.08, "debuffImmune": true }
+      }
+    }
+  },
+
+  "bossSkillTypes": {
+    "stun": { "icon": "💫", "effect": "Block player input", "durationRange": "1-1.5s", "cooldownRange": "20-25s" },
+    "burn": { "icon": "🔥", "effect": "2% maxHP/sec DoT", "durationRange": "5s", "cooldownRange": "20-25s" },
+    "heal_block": { "icon": "🚫", "effect": "Block HP healing", "durationRange": "6-8s", "cooldownRange": "25-30s" },
+    "armor_break": { "icon": "💔", "effect": "DEF becomes 0", "durationRange": "8-10s", "cooldownRange": "30-35s" },
+    "shield": { "icon": "🛡️", "effect": "Boss 80% damage reduction", "durationRange": "3s", "cooldownRange": "25s" },
+    "reflect": { "icon": "🔄", "effect": "30% damage reflected to player", "durationRange": "5s", "cooldownRange": "20-25s" },
+    "egg": { "icon": "🥚", "effect": "Absorbs damage, heals boss on hatch", "durationRange": "8s", "cooldownRange": "15s" },
+    "gem_lock": { "icon": "🔒", "effect": "Lock N random gems", "durationRange": "5s", "cooldownRange": "15-20s" }
+  },
+
+  "bossData": {
+    "zone1_ruong_lua": {
+      "archetype": "glass_cannon",
+      "levelRange": "1-5",
+      "turnLimit": 100,
+      "bosses": [
+        { "id": 1, "name": "Rệp Con", "tier": "minion", "hp": 4500, "atk": 50, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "none" },
+        { "id": 2, "name": "Rệp Lính", "tier": "minion", "hp": 7500, "atk": 70, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "none" },
+        { "id": 3, "name": "Rệp Cánh", "tier": "elite", "hp": 13500, "atk": 100, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "HP<50%: ATK +50%" },
+        { "id": 4, "name": "Rệp Chúa", "tier": "boss", "hp": 27000, "atk": 110, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "Egg every 5 turns: heal 15% if not destroyed" }
+      ]
+    },
+    "zone2_vuon_ca_chua": {
+      "archetype": "assassin",
+      "levelRange": "5-10",
+      "turnLimit": 100,
+      "bosses": [
+        { "id": 5, "name": "Sâu Non", "tier": "minion", "hp": 10500, "atk": 80, "def": 0, "freq": 2, "healPct": 0, "skills": [], "special": "none" },
+        { "id": 6, "name": "Sâu Tơ", "tier": "minion", "hp": 16500, "atk": 90, "def": 0, "freq": 2, "healPct": 0, "skills": [], "special": "Cocoon: -50% dmg for 1 turn every 5 turns" },
+        { "id": 7, "name": "Sâu Khoang", "tier": "elite", "hp": 27000, "atk": 100, "def": 0, "freq": 2, "healPct": 0, "skills": [], "special": "Poison: 2% maxHP/turn x2 turns on hit" },
+        { "id": 8, "name": "Bướm Đêm", "tier": "boss", "hp": 42000, "atk": 120, "def": 0, "freq": 2, "healPct": 0, "skills": ["stun:cd20/dur1"], "special": "20% dodge + Pollen: -15% ATK x2 turns every 4 turns" }
+      ]
+    },
+    "zone3_vuon_ot": {
+      "archetype": "tank",
+      "levelRange": "10-15",
+      "turnLimit": 125,
+      "bosses": [
+        { "id": 9, "name": "Bọ Rùa Con", "tier": "minion", "hp": 30000, "atk": 70, "def": 150, "freq": 1, "healPct": 0, "skills": [], "special": "Turn 1: DEF x2" },
+        { "id": 10, "name": "Bọ Cánh Cam", "tier": "minion", "hp": 45000, "atk": 80, "def": 200, "freq": 1, "healPct": 0, "skills": [], "special": "none" },
+        { "id": 11, "name": "Bọ Hung", "tier": "elite", "hp": 67500, "atk": 100, "def": 250, "freq": 1, "healPct": 0, "skills": [], "special": "Every 4 turns: charge ATK x3" },
+        { "id": 12, "name": "Bọ Ngựa", "tier": "boss", "hp": 105000, "atk": 100, "def": 350, "freq": 1, "healPct": 0, "skills": ["shield:cd25/dur3"], "special": "HP>50%: DEF+150. Rage <25%: DEF=0, ATK x3" }
+      ]
+    },
+    "zone4_ray_ca_rot": {
+      "archetype": "controller",
+      "levelRange": "15-20",
+      "turnLimit": 125,
+      "bosses": [
+        { "id": 13, "name": "Châu Chấu Non", "tier": "minion", "hp": 52500, "atk": 160, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "Shuffle 1 row every 3 turns" },
+        { "id": 14, "name": "Châu Chấu Cánh", "tier": "minion", "hp": 75000, "atk": 180, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "Shuffle 2 rows + drain 10% Mana every 4 turns" },
+        { "id": 15, "name": "Dế Mèn", "tier": "elite", "hp": 112500, "atk": 200, "def": 0, "freq": 1, "healPct": 0, "skills": ["stun:cd25/dur1"], "special": "Stun 1 turn every 4 turns + drain 15% Mana" },
+        { "id": 16, "name": "Vua Châu Chấu", "tier": "boss", "hp": 150000, "atk": 230, "def": 0, "freq": 1, "healPct": 0, "skills": ["stun:cd20/dur1.5", "gem_lock:cd20/dur5/val3"], "special": "Stun/4t + Shuffle board/6t + Drain 20% Mana/3t" }
+      ]
+    },
+    "zone5_nha_kho": {
+      "archetype": "healer",
+      "levelRange": "20-30",
+      "turnLimit": 125,
+      "bosses": [
+        { "id": 17, "name": "Bọ Xít Xanh", "tier": "minion", "hp": 75000, "atk": 180, "def": 0, "freq": 1, "healPct": 1.5, "skills": [], "special": "none" },
+        { "id": 18, "name": "Bọ Xít Nâu", "tier": "minion", "hp": 112500, "atk": 200, "def": 0, "freq": 1, "healPct": 2, "skills": [], "special": "Debuff: -15% ATK for 2 turns every 5 turns" },
+        { "id": 19, "name": "Ốc Sên Gai", "tier": "elite", "hp": 150000, "atk": 220, "def": 100, "freq": 1, "healPct": 2, "skills": [], "special": "Reflect 10% damage taken" },
+        { "id": 20, "name": "Ốc Sên Chúa", "tier": "boss", "hp": 210000, "atk": 250, "def": 100, "freq": 1, "healPct": 2, "skills": [], "special": "Shell: immune 2t/6t. Slime <30%: -20% ATK permanent" }
+      ]
+    },
+    "zone6_dong_hoang": {
+      "archetype": "assassin",
+      "levelRange": "30-40",
+      "turnLimit": 150,
+      "bosses": [
+        { "id": 21, "name": "Chuột Con", "tier": "minion", "hp": 120000, "atk": 250, "def": 0, "freq": 2, "healPct": 0, "skills": [], "special": "none" },
+        { "id": 22, "name": "Chuột Cống", "tier": "minion", "hp": 180000, "atk": 280, "def": 0, "freq": 2, "healPct": 0, "skills": [], "special": "DoT: 20% chance 2% maxHP x3 turns" },
+        { "id": 23, "name": "Chuột Chũi", "tier": "elite", "hp": 240000, "atk": 320, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "Burrow: vanish 1t/4t, return ATK x4" },
+        { "id": 24, "name": "Chuột Vương", "tier": "boss", "hp": 330000, "atk": 350, "def": 0, "freq": 2, "healPct": 0, "skills": [], "special": "Rage <40%: ATK x1.5, Freq 3. Drain 10% Mana/4t" }
+      ]
+    },
+    "zone7_rung_tre": {
+      "archetype": "glass_cannon",
+      "levelRange": "40-50",
+      "turnLimit": 150,
+      "bosses": [
+        { "id": 25, "name": "Sâu Róm Lửa", "tier": "minion", "hp": 150000, "atk": 400, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "DoT burn: 2% maxHP/turn x2 turns" },
+        { "id": 26, "name": "Bò Cạp", "tier": "minion", "hp": 210000, "atk": 480, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "25% stun 1 turn" },
+        { "id": 27, "name": "Rết Khổng Lồ", "tier": "elite", "hp": 270000, "atk": 550, "def": 0, "freq": 1, "healPct": 0, "skills": ["armor_break:cd35/dur8"], "special": "True damage 10% maxHP every 5 turns" },
+        { "id": 28, "name": "Rồng Đất", "tier": "boss", "hp": 375000, "atk": 600, "def": 0, "freq": 1, "healPct": 0, "skills": ["armor_break:cd30/dur10", "burn:cd20/dur5/val2"], "special": "True dmg 10% maxHP/3t. Lock 2 tiles 2t. Rage <20%: ATK x2" }
+      ]
+    },
+    "zone8_dam_lay": {
+      "archetype": "tank",
+      "levelRange": "50-65",
+      "turnLimit": 150,
+      "bosses": [
+        { "id": 29, "name": "Đỉa Khổng Lồ", "tier": "minion", "hp": 225000, "atk": 200, "def": 300, "freq": 1, "healPct": 0, "skills": [], "special": "Lifesteal: heal 30% of damage dealt" },
+        { "id": 30, "name": "Ếch Độc", "tier": "minion", "hp": 300000, "atk": 250, "def": 350, "freq": 1, "healPct": 0, "skills": [], "special": "DoT 2% maxHP x2t + drain 10% Mana" },
+        { "id": 31, "name": "Rắn Hổ Mang", "tier": "elite", "hp": 420000, "atk": 300, "def": 300, "freq": 1, "healPct": 0, "skills": ["shield:cd25/dur3"], "special": "20% crit x3. Molt <50%: heal 15% + ATK +20%" },
+        { "id": 32, "name": "Rồng Nước", "tier": "boss", "hp": 570000, "atk": 300, "def": 450, "freq": 1, "healPct": 0, "skills": ["shield:cd25/dur3", "reflect:cd20/dur5/val30"], "special": "HP>60%: DEF+200. Wave 8% maxHP/4t. Flood 1t/8t. <30%: DEF=0 ATK x2" }
+      ]
+    },
+    "zone9_nui_lua": {
+      "archetype": "hybrid",
+      "levelRange": "65-80",
+      "turnLimit": 175,
+      "bosses": [
+        { "id": 33, "name": "Bọ Lửa", "tier": "minion", "hp": 300000, "atk": 500, "def": 0, "freq": 1, "healPct": 0, "skills": [], "special": "Self-destruct <10%: 25% maxHP explosion" },
+        { "id": 34, "name": "Thằn Lằn Nham", "tier": "minion", "hp": 420000, "atk": 350, "def": 400, "freq": 1, "healPct": 1.5, "skills": [], "special": "DEF decreases 30/turn (400→370→...)" },
+        { "id": 35, "name": "Phượng Hoàng Đen", "tier": "elite", "hp": 480000, "atk": 500, "def": 0, "freq": 1, "healPct": 0, "skills": ["burn:cd20/dur5/val2", "heal_block:cd30/dur8"], "special": "Resurrect once at 25% HP. Burn 2 tiles/3t" },
+        { "id": 36, "name": "Rồng Lửa", "tier": "boss", "hp": 720000, "atk": 650, "def": 150, "freq": 1, "healPct": 1.5, "skills": ["heal_block:cd25/dur8", "armor_break:cd30/dur10", "burn:cd20/dur5/val2"], "special": "True dmg 10% maxHP/3t. Burn tile 2/4t. <15%: ATK x2.5, self-dmg 3% HP/t" }
+      ]
+    },
+    "zone10_the_gioi_ngam": {
+      "archetype": "mixed",
+      "levelRange": "80-100",
+      "turnLimit": 175,
+      "bosses": [
+        { "id": 37, "name": "Nấm Độc", "tier": "minion", "hp": 375000, "atk": 400, "def": 0, "freq": 1, "healPct": 0, "skills": ["stun:cd20/dur1.5"], "special": "Spores on death: 4 mushroom tiles (match = 4% maxHP)" },
+        { "id": 38, "name": "Mối Chúa", "tier": "minion", "hp": 525000, "atk": 350, "def": 200, "freq": 1, "healPct": 1.5, "skills": ["gem_lock:cd15/dur5/val4"], "special": "Summon termites/4t (3k HP, 200 ATK each)" },
+        { "id": 39, "name": "Bọ Ngựa Đêm", "tier": "elite", "hp": 630000, "atk": 700, "def": 0, "freq": 2, "healPct": 0, "skills": ["shield:cd20/dur3", "reflect:cd25/dur5/val30"], "special": "Stealth 1t/4t. Execute: player <20% → dmg x5" },
+        { "id": 40, "name": "Đế Vương", "tier": "final_boss", "hp": 1050000, "atk": "250-800", "def": "0-500", "freq": "1-3", "healPct": "0-3", "skills": "phase-based", "special": "4-PHASE BOSS" }
+      ]
+    },
+    "deVuong_phases": [
+      { "phase": 1, "name": "Giáp Đá", "archetype": "tank", "hpRange": "100%-75%", "atk": 250, "def": 500, "freq": 1, "healPct": 0, "skill": "🛡️ Giáp thần!", "tip": "DEF cực cao. Tập trung phá giáp." },
+      { "phase": 2, "name": "Cuồng Sát", "archetype": "assassin", "hpRange": "75%-50%", "atk": 600, "def": 0, "freq": 3, "healPct": 0, "skill": "⚡ Tam liên kích!", "tip": "3 đòn liên hoàn. NÉ hoặc chết!" },
+      { "phase": 3, "name": "Hồi Sinh", "archetype": "healer", "hpRange": "50%-25%", "atk": 350, "def": 200, "freq": 1, "healPct": 3, "skill": "💚 Hồi sinh!", "tip": "Hồi 3% HP/5s. DPS race — burst nhanh!" },
+      { "phase": 4, "name": "Hủy Diệt", "archetype": "glass_cannon", "hpRange": "25%-0%", "atk": 800, "def": 0, "freq": 2, "healPct": 0, "skill": "💀 Hủy diệt!", "tip": "ATK tối đa, tự mất 2% HP/5s. Sống sót = thắng!" }
+    ]
+  },
+
+  "archetypeCounterStrategies": {
+    "glass_cannon": { "icon": "🗡️", "counterBuild": "ATK", "counterTactic": "Rush kill", "worstBuild": null, "tip": "Giết nhanh, né khi boss rage" },
+    "tank": { "icon": "🛡️", "counterBuild": "ATK", "counterTactic": "Phá giáp", "worstBuild": "DEF", "tip": "ATK cao phá giáp. Kiên nhẫn phase 1, burst rage" },
+    "healer": { "icon": "💚", "counterBuild": "ATK", "counterTactic": "Vượt hồi", "worstBuild": "DEF", "tip": "DPS > heal/turn. Burst khi boss mở guard" },
+    "assassin": { "icon": "⚡", "counterBuild": "DEF", "counterTactic": "Tank burst", "worstBuild": "ATK", "tip": "DEF giảm mỗi đòn x Freq. Né phase rage" },
+    "controller": { "icon": "🌀", "counterBuild": "balanced", "counterTactic": "Mana chống drain", "worstBuild": "ATK", "tip": "Mana cao chịu drain. Nhớ pattern stun" },
+    "hybrid": { "icon": "💀", "counterBuild": "ATK", "counterTactic": "Burst vượt hồi", "worstBuild": "balanced", "tip": "DPS race. Né true damage. Boss tự hủy khi HP thấp" },
+    "all": { "icon": "👑", "counterBuild": "DEF", "counterTactic": "An toàn nhất", "tip": "4 phase: Tank→Assassin→Healer→GlassCannon. Tích Mana P1, Né P2, Burst P3, Sống P4" }
+  },
+
+  "gemWeights": {
+    "normal": {
+      "_condition": "Default state (40% <= playerHP < 70%, bossHP > 20%)",
+      "atk": 3.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 2.0
+    },
+    "hpCritical": {
+      "_condition": "playerHP < 25%",
+      "atk": 0.3,
+      "hp": 8.0,
+      "def": 5.0,
+      "star": 1.0,
+      "_note": "Survival mode — heal or die"
+    },
+    "hpLow": {
+      "_condition": "25% <= playerHP < 40%",
+      "atk": 0.5,
+      "hp": 6.0,
+      "def": 4.0,
+      "star": 1.5,
+      "_note": "Defensive play, prioritize healing"
+    },
+    "hpMedium": {
+      "_condition": "40% <= playerHP < 70%",
+      "atk": 2.5,
+      "hp": 2.5,
+      "def": 1.5,
+      "star": 2.0,
+      "_note": "Balanced approach"
+    },
+    "hpHigh": {
+      "_condition": "playerHP >= 70%",
+      "atk": 4.0,
+      "hp": 0.5,
+      "def": 0.8,
+      "star": 2.5,
+      "_note": "Aggressive — maximize damage output"
+    },
+    "bossLowHP": {
+      "_condition": "bossHP < 20%",
+      "atk": 6.0,
+      "hp": 1.5,
+      "def": 0.3,
+      "star": 1.0,
+      "_note": "Rush boss — finish it off"
+    },
+    "ultReady": {
+      "_condition": "ultCharge >= 100",
+      "atk": 3.0,
+      "hp": 2.0,
+      "def": 1.0,
+      "star": 0.1,
+      "_note": "Ult ready — stop farming star gems"
+    },
+    "ultAlmostReady": {
+      "_condition": "70 <= ultCharge < 100",
+      "atk": 2.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 4.0,
+      "_note": "Close to ult — prioritize star gems for charge"
+    },
+    "bossShieldActive": {
+      "_condition": "boss shield buff active (80% reduction)",
+      "atk": 0.2,
+      "hp": 3.0,
+      "def": 2.0,
+      "star": 5.0,
+      "_note": "Don't waste damage — farm mana/heal during shield"
+    },
+    "bossReflectActive": {
+      "_condition": "boss reflect buff active (30% dmg reflected)",
+      "atk": 0.5,
+      "hp": 4.0,
+      "def": 3.0,
+      "star": 2.0,
+      "_note": "Reduce self-damage from reflect, play defensive"
+    },
+    "healBlocked": {
+      "_condition": "heal_block debuff on player",
+      "atk": 4.0,
+      "hp": 0.0,
+      "def": 3.0,
+      "star": 2.0,
+      "_note": "HP gems useless — pivot to ATK/DEF/star"
+    },
+    "armorBroken": {
+      "_condition": "armor_break debuff on player (DEF=0)",
+      "atk": 2.0,
+      "hp": 4.0,
+      "def": 0.0,
+      "star": 2.0,
+      "_note": "DEF gems useless while armor broken — pivot to HP/ATK"
+    }
+  },
+
+  "bonusWeights": {
+    "specialGemCreation": 4.0,
+    "cascadePotential": 2.5,
+    "comboChain": 2.0,
+    "matchCountBonus": {
+      "3": 1.0,
+      "4": 3.0,
+      "5": 6.0,
+      "6+": 10.0
+    },
+    "chainReactionBonus": {
+      "striped": 5.0,
+      "bomb": 7.0,
+      "rainbow": 10.0
+    }
+  },
+
+  "skillPriority": {
+    "dodge": {
+      "useWhen": "skillWarning active OR attackWarning.phase === 'dodge_window'",
+      "condition": "mana >= dodgeCost",
+      "priority": "CRITICAL",
+      "manaCost": "30 (25 if Mana >= 250)",
+      "effect": "Avoid boss skill damage (2x normal ATK)",
+      "autoPlayRule": "ALWAYS dodge when warning appears and mana sufficient"
+    },
+    "ultimate": {
+      "useWhen_boss": "ultCharge >= 100 AND mana >= ultCost AND result === 'fighting'",
+      "useWhen_campaign": "ultCharge >= 100 AND appropriate timing",
+      "priority": "HIGHEST",
+      "manaCost": "80 (65 if Mana >= 800), free if SuperMana",
+      "damage": "ATK * 3 + MANA * 0.5 (boss) / ATK * 3.0-5.0 (campaign)",
+      "autoPlayRule": "Fire immediately when charged (boss). In campaign, consider timing with boss phases."
+    },
+    "ot_hiem": {
+      "useWhen": "Off cooldown AND (bossHP > 60% for sustained DPS OR burst window)",
+      "priority": "HIGH",
+      "cooldown": "20s",
+      "autoPlayRule": "Cast on cooldown for maximum DPS uptime. Save for burst if boss enters rage phase soon."
+    },
+    "rom_boc": {
+      "useWhen": "playerHP < 50% OR boss about to use skill attack OR boss in rage phase",
+      "priority": "HIGH",
+      "cooldown": "25s",
+      "autoPlayRule": "Cast when HP drops low or anticipating heavy damage phase."
+    }
+  },
+
+  "bossStrategies": {
+    "zone1": { "approach": "aggro", "primaryGem": "atk", "tips": "Tutorial zone. Pure ATK rush. No mechanics." },
+    "zone2": { "approach": "aggro", "primaryGem": "atk", "tips": "Freq 2 = double hits. Dodge important for boss #8. Watch for stun." },
+    "zone3": { "approach": "sustained", "primaryGem": "atk", "tips": "Tank bosses with high DEF. Need high ATK to penetrate. Boss #12 drops DEF at <25% = burst window." },
+    "zone4": { "approach": "balanced", "primaryGem": "star", "tips": "Controllers drain Mana. Prioritize star gems for Mana regen. Dodge stuns. Watch board shuffles." },
+    "zone5": { "approach": "dps_race", "primaryGem": "atk", "tips": "Healers regen 1.5-2% HP. Must out-DPS healing. Boss #20 has immunity windows." },
+    "zone6": { "approach": "defensive", "primaryGem": "def", "tips": "Assassin freq 2-3. High ATK. Need DEF/shield to survive. Boss #24 Mana drain dangerous." },
+    "zone7": { "approach": "burst", "primaryGem": "atk", "tips": "Glass cannons with true damage. Kill fast or die. Armor break = DEF useless. Rush with ATK." },
+    "zone8": { "approach": "sustained", "primaryGem": "atk", "tips": "Tank + lifesteal/reflect. Sustained ATK. Watch for reflect damage on boss #32." },
+    "zone9": { "approach": "adaptive", "primaryGem": "atk", "tips": "Hybrid mechanics. Boss #33 self-destructs. Boss #35 resurrects. Boss #36 heal block = no HP gems." },
+    "zone10": { "approach": "expert", "primaryGem": "varies", "tips": "Mixed everything. Boss #39 executes at <20% HP. Boss #40 Đế Vương: 4-phase adaptive strategy needed." },
+    "de_vuong_phases": {
+      "phase1_tank": "Farm star gems for Mana. Use DEF gems for shield. Chip away at DEF. Save skills.",
+      "phase2_assassin": "Dodge EVERYTHING. Use Rơm Bọc for damage reduction. 3-hit combo is lethal.",
+      "phase3_healer": "DPS race. Use Ớt Hiểm for max damage. Out-DPS 3% heal. Use ULT here.",
+      "phase4_glass_cannon": "Survive. Boss self-destructs at 2% HP/5s. Use Rơm Bọc + HP gems. Time will win."
+    }
+  },
+
+  "turnSystem": {
+    "definition": "Each cascade (match → gravity → check) = 1 turn",
+    "perTurn": [
+      "turnCount++",
+      "ultCooldown-- (if > 0)",
+      "Apply gem effects (damage/heal/shield/mana)",
+      "Check milestones (regen every 5 turns, fort every 10 turns)",
+      "Check phase transition (campaign)"
+    ],
+    "bossAttacks": "Real-time interval (not turn-based). Boss attacks on timer independent of player moves.",
+    "winCondition": "bossHp <= 0",
+    "loseConditions": ["playerHp <= 0", "turnCount >= turnLimit (campaign only)"],
+    "stars_boss": { "formula": "baseTime = 45 + bossLevel * 0.5", "3star": "duration <= baseTime", "2star": "duration <= baseTime * 1.5", "1star": "duration > baseTime * 1.5" },
+    "stars_campaign": { "formula": "baseTime = 60 + bossLevel * 1.5", "3star": "duration <= baseTime", "2star": "duration <= baseTime * 1.5", "1star": "duration > baseTime * 1.5" }
+  },
+
+  "board8x8Scaling": {
+    "BOARD_8X8_BOSS_HP_MULT": 1.25,
+    "_note": "8x8 board (64 cells) generates more matches than 6x6 (36 cells). Boss HP increased 25% to compensate."
+  },
+
+  "levelConfigs": {
+    "lv1_free": {
+      "algorithm": "random_valid",
+      "speed_ms": 2500,
+      "usesWeights": false,
+      "usesMCTS": false,
+      "selfLearn": false,
+      "description": "Picks random valid move. Free tier — shows auto-play is possible."
+    },
+    "lv2": {
+      "algorithm": "greedy_weighted",
+      "speed_ms": 2000,
+      "usesWeights": true,
+      "usesMCTS": false,
+      "selfLearn": true,
+      "learningRate": 0.03,
+      "description": "Scores each move by gem type weights × match count. Picks highest score."
+    },
+    "lv3": {
+      "algorithm": "greedy_cascade",
+      "speed_ms": 1500,
+      "usesWeights": true,
+      "usesMCTS": false,
+      "selfLearn": true,
+      "learningRate": 0.05,
+      "cascadeSimulation": true,
+      "description": "Simulates 1-step cascade to predict total damage. Better at finding combos."
+    },
+    "lv4": {
+      "algorithm": "mcts_light",
+      "speed_ms": 1200,
+      "usesWeights": true,
+      "usesMCTS": true,
+      "mctsSimulations": 30,
+      "guideWeight": 0.6,
+      "selfLearn": true,
+      "learningRate": 0.05,
+      "description": "Monte Carlo tree search with 30 simulations. Uses gem weights as heuristic guide."
+    },
+    "lv5": {
+      "algorithm": "mcts_full",
+      "speed_ms": 1000,
+      "usesWeights": true,
+      "usesMCTS": true,
+      "mctsSimulations": 80,
+      "guideWeight": 0.85,
+      "selfLearn": true,
+      "learningRate": 0.05,
+      "memoryMoves": 20,
+      "description": "Full MCTS with memory. Remembers patterns. Best at cascades and special gem creation."
+    }
+  },
+
+  "existingFunctions": {
+    "_note": "Functions already in codebase that auto-play can reuse directly",
+    "board": {
+      "createGrid": { "file": "src/shared/match3/board.utils.ts", "line": 33, "pure": true, "sig": "(): Gem[]" },
+      "randomGem": { "file": "src/shared/match3/board.utils.ts", "line": 31, "pure": false, "sig": "(): Gem" },
+      "findMatches": { "file": "src/shared/match3/board.utils.ts", "line": 47, "pure": true, "sig": "(grid: Gem[]): Set<number>" },
+      "findMatchGroups": { "file": "src/shared/match3/board.utils.ts", "line": 103, "pure": true, "sig": "(grid: Gem[], swapPos?: number): MatchGroup[]" },
+      "applyGravity": { "file": "src/shared/match3/board.utils.ts", "line": 258, "pure": false, "sig": "(grid: Gem[]): Gem[]" },
+      "areAdjacent": { "file": "src/shared/match3/board.utils.ts", "line": 271, "pure": true, "sig": "(a: number, b: number): boolean" },
+      "triggerStriped": { "file": "src/shared/match3/board.utils.ts", "line": 178, "pure": true, "sig": "(pos: number, direction: 'h'|'v'): number[]" },
+      "triggerBomb": { "file": "src/shared/match3/board.utils.ts", "line": 190, "pure": true, "sig": "(pos: number): number[]" },
+      "triggerRainbow": { "file": "src/shared/match3/board.utils.ts", "line": 203, "pure": true, "sig": "(grid: Gem[], targetType: GemType): number[]" },
+      "collectTriggeredCells": { "file": "src/shared/match3/board.utils.ts", "line": 212, "pure": true, "sig": "(grid: Gem[], initialRemove: Set<number>, swapContext?: {...}): Set<number>" }
+    },
+    "combat": {
+      "atkGemDamage": { "file": "src/shared/utils/combat-formulas.ts", "line": 11, "pure": true, "sig": "(atk: number): number" },
+      "starGemDamage": { "file": "src/shared/utils/combat-formulas.ts", "line": 16, "pure": true, "sig": "(atk: number): number" },
+      "hpPerGem": { "file": "src/shared/utils/combat-formulas.ts", "line": 33, "pure": true, "sig": "(hp: number): number" },
+      "shieldPerGem": { "file": "src/shared/utils/combat-formulas.ts", "line": 38, "pure": true, "sig": "(def: number, maxHp: number): number" },
+      "maxPlayerHp": { "file": "src/shared/utils/combat-formulas.ts", "line": 23, "pure": true, "sig": "(hp: number): number" },
+      "startingShield": { "file": "src/shared/utils/combat-formulas.ts", "line": 28, "pure": true, "sig": "(def: number): number" },
+      "damageReduction": { "file": "src/shared/utils/combat-formulas.ts", "line": 45, "pure": true, "sig": "(def: number): number" },
+      "actualBossDamage": { "file": "src/shared/utils/combat-formulas.ts", "line": 50, "pure": true, "sig": "(rawDamage: number, def: number): number" },
+      "bossDEFReduction": { "file": "src/shared/match3/combat.config.ts", "line": 82, "pure": true, "sig": "(rawDamage: number, bossDef: number): number" },
+      "manaRegenPerTurn": { "file": "src/shared/utils/combat-formulas.ts", "line": 63, "pure": true, "sig": "(mana: number): number" },
+      "ultDamage": { "file": "src/shared/utils/combat-formulas.ts", "line": 58, "pure": true, "sig": "(atk: number, mana: number): number" },
+      "dodgeCost": { "file": "src/shared/utils/combat-formulas.ts", "line": 68, "pure": true, "sig": "(hasSave1: boolean): number" },
+      "ultCost": { "file": "src/shared/utils/combat-formulas.ts", "line": 73, "pure": true, "sig": "(hasSave2: boolean): number" },
+      "getActiveMilestones": { "file": "src/shared/utils/combat-formulas.ts", "line": 93, "pure": true, "sig": "(stats: PlayerCombatStats): ActiveMilestones" }
+    },
+    "config": {
+      "getComboTier": { "file": "src/shared/match3/combat.config.ts", "line": 18, "pure": true, "sig": "(combo: number): ComboTier" },
+      "getComboInfo": { "file": "src/shared/match3/combat.config.ts", "line": 26, "pure": true, "sig": "(combo: number): ComboTier" },
+      "getEnrageMultiplier": { "file": "src/shared/match3/combat.config.ts", "line": 75, "pure": true, "sig": "(startTime: number, pausedMs?: number): number" },
+      "getBossAttackInterval": { "file": "src/shared/match3/combat.config.ts", "line": 49, "pure": true, "sig": "(zone: number): number" },
+      "COMBO_TIERS": { "file": "src/shared/match3/combat.config.ts", "line": 5, "type": "constant" },
+      "OT_HIEM_CONFIG": { "file": "src/shared/match3/combat.config.ts", "line": 93, "type": "constant" },
+      "ROM_BOC_CONFIG": { "file": "src/shared/match3/combat.config.ts", "line": 103, "type": "constant" },
+      "SAM_DONG_CONFIG": { "file": "src/shared/match3/combat.config.ts", "line": 114, "type": "constant" }
+    },
+    "existing_autoplay": {
+      "useAutoPlay": { "file": "src/shared/hooks/useAutoPlay.ts", "line": 105, "note": "Existing 6x6 auto-play reference implementation" },
+      "findBestMove": { "file": "src/shared/hooks/useAutoPlay.ts", "line": 54, "pure": true, "sig": "(grid: Gem[], lockedGems?: Set<number>): BestMove | null", "note": "Greedy scorer for 6x6 — adapt for 8x8" }
+    }
+  },
+
+  "gameState": {
+    "bossState": {
+      "bossHp": "number — current boss HP",
+      "bossMaxHp": "number — max boss HP",
+      "playerHp": "number — current player HP",
+      "playerMaxHp": "number — max player HP",
+      "shield": "number — current shield HP",
+      "ultCharge": "number — 0-100 (fire at 100)",
+      "mana": "number — current mana",
+      "maxMana": "number — max mana",
+      "turnCount": "number — turns elapsed",
+      "immortalUsed": "boolean — revive used",
+      "lastCrit": "boolean — last hit crit",
+      "ultCooldown": "number — turns until ULT available"
+    },
+    "combatStats": {
+      "critCount": "number",
+      "reflectTotal": "number",
+      "dodgeCount": "number",
+      "ultCount": "number",
+      "totalHealed": "number",
+      "totalShieldGained": "number",
+      "turnsPlayed": "number"
+    },
+    "campaignExtras": {
+      "activeDebuffs": "ActiveDebuff[] — player debuffs (burn, stun, heal_block, armor_break)",
+      "activeBossBuffs": "ActiveBossBuff[] — boss buffs (shield, reflect)",
+      "lockedGems": "Set<number> — locked gem positions",
+      "eggState": "{ hp, countdown, healPercent } | null",
+      "activeBossStats": "{ atk, def, freq, healPercent } — current phase stats",
+      "currentPhase": "number — 1-4 for multi-phase bosses",
+      "otHiemActive": "boolean",
+      "romBocActive": "boolean",
+      "skillCooldowns": "{ ot_hiem: number, rom_boc: number }"
+    }
+  },
+
+  "antiCheat": {
+    "rateLimit": "2 req/sec per user",
+    "concurrentLock": "5s TTL",
+    "minDuration_campaign": "max(2s, bossHP / 50000)",
+    "damageRange_campaign": "0.8x–5x boss HP",
+    "dailyWinCap": 50,
+    "dailyOgnCap": 5000,
+    "_note": "Auto-play must respect these limits. Duration validation means fights can't be instant."
+  }
+}

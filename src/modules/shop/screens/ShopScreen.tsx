@@ -8,14 +8,15 @@ import { useShopBuy } from '@/shared/hooks/useShopBuy';
 import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { playSound, audioManager } from '@/shared/audio';
+import AutoPlayShopSection from '../components/AutoPlayShopSection';
 
-type ShopTab = 'seed' | 'tool' | 'card' | 'nft';
+type ShopTab = 'seed' | 'tool' | 'card' | 'nft' | 'autoplay';
 
 const TABS: { key: ShopTab; label: string }[] = [
   { key: 'seed', label: 'Hạt giống' },
   { key: 'tool', label: 'Dụng cụ' },
   { key: 'card', label: 'Thẻ TP' },
-  { key: 'nft', label: 'NFT' },
+  { key: 'autoplay', label: 'Auto AI' },
 ];
 
 const RARITY_STYLES: Record<string, { border: string; badge: string; badgeText: string }> = {
@@ -124,8 +125,15 @@ export default function ShopScreen() {
         ))}
       </div>
 
+      {/* Auto-play tab */}
+      {activeTab === 'autoplay' && (
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-24" style={{ scrollbarWidth: 'none' }}>
+          <AutoPlayShopSection />
+        </div>
+      )}
+
       {/* Grid */}
-      <div
+      {activeTab !== 'autoplay' && <div
         className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-24 grid grid-cols-2 gap-3 content-start"
         style={{ scrollbarWidth: 'none' }}
       >
@@ -205,7 +213,7 @@ export default function ShopScreen() {
             </div>
           );
         })}
-      </div>
+      </div>}
 
       {/* Confirm modal */}
       {confirmItem && (

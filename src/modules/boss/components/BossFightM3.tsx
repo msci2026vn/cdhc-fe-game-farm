@@ -11,7 +11,10 @@ import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import { getDominantAura } from '@/shared/components/BuildAura';
 import { audioManager } from '@/shared/audio';
 import BossSkillWarning from './BossSkillWarning';
-import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
+import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
+import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner';
+import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
+import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 
 // Shared match-3 components & hooks
@@ -78,12 +81,36 @@ export default function BossFightM3({
 
   // ═══ Auto-play (VIP only) ═══
   const { isVip } = useVipStatus();
-  const { autoEnabled, toggleAuto } = useAutoPlay({
-    grid, animating, result,
-    handleSwipe, handleDodge, fireUltimate,
-    ultCharge: boss.ultCharge,
-    skillWarning, isVip,
+  const { autoPlayLevel } = useAutoPlayLevel();
+  const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
+
+  // Create refs from state for auto-play controller
+  const gridRef = useRef(grid); gridRef.current = grid;
+  const bossRef = useRef(boss); bossRef.current = boss;
+  const animatingRef = useRef(animating); animatingRef.current = animating;
+  const resultRef = useRef<'fighting' | 'victory' | 'defeat'>(result); resultRef.current = result;
+  const skillWarningRef = useRef(skillWarning); skillWarningRef.current = skillWarning;
+  const enrageRef = useRef(enrageMultiplier); enrageRef.current = enrageMultiplier;
+
+  const autoPlay = useAutoPlayController({
+    gridRef,
+    bossRef,
+    animatingRef,
+    result: resultRef,
+    skillWarningRef: skillWarningRef as React.MutableRefObject<any>,
+    playerStats: combatStats,
+    mode: 'boss',
+    bossArchetype: archetype,
+    enrageMultiplierRef: enrageRef,
+    handleSwipe,
+    handleDodge,
+    fireUltimate,
+    onHighlightGem: (pos) => setHighlightedGem(pos),
+    onClearHighlight: () => setHighlightedGem(null),
   });
+
+  // Sync VIP level
+  useEffect(() => { autoPlay.setVipLevel(isVip ? autoPlayLevel : 1); }, [isVip, autoPlayLevel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ Start battle session on BE (anti-cheat) ═══
   const [sessionReady, setSessionReady] = useState(false);
@@ -123,7 +150,7 @@ export default function BossFightM3({
   const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
   const comboParticles = useComboParticles(combo, showCombo);
 
-  // Call API on fight end (victory or defeat)
+  // Call API on fight end (victory or defeat) + learner
   useEffect(() => {
     if (result !== 'fighting' && !rewardedRef.current) {
       rewardedRef.current = true;
@@ -139,8 +166,24 @@ export default function BossFightM3({
         dodgeCount: combatStatsTracker.dodgeCount,
         isCampaign,
       });
+
+      // Self-learning (Lv5 only)
+      if (autoPlay.isActive && autoPlay.vipLevel >= 5 && archetype) {
+        learnerBattleEnd({
+          won: result === 'victory',
+          bossArchetype: archetype,
+          bossId: Number(campaignBossId || bossInfo.id) || 0,
+          totalTurns: boss.turnCount,
+          turnLimit: turnLimit,
+          gemsUsed: autoPlay.gemsUsed,
+          playerHPPercent: playerHpPct,
+          dodgesUsed: autoPlay.dodgesUsed,
+          ultsUsed: autoPlay.ultsUsed,
+          timeSeconds: durationSeconds,
+        });
+      }
     }
-  }, [result, bossInfo.id, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, isCampaign, boss.playerHp, boss.playerMaxHp]);
+  }, [result, bossInfo.id, campaignBossId, totalDmgDealt, durationSeconds, bossComplete, stars, maxCombo, combatStatsTracker.dodgeCount, isCampaign, boss.playerHp, boss.playerMaxHp]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
   const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
@@ -361,6 +404,7 @@ export default function BossFightM3({
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}
+                    ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
                   `}>
                   {meta.emoji}
                 </div>
@@ -385,17 +429,13 @@ export default function BossFightM3({
             />
           </div>
           {isVip && (
-            <button
-              onClick={toggleAuto}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 flex items-center gap-1 ${
-                autoEnabled
-                  ? 'bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.5)]'
-                  : 'bg-white/10 text-white/60 border border-white/10'
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">👑</span>
-              AUTO
-            </button>
+            <AutoPlayToggle
+              isActive={autoPlay.isActive}
+              onToggle={autoPlay.toggle}
+              vipLevel={autoPlay.vipLevel}
+              dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+              currentSituation={autoPlay.currentSituation}
+            />
           )}
         </div>
       </div>

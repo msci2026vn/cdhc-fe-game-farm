@@ -16,7 +16,10 @@ import { getDominantAura } from '@/shared/components/BuildAura';
 import { audioManager } from '@/shared/audio';
 import { useBossSprite } from '../hooks/useBossSprite';
 import { BossSprite } from './BossSprite';
-import { useAutoPlay } from '@/shared/hooks/useAutoPlay';
+import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
+import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner';
+import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
+import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
@@ -107,13 +110,66 @@ export default function BossFightCampaign({
 
   // ═══ Auto-play (VIP only) ═══
   const { isVip } = useVipStatus();
-  const { autoEnabled, toggleAuto } = useAutoPlay({
-    grid, animating, result,
-    handleSwipe, handleDodge, fireUltimate,
-    ultCharge: boss.ultCharge,
-    skillWarning, isVip,
-    lockedGems, isStunned, isPaused,
+  const { autoPlayLevel } = useAutoPlayLevel();
+  const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
+
+  // Create refs from state for auto-play controller
+  const gridRef = useRef(grid); gridRef.current = grid;
+  const bossRef = useRef(boss); bossRef.current = boss;
+  const animatingRef = useRef(animating); animatingRef.current = animating;
+  const resultRef = useRef<'fighting' | 'victory' | 'defeat'>(result); resultRef.current = result;
+  const skillWarningRef = useRef(skillWarning); skillWarningRef.current = skillWarning;
+  const activeDebuffsRef = useRef(activeDebuffs); activeDebuffsRef.current = activeDebuffs;
+  const activeBossBuffsRef = useRef(activeBossBuffs); activeBossBuffsRef.current = activeBossBuffs;
+  const eggRef = useRef(egg); eggRef.current = egg;
+  const lockedGemsRef = useRef(lockedGems); lockedGemsRef.current = lockedGems;
+  const activeBossStatsRef = useRef(activeBossStats); activeBossStatsRef.current = activeBossStats;
+  const otHiemActiveRef = useRef(otHiemActive); otHiemActiveRef.current = otHiemActive;
+  const otHiemCooldownRef = useRef(otHiemCooldown > 0); otHiemCooldownRef.current = otHiemCooldown > 0;
+  const romBocActiveRef = useRef(romBocActive); romBocActiveRef.current = romBocActive;
+  const romBocCooldownRef = useRef(romBocCooldown > 0); romBocCooldownRef.current = romBocCooldown > 0;
+  const isStunnedRef = useRef(isStunned); isStunnedRef.current = isStunned;
+  const isPausedRef = useRef(isPaused); isPausedRef.current = isPaused;
+  const enrageRef = useRef(enrageMultiplier); enrageRef.current = enrageMultiplier;
+  const deVuongPhaseRef = useRef(currentPhase); deVuongPhaseRef.current = currentPhase;
+
+  const isDeVuong = bossData.id === 40 || (totalPhases ?? 0) >= 4;
+
+  const autoPlay = useAutoPlayController({
+    gridRef,
+    bossRef,
+    lockedGemsRef,
+    activeDebuffsRef: activeDebuffsRef as React.MutableRefObject<any>,
+    activeBossBuffsRef: activeBossBuffsRef as React.MutableRefObject<any>,
+    eggRef: eggRef as React.MutableRefObject<any>,
+    skillWarningRef: skillWarningRef as React.MutableRefObject<any>,
+    activeBossStatsRef: activeBossStatsRef as React.MutableRefObject<any>,
+    playerStats: combatStats,
+    skillLevels,
+    otHiemActiveRef,
+    otHiemOnCooldownRef: otHiemCooldownRef,
+    romBocActiveRef,
+    romBocOnCooldownRef: romBocCooldownRef,
+    mode: 'campaign',
+    bossArchetype: archetype,
+    isDeVuong,
+    deVuongPhaseRef,
+    enrageMultiplierRef: enrageRef,
+    handleSwipe,
+    handleDodge,
+    fireUltimate,
+    onOtHiem: castOtHiem,
+    onRomBoc: castRomBoc,
+    onHighlightGem: (pos) => setHighlightedGem(pos),
+    onClearHighlight: () => setHighlightedGem(null),
+    animatingRef,
+    isStunnedRef,
+    isPausedRef,
+    result: resultRef,
   });
+
+  // Sync VIP level
+  useEffect(() => { autoPlay.setVipLevel(isVip ? autoPlayLevel : 1); }, [isVip, autoPlayLevel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ Boss sprite state management (multi-state SVG) ═══
   const {
@@ -172,6 +228,29 @@ export default function BossFightCampaign({
     totalDmgDealt, durationSeconds, stars,
     maxCombo, combatStatsTracker,
   });
+
+  // Self-learning (Lv5 only)
+  const learnerCalledRef = useRef(false);
+  useEffect(() => {
+    if (result !== 'fighting' && !learnerCalledRef.current) {
+      learnerCalledRef.current = true;
+      if (autoPlay.isActive && autoPlay.vipLevel >= 5 && archetype) {
+        const playerHpPct = Math.round((boss.playerHp / boss.playerMaxHp) * 100);
+        learnerBattleEnd({
+          won: result === 'victory',
+          bossArchetype: isDeVuong ? 'de_vuong' : archetype,
+          bossId: Number(campaignBossId) || 0,
+          totalTurns: boss.turnCount,
+          turnLimit: 0,
+          gemsUsed: autoPlay.gemsUsed,
+          playerHPPercent: playerHpPct,
+          dodgesUsed: autoPlay.dodgesUsed,
+          ultsUsed: autoPlay.ultsUsed,
+          timeSeconds: durationSeconds,
+        });
+      }
+    }
+  }, [result]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ Fragment drop animation state ═══
   const [showDropAnim, setShowDropAnim] = useState(true);
@@ -605,6 +684,7 @@ export default function BossFightCampaign({
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}
                     ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
+                    ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
                   `}>
                   {sp === 'rainbow' ? '🌈' : meta.emoji}
                   {lockedGems.has(i) && (
@@ -671,17 +751,13 @@ export default function BossFightCampaign({
             />
           </div>
           {isVip && (
-            <button
-              onClick={toggleAuto}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 flex items-center gap-1 ${
-                autoEnabled
-                  ? 'bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.5)]'
-                  : 'bg-white/10 text-white/60 border border-white/10'
-              }`}
-            >
-              <span className="text-sm">👑</span>
-              AUTO
-            </button>
+            <AutoPlayToggle
+              isActive={autoPlay.isActive}
+              onToggle={autoPlay.toggle}
+              vipLevel={autoPlay.vipLevel}
+              dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+              currentSituation={autoPlay.currentSituation}
+            />
           )}
         </div>
       </div>

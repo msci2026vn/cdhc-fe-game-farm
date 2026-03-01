@@ -1,0 +1,548 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Auto-play strategy weights for FARMVERSE Match-3 Boss Combat. All weights derived from combat-formulas.ts and combat.config.ts. Used by auto-scorer to evaluate swap candidates each tick.",
+    "generatedDate": "2026-03-01",
+    "_note": "Comments use _ prefix. Weights 0.0-10.0 scale. Priority lower = checked first."
+  },
+
+  "boardConfig": {
+    "gridSize": 8,
+    "gemTypes": ["atk", "hp", "def", "star"],
+    "minMatch": 3,
+    "maxCascadeDepth": 50
+  },
+
+  "gemFormulas": {
+    "atk": {
+      "formula": "40 + ATK_stat * 0.6",
+      "_note": "Damage per gem. Reduced by boss DEF: dmg * (1 - DEF/(DEF+500))"
+    },
+    "star": {
+      "formula": "25 + ATK_stat * 0.3",
+      "_note": "Damage per gem + 8 ULT charge. ULT pierce DEF at Lv5. Dual-purpose gem."
+    },
+    "hp": {
+      "formula": "25 + HP_stat * 0.04",
+      "_note": "Heal per gem. Blocked by healBlock debuff."
+    },
+    "def": {
+      "formula": "20 + DEF_stat * 0.02 + maxHP * 0.01",
+      "_note": "Shield per gem. Useless when armorBreak active."
+    }
+  },
+
+  "specialGemRules": {
+    "match4h": {
+      "pattern": "4 horizontal",
+      "creates": "striped_h",
+      "effect": "Clear entire row (8 gems)",
+      "bonusValue": 2.5,
+      "_reason": "8 gems cleared vs 4 matched = 2x efficiency"
+    },
+    "match4v": {
+      "pattern": "4 vertical",
+      "creates": "striped_v",
+      "effect": "Clear entire column (8 gems)",
+      "bonusValue": 2.5,
+      "_reason": "Same as striped_h, 8 gems cleared"
+    },
+    "match5": {
+      "pattern": "5 in line",
+      "creates": "rainbow",
+      "effect": "Clear ALL gems of chosen type",
+      "bonusValue": 6.0,
+      "_reason": "Average ~12-16 gems of one type on 8x8 board with 4 types. Massive value."
+    },
+    "matchL": {
+      "pattern": "L-shape (3+3)",
+      "creates": "bomb",
+      "effect": "Clear 3x3 area (9 gems)",
+      "bonusValue": 3.0,
+      "_reason": "9 gems cleared from 5 matched = 1.8x efficiency + AoE positioning"
+    },
+    "matchT": {
+      "pattern": "T-shape (3+3)",
+      "creates": "bomb",
+      "effect": "Clear 3x3 area (9 gems)",
+      "bonusValue": 3.0,
+      "_reason": "Same as L-shape bomb"
+    }
+  },
+
+  "comboTiers": [
+    { "combo": 1, "multiplier": 1.0 },
+    { "combo": 2, "multiplier": 1.15 },
+    { "combo": 3, "multiplier": 1.3 },
+    { "combo": 4, "multiplier": 1.5 },
+    { "combo": 5, "multiplier": 1.75 },
+    { "combo": 6, "multiplier": 2.0, "_note": "6+ all capped at x2.0" }
+  ],
+
+  "dodgeConfig": {
+    "freePerBattle": 5,
+    "paidCost": { "mana": 30, "ogn": 5 },
+    "reducedManaCost": 25,
+    "reducedManaThreshold": 250,
+    "_assassinFreqNote": "Assassin freq=3 means 3 hits per attack. Each hit costs 1 dodge. 3 hits = 3 dodges consumed."
+  },
+
+  "situationWeights": {
+    "_doc": "Priority lower = checked first. First match wins. Weights: atk/hp/def/star on 0.0-10.0 scale.",
+
+    "healBlock": {
+      "_when": "Boss applied healBlock debuff on player",
+      "_priority": 0,
+      "atk": 3.0,
+      "hp": 0.0,
+      "def": 2.5,
+      "star": 3.5,
+      "_reason": "HP gems heal 0 during healBlock. Shift all survival to DEF shield. ATK/star to end fight faster."
+    },
+    "armorBreak": {
+      "_when": "Boss applied armorBreak — player DEF=0",
+      "_priority": 1,
+      "atk": 3.5,
+      "hp": 3.0,
+      "def": 0.0,
+      "star": 3.0,
+      "_reason": "DEF gems give 0 shield when armorBreak active. Must rely on HP heal for survival."
+    },
+    "bossShield": {
+      "_when": "Boss has active shield (80% damage reduction)",
+      "_priority": 2,
+      "atk": 0.3,
+      "hp": 3.0,
+      "def": 2.0,
+      "star": 4.5,
+      "_reason": "ATK deals only 20% damage during shield. Star still charges ULT (8/gem unaffected). Farm ULT + survive."
+    },
+    "bossReflect": {
+      "_when": "Boss has reflect (30% damage returned to player)",
+      "_priority": 3,
+      "atk": 0.8,
+      "hp": 4.0,
+      "def": 3.0,
+      "star": 1.5,
+      "_reason": "High ATK = self-damage via 30% reflect. Combo x2.0 reflect can kill player. Prioritize survival, avoid big combos."
+    },
+
+    "playerCritical": {
+      "_when": "Player HP <= 15%",
+      "_priority": 10,
+      "atk": 0.5,
+      "hp": 10.0,
+      "def": 6.0,
+      "star": 1.0,
+      "_reason": "Imminent death. HP gem heals 25+HP*0.04; at 1000HP stat = 65/gem. Need 3-4 HP gems to survive one hit. DEF shield as backup."
+    },
+    "playerDanger": {
+      "_when": "Player HP 16-30%",
+      "_priority": 11,
+      "atk": 1.0,
+      "hp": 6.0,
+      "def": 4.0,
+      "star": 2.0,
+      "_reason": "Two boss hits from death. Balance survival with some offense. HP weight ~3x ATK."
+    },
+    "playerLow": {
+      "_when": "Player HP 31-50%",
+      "_priority": 12,
+      "atk": 2.0,
+      "hp": 3.5,
+      "def": 2.5,
+      "star": 2.5,
+      "_reason": "Can take 2-3 hits. Slightly favor HP but maintain offense to avoid prolonged fight."
+    },
+    "boss39Execute": {
+      "_when": "Boss #39 active AND player HP < 25%",
+      "_priority": 13,
+      "atk": 0.2,
+      "hp": 10.0,
+      "def": 8.0,
+      "star": 0.5,
+      "_reason": "Boss #39 execute: x5 damage when player <20% HP. Must stay above 20% at ALL costs. Near all-in on survival."
+    },
+
+    "bossAlmostDead": {
+      "_when": "Boss HP <= 5%",
+      "_priority": 20,
+      "atk": 8.0,
+      "hp": 0.5,
+      "def": 0.3,
+      "star": 5.0,
+      "_reason": "One or two good ATK matches finish the fight. Star for ULT as finisher. Survival nearly irrelevant."
+    },
+    "bossLowHP": {
+      "_when": "Boss HP 6-20%",
+      "_priority": 21,
+      "atk": 5.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 4.0,
+      "_reason": "Push for kill. ATK full value. Star charges ULT for guaranteed finish (ULT pierce at Lv5)."
+    },
+
+    "bossHighDEF": {
+      "_when": "Boss DEF >= 200 (29%+ ATK reduction)",
+      "_priority": 30,
+      "atk": 1.4,
+      "hp": 2.0,
+      "def": 1.5,
+      "star": 4.5,
+      "_reason": "DEF=200 reduces ATK by 29%, DEF=300 by 38%, DEF=500 by 50%. Star charges ULT which pierces DEF at Lv5. Star ~3x more valuable than ATK."
+    },
+    "bossHighDEFWithOtHiem": {
+      "_when": "Boss DEF >= 200 AND Ot Hiem buff active (+50% DEF bypass at Lv5)",
+      "_priority": 31,
+      "atk": 3.5,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 3.0,
+      "_reason": "Ot Hiem Lv5 bypasses 50% DEF. Effective DEF halved: DEF=300 becomes ~150 (23% reduction). ATK viable again."
+    },
+    "bossVeryHighDEF": {
+      "_when": "Boss DEF >= 400 (44%+ ATK reduction)",
+      "_priority": 32,
+      "atk": 0.7,
+      "hp": 2.0,
+      "def": 1.5,
+      "star": 6.0,
+      "_reason": "DEF=400+ means ATK loses 44%+ value. Star/ULT pierce is the only efficient damage path. Near all-in star."
+    },
+
+    "ultAlmostReady": {
+      "_when": "ULT charge >= 70% (close to full)",
+      "_priority": 40,
+      "atk": 2.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 5.0,
+      "_reason": "A few more star gems fill ULT. Each star gives 8 charge. Prioritize star to reach threshold."
+    },
+    "ultReadyBossShielded": {
+      "_when": "ULT fully charged BUT boss has active shield",
+      "_priority": 41,
+      "atk": 0.5,
+      "hp": 3.0,
+      "def": 2.0,
+      "star": 0.5,
+      "_reason": "ULT is ready but shield blocks 80%. Don't fire ULT. Farm survival until shield expires. Star no longer needed."
+    },
+
+    "eggActive": {
+      "_when": "Boss has summoned Egg (absorbs damage before boss)",
+      "_priority": 50,
+      "atk": 5.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 2.0,
+      "_reason": "Egg must be destroyed first. Egg has no DEF so ATK is full value. Star wastes ULT on egg. Burn egg with raw ATK."
+    },
+
+    "bossHealerRace": {
+      "_when": "Boss archetype=healer AND boss HP > 30%",
+      "_priority": 60,
+      "atk": 4.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 4.0,
+      "_reason": "Healer recovers 1.5-3% HP per tick. Must out-DPS heal rate. At 2% heal on 10K HP = 200 HP/tick. Need ~5 ATK gems/turn minimum."
+    },
+    "bossHealerLowHP": {
+      "_when": "Boss archetype=healer AND boss HP <= 30%",
+      "_priority": 61,
+      "atk": 6.0,
+      "hp": 0.5,
+      "def": 0.5,
+      "star": 5.0,
+      "_reason": "Healer low HP — one ULT or big combo kills before heal ticks. All-in damage. 30% of 10K = 3000 HP, ULT at 3.0x with ATK=100 stat = ~300 damage."
+    },
+
+    "enrageLate": {
+      "_when": "Enrage multiplier >= 1.5 (boss ATK boosted 50%+)",
+      "_priority": 70,
+      "atk": 5.0,
+      "hp": 2.0,
+      "def": 2.0,
+      "star": 4.0,
+      "_reason": "Enrage +50% at 150s, capped x2.0 at 300s. Each boss hit hurts 50%+ more. Must finish fast but need HP/DEF to survive boosted hits."
+    },
+    "enrageCritical": {
+      "_when": "Enrage multiplier >= 1.8 (near cap)",
+      "_priority": 71,
+      "atk": 7.0,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 6.0,
+      "_reason": "Near x2.0 cap. Boss hits are devastating. Race to kill. ULT is fastest guaranteed damage."
+    },
+
+    "normal": {
+      "_when": "No special situation active (default fallback)",
+      "_priority": 999,
+      "atk": 2.5,
+      "hp": 1.5,
+      "def": 1.0,
+      "star": 2.0,
+      "_reason": "Balanced offense. ATK slightly favored (40+ATK*0.6 > star 25+ATK*0.3 per gem). Star valued for ULT charge. DEF lowest priority in neutral."
+    }
+  },
+
+  "bonusWeights": {
+    "specialGemCreation": {
+      "striped": 2.5,
+      "bomb": 3.0,
+      "rainbow": 6.0,
+      "_reason": "Rainbow clears ~12-16 gems of one type (massive). Bomb clears 9 (good AoE). Striped clears 8 (row/col)."
+    },
+    "cascadeDepthBonus": {
+      "perStep": 0.3,
+      "maxBonus": 3.0,
+      "_reason": "Each cascade step increases combo tier. At step 5+, combo x1.75-2.0. Bonus of 0.3/step * 10 steps = 3.0 max."
+    },
+    "matchCountBonus": {
+      "match3": 0.0,
+      "match4": 1.5,
+      "match5": 4.0,
+      "match6plus": 5.0,
+      "_reason": "match3 is baseline (no bonus). match4 creates special gem (+1.5). match5 creates rainbow (+4.0). 6+ is rare but extremely powerful."
+    }
+  },
+
+  "skillPriority": {
+    "dodge": {
+      "priority": 1,
+      "condition": "Boss skill warning active AND (freeDodges > 0 OR (mana >= 30 AND acceptPaidDodge))",
+      "timing": {
+        "_doNot": "Don't dodge normal attacks (only dodge skill attacks). Don't dodge if boss HP < 3% (waste).",
+        "_assassinNote": "Assassin freq=3: each of 3 hits needs separate dodge. Costs 3 dodges total. Only dodge if can afford all 3 or accept partial."
+      },
+      "_reason": "Boss skills deal 2-5x normal damage. Dodging prevents massive HP loss. Free dodges are zero-cost. Highest priority."
+    },
+    "romBoc": {
+      "priority": 2,
+      "condition": "Player HP < 40% OR (boss archetype=assassin AND boss attack imminent) OR need debuff immunity",
+      "timing": {
+        "_doNot": "Don't use if HP > 70% and no assassin threat. Don't stack with existing shield (wait for expiry).",
+        "_note": "Lv5 grants debuff immunity — use preemptively against controller bosses."
+      },
+      "_reason": "Shield (10-30% maxHP) + damage reduction (15-35%). At Lv5 also debuff immune. Critical for survival against burst."
+    },
+    "samDongULT": {
+      "priority": 3,
+      "condition": "ULT charge >= 80 mana (60 at Lv5) AND boss has no active shield AND boss not in invuln phase",
+      "timing": {
+        "_doNot": "Don't fire into boss shield (80% reduction wastes ULT). Don't fire if boss HP < 2% (overkill).",
+        "_note": "Lv5 pierces DEF + 2s stun. Against high-DEF bosses, ULT is primary damage source."
+      },
+      "_reason": "3.0x-5.0x ATK multiplier. Lv5 pierces DEF and stuns 2s. Best single-hit damage in game."
+    },
+    "otHiem": {
+      "priority": 4,
+      "condition": "Off cooldown (20s CD) AND boss HP > 10% AND no active buff already",
+      "timing": {
+        "_doNot": "Don't use when boss HP < 10% (fight ending soon, waste CD). Don't use right before boss shield phase.",
+        "_note": "Lv5: +50% DEF bypass + 20% crit + cleanse. Use before ULT against high-DEF bosses for combo."
+      },
+      "_reason": "+20-60% damage buff. At Lv5 bypasses 50% DEF. Best used right before ULT or big combo turn."
+    }
+  },
+
+  "archetypeOverrides": {
+    "_doc": "Bias values ADDED to situationWeights.normal. Positive = increase, negative = decrease.",
+
+    "glass_cannon": {
+      "atkBias": 1.5,
+      "hpBias": 0.5,
+      "defBias": -0.5,
+      "starBias": 0.0,
+      "_reason": "DEF=0 means ATK gems deal full value (no reduction). High ATK means need some HP heal. DEF less useful since boss hits infrequent (freq=1)."
+    },
+    "assassin": {
+      "atkBias": -0.5,
+      "hpBias": 2.0,
+      "defBias": 2.0,
+      "starBias": 0.5,
+      "_reason": "freq=2-3 means 2-3 hits per attack cycle. At ATK=300, freq=3 = 900 damage/cycle. Need heavy HP/DEF to survive. Dodge is critical."
+    },
+    "tank": {
+      "atkBias": -1.0,
+      "hpBias": 0.0,
+      "defBias": 0.0,
+      "starBias": 3.0,
+      "_reason": "DEF 150-450 reduces ATK by 23-47%. Star charges ULT which pierces DEF (Lv5). Star is 3x more efficient than ATK against tanks."
+    },
+    "controller": {
+      "atkBias": 0.5,
+      "hpBias": 0.5,
+      "defBias": 0.5,
+      "starBias": 0.5,
+      "_reason": "Balanced with debuffs. Debuff situations (healBlock, armorBreak) handled by situationWeights overrides. Small all-around boost for flexibility."
+    },
+    "healer": {
+      "atkBias": 1.5,
+      "hpBias": -0.5,
+      "defBias": -0.5,
+      "starBias": 1.5,
+      "_reason": "Must out-DPS heal rate (1.5-3% HP/tick). At 2% heal on 8000 HP boss = 160 HP/tick to overcome. Favor ATK+star for sustained DPS."
+    },
+    "hybrid": {
+      "atkBias": 0.5,
+      "hpBias": 0.5,
+      "defBias": 0.5,
+      "starBias": 1.0,
+      "_reason": "Mixed traits. Slight star bias since DEF may be present. Adapt via situationWeights as fight progresses."
+    },
+    "mixed": {
+      "atkBias": 0.0,
+      "hpBias": 1.0,
+      "defBias": 0.5,
+      "starBias": 0.5,
+      "_reason": "Unpredictable boss. Slight HP bias for safety. Let situationWeights handle specifics as conditions change."
+    }
+  },
+
+  "deVuongStrategy": {
+    "_doc": "De Vuong (Final Boss) — 4 phases. Each phase has unique weights and skill timing.",
+
+    "phase1": {
+      "_name": "Tank Phase",
+      "_stats": "ATK=250, DEF=500, freq=1, heal=0%",
+      "weights": {
+        "atk": 0.5,
+        "hp": 1.5,
+        "def": 1.0,
+        "star": 7.0
+      },
+      "skillTiming": {
+        "dodge": "Save free dodges for Phase 2. Only dodge if HP < 30%.",
+        "romBoc": "Use only if HP drops below 35%. Conserve CD for Phase 2.",
+        "samDongULT": "Fire ULT when ready — DEF=500 means 50% reduction on ATK but ULT Lv5 pierces.",
+        "otHiem": "Use before ULT for DEF bypass combo. +50% DEF bypass makes ULT devastating."
+      },
+      "_reason": "DEF=500 = 50% ATK reduction. ATK gems nearly useless (0.5). Star is king — charges ULT which pierces DEF. Farm star gems, survive, fire ULTs."
+    },
+    "phase2": {
+      "_name": "Assassin Phase",
+      "_stats": "ATK=600, DEF=0, freq=3, heal=0%",
+      "weights": {
+        "atk": 2.0,
+        "hp": 4.0,
+        "def": 3.5,
+        "star": 2.5
+      },
+      "skillTiming": {
+        "dodge": "CRITICAL. freq=3 = 3 hits per attack = 1800 damage/cycle. Use free dodges here. Each hit costs 1 dodge.",
+        "romBoc": "Activate IMMEDIATELY at phase start. Shield + damage reduction essential.",
+        "samDongULT": "Fire when ready. DEF=0 so all damage lands. Stun gives 2s breathing room.",
+        "otHiem": "Use when available. +dmg helps end phase faster. Cleanse removes any carried debuffs."
+      },
+      "_reason": "600 ATK * freq=3 = 1800 dmg/cycle. Lethal. HP/DEF critical for survival. Dodge is lifesaver. ATK works at full value (DEF=0)."
+    },
+    "phase3": {
+      "_name": "Healer Phase",
+      "_stats": "ATK=350, DEF=200, freq=1, heal=3%",
+      "weights": {
+        "atk": 3.0,
+        "hp": 1.5,
+        "def": 1.0,
+        "star": 5.0
+      },
+      "skillTiming": {
+        "dodge": "Less critical. freq=1 with ATK=350 is manageable. Save remaining dodges for Phase 4.",
+        "romBoc": "Use if HP < 40%. Otherwise conserve.",
+        "samDongULT": "Fire on cooldown. Must out-DPS 3% heal. ULT pierces DEF=200.",
+        "otHiem": "Use on cooldown. +dmg + DEF bypass essential to overcome heal rate."
+      },
+      "_reason": "3% heal is massive (boss regens ~300 HP/tick on 10K HP). DEF=200 reduces ATK by 29%. Star/ULT is best DPS. Must maintain constant pressure."
+    },
+    "phase4": {
+      "_name": "Cannon Phase (Self-Destruct)",
+      "_stats": "ATK=800, DEF=0, freq=2, heal=0%, self-destruct 2%HP/5s",
+      "weights": {
+        "atk": 8.0,
+        "hp": 1.0,
+        "def": 0.5,
+        "star": 6.0
+      },
+      "skillTiming": {
+        "dodge": "Use ALL remaining dodges. ATK=800 * freq=2 = 1600 dmg/cycle. Every dodge matters.",
+        "romBoc": "Activate immediately. Shield buys time for DPS.",
+        "samDongULT": "Fire ASAP. Every ULT could be the kill shot. 2s stun delays self-destruct.",
+        "otHiem": "Use immediately. Max damage buff for final push."
+      },
+      "_reason": "Race against self-destruct timer (2% boss HP/5s). DEF=0 means ATK full value. ALL-IN damage. Survival secondary — boss kills itself if you stall."
+    }
+  },
+
+  "weeklyBossStrategy": {
+    "_doc": "Weekly bosses: 8 bosses, HP 500-10K, DEF=0, no debuffs, no phases. Simpler than campaign.",
+    "weights": {
+      "atk": 4.0,
+      "hp": 1.5,
+      "def": 0.5,
+      "star": 3.0
+    },
+    "skillTiming": {
+      "dodge": "Use free dodges only. Not worth spending OGN on weekly bosses.",
+      "romBoc": "Use if HP < 30%.",
+      "samDongULT": "Fire when ready. DEF=0 so full damage.",
+      "otHiem": "Use on cooldown for +dmg."
+    },
+    "_reason": "DEF=0 on all weekly bosses means ATK is king. No debuffs simplifies strategy. Star for ULT burst. Minimal DEF investment since no prolonged fights."
+  },
+
+  "vipTiers": {
+    "lv1": {
+      "name": "Free",
+      "algorithm": "random",
+      "tickMs": 2500,
+      "autoSkill": false,
+      "mctsSimulations": 0,
+      "freeDodges": 5,
+      "rechargeDiscount": 0,
+      "_note": "Random valid swap. No intelligence. Baseline experience."
+    },
+    "lv2": {
+      "name": "Basic",
+      "algorithm": "greedy_weighted",
+      "tickMs": 2000,
+      "autoSkill": false,
+      "mctsSimulations": 0,
+      "freeDodges": 5,
+      "rechargeDiscount": 0,
+      "_note": "Evaluates all valid swaps, picks highest weighted score. Uses situationWeights + archetypeOverrides."
+    },
+    "lv3": {
+      "name": "Advanced",
+      "algorithm": "greedy_cascade",
+      "tickMs": 1500,
+      "autoSkill": "dodge_only",
+      "mctsSimulations": 0,
+      "freeDodges": 5,
+      "rechargeDiscount": 0,
+      "_note": "Greedy + simulates 1-step cascade to find chain reactions. Auto-dodge with 5 free dodges."
+    },
+    "lv4": {
+      "name": "Pro",
+      "algorithm": "mcts",
+      "tickMs": 1200,
+      "autoSkill": "dodge_and_ult",
+      "mctsSimulations": 30,
+      "freeDodges": 5,
+      "rechargeDiscount": 0.3,
+      "_note": "Monte Carlo Tree Search with 30 simulations. Auto-dodge + auto-ULT. 30% faster instant recharge."
+    },
+    "lv5": {
+      "name": "Elite",
+      "algorithm": "mcts",
+      "tickMs": 1000,
+      "autoSkill": "full",
+      "mctsSimulations": 80,
+      "freeDodges": 7,
+      "rechargeDiscount": 0.5,
+      "_note": "Full MCTS 80 sims. All skills auto-managed. 7 free dodges. 50% faster instant recharge. Best possible play."
+    }
+  }
+}
