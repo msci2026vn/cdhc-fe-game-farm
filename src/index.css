@@ -2078,6 +2078,15 @@ body {
     100% { background-position: -200% 0; }
   }
 
+  @keyframes auto-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+
+  @keyframes ping {
+    75%, 100% { transform: scale(1.5); opacity: 0; }
+  }
+
   .prayer-float-up {
     animation: floatUp 8s linear infinite;
     opacity: 0;

@@ -15,7 +15,7 @@ import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
 import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner';
 import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
-import { useVipStatus } from '@/shared/hooks/useVipStatus';
+// useVipStatus removed — auto-play level is based on purchase, not VIP
 
 // Shared match-3 components & hooks
 import { useGemPointer, useComboParticles } from '@/shared/match3';
@@ -80,7 +80,6 @@ export default function BossFightM3({
   const auraType = getDominantAura(combatStats);
 
   // ═══ Auto-play (Lv1 free for all, Lv2+ VIP) ═══
-  const { isVip } = useVipStatus();
   const { autoPlayLevel } = useAutoPlayLevel();
   const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
 
@@ -109,8 +108,8 @@ export default function BossFightM3({
     onClearHighlight: () => setHighlightedGem(null),
   });
 
-  // Sync VIP level
-  useEffect(() => { autoPlay.setVipLevel(isVip ? autoPlayLevel : 1); }, [isVip, autoPlayLevel]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Sync auto-play level (purchased in shop, independent of VIP subscription)
+  useEffect(() => { autoPlay.setVipLevel(autoPlayLevel); }, [autoPlayLevel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ Start battle session on BE (anti-cheat) ═══
   const [sessionReady, setSessionReady] = useState(false);
