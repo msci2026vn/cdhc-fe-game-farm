@@ -24,7 +24,7 @@ import { GEM_META, getComboInfo, getEnrageMultiplier, bossDEFReduction } from '@
 import type {
   BossState, DamagePopup, FightResult, SkillWarning, BossAttackWarning,
   CombatStats, CombatNotif, CombatNotifType,
-  ActiveDebuff, ActiveBossBuff, EggState, BlastVfx, BurstData
+  ActiveDebuff, ActiveBossBuff, EggState, BlastVfx, BurstData, ChainLightningData
 } from '@/shared/match3/combat.types';
 import type { FloatingTextData } from '../components/FloatingCombatText';
 
@@ -151,6 +151,8 @@ export function useMatch3Campaign(
   const burstId = useRef(0);
   const [floatingTexts, setFloatingTexts] = useState<FloatingTextData[]>([]);
   const floatingTextId = useRef(0);
+  const [chainLightnings, setChainLightnings] = useState<ChainLightningData[]>([]);
+  const chainLightningId = useRef(0);
   const fightStartTime = useRef(Date.now());
   const maxComboRef = useRef(0);
   const [stars, setStars] = useState(0);
@@ -222,7 +224,12 @@ export function useMatch3Campaign(
 
   const addFloatingText = useCallback((text: string, x: number, y: number, color: string) => {
     const id = floatingTextId.current++;
-    setFloatingTexts(prev => [...prev, { id, text, x, y, color }]);
+    setFloatingTexts(prev => [...prev, { id, text, x, y, color, expiresAt: Date.now() + 1500 }]);
+  }, []);
+
+  const addChainLightning = useCallback((path: number[], color?: string) => {
+    const id = chainLightningId.current++;
+    setChainLightnings(prev => [...prev, { id, path, color, expiresAt: Date.now() + 1000 }]);
   }, []);
 
   // ═══ GC Ticker for Popups, Notifs, and Blasts ═══
@@ -245,6 +252,11 @@ export function useMatch3Campaign(
         return next.length !== prev.length ? next : prev;
       });
       setParticleBursts(prev => {
+        if (prev.length === 0) return prev;
+        const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
+        return next.length !== prev.length ? next : prev;
+      });
+      setChainLightnings(prev => {
         if (prev.length === 0) return prev;
         const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
         return next.length !== prev.length ? next : prev;
@@ -592,10 +604,11 @@ export function useMatch3Campaign(
       addBlastVfx,
       addParticleBurst,
       addFloatingText,
+      addChainLightning,
     }, currentGrid, currentCombo,
       (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
       swapPair, cascadeDepth);
-  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx, addParticleBurst, addFloatingText]);
+  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx, addParticleBurst, addFloatingText, addChainLightning]);
 
   const handleTap = useCallback((idx: number) => {
     setHintedGems([]); // Clear hints on interaction
@@ -661,5 +674,6 @@ export function useMatch3Campaign(
     hintedGems,
     particleBursts,
     floatingTexts,
+    chainLightnings,
   };
 }

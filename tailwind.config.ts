@@ -386,6 +386,11 @@ export default {
           "0%": { opacity: "0.3" },
           "100%": { opacity: "0.8" },
         },
+        "bolt-flash": {
+          "0%": { opacity: "0" },
+          "10%": { opacity: "1", filter: "brightness(2)" },
+          "100%": { opacity: "0" },
+        },
         "heal-pulse": {
           "0%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.8)" },
           "50%": { boxShadow: "0 0 20px 8px rgba(34, 197, 94, 0.6)" },
@@ -432,6 +437,7 @@ export default {
         "scale-in": "scale-in 0.3s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "combo-burst": "combo-burst 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "bolt-flash": "bolt-flash 0.3s ease-out forwards",
         "boss-attack": "boss-attack 0.6s ease-out",
         "boss-atk-flash": "boss-atk-flash 0.8s ease-out",
         "ult-flash": "ult-flash 1.5s ease-out",

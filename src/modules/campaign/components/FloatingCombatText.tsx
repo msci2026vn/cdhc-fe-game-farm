@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 export interface FloatingTextData {
     id: number;
@@ -6,7 +6,7 @@ export interface FloatingTextData {
     x: number;
     y: number;
     color: string;
-    duration?: number;
+    expiresAt?: number;
 }
 
 interface Props {
@@ -14,35 +14,6 @@ interface Props {
 }
 
 export function FloatingCombatText({ data }: Props) {
-    // We use local state to track items so we can fade them out gracefully
-    // before the parent completely unmounts them via GC
-    const [items, setItems] = useState<FloatingTextData[]>([]);
-
-    useEffect(() => {
-        // Add new ones
-        setItems(prev => {
-            const existingIds = new Set(prev.map(i => i.id));
-            const incoming = data.filter(d => !existingIds.has(d.id));
-            return [...prev, ...incoming];
-        });
-    }, [data]);
-
-    useEffect(() => {
-        // Local GC to clear strictly expired things from React DOM
-        const interval = setInterval(() => {
-            const now = Date.now();
-            setItems(prev => {
-                const next = prev.filter(i => {
-                    // We infer expiration by adding duration to some arbitrary start,
-                    // but really we rely on parent's GC. This just masks them earlier if needed.
-                    return true;
-                });
-                return next;
-            });
-        }, 100);
-        return () => clearInterval(interval);
-    }, []);
-
     return (
         <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
             {data.map(item => (

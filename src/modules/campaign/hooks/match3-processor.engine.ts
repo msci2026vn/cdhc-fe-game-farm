@@ -47,6 +47,7 @@ export interface CampaignProcessorDeps {
   addBlastVfx?: (type: 'row' | 'col', index: number) => void;
   addParticleBurst?: (index: number, color: string, type?: 'burst' | 'fire' | 'heal') => void;
   addFloatingText?: (text: string, x: number, y: number, color: string) => void;
+  addChainLightning?: (path: number[], color?: string) => void;
 }
 
 export function processCampaignMatchesImpl(
@@ -109,7 +110,14 @@ export function processCampaignMatchesImpl(
 
   // Collect all matched positions from groups
   const matchedPositions = new Set<number>();
-  for (const g of groups) for (const p of g.positions) matchedPositions.add(p);
+  for (const g of groups) {
+    for (const p of g.positions) matchedPositions.add(p);
+
+    // Spawn Chain Lightning for Star matches
+    if (g.type === 'star' && deps.addChainLightning && g.positions.length >= 2) {
+      deps.addChainLightning(g.positions, '#eab308');
+    }
+  }
 
   // Compute swap context for rainbow targeting (clear swapped gem's type, not most common)
   let swapContext: { pos: number; targetType: GemType } | undefined;

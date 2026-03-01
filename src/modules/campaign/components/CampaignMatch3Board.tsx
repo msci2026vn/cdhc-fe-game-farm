@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import { BlastVfx, BurstData } from '@/shared/match3/combat.types';
 import { ParticleOverlay } from './ParticleOverlay';
 import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
+import { BoardWeatherOverlay } from './BoardWeatherOverlay';
+import { ChainLightningContainer } from './ChainLightningContainer';
+import { ChainLightningData } from '@/shared/match3/combat.types';
 
 interface Props {
     grid: any[];
@@ -26,16 +29,19 @@ interface Props {
     hintedGems?: number[];
     particleBursts?: BurstData[];
     floatingTexts?: FloatingTextData[];
+    chainLightnings?: ChainLightningData[];
 }
 
 export default function CampaignMatch3Board({
     grid, selected, matchedCells, spawningGems, lockedGems, highlightedGem,
     isStunned, animating, handlePointerDown, handlePointerMove, handlePointerUp,
     combo, showCombo, otHiemActive, romBocActive, GEM_META,
-    blastVfxs = [], hintedGems = [], particleBursts = [], floatingTexts = []
+    blastVfxs = [], hintedGems = [], particleBursts = [], floatingTexts = [], chainLightnings = []
 }: Props) {
     return (
-        <div className="relative flex-1">
+        <div className="relative flex-1 rounded-lg">
+            <BoardWeatherOverlay />
+            <ChainLightningContainer strikes={chainLightnings} />
             <ParticleOverlay bursts={particleBursts} />
             <FloatingCombatText data={floatingTexts} />
             {showCombo && combo >= 3 && (
