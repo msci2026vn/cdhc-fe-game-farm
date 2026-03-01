@@ -1,0 +1,281 @@
+@layer utilities {
+  .text-outline {
+    text-shadow: 1px 1px 0 #5d4037, -1px -1px 0 #5d4037, 1px -1px 0 #5d4037, -1px 1px 0 #5d4037;
+  }
+
+  .bg-farm-vibe {
+    background: linear-gradient(to bottom, #A5D6A7 0%, #E8F5E9 40%, #FFFDE7 100%);
+  }
+
+  .border-wood {
+    border: 3px solid #8c6239;
+    border-radius: 12px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .wood-btn {
+    background: #8c6239;
+    border-bottom: 4px solid #5d4037;
+    color: #fefae0;
+  }
+
+  .wood-btn:active {
+    transform: translateY(2px);
+    border-bottom: 2px solid #5d4037;
+  }
+
+  .popup-overlay {
+    background-color: rgba(45, 106, 79, 0.75);
+    backdrop-filter: blur(4px);
+  }
+
+  .stats-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+
+  .stats-btn-minus {
+    background-color: #fecaca;
+    color: #dc2626;
+    border: 1px solid #f87171;
+    border-bottom: 3px solid #ef4444;
+  }
+
+  .stats-btn-minus:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+  }
+
+  .stats-btn-plus {
+    background-color: #bbf7d0;
+    color: #16a34a;
+    border: 1px solid #4ade80;
+    border-bottom: 3px solid #22c55e;
+  }
+
+  .stats-btn-plus:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+  }
+
+  .bg-nature-vibe {
+    background: linear-gradient(to bottom, #ecfdf5 0%, #d1fae5 30%, #a7f3d0 60%, #34d399 100%);
+  }
+
+  .wood-panel {
+    background: #8c6239;
+    border: 3px solid #5d4037;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-spirit {
+    background: linear-gradient(to bottom, #fcd34d, #f59e0b);
+    border: 2px solid #fff;
+    box-shadow: 0 4px 0 #b45309, 0 6px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-spirit:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #b45309, 0 3px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-wood-rustic {
+    background: #deb887;
+    border: 2px solid #8b4513;
+    box-shadow: 0 3px 0 #5d4037, 0 4px 4px rgba(0, 0, 0, 0.2);
+    color: #5d4037;
+  }
+
+  .btn-wood-rustic:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #5d4037, 0 2px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .bg-nature-vibe-list {
+    background: linear-gradient(to bottom, #a8e6cf 0%, #dcedc1 100%);
+  }
+
+  .wood-card {
+    background: #fdf6e3;
+    border: 2px solid #8c6239;
+    box-shadow: 4px 4px 0 #5d4037;
+    position: relative;
+  }
+
+  .wood-card::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #5d4037;
+    border-radius: 14px;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .prayer-btn {
+    background: linear-gradient(180deg, #52b788 0%, #2d6a4f 100%);
+    border: 2px solid #1b4332;
+    box-shadow: 0 3px 0 #1b4332;
+    color: white;
+  }
+
+  .prayer-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #1b4332;
+  }
+
+  .tab-active {
+    background: #e9c46a;
+    color: #5d4037;
+    border-color: #5d4037;
+    font-weight: bold;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab-inactive {
+    background: #fdf6e3;
+    color: #8c6239;
+    border-color: #d7c0a0;
+  }
+
+  .bg-prayer-vibe {
+    background: linear-gradient(to bottom, #a8e6cf 0%, #dcedc1 100%);
+  }
+
+  .wood-frame {
+    background: #8c6239;
+    border: 4px solid #5d4037;
+    box-shadow:
+      inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+      inset -2px -2px 0 rgba(0, 0, 0, 0.2),
+      0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+
+  .wood-btn-carved {
+    background: linear-gradient(180deg, #a0522d 0%, #8b4513 100%);
+    border: 2px solid #5d4037;
+    box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .wood-btn-carved:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #3e2723, inset 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  .parchment-input {
+    background-color: #fdfbf7;
+    background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+    border: 2px dashed #deb887;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .text-outline-light {
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .bg-spiritual {
+    background: linear-gradient(to bottom, #d8f3dc 0%, #b7e4c7 40%, #95d5b2 100%);
+  }
+
+  .wood-panel {
+    background: #fdf6e3;
+    border: 2px solid #8c6239;
+    box-shadow: 0 4px 0 #8c6239, 0 6px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .vine-decoration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    border: 12px solid transparent;
+    border-image: url("https://i.imgur.com/7s1H5Kz.png") 30 round;
+    /* border: 8px solid #52b788; */
+    border-radius: 24px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(140, 98, 57, 0.1);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #8c6239;
+    border-radius: 10px;
+  }
+
+  .rank-1-bg {
+    background: linear-gradient(135deg, #ffd700 0%, #fdb931 100%);
+    border-color: #b8860b;
+  }
+
+  .rank-2-bg {
+    background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+    border-color: #757575;
+  }
+
+  .rank-3-bg {
+    background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%);
+    border-color: #8b4513;
+  }
+
+  .bg-wood-table {
+    background-color: #5d4037;
+    background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+  }
+
+  .diary-paper {
+    background-color: #fdf6e3;
+    background-image:
+      linear-gradient(#e0d8b4 1px, transparent 1px),
+      url("https://www.transparenttextures.com/patterns/cream-paper.png");
+    background-size: 100% 1.5rem, auto;
+    line-height: 1.5rem;
+  }
+
+  .wood-frame-book {
+    box-shadow:
+      inset 0 0 20px rgba(0, 0, 0, 0.5),
+      0 0 0 8px #8c6239,
+      0 0 0 10px #5d4037,
+      5px 10px 15px rgba(0, 0, 0, 0.4);
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .leaf-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+      transform: translateY(-10px) rotate(5deg);
+    }
+
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+  }
+}

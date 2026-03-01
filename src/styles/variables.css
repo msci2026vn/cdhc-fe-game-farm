@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 20% 95%;
+    --foreground: 17 45% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 17 45% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 17 45% 12%;
+
+    --primary: 145 50% 36%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 145 60% 48%;
+    --primary-dark: 145 55% 23%;
+    --primary-pale: 140 66% 83%;
+
+    --secondary: 42 87% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-dark: 38 79% 47%;
+    --secondary-light: 48 100% 70%;
+
+    --muted: 30 20% 92%;
+    --muted-foreground: 20 22% 29%;
+
+    --accent: 42 87% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 6 78% 57%;
+    --destructive-dark: 6 67% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 30% 88%;
+    --input: 30 30% 88%;
+    --ring: 145 50% 36%;
+    --radius: 16px;
+
+    /* Game tokens */
+    --green-dark: 145 55% 23%;
+    --green-mid: 145 50% 36%;
+    --green-light: 145 60% 48%;
+    --green-pale: 140 66% 83%;
+
+    --gold: 42 87% 55%;
+    --gold-dark: 38 79% 47%;
+    --gold-light: 48 100% 70%;
+
+    --brown: 25 45% 37%;
+    --brown-dark: 25 50% 24%;
+    --brown-light: 25 40% 59%;
+
+    --farm-red: 6 78% 57%;
+    --farm-blue: 204 70% 53%;
+    --farm-sky: 197 71% 73%;
+
+    --boss-dark: 270 50% 11%;
+    --boss-mid: 270 40% 21%;
+
+    --text-dark: 17 45% 12%;
+    --text-mid: 20 22% 29%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}

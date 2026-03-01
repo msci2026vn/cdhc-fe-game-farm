@@ -1,0 +1,664 @@
+@layer components {
+
+  /* Splash */
+  .splash-gradient {
+    background: linear-gradient(160deg, #1a5c2a 0%, #2d8a4e 40%, #4eca6a 100%);
+  }
+
+  /* Farm sky */
+  .farm-sky-gradient {
+    background: linear-gradient(180deg, #c8e6ff 0%, #e8f5e9 35%, #f5e6d3 100%);
+  }
+
+  /* Boss */
+  .boss-gradient {
+    background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 30%, #1a2a1a 100%);
+  }
+
+  /* Quiz */
+  .quiz-gradient {
+    background: linear-gradient(160deg, #f8f3e8 0%, #e8f5e9 50%, #fff8e1 100%);
+  }
+
+  /* Shop */
+  .shop-gradient {
+    background: linear-gradient(160deg, #fff8e1 0%, #f5e6d3 50%, #e8f5e9 100%);
+  }
+
+  /* Profile */
+  .profile-gradient {
+    background: linear-gradient(160deg, #e8f5e9 0%, #f0f7f1 50%, #d4f1ff 100%);
+  }
+
+  /* Stat chip */
+  .stat-chip {
+    @apply flex items-center gap-2 rounded-2xl px-3 py-2.5;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Gem types */
+  .gem-atk {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+  }
+
+  .gem-hp {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+  }
+
+  .gem-def {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+  }
+
+  .gem-star {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+  }
+
+  .gem-shine::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+    border-radius: 8px 8px 50% 50%;
+    pointer-events: none;
+  }
+
+  /* ═══ Gem Match Explosion Ring ═══ */
+  .gem-match-burst::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: match-ring 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* Bright flash on matched gem */
+  .gem-match-burst::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, transparent 70%);
+    animation: match-flash 0.4s ease-out forwards;
+    pointer-events: none;
+    z-index: 19;
+  }
+
+  /* ═══ Gem type glow colors for matched state ═══ */
+  .gem-atk.gem-match-burst {
+    color: #ff6b6b;
+  }
+
+  .gem-hp.gem-match-burst {
+    color: #55efc4;
+  }
+
+  .gem-def.gem-match-burst {
+    color: #74b9ff;
+  }
+
+  .gem-star.gem-match-burst {
+    color: #fdcb6e;
+  }
+
+  .gem-mana.gem-match-burst {
+    color: #a29bfe;
+  }
+
+  .gem-heal.gem-match-burst {
+    color: #55efc4;
+  }
+
+  /* ═══ Special gem visuals ═══ */
+
+  /* Rainbow gem — white/iridescent with hue rotation */
+  .gem-rainbow {
+    background: linear-gradient(135deg, #fff 0%, #f0e6ff 25%, #e6f0ff 50%, #e6ffe6 75%, #fff 100%);
+    box-shadow: 0 3px 12px rgba(255, 255, 255, 0.5), 0 0 8px rgba(200, 160, 255, 0.4);
+    animation: rainbow-glow 2s linear infinite;
+  }
+
+  @keyframes rainbow-glow {
+    0% { filter: hue-rotate(0deg) brightness(1.05); }
+    50% { filter: hue-rotate(180deg) brightness(1.15); }
+    100% { filter: hue-rotate(360deg) brightness(1.05); }
+  }
+
+  /* Striped horizontal — 3 white horizontal lines */
+  .gem-special-striped-h::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 6px;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 25%,
+      rgba(255, 255, 255, 0.45) 25%,
+      rgba(255, 255, 255, 0.45) 30%,
+      transparent 30%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Striped vertical — 3 white vertical lines */
+  .gem-special-striped-v::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 6px;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 25%,
+      rgba(255, 255, 255, 0.45) 25%,
+      rgba(255, 255, 255, 0.45) 30%,
+      transparent 30%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Bomb — circle ring + pulse */
+  .gem-special-bomb {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 200, 50, 0.5) !important;
+    animation: bomb-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes bomb-pulse {
+    0%, 100% { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 200, 50, 0.4); }
+    50% { box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 200, 50, 0.7); }
+  }
+
+  /* Rainbow special glow */
+  .gem-special-rainbow {
+    animation: rainbow-glow 2s linear infinite;
+  }
+
+  /* ═══ Special gem SPAWN animation ═══ */
+  .gem-special-spawn {
+    animation: gem-spawn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    z-index: 10;
+  }
+  .gem-special-spawn::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+    animation: match-flash 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 25;
+  }
+
+  /* ═══ Cascade landing bounce ═══ */
+  .gem-landed {
+    animation: gem-land 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ═══ Grid board shake on big combos ═══ */
+  .grid-combo-shake {
+    animation: grid-shake 0.35s ease-out;
+  }
+
+  /* ═══ Combo flash overlay (on the grid) ═══ */
+  .combo-flash-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 15;
+    animation: match-flash 0.5s ease-out forwards;
+  }
+
+  .combo-flash-2 {
+    background: radial-gradient(circle, rgba(162, 155, 254, 0.3) 0%, transparent 70%);
+  }
+
+  .combo-flash-3 {
+    background: radial-gradient(circle, rgba(253, 203, 110, 0.4) 0%, transparent 70%);
+  }
+
+  .combo-flash-4 {
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.4) 0%, transparent 70%);
+  }
+
+  .combo-flash-5 {
+    background: radial-gradient(circle, rgba(253, 121, 168, 0.5) 0%, transparent 70%);
+  }
+
+  .combo-flash-6 {
+    background: radial-gradient(circle, rgba(224, 86, 253, 0.5) 0%, transparent 70%);
+  }
+
+  /* ═══ Combo badge effects ═══ */
+
+  /* Expanding ring behind combo badge for high combos */
+  .combo-ring-burst {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    animation: match-ring 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+
+  /* Pulsing glow for high combo badges */
+  .combo-badge-high {
+    animation: combo-badge-pulse 0.6s ease-in-out;
+  }
+
+  /* Godlike badge: rainbow shimmer + scale */
+  .combo-badge-godlike {
+    animation: combo-badge-godlike 0.8s ease-in-out;
+  }
+
+  /* Inner shimmer overlay on badge */
+  .combo-inner-glow {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%);
+    background-size: 200% 200%;
+    animation: combo-shimmer 0.8s ease-out;
+    pointer-events: none;
+  }
+
+  @keyframes combo-badge-pulse {
+    0% {
+      transform: scale(0.8);
+    }
+
+    40% {
+      transform: scale(1.15);
+    }
+
+    70% {
+      transform: scale(0.95);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes combo-badge-godlike {
+    0% {
+      transform: scale(0.5);
+      filter: brightness(2);
+    }
+
+    30% {
+      transform: scale(1.25);
+      filter: brightness(1.5);
+    }
+
+    60% {
+      transform: scale(0.95);
+      filter: brightness(1);
+    }
+
+    100% {
+      transform: scale(1);
+      filter: brightness(1);
+    }
+  }
+
+  @keyframes combo-shimmer {
+    0% {
+      background-position: -100% -100%;
+      opacity: 0;
+    }
+
+    30% {
+      opacity: 1;
+    }
+
+    100% {
+      background-position: 100% 100%;
+      opacity: 0;
+    }
+  }
+
+  /* ═══ Combo tier animations ═══ */
+  .combo-tier-nice {
+    animation: combo-nice 0.4s ease-out forwards;
+  }
+  .combo-tier-great {
+    animation: combo-great 0.5s ease-out forwards;
+  }
+  .combo-tier-excellent {
+    animation: combo-excellent 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .combo-tier-amazing {
+    animation: combo-amazing 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .combo-tier-epic {
+    animation: combo-epic 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+  .combo-tier-legendary {
+    animation: combo-legendary 0.7s ease-out forwards;
+  }
+  .combo-tier-mythic {
+    animation: combo-mythic 0.6s ease-out forwards;
+  }
+
+  @keyframes combo-nice {
+    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  @keyframes combo-great {
+    0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.8); }
+    60% { transform: translateX(-50%) translateY(-5px) scale(1.1); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+  @keyframes combo-excellent {
+    0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
+    50% { transform: translateX(-50%) scale(1.3); }
+    70% { transform: translateX(-50%) scale(0.95); }
+    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  }
+  @keyframes combo-amazing {
+    0% { transform: translateX(-50%) scale(0.3) rotate(-5deg); opacity: 0; }
+    40% { transform: translateX(-50%) scale(1.2) rotate(2deg); opacity: 1; }
+    60% { transform: translateX(-50%) scale(0.9) rotate(-1deg); }
+    80% { transform: translateX(-50%) scale(1.05) rotate(0); }
+    100% { transform: translateX(-50%) scale(1) rotate(0); }
+  }
+  @keyframes combo-epic {
+    0% { transform: translateX(-50%) scale(2) translateY(-20px); opacity: 0; filter: blur(4px); }
+    40% { transform: translateX(-50%) scale(0.9) translateY(3px); opacity: 1; filter: blur(0); }
+    60% { transform: translateX(-50%) scale(1.15) translateY(-2px); }
+    100% { transform: translateX(-50%) scale(1) translateY(0); }
+  }
+  @keyframes combo-legendary {
+    0% { transform: translateX(-50%) scale(0) rotate(-5deg); opacity: 0; }
+    30% { transform: translateX(-50%) scale(1.5) rotate(2deg); opacity: 1; }
+    50% { transform: translateX(-50%) scale(0.9) rotate(-1deg); }
+    70% { transform: translateX(-50%) scale(1.1) rotate(0.5deg); }
+    100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+  }
+  @keyframes combo-mythic {
+    0% { transform: translateX(-50%) scale(3); opacity: 0; filter: blur(10px); }
+    40% { transform: translateX(-50%) scale(0.8); opacity: 1; filter: blur(0); }
+    60% { transform: translateX(-50%) scale(1.2); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+
+  /* Legendary badge glow */
+  .combo-badge-legendary {
+    animation: combo-legendary-glow 1.5s ease-in-out infinite;
+  }
+  @keyframes combo-legendary-glow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+  }
+
+  /* Mythic badge: rainbow shimmer + scale */
+  .combo-badge-mythic {
+    animation: combo-badge-godlike 0.8s ease-in-out, combo-mythic-pulse 1.2s ease-in-out infinite 0.8s;
+  }
+  @keyframes combo-mythic-pulse {
+    0%, 100% { filter: brightness(1) hue-rotate(0deg); }
+    50% { filter: brightness(1.4) hue-rotate(30deg); }
+  }
+
+  /* Mythic rainbow text */
+  .combo-text-mythic {
+    background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: combo-rainbow-text 2s linear infinite;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+  @keyframes combo-rainbow-text {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  /* ═══ HP bar animations ═══ */
+
+  /* Smooth HP fill transition */
+  .hp-bar-fill {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: width;
+  }
+
+  /* Ghost bar trails behind real HP — creates "damage drain" effect */
+  .hp-ghost-bar {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    will-change: width, opacity;
+  }
+
+  /* Red flash when player takes damage */
+  .hp-bar-hit {
+    animation: hp-hit-flash 0.4s ease-out;
+  }
+
+  @keyframes hp-hit-flash {
+    0% {
+      background: rgba(231, 76, 60, 0.3);
+      transform: translateX(0);
+    }
+
+    20% {
+      background: rgba(231, 76, 60, 0.2);
+      transform: translateX(-2px);
+    }
+
+    40% {
+      transform: translateX(2px);
+    }
+
+    60% {
+      transform: translateX(-1px);
+    }
+
+    80% {
+      background: transparent;
+      transform: translateX(1px);
+    }
+
+    100% {
+      background: transparent;
+      transform: translateX(0);
+    }
+  }
+
+  /* Critical HP pulse glow */
+  .hp-bar-critical {
+    animation: hp-critical-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes hp-critical-pulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 4px rgba(231, 76, 60, 0.3);
+    }
+
+    50% {
+      box-shadow: 0 0 12px rgba(231, 76, 60, 0.6), inset 0 0 4px rgba(231, 76, 60, 0.2);
+    }
+  }
+
+  /* ═══ Boss attack screen effects ═══ */
+
+  /* Red vignette pulse on boss attack */
+  .boss-atk-vignette {
+    animation: vignette-pulse 0.5s ease-out;
+    pointer-events: none;
+  }
+
+  @keyframes vignette-pulse {
+    0% {
+      box-shadow: inset 0 0 100px rgba(231, 76, 60, 0.4);
+    }
+
+    100% {
+      box-shadow: inset 0 0 0 transparent;
+    }
+  }
+
+  /* GPU-accelerated transforms for smooth mobile */
+  .gem-shine,
+  .gem-match-burst,
+  .gem-landed,
+  .hp-bar-fill,
+  .hp-ghost-bar {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Gold button */
+  .btn-gold {
+    background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-dark)));
+    box-shadow: 0 3px 10px rgba(240, 180, 41, 0.3);
+  }
+
+  /* Green button */
+  .btn-green {
+    background: linear-gradient(135deg, hsl(var(--green-mid)), hsl(var(--green-light)));
+    box-shadow: 0 6px 20px rgba(45, 138, 78, 0.3);
+  }
+
+  /* Glass card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Action button */
+  .action-btn-base {
+    @apply flex flex-col items-center gap-1.5 rounded-2xl relative overflow-hidden;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+  }
+
+  .action-btn-base::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(78, 202, 106, 0.08) 100%);
+  }
+
+  .action-btn-base:active {
+    transform: scale(0.94);
+    border-color: hsl(var(--green-light));
+    background: #e8f8ea;
+  }
+
+  /* Plant pot */
+  .plant-pot-gradient {
+    background: linear-gradient(180deg, #c49a6c 0%, #8b5e34 50%, #5c3d1f 100%);
+  }
+
+  /* Avatar ring */
+  .avatar-ring {
+    background: linear-gradient(135deg, hsl(var(--green-light)), hsl(var(--gold)));
+    padding: 3px;
+  }
+
+  /* Header button */
+  .header-btn-glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Boss HP bar glow */
+  .boss-hp-glow {
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+  }
+
+  /* Ultimate gradient */
+  .ult-gradient {
+    background: linear-gradient(90deg, #a29bfe, #fd79a8, #fdcb6e);
+    box-shadow: 0 0 10px rgba(253, 121, 168, 0.4);
+  }
+
+  .ult-btn-gradient {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+  }
+
+  /* ═══════ Campaign Zone Gradients ═══════ */
+  .zone-bg-1 {
+    background: linear-gradient(180deg, #A5D6A7 0%, #66BB6A 50%, #2E7D32 100%);
+  }
+
+  .zone-bg-2 {
+    background: linear-gradient(180deg, #C8E6C9 0%, #81C784 50%, #388E3C 100%);
+  }
+
+  .zone-bg-3 {
+    background: linear-gradient(180deg, #FFCDD2 0%, #EF9A9A 50%, #C62828 100%);
+  }
+
+  .zone-bg-4 {
+    background: linear-gradient(180deg, #FFE0B2 0%, #FFCC80 50%, #E65100 100%);
+  }
+
+  .zone-bg-5 {
+    background: linear-gradient(180deg, #D7CCC8 0%, #BCAAA4 50%, #4E342E 100%);
+  }
+
+  .zone-bg-6 {
+    background: linear-gradient(180deg, #FFF9C4 0%, #FFF176 50%, #F9A825 100%);
+  }
+
+  .zone-bg-7 {
+    background: linear-gradient(180deg, #C8E6C9 0%, #A5D6A7 50%, #1B5E20 100%);
+  }
+
+  .zone-bg-8 {
+    background: linear-gradient(180deg, #B2DFDB 0%, #80CBC4 50%, #004D40 100%);
+  }
+
+  .zone-bg-9 {
+    background: linear-gradient(180deg, #FFAB91 0%, #FF7043 50%, #BF360C 100%);
+  }
+
+  .zone-bg-10 {
+    background: linear-gradient(180deg, #37474F 0%, #263238 50%, #0d0d1a 100%);
+  }
+
+  /* Prayer */
+  .prayer-gradient {
+    background: linear-gradient(180deg,
+        #1a1a3e 0%,
+        #2d1b69 30%,
+        #4a2c8a 60%,
+        #7c5cbf 100%);
+  }
+
+  /* Campaign map gradient (full map background) */
+  .campaign-map-gradient {
+    background: linear-gradient(180deg,
+        #0d0d1a 0%,
+        #BF360C 15%,
+        #004D40 30%,
+        #1B5E20 42%,
+        #F9A825 52%,
+        #4E342E 62%,
+        #E65100 72%,
+        #C62828 80%,
+        #388E3C 90%,
+        #2E7D32 100%);
+  }
+}

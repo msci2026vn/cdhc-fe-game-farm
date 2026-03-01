@@ -1,0 +1,49 @@
+@layer base {
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    height: 100dvh;
+    height: 100vh;
+    /* fallback for older browsers */
+    overflow: hidden;
+    /* Prevent iOS bounce/rubber-band scrolling */
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    @apply bg-background font-body antialiased;
+    color: hsl(var(--text-dark));
+    height: 100dvh;
+    height: 100vh;
+    /* fallback */
+    overflow: hidden;
+    overscroll-behavior: none;
+    /* Prevent pull-to-refresh on mobile */
+    overscroll-behavior-y: contain;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  #root {
+    height: 100dvh;
+    height: 100vh;
+    /* fallback */
+    overflow: hidden;
+    /* Ensure content doesn't escape viewport */
+    position: relative;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
