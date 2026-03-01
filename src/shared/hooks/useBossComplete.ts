@@ -16,14 +16,16 @@ export function useBossComplete() {
         onSuccess: (data) => {
             console.log('[FARM-DEBUG] useBossComplete.onSuccess:', data);
 
-            // Toast notification
+            // Toast notification — trust server won flag
+            // If wasAdjusted, damage was adjusted but won is still from FE
             if (data.won) {
               useUIStore.getState().addToast(
                 `Đánh bại Boss! +${data.ognReward || 0} OGN +${data.xpGained || 0} XP`,
                 'success',
                 '⚔️'
               );
-            } else {
+            } else if (!data.wasAdjusted) {
+              // Only show loss toast if result was NOT adjusted by server
               useUIStore.getState().addToast(
                 'Thua trận! Thử lại nhé.',
                 'warning',

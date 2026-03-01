@@ -54,7 +54,10 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
               check
             </span>
           ) : isLocked ? (
-            <span className="material-symbols-outlined text-white/60 text-3xl">lock</span>
+            <div className="relative flex items-center justify-center">
+              <span className="text-4xl opacity-30">{boss.emoji || '🔒'}</span>
+              <span className="material-symbols-outlined text-white/80 text-lg absolute -bottom-1 -right-1 drop-shadow">lock</span>
+            </div>
           ) : globalBossNumber ? (
             <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-16 h-16 object-contain drop-shadow-lg" />
           ) : (
@@ -83,6 +86,13 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       )}>
         {boss.name}
       </p>
+
+      {/* Lock reason */}
+      {isLocked && boss.lockReason && (
+        <p className="text-[9px] text-yellow-400/60 text-center max-w-[100px] leading-tight mt-0.5">
+          {boss.lockReason}
+        </p>
+      )}
 
       {isCompleted && boss.bestStars > 0 && (
         <div className="flex justify-center gap-0.5 mt-0.5">

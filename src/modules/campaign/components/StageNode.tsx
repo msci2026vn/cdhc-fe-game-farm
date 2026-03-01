@@ -79,6 +79,13 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
       )}>
         {boss.name}
       </p>
+
+      {/* Lock reason */}
+      {isLocked && boss.lockReason && (
+        <p className="text-[9px] text-yellow-400/60 text-center max-w-[90px] leading-tight mt-0.5">
+          {boss.lockReason}
+        </p>
+      )}
     </button>
   );
 }

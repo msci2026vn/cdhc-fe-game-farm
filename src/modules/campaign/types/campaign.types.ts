@@ -36,6 +36,7 @@ export interface ZoneBoss {
   // Extended fields for Boss Detail (may come from API or static fallback)
   bestTurns?: number | null;
   bestHpPercent?: number | null;
+  lockReason?: string | null;
 }
 
 export interface ZoneInfo {
