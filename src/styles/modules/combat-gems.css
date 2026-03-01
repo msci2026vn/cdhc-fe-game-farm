@@ -500,10 +500,79 @@
   .gem-landed,
   .gem-special-spawn,
   .combo-flash-overlay,
-  .combo-ring-burst {
+  .combo-ring-burst,
+  .blast-row,
+  .blast-col {
     will-change: transform, opacity;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     transform: translateZ(0);
+  }
+
+  /* ═══ Candy Blast VFX ═══ */
+  .blast-row {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 12px;
+    margin-top: -6px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9) 20%, rgba(255, 215, 0, 0.8) 50%, rgba(255, 255, 255, 0.9) 80%, transparent);
+    box-shadow: 0 0 15px rgba(255, 230, 0, 0.6), inset 0 0 5px rgba(255, 255, 255, 1);
+    transform-origin: center;
+    animation: blast-expand-h 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    pointer-events: none;
+    z-index: 25;
+  }
+
+  .blast-col {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 12px;
+    margin-left: -6px;
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.9) 20%, rgba(255, 215, 0, 0.8) 50%, rgba(255, 255, 255, 0.9) 80%, transparent);
+    box-shadow: 0 0 15px rgba(255, 230, 0, 0.6), inset 0 0 5px rgba(255, 255, 255, 1);
+    transform-origin: center;
+    animation: blast-expand-v 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    pointer-events: none;
+    z-index: 25;
+  }
+
+  @keyframes blast-expand-h {
+    0% {
+      transform: scaleX(0);
+      opacity: 1;
+    }
+
+    50% {
+      transform: scaleX(1.1);
+      opacity: 1;
+      filter: brightness(1.5);
+    }
+
+    100% {
+      transform: scaleX(1.2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes blast-expand-v {
+    0% {
+      transform: scaleY(0);
+      opacity: 1;
+    }
+
+    50% {
+      transform: scaleY(1.1);
+      opacity: 1;
+      filter: brightness(1.5);
+    }
+
+    100% {
+      transform: scaleY(1.2);
+      opacity: 0;
+    }
   }
 }

@@ -45,6 +45,7 @@ export interface CampaignProcessorDeps {
   setScreenShake?: Dispatch<SetStateAction<boolean>>;
   // Unmount guard — skip setState after component unmounts
   mountedRef: MutableRefObject<boolean>;
+  addBlastVfx?: (type: 'row' | 'col', index: number) => void;
 }
 
 export function processCampaignMatchesImpl(
@@ -136,7 +137,15 @@ export function processCampaignMatchesImpl(
   const tally: Partial<Record<GemType, number>> = {};
   allRemove.forEach(idx => {
     const g = currentGrid[idx];
-    if (g) { tally[g.type] = (tally[g.type] || 0) + 1; }
+    if (g) {
+      tally[g.type] = (tally[g.type] || 0) + 1;
+
+      // Trigger Candy Blast VFX if a striped gem explodes
+      if (deps.addBlastVfx) {
+        if (g.special === 'striped_h') deps.addBlastVfx('row', Math.floor(idx / 8));
+        else if (g.special === 'striped_v') deps.addBlastVfx('col', idx % 8);
+      }
+    }
   });
 
   // Show special gem trigger popups

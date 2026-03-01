@@ -24,7 +24,7 @@ import { GEM_META, getComboInfo, getEnrageMultiplier, bossDEFReduction } from '@
 import type {
   BossState, DamagePopup, FightResult, SkillWarning, BossAttackWarning,
   CombatStats, CombatNotif, CombatNotifType,
-  ActiveDebuff, ActiveBossBuff, EggState,
+  ActiveDebuff, ActiveBossBuff, EggState, BlastVfx
 } from '@/shared/match3/combat.types';
 
 // Re-export for backward compatibility
@@ -142,6 +142,8 @@ export function useMatch3Campaign(
   });
   const [combatNotifs, setCombatNotifs] = useState<CombatNotif[]>([]);
   const notifIdRef = useRef(0);
+  const [blastVfxs, setBlastVfxs] = useState<BlastVfx[]>([]);
+  const blastId = useRef(0);
   const fightStartTime = useRef(Date.now());
   const maxComboRef = useRef(0);
   const [stars, setStars] = useState(0);
@@ -201,7 +203,12 @@ export function useMatch3Campaign(
     setPopups(prev => [...prev, { id, text, color, x, y, expiresAt: Date.now() + 1400 }]);
   }, []);
 
-  // ═══ GC Ticker for Popups and Notifs ═══
+  const addBlastVfx = useCallback((type: 'row' | 'col', index: number) => {
+    const id = blastId.current++;
+    setBlastVfxs(prev => [...prev, { id, type, index, expiresAt: Date.now() + 400 }]);
+  }, []);
+
+  // ═══ GC Ticker for Popups, Notifs, and Blasts ═══
   useEffect(() => {
     const gcInterval = setInterval(() => {
       const now = Date.now();
@@ -213,6 +220,11 @@ export function useMatch3Campaign(
       setCombatNotifs(prev => {
         if (prev.length === 0) return prev;
         const next = prev.filter(n => !n.expiresAt || n.expiresAt > now);
+        return next.length !== prev.length ? next : prev;
+      });
+      setBlastVfxs(prev => {
+        if (prev.length === 0) return prev;
+        const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
         return next.length !== prev.length ? next : prev;
       });
     }, 500);
@@ -549,10 +561,12 @@ export function useMatch3Campaign(
       otHiemActiveRef, skillLevelsRef,
       setSpawningGems, setScreenShake,
       mountedRef,
+      addCombatNotif,
+      addBlastVfx,
     }, currentGrid, currentCombo,
       (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
       swapPair, cascadeDepth);
-  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif]);
+  }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx]);
 
   // ═══ Wire: handleTap / handleSwipe ═══
   const handleTap = useCallback((idx: number) => {
@@ -594,5 +608,6 @@ export function useMatch3Campaign(
     romBocActive, romBocCooldown, romBocDuration, castRomBoc,
     otHiemActiveRef, romBocActiveRef, skillLevelsRef,
     spawningGems,
+    blastVfxs,
   };
 }

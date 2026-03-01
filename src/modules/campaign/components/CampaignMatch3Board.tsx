@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { BlastVfx } from '@/shared/match3/combat.types';
+
 interface Props {
     grid: any[];
     selected: number | null;
@@ -17,12 +19,13 @@ interface Props {
     otHiemActive: boolean;
     romBocActive: boolean;
     GEM_META: any;
+    blastVfxs?: BlastVfx[];
 }
 
 export default function CampaignMatch3Board({
     grid, selected, matchedCells, spawningGems, lockedGems, highlightedGem,
     isStunned, animating, handlePointerDown, handlePointerMove, handlePointerUp,
-    combo, showCombo, otHiemActive, romBocActive, GEM_META
+    combo, showCombo, otHiemActive, romBocActive, GEM_META, blastVfxs = []
 }: Props) {
     return (
         <div className="relative flex-1">
@@ -74,6 +77,15 @@ export default function CampaignMatch3Board({
                         </div>
                     );
                 })}
+
+                {/* Candy Blast VFX Overlay */}
+                {blastVfxs.map(vfx => (
+                    vfx.type === 'row' ? (
+                        <div key={`blast-${vfx.id}`} className="blast-row" style={{ top: `calc(${vfx.index * 12.5}% + 6.25%)` }} />
+                    ) : (
+                        <div key={`blast-${vfx.id}`} className="blast-col" style={{ left: `calc(${vfx.index * 12.5}% + 6.25%)` }} />
+                    )
+                ))}
             </div>
 
             {/* Stun overlay */}
