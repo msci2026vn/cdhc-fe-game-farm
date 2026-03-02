@@ -5,6 +5,7 @@ import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useBossStatus } from '@/shared/hooks/useBossStatus';
 import { playSound, audioManager } from '@/shared/audio';
 import { SoundToggle } from '@/shared/audio';
+import { WorldBossMarquee } from '@/modules/world-boss/components/WorldBossMarquee';
 
 interface MenuItem {
   icon: string;
@@ -150,6 +151,9 @@ export default function MainMenuScreen() {
         <div className="relative z-10 px-4 mb-5">
           <PlayerCard />
         </div>
+
+        {/* World Boss Alert Banner */}
+        <WorldBossMarquee />
 
         {/* Main Menu Grid — 3x2 */}
         <div className="relative z-10 px-4 mb-4">

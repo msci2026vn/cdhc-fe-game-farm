@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useWorldBossRewards } from '../hooks/useWorldBossHistory';
+import { useWorldBossRewards, useWorldBossHistoryLeaderboard } from '../hooks/useWorldBossHistory';
 import { FullLeaderboard } from './FullLeaderboard';
 import { BottomDrawer } from './BottomDrawer';
 
@@ -61,6 +61,7 @@ function RewardNumbers({ xpAmount, ognAmount }: { xpAmount: number; ognAmount: n
 export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }: RewardsScreenProps) {
   const { data: rewardsData, isLoading } = useWorldBossRewards(eventId);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const { data: lbData } = useWorldBossHistoryLeaderboard(showLeaderboard ? eventId : null);
 
   const isDefeated = status === 'defeated';
   const reward = rewardsData?.rewards?.[0];
@@ -166,9 +167,17 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
         onClose={() => setShowLeaderboard(false)}
         title={`🏆 ${bossName}`}
       >
-        <p className="text-xs text-gray-500 text-center py-4">
-          Bảng xếp hạng sẽ có sau khi boss kết thúc hoàn toàn.
-        </p>
+        {lbData?.leaderboard && lbData.leaderboard.length > 0 ? (
+          <FullLeaderboard
+            leaderboard={lbData.leaderboard.map(e => ({
+              userId: e.userId,
+              damage: e.totalDamage,
+            }))}
+            currentUserId={null}
+          />
+        ) : (
+          <div className="text-center py-8 text-gray-400">Đang tải...</div>
+        )}
       </BottomDrawer>
 
       <style>{`

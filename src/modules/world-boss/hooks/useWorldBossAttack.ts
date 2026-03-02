@@ -18,9 +18,11 @@ export function useWorldBossAttack(eventId: string | undefined) {
   const [lastResult, setLastResult] = useState<WorldBossAttackResult | null>(null);
   const [cooldownEnd, setCooldownEnd] = useState(0);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [cooldownTotal, setCooldownTotal] = useState(20);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const resultTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Cooldown tick
   useEffect(() => {
@@ -40,6 +42,11 @@ export function useWorldBossAttack(eventId: string | undefined) {
     timerRef.current = setInterval(tick, 1000);
     return () => clearInterval(timerRef.current);
   }, [state, cooldownEnd]);
+
+  // Cleanup result timer on unmount
+  useEffect(() => {
+    return () => { clearTimeout(resultTimerRef.current); };
+  }, []);
 
   const openMatch3 = useCallback(() => {
     if (state !== 'idle') return;
@@ -82,9 +89,10 @@ export function useWorldBossAttack(eventId: string | undefined) {
       queryClient.invalidateQueries({ queryKey: [...WORLD_BOSS_KEY] });
 
       // After 1.5s showing damage → cooldown
-      setTimeout(() => {
-        const cd = (result.cooldownSeconds || 20) * 1000;
-        setCooldownEnd(Date.now() + cd);
+      const cdSeconds = result.cooldownSeconds || 20;
+      setCooldownTotal(cdSeconds);
+      resultTimerRef.current = setTimeout(() => {
+        setCooldownEnd(Date.now() + cdSeconds * 1000);
         setState('cooldown');
       }, 1500);
     } catch (err) {
@@ -106,7 +114,7 @@ export function useWorldBossAttack(eventId: string | undefined) {
     state,
     lastResult,
     cooldownRemaining,
-    cooldownTotal: 20,
+    cooldownTotal,
     error,
     openMatch3,
     onMatch3Complete,

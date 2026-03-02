@@ -13,7 +13,7 @@ export function AttackButton({ state, cooldownRemaining, cooldownTotal, onPress,
   if (state === 'boss_dead') {
     return (
       <div className="w-full py-4 bg-yellow-600 text-white text-xl font-bold rounded-xl text-center" style={{ minHeight: 56 }}>
-        Boss da bi ha!
+        Boss đã bị hạ!
       </div>
     );
   }
@@ -25,8 +25,8 @@ export function AttackButton({ state, cooldownRemaining, cooldownTotal, onPress,
         style={{ minHeight: 56 }}
         onClick={onDismissError}
       >
-        <div>{error || 'Loi'}</div>
-        <div className="text-sm text-red-200">Bam de thu lai</div>
+        <div>{error || 'Lỗi'}</div>
+        <div className="text-sm text-red-200">Bấm để thử lại</div>
       </button>
     );
   }
@@ -34,7 +34,7 @@ export function AttackButton({ state, cooldownRemaining, cooldownTotal, onPress,
   if (state === 'submitting') {
     return (
       <button className="w-full py-4 bg-gray-500 text-gray-200 text-xl font-bold rounded-xl" style={{ minHeight: 56 }} disabled>
-        Dang gui...
+        Đang gửi...
       </button>
     );
   }
@@ -47,7 +47,7 @@ export function AttackButton({ state, cooldownRemaining, cooldownTotal, onPress,
           className="absolute inset-y-0 left-0 bg-gray-500 transition-all duration-1000"
           style={{ width: `${pct}%` }}
         />
-        <span className="relative z-10">Cho {cooldownRemaining}s</span>
+        <span className="relative z-10">Chờ {cooldownRemaining}s</span>
       </button>
     );
   }
@@ -55,7 +55,7 @@ export function AttackButton({ state, cooldownRemaining, cooldownTotal, onPress,
   if (state === 'result' || state === 'match3') {
     return (
       <button className="w-full py-4 bg-gray-500 text-gray-200 text-xl font-bold rounded-xl" style={{ minHeight: 56 }} disabled>
-        Tan Cong
+        Tấn Công
       </button>
     );
   }
@@ -67,7 +67,7 @@ export function AttackButton({ state, cooldownRemaining, cooldownTotal, onPress,
       style={{ minHeight: 56 }}
       onClick={onPress}
     >
-      Tan Cong
+      Tấn Công
     </button>
   );
 }

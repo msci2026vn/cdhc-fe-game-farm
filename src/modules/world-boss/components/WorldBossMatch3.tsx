@@ -31,9 +31,13 @@ export function WorldBossMatch3({ onComplete, onCancel }: Props) {
   const [combo, setCombo] = useState(0);
   const [showCombo, setShowCombo] = useState(false);
 
-  // Accumulate stats
+  // Accumulate stats — ref for logic, state for display
   const statsRef = useRef({ gemsMatched: 0, maxCombo: 0, specialGems: 0, score: 0 });
   const completedRef = useRef(false);
+  const [displayScore, setDisplayScore] = useState(0);
+  const [displayGems, setDisplayGems] = useState(0);
+  const [displayMaxCombo, setDisplayMaxCombo] = useState(0);
+  const [displaySpecials, setDisplaySpecials] = useState(0);
 
   // Process matches cascading
   const processCascade = useCallback(async (currentGrid: Gem[]) => {
@@ -64,10 +68,13 @@ export function WorldBossMatch3({ onComplete, onCancel }: Props) {
       // Collect triggered cells (chain reactions from specials)
       const toRemove = collectTriggeredCells(g, allPositions);
 
-      // Update stats
+      // Update stats (ref for logic + state for display)
       statsRef.current.gemsMatched += toRemove.size;
       statsRef.current.specialGems += specialCount;
       statsRef.current.score += toRemove.size * cascadeCombo;
+      setDisplayGems(statsRef.current.gemsMatched);
+      setDisplaySpecials(statsRef.current.specialGems);
+      setDisplayScore(statsRef.current.score);
 
       // Show matched cells animation
       setMatchedCells(new Set(toRemove));
@@ -88,6 +95,7 @@ export function WorldBossMatch3({ onComplete, onCancel }: Props) {
 
     if (cascadeCombo > statsRef.current.maxCombo) {
       statsRef.current.maxCombo = cascadeCombo;
+      setDisplayMaxCombo(cascadeCombo);
     }
     setTimeout(() => setShowCombo(false), 600);
     return g;
@@ -173,7 +181,7 @@ export function WorldBossMatch3({ onComplete, onCancel }: Props) {
           Luot: {turnsLeft}/{MAX_TURNS}
         </div>
         <div className="text-yellow-400 font-bold text-sm">
-          {statsRef.current.score} diem
+          {displayScore} diem
         </div>
       </div>
 
@@ -231,9 +239,9 @@ export function WorldBossMatch3({ onComplete, onCancel }: Props) {
 
       {/* Stats footer */}
       <div className="flex gap-4 mt-3 text-xs text-gray-400">
-        <span>Gems: {statsRef.current.gemsMatched}</span>
-        <span>Max combo: {statsRef.current.maxCombo}</span>
-        <span>Specials: {statsRef.current.specialGems}</span>
+        <span>Gems: {displayGems}</span>
+        <span>Max combo: {displayMaxCombo}</span>
+        <span>Specials: {displaySpecials}</span>
       </div>
     </div>
   );

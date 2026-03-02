@@ -36,7 +36,7 @@ function LoadingSkeleton() {
 
 export function WorldBossScreen() {
   const navigate = useNavigate();
-  const { data, isLoading } = useWorldBoss();
+  const { data, isLoading, isError, refetch } = useWorldBoss();
   const { data: authData } = useAuth();
   const boss = data?.boss;
   const combat = useWorldBossAttack(boss?.id);
@@ -126,6 +126,18 @@ export function WorldBossScreen() {
           <HistoryList />
         ) : isLoading ? (
           <LoadingSkeleton />
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 gap-4 text-center">
+            <div className="text-5xl">⚠️</div>
+            <h2 className="text-lg font-bold text-red-400">Không thể kết nối server</h2>
+            <p className="text-gray-400 text-sm max-w-xs">Đang có sự cố kết nối. Boss có thể đang hoạt động — thử lại sau vài giây.</p>
+            <button
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white text-sm font-bold rounded-lg transition-colors"
+            >
+              🔄 Thử lại
+            </button>
+          </div>
         ) : !data?.active || !boss ? (
           <BossWaiting onShowHistory={() => setMainTab('history')} />
         ) : (
