@@ -57,6 +57,7 @@ const MyGardenScreen = lazyWithRetry(() => import('@/modules/rwa/screens/MyGarde
 const TopupPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupPage'));
 const TopupSuccessPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupSuccessPage'));
 const TopupCancelPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupCancelPage'));
+const WorldBossScreen = lazyWithRetry(() => import('@/modules/world-boss/screens/WorldBossScreen').then(m => ({ default: m.WorldBossScreen })));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -125,6 +126,7 @@ const AuthenticatedApp = () => {
         <Route path="/campaign/achievements" element={<AchievementsHubScreen />} />
         <Route path="/campaign/:zoneNumber" element={<CampaignZoneScreen />} />
         <Route path="/prayer" element={<PrayerScreen />} />
+        <Route path="/world-boss" element={<WorldBossScreen />} />
         <Route path="/market" element={<MarketScreen />} />
         <Route path="/vip/purchase" element={<VipPurchaseScreen />} />
         <Route path="/rwa/my-garden" element={<MyGardenScreen />} />
