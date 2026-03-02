@@ -22,9 +22,8 @@ export default function MainMenuScreen() {
   return (
     <div className="bg-[#111] min-h-[100dvh] flex items-center justify-center select-none font-body text-farm-brown-dark">
       <div
-        className="relative overflow-hidden w-full max-w-[390px] mx-auto shadow-2xl"
+        className="relative overflow-hidden w-full max-w-[430px] mx-auto min-h-[100dvh] shadow-2xl"
         style={{
-          aspectRatio: '9/16',
           backgroundImage: 'url(/assets/home/nen.jpeg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
