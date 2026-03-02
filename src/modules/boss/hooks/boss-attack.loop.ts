@@ -28,6 +28,8 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
     applyBossDamageToPlayer,
   } = deps;
 
+  let skillTimeout: ReturnType<typeof setTimeout>;
+
   const interval = setInterval(() => {
     // Enrage: +10% ATK every 30 seconds
     const enrageMult = getEnrageMultiplier(fightStartTime.current);
@@ -46,7 +48,7 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
       setSkillWarning({ name: skillName, damage: skillDmg, countdown: 1.5 });
 
       // After 1.5s: resolve
-      setTimeout(() => {
+      skillTimeout = setTimeout(() => {
         setAttackWarning(null);
         setSkillWarning(null);
 
@@ -67,5 +69,8 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
     }
   }, BOSS_ATK_INTERVAL);
 
-  return () => clearInterval(interval);
+  return () => {
+    clearInterval(interval);
+    clearTimeout(skillTimeout);
+  };
 }

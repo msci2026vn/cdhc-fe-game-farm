@@ -60,6 +60,7 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
       setSkillWarning({ name: skillName, damage: skillDmg, countdown: 1.5 });
 
       const skillTimeout = setTimeout(() => {
+        pendingHitsRef.current = pendingHitsRef.current.filter(t => t !== skillTimeout);
         setAttackWarning(null);
         setSkillWarning(null);
 
@@ -78,6 +79,7 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
       const freq = Math.max(1, activeBossStats.current.freq);
       for (let i = 0; i < freq; i++) {
         const hitTimeout = setTimeout(() => {
+          pendingHitsRef.current = pendingHitsRef.current.filter(t => t !== hitTimeout);
           const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.2)));
           const hitLabel = freq > 1 ? `Đòn ${i + 1}/${freq}!` : 'Boss tấn công!';
           applyBossDamageRef.current(normalDmg, hitLabel, '💥');
@@ -106,7 +108,7 @@ export function setupBossHealTimer(deps: BossHealTimerDeps): () => void {
   const { isPausedRef, activeBossStats, setBoss, addPopup } = deps;
 
   const hp = activeBossStats.current.healPercent;
-  if (hp <= 0) return () => {};
+  if (hp <= 0) return () => { };
 
   const healTimer = setInterval(() => {
     if (isPausedRef.current) return;
@@ -156,7 +158,7 @@ export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
     setIsStunned, setSkillAlert,
   } = deps;
 
-  if (!skills?.length) return () => {};
+  if (!skills?.length) return () => { };
 
   const interval = setInterval(() => {
     if (isPausedRef.current) return;
@@ -181,7 +183,10 @@ export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
 
     // Show alert
     setSkillAlert({ icon: skill.icon, text: `${bossName} ${skill.label}` });
-    const alertTimeout = setTimeout(() => setSkillAlert(null), 2500);
+    const alertTimeout = setTimeout(() => {
+      skillTimersRef.current = skillTimersRef.current.filter(t => t !== alertTimeout);
+      setSkillAlert(null);
+    }, 2500);
     skillTimersRef.current.push(alertTimeout);
 
     switch (skill.type) {
@@ -189,6 +194,7 @@ export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
         isStunnedRef.current = true;
         setIsStunned(true);
         const stunTimeout = setTimeout(() => {
+          skillTimersRef.current = skillTimersRef.current.filter(t => t !== stunTimeout);
           isStunnedRef.current = false;
           setIsStunned(false);
         }, skill.duration * 1000);
@@ -267,6 +273,7 @@ export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
         setLockedGems(new Set(newLocked));
         // Auto-unlock after duration
         const unlockTimeout = setTimeout(() => {
+          skillTimersRef.current = skillTimersRef.current.filter(t => t !== unlockTimeout);
           shuffled.forEach(gi => lockedGemsRef.current.delete(gi));
           setLockedGems(new Set(lockedGemsRef.current));
         }, skill.duration * 1000);

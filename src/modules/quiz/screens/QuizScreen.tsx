@@ -53,16 +53,22 @@ export default function QuizScreen() {
   // Timer logic
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
-    if (phase === 'playing' && timeLeft > 0) {
+    if (phase === 'playing') {
       timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev) => Math.max(0, prev - 1));
       }, 1000);
-    } else if (timeLeft === 0 && phase === 'playing') {
-      // Auto-submit or handle timeout if needed
-    } else if (timeLeft <= 5 && timeLeft > 0 && phase === 'playing') {
-      playSound('quiz_timer_low');
     }
     return () => clearInterval(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === 'playing') {
+      if (timeLeft <= 5 && timeLeft > 0) {
+        playSound('quiz_timer_low');
+      } else if (timeLeft === 0) {
+        // Auto-submit or handle timeout if needed
+      }
+    }
   }, [phase, timeLeft]);
 
   // Start quiz

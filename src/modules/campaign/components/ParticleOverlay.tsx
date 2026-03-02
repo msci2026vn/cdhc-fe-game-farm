@@ -22,6 +22,7 @@ export function ParticleOverlay({ bursts }: Props) {
     const particlesRef = useRef<Particle[]>([]);
     const animationRef = useRef<number>();
     const seenBurstsRef = useRef<Set<number>>(new Set());
+    const startAnimationRef = useRef<() => void>();
 
     // 1. Process incoming bursts
     useEffect(() => {
@@ -31,9 +32,12 @@ export function ParticleOverlay({ bursts }: Props) {
         const width = canvas.width / (window.devicePixelRatio || 1);
         const height = canvas.height / (window.devicePixelRatio || 1);
 
+        let newParticlesAdded = false;
+
         bursts.forEach(b => {
             if (!seenBurstsRef.current.has(b.id)) {
                 seenBurstsRef.current.add(b.id);
+                newParticlesAdded = true;
 
                 // Keep memory check (optional, but good for GC)
                 if (seenBurstsRef.current.size > 200) {
@@ -80,6 +84,10 @@ export function ParticleOverlay({ bursts }: Props) {
                 }
             }
         });
+
+        if (newParticlesAdded && startAnimationRef.current) {
+            startAnimationRef.current();
+        }
     }, [bursts]);
 
     // 2. Setup Canvas and render loop
@@ -108,6 +116,11 @@ export function ParticleOverlay({ bursts }: Props) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             const particles = particlesRef.current;
+            if (particles.length === 0) {
+                animationRef.current = undefined;
+                return;
+            }
+
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.life++;
@@ -152,11 +165,18 @@ export function ParticleOverlay({ bursts }: Props) {
             animationRef.current = requestAnimationFrame(render);
         };
 
-        render();
+        startAnimationRef.current = () => {
+            if (!animationRef.current && particlesRef.current.length > 0) {
+                animationRef.current = requestAnimationFrame(render);
+            }
+        };
+
+        startAnimationRef.current();
 
         return () => {
             window.removeEventListener('resize', resize);
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            animationRef.current = undefined;
         };
     }, []);
 

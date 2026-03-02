@@ -25,11 +25,11 @@ interface VipTier {
 }
 
 const vipTiers: Record<number, VipTier> = {
-  1: { algorithm: 'random',          tickMs: 2500, autoSkill: false,          freeDodges: 5 },
-  2: { algorithm: 'greedy_weighted', tickMs: 2000, autoSkill: false,          freeDodges: 5 },
-  3: { algorithm: 'greedy_cascade',  tickMs: 1500, autoSkill: 'dodge_only',   freeDodges: 5 },
-  4: { algorithm: 'mcts',            tickMs: 1200, autoSkill: 'dodge_and_ult', freeDodges: 5 },
-  5: { algorithm: 'mcts',            tickMs: 1000, autoSkill: 'full',          freeDodges: 7 },
+  1: { algorithm: 'random', tickMs: 2500, autoSkill: false, freeDodges: 5 },
+  2: { algorithm: 'greedy_weighted', tickMs: 2000, autoSkill: false, freeDodges: 5 },
+  3: { algorithm: 'greedy_cascade', tickMs: 1500, autoSkill: 'dodge_only', freeDodges: 5 },
+  4: { algorithm: 'mcts', tickMs: 1200, autoSkill: 'dodge_and_ult', freeDodges: 5 },
+  5: { algorithm: 'mcts', tickMs: 1000, autoSkill: 'full', freeDodges: 7 },
 };
 
 const dodgeFreeDefault = (strategy.dodgeConfig as { freePerBattle: number }).freePerBattle;
@@ -433,6 +433,7 @@ export function useAutoPlayController(props: UseAutoPlayControllerProps): UseAut
 
         const dir = swapDirection(bestSwap.posA, bestSwap.posB);
         setTimeout(() => {
+          if (!isActiveRef.current) return;
           handleSwipeRef.current(bestSwap.posA, dir);
           onClearHighlightRef.current?.();
           setTickCount(prev => prev + 1);
