@@ -118,7 +118,15 @@ export default function MainMenuScreen() {
 
   return (
     <div className="bg-background-light min-h-[100dvh] text-farm-brown-dark font-body select-none">
-      <div className="max-w-[430px] mx-auto min-h-[100dvh] relative bg-farm-vibe shadow-2xl overflow-hidden">
+      <div
+        className="max-w-[430px] mx-auto min-h-[100dvh] relative shadow-2xl overflow-hidden"
+        style={{
+          backgroundImage: 'url(/assets/home/nen.jpeg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
 
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
