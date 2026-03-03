@@ -15,8 +15,8 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
   const currentUserInTop = currentUserRank != null && currentUserRank <= 10;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto">
+    <div>
+      <div>
         {leaderboard.length === 0 ? (
           <p className="text-xs text-gray-500 text-center py-4">Chưa có ai tấn công</p>
         ) : (

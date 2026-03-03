@@ -31,7 +31,7 @@ export function LiveFeed({ feed }: LiveFeedProps) {
   return (
     <div
       ref={feedRef}
-      className="overflow-y-auto h-full px-4 py-2"
+      className="px-4 py-2"
     >
       {visible.length === 0 ? (
         <p className="text-xs text-gray-500 text-center py-4">Chưa có hoạt động</p>

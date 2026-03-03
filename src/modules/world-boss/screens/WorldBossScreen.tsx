@@ -85,52 +85,52 @@ export function WorldBossScreen() {
   }
 
   return (
-    <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-800 flex-shrink-0">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white text-xl p-1">
-          ←
-        </button>
-        <h1 className="text-lg font-bold flex-1">World Boss</h1>
-        {data?.active && (
-          <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full animate-pulse">
-            LIVE
-          </span>
-        )}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      {/* Header — sticky */}
+      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white text-xl p-1">
+            ←
+          </button>
+          <h1 className="text-lg font-bold flex-1">World Boss</h1>
+          {data?.active && (
+            <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full animate-pulse">
+              LIVE
+            </span>
+          )}
+        </div>
+
+        {/* Main tabs */}
+        <div className="flex border-t border-gray-800">
+          <button
+            onClick={() => setMainTab('arena')}
+            className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'arena'
+                ? 'border-b-2 border-yellow-400 text-yellow-400'
+                : 'text-gray-400'
+              }`}
+          >
+            Dau truong
+          </button>
+          <button
+            onClick={() => setMainTab('history')}
+            className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'history'
+                ? 'border-b-2 border-blue-400 text-blue-400'
+                : 'text-gray-400'
+              }`}
+          >
+            Lich su
+          </button>
+        </div>
       </div>
 
-      {/* Main tabs */}
-      <div className="flex border-b border-gray-800 flex-shrink-0">
-        <button
-          onClick={() => setMainTab('arena')}
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'arena'
-              ? 'border-b-2 border-yellow-400 text-yellow-400'
-              : 'text-gray-400'
-            }`}
-        >
-          Dau truong
-        </button>
-        <button
-          onClick={() => setMainTab('history')}
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'history'
-              ? 'border-b-2 border-blue-400 text-blue-400'
-              : 'text-gray-400'
-            }`}
-        >
-          Lich su
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto">
         {mainTab === 'history' ? (
           <HistoryList />
         ) : isLoading ? (
-          <div className="flex-1 overflow-y-auto">
-            <LoadingSkeleton />
-          </div>
+          <LoadingSkeleton />
         ) : isError ? (
-          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center px-6 gap-4 text-center">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 gap-4 text-center">
             <div className="text-5xl">!</div>
             <h2 className="text-lg font-bold text-red-400">Khong the ket noi server</h2>
             <p className="text-gray-400 text-sm max-w-xs">Dang co su co ket noi. Boss co the dang hoat dong — thu lai sau vai giay.</p>
@@ -144,29 +144,27 @@ export function WorldBossScreen() {
         ) : !data?.active || !boss ? (
           <BossWaiting onShowHistory={() => setMainTab('history')} />
         ) : (
-          <>
-            {/* Boss info — scrollable top section */}
-            <div className="flex-shrink-0 overflow-y-auto" style={{ maxHeight: '55%' }}>
-              <BossDisplay boss={boss} />
+          <div className="flex flex-col">
+            {/* Boss display section */}
+            <BossDisplay boss={boss} />
 
-              <HpBar
-                currentHp={boss.currentHp}
-                maxHp={boss.stats.max_hp}
-              />
+            <HpBar
+              currentHp={boss.currentHp}
+              maxHp={boss.stats.max_hp}
+            />
 
-              <CountdownTimer
-                startedAt={boss.startedAt}
-                durationMinutes={boss.durationMinutes}
-              />
+            <CountdownTimer
+              startedAt={boss.startedAt}
+              durationMinutes={boss.durationMinutes}
+            />
 
-              <div className="flex items-center justify-between px-4 py-1 text-xs text-gray-400">
-                <span>{boss.participantCount} nguoi tham gia</span>
-              </div>
+            <div className="flex items-center justify-between px-4 py-1 text-xs text-gray-400">
+              <span>{boss.participantCount} nguoi tham gia</span>
             </div>
 
-            {/* Inner tabs: Leaderboard / Feed */}
-            <div className="flex-1 flex flex-col overflow-hidden border-t border-gray-800 min-h-0">
-              <div className="flex flex-shrink-0 border-b border-gray-700">
+            {/* Sub tabs: Xep hang / Tran chien */}
+            <div className="border-t border-gray-800 mt-1">
+              <div className="flex border-b border-gray-700 sticky top-[97px] z-10 bg-gray-900">
                 <button
                   onClick={() => setTab('leaderboard')}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'leaderboard'
@@ -187,26 +185,24 @@ export function WorldBossScreen() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto min-h-0">
-                {tab === 'leaderboard' ? (
-                  <FullLeaderboard
-                    leaderboard={boss.leaderboard}
-                    currentUserId={currentUserId}
-                  />
-                ) : (
-                  <LiveFeed feed={boss.feed} />
-                )}
-              </div>
+              {tab === 'leaderboard' ? (
+                <FullLeaderboard
+                  leaderboard={boss.leaderboard}
+                  currentUserId={currentUserId}
+                />
+              ) : (
+                <LiveFeed feed={boss.feed} />
+              )}
             </div>
 
             {/* Attack button */}
-            <div className="flex-shrink-0 px-4 py-3 border-t border-gray-800">
+            <div className="px-4 py-3 border-t border-gray-800">
               <AttackButton
                 battleState="idle"
                 onAttack={() => setShowBattle(true)}
               />
             </div>
-          </>
+          </div>
         )}
       </div>
 
