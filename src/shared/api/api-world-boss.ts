@@ -1,8 +1,9 @@
 import { API_BASE_URL, handleUnauthorized } from './api-utils';
 import type {
   WorldBossData,
-  WorldBossAttackData,
+  WorldBossAttackPayload,
   WorldBossAttackResult,
+  WorldBossLiteData,
   WorldBossMyRewards,
   WorldBossHistoryResponse,
   WorldBossHistoryLeaderboard,
@@ -24,21 +25,22 @@ export const worldBossApi = {
     return response.json();
   },
 
-  attack: async (data: WorldBossAttackData): Promise<WorldBossAttackResult> => {
+  attack: async (data: WorldBossAttackPayload): Promise<WorldBossAttackResult> => {
     const response = await fetch(API_BASE_URL + '/api/world-boss/attack', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        eventId: data.eventId,
+        damageDelta: data.damageDelta,
+        hits: data.hits,
+        maxCombo: data.maxCombo,
+        final: data.final ?? false,
+      }),
     });
     if (response.status === 401) {
       handleUnauthorized('worldBoss.attack');
       throw new Error('Session expired');
-    }
-    // 429 cooldown and 410 boss dead — parse body instead of throwing
-    if (response.status === 429 || response.status === 410) {
-      const json = await response.json().catch(() => ({}));
-      return { success: false, damage: 0, isCrit: false, bossHp: 0, bossDefeated: false, ...json };
     }
     if (!response.ok) {
       const text = await response.text().catch(() => '');
@@ -46,6 +48,21 @@ export const worldBossApi = {
     }
     const json = await response.json();
     return json.data ?? json;
+  },
+
+  getLite: async (): Promise<WorldBossLiteData> => {
+    const response = await fetch(API_BASE_URL + '/api/world-boss/current/lite', {
+      credentials: 'include',
+    });
+    if (response.status === 401) {
+      handleUnauthorized('worldBoss.getLite');
+      throw new Error('Session expired');
+    }
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(text || `HTTP ${response.status}`);
+    }
+    return response.json();
   },
 
   getMyRewards: async (eventId: string): Promise<WorldBossMyRewards> => {

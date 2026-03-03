@@ -13,6 +13,7 @@ export interface Match3Result {
   score: number;
 }
 
+/** @deprecated Use useWorldBossBattle instead — this hook uses the old 5-turn match3 flow */
 export function useWorldBossAttack(eventId: string | undefined) {
   const [state, setState] = useState<AttackState>('idle');
   const [lastResult, setLastResult] = useState<WorldBossAttackResult | null>(null);

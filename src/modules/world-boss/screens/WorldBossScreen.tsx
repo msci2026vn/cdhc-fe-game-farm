@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorldBoss } from '../hooks/useWorldBoss';
-import { useWorldBossAttack } from '../hooks/useWorldBossAttack';
 import { useAuth } from '../../../shared/hooks/useAuth';
 import { BossDisplay } from '../components/BossDisplay';
 import { HpBar } from '../components/HpBar';
@@ -10,10 +9,9 @@ import { FullLeaderboard } from '../components/FullLeaderboard';
 import { LiveFeed } from '../components/LiveFeed';
 import { BossWaiting } from '../components/BossWaiting';
 import { AttackButton } from '../components/AttackButton';
-import { DamageFloat } from '../components/DamageFloat';
-import { WorldBossMatch3 } from '../components/WorldBossMatch3';
 import { RewardsScreen } from '../components/RewardsScreen';
 import { HistoryList } from '../components/HistoryList';
+import { WorldBossBattleView } from '../components/WorldBossBattleView';
 
 interface EndedBossInfo {
   id: string;
@@ -39,10 +37,12 @@ export function WorldBossScreen() {
   const { data, isLoading, isError, refetch } = useWorldBoss();
   const { data: authData } = useAuth();
   const boss = data?.boss;
-  const combat = useWorldBossAttack(boss?.id);
   const [tab, setTab] = useState<'leaderboard' | 'feed'>('leaderboard');
   const [mainTab, setMainTab] = useState<'arena' | 'history'>('arena');
   const currentUserId = authData?.user?.id ?? null;
+
+  // === Battle state ===
+  const [showBattle, setShowBattle] = useState(false);
 
   // === Boss End Detection ===
   const [showEndScreen, setShowEndScreen] = useState(false);
@@ -50,7 +50,7 @@ export function WorldBossScreen() {
   const prevActiveRef = useRef(false);
   const currentBossRef = useRef<EndedBossInfo | null>(null);
 
-  // Track current boss info while active (so we have it after boss ends)
+  // Track current boss info while active
   useEffect(() => {
     if (data?.active && data.boss) {
       currentBossRef.current = {
@@ -69,17 +69,20 @@ export function WorldBossScreen() {
     if (wasActive && !isActive && currentBossRef.current) {
       setEndedBossInfo({ ...currentBossRef.current, status: 'expired' });
       setShowEndScreen(true);
+      setShowBattle(false);
     }
     prevActiveRef.current = isActive;
   }, [data?.active]);
 
-  // Detect end via combat 410 boss_dead
-  useEffect(() => {
-    if (combat.state === 'boss_dead' && currentBossRef.current) {
-      setEndedBossInfo({ ...currentBossRef.current, status: 'defeated' });
-      setShowEndScreen(true);
-    }
-  }, [combat.state]);
+  // Fullscreen battle view
+  if (showBattle && boss) {
+    return (
+      <WorldBossBattleView
+        worldBoss={boss}
+        onExit={() => setShowBattle(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -88,7 +91,7 @@ export function WorldBossScreen() {
         <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white text-xl p-1">
           ←
         </button>
-        <h1 className="text-lg font-bold flex-1">⚔️ World Boss</h1>
+        <h1 className="text-lg font-bold flex-1">World Boss</h1>
         {data?.active && (
           <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full animate-pulse">
             LIVE
@@ -106,7 +109,7 @@ export function WorldBossScreen() {
               : 'text-gray-400'
           }`}
         >
-          ⚔️ Đấu trường
+          Dau truong
         </button>
         <button
           onClick={() => setMainTab('history')}
@@ -116,7 +119,7 @@ export function WorldBossScreen() {
               : 'text-gray-400'
           }`}
         >
-          📜 Lịch sử
+          Lich su
         </button>
       </div>
 
@@ -128,14 +131,14 @@ export function WorldBossScreen() {
           <LoadingSkeleton />
         ) : isError ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 gap-4 text-center">
-            <div className="text-5xl">⚠️</div>
-            <h2 className="text-lg font-bold text-red-400">Không thể kết nối server</h2>
-            <p className="text-gray-400 text-sm max-w-xs">Đang có sự cố kết nối. Boss có thể đang hoạt động — thử lại sau vài giây.</p>
+            <div className="text-5xl">!</div>
+            <h2 className="text-lg font-bold text-red-400">Khong the ket noi server</h2>
+            <p className="text-gray-400 text-sm max-w-xs">Dang co su co ket noi. Boss co the dang hoat dong — thu lai sau vai giay.</p>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white text-sm font-bold rounded-lg transition-colors"
             >
-              🔄 Thử lại
+              Thu lai
             </button>
           </div>
         ) : !data?.active || !boss ? (
@@ -144,15 +147,7 @@ export function WorldBossScreen() {
           <>
             {/* Boss info — fixed top section */}
             <div className="flex-shrink-0">
-              <div className="relative">
-                <BossDisplay boss={boss} />
-                {combat.state === 'result' && combat.lastResult && (
-                  <DamageFloat
-                    damage={combat.lastResult.damage}
-                    isCrit={combat.lastResult.isCrit}
-                  />
-                )}
-              </div>
+              <BossDisplay boss={boss} />
 
               <HpBar
                 currentHp={boss.currentHp}
@@ -165,10 +160,7 @@ export function WorldBossScreen() {
               />
 
               <div className="flex items-center justify-between px-4 py-1 text-xs text-gray-400">
-                <span>👥 {boss.participantCount} người tham gia</span>
-                {combat.lastResult?.userTotalDamage != null && (
-                  <span>Của bạn: <span className="text-yellow-400 font-bold">{combat.lastResult.userTotalDamage.toLocaleString()}</span></span>
-                )}
+                <span>{boss.participantCount} nguoi tham gia</span>
               </div>
             </div>
 
@@ -183,7 +175,7 @@ export function WorldBossScreen() {
                       : 'text-gray-400'
                   }`}
                 >
-                  🏆 Xếp hạng
+                  Xep hang
                 </button>
                 <button
                   onClick={() => setTab('feed')}
@@ -193,7 +185,7 @@ export function WorldBossScreen() {
                       : 'text-gray-400'
                   }`}
                 >
-                  ⚡ Trận chiến
+                  Tran chien
                 </button>
               </div>
 
@@ -212,25 +204,13 @@ export function WorldBossScreen() {
             {/* Attack button */}
             <div className="flex-shrink-0 px-4 py-3 border-t border-gray-800">
               <AttackButton
-                state={combat.state}
-                cooldownRemaining={combat.cooldownRemaining}
-                cooldownTotal={combat.cooldownTotal}
-                onPress={combat.openMatch3}
-                error={combat.error}
-                onDismissError={combat.dismissError}
+                battleState="idle"
+                onAttack={() => setShowBattle(true)}
               />
             </div>
           </>
         )}
       </div>
-
-      {/* Match-3 overlay */}
-      {combat.state === 'match3' && (
-        <WorldBossMatch3
-          onComplete={combat.onMatch3Complete}
-          onCancel={combat.onMatch3Cancel}
-        />
-      )}
 
       {/* End Screen */}
       {showEndScreen && endedBossInfo && (

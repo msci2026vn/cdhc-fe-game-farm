@@ -1,7 +1,9 @@
 export interface WorldBossSkill {
-  mechanicId: string
+  type: string        // mechanicId từ BE: dot_poison, aoe_blast, shield, heal, stun, etc.
   name: string
   description: string
+  trigger: string     // normal, every_2_turns, every_3_turns, hp_below_50, hp_below_10, etc.
+  damage_multi: number
 }
 
 export interface WorldBossFeedEntry {
@@ -60,12 +62,28 @@ export interface WorldBossData {
   boss?: WorldBossInfo
 }
 
+/** @deprecated Dùng WorldBossAttackPayload thay thế */
 export interface WorldBossAttackData {
   eventId: string
   gemsMatched: number
   maxCombo: number
   specialGems: number
   score: number
+}
+
+export interface WorldBossAttackPayload {
+  eventId: string
+  damageDelta: number
+  hits: number
+  maxCombo: number
+  final?: boolean
+}
+
+export interface WorldBossLiteData {
+  active: boolean
+  hpPercent?: number
+  participantCount?: number
+  timeRemaining?: number
 }
 
 export interface WorldBossMyRewards {
@@ -117,7 +135,8 @@ export interface WorldBossHistoryLeaderboard {
   }>
 }
 
-export interface WorldBossAttackResult {
+/** @deprecated Dùng WorldBossAttackResult mới bên dưới */
+export interface WorldBossAttackResultLegacy {
   success: boolean
   damage: number
   isCrit: boolean
@@ -127,4 +146,11 @@ export interface WorldBossAttackResult {
   cooldownSeconds?: number
   error?: string
   retryAfter?: number
+}
+
+export interface WorldBossAttackResult {
+  ok: boolean
+  hpPercent: number
+  rank: number | null
+  totalDamage?: number  // chỉ có khi final=true
 }
