@@ -234,6 +234,16 @@ export default function ProfileScreen() {
           </button>
         </div>
 
+        {/* Marketplace Link */}
+        <div className="px-3 mt-2 z-10 shrink-0">
+          <button
+            onClick={() => { playSound('ui_click'); navigate('/marketplace'); }}
+            className="w-full py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-600/30 transition-colors"
+          >
+            🏪 Chợ NFT →
+          </button>
+        </div>
+
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto px-4 pb-6 mt-4 z-10" style={{ scrollbarWidth: 'none' }}>
 

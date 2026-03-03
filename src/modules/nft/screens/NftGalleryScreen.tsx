@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { nftApi, type NftCard } from '@/shared/api/api-nft';
+import { marketplaceApi } from '@/shared/api/api-marketplace';
 import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
@@ -53,7 +54,246 @@ function CardGrid({ cards, onSelect }: { cards: NftCard[]; onSelect: (c: NftCard
   );
 }
 
-function CardDetail({ card, onClose }: { card: NftCard; onClose: () => void }) {
+function SellModal({
+  card,
+  onClose,
+  onSuccess,
+}: {
+  card: NftCard;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const r = RARITY[card.bossDifficulty || 'hard'] || RARITY.hard;
+  const [price, setPrice] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleSell = async () => {
+    if (!card.nftTokenId || !price) return;
+    setLoading(true);
+    setError('');
+    try {
+      const result = await marketplaceApi.listNft(card.nftTokenId, price);
+      if (result.ok) {
+        playSound('ui_click');
+        setSuccess(true);
+        onSuccess();
+      } else {
+        setError(result.error || 'Đăng bán thất bại');
+      }
+    } catch {
+      setError('Lỗi kết nối, vui lòng thử lại');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+        {success ? (
+          <div className="text-center space-y-3">
+            <div className="text-5xl">🎉</div>
+            <h3 className="text-green-400 text-lg font-bold">Đã đăng bán thành công!</h3>
+            <p className="text-gray-300 text-sm">Card của bạn đang hiện trên Chợ NFT</p>
+            <button
+              onClick={onClose}
+              className="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium"
+            >
+              Đóng
+            </button>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-white font-bold text-lg text-center">Đăng bán NFT</h3>
+
+            <div className="flex justify-center">
+              {card.nftCardImageUrl ? (
+                <img src={card.nftCardImageUrl} alt={card.bossName} className="w-32 rounded-xl" />
+              ) : (
+                <div className="w-32 h-48 bg-gray-700 rounded-xl flex items-center justify-center text-4xl">🎴</div>
+              )}
+            </div>
+
+            <p className={`text-center font-bold text-sm ${r.color}`}>{card.bossName} — {r.label}</p>
+
+            <div>
+              <label className="text-gray-400 text-xs mb-1 block">Giá bán (AVAX)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="VD: 2.5"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                className="w-full p-3 bg-gray-700 rounded-xl text-white text-lg border border-gray-600 focus:border-emerald-500 outline-none transition-colors"
+              />
+              {price && parseFloat(price) > 0 && (
+                <p className="text-gray-500 text-xs mt-1">~ ${(parseFloat(price) * 9).toFixed(2)} USD</p>
+              )}
+            </div>
+
+            {error && (
+              <p className="text-red-400 text-sm text-center bg-red-500/10 rounded-lg py-2">{error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSell}
+                disabled={!price || parseFloat(price) <= 0 || loading}
+                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Đang đăng...' : `Bán ${price || '?'} AVAX`}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WithdrawModal({
+  card,
+  onClose,
+  onSuccess,
+}: {
+  card: NftCard;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState<{ txHash: string; snowscan: string } | null>(null);
+  const validAddr = /^0x[0-9a-fA-F]{40}$/.test(address);
+
+  const handleWithdraw = async () => {
+    if (!card.nftTokenId || !validAddr) return;
+    setLoading(true);
+    setError('');
+    try {
+      const result = await nftApi.withdrawNft(card.nftTokenId, address);
+      if (result.ok) {
+        playSound('ui_click');
+        setSuccess({ txHash: result.withdrawal.txHash, snowscan: result.withdrawal.snowscan });
+        onSuccess();
+      } else {
+        setError(result.error || 'Rút thất bại');
+      }
+    } catch {
+      setError('Lỗi kết nối, vui lòng thử lại');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+        {success ? (
+          <div className="text-center space-y-3">
+            <div className="text-5xl">✅</div>
+            <h3 className="text-green-400 text-lg font-bold">Rút NFT thành công!</h3>
+            <p className="text-gray-300 text-sm">NFT đã chuyển về ví MetaMask của bạn</p>
+            <p className="text-gray-500 text-xs break-all">{address}</p>
+            <a
+              href={success.snowscan}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block py-2 text-blue-400 text-sm hover:text-blue-300"
+            >
+              🔗 Xem trên Snowscan
+            </a>
+            <p className="text-yellow-400 text-xs">💡 Mở OpenSea/Joepegs để bán NFT trên marketplace ngoài</p>
+            <button
+              onClick={onClose}
+              className="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium"
+            >
+              Đóng
+            </button>
+          </div>
+        ) : loading ? (
+          <div className="text-center space-y-3 py-6">
+            <div className="animate-spin w-10 h-10 border-3 border-blue-400 border-t-transparent rounded-full mx-auto" />
+            <h3 className="text-white font-bold">Đang rút NFT...</h3>
+            <p className="text-gray-400 text-sm">Chuyển NFT lên blockchain ~10 giây</p>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-white font-bold text-lg text-center">📤 Rút NFT về ví cá nhân</h3>
+
+            <div className="flex justify-center">
+              {card.nftCardImageUrl ? (
+                <img src={card.nftCardImageUrl} alt={card.bossName} className="w-28 rounded-xl" />
+              ) : (
+                <div className="w-28 h-40 bg-gray-700 rounded-xl flex items-center justify-center text-4xl">🎴</div>
+              )}
+            </div>
+            <p className="text-center text-white font-bold text-sm">{card.bossName}</p>
+
+            <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-xl p-3 text-sm text-yellow-300">
+              ⚠️ Sau khi rút, NFT sẽ rời khỏi game. Bạn có thể bán trên OpenSea/Joepegs hoặc chuyển lại vào game sau.
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-xs mb-1 block">Địa chỉ ví (MetaMask)</label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={address}
+                onChange={e => setAddress(e.target.value.trim())}
+                className="w-full p-3 bg-gray-700 rounded-xl text-white font-mono text-sm border border-gray-600 focus:border-blue-500 outline-none"
+                spellCheck={false}
+              />
+              {address && !validAddr && (
+                <p className="text-red-400 text-xs mt-1">Địa chỉ không hợp lệ (0x + 40 ký tự hex)</p>
+              )}
+            </div>
+
+            {error && (
+              <p className="text-red-400 text-sm text-center bg-red-500/10 rounded-lg py-2">{error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleWithdraw}
+                disabled={!validAddr}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Xác nhận rút
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CardDetail({
+  card,
+  onClose,
+  onSell,
+  onWithdraw,
+}: {
+  card: NftCard;
+  onClose: () => void;
+  onSell: (c: NftCard) => void;
+  onWithdraw: (c: NftCard) => void;
+}) {
   const r = RARITY[card.bossDifficulty || 'hard'] || RARITY.hard;
   const ct = CARD_TYPE[card.nftCardType] || CARD_TYPE.last_hit;
   const elIcon = ELEMENT_ICON[card.bossElement || ''] || '';
@@ -128,6 +368,24 @@ function CardDetail({ card, onClose }: { card: NftCard; onClose: () => void }) {
               📄 Metadata IPFS
             </a>
           )}
+
+          {/* Action buttons — only for minted cards with tokenId */}
+          {card.nftMintStatus === 'minted' && card.nftTokenId && (
+            <div className="space-y-2">
+              <button
+                onClick={() => { playSound('ui_click'); onSell(card); }}
+                className="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+              >
+                🏪 Bán NFT này
+              </button>
+              <button
+                onClick={() => { playSound('ui_click'); onWithdraw(card); }}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+              >
+                📤 Rút về ví MetaMask
+              </button>
+            </div>
+          )}
         </div>
 
         <button
@@ -143,14 +401,36 @@ function CardDetail({ card, onClose }: { card: NftCard; onClose: () => void }) {
 
 export default function NftGalleryScreen() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: cards = [], isLoading } = useQuery({
     queryKey: ['nft', 'my-cards'],
     queryFn: () => nftApi.getMyCards(),
     staleTime: 30_000,
   });
   const [selected, setSelected] = useState<NftCard | null>(null);
+  const [sellCard, setSellCard] = useState<NftCard | null>(null);
+  const [withdrawCard, setWithdrawCard] = useState<NftCard | null>(null);
 
   const mintedCards = cards.filter(c => c.nftMintStatus === 'minted');
+
+  const handleSellRequest = (card: NftCard) => {
+    setSelected(null);
+    setSellCard(card);
+  };
+
+  const handleWithdrawRequest = (card: NftCard) => {
+    setSelected(null);
+    setWithdrawCard(card);
+  };
+
+  const handleSellSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['nft', 'my-cards'] });
+    queryClient.invalidateQueries({ queryKey: ['marketplace', 'listings'] });
+  };
+
+  const handleWithdrawSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['nft', 'my-cards'] });
+  };
 
   return (
     <div className="h-[100dvh] max-w-[430px] mx-auto bg-gradient-to-b from-gray-900 to-gray-950 flex flex-col overflow-hidden">
@@ -192,7 +472,30 @@ export default function NftGalleryScreen() {
 
       <div className="z-50 shrink-0"><BottomNav /></div>
 
-      {selected && <CardDetail card={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <CardDetail
+          card={selected}
+          onClose={() => setSelected(null)}
+          onSell={handleSellRequest}
+          onWithdraw={handleWithdrawRequest}
+        />
+      )}
+
+      {sellCard && (
+        <SellModal
+          card={sellCard}
+          onClose={() => setSellCard(null)}
+          onSuccess={handleSellSuccess}
+        />
+      )}
+
+      {withdrawCard && (
+        <WithdrawModal
+          card={withdrawCard}
+          onClose={() => setWithdrawCard(null)}
+          onSuccess={handleWithdrawSuccess}
+        />
+      )}
     </div>
   );
 }

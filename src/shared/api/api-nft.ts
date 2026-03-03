@@ -17,6 +17,20 @@ export interface NftCard {
 }
 
 export const nftApi = {
+  withdrawNft: async (tokenId: number, toAddress: string) => {
+    const response = await fetch(API_BASE_URL + '/api/nft/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ tokenId, toAddress }),
+    });
+    if (response.status === 401) {
+      handleUnauthorized('nft.withdrawNft');
+      throw new Error('Session expired');
+    }
+    return response.json();
+  },
+
   getCard: async (eventId: string): Promise<NftCard | null> => {
     const response = await fetch(API_BASE_URL + `/api/nft/card/${eventId}`, {
       credentials: 'include',
