@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useWorldBossRewards, useWorldBossHistoryLeaderboard } from '../hooks/useWorldBossHistory';
 import { FullLeaderboard } from './FullLeaderboard';
 import { BottomDrawer } from './BottomDrawer';
+import { NftCardReveal } from './NftCardReveal';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { nftApi } from '@/shared/api/api-nft';
 
 interface RewardsScreenProps {
   eventId: string;
@@ -62,6 +65,26 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
   const { data: rewardsData, isLoading } = useWorldBossRewards(eventId);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const { data: lbData } = useWorldBossHistoryLeaderboard(showLeaderboard ? eventId : null);
+
+  // NFT notification
+  const { data: authData } = useAuth();
+  const [showNftNotification, setShowNftNotification] = useState(false);
+  const [showNftReveal, setShowNftReveal] = useState(false);
+  const nftCheckedRef = useRef(false);
+
+  useEffect(() => {
+    if (!eventId || status !== 'defeated' || nftCheckedRef.current) return;
+    if (!authData?.user?.id) return;
+    nftCheckedRef.current = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const card = await nftApi.getCard(eventId);
+        if (card) setShowNftNotification(true);
+      } catch { /* no NFT for this user */ }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [eventId, status, authData?.user?.id]);
 
   const isDefeated = status === 'defeated';
   const reward = rewardsData?.rewards?.[0];
@@ -180,6 +203,31 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
         )}
       </BottomDrawer>
 
+      {/* NFT Notification Banner */}
+      {showNftNotification && (
+        <div
+          className="fixed bottom-24 left-4 right-4 z-[55] nft-notif-pulse cursor-pointer"
+          onClick={() => { setShowNftReveal(true); setShowNftNotification(false); }}
+        >
+          <div className="bg-gradient-to-r from-indigo-900 to-indigo-800 rounded-2xl px-5 py-4 flex items-center gap-3 border border-indigo-500/40 shadow-lg">
+            <span className="text-3xl">🎴</span>
+            <div className="flex-1">
+              <p className="text-white font-bold text-sm">Bạn đã nhận được 1 thẻ NFT!</p>
+              <p className="text-indigo-300 text-xs mt-0.5">Nhấn để mở thẻ</p>
+            </div>
+            <span className="text-indigo-300 text-lg">→</span>
+          </div>
+        </div>
+      )}
+
+      {/* NFT Card Reveal Modal */}
+      {showNftReveal && (
+        <NftCardReveal
+          eventId={eventId}
+          onClose={() => setShowNftReveal(false)}
+        />
+      )}
+
       <style>{`
         .wb-mvp-glow {
           animation: wbMvpPulse 2s ease-in-out infinite;
@@ -187,6 +235,13 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
         @keyframes wbMvpPulse {
           0%, 100% { box-shadow: 0 0 12px 2px rgba(234, 179, 8, 0.3); }
           50%       { box-shadow: 0 0 24px 6px rgba(234, 179, 8, 0.6); }
+        }
+        .nft-notif-pulse {
+          animation: nftNotifPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes nftNotifPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.02); }
         }
       `}</style>
     </div>

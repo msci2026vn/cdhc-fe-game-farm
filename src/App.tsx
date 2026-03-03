@@ -58,6 +58,7 @@ const TopupPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse
 const TopupSuccessPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupSuccessPage'));
 const TopupCancelPage = lazyWithRetry(() => import('@/desktop/modules/avalan/farmverse/pages/TopupCancelPage'));
 const WorldBossScreen = lazyWithRetry(() => import('@/modules/world-boss/screens/WorldBossScreen').then(m => ({ default: m.WorldBossScreen })));
+const NftGalleryScreen = lazyWithRetry(() => import('@/modules/nft/screens/NftGalleryScreen'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -130,6 +131,7 @@ const AuthenticatedApp = () => {
         <Route path="/market" element={<MarketScreen />} />
         <Route path="/vip/purchase" element={<VipPurchaseScreen />} />
         <Route path="/rwa/my-garden" element={<MyGardenScreen />} />
+        <Route path="/nft-gallery" element={<NftGalleryScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/farmverse/topup" element={<TopupPage />} />
         <Route path="/farmverse/topup/success" element={<TopupSuccessPage />} />
