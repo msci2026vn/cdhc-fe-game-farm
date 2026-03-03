@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="shellGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#c8a05a"/>
+      <stop offset="100%" stop-color="#7a5c1e"/>
+    </radialGradient>
+    <radialGradient id="bodyGrad" cx="50%" cy="60%" r="55%">
+      <stop offset="0%" stop-color="#d4c090"/>
+      <stop offset="100%" stop-color="#9a7a40"/>
+    </radialGradient>
+  </defs>
+  <!-- Shell -->
+  <ellipse cx="100" cy="90" rx="55" ry="48" fill="url(#shellGrad)"/>
+  <!-- Shell spiral -->
+  <path d="M100,55 Q130,60 135,90 Q130,120 100,125 Q70,120 65,90 Q70,60 100,55Z" fill="none" stroke="#7a5c1e" stroke-width="2" opacity="0.5"/>
+  <path d="M100,65 Q120,70 125,90 Q120,110 100,115 Q80,110 75,90 Q80,70 100,65Z" fill="none" stroke="#7a5c1e" stroke-width="2" opacity="0.4"/>
+  <circle cx="100" cy="90" r="12" fill="#a08030" opacity="0.5"/>
+  <!-- Body/foot -->
+  <ellipse cx="100" cy="140" rx="45" ry="22" fill="url(#bodyGrad)"/>
+  <!-- Head/antennae -->
+  <ellipse cx="100" cy="56" rx="18" ry="14" fill="#d4c090"/>
+  <!-- Antennae -->
+  <line x1="92" y1="48" x2="75" y2="20" stroke="#9a7a40" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="75" cy="20" r="4" fill="#c8a05a"/>
+  <line x1="108" y1="48" x2="125" y2="20" stroke="#9a7a40" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="125" cy="20" r="4" fill="#c8a05a"/>
+  <!-- Short antennae -->
+  <line x1="90" y1="45" x2="80" y2="30" stroke="#9a7a40" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="80" cy="30" r="2.5" fill="#c8a05a"/>
+  <line x1="110" y1="45" x2="120" y2="30" stroke="#9a7a40" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="120" cy="30" r="2.5" fill="#c8a05a"/>
+  <!-- Eyes -->
+  <circle cx="92" cy="57" r="5" fill="#3a2500"/>
+  <circle cx="108" cy="57" r="5" fill="#3a2500"/>
+  <circle cx="91" cy="56" r="2" fill="#fff" opacity="0.5"/>
+  <circle cx="107" cy="56" r="2" fill="#fff" opacity="0.5"/>
+  <!-- Mouth -->
+  <path d="M94,66 Q100,70 106,66" stroke="#7a5c1e" stroke-width="2" fill="none"/>
+</svg>

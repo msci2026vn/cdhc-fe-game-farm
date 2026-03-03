@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="capGrad" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#d4763b"/>
+      <stop offset="100%" stop-color="#7a3500"/>
+    </radialGradient>
+    <radialGradient id="stemGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8c49e"/>
+      <stop offset="100%" stop-color="#b08050"/>
+    </radialGradient>
+  </defs>
+  <!-- Mycelium roots -->
+  <path d="M100,170 Q70,165 50,175 Q40,178 55,175 Q65,172 80,175" stroke="#a06030" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M100,170 Q130,165 150,175 Q160,178 145,175 Q135,172 120,175" stroke="#a06030" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M90,168 Q75,180 60,185 Q55,188 65,185" stroke="#a06030" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M110,168 Q125,180 140,185 Q145,188 135,185" stroke="#a06030" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Stem -->
+  <rect x="87" y="110" width="26" height="62" rx="6" fill="url(#stemGrad)"/>
+  <!-- Skirt ring -->
+  <ellipse cx="100" cy="120" rx="30" ry="8" fill="#e8c49e" opacity="0.8"/>
+  <!-- Mushroom cap -->
+  <ellipse cx="100" cy="95" rx="62" ry="35" fill="url(#capGrad)"/>
+  <!-- Cap underside shadow -->
+  <ellipse cx="100" cy="107" rx="50" ry="12" fill="#5a2500" opacity="0.4"/>
+  <!-- Cap spots (white) -->
+  <circle cx="78" cy="82" r="8" fill="#fff" opacity="0.85"/>
+  <circle cx="105" cy="73" r="10" fill="#fff" opacity="0.85"/>
+  <circle cx="132" cy="80" r="7" fill="#fff" opacity="0.85"/>
+  <circle cx="65" cy="93" r="5" fill="#fff" opacity="0.7"/>
+  <circle cx="148" cy="90" r="5" fill="#fff" opacity="0.7"/>
+  <!-- Angry face on cap -->
+  <circle cx="88" cy="90" r="7" fill="#ffe0cc"/>
+  <circle cx="112" cy="90" r="7" fill="#ffe0cc"/>
+  <circle cx="88" cy="90" r="3" fill="#3a1500"/>
+  <circle cx="112" cy="90" r="3" fill="#3a1500"/>
+  <!-- Angry eyebrows -->
+  <line x1="83" y1="83" x2="93" y2="86" stroke="#3a1500" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="107" y1="86" x2="117" y2="83" stroke="#3a1500" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Mouth -->
+  <path d="M91,100 Q100,96 109,100" stroke="#3a1500" stroke-width="2" fill="none"/>
+  <!-- Spores floating -->
+  <circle cx="45" cy="60" r="3" fill="#d4763b" opacity="0.6"/>
+  <circle cx="155" cy="55" r="4" fill="#d4763b" opacity="0.5"/>
+  <circle cx="30" cy="80" r="2.5" fill="#d4763b" opacity="0.5"/>
+  <circle cx="170" cy="75" r="3" fill="#d4763b" opacity="0.5"/>
+</svg>

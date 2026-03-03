@@ -15,11 +15,8 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
   const currentUserInTop = currentUserRank != null && currentUserRank <= 10;
 
   return (
-    <div>
-      <div
-        className="overflow-y-auto"
-        style={{ maxHeight: 280 }}
-      >
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto">
         {leaderboard.length === 0 ? (
           <p className="text-xs text-gray-500 text-center py-4">Chưa có ai tấn công</p>
         ) : (
@@ -30,9 +27,8 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
               return (
                 <div
                   key={entry.userId}
-                  className={`flex items-center justify-between py-1.5 px-2 rounded text-sm ${
-                    isCurrentUser ? 'bg-blue-900/40 border border-blue-700/50' : ''
-                  }`}
+                  className={`flex items-center justify-between py-1.5 px-2 rounded text-sm ${isCurrentUser ? 'bg-blue-900/40 border border-blue-700/50' : ''
+                    }`}
                 >
                   <span className="flex items-center gap-2 text-gray-300 min-w-0">
                     <span className="w-6 text-center flex-shrink-0">
@@ -55,7 +51,7 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
 
       {/* Current user not in top 10 */}
       {currentUserEntry && !currentUserInTop && (
-        <div className="px-4 pb-2 border-t border-gray-700/50 pt-2">
+        <div className="px-4 pb-2 border-t border-gray-700/50 pt-2 flex-shrink-0">
           <div className="flex items-center justify-between text-xs text-gray-400 bg-blue-900/20 px-2 py-1.5 rounded border border-blue-700/30">
             <span>Bạn: #{currentUserRank}</span>
             <span className="text-yellow-400">{currentUserEntry.damage.toLocaleString()} dmg</span>

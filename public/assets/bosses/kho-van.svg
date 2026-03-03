@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#d4943a"/>
+      <stop offset="100%" stop-color="#7a4800"/>
+    </radialGradient>
+    <radialGradient id="dryGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#c8a060"/>
+      <stop offset="100%" stop-color="#7a5020"/>
+    </radialGradient>
+  </defs>
+  <!-- Dry/parched soil cracking effect (beetle on dry land) -->
+  <!-- Cracks on ground -->
+  <path d="M30,175 L60,165 L75,175 L90,162 L100,172 L115,160 L130,170 L150,162 L175,175" 
+        stroke="#5a3010" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M40,185 L65,175 L85,180" stroke="#5a3010" stroke-width="1" fill="none" opacity="0.4"/>
+  <!-- Grain/rice granules around body -->
+  <ellipse cx="45" cy="155" rx="7" ry="4" fill="#d4a060" transform="rotate(-20,45,155)"/>
+  <ellipse cx="155" cy="152" rx="7" ry="4" fill="#d4a060" transform="rotate(15,155,152)"/>
+  <ellipse cx="60" cy="165" rx="6" ry="3.5" fill="#c89040" transform="rotate(10,60,165)"/>
+  <ellipse cx="145" cy="162" rx="6" ry="3.5" fill="#c89040" transform="rotate(-10,145,162)"/>
+  <!-- Wings/elytra -->
+  <ellipse cx="100" cy="105" rx="38" ry="48" fill="url(#dryGrad)"/>
+  <!-- Wing split line -->
+  <line x1="100" y1="62" x2="100" y2="155" stroke="#5a3010" stroke-width="1.5" opacity="0.6"/>
+  <!-- Body head -->
+  <ellipse cx="100" cy="65" rx="22" ry="20" fill="url(#bodyGrad)"/>
+  <!-- Thorax -->
+  <ellipse cx="100" cy="88" rx="26" ry="16" fill="#c87830"/>
+  <!-- Head details -->
+  <!-- Beak/rostrum -->
+  <path d="M100,50 Q96,35 97,22" stroke="#5a3010" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="88" cy="63" r="6" fill="#2a1500"/>
+  <circle cx="112" cy="63" r="6" fill="#2a1500"/>
+  <circle cx="87" cy="62" r="2" fill="#ff8800" opacity="0.7"/>
+  <circle cx="111" cy="62" r="2" fill="#ff8800" opacity="0.7"/>
+  <!-- Antennae -->
+  <path d="M94,52 Q82,38 72,28" stroke="#7a4800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M72,28 L65,22" stroke="#7a4800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M72,28 L68,23" stroke="#7a4800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Legs -->
+  <line x1="82" y1="95" x2="45" y2="82" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="80" y1="105" x2="38" y2="108" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="82" y1="115" x2="46" y2="128" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="118" y1="95" x2="155" y2="82" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="120" y1="105" x2="162" y2="108" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="118" y1="115" x2="154" y2="128" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Elytra pattern/texture -->
+  <ellipse cx="85" cy="110" rx="12" ry="28" fill="#a06030" opacity="0.25"/>
+  <ellipse cx="115" cy="110" rx="12" ry="28" fill="#a06030" opacity="0.25"/>
+  <path d="M82,75 Q80,110 84,148" stroke="#5a3010" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M118,75 Q120,110 116,148" stroke="#5a3010" stroke-width="1" fill="none" opacity="0.4"/>
+</svg>

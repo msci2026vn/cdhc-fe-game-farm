@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#cc1111"/>
+      <stop offset="100%" stop-color="#6b0000"/>
+    </radialGradient>
+    <radialGradient id="abdGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#e63333"/>
+      <stop offset="100%" stop-color="#800000"/>
+    </radialGradient>
+  </defs>
+  <!-- Legs left -->
+  <line x1="75" y1="95" x2="20" y2="65" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="75" y1="100" x2="15" y2="100" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="75" y1="108" x2="22" y2="130" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="78" y1="115" x2="35" y2="155" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <!-- Legs right -->
+  <line x1="125" y1="95" x2="180" y2="65" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="125" y1="100" x2="185" y2="100" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="125" y1="108" x2="178" y2="130" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="122" y1="115" x2="165" y2="155" stroke="#8B0000" stroke-width="5" stroke-linecap="round"/>
+  <!-- Abdomen -->
+  <ellipse cx="100" cy="140" rx="32" ry="38" fill="url(#abdGrad)"/>
+  <ellipse cx="100" cy="135" rx="22" ry="12" fill="#ff4444" opacity="0.4"/>
+  <!-- Body/cephalothorax -->
+  <ellipse cx="100" cy="95" rx="30" ry="28" fill="url(#bodyGrad)"/>
+  <!-- Eyes - 8 eyes -->
+  <circle cx="87" cy="84" r="5" fill="#ffffff"/>
+  <circle cx="101" cy="82" r="5" fill="#ffffff"/>
+  <circle cx="113" cy="84" r="5" fill="#ffffff"/>
+  <circle cx="92" cy="92" r="3.5" fill="#ffcccc"/>
+  <circle cx="108" cy="92" r="3.5" fill="#ffcccc"/>
+  <circle cx="87" cy="84" r="2" fill="#000"/>
+  <circle cx="101" cy="82" r="2" fill="#000"/>
+  <circle cx="113" cy="84" r="2" fill="#000"/>
+  <!-- Fangs -->
+  <path d="M93,107 L88,120 L91,120 L94,107Z" fill="#cc0000"/>
+  <path d="M107,107 L112,120 L109,120 L106,107Z" fill="#cc0000"/>
+  <!-- Thread -->
+  <line x1="100" y1="178" x2="100" y2="200" stroke="#cc1111" stroke-width="2"/>
+</svg>

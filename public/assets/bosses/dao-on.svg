@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="coreGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#7cb518"/>
+      <stop offset="100%" stop-color="#3d7500"/>
+    </radialGradient>
+    <radialGradient id="spotGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4a0080"/>
+      <stop offset="100%" stop-color="#1a0030"/>
+    </radialGradient>
+  </defs>
+  <!-- Fungal/disease body -->
+  <!-- Tendrils -->
+  <path d="M100,100 Q60,50 30,40" stroke="#3d7500" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M100,100 Q80,40 90,15" stroke="#3d7500" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M100,100 Q140,50 170,40" stroke="#3d7500" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M100,100 Q120,40 110,15" stroke="#3d7500" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M100,100 Q50,110 20,130" stroke="#3d7500" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M100,100 Q150,110 180,130" stroke="#3d7500" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Leaf shapes damaged -->
+  <ellipse cx="30" cy="38" rx="18" ry="10" fill="#7cb518" transform="rotate(-30,30,38)"/>
+  <ellipse cx="30" cy="38" rx="8" ry="5" fill="#4a0080" opacity="0.7" transform="rotate(-30,30,38)"/>
+  <ellipse cx="170" cy="38" rx="18" ry="10" fill="#7cb518" transform="rotate(30,170,38)"/>
+  <ellipse cx="170" cy="38" rx="8" ry="5" fill="#4a0080" opacity="0.7" transform="rotate(30,170,38)"/>
+  <ellipse cx="90" cy="13" rx="15" ry="9" fill="#7cb518" transform="rotate(-10,90,15)"/>
+  <ellipse cx="90" cy="13" rx="7" ry="4" fill="#4a0080" opacity="0.7"/>
+  <!-- Main body - round blob -->
+  <circle cx="100" cy="105" r="42" fill="url(#coreGrad)"/>
+  <!-- Disease spots -->
+  <circle cx="85" cy="95" r="12" fill="url(#spotGrad)" opacity="0.85"/>
+  <circle cx="112" cy="110" r="9" fill="url(#spotGrad)" opacity="0.85"/>
+  <circle cx="90" cy="120" r="7" fill="url(#spotGrad)" opacity="0.7"/>
+  <!-- Face -->
+  <circle cx="90" cy="98" r="6" fill="#ffe066"/>
+  <circle cx="112" cy="98" r="6" fill="#ffe066"/>
+  <circle cx="90" cy="98" r="3" fill="#000"/>
+  <circle cx="112" cy="98" r="3" fill="#000"/>
+  <!-- Mouth - sinister grin -->
+  <path d="M83,115 Q100,128 118,115" stroke="#1a5000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Spores -->
+  <circle cx="60" cy="70" r="4" fill="#a8e063" opacity="0.8"/>
+  <circle cx="140" cy="70" r="4" fill="#a8e063" opacity="0.8"/>
+  <circle cx="75" cy="55" r="3" fill="#a8e063" opacity="0.6"/>
+  <circle cx="125" cy="55" r="3" fill="#a8e063" opacity="0.6"/>
+  <circle cx="100" cy="50" r="3" fill="#a8e063" opacity="0.6"/>
+</svg>

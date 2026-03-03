@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#8B4513"/>
+      <stop offset="100%" stop-color="#3d1a00"/>
+    </radialGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff6600" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Glow -->
+  <ellipse cx="100" cy="110" rx="85" ry="60" fill="url(#glowGrad)"/>
+  <!-- Body - flat manta/ray shape -->
+  <ellipse cx="100" cy="105" rx="75" ry="45" fill="url(#bodyGrad)"/>
+  <!-- Wings -->
+  <path d="M25,105 Q5,75 30,70 Q60,65 100,95 Q140,65 170,70 Q195,75 175,105 Q140,130 100,125 Q60,130 25,105Z" fill="#6B2F08"/>
+  <!-- Tail -->
+  <path d="M100,125 Q105,155 95,175 Q98,185 100,175 Q102,165 105,175 Q107,185 100,180" stroke="#5a2506" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="80" cy="98" r="7" fill="#111"/>
+  <circle cx="120" cy="98" r="7" fill="#111"/>
+  <circle cx="78" cy="96" r="3" fill="#ff4400" opacity="0.9"/>
+  <circle cx="118" cy="96" r="3" fill="#ff4400" opacity="0.9"/>
+  <!-- Mouth -->
+  <path d="M85,112 Q100,120 115,112" stroke="#3d1a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Spots/patterns -->
+  <circle cx="70" cy="108" r="4" fill="#8B4513" opacity="0.5"/>
+  <circle cx="130" cy="108" r="4" fill="#8B4513" opacity="0.5"/>
+  <circle cx="55" cy="100" r="3" fill="#8B4513" opacity="0.4"/>
+  <circle cx="145" cy="100" r="3" fill="#8B4513" opacity="0.4"/>
+</svg>

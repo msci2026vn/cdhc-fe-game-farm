@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#a0a0aa"/>
+      <stop offset="100%" stop-color="#404050"/>
+    </radialGradient>
+    <radialGradient id="drillGrad" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#c0c0d0"/>
+      <stop offset="100%" stop-color="#505060"/>
+    </radialGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6644ff" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#6644ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Glow aura (steel borer) -->
+  <ellipse cx="100" cy="110" rx="70" ry="50" fill="url(#glowGrad)"/>
+  <!-- Body - elongated larva -->
+  <ellipse cx="100" cy="120" rx="28" ry="55" fill="url(#bodyGrad)"/>
+  <!-- Body segments -->
+  <line x1="72" y1="95" x2="128" y2="95" stroke="#303040" stroke-width="1.5" opacity="0.5"/>
+  <line x1="72" y1="108" x2="128" y2="108" stroke="#303040" stroke-width="1.5" opacity="0.5"/>
+  <line x1="72" y1="121" x2="128" y2="121" stroke="#303040" stroke-width="1.5" opacity="0.5"/>
+  <line x1="72" y1="134" x2="128" y2="134" stroke="#303040" stroke-width="1.5" opacity="0.5"/>
+  <line x1="72" y1="147" x2="128" y2="147" stroke="#303040" stroke-width="1.5" opacity="0.5"/>
+  <!-- Drill head -->
+  <ellipse cx="100" cy="60" rx="22" ry="20" fill="url(#drillGrad)"/>
+  <!-- Drill mandibles -->
+  <path d="M100,42 L93,20 L100,30 L107,20Z" fill="#808090"/>
+  <!-- Mandible details -->
+  <path d="M93,20 L88,12" stroke="#505060" stroke-width="2" fill="none"/>
+  <path d="M107,20 L112,12" stroke="#505060" stroke-width="2" fill="none"/>
+  <!-- Eyes -->
+  <circle cx="90" cy="60" r="6" fill="#4444ff"/>
+  <circle cx="110" cy="60" r="6" fill="#4444ff"/>
+  <circle cx="90" cy="60" r="3" fill="#000080"/>
+  <circle cx="110" cy="60" r="3" fill="#000080"/>
+  <circle cx="89" cy="59" r="1.5" fill="#8888ff"/>
+  <circle cx="109" cy="59" r="1.5" fill="#8888ff"/>
+  <!-- Stubby legs -->
+  <line x1="78" y1="100" x2="58" y2="95" stroke="#505060" stroke-width="4" stroke-linecap="round"/>
+  <line x1="78" y1="115" x2="55" y2="115" stroke="#505060" stroke-width="4" stroke-linecap="round"/>
+  <line x1="80" y1="130" x2="60" y2="138" stroke="#505060" stroke-width="4" stroke-linecap="round"/>
+  <line x1="122" y1="100" x2="142" y2="95" stroke="#505060" stroke-width="4" stroke-linecap="round"/>
+  <line x1="122" y1="115" x2="145" y2="115" stroke="#505060" stroke-width="4" stroke-linecap="round"/>
+  <line x1="120" y1="130" x2="140" y2="138" stroke="#505060" stroke-width="4" stroke-linecap="round"/>
+  <!-- Metal sheen highlight -->
+  <ellipse cx="90" cy="90" rx="14" ry="35" fill="white" opacity="0.1"/>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#7ec850"/>
+      <stop offset="100%" stop-color="#3a6618"/>
+    </radialGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8e063"/>
+      <stop offset="100%" stop-color="#3a6618"/>
+    </linearGradient>
+  </defs>
+  <!-- Rolled leaf tube body -->
+  <!-- Back leaf edge -->
+  <ellipse cx="100" cy="100" rx="35" ry="75" fill="#3a6618" opacity="0.7"/>
+  <!-- Main rolled leaf -->
+  <ellipse cx="100" cy="100" rx="30" ry="70" fill="url(#bodyGrad)"/>
+  <!-- Leaf spiral/roll layer -->
+  <path d="M70,45 Q68,100 70,155 Q80,162 100,165 Q120,162 130,155 Q132,100 130,45 Q120,38 100,35 Q80,38 70,45Z" 
+        fill="none" stroke="#2a5010" stroke-width="2" opacity="0.5"/>
+  <!-- Silk thread holding roll -->
+  <line x1="72" y1="60" x2="128" y2="55" stroke="#d4e8a0" stroke-width="2"/>
+  <line x1="70" y1="80" x2="130" y2="80" stroke="#d4e8a0" stroke-width="1.5"/>
+  <line x1="71" y1="100" x2="129" y2="100" stroke="#d4e8a0" stroke-width="2"/>
+  <line x1="70" y1="120" x2="130" y2="120" stroke="#d4e8a0" stroke-width="1.5"/>
+  <line x1="72" y1="140" x2="128" y2="138" stroke="#d4e8a0" stroke-width="2"/>
+  <!-- Larva peeking from top -->
+  <ellipse cx="100" cy="45" rx="18" ry="16" fill="#e8d8a0"/>
+  <!-- Eyes -->
+  <circle cx="92" cy="42" r="5" fill="#1a0000"/>
+  <circle cx="108" cy="42" r="5" fill="#1a0000"/>
+  <circle cx="91" cy="41" r="2" fill="#ffffff" opacity="0.6"/>
+  <circle cx="107" cy="41" r="2" fill="#ffffff" opacity="0.6"/>
+  <!-- Mouth -->
+  <path d="M93,52 Q100,57 107,52" stroke="#8b5e3c" stroke-width="2" fill="none"/>
+  <!-- Mandibles (chompers) -->
+  <path d="M93,52 L88,60" stroke="#4a2a10" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M107,52 L112,60" stroke="#4a2a10" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Little legs -->
+  <line x1="76" y1="90" x2="55" y2="87" stroke="#3a6618" stroke-width="3" stroke-linecap="round"/>
+  <line x1="76" y1="102" x2="52" y2="103" stroke="#3a6618" stroke-width="3" stroke-linecap="round"/>
+  <line x1="78" y1="114" x2="57" y2="118" stroke="#3a6618" stroke-width="3" stroke-linecap="round"/>
+  <line x1="124" y1="90" x2="145" y2="87" stroke="#3a6618" stroke-width="3" stroke-linecap="round"/>
+  <line x1="124" y1="102" x2="148" y2="103" stroke="#3a6618" stroke-width="3" stroke-linecap="round"/>
+  <line x1="122" y1="114" x2="143" y2="118" stroke="#3a6618" stroke-width="3" stroke-linecap="round"/>
+  <!-- Leaf vein pattern -->
+  <line x1="100" y1="60" x2="100" y2="160" stroke="#2a5010" stroke-width="1.5" opacity="0.3"/>
+  <line x1="100" y1="90" x2="118" y2="80" stroke="#2a5010" stroke-width="1" opacity="0.3"/>
+  <line x1="100" y1="90" x2="82" y2="80" stroke="#2a5010" stroke-width="1" opacity="0.3"/>
+  <line x1="100" y1="110" x2="120" y2="100" stroke="#2a5010" stroke-width="1" opacity="0.3"/>
+  <line x1="100" y1="110" x2="80" y2="100" stroke="#2a5010" stroke-width="1" opacity="0.3"/>
+</svg>

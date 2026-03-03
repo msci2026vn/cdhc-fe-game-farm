@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#8b5e3c"/>
+      <stop offset="100%" stop-color="#4a2a10"/>
+    </radialGradient>
+    <radialGradient id="wingGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#6b2f08" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#2a0f00" stop-opacity="0.7"/>
+    </radialGradient>
+  </defs>
+  <!-- Wings -->
+  <ellipse cx="58" cy="90" rx="52" ry="22" fill="url(#wingGrad)" transform="rotate(-10,58,90)"/>
+  <ellipse cx="142" cy="90" rx="52" ry="22" fill="url(#wingGrad)" transform="rotate(10,142,90)"/>
+  <!-- Elytra highlight -->
+  <ellipse cx="58" cy="88" rx="42" ry="14" fill="#8b2e0a" opacity="0.4" transform="rotate(-10,58,88)"/>
+  <ellipse cx="142" cy="88" rx="42" ry="14" fill="#8b2e0a" opacity="0.4" transform="rotate(10,142,88)"/>
+  <!-- Body segments -->
+  <ellipse cx="100" cy="75" rx="15" ry="19" fill="url(#bodyGrad)"/>
+  <ellipse cx="100" cy="105" rx="18" ry="20" fill="#7a4a25"/>
+  <ellipse cx="100" cy="135" rx="15" ry="18" fill="#6b3a18"/>
+  <ellipse cx="100" cy="160" rx="11" ry="13" fill="#5a2d0f"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="54" rx="17" ry="14" fill="url(#bodyGrad)"/>
+  <!-- Horn -->
+  <path d="M100,42 Q95,25 98,15" stroke="#4a2a10" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M98,15 Q88,10 85,5" stroke="#4a2a10" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M98,15 Q105,8 108,3" stroke="#4a2a10" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="91" cy="54" r="6" fill="#cc4400"/>
+  <circle cx="109" cy="54" r="6" fill="#cc4400"/>
+  <circle cx="91" cy="54" r="3" fill="#1a0500"/>
+  <circle cx="109" cy="54" r="3" fill="#1a0500"/>
+  <!-- Antennae -->
+  <path d="M94,44 Q85,30 75,22" stroke="#4a2a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M106,44 Q115,30 125,22" stroke="#4a2a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="75" cy="22" r="3" fill="#8b5e3c"/>
+  <circle cx="125" cy="22" r="3" fill="#8b5e3c"/>
+  <!-- Legs -->
+  <line x1="88" y1="103" x2="50" y2="90" stroke="#4a2a10" stroke-width="3" stroke-linecap="round"/>
+  <line x1="88" y1="110" x2="45" y2="115" stroke="#4a2a10" stroke-width="3" stroke-linecap="round"/>
+  <line x1="90" y1="118" x2="55" y2="138" stroke="#4a2a10" stroke-width="3" stroke-linecap="round"/>
+  <line x1="112" y1="103" x2="150" y2="90" stroke="#4a2a10" stroke-width="3" stroke-linecap="round"/>
+  <line x1="112" y1="110" x2="155" y2="115" stroke="#4a2a10" stroke-width="3" stroke-linecap="round"/>
+  <line x1="110" y1="118" x2="145" y2="138" stroke="#4a2a10" stroke-width="3" stroke-linecap="round"/>
+  <!-- Body line -->
+  <line x1="100" y1="65" x2="100" y2="170" stroke="#3a1a08" stroke-width="1.5" opacity="0.5"/>
+</svg>
