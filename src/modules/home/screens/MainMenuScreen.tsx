@@ -56,10 +56,10 @@ export default function MainMenuScreen() {
         <div
           className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
           style={{ left: '52.5%', top: '26.6%', width: '35.3%', height: '20.5%' }}
-          onClick={() => { playSound('ui_click'); navigate('/boss'); }}
+          onClick={() => { playSound('ui_click'); navigate('/world-boss'); }}
         >
           <img src="/assets/home/2.png" alt="boss-word" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>👹 Boss</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>👹 World Boss</span>
         </div>
 
         {/* ── CARD: Chiến dịch ── */}
