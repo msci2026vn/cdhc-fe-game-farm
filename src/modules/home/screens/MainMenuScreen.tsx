@@ -49,7 +49,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/farm'); }}
         >
           <img src="/assets/home/3.png" alt="nong-trai" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '12%' }}>🌱 Trồng cây</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>🌱 Trồng cây</span>
         </div>
 
         {/* ── CARD: World Boss ── */}
@@ -59,7 +59,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/boss'); }}
         >
           <img src="/assets/home/2.png" alt="boss-word" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '12%' }}>👹 Boss</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>👹 Boss</span>
         </div>
 
         {/* ── CARD: Chiến dịch ── */}
@@ -69,7 +69,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/campaign'); }}
         >
           <img src="/assets/home/1.png" alt="camping" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '12%' }}>⚔️ Chiến dịch</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>⚔️ Chiến dịch</span>
         </div>
 
         {/* ── CARD: Học tập ── */}
@@ -79,7 +79,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/quiz'); }}
         >
           <img src="/assets/home/4.png" alt="quizz" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '12%' }}>📚 Học tập</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>📚 Học tập</span>
         </div>
 
         {/* ── BAR: IoT / Vườn thông minh ── */}
@@ -133,28 +133,41 @@ export default function MainMenuScreen() {
           <span className={`${labelClass} text-[11px] font-black`} style={{ bottom: '6%' }}>👥 Bạn bè</span>
         </div>
 
-        {/* ── Cài đặt ── (nhỏ, top-right) */}
+        {/* ── Hồ sơ nông dân (top bar) ── */}
+        <div
+          className="absolute cursor-pointer flex items-center"
+          style={{ left: '3.6%', top: '1.9%', width: '63.3%', height: '11.4%' }}
+          onClick={() => { playSound('ui_click'); navigate('/profile'); }}
+        >
+          <span
+            className="text-[11px] font-black text-white leading-tight"
+            style={{ textShadow: '0 1px 4px rgba(0,0,0,0.95)', paddingLeft: '48px' }}
+          >
+            👤 Hồ Sơ Nông Dân
+          </span>
+        </div>
+
+        {/* ── OGN (top-right) ── */}
         <div
           className="absolute cursor-pointer flex items-center justify-center"
-          style={{ left: '90.6%', top: '1.4%', width: '7.5%', height: '3.9%' }}
-          onClick={() => { playSound('ui_click'); navigate('/settings'); }}
-        />
-
-        {/* ── Hồ sơ (top bar areas) ── */}
-        <div
-          className="absolute cursor-pointer"
           style={{ left: '72.8%', top: '5.8%', width: '24.7%', height: '3.4%' }}
           onClick={() => { playSound('ui_click'); navigate('/profile'); }}
-        />
+        >
+          <span className="text-[9px] font-black text-yellow-300" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>💰 OGN</span>
+        </div>
+
+        {/* ── Thống kê (top-right 2nd row) ── */}
         <div
           className="absolute cursor-pointer"
           style={{ left: '72.2%', top: '9.4%', width: '25.6%', height: '3.6%' }}
           onClick={() => { playSound('ui_click'); navigate('/profile'); }}
         />
+
+        {/* ── Cài đặt ── */}
         <div
-          className="absolute cursor-pointer"
-          style={{ left: '3.6%', top: '1.9%', width: '63.3%', height: '11.4%' }}
-          onClick={() => { playSound('ui_click'); navigate('/profile'); }}
+          className="absolute cursor-pointer flex items-center justify-center"
+          style={{ left: '90.6%', top: '1.4%', width: '7.5%', height: '3.9%' }}
+          onClick={() => { playSound('ui_click'); navigate('/settings'); }}
         />
       </div>
     </div>
