@@ -1,0 +1,548 @@
+/* ═══════════════════════════════════════════════════════════════
+   FARM REDESIGN — Organic Kingdom Theme
+   Canvas: 390×693 (9:16 ratio)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* === FARM SCREEN CONTAINER === */
+.farm-screen-container {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #0a1f08;
+}
+
+.farm-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #0d2b0a 0%,
+    #142e10 30%,
+    #1a3a14 50%,
+    #1f4a18 70%,
+    #0a1f08 100%
+  );
+  z-index: 0;
+}
+
+/* Firefly particles */
+.farm-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(212,175,55,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 20%, rgba(212,175,55,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 60%, rgba(212,175,55,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 70%, rgba(212,175,55,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 80%, rgba(144,238,144,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 40%, rgba(144,238,144,0.3) 0%, transparent 100%);
+  animation: fireflyDrift 8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes fireflyDrift {
+  0% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; transform: translateY(-8px); }
+}
+
+/* === CHARACTER HUD === */
+.farm-hud {
+  position: absolute;
+  left: 4.4%;
+  top: 2.7%;
+  width: 44.7%;
+  height: 11.7%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(212,175,55,0.2);
+}
+
+.farm-hud-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #D4AF37;
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.farm-hud-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.farm-hud-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.farm-hud-name {
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.farm-title-gold {
+  color: #D4AF37;
+  font-style: italic;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.farm-lv-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #D4AF37;
+  color: #000;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 1px 5px;
+  line-height: 1.2;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+/* HP Bar */
+.farm-hp-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.farm-hp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef5350, #e57373);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* Mana Bar */
+.farm-mana-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.farm-mana-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4AF37, #FFD54F);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* Armor Bar — segmented */
+.farm-armor-segments {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+}
+
+.farm-armor-segment {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+}
+
+.farm-armor-segment--filled {
+  background: #78909C;
+}
+
+/* === WEATHER + OGN PILLS === */
+.farm-weather-pill {
+  position: absolute;
+  left: 70%;
+  top: 3.2%;
+  width: 26.4%;
+  height: 6.4%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.farm-ogn-pill {
+  position: absolute;
+  left: 76.1%;
+  top: 10.9%;
+  width: 20.3%;
+  height: 4.2%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  color: #D4AF37;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid rgba(212,175,55,0.4);
+}
+
+/* === RWA BANNER === */
+.rwa-farm-banner {
+  position: absolute;
+  left: 30.3%;
+  top: 16.3%;
+  width: 40.8%;
+  height: 6.7%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #2d5a1b 0%, #3d7a25 100%);
+  border: 1px solid rgba(212,175,55,0.6);
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.rwa-farm-banner:active {
+  transform: scale(0.97);
+}
+
+/* Vine decoration */
+.rwa-farm-banner::before {
+  content: '🌿';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  opacity: 0.5;
+}
+
+.rwa-farm-banner::after {
+  content: '🌿';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(-1);
+  font-size: 16px;
+  opacity: 0.5;
+}
+
+.rwa-farm-banner--locked {
+  filter: grayscale(0.8);
+  opacity: 0.6;
+}
+
+.rwa-vip-crown {
+  color: #D4AF37;
+  font-size: 14px;
+  animation: bannerShimmer 2s ease-in-out infinite;
+}
+
+@keyframes bannerShimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* === BREADCRUMB === */
+.farm-breadcrumb {
+  position: absolute;
+  left: 5%;
+  top: 45%;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.3px;
+  z-index: 5;
+}
+
+/* === PLOTS === */
+.farm-plot {
+  position: absolute;
+  border-radius: 12px;
+  border: 2px solid rgba(139,90,43,0.8);
+  background: radial-gradient(ellipse, #3d2008 0%, #1a0d04 100%);
+  box-shadow: inset 0 0 20px rgba(212,175,55,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.farm-plot:active {
+  transform: scale(0.95);
+}
+
+.farm-plot--plot1 {
+  left: 5%;
+  top: 50.7%;
+  width: 26.7%;
+  height: 19.5%;
+}
+
+.farm-plot--plot2 {
+  left: 35.8%;
+  top: 50.4%;
+  width: 28.3%;
+  height: 18.9%;
+}
+
+.farm-plot--plot3 {
+  left: 68.9%;
+  top: 51%;
+  width: 26.4%;
+  height: 18.3%;
+}
+
+.farm-plot--locked {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(20,10,5,0.9),
+    rgba(20,10,5,0.9) 4px,
+    rgba(40,20,10,0.7) 4px,
+    rgba(40,20,10,0.7) 8px
+  );
+  border-color: rgba(80,40,20,0.5);
+}
+
+.farm-plot--empty {
+  border-style: dashed;
+  border-color: rgba(139,90,43,0.5);
+}
+
+.farm-plot--growing {
+  box-shadow: inset 0 0 20px rgba(212,175,55,0.15), 0 0 8px rgba(76,175,80,0.3);
+}
+
+.farm-plot--ready {
+  box-shadow: inset 0 0 20px rgba(212,175,55,0.15), 0 0 12px rgba(255,215,0,0.5);
+  animation: readyGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes readyGlow {
+  0%, 100% { box-shadow: inset 0 0 20px rgba(212,175,55,0.15), 0 0 8px rgba(255,215,0,0.3); }
+  50% { box-shadow: inset 0 0 20px rgba(212,175,55,0.15), 0 0 16px rgba(255,215,0,0.6); }
+}
+
+.farm-plot-emoji {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.farm-plot-add {
+  font-size: 28px;
+  color: rgba(139,90,43,0.6);
+  line-height: 1;
+}
+
+.farm-plot-add-label {
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+.farm-plot-lock {
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.farm-plot-lock-label {
+  font-size: 8px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Growth progress inside plot */
+.farm-plot-progress {
+  position: absolute;
+  bottom: 6px;
+  left: 10%;
+  width: 80%;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.farm-plot-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 1s ease;
+}
+
+.farm-plot-progress-fill--ready {
+  background: linear-gradient(90deg, #FFD54F, #FFC107);
+}
+
+/* Worm & Water indicators */
+.worm-icon {
+  position: absolute;
+  bottom: 14px;
+  right: 6px;
+  font-size: 18px;
+  animation: wormWiggle 0.8s ease-in-out infinite;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+@keyframes wormWiggle {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  25% { transform: rotate(8deg) translateY(-2px); }
+  75% { transform: rotate(-5deg) translateY(2px); }
+}
+
+.water-need-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 16px;
+  animation: waterRipple 1.2s ease-out infinite;
+}
+
+@keyframes waterRipple {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Dead overlay */
+.farm-plot-dead-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === ACTION BAR === */
+.farm-action-btn {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(30,50,20,0.85) 0%, rgba(10,25,8,0.9) 100%);
+  cursor: pointer;
+  transition: transform 0.15s;
+  z-index: 10;
+}
+
+.farm-action-btn:active {
+  transform: scale(0.9);
+}
+
+.farm-action-btn--home {
+  left: 4%;
+  top: 80.4%;
+  width: 21%;
+  height: 14.1%;
+  border: 2px solid rgba(76,175,80,0.5);
+  box-shadow: 0 0 12px rgba(76,175,80,0.4);
+  animation: idlePulse-green 2s ease-in-out infinite;
+}
+
+.farm-action-btn--dugia {
+  left: 28%;
+  top: 80.1%;
+  width: 21%;
+  height: 14.4%;
+  border: 2px solid rgba(76,175,80,0.5);
+  box-shadow: 0 0 12px rgba(76,175,80,0.4);
+  animation: idlePulse-green 2s ease-in-out 0.5s infinite;
+}
+
+.farm-action-btn--shop {
+  left: 52%;
+  top: 80.1%;
+  width: 21%;
+  height: 14.1%;
+  border: 2px solid rgba(245,158,11,0.5);
+  box-shadow: 0 0 12px rgba(245,158,11,0.4);
+  animation: idlePulse-amber 2s ease-in-out 1s infinite;
+}
+
+.farm-action-btn--kho {
+  left: 76%;
+  top: 80.1%;
+  width: 21%;
+  height: 14.1%;
+  border: 2px solid rgba(212,175,55,0.5);
+  box-shadow: 0 0 12px rgba(212,175,55,0.4);
+  animation: idlePulse-gold 2s ease-in-out 1.5s infinite;
+}
+
+.farm-action-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.farm-action-label {
+  font-size: 9px;
+  color: white;
+  text-align: center;
+  margin-top: 3px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@keyframes idlePulse-green {
+  0%, 100% { box-shadow: 0 0 8px rgba(76,175,80,0.3); }
+  50% { box-shadow: 0 0 16px rgba(76,175,80,0.6); }
+}
+
+@keyframes idlePulse-amber {
+  0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.3); }
+  50% { box-shadow: 0 0 16px rgba(245,158,11,0.6); }
+}
+
+@keyframes idlePulse-gold {
+  0%, 100% { box-shadow: 0 0 8px rgba(212,175,55,0.3); }
+  50% { box-shadow: 0 0 16px rgba(212,175,55,0.6); }
+}

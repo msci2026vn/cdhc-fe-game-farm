@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import PlantSeedModal from '../components/PlantSeedModal';
@@ -12,9 +11,8 @@ import FriendGarden from '@/modules/friends/components/FriendGarden';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
 import type { FriendData } from '@/shared/types/game-api.types';
 import { useFarmStore, startHappinessDecay } from '../stores/farmStore';
-import { useWeatherStore, WEATHER_INFO } from '../stores/weatherStore';
+import { useWeatherStore } from '../stores/weatherStore';
 import { useCooldown } from '@/shared/hooks/useCooldown';
-import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { useWeather } from '@/shared/hooks/useWeather';
 import { PlantType } from '../types/farm.types';
 import { useTransformedFarmPlots } from '@/shared/hooks/useFarmPlots';
@@ -22,18 +20,23 @@ import { useGrowthTimer } from '@/shared/hooks/useGrowthTimer';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
-import { playSound, audioManager } from '@/shared/audio';
+import { audioManager } from '@/shared/audio';
 import { useUIStore } from '@/shared/stores/uiStore';
 
-// UI Components
-import FarmHeader from '../components/ui/FarmHeader';
-import FarmToolbelt from '../components/ui/FarmToolbelt';
-import FarmPlotGrid from '../components/ui/FarmPlotGrid';
+// NEW UI Components
+import FarmCharacterHUD from '../components/ui/FarmCharacterHUD';
+import FarmWeatherOGN from '../components/ui/FarmWeatherOGN';
+import RwaFarmBanner from '../components/ui/RwaFarmBanner';
+import FarmPlotRow from '../components/ui/FarmPlotRow';
+import FarmActionBar from '../components/ui/FarmActionBar';
 import FarmActivePlot from '../components/ui/FarmActivePlot';
 import FarmHarvestOverlay from '../components/ui/FarmHarvestOverlay';
 
 // Hooks
 import { useFarmingActions } from '../hooks/useFarmingActions';
+
+// CSS
+import '@/styles/modules/farm-redesign.css';
 
 const MAX_DISPLAY_SLOTS = 3;
 
@@ -43,7 +46,7 @@ export default function FarmingScreen() {
     const { data: profile } = usePlayerProfile();
     const { data: auth } = useAuth();
     const { isVip } = useVipStatus();
-    const { data: weatherData, error: weatherError } = useWeather();
+    const { data: weatherData } = useWeather();
     const setWeatherData = useWeatherStore((s) => s.setWeatherData);
     const addToast = useUIStore((s) => s.addToast);
     const getCooldown = useFarmStore((s) => s.getWaterCooldownRemaining);
@@ -59,11 +62,9 @@ export default function FarmingScreen() {
     const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
     const [showInvite, setShowInvite] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
-    const [isMuted, setIsMuted] = useState(audioManager.muted);
 
-    const timeOfDay = useWeatherStore((s) => s.timeOfDay);
     const temperature = useWeatherStore((s) => s.temperature);
-    const locationName = useWeatherStore((s) => s.location.province) || 'Thái Nguyên';
+    const humidity = useWeatherStore((s) => s.humidity ?? 50);
 
     const activePlot = useMemo(() => plots[activePlotIndex] || null, [plots, activePlotIndex]);
     const cooldownSeconds = activePlot ? getCooldown(activePlot.id) : 0;
@@ -98,12 +99,6 @@ export default function FarmingScreen() {
 
     useEffect(() => { startHappinessDecay(); }, []);
 
-    const toggleMute = () => {
-        const muted = audioManager.toggleMute();
-        setIsMuted(muted);
-        if (!muted) playSound('ui_click');
-    };
-
     const plotBySlot = useMemo(() => new Map(plots.map((p) => [p.slotIndex, p])), [plots]);
     const slotGrid = useMemo(() => {
         return Array.from({ length: MAX_DISPLAY_SLOTS }, (_, i) => ({
@@ -112,31 +107,6 @@ export default function FarmingScreen() {
             unlocked: i < totalSlots,
         }));
     }, [plotBySlot, totalSlots]);
-
-    const getCelestialState = useCallback(() => {
-        const now = new Date();
-        const totalMinutes = now.getHours() * 60 + now.getMinutes();
-        let isNightLocal = false;
-        let progress = 0;
-
-        if (totalMinutes >= 360 && totalMinutes < 1080) {
-            isNightLocal = false;
-            progress = (totalMinutes - 360) / 720;
-        } else {
-            isNightLocal = true;
-            if (totalMinutes >= 1080) {
-                progress = (totalMinutes - 1080) / 720;
-            } else {
-                progress = (totalMinutes + 360) / 720;
-            }
-        }
-        const left = -10 + progress * 105;
-        const top = 25 - (Math.sin(Math.PI * progress) * 18);
-        return { left: `${left}%`, top: `${top}%`, isNight: isNightLocal };
-    }, []);
-
-    const celestial = getCelestialState();
-    const currentDate = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
     const handleSlotClick = useCallback((slotIndex: number, unlocked: boolean) => {
         if (!unlocked) return navigate('/vip/purchase');
@@ -160,85 +130,107 @@ export default function FarmingScreen() {
         addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
     }, [plantSeedZustand, addToast, plots.length]);
 
+    // Loading
     if (plotsLoading) {
         return (
-            <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-pulse text-4xl mb-2">🌱</div>
-                    <p className="text-sm text-white/70">Đang tải vườn...</p>
-                    <div className="grid grid-cols-3 gap-3 mt-4 px-4">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="aspect-square rounded-2xl bg-white/5 animate-pulse" />
-                        ))}
-                    </div>
+            <div className="farm-screen-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="farm-bg" />
+                <div style={{ textAlign: 'center', zIndex: 10 }}>
+                    <div style={{ fontSize: 40, marginBottom: 8 }} className="animate-pulse">🌱</div>
+                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>Đang tải vườn...</p>
                 </div>
             </div>
         );
     }
 
+    // Error
     if (plotsError) {
         return (
-            <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex items-center justify-center">
-                <div className="text-center px-4">
-                    <div className="text-4xl mb-2">😵</div>
-                    <p className="text-red-400 text-sm mb-2">Lỗi tải vườn</p>
-                    <p className="text-white/30 text-xs">{String(plotsError)}</p>
+            <div className="farm-screen-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="farm-bg" />
+                <div style={{ textAlign: 'center', zIndex: 10, padding: 16 }}>
+                    <div style={{ fontSize: 40, marginBottom: 8 }}>😵</div>
+                    <p style={{ color: '#ef5350', fontSize: 13 }}>Lỗi tải vườn</p>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 4 }}>{String(plotsError)}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col bg-[#81C784]">
-            {/* Background Decor */}
-            <div className="landscape-bg-v2 absolute inset-0 z-0 pointer-events-none" style={{
-                background: celestial.isNight
-                    ? 'linear-gradient(180deg, #1A237E 0%, #3949AB 40%, #A5D6A7 40%, #81C784 100%)'
-                    : 'linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #A5D6A7 40%, #81C784 100%)'
+        <div className="farm-screen-container">
+            {/* Background */}
+            <div className="farm-bg" />
+
+            {/* TOP-LEFT: Character HUD */}
+            <FarmCharacterHUD
+                avatarUrl={auth?.user?.picture || profile?.picture}
+                name={auth?.user?.name || profile?.name || 'Nông dân'}
+                title="Thông Thiên Kỳ"
+                level={profile?.level || 1}
+                hp={profile?.hp ?? 100}
+                maxHp={profile?.maxHp ?? 100}
+                mana={profile?.mana ?? 50}
+                maxMana={profile?.maxMana ?? 100}
+                armor={profile?.armor ?? 3}
+                maxArmor={profile?.maxArmor ?? 5}
+            />
+
+            {/* TOP-RIGHT: Weather + OGN */}
+            <FarmWeatherOGN
+                temperature={temperature}
+                humidity={humidity}
+                ognBalance={profile?.ogn ?? 0}
+            />
+
+            {/* CENTER-TOP: RWA Farm Banner */}
+            <RwaFarmBanner isVip={isVip} />
+
+            {/* Breadcrumb */}
+            <div className="farm-breadcrumb">My Garden &gt; Vùng 1</div>
+
+            {/* Active Plot Detail — centered area */}
+            <div style={{
+                position: 'absolute', left: '5%', top: '24%', width: '90%', height: '25%',
+                zIndex: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-                <div className={celestial.isNight ? "moon-v2" : "sun-v2"} style={{ left: celestial.left, top: celestial.top }} />
-                <div className="cloud w-32 h-12 top-20 left-10 cloud-decoration opacity-80" style={{ fontSize: '40px' }}>☁️</div>
-                <div className="cloud w-24 h-8 top-32 right-20 opacity-60 cloud-decoration" style={{ fontSize: '30px' }}>☁️</div>
-                <div className="hill-bg-v2 opacity-50"></div>
-                <div className="hill-fg-v2"></div>
-                <div className="absolute bottom-[35%] left-[10%] opacity-20 pointer-events-none">
-                    <span className="material-symbols-outlined text-green-950 text-7xl transform -rotate-12">grass</span>
-                </div>
-                <div className="absolute bottom-[38%] right-[25%] opacity-20 pointer-events-none">
-                    <span className="material-symbols-outlined text-green-950 text-8xl transform rotate-6">grass</span>
-                </div>
+                <FarmActivePlot
+                    activePlot={activePlot}
+                    growthMap={growthMap}
+                    showWaterEffect={showWaterEffect}
+                    canWater={canWater}
+                    getCooldownRemaining={getCooldownRemaining}
+                    handleWater={handleWaterWithEffect}
+                    handleHarvest={handleHarvest}
+                    handleClear={handleClear}
+                    handleEmptySlotClick={handleEmptySlotClick}
+                    isWatering={isWatering}
+                    isClearing={isClearing}
+                />
             </div>
 
-            <div className="relative z-10 flex-1 min-h-0 flex flex-col pb-20 overflow-y-auto overflow-x-hidden hide-scrollbar">
-                <FarmHeader
-                    profile={profile} auth={auth} isVip={isVip} temperature={temperature}
-                    locationName={locationName} currentDate={currentDate} isNightLocal={celestial.isNight}
-                    isMuted={isMuted} toggleMute={toggleMute}
-                />
+            {/* CENTER: 3 Plot Row */}
+            <FarmPlotRow
+                slotGrid={slotGrid}
+                plots={plots}
+                activePlotIndex={activePlotIndex}
+                growthMap={growthMap}
+                onSlotClick={handleSlotClick}
+                setActivePlotIndex={setActivePlotIndex}
+            />
 
-                <div className="flex-1 flex flex-col justify-end items-center px-4 w-full relative z-20 min-h-[380px]">
-                    <FarmActivePlot
-                        activePlot={activePlot} growthMap={growthMap} showWaterEffect={showWaterEffect}
-                        canWater={canWater} getCooldownRemaining={getCooldownRemaining}
-                        handleWater={handleWaterWithEffect} handleHarvest={handleHarvest} handleClear={handleClear}
-                        handleEmptySlotClick={handleEmptySlotClick} isWatering={isWatering} isClearing={isClearing}
-                    />
-                </div>
+            {/* BOTTOM: 4 Action Buttons */}
+            <FarmActionBar
+                onHome={() => navigate('/')}
+                onDuGia={() => navigate('/market')}
+                onShop={() => navigate('/shop')}
+                onKhoDo={() => navigate('/inventory')}
+            />
 
-                <FarmPlotGrid
-                    slotGrid={slotGrid} plots={plots} activePlotIndex={activePlotIndex}
-                    plantSlotIndex={plantSlotIndex} growthMap={growthMap}
-                    handleSlotClick={handleSlotClick} setActivePlotIndex={setActivePlotIndex}
-                />
-
-                <FarmToolbelt setShowFriends={setShowFriends} />
-            </div>
-
-            <div className="z-50 shrink-0"><BottomNav /></div>
+            {/* Overlays & Modals — kept intact */}
             <Toast />
             <PointsFlyUp />
             <FarmHarvestOverlay harvestResult={harvestResult} onClose={() => setHarvestResult(null)} />
-
             <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
             {showPlantPicker && (
                 <PlantPickerModal
