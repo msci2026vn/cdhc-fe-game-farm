@@ -5,14 +5,30 @@ import { useBossStatus } from '@/shared/hooks/useBossStatus';
 import { playSound, audioManager } from '@/shared/audio';
 import { SoundToggle } from '@/shared/audio';
 import { WorldBossMarquee } from '@/modules/world-boss/components/WorldBossMarquee';
+import { HomeParticles } from '../components/HomeParticles';
 
 // Shared text label style — bold white with dark shadow, readable on any background
 const labelClass = 'absolute left-0 right-0 text-center font-black text-white leading-tight pointer-events-none z-10'
   + ' drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] [text-shadow:0_2px_6px_rgba(0,0,0,0.9)]';
 
+const miniCards = [
+  { emoji: '🛒', label: 'Chợ',    route: '/market' },
+  { emoji: '🎒', label: 'Túi đồ', route: '/inventory' },
+  { emoji: '👥', label: 'Bạn bè', route: '/friends' },
+];
+
+/** Simple inline gear SVG — no external dependency */
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%">
+      <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.92c.04-.3.07-.62.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61z" />
+    </svg>
+  );
+}
+
 export default function MainMenuScreen() {
   const navigate = useNavigate();
-  usePlayerProfile();
+  const { data: profile } = usePlayerProfile();
   useBossStatus();
 
   useEffect(() => {
@@ -20,6 +36,11 @@ export default function MainMenuScreen() {
     audioManager.startBgm('farm_day');
     return () => { audioManager.stopBgm(); };
   }, []);
+
+  const avatar = profile?.picture ?? '/assets/home/ava.png';
+  const level  = profile?.level  ?? 1;
+  const name   = profile?.name   ?? 'Nông Dân';
+  const ogn    = profile?.ogn    ?? 0;
 
   return (
     <div className="bg-[#111] min-h-[100dvh] flex items-center justify-center select-none font-body text-farm-brown-dark">
@@ -32,9 +53,39 @@ export default function MainMenuScreen() {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Sound toggle */}
-        <div className="absolute z-50 px-4 w-full flex justify-end" style={{ top: 'max(env(safe-area-inset-top, 8px), 16px)' }}>
-          <SoundToggle className="w-8 h-8 rounded-full bg-black/40 border border-[#d4c5a3]/40 flex items-center justify-center" />
+        {/* ── Particle effects (z-15, behind all UI) ── */}
+        <HomeParticles />
+
+        {/* ── Logo ── left:23.08% top:16.08% w:52.82% h:11.4% */}
+        <div
+          className="absolute pointer-events-none"
+          style={{ left: '23.08%', top: '16.08%', width: '52.82%', height: '11.4%' }}
+        >
+          <img
+            src="/assets/login/login-logo.png"
+            alt="Organic Kingdom"
+            className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+            draggable={false}
+          />
+        </div>
+
+        {/* ── Top-right actions: Settings + Sound (z-50) ── */}
+        <div
+          className="absolute z-50 flex items-center gap-1"
+          style={{ right: '2%', top: '0.63%' }}
+        >
+          {/* Settings icon */}
+          <button
+            aria-label="Cài đặt"
+            className="flex items-center justify-center rounded-full bg-black/40 border border-[#d4c5a3]/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors"
+            style={{ width: 28, height: 28, padding: 5 }}
+            onClick={() => { playSound('ui_click'); navigate('/settings'); }}
+          >
+            <GearIcon />
+          </button>
+
+          {/* Sound toggle */}
+          <SoundToggle className="w-7 h-7 rounded-full bg-black/40 border border-[#d4c5a3]/40 flex items-center justify-center" />
         </div>
 
         {/* World Boss marquee */}
@@ -82,6 +133,33 @@ export default function MainMenuScreen() {
           <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>📚 Học tập</span>
         </div>
 
+        {/* ── MINI CARDS: Chợ / Túi đồ / Bạn bè ── */}
+        {miniCards.map(({ emoji, label, route }, i) => (
+          <div
+            key={route}
+            className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
+            style={{ left: `${9 + i * 28.7}%`, top: '68.5%', width: '25%', height: '13%' }}
+            onClick={() => { playSound('ui_click'); navigate(route); }}
+          >
+            <div
+              className="absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-1"
+              style={{
+                background: 'linear-gradient(160deg, #d4a84b 0%, #9c6325 55%, #6b3e12 100%)',
+                border: '2.5px solid #4a2a08',
+                boxShadow: 'inset 0 1px 0 rgba(255,230,130,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.55)',
+              }}
+            >
+              <span className="text-[26px] leading-none drop-shadow-md">{emoji}</span>
+              <span
+                className="text-[11px] font-black text-white leading-none"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)', letterSpacing: '0.02em' }}
+              >
+                {label}
+              </span>
+            </div>
+          </div>
+        ))}
+
         {/* ── BAR: IoT / Vườn thông minh ── */}
         <div
           className="absolute cursor-pointer hover:-translate-y-0.5 transition-transform"
@@ -106,69 +184,66 @@ export default function MainMenuScreen() {
           </span>
         </div>
 
-        {/* ── Chợ ── */}
-        <div
-          className="absolute cursor-pointer"
-          style={{ left: '8.9%', top: '68.6%', width: '25.6%', height: '14.8%' }}
-          onClick={() => { playSound('ui_click'); navigate('/market'); }}
-        >
-          <span className={`${labelClass} text-[11px] font-black`} style={{ bottom: '6%' }}>🛒 Chợ</span>
-        </div>
-
-        {/* ── Túi đồ ── */}
-        <div
-          className="absolute cursor-pointer"
-          style={{ left: '38.9%', top: '68.5%', width: '24.2%', height: '14.8%' }}
-          onClick={() => { playSound('ui_click'); navigate('/inventory'); }}
-        >
-          <span className={`${labelClass} text-[11px] font-black`} style={{ bottom: '6%' }}>🎒 Túi đồ</span>
-        </div>
-
-        {/* ── Bạn bè ── */}
-        <div
-          className="absolute cursor-pointer"
-          style={{ left: '66.9%', top: '68.3%', width: '25.8%', height: '15%' }}
-          onClick={() => { playSound('ui_click'); navigate('/friends'); }}
-        >
-          <span className={`${labelClass} text-[11px] font-black`} style={{ bottom: '6%' }}>👥 Bạn bè</span>
-        </div>
-
-        {/* ── Hồ sơ nông dân (top bar) ── */}
+        {/* ── Hồ sơ nông dân — avatar + level + nickname ── */}
         <div
           className="absolute cursor-pointer flex items-center"
-          style={{ left: '3.6%', top: '1.9%', width: '63.3%', height: '11.4%' }}
+          style={{ left: '3.6%', top: '1.9%', width: '63%', height: '11.4%', gap: '8px', paddingLeft: '6px' }}
+          onClick={() => { playSound('ui_click'); navigate('/profile'); }}
+        >
+          {/* Avatar circle with level badge */}
+          <div className="relative flex-shrink-0" style={{ width: '44px', height: '44px' }}>
+            <img
+              src={avatar}
+              alt="avatar"
+              className="w-full h-full rounded-full object-cover"
+              style={{ border: '2px solid #f6c94e', boxShadow: '0 2px 8px rgba(0,0,0,0.8)' }}
+              onError={(e) => { e.currentTarget.src = '/assets/home/ava.png'; }}
+            />
+            {/* Level badge */}
+            <div
+              className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full flex items-center justify-center border border-yellow-200"
+              style={{
+                width: '20px', height: '14px',
+                fontSize: '8px', fontWeight: 900,
+                color: '#3a1f00', lineHeight: 1,
+                background: 'linear-gradient(135deg, #f6c94e, #e09a10)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.6)',
+              }}
+            >
+              {level}
+            </div>
+          </div>
+
+          {/* Name + Level text */}
+          <div className="flex flex-col justify-center min-w-0">
+            <span
+              className="font-black text-white leading-tight truncate"
+              style={{ fontSize: '11px', textShadow: '0 1px 4px rgba(0,0,0,0.95)', maxWidth: '110px' }}
+            >
+              {name}
+            </span>
+            <span
+              className="font-bold text-yellow-300 leading-tight"
+              style={{ fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
+            >
+              Lv.{level} Nông Dân
+            </span>
+          </div>
+        </div>
+
+        {/* ── OGN balance (top-right) ── */}
+        <div
+          className="absolute cursor-pointer flex items-center justify-center"
+          style={{ left: '67%', top: '4.5%', width: '25%', height: '5%' }}
           onClick={() => { playSound('ui_click'); navigate('/profile'); }}
         >
           <span
-            className="text-[11px] font-black text-white leading-tight"
-            style={{ textShadow: '0 1px 4px rgba(0,0,0,0.95)', paddingLeft: '48px' }}
+            className="font-black text-yellow-300 leading-tight whitespace-nowrap"
+            style={{ fontSize: '11px', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
           >
-            👤 Hồ Sơ Nông Dân
+            💰 {ogn.toLocaleString()}
           </span>
         </div>
-
-        {/* ── OGN (top-right) ── */}
-        <div
-          className="absolute cursor-pointer flex items-center justify-center"
-          style={{ left: '72.8%', top: '5.8%', width: '24.7%', height: '3.4%' }}
-          onClick={() => { playSound('ui_click'); navigate('/profile'); }}
-        >
-          <span className="text-[9px] font-black text-yellow-300" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>💰 OGN</span>
-        </div>
-
-        {/* ── Thống kê (top-right 2nd row) ── */}
-        <div
-          className="absolute cursor-pointer"
-          style={{ left: '72.2%', top: '9.4%', width: '25.6%', height: '3.6%' }}
-          onClick={() => { playSound('ui_click'); navigate('/profile'); }}
-        />
-
-        {/* ── Cài đặt ── */}
-        <div
-          className="absolute cursor-pointer flex items-center justify-center"
-          style={{ left: '90.6%', top: '1.4%', width: '7.5%', height: '3.9%' }}
-          onClick={() => { playSound('ui_click'); navigate('/settings'); }}
-        />
       </div>
     </div>
   );
