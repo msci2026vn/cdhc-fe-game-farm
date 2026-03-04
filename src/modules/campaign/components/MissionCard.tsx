@@ -20,9 +20,8 @@ export default function MissionCard({ mission, onClaim, isClaiming }: MissionCar
 
   return (
     <div
-      className={`rounded-xl p-3 transition-all ${
-        isClaimed ? 'opacity-50' : isClaimable ? 'ring-2 ring-amber-500/50' : ''
-      }`}
+      className={`rounded-xl p-3 transition-all ${isClaimed ? 'opacity-50' : isClaimable ? 'ring-2 ring-amber-500/50' : ''
+        }`}
       style={{
         background: isClaimable
           ? 'rgba(245,158,11,0.08)'
@@ -43,7 +42,7 @@ export default function MissionCard({ mission, onClaim, isClaiming }: MissionCar
         {/* Status / Claim */}
         {isClaimed ? (
           <span className="text-[10px] font-bold text-green-400/60 shrink-0 flex items-center gap-1">
-            ✅ Da nhan
+            ✅ Đã nhận
           </span>
         ) : isClaimable ? (
           <button

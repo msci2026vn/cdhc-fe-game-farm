@@ -242,7 +242,7 @@ export default function FarmingScreen() {
             <PlantSeedModal open={showPlantModal} onClose={() => setShowPlantModal(false)} onSelect={handleSelectPlant} />
             {showPlantPicker && (
                 <PlantPickerModal
-                    onSelect={(slotIndex, plantTypeId) => handleSelectPlantFromPicker(slotIndex, plantTypeId, setShowPlantPicker)}
+                    onSelect={(plantTypeId) => handleSelectPlantFromPicker(plantSlotIndex, plantTypeId, setShowPlantPicker)}
                     onClose={() => setShowPlantPicker(false)}
                     isPlanting={isPlanting}
                 />

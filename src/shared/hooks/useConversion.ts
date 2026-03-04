@@ -45,10 +45,10 @@ export function useConvert() {
     },
     onSuccess: (data) => {
       const c = data.conversion;
-      const dirLabel = c.direction === 'seed_to_ogn' ? 'Hat → OGN' : 'OGN → Hat';
+      const dirLabel = c.direction === 'seed_to_ogn' ? 'Hạt → OGN' : 'OGN → Hạt';
       const toLabel = c.direction === 'seed_to_ogn'
         ? `${(c.toAmount / 100).toFixed(2)} OGN`
-        : `${c.toAmount.toLocaleString('vi-VN')} Hat`;
+        : `${c.toAmount.toLocaleString('vi-VN')} Hạt`;
       useUIStore.getState().addToast(
         `${dirLabel}: +${toLabel}`,
         'success',
@@ -63,7 +63,7 @@ export function useConvert() {
     },
     onError: (err: any) => {
       useUIStore.getState().addToast(
-        err.message || 'Loi chuyen doi. Thu lai sau.',
+        err.message || 'Lỗi chuyển đổi. Thử lại sau.',
         'error',
         '❌',
       );

@@ -25,28 +25,28 @@ export function AudioSettingsPanel({ onClose }: AudioSettingsPanelProps) {
 
   const sliders: SliderConfig[] = [
     {
-      label: 'Am luong',
+      label: 'Âm lượng',
       icon: 'volume_up',
       category: 'master',
       getValue: () => audioManager.volume,
       setValue: (v) => { audioManager.setVolume(v); rerender(); },
     },
     {
-      label: 'Nhac nen',
+      label: 'Nhạc nền',
       icon: 'music_note',
       category: 'bgm',
       getValue: () => audioManager.bgmVolume,
       setValue: (v) => { audioManager.setBgmVolume(v); rerender(); },
     },
     {
-      label: 'Hieu ung',
+      label: 'Hiệu ứng',
       icon: 'graphic_eq',
       category: 'sfx',
       getValue: () => audioManager.sfxVolume,
       setValue: (v) => { audioManager.setSfxVolume(v); rerender(); },
     },
     {
-      label: 'Giao dien',
+      label: 'Giao diện',
       icon: 'touch_app',
       category: 'ui',
       getValue: () => audioManager.uiVolume,
@@ -60,7 +60,7 @@ export function AudioSettingsPanel({ onClose }: AudioSettingsPanelProps) {
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-white/90 text-xs font-medium">Am thanh</span>
+        <span className="text-white/90 text-xs font-medium">Âm thanh</span>
         {onClose && (
           <button
             onClick={onClose}

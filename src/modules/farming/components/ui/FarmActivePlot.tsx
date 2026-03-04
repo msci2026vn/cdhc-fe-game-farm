@@ -54,7 +54,7 @@ export default function FarmActivePlot({
             <div className="absolute top-4 w-full flex justify-center gap-3 z-30 pointer-events-none">
                 <div className={`bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md border flex items-center gap-1 text-[9px] font-black uppercase tracking-wider ${activePlot.isDead ? 'border-red-300 text-red-600' : 'border-green-300 text-green-700'}`}>
                     <span className="material-symbols-outlined text-[12px]">{activePlot.isDead ? 'sentiment_dissatisfied' : 'check_circle'}</span>
-                    {activePlot.isDead ? 'Héo Rỗi' : 'Khỏe Mạnh'}
+                    {activePlot.isDead ? 'Héo Úa' : 'Khỏe Mạnh'}
                 </div>
                 {!activePlot.isDead && (
                     <div className={`bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md border flex items-center gap-1 text-[9px] font-black uppercase tracking-wider ${activePlot.happiness >= 50 ? 'border-blue-300 text-blue-600' : 'border-amber-300 text-amber-600'}`}>

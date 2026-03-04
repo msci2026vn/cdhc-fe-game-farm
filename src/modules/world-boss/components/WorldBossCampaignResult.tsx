@@ -19,7 +19,7 @@ export function WorldBossCampaignResult({ result, onFightAgain, onExit }: WorldB
   return (
     <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 text-center border border-gray-600">
-        <h2 className="text-xl font-bold text-red-400 mb-1">Phên Đấu Kết Thúc</h2>
+        <h2 className="text-xl font-bold text-red-400 mb-1">Phiên Đấu Kết Thúc</h2>
         <p className="text-gray-400 text-xs mb-5">Bạn đã bị hạ gục!</p>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
