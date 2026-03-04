@@ -133,14 +133,43 @@ export function WorldBossScreen() {
         </div>
       </div>
 
-      {/* Scrollable content — flex-1 + overflow-y-scroll (not auto) for iOS */}
+      {/* Non-scrollable: boss info + attack button (only when active) */}
+      {mainTab === 'arena' && data?.active && boss && (
+        <div style={{ flexShrink: 0, borderBottom: '1px solid #1f2937' }}>
+          <BossDisplay boss={boss} />
+
+          <HpBar
+            currentHp={boss.currentHp}
+            maxHp={boss.stats.max_hp}
+          />
+
+          <CountdownTimer
+            startedAt={boss.startedAt}
+            durationMinutes={boss.durationMinutes}
+          />
+
+          {/* Attack button — ngay dưới đếm ngược */}
+          <div style={{ padding: '10px 16px' }}>
+            <AttackButton
+              battleState="idle"
+              onAttack={() => setShowBattle(true)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between px-4 pb-1 text-xs text-gray-400">
+            <span>{boss.participantCount} nguoi tham gia</span>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable: tabs + leaderboard/feed — or full-page fallbacks */}
       <div
         style={{
           flex: 1,
           overflowY: 'scroll',
           WebkitOverflowScrolling: 'touch',
           overscrollBehavior: 'contain',
-          paddingBottom: data?.active && boss ? '0' : '16px',
+          paddingBottom: '16px',
         }}
       >
         {mainTab === 'history' ? (
@@ -163,25 +192,9 @@ export function WorldBossScreen() {
           <BossWaiting onShowHistory={() => setMainTab('history')} />
         ) : (
           <div className="flex flex-col">
-            <BossDisplay boss={boss} />
-
-            <HpBar
-              currentHp={boss.currentHp}
-              maxHp={boss.stats.max_hp}
-            />
-
-            <CountdownTimer
-              startedAt={boss.startedAt}
-              durationMinutes={boss.durationMinutes}
-            />
-
-            <div className="flex items-center justify-between px-4 py-1 text-xs text-gray-400">
-              <span>{boss.participantCount} nguoi tham gia</span>
-            </div>
-
-            {/* Sub tabs */}
-            <div className="border-t border-gray-800 mt-1">
-              <div className="flex border-b border-gray-700">
+            {/* Sub tabs: Xep hang / Tran chien */}
+            <div>
+              <div className="flex border-b border-gray-700 bg-gray-900 sticky top-0 z-10">
                 <button
                   onClick={() => setTab('leaderboard')}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'leaderboard'
@@ -214,23 +227,6 @@ export function WorldBossScreen() {
           </div>
         )}
       </div>
-
-      {/* Attack button — luôn hiển thị đáy màn hình */}
-      {data?.active && boss && (
-        <div
-          style={{
-            flexShrink: 0,
-            padding: '12px 16px',
-            borderTop: '1px solid #1f2937',
-            background: '#111827',
-          }}
-        >
-          <AttackButton
-            battleState="idle"
-            onAttack={() => setShowBattle(true)}
-          />
-        </div>
-      )}
 
       {/* End Screen */}
       {showEndScreen && endedBossInfo && (
