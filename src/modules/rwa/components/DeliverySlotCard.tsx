@@ -80,7 +80,7 @@ export default function DeliverySlotCard({
       <div className={`${config.iconBg} w-10 h-10 rounded-full flex items-center justify-center`}>
         <span className="text-xl">{config.icon}</span>
       </div>
-      <p className="text-sm font-bold text-stone-700">Tuần {index + 1}</p>
+      <p className="text-sm font-bold text-stone-700">Hộp {index + 1}</p>
       <p className={`text-xs font-medium ${config.textColor} text-center`}>{config.label}</p>
 
       {/* === AVAILABLE: Claim button === */}

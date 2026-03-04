@@ -6,13 +6,17 @@ import {
   getSlotQr, getDeliveryProof,
 } from '../api/game-api';
 import { useUIStore } from '../stores/uiStore';
+import { useAuth } from './useAuth';
 
 /** Lấy garden data — chỉ gọi khi user là VIP */
 export function useMyGarden(enabled = true) {
+  const { data: auth } = useAuth();
+  const userId = auth?.user?.id;
+  const today = new Date().toISOString().slice(0, 10); // cache per day
   return useQuery({
-    queryKey: ['rwa', 'my-garden'],
+    queryKey: ['rwa', 'my-garden', userId, today],
     queryFn: () => getMyGarden(),
-    enabled,
+    enabled: enabled && !!userId,
     staleTime: 60 * 1000,
     retry: (count, error) => {
       if (error?.message === 'VIP_REQUIRED') return false;
@@ -23,19 +27,24 @@ export function useMyGarden(enabled = true) {
 
 /** Summary — gọi cho mọi user (badge/widget) */
 export function useGardenSummary() {
+  const { data: auth } = useAuth();
+  const userId = auth?.user?.id;
   return useQuery({
-    queryKey: ['rwa', 'garden-summary'],
+    queryKey: ['rwa', 'garden-summary', userId],
     queryFn: () => getGardenSummary(),
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
   });
 }
 
 /** Delivery history — chỉ VIP */
 export function useDeliveryHistory(enabled = true) {
+  const { data: auth } = useAuth();
+  const userId = auth?.user?.id;
   return useQuery({
-    queryKey: ['rwa', 'delivery-history'],
+    queryKey: ['rwa', 'delivery-history', userId],
     queryFn: () => getDeliveryHistory(),
-    enabled,
+    enabled: enabled && !!userId,
     staleTime: 5 * 60 * 1000,
     retry: (count, error) => {
       if (error?.message === 'VIP_REQUIRED') return false;

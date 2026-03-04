@@ -226,7 +226,7 @@ export interface VipPlan {
   priceAvax: string;
   durationDays: number;
   ognMultiplier: number;
-  deliveriesPerMonth: number;
+  deliveriesPerDay: number;
   features: string[];
   receiverAddress: string;
   chainId: number;
@@ -277,7 +277,7 @@ export interface VipStatus {
   ognMultiplier: number;
   expiresAt: string | null;
   daysRemaining: number;
-  deliveriesPerMonth: number;
+  deliveriesPerDay: number;
   subscription: {
     id: string;
     startsAt: string;
@@ -307,12 +307,12 @@ export interface DeliverySlot {
 }
 
 export interface MyGardenData {
-  monthYear: string;
+  date: string;             // 'YYYY-MM-DD' — ngày hiện tại
   totalSlots: number;
   availableSlots: number;
   claimedSlots: number;
   vipTier: string;
-  deliveriesPerMonth: number;
+  deliveriesPerDay: number;
   slots: DeliverySlot[];
   lastRecipientInfo: RecipientInfo | null;
 }
@@ -320,14 +320,14 @@ export interface MyGardenData {
 export interface GardenSummary {
   isVip: boolean;
   tier?: string;
-  monthYear?: string;
+  date?: string;            // 'YYYY-MM-DD'
   totalSlots: number;
   availableSlots: number;
   claimedSlots?: number;
 }
 
-export interface DeliveryHistoryMonth {
-  monthYear: string;
+export interface DeliveryHistoryDay {
+  date: string;             // 'YYYY-MM-DD'
   totalSlots: number;
   deliveredSlots: number;
   slots: DeliverySlot[];
@@ -406,7 +406,7 @@ export interface DeliveryProof {
   deliveryData?: {
     slotId: string;
     slotNumber: number;
-    monthYear: string;
+    date: string;
     deliveredAt: string;
     product: string;
     farm: string;

@@ -4,7 +4,7 @@
 
 import { handleUnauthorized, handleApiError, API_BASE_URL } from './api-utils';
 import type {
-  MyGardenData, GardenSummary, DeliveryHistoryMonth,
+  MyGardenData, GardenSummary, DeliveryHistoryDay,
   ClaimSlotRequest, ClaimSlotResult, ScanClaimRequest, ScanClaimResult,
   VerifyOtpResult, SlotQrData, DeliveryProof,
 } from '../types/game-api.types';
@@ -173,10 +173,8 @@ export const getCameraStreamInfo = async (deviceId?: string): Promise<CameraStre
 
 // ═══ Phase 4: Delivery / My Garden ═══
 
-export const getMyGarden = async (month?: string): Promise<MyGardenData> => {
-  const url = month
-    ? `${API_BASE_URL}/api/rwa/my-garden?month=${month}`
-    : `${API_BASE_URL}/api/rwa/my-garden`;
+export const getMyGarden = async (): Promise<MyGardenData> => {
+  const url = `${API_BASE_URL}/api/rwa/my-garden`;
   const res = await fetch(url, { credentials: 'include' });
   if (res.status === 401) { handleUnauthorized('getMyGarden'); throw new Error('Session expired'); }
   if (res.status === 403) throw new Error('VIP_REQUIRED');
@@ -193,7 +191,7 @@ export const getGardenSummary = async (): Promise<GardenSummary> => {
   return json.data;
 };
 
-export const getDeliveryHistory = async (): Promise<DeliveryHistoryMonth[]> => {
+export const getDeliveryHistory = async (): Promise<DeliveryHistoryDay[]> => {
   const res = await fetch(`${API_BASE_URL}/api/rwa/delivery-history`, { credentials: 'include' });
   if (res.status === 401) { handleUnauthorized('getDeliveryHistory'); throw new Error('Session expired'); }
   if (res.status === 403) throw new Error('VIP_REQUIRED');

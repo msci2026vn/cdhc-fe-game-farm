@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MyGardenData, DeliveryHistoryMonth, DeliverySlot } from '@/shared/types/game-api.types';
+import type { MyGardenData, DeliveryHistoryDay, DeliverySlot } from '@/shared/types/game-api.types';
 import DeliverySlotCard from './DeliverySlotCard';
 import OtpClaimModal from './OtpClaimModal';
 import QrScannerModal from './QrScannerModal';
@@ -10,9 +10,11 @@ import DeliveryDetailModal from './DeliveryDetailModal';
 import SensorTimeline from './SensorTimeline';
 import CameraLiveView from './CameraLiveView';
 
-function formatMonthYear(my: string) {
-  const [year, month] = my.split('-');
-  return `Tháng ${month}/${year}`;
+function formatSlotDate(dateStr: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (dateStr === today) return 'Hôm nay';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
 }
 
 function tierLabel(tier: string) {
@@ -22,7 +24,7 @@ function tierLabel(tier: string) {
 
 interface MyGardenViewProps {
   garden: MyGardenData;
-  history?: DeliveryHistoryMonth[];
+  history?: DeliveryHistoryDay[];
   isLoadingHistory?: boolean;
 }
 
@@ -103,13 +105,13 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         {/* Month + VIP info bar */}
         <div className="px-4 mt-3 flex items-center gap-2 flex-wrap">
           <span className="px-2.5 py-1 bg-white/80 rounded-full text-xs font-semibold text-stone-600 border border-stone-200">
-            {formatMonthYear(garden.monthYear)}
+            {formatSlotDate(garden.date)}
           </span>
           <span className="px-2.5 py-1 bg-amber-100 rounded-full text-xs font-bold text-amber-700 border border-amber-200">
             {tierLabel(garden.vipTier)}
           </span>
           <span className="px-2.5 py-1 bg-green-100 rounded-full text-xs font-bold text-green-700 border border-green-200">
-            {garden.availableSlots}/{garden.totalSlots} sẵn sàng
+            {garden.claimedSlots}/{garden.totalSlots} đã nhận
           </span>
         </div>
 
@@ -144,7 +146,8 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           <div className="bg-white/60 border border-green-200 rounded-xl p-3 flex items-start gap-2">
             <span className="text-lg leading-none mt-0.5">ℹ️</span>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Bấm "Nhận quà" để điền thông tin giao hàng. Khi nhận thùng rau, bấm "Scan nhận hàng" hoặc nhập mã 6 số để xác nhận.
+
+              {garden.deliveriesPerDay} hộp rau/ngày. Bấm "Nhận quà" để điền thông tin giao hàng. Khi nhận hàng, bấm "Scan nhận hàng" hoặc nhập mã 6 số để xác nhận.
             </p>
           </div>
         </div>
@@ -172,16 +175,16 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
                   <div className="w-5 h-5 border-2 border-green-300 border-t-green-600 rounded-full animate-spin" />
                 </div>
               ) : history && history.length > 0 ? (
-                history.map((m) => (
+                history.map((d) => (
                   <div
-                    key={m.monthYear}
+                    key={d.date}
                     className="bg-white/60 border border-stone-200 rounded-lg px-3 py-2.5 flex items-center justify-between"
                   >
                     <span className="text-sm font-medium text-stone-700">
-                      {formatMonthYear(m.monthYear)}
+                      {formatSlotDate(d.date)}
                     </span>
                     <span className="text-xs font-bold text-stone-500">
-                      {m.deliveredSlots}/{m.totalSlots} đã nhận
+                      {d.deliveredSlots}/{d.totalSlots} đã nhận
                     </span>
                   </div>
                 ))

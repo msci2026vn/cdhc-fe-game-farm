@@ -121,7 +121,7 @@ export type {
   VipOrderStatus,
   MyGardenData,
   GardenSummary,
-  DeliveryHistoryMonth,
+  DeliveryHistoryDay,
   DeliverySlotStatus,
   DeliverySlot,
   ClaimSlotRequest,

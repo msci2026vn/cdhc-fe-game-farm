@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { handleUnauthorized, handleApiError, API_BASE_URL } from './api-utils';
+import { queryClient } from '../lib/queryClient';
 import type { ApiResponse } from '../types/common';
 import type { PingResult, AuthStatus } from '../types/game-api.types';
 
@@ -59,6 +60,11 @@ export const authApi = {
     } catch (error) {
       console.warn('[GameAPI] logout request failed:', error);
     }
+
+    // Clear toàn bộ TanStack Query cache — tránh data leak giữa các user
+    try {
+      queryClient.clear();
+    } catch (_) { /* ignore */ }
 
     // Clear farmverse localStorage data to prevent stale data on next login
     try {
