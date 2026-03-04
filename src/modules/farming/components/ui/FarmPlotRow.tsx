@@ -67,8 +67,9 @@ export default function FarmPlotRow({
         const growth = growthMap.get(slot.plot.id);
         const isReady = growth?.isReady && !slot.plot.isDead;
         const needsWater = slot.plot.happiness < 40 && !slot.plot.isDead && !isReady;
-        const waterCooldown = getCooldownRemaining(slot.plot.id);
+        const isHealthy = !slot.plot.isDead && !needsWater && !isReady;
         const canWaterNow = canWater(slot.plot.id);
+        const waterCooldown = getCooldownRemaining(slot.plot.id);
 
         // DEAD / WILTED
         if (slot.plot.isDead) {
@@ -106,6 +107,22 @@ export default function FarmPlotRow({
         // GROWING
         return (
           <div key={slot.index} className={`farm-plot farm-plot--growing ${posClass}`}>
+
+            {/* 💧 Water icon — top right, tapable */}
+            {needsWater && (
+              <button
+                className={`plot-water-icon ${canWaterNow ? 'water-pulse' : ''}`}
+                disabled={!canWaterNow || isWatering}
+                onClick={(e) => { e.stopPropagation(); onWater(i); }}
+                title={!canWaterNow ? `Còn ${waterCooldown}s` : 'Tưới nước'}
+              >
+                💧
+                {!canWaterNow && (
+                  <span className="plot-water-cooldown">{waterCooldown}s</span>
+                )}
+              </button>
+            )}
+
             <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
 
             {/* Timer countdown */}
@@ -121,20 +138,16 @@ export default function FarmPlotRow({
               </div>
             )}
 
-            {/* Water button */}
-            {needsWater && (
-              <button
-                className={`plot-water-btn ${canWaterNow ? 'water-pulse' : ''}`}
-                disabled={!canWaterNow || isWatering}
-                onClick={(e) => { e.stopPropagation(); onWater(i); }}
-                title={!canWaterNow ? `${waterCooldown}s` : 'Tưới nước'}
-              >
-                💧
-                {!canWaterNow && (
-                  <span className="plot-water-cooldown">{waterCooldown}s</span>
-                )}
-              </button>
-            )}
+            {/* Status badges — bottom, only when growing */}
+            <div className="plot-status-badges">
+              {isHealthy && (
+                <span className="plot-badge plot-badge--healthy">✅ Khỏe mạnh</span>
+              )}
+              {!needsWater && (
+                <span className="plot-badge plot-badge--water">💧 Đủ nước</span>
+              )}
+            </div>
+
           </div>
         );
       })}

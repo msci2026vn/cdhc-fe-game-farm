@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   avatarUrl?: string;
@@ -19,12 +20,19 @@ export default function FarmCharacterHUD({
   avatarUrl, name, title, level,
   hp, maxHp, mana, maxMana, armor, maxArmor,
 }: Props) {
+  const navigate = useNavigate();
   const hpPct = maxHp > 0 ? Math.min(100, (hp / maxHp) * 100) : 0;
   const manaPct = maxMana > 0 ? Math.min(100, (mana / maxMana) * 100) : 0;
   const filledSegments = maxArmor > 0 ? Math.round((armor / maxArmor) * ARMOR_SEGMENTS) : 0;
 
   return (
-    <div className="farm-hud">
+    <div
+      className="farm-hud"
+      onClick={() => navigate('/profile')}
+      style={{ cursor: 'pointer' }}
+      role="button"
+      aria-label="Xem hồ sơ cá nhân"
+    >
       <div className="farm-hud-avatar">
         {avatarUrl ? (
           <img src={avatarUrl} alt={name} />

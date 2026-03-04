@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   temperature: number;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function FarmWeatherOGN({ temperature, humidity, weatherIcon, ognBalance }: Props) {
+  const navigate = useNavigate();
   const icon = weatherIcon || (temperature > 30 ? '☀️' : temperature > 20 ? '⛅' : '🌧️');
   const formatted = typeof ognBalance === 'number'
     ? ognBalance.toLocaleString('vi-VN')
@@ -20,7 +22,13 @@ export default function FarmWeatherOGN({ temperature, humidity, weatherIcon, ogn
         <span>{Math.round(temperature)}°C</span>
         <span>💧{humidity}%</span>
       </div>
-      <div className="farm-ogn-pill">
+      <div
+        className="farm-ogn-pill"
+        onClick={() => navigate('/ogn-history')}
+        style={{ cursor: 'pointer' }}
+        role="button"
+        aria-label="Lịch sử OGN"
+      >
         <span>🌿</span>
         <span>{formatted}</span>
       </div>
