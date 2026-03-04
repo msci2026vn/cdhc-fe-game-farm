@@ -252,16 +252,18 @@ export function PurchaseFlow() {
       setOrder(newOrder);
       setProgress(2);
 
-      // 2. Send AVAX
+      // 2. Send AVAX (sendFn now waits for TX to be mined)
+      setProgress(2);
       const txHash = await sendFn(newOrder.receiverAddress, newOrder.amountAvax);
-      setProgress(3);
+      setProgress(3); // TX mined
 
-      // 3. Verify payment
+      // 3. Verify payment on backend
+      setProgress(4);
       const verifyResult = await verifyPayment.mutateAsync({
         orderId: newOrder.orderId,
         txHash,
       });
-      setProgress(4);
+      setProgress(5);
 
       // 4. Done
       setResult(verifyResult);

@@ -8,8 +8,9 @@ export function StepProcessing({ progress }: Props) {
     const steps = [
         { label: 'Tạo đơn hàng', done: progress >= 1 },
         { label: 'Gửi AVAX', done: progress >= 2 },
-        { label: 'Xác nhận trên blockchain', done: progress >= 3 },
-        { label: 'Kích hoạt VIP', done: progress >= 4 },
+        { label: 'Chờ blockchain xác nhận (~5-10s)', done: progress >= 3 },
+        { label: 'Xác minh giao dịch', done: progress >= 4 },
+        { label: 'Kích hoạt VIP', done: progress >= 5 },
     ];
 
     return (

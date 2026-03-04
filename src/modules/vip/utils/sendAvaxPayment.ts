@@ -19,6 +19,30 @@ function bufferToBase64url(buffer: ArrayBuffer): string {
   return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
+// ─── Wait for TX receipt (polling via eth_getTransactionReceipt) ───
+
+async function waitForTxReceipt(
+  txHash: string,
+  timeout = 30_000,
+  interval = 2_000,
+): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const receipt = await window.ethereum!.request({
+      method: 'eth_getTransactionReceipt',
+      params: [txHash],
+    });
+    if (receipt) {
+      if (receipt.status === '0x0') {
+        throw new Error('Giao dịch thất bại trên blockchain');
+      }
+      return;
+    }
+    await new Promise((r) => setTimeout(r, interval));
+  }
+  // Timeout — let backend handle final verification
+}
+
 // ─── MetaMask / Core Wallet ───
 
 export function hasWalletExtension(): boolean {
@@ -66,7 +90,7 @@ export async function sendViaWalletExtension(
 
   const valueHex = '0x' + parseEther(amountAvax).toString(16);
 
-  const txHash = await window.ethereum.request({
+  const txHash = (await window.ethereum.request({
     method: 'eth_sendTransaction',
     params: [
       {
@@ -75,9 +99,12 @@ export async function sendViaWalletExtension(
         value: valueHex,
       },
     ],
-  });
+  })) as string;
 
-  return txHash as string;
+  // Wait for TX to be mined before returning (fixes race condition)
+  await waitForTxReceipt(txHash);
+
+  return txHash;
 }
 
 // ─── Smart Wallet (Passkey + ERC-4337) ───

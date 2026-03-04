@@ -8,6 +8,26 @@ import { BoardWeatherOverlay } from './BoardWeatherOverlay';
 import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
 
+// Fix: Tailwind JIT purge-safe gem colors — inline styles bypass dynamic class scanning
+const GEM_STYLES: Record<string, React.CSSProperties> = {
+    atk: {
+        background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
+        boxShadow: '0 3px 10px rgba(231, 76, 60, 0.3)',
+    },
+    hp: {
+        background: 'linear-gradient(135deg, #2ecc71, #27ae60)',
+        boxShadow: '0 3px 10px rgba(46, 204, 113, 0.3)',
+    },
+    def: {
+        background: 'linear-gradient(135deg, #3498db, #2980b9)',
+        boxShadow: '0 3px 10px rgba(52, 152, 219, 0.3)',
+    },
+    star: {
+        background: 'linear-gradient(135deg, #f39c12, #e67e22)',
+        boxShadow: '0 3px 10px rgba(243, 156, 18, 0.3)',
+    },
+};
+
 interface Props {
     grid: any[];
     selected: number | null;
@@ -97,15 +117,16 @@ export default function CampaignMatch3Board({
                                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                                 onPointerDown={(e: any) => handlePointerDown(i, e)}
                                 onPointerUp={handlePointerUp}
+                                style={sp !== 'rainbow' ? GEM_STYLES[gem.type] ?? GEM_STYLES.atk : undefined}
                                 className={`aspect-square rounded-md flex items-center justify-center text-[16px] cursor-pointer relative gem-shine transition-colors duration-200
-                ${sp === 'rainbow' ? 'gem-rainbow' : meta.css}
+                ${sp === 'rainbow' ? 'gem-rainbow' : ''}
                 ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
                 ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}
                 ${sp === 'bomb' ? 'gem-special-bomb' : ''}
                 ${sp === 'rainbow' ? 'gem-special-rainbow' : ''}
                 ${spawningGems.has(gem.id) ? 'gem-special-spawn' : ''}
                 ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
-                ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
+                ${isMatched ? `animate-gem-pop gem-match-burst gem-${gem.type}` : ''}
                 ${animating && !isMatched ? 'pointer-events-none' : ''}
                 ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
                 ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
