@@ -36,7 +36,7 @@ export default function MarketScreen() {
   // ── Loading ──
   if (loading) {
     return (
-      <div className="max-w-md mx-auto h-screen flex flex-col items-center justify-center relative bg-gradient-to-b from-[#dcedc8] to-[#aed581]">
+      <div className="max-w-md mx-auto h-screen flex flex-col items-center justify-center relative" style={{ background: "url('/assets/farm/nen.jpeg') center/cover no-repeat" }}>
         <div className="animate-pulse text-5xl mb-3">📊</div>
         <p className="text-sm text-[#5d4037] font-semibold">Đang tải dữ liệu thị trường...</p>
       </div>
@@ -46,7 +46,7 @@ export default function MarketScreen() {
   // ── Error ──
   if (error || !data) {
     return (
-      <div className="max-w-md mx-auto h-screen flex flex-col relative bg-gradient-to-b from-[#dcedc8] to-[#aed581] overflow-hidden">
+      <div className="max-w-md mx-auto h-screen flex flex-col relative overflow-hidden" style={{ background: "url('/assets/farm/nen.jpeg') center/cover no-repeat" }}>
         <div className="relative z-30 px-4 pt-4 pb-2 flex items-center justify-between">
           <button onClick={() => { playSound('ui_back'); navigate(-1); }}
             className="w-10 h-10 rounded-full bg-[#f4e4bc] border-2 border-[#8c6239] shadow-[0_2px_0_#5d4037] flex items-center justify-center active:translate-y-0.5 active:shadow-none transition-all">
@@ -72,7 +72,7 @@ export default function MarketScreen() {
   }
 
   return (
-    <div className="max-w-md mx-auto h-screen flex flex-col relative bg-gradient-to-b from-[#dcedc8] to-[#aed581] shadow-2xl overflow-hidden select-none">
+    <div className="max-w-md mx-auto h-screen flex flex-col relative shadow-2xl overflow-hidden select-none" style={{ background: "url('/assets/farm/nen.jpeg') center/cover no-repeat" }}>
       {/* ── Ambient blobs ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-300/30 rounded-full blur-3xl" />
