@@ -37,12 +37,12 @@ export function WorldBossScreen() {
   const { data, isLoading, isError, refetch } = useWorldBoss();
   const { data: authData } = useAuth();
   const boss = data?.boss;
-  const [tab, setTab] = useState<'leaderboard' | 'feed'>('leaderboard');
   const [mainTab, setMainTab] = useState<'arena' | 'history'>('arena');
   const currentUserId = authData?.user?.id ?? null;
 
   // === Battle state ===
   const [showBattle, setShowBattle] = useState(false);
+  const [popup, setPopup] = useState<'leaderboard' | 'feed' | null>(null);
 
   // === Boss End Detection ===
   const [showEndScreen, setShowEndScreen] = useState(false);
@@ -162,7 +162,7 @@ export function WorldBossScreen() {
         </div>
       )}
 
-      {/* Scrollable: tabs + leaderboard/feed — or full-page fallbacks */}
+      {/* Scrollable: history hoặc fallbacks */}
       <div
         style={{
           flex: 1,
@@ -191,42 +191,80 @@ export function WorldBossScreen() {
         ) : !data?.active || !boss ? (
           <BossWaiting onShowHistory={() => setMainTab('history')} />
         ) : (
-          <div className="flex flex-col">
-            {/* Sub tabs: Xep hang / Tran chien */}
-            <div>
-              <div className="flex border-b border-gray-700 bg-gray-900 sticky top-0 z-10">
-                <button
-                  onClick={() => setTab('leaderboard')}
-                  className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'leaderboard'
-                    ? 'border-b-2 border-yellow-400 text-yellow-400'
-                    : 'text-gray-400'
-                    }`}
-                >
-                  Xep hang
-                </button>
-                <button
-                  onClick={() => setTab('feed')}
-                  className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'feed'
-                    ? 'border-b-2 border-blue-400 text-blue-400'
-                    : 'text-gray-400'
-                    }`}
-                >
-                  Tran chien
-                </button>
-              </div>
-
-              {tab === 'leaderboard' ? (
-                <FullLeaderboard
-                  leaderboard={boss.leaderboard}
-                  currentUserId={currentUserId}
-                />
-              ) : (
-                <LiveFeed feed={boss.feed} />
-              )}
-            </div>
+          /* 2 nút mở popup */
+          <div className="px-4 pt-3 pb-4 grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setPopup('leaderboard')}
+              className="flex flex-col items-center gap-2 py-4 rounded-2xl border border-yellow-500/40 active:scale-95 transition-transform"
+              style={{ background: 'rgba(234,179,8,0.08)' }}
+            >
+              <span className="text-2xl">🏆</span>
+              <span className="text-sm font-bold text-yellow-400">Xếp hạng</span>
+              <span className="text-xs text-gray-400">{boss.leaderboard?.length ?? 0} người</span>
+            </button>
+            <button
+              onClick={() => setPopup('feed')}
+              className="flex flex-col items-center gap-2 py-4 rounded-2xl border border-blue-500/40 active:scale-95 transition-transform"
+              style={{ background: 'rgba(59,130,246,0.08)' }}
+            >
+              <span className="text-2xl">⚔️</span>
+              <span className="text-sm font-bold text-blue-400">Trận chiến</span>
+              <span className="text-xs text-gray-400">Live feed</span>
+            </button>
           </div>
         )}
       </div>
+
+      {/* Popup: Xếp hạng */}
+      {popup === 'leaderboard' && boss && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.7)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+          onClick={() => setPopup(null)}
+        >
+          <div
+            style={{ background: '#1f2937', borderRadius: '20px 20px 0 0', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+              <div style={{ width: 40, height: 4, borderRadius: 2, background: '#4b5563' }} />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 pb-3">
+              <h2 className="text-lg font-bold text-yellow-400">🏆 Xếp hạng</h2>
+              <button onClick={() => setPopup(null)} className="text-gray-400 text-2xl leading-none">×</button>
+            </div>
+            {/* Content */}
+            <div style={{ flex: 1, overflowY: 'scroll', WebkitOverflowScrolling: 'touch' }}>
+              <FullLeaderboard leaderboard={boss.leaderboard} currentUserId={currentUserId} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popup: Trận chiến */}
+      {popup === 'feed' && boss && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.7)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+          onClick={() => setPopup(null)}
+        >
+          <div
+            style={{ background: '#1f2937', borderRadius: '20px 20px 0 0', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+              <div style={{ width: 40, height: 4, borderRadius: 2, background: '#4b5563' }} />
+            </div>
+            <div className="flex items-center justify-between px-4 pb-3">
+              <h2 className="text-lg font-bold text-blue-400">⚔️ Trận chiến</h2>
+              <button onClick={() => setPopup(null)} className="text-gray-400 text-2xl leading-none">×</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'scroll', WebkitOverflowScrolling: 'touch' }}>
+              <LiveFeed feed={boss.feed} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* End Screen */}
       {showEndScreen && endedBossInfo && (
