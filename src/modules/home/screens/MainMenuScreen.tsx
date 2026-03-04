@@ -38,37 +38,53 @@ export default function MainMenuScreen() {
           <WorldBossMarquee />
         </div>
 
-        <img
-          className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
-          src="/assets/home/3.png"
-          alt="nong-trai"
+        {/* Trồng cây */}
+        <div
+          className="absolute cursor-pointer hover:-translate-y-1 transition-transform flex flex-col items-center justify-end overflow-hidden"
           style={{ left: '13.9%', top: '26.6%', width: '33.6%', height: '20.3%' }}
           onClick={() => { playSound('ui_click'); navigate('/farm'); }}
-        />
+        >
+          <img src="/assets/home/3.png" alt="nong-trai" className="absolute inset-0 w-full h-full object-cover" />
+          <span className="relative z-10 mb-1.5 text-[11px] font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] leading-none">
+            🌱 Trồng cây
+          </span>
+        </div>
 
-        <img
-          className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
-          src="/assets/home/2.png"
-          alt="boss-word"
+        {/* World Boss */}
+        <div
+          className="absolute cursor-pointer hover:-translate-y-1 transition-transform flex flex-col items-center justify-end overflow-hidden"
           style={{ left: '52.5%', top: '26.6%', width: '35.3%', height: '20.5%' }}
           onClick={() => { playSound('ui_click'); navigate('/boss'); }}
-        />
+        >
+          <img src="/assets/home/2.png" alt="boss-word" className="absolute inset-0 w-full h-full object-cover" />
+          <span className="relative z-10 mb-1.5 text-[11px] font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] leading-none">
+            👹 Boss
+          </span>
+        </div>
 
-        <img
-          className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
-          src="/assets/home/1.png"
-          alt="camping"
+        {/* Chiến dịch */}
+        <div
+          className="absolute cursor-pointer hover:-translate-y-1 transition-transform flex flex-col items-center justify-end overflow-hidden"
           style={{ left: '13.9%', top: '47.9%', width: '33.9%', height: '19.4%' }}
           onClick={() => { playSound('ui_click'); navigate('/campaign'); }}
-        />
+        >
+          <img src="/assets/home/1.png" alt="camping" className="absolute inset-0 w-full h-full object-cover" />
+          <span className="relative z-10 mb-1.5 text-[11px] font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] leading-none">
+            ⚔️ Chiến dịch
+          </span>
+        </div>
 
-        <img
-          className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
-          src="/assets/home/4.png"
-          alt="quizz"
+        {/* Học tập */}
+        <div
+          className="absolute cursor-pointer hover:-translate-y-1 transition-transform flex flex-col items-center justify-end overflow-hidden"
           style={{ left: '52.8%', top: '47.9%', width: '35%', height: '19.8%' }}
           onClick={() => { playSound('ui_click'); navigate('/quiz'); }}
-        />
+        >
+          <img src="/assets/home/4.png" alt="quizz" className="absolute inset-0 w-full h-full object-cover" />
+          <span className="relative z-10 mb-1.5 text-[11px] font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] leading-none">
+            📚 Học tập
+          </span>
+        </div>
 
         <img
           className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
