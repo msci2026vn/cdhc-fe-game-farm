@@ -40,9 +40,9 @@ export default function CampaignArenaTop({
     egg, popups, combo, showCombo, comboInfo
 }: Props) {
     return (
-        <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden">
+        <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden z-[5]">
             <div className="absolute inset-0" style={{
-                background: 'radial-gradient(circle at 50% 60%, rgba(231,76,60,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(142,68,173,0.1) 0%, transparent 40%)'
+                background: 'radial-gradient(circle at 50% 60%, rgba(30,100,15,0.2) 0%, transparent 55%), radial-gradient(circle at 20% 20%, rgba(20,80,10,0.12) 0%, transparent 40%)'
             }} />
 
             {/* Top bar */}

@@ -10,9 +10,40 @@
         background: linear-gradient(180deg, #c8e6ff 0%, #e8f5e9 35%, #f5e6d3 100%);
     }
 
-    /* Boss */
+    /* Boss (World Boss — keep purple) */
     .boss-gradient {
         background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 30%, #1a2a1a 100%);
+    }
+
+    /* Campaign Battle — forest green theme */
+    .campaign-battle-gradient {
+        background:
+            radial-gradient(ellipse 280px 200px at 65% 25%, rgba(15, 70, 8, 0.95) 0%, transparent 60%),
+            radial-gradient(ellipse at 20% 70%, rgba(5, 30, 5, 0.8) 0%, transparent 45%),
+            linear-gradient(180deg, #060e04 0%, #091a06 25%, #071308 55%, #030a02 100%);
+    }
+
+    /* Campaign battle — tree/fog layers */
+    .campaign-trees-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+            radial-gradient(ellipse 20px 120px at 5% 45%, rgba(8, 28, 5, 0.6) 0%, transparent 100%),
+            radial-gradient(ellipse 25px 150px at 15% 38%, rgba(6, 22, 4, 0.5) 0%, transparent 100%),
+            radial-gradient(ellipse 18px 100px at 85% 45%, rgba(8, 28, 5, 0.6) 0%, transparent 100%),
+            radial-gradient(ellipse 22px 130px at 94% 38%, rgba(6, 22, 4, 0.5) 0%, transparent 100%);
+    }
+
+    /* Campaign battle — bottom fog */
+    .campaign-bottom-fog {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 120px;
+        pointer-events: none;
+        background: linear-gradient(180deg, transparent, rgba(3, 8, 2, 0.75) 35%, rgba(2, 5, 1, 0.92) 100%);
     }
 
     /* Quiz */
@@ -82,5 +113,76 @@
                 #0d0d1a 0%, #BF360C 15%, #004D40 30%, #1B5E20 42%,
                 #F9A825 52%, #4E342E 62%, #E65100 72%, #C62828 80%,
                 #388E3C 90%, #2E7D32 100%);
+    }
+}
+
+/* ── Campaign battle forest keyframes (outside @layer for global scope) ── */
+@keyframes glow-breathe {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.15);
+    }
+}
+
+@keyframes ff-float {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(12px, -35px);
+    }
+}
+
+@keyframes mush-sway {
+
+    0%,
+    100% {
+        transform: rotate(-3deg);
+    }
+
+    50% {
+        transform: rotate(3deg);
+    }
+}
+
+@keyframes ult-glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 24px rgba(160, 80, 255, 0.65), 0 5px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(160, 80, 255, 1), 0 5px 14px rgba(0, 0, 0, 0.6);
+    }
+}
+
+@keyframes dodge-danger-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 18px rgba(231, 76, 60, 0.7), 0 5px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 0 36px rgba(231, 76, 60, 1), 0 5px 14px rgba(0, 0, 0, 0.6);
     }
 }
