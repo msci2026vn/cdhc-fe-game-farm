@@ -1,5 +1,6 @@
 import React from 'react';
 import type { FarmPlot } from '@/shared/hooks/useFarmPlots';
+import type { GrowthState } from '@/shared/hooks/useGrowthTimer';
 
 interface SlotData {
   index: number;
@@ -9,25 +10,29 @@ interface SlotData {
 
 interface Props {
   slotGrid: SlotData[];
-  plots: FarmPlot[];
-  activePlotIndex: number;
-  growthMap: Map<string, any>;
-  onSlotClick: (slotIndex: number, unlocked: boolean) => void;
-  setActivePlotIndex: (index: number) => void;
+  growthMap: Map<string, GrowthState>;
+  canWater: (plotId: string) => boolean;
+  getCooldownRemaining: (plotId: string) => number;
+  onPlant: (slotIndex: number) => void;
+  onWater: (plotIndex: number) => void;
+  onHarvest: (plotIndex: number) => void;
+  onClear: (plotIndex: number) => void;
+  onLocked: (slotIndex: number) => void;
+  isWatering: boolean;
+  isClearing: boolean;
 }
 
 const PLOT_CLASSES = ['farm-plot--plot1', 'farm-plot--plot2', 'farm-plot--plot3'];
 
 export default function FarmPlotRow({
-  slotGrid, plots, activePlotIndex, growthMap, onSlotClick, setActivePlotIndex,
+  slotGrid, growthMap, canWater, getCooldownRemaining,
+  onPlant, onWater, onHarvest, onClear, onLocked,
+  isWatering, isClearing,
 }: Props) {
   return (
     <>
       {slotGrid.map((slot, i) => {
         const posClass = PLOT_CLASSES[i] || '';
-        const growth = slot.plot ? growthMap.get(slot.plot.id) : undefined;
-        const isSelected = slot.plot && plots.indexOf(slot.plot) === activePlotIndex;
-        const isReady = growth?.isReady && !slot.plot?.isDead;
 
         // LOCKED
         if (!slot.unlocked) {
@@ -35,7 +40,7 @@ export default function FarmPlotRow({
             <div
               key={slot.index}
               className={`farm-plot farm-plot--locked ${posClass}`}
-              onClick={() => onSlotClick(slot.index, false)}
+              onClick={() => onLocked(slot.index)}
             >
               <span className="farm-plot-lock">🔒</span>
               <span className="farm-plot-lock-label">VIP</span>
@@ -49,63 +54,86 @@ export default function FarmPlotRow({
             <div
               key={slot.index}
               className={`farm-plot farm-plot--empty ${posClass}`}
-              onClick={() => onSlotClick(slot.index, true)}
+              onClick={() => onPlant(slot.index)}
             >
-              <span className="farm-plot-add">+</span>
-              <span className="farm-plot-add-label">Trồng</span>
+              <div className="plot-empty-action">
+                <span className="plot-plus">+</span>
+                <span className="plot-plant-label">Trồng cây</span>
+              </div>
             </div>
           );
         }
 
-        // DEAD
+        const growth = growthMap.get(slot.plot.id);
+        const isReady = growth?.isReady && !slot.plot.isDead;
+        const needsWater = slot.plot.happiness < 40 && !slot.plot.isDead && !isReady;
+        const waterCooldown = getCooldownRemaining(slot.plot.id);
+        const canWaterNow = canWater(slot.plot.id);
+
+        // DEAD / WILTED
         if (slot.plot.isDead) {
           return (
-            <div
-              key={slot.index}
-              className={`farm-plot ${posClass}`}
-              style={isSelected ? { borderColor: '#ef5350', boxShadow: '0 0 12px rgba(239,83,80,0.5)' } : {}}
-              onClick={() => {
-                const idx = plots.indexOf(slot.plot!);
-                if (idx >= 0) setActivePlotIndex(idx);
-              }}
-            >
+            <div key={slot.index} className={`farm-plot ${posClass}`}>
               <span className="farm-plot-emoji" style={{ filter: 'grayscale(0.7)', opacity: 0.7 }}>🥀</span>
+              <span className="plot-timer" style={{ color: '#fca5a5' }}>Đã héo</span>
+              <button
+                className="plot-clear-btn"
+                disabled={isClearing}
+                onClick={(e) => { e.stopPropagation(); onClear(i); }}
+              >
+                🗑 Dọn
+              </button>
             </div>
           );
         }
 
-        // PLANTED / GROWING / READY
+        // READY TO HARVEST
+        if (isReady) {
+          return (
+            <div key={slot.index} className={`farm-plot farm-plot--ready ${posClass}`}>
+              <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
+              <span className="plot-timer" style={{ color: '#fde047' }}>Thu hoạch!</span>
+              <button
+                className="plot-harvest-btn ready-glow"
+                onClick={(e) => { e.stopPropagation(); onHarvest(i); }}
+              >
+                ✅ Thu hoạch
+              </button>
+            </div>
+          );
+        }
+
+        // GROWING
         return (
-          <div
-            key={slot.index}
-            className={`farm-plot ${isReady ? 'farm-plot--ready' : 'farm-plot--growing'} ${posClass}`}
-            style={isSelected ? { borderColor: '#4CAF50', boxShadow: '0 0 14px rgba(76,175,80,0.5)' } : {}}
-            onClick={() => {
-              const idx = plots.indexOf(slot.plot!);
-              if (idx >= 0) setActivePlotIndex(idx);
-            }}
-          >
+          <div key={slot.index} className={`farm-plot farm-plot--growing ${posClass}`}>
             <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
 
-            {/* Water need indicator */}
-            {slot.plot.happiness < 40 && <span className="water-need-icon">💧</span>}
+            {/* Timer countdown */}
+            <span className="plot-timer">{growth?.remainingText || '...'}</span>
 
-            {/* Growth progress bar */}
+            {/* Progress bar */}
             {growth && (
-              <div className="farm-plot-progress">
+              <div className="plot-progress">
                 <div
-                  className={`farm-plot-progress-fill ${isReady ? 'farm-plot-progress-fill--ready' : ''}`}
+                  className="plot-progress-fill"
                   style={{ width: `${Math.max(5, growth.percent)}%` }}
                 />
               </div>
             )}
 
-            {/* Ready badge */}
-            {isReady && (
-              <span style={{
-                position: 'absolute', top: 4, right: 4,
-                fontSize: 16, animation: 'readyGlow 1.5s infinite',
-              }}>🌾</span>
+            {/* Water button */}
+            {needsWater && (
+              <button
+                className={`plot-water-btn ${canWaterNow ? 'water-pulse' : ''}`}
+                disabled={!canWaterNow || isWatering}
+                onClick={(e) => { e.stopPropagation(); onWater(i); }}
+                title={!canWaterNow ? `${waterCooldown}s` : 'Tưới nước'}
+              >
+                💧
+                {!canWaterNow && (
+                  <span className="plot-water-cooldown">{waterCooldown}s</span>
+                )}
+              </button>
             )}
           </div>
         );

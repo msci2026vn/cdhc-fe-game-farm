@@ -23,13 +23,12 @@ import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import { audioManager } from '@/shared/audio';
 import { useUIStore } from '@/shared/stores/uiStore';
 
-// NEW UI Components
+// UI Components
 import FarmCharacterHUD from '../components/ui/FarmCharacterHUD';
 import FarmWeatherOGN from '../components/ui/FarmWeatherOGN';
 import RwaFarmBanner from '../components/ui/RwaFarmBanner';
 import FarmPlotRow from '../components/ui/FarmPlotRow';
 import FarmActionBar from '../components/ui/FarmActionBar';
-import FarmActivePlot from '../components/ui/FarmActivePlot';
 import FarmHarvestOverlay from '../components/ui/FarmHarvestOverlay';
 
 // Hooks
@@ -57,7 +56,6 @@ export default function FarmingScreen() {
     const [showPlantModal, setShowPlantModal] = useState(false);
     const [showPlantPicker, setShowPlantPicker] = useState(false);
     const [showBugGame, setShowBugGame] = useState(false);
-    const [showWaterEffect, setShowWaterEffect] = useState(false);
     const [showFriends, setShowFriends] = useState(false);
     const [visitingFriend, setVisitingFriend] = useState<FriendData | null>(null);
     const [showInvite, setShowInvite] = useState(false);
@@ -108,19 +106,32 @@ export default function FarmingScreen() {
         }));
     }, [plotBySlot, totalSlots]);
 
-    const handleSlotClick = useCallback((slotIndex: number, unlocked: boolean) => {
-        if (!unlocked) return navigate('/vip/purchase');
-        setPlantSlotIndex(slotIndex);
-        setShowPlantPicker(true);
-    }, [navigate]);
-
-    const handleWaterWithEffect = useCallback(() => {
-        handleWater();
-        setShowWaterEffect(true);
-        setTimeout(() => setShowWaterEffect(false), 1200);
+    // Per-plot action wrappers: set activePlotIndex then call handler
+    const handlePlotWater = useCallback((plotIdx: number) => {
+        setActivePlotIndex(plotIdx);
+        // Need to call water directly since setState is async
+        // The handler reads plots[activePlotIndex], so we schedule it
+        setTimeout(() => handleWater(), 0);
     }, [handleWater]);
 
-    const handleEmptySlotClick = useCallback(() => handleSlotClick(0, true), [handleSlotClick]);
+    const handlePlotHarvest = useCallback((plotIdx: number) => {
+        setActivePlotIndex(plotIdx);
+        setTimeout(() => handleHarvest(), 0);
+    }, [handleHarvest]);
+
+    const handlePlotClear = useCallback((plotIdx: number) => {
+        setActivePlotIndex(plotIdx);
+        setTimeout(() => handleClear(), 0);
+    }, [handleClear]);
+
+    const handlePlotPlant = useCallback((slotIndex: number) => {
+        setPlantSlotIndex(slotIndex);
+        setShowPlantPicker(true);
+    }, []);
+
+    const handleLockedSlot = useCallback(() => {
+        navigate('/vip/purchase');
+    }, [navigate]);
 
     const handleSelectPlant = useCallback((plantType: PlantType) => {
         const currentLength = plots.length;
@@ -159,7 +170,7 @@ export default function FarmingScreen() {
 
     return (
         <div className="farm-screen-container">
-            {/* Background */}
+            {/* Background — nen.jpeg */}
             <div className="farm-bg" />
 
             {/* TOP-LEFT: Character HUD */}
@@ -189,34 +200,19 @@ export default function FarmingScreen() {
             {/* Breadcrumb */}
             <div className="farm-breadcrumb">My Garden &gt; Vùng 1</div>
 
-            {/* Active Plot Detail — centered area */}
-            <div style={{
-                position: 'absolute', left: '5%', top: '24%', width: '90%', height: '25%',
-                zIndex: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-                <FarmActivePlot
-                    activePlot={activePlot}
-                    growthMap={growthMap}
-                    showWaterEffect={showWaterEffect}
-                    canWater={canWater}
-                    getCooldownRemaining={getCooldownRemaining}
-                    handleWater={handleWaterWithEffect}
-                    handleHarvest={handleHarvest}
-                    handleClear={handleClear}
-                    handleEmptySlotClick={handleEmptySlotClick}
-                    isWatering={isWatering}
-                    isClearing={isClearing}
-                />
-            </div>
-
-            {/* CENTER: 3 Plot Row */}
+            {/* 3 Plot Row — all interactions built-in */}
             <FarmPlotRow
                 slotGrid={slotGrid}
-                plots={plots}
-                activePlotIndex={activePlotIndex}
                 growthMap={growthMap}
-                onSlotClick={handleSlotClick}
-                setActivePlotIndex={setActivePlotIndex}
+                canWater={canWater}
+                getCooldownRemaining={getCooldownRemaining}
+                onPlant={handlePlotPlant}
+                onWater={handlePlotWater}
+                onHarvest={handlePlotHarvest}
+                onClear={handlePlotClear}
+                onLocked={handleLockedSlot}
+                isWatering={isWatering}
+                isClearing={isClearing}
             />
 
             {/* BOTTOM: 4 Action Buttons */}
@@ -227,7 +223,7 @@ export default function FarmingScreen() {
                 onKhoDo={() => navigate('/inventory')}
             />
 
-            {/* Overlays & Modals — kept intact */}
+            {/* Overlays & Modals */}
             <Toast />
             <PointsFlyUp />
             <FarmHarvestOverlay harvestResult={harvestResult} onClose={() => setHarvestResult(null)} />
