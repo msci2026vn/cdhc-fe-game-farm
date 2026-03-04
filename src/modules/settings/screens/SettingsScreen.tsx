@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gameApi } from '@/shared/api/game-api';
 import { useSecurityVerify } from '@/shared/hooks/useSecurityVerify';
@@ -16,6 +16,27 @@ export default function SettingsScreen() {
     const [pinError, setPinError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
+
+    // Fullscreen
+    const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
+
+    useEffect(() => {
+        const handler = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', handler);
+        return () => document.removeEventListener('fullscreenchange', handler);
+    }, []);
+
+    const toggleFullscreen = useCallback(async () => {
+        try {
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+            } else {
+                await document.exitFullscreen();
+            }
+        } catch (err) {
+            toast.error('Trình duyệt không hỗ trợ toàn màn hình');
+        }
+    }, []);
 
     // Fetch security status
     const { data: securityStatus, isLoading } = useQuery({
@@ -136,6 +157,46 @@ export default function SettingsScreen() {
 
                 {/* Content Area */}
                 <div className="flex-1 overflow-y-auto px-4 py-6 z-10 space-y-6">
+
+                    {/* Section: Display */}
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-farm-brown/20 shadow-sm overflow-hidden">
+                        <div className="bg-green-50 px-4 py-3 flex items-center gap-2 border-b-2 border-farm-brown/10">
+                            <span className="material-symbols-outlined text-green-600">display_settings</span>
+                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">Hiển thị</h2>
+                        </div>
+
+                        {/* Fullscreen toggle */}
+                        <button
+                            onClick={toggleFullscreen}
+                            className="w-full px-4 py-4 flex items-center justify-between hover:bg-black/5 active:bg-black/10 transition-colors text-left"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-green-600">
+                                        {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="font-bold text-farm-brown-dark">Toàn màn hình</div>
+                                    <div className="text-xs text-gray-500">
+                                        {isFullscreen ? 'Đang bật — nhấn để tắt' : 'Nhấn để bật toàn màn hình'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {/* Toggle pill */}
+                                <div
+                                    className={`w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 ${isFullscreen ? 'bg-green-500' : 'bg-gray-300'
+                                        }`}
+                                >
+                                    <div
+                                        className={`w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 ${isFullscreen ? 'translate-x-6' : 'translate-x-0'
+                                            }`}
+                                    />
+                                </div>
+                            </div>
+                        </button>
+                    </div>
 
                     {/* Section: Security Details */}
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-farm-brown/20 shadow-sm overflow-hidden">
