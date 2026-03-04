@@ -270,6 +270,7 @@ export default function CampaignPlayerHUD({
                 maxMana={boss.maxMana}
                 dodgeCost={manaDodgeCost}
                 ultCost={manaUltCost}
+                ultCharge={boss.ultCharge ?? 0}
             />
 
             {/* Skill warning inline */}
