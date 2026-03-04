@@ -85,9 +85,19 @@ export function WorldBossScreen() {
   }
 
   return (
-    <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
-      {/* Header — sticky */}
-      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800">
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#111827',
+        color: 'white',
+        zIndex: 10,
+      }}
+    >
+      {/* Header */}
+      <div style={{ flexShrink: 0, borderBottom: '1px solid #1f2937', background: '#111827' }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white text-xl p-1">
             ←
@@ -123,8 +133,16 @@ export function WorldBossScreen() {
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto pb-20">
+      {/* Scrollable content — flex-1 + overflow-y-scroll (not auto) for iOS */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'scroll',
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain',
+          paddingBottom: data?.active && boss ? '0' : '16px',
+        }}
+      >
         {mainTab === 'history' ? (
           <HistoryList />
         ) : isLoading ? (
@@ -145,7 +163,6 @@ export function WorldBossScreen() {
           <BossWaiting onShowHistory={() => setMainTab('history')} />
         ) : (
           <div className="flex flex-col">
-            {/* Boss display section */}
             <BossDisplay boss={boss} />
 
             <HpBar
@@ -162,9 +179,9 @@ export function WorldBossScreen() {
               <span>{boss.participantCount} nguoi tham gia</span>
             </div>
 
-            {/* Sub tabs: Xep hang / Tran chien */}
+            {/* Sub tabs */}
             <div className="border-t border-gray-800 mt-1">
-              <div className="flex border-b border-gray-700 sticky top-[97px] z-10 bg-gray-900">
+              <div className="flex border-b border-gray-700">
                 <button
                   onClick={() => setTab('leaderboard')}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'leaderboard'
@@ -194,15 +211,20 @@ export function WorldBossScreen() {
                 <LiveFeed feed={boss.feed} />
               )}
             </div>
-
-
           </div>
         )}
       </div>
 
-      {/* Attack button — always visible at bottom */}
+      {/* Attack button — luôn hiển thị đáy màn hình */}
       {data?.active && boss && (
-        <div className="flex-shrink-0 px-4 py-3 border-t border-gray-800 bg-gray-900">
+        <div
+          style={{
+            flexShrink: 0,
+            padding: '12px 16px',
+            borderTop: '1px solid #1f2937',
+            background: '#111827',
+          }}
+        >
           <AttackButton
             battleState="idle"
             onAttack={() => setShowBattle(true)}
