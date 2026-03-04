@@ -3,7 +3,7 @@
 // Mounts only when player starts battle. Uses useWorldBossBattle.
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useWorldBossBattle, type WorldBossSessionResult } from '../hooks/useWorldBossBattle';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
@@ -12,6 +12,7 @@ import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import type { WorldBossInfo } from '../types/world-boss.types';
 import { useWorldBossLite } from '../hooks/useWorldBoss';
+import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
 
 // Campaign components (reuse, NOT modify)
 import CampaignMatch3Board from '@/modules/campaign/components/CampaignMatch3Board';
@@ -25,7 +26,6 @@ import { BossRageOverlay } from '@/modules/boss/components/hud';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
 
 import { WorldBossCampaignResult } from './WorldBossCampaignResult';
-import { HpBar } from './HpBar';
 
 interface Props {
   worldBoss: WorldBossInfo;
@@ -100,10 +100,67 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     currentPhase, totalPhases,
   } = engine;
 
+  // ═══ Auto-play: wire refs for controller ═══
+  const gridRef = useRef(grid); gridRef.current = grid;
+  const bossRef = useRef(boss); bossRef.current = boss;
+  const animatingRef = useRef(animating); animatingRef.current = animating;
+  const resultRef = useRef<'fighting' | 'victory' | 'defeat'>(result); resultRef.current = result;
+  const skillWarningRef = useRef(skillWarning); skillWarningRef.current = skillWarning;
+  const activeDebuffsRef = useRef(activeDebuffs); activeDebuffsRef.current = activeDebuffs;
+  const activeBossBuffsRef = useRef(activeBossBuffs); activeBossBuffsRef.current = activeBossBuffs;
+  const eggRef = useRef(egg); eggRef.current = egg;
+  const lockedGemsRef = useRef(lockedGems); lockedGemsRef.current = lockedGems;
+  const activeBossStatsRef = useRef(activeBossStats); activeBossStatsRef.current = activeBossStats;
+  const otHiemActiveRef = useRef(otHiemActive); otHiemActiveRef.current = otHiemActive;
+  const otHiemCooldownRef = useRef(otHiemCooldown > 0); otHiemCooldownRef.current = otHiemCooldown > 0;
+  const romBocActiveRef = useRef(romBocActive); romBocActiveRef.current = romBocActive;
+  const romBocCooldownRef = useRef(romBocCooldown > 0); romBocCooldownRef.current = romBocCooldown > 0;
+  const isStunnedRef = useRef(isStunned); isStunnedRef.current = isStunned;
+  const isPausedRef = useRef(isPaused); isPausedRef.current = isPaused;
+  const enrageRef = useRef(enrageMultiplier); enrageRef.current = enrageMultiplier;
+
+  const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
+
+  // NOTE: VIP level hiện tại = 1 (free). Sau này gating VIP sẽ dùng useAutoPlayLevel()
+  const autoPlay = useAutoPlayController({
+    gridRef,
+    bossRef,
+    lockedGemsRef,
+    activeDebuffsRef: activeDebuffsRef as React.MutableRefObject<any>,
+    activeBossBuffsRef: activeBossBuffsRef as React.MutableRefObject<any>,
+    eggRef: eggRef as React.MutableRefObject<any>,
+    skillWarningRef: skillWarningRef as React.MutableRefObject<any>,
+    activeBossStatsRef: activeBossStatsRef as React.MutableRefObject<any>,
+    playerStats: combatStats,
+    skillLevels,
+    otHiemActiveRef,
+    otHiemOnCooldownRef: otHiemCooldownRef,
+    romBocActiveRef,
+    romBocOnCooldownRef: romBocCooldownRef,
+    mode: 'boss',
+    bossArchetype: worldBoss.element ?? 'chaos',
+    handleSwipe,
+    handleDodge,
+    fireUltimate,
+    onOtHiem: castOtHiem,
+    onRomBoc: castRomBoc,
+    onHighlightGem: (pos) => setHighlightedGem(pos),
+    onClearHighlight: () => setHighlightedGem(null),
+    animatingRef,
+    isStunnedRef,
+    isPausedRef,
+    result: resultRef,
+  });
+
+  // VIP Lv1: free for all (later will gate to VIP only via useAutoPlayLevel)
+  useEffect(() => { autoPlay.setVipLevel(1); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
   const comboParticles = useComboParticles(combo, showCombo);
 
-  const bossHpPct = Math.round((boss.bossHp / boss.bossMaxHp) * 100);
+  // HP: dùng server % (sessionStats.hpPercent) thay vì local engine (không nhất quán)
+  const serverHpPct = Math.round(sessionStats.hpPercent * 100);
+  const bossHpPct = serverHpPct; // dùng cho BossRageOverlay (rage khi boss HP server thấp)
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
   const comboInfo = getComboInfo(combo);
 
@@ -114,7 +171,6 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
         result={sessionResult}
         onFightAgain={() => {
           setSessionResult(null);
-          // Re-mount by exiting and re-entering
           onExit();
         }}
         onExit={onExit}
@@ -151,20 +207,20 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       {/* Damage vignette */}
       <DamageVignette screenShake={screenShake} ultActive={ultActive} />
 
-      {/* Boss rage */}
+      {/* Boss rage — based on SERVER HP % */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={'👾'} />
 
-      {/* Global boss HP indicator */}
+      {/* Global boss HP — server-sourced, consistent */}
       <div className="absolute top-2 left-2 right-2 z-30">
         <div className="flex items-center gap-2 bg-black/60 rounded-lg px-2 py-1 text-[10px]">
           <span className="text-gray-400">Boss HP:</span>
           <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
             <div
               className="h-full bg-red-500 transition-all duration-500"
-              style={{ width: `${(sessionStats.hpPercent * 100).toFixed(1)}%` }}
+              style={{ width: `${serverHpPct}%` }}
             />
           </div>
-          <span className="text-gray-300">{(sessionStats.hpPercent * 100).toFixed(1)}%</span>
+          <span className="text-gray-300">{serverHpPct}%</span>
         </div>
       </div>
 
@@ -188,7 +244,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
 
         <CampaignMatch3Board
           grid={grid} selected={selected} matchedCells={matchedCells}
-          spawningGems={spawningGems} lockedGems={lockedGems} highlightedGem={null}
+          spawningGems={spawningGems} lockedGems={lockedGems} highlightedGem={highlightedGem}
           isStunned={isStunned} animating={animating}
           handlePointerDown={handlePointerDown} handlePointerMove={handlePointerMove} handlePointerUp={handlePointerUp}
           combo={combo} showCombo={showCombo} otHiemActive={otHiemActive} romBocActive={romBocActive}
@@ -202,7 +258,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
           manaDodgeCost={manaDodgeCost} manaUltCost={manaUltCost}
           skillWarning={!!skillWarning} skillAlert={skillAlert}
           daysUntilExpiry={null}
-          autoPlay={{ isActive: false, toggle: () => {}, vipLevel: 0, dodgeFreeRemaining: 0, currentSituation: '' }}
+          autoPlay={autoPlay}
           skillLevels={skillLevels}
           otHiemActive={otHiemActive} otHiemCooldown={otHiemCooldown} OT_HIEM_CONFIG={OT_HIEM_CONFIG} otHiemDuration={otHiemDuration} castOtHiem={castOtHiem}
           romBocActive={romBocActive} romBocCooldown={romBocCooldown} ROM_BOC_CONFIG={ROM_BOC_CONFIG} romBocDuration={romBocDuration} castRomBoc={castRomBoc}
