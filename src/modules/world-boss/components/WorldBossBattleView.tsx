@@ -158,9 +158,15 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
   const comboParticles = useComboParticles(combo, showCombo);
 
-  // HP: dùng server % (sessionStats.hpPercent) thay vì local engine (không nhất quán)
-  const serverHpPct = Math.round(sessionStats.hpPercent * 100);
-  const bossHpPct = serverHpPct; // dùng cho BossRageOverlay (rage khi boss HP server thấp)
+  // HP từ server — override engine local để hiển thị đúng máu boss toàn server
+  const serverHpPct = sessionStats.hpPercent; // 0..1
+  const serverHp = Math.round(serverHpPct * worldBoss.stats.max_hp);
+  const serverMaxHp = worldBoss.stats.max_hp;
+  const bossHpPct = Math.round(serverHpPct * 100); // rage overlay
+
+  // displayBoss: giữ nguyên state engine nhưng override bossHp/bossMaxHp bằng server
+  const displayBoss = { ...boss, bossHp: serverHp, bossMaxHp: serverMaxHp };
+
   const shieldMax = Math.max(boss.playerMaxHp * 0.5, 200);
   const comboInfo = getComboInfo(combo);
 
@@ -210,23 +216,11 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       {/* Boss rage — based on SERVER HP % */}
       <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={'👾'} />
 
-      {/* Global boss HP — server-sourced, consistent */}
-      <div className="absolute top-2 left-2 right-2 z-30">
-        <div className="flex items-center gap-2 bg-black/60 rounded-lg px-2 py-1 text-[10px]">
-          <span className="text-gray-400">Boss HP:</span>
-          <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-500 transition-all duration-500"
-              style={{ width: `${serverHpPct}%` }}
-            />
-          </div>
-          <span className="text-gray-300">{serverHpPct}%</span>
-        </div>
-      </div>
+      {/* Không có red bar — thanh xanh bên dưới đã hiển thị HP server */}
 
-      {/* Top half: Boss arena */}
+      {/* Top half: Boss arena — displayBoss override HP bằng server */}
       <CampaignArenaTop
-        boss={boss} bossData={{ id: worldBoss.id, name: worldBoss.bossName, emoji: '👾', image: '', hp: worldBoss.stats.max_hp, attack: worldBoss.stats.atk, reward: 0, xpReward: 0, description: '', difficulty: worldBoss.difficulty, unlockLevel: 0, archetype: 'none', def: worldBoss.stats.def, freq: 1, healPercent: 0, turnLimit: 0, skills: [] }}
+        boss={displayBoss} bossData={{ id: worldBoss.id, name: worldBoss.bossName, emoji: '👾', image: '', hp: serverMaxHp, attack: worldBoss.stats.atk, reward: 0, xpReward: 0, description: '', difficulty: worldBoss.difficulty, unlockLevel: 0, archetype: 'none', def: worldBoss.stats.def, freq: 1, healPercent: 0, turnLimit: 0, skills: [] }}
         level={1} combatStats={combatStats}
         onBack={onExit} elapsedSeconds={elapsedSeconds} enrageLevel={0}
         pauseBattle={pauseBattle} resumeBattle={resumeBattle}
