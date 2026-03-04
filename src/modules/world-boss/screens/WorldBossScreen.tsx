@@ -85,7 +85,7 @@ export function WorldBossScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
       {/* Header — sticky */}
       <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-3 px-4 py-3">
@@ -105,8 +105,8 @@ export function WorldBossScreen() {
           <button
             onClick={() => setMainTab('arena')}
             className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'arena'
-                ? 'border-b-2 border-yellow-400 text-yellow-400'
-                : 'text-gray-400'
+              ? 'border-b-2 border-yellow-400 text-yellow-400'
+              : 'text-gray-400'
               }`}
           >
             Dau truong
@@ -114,8 +114,8 @@ export function WorldBossScreen() {
           <button
             onClick={() => setMainTab('history')}
             className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'history'
-                ? 'border-b-2 border-blue-400 text-blue-400'
-                : 'text-gray-400'
+              ? 'border-b-2 border-blue-400 text-blue-400'
+              : 'text-gray-400'
               }`}
           >
             Lich su
@@ -124,7 +124,7 @@ export function WorldBossScreen() {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-20">
         {mainTab === 'history' ? (
           <HistoryList />
         ) : isLoading ? (
@@ -168,8 +168,8 @@ export function WorldBossScreen() {
                 <button
                   onClick={() => setTab('leaderboard')}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'leaderboard'
-                      ? 'border-b-2 border-yellow-400 text-yellow-400'
-                      : 'text-gray-400'
+                    ? 'border-b-2 border-yellow-400 text-yellow-400'
+                    : 'text-gray-400'
                     }`}
                 >
                   Xep hang
@@ -177,8 +177,8 @@ export function WorldBossScreen() {
                 <button
                   onClick={() => setTab('feed')}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${tab === 'feed'
-                      ? 'border-b-2 border-blue-400 text-blue-400'
-                      : 'text-gray-400'
+                    ? 'border-b-2 border-blue-400 text-blue-400'
+                    : 'text-gray-400'
                     }`}
                 >
                   Tran chien
@@ -195,16 +195,20 @@ export function WorldBossScreen() {
               )}
             </div>
 
-            {/* Attack button */}
-            <div className="px-4 py-3 border-t border-gray-800">
-              <AttackButton
-                battleState="idle"
-                onAttack={() => setShowBattle(true)}
-              />
-            </div>
+
           </div>
         )}
       </div>
+
+      {/* Attack button — always visible at bottom */}
+      {data?.active && boss && (
+        <div className="flex-shrink-0 px-4 py-3 border-t border-gray-800 bg-gray-900">
+          <AttackButton
+            battleState="idle"
+            onAttack={() => setShowBattle(true)}
+          />
+        </div>
+      )}
 
       {/* End Screen */}
       {showEndScreen && endedBossInfo && (
