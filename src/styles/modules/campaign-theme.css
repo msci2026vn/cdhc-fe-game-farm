@@ -1,0 +1,360 @@
+/* ============================================================
+   campaign-theme.css
+   Import vào: src/styles/modules/campaign-theme.css
+   Rồi thêm vào src/styles/index.css (hoặc main.css):
+     @import './modules/campaign-theme.css';
+   ============================================================ */
+
+/* ── 1. FONT ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
+/* ── 2. CSS VARIABLES ────────────────────────────────────── */
+:root {
+  --c-wood-border:  #a06018;
+  --c-wood-dark:    #3d1f08;
+  --c-wood-mid:     #5c2e0f;
+  --c-green-glow:   rgba(50, 200, 60, 0.55);
+  --c-green-bright: #3ddc5c;
+  --c-gold:         #f5c518;
+  --c-purple:       #9955ff;
+  --c-purple-glow:  rgba(160, 80, 255, 0.7);
+}
+
+/* ── 3. BACKGROUND ───────────────────────────────────────── */
+.campaign-battle-gradient {
+  background:
+    radial-gradient(ellipse 280px 220px at 65% 22%, rgba(15,70,8,0.92) 0%, transparent 55%),
+    radial-gradient(ellipse 180px 160px at 20% 65%, rgba(5,30,5,0.7)  0%, transparent 50%),
+    radial-gradient(ellipse 200px 180px at 80% 70%, rgba(8,40,5,0.6)  0%, transparent 50%),
+    linear-gradient(180deg, #060e04 0%, #091a06 25%, #071308 55%, #030a02 100%) !important;
+}
+
+/* Center green glow overlay */
+.campaign-battle-gradient::before {
+  content: '';
+  position: absolute;
+  top: 3%; left: 50%;
+  transform: translateX(-50%);
+  width: 240px; height: 240px;
+  background: radial-gradient(ellipse, rgba(50,180,30,0.16) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 2;
+  animation: campaign-glow-breathe 4s ease-in-out infinite;
+}
+
+@keyframes campaign-glow-breathe {
+  0%,100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 1;    transform: translateX(-50%) scale(1.18); }
+}
+
+/* ── 4. TREES LAYER ──────────────────────────────────────── */
+.campaign-trees-layer {
+  background-image:
+    linear-gradient(180deg, rgba(5,18,3,0.75) 0%, transparent 35%),
+    radial-gradient(ellipse 22px 140px at  8% 55%, rgba(6,22,4,0.55) 0%, transparent 100%),
+    radial-gradient(ellipse 28px 170px at 18% 48%, rgba(5,18,4,0.45) 0%, transparent 100%),
+    radial-gradient(ellipse 20px 120px at 78% 52%, rgba(6,22,4,0.55) 0%, transparent 100%),
+    radial-gradient(ellipse 24px 150px at 88% 44%, rgba(5,18,4,0.45) 0%, transparent 100%) !important;
+}
+
+/* ── 5. BOTTOM FOG ───────────────────────────────────────── */
+.campaign-bottom-fog {
+  background: linear-gradient(180deg,
+    transparent,
+    rgba(3,8,2,0.82) 30%,
+    rgba(2,5,1,0.96) 100%
+  ) !important;
+  height: 120px !important;
+}
+
+/* ── 6. HP BAR FILL (boss + player dùng chung .hp-bar-fill) */
+.hp-bar-fill {
+  background: linear-gradient(90deg, #1a8c2a 0%, #3ddc5c 60%, #66ff7a 100%) !important;
+  box-shadow: 0 0 10px rgba(60,220,90,0.7), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  position: relative;
+}
+.hp-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 5%; right: 5%;
+  height: 3px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 2px;
+}
+
+/* Boss HP bar track */
+.campaign-boss-hp-track {
+  border: 1.5px solid rgba(50,160,40,0.5) !important;
+  box-shadow: 0 0 8px rgba(50,180,40,0.2) inset !important;
+}
+
+/* ── 7. GRID WOODEN FRAME ────────────────────────────────── */
+/* Cần thêm className="campaign-grid-frame" vào div wooden frame
+   trong CampaignMatch3Board.tsx (xem APPLY_GUIDE.md bước 2)    */
+.campaign-grid-frame {
+  border: 5px solid var(--c-wood-border) !important;
+  background: linear-gradient(180deg, #284e10 0%, #183208 100%) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 0 0 3px var(--c-wood-dark),
+    0 0 0 6px rgba(140,80,15,0.35),
+    0 12px 36px rgba(0,0,0,0.78),
+    inset 0 1px 0 rgba(255,200,80,0.12),
+    inset 0 0 22px rgba(0,0,0,0.35) !important;
+  position: relative;
+}
+
+/* Vine corner decorations */
+.campaign-grid-frame::before {
+  content: '🌿';
+  position: absolute;
+  top: -13px; left: -9px;
+  font-size: 19px;
+  transform: rotate(-22deg);
+  filter: drop-shadow(0 0 5px rgba(40,180,30,0.55));
+  z-index: 3;
+  pointer-events: none;
+}
+.campaign-grid-frame::after {
+  content: '🍀';
+  position: absolute;
+  bottom: -11px; right: -9px;
+  font-size: 17px;
+  filter: drop-shadow(0 0 5px rgba(40,180,30,0.55));
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Grid cells */
+.campaign-grid-frame .grid > * {
+  background: linear-gradient(135deg, #1e4810 0%, #112808 100%) !important;
+  border-radius: 8px !important;
+  border: 1.5px solid rgba(55,110,28,0.4) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -2px 0 rgba(0,0,0,0.3) !important;
+  transition: transform 0.12s ease, filter 0.12s ease, border-color 0.12s ease !important;
+}
+.campaign-grid-frame .grid > *:hover {
+  transform: scale(1.13) !important;
+  filter: brightness(1.38) !important;
+  border-color: rgba(150,255,100,0.65) !important;
+  z-index: 3;
+}
+
+/* ── 8. PLAYER HUD AREA ──────────────────────────────────── */
+/* Rounded top container (bottom 70%) */
+.campaign-battle-gradient > div:last-child {
+  background: linear-gradient(180deg,
+    rgba(8,20,5,0.7) 0%,
+    rgba(5,14,3,0.85) 100%
+  ) !important;
+  border-top: 2px solid rgba(80,160,40,0.25) !important;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.5) !important;
+}
+
+/* Player HP bar wrapper glow on hit */
+.hp-bar-hit {
+  animation: hp-hit-shake 0.35s ease !important;
+}
+@keyframes hp-hit-shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  60%      { transform: translateX(4px); }
+}
+
+/* Mana bar */
+.campaign-mana-bar-fill {
+  background: linear-gradient(90deg, #4a20cc 0%, #7c55ef 60%, #a29bfe 100%) !important;
+  box-shadow: 0 0 8px rgba(130,90,255,0.7) !important;
+}
+
+/* ── 9. SKILL BUTTONS ────────────────────────────────────── */
+/* Cần thêm className="campaign-skill-btn" vào mỗi CircleSkillBtn
+   (xem APPLY_GUIDE.md bước 3)                                   */
+.campaign-skill-btn {
+  box-shadow:
+    0 5px 16px rgba(0,0,0,0.65),
+    inset 0 2px 5px rgba(255,255,255,0.15),
+    inset 0 -3px 6px rgba(0,0,0,0.35) !important;
+  transition: transform 0.14s ease, box-shadow 0.14s ease !important;
+}
+.campaign-skill-btn:hover {
+  transform: translateY(-5px) scale(1.06) !important;
+}
+.campaign-skill-btn:active {
+  transform: scale(0.94) !important;
+}
+
+/* NÉ / Skill green buttons */
+.campaign-skill-btn-green {
+  background: radial-gradient(circle at 38% 30%, #6ab828, #2a6e0c) !important;
+  border: 3px solid #80cc30 !important;
+}
+/* ULT purple button */
+.campaign-skill-btn-ult {
+  background: radial-gradient(circle at 38% 30%, #9955ff, #3a18cc) !important;
+  border: 3px solid #aa77ff !important;
+  box-shadow:
+    0 0 26px var(--c-purple-glow),
+    0 5px 16px rgba(0,0,0,0.65),
+    inset 0 2px 5px rgba(255,255,255,0.18),
+    inset 0 -3px 6px rgba(0,0,0,0.4) !important;
+  animation: campaign-ult-pulse 2.2s ease-in-out infinite !important;
+}
+@keyframes campaign-ult-pulse {
+  0%,100% { box-shadow: 0 0 26px var(--c-purple-glow), 0 5px 16px rgba(0,0,0,0.65), inset 0 2px 5px rgba(255,255,255,0.18), inset 0 -3px 6px rgba(0,0,0,0.4); }
+  50%      { box-shadow: 0 0 44px rgba(180,100,255,1),  0 5px 16px rgba(0,0,0,0.65), inset 0 2px 5px rgba(255,255,255,0.18), inset 0 -3px 6px rgba(0,0,0,0.4); }
+}
+
+/* NÉ dodge window — nổi bật khi boss ra đòn */
+.campaign-skill-btn-dodge-active {
+  border-color: #ffff44 !important;
+  box-shadow:
+    0 0 0 3px rgba(255,255,80,0.6),
+    0 0 20px rgba(255,255,80,0.8),
+    0 5px 16px rgba(0,0,0,0.65) !important;
+  animation: campaign-dodge-flash 0.5s ease-in-out infinite !important;
+}
+@keyframes campaign-dodge-flash {
+  0%,100% { border-color: #ffff44; }
+  50%      { border-color: #ff8800; }
+}
+
+/* Wood log platform under skill bar */
+.campaign-skill-row {
+  background: linear-gradient(180deg, transparent, rgba(8,5,2,0.6)) !important;
+  padding-bottom: 6px !important;
+}
+.campaign-skill-row::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 10px;
+  background: linear-gradient(180deg, var(--c-wood-mid), var(--c-wood-dark));
+  border-top: 1px solid var(--c-wood-border);
+  z-index: 0;
+}
+
+/* ── 10. BOSS TITLE BANNER ───────────────────────────────── */
+/* Cần thêm className="campaign-boss-banner" vào wrapper tên boss
+   trong BossHPBar.tsx (xem APPLY_GUIDE.md bước 4 — optional)    */
+.campaign-boss-banner {
+  background: linear-gradient(180deg, #7a4520 0%, #3d1f0a 50%, #2a1206 100%) !important;
+  border: 3px solid var(--c-wood-border) !important;
+  border-radius: 10px !important;
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,200,100,0.2) !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.2px !important;
+  text-shadow: 0 0 12px rgba(255,200,60,0.5), 2px 2px 4px #000 !important;
+}
+.campaign-boss-banner::before,
+.campaign-boss-banner::after {
+  content: '';
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px;
+  background: radial-gradient(circle, #80ff50 40%, #2a9010 100%);
+  border-radius: 50%;
+  border: 2px solid #a07020;
+  box-shadow: 0 0 10px rgba(100,255,60,0.8);
+}
+.campaign-boss-banner::before { left:  -8px; }
+.campaign-boss-banner::after  { right: -8px; }
+
+/* ── 11. COMBAT NOTIFICATIONS ────────────────────────────── */
+.campaign-combat-notif {
+  background: rgba(10,25,8,0.88) !important;
+  border: 1px solid rgba(80,180,50,0.4) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ── 12. WARNING BANNERS ─────────────────────────────────── */
+/* Đòn mạnh đến */
+.campaign-skill-warning {
+  background: linear-gradient(90deg, rgba(180,20,20,0.9), rgba(220,50,50,0.85)) !important;
+  border: 1px solid rgba(255,80,80,0.6) !important;
+  box-shadow: 0 0 20px rgba(220,50,50,0.5) !important;
+  animation: campaign-warning-pulse 0.7s ease-in-out infinite !important;
+}
+@keyframes campaign-warning-pulse {
+  0%,100% { box-shadow: 0 0 20px rgba(220,50,50,0.5); }
+  50%      { box-shadow: 0 0 36px rgba(255,80,80,0.9); }
+}
+
+/* ── 13. FIREFLY PARTICLES (pure CSS) ────────────────────── */
+/* Thêm vào decorative layer trong BossFightCampaign.tsx:
+   <div className="campaign-fireflies" aria-hidden="true" />    */
+.campaign-fireflies {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 3;
+  overflow: hidden;
+}
+.campaign-fireflies::before,
+.campaign-fireflies::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+.campaign-fireflies::before {
+  width: 3px; height: 3px;
+  background: #afffb0;
+  box-shadow:
+    30px  80px 0 rgba(175,255,176,0.9),
+    80px  50px 0 rgba(255,255,140,0.8),
+    140px 90px 0 rgba(120,255,200,0.85),
+    200px 40px 0 rgba(175,255,176,0.7),
+    260px 70px 0 rgba(255,255,140,0.9),
+    320px 55px 0 rgba(120,255,200,0.75),
+    60px 120px 0 rgba(175,255,176,0.6),
+    180px 35px 0 rgba(255,255,140,0.8);
+  animation: ff-drift-a 7s ease-in-out infinite;
+}
+.campaign-fireflies::after {
+  width: 2px; height: 2px;
+  background: #ffffaa;
+  box-shadow:
+    50px 100px 0 rgba(255,255,170,0.7),
+    110px 60px 0 rgba(175,255,176,0.8),
+    170px 110px 0 rgba(120,255,200,0.6),
+    230px 45px 0 rgba(255,255,170,0.85),
+    290px 80px 0 rgba(175,255,176,0.65),
+    350px 65px 0 rgba(120,255,200,0.9),
+    20px  140px 0 rgba(255,255,170,0.7),
+    150px 130px 0 rgba(175,255,176,0.6);
+  animation: ff-drift-b 9s ease-in-out infinite;
+}
+@keyframes ff-drift-a {
+  0%,100% { opacity:0.4; transform:translate(0,0); }
+  25%      { opacity:1;   transform:translate(6px,-12px); }
+  75%      { opacity:0.6; transform:translate(-4px,-8px); }
+}
+@keyframes ff-drift-b {
+  0%,100% { opacity:0.5; transform:translate(0,0); }
+  33%      { opacity:0.9; transform:translate(-8px,-10px); }
+  66%      { opacity:0.6; transform:translate(5px,-14px); }
+}
+
+/* ── 14. DAMAGE POPUP POLISH ─────────────────────────────── */
+.damage-popup {
+  font-family: 'Cinzel', serif !important;
+  font-weight: 900 !important;
+  text-shadow:
+    0 0 10px currentColor,
+    2px 2px 4px rgba(0,0,0,0.8) !important;
+  filter: drop-shadow(0 0 6px currentColor) !important;
+}
+
+/* ── 15. ENRAGE TIMER (blink đỏ khi enrage) ─────────────── */
+.campaign-timer-enrage {
+  color: #ff4444 !important;
+  animation: campaign-enrage-blink 0.6s ease-in-out infinite !important;
+}
+@keyframes campaign-enrage-blink {
+  0%,100% { opacity:1; text-shadow: 0 0 8px rgba(255,50,50,0.8); }
+  50%      { opacity:0.6; text-shadow: 0 0 20px rgba(255,80,80,1); }
+}

@@ -26,6 +26,7 @@
 @import './styles/modules/game-backgrounds.css';
 @import './styles/modules/game-components.css';
 @import './styles/modules/campaign.css';
+@import './styles/modules/campaign-theme.css';
 @import './styles/modules/prayer.css';
 @import './styles/modules/pwa-prompt.css';
 

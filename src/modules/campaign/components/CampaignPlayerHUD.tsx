@@ -36,6 +36,7 @@ interface CircleSkillBtnProps {
     icon: string;
     label: string;
     sublabel?: string;
+    className?: string;
     variant?: 'green' | 'red' | 'blue' | 'ult' | 'run';
     isActive?: boolean;
     onCooldown?: boolean;
@@ -51,6 +52,7 @@ interface CircleSkillBtnProps {
 
 function CircleSkillBtn({
     icon, label, sublabel,
+    className,
     variant = 'green',
     isActive = false,
     onCooldown = false,
@@ -118,7 +120,7 @@ function CircleSkillBtn({
                     : '0 3px 8px rgba(0,0,0,0.5)';
 
     return (
-        <div className="flex flex-col items-center gap-1.5 cursor-pointer" onClick={() => { if (canClick) { playSound('ui_click'); onClick(); } }}>
+        <div className={`flex flex-col items-center gap-1.5 cursor-pointer ${className ?? ''}`} onClick={() => { if (canClick) { playSound('ui_click'); onClick(); } }}>
             <div
                 className="relative flex items-center justify-center active:scale-95 transition-transform"
                 style={{
@@ -299,6 +301,7 @@ export default function CampaignPlayerHUD({
             <div className="flex items-end justify-around px-1 pb-1 pt-2">
                 {/* Ớt Hiểm */}
                 <CircleSkillBtn
+                    className="campaign-skill-btn"
                     icon="🌶️"
                     label={`Ớt${skillLevels.ot_hiem > 0 ? ` Lv${skillLevels.ot_hiem}` : ''}`}
                     sublabel={otHiemCooldown > 0 ? undefined : otHiemActive ? 'active' : undefined}
@@ -315,6 +318,7 @@ export default function CampaignPlayerHUD({
 
                 {/* Rơm Bọc */}
                 <CircleSkillBtn
+                    className="campaign-skill-btn campaign-skill-btn-green"
                     icon="🪹"
                     label={`Rơm${skillLevels.rom_boc > 0 ? ` Lv${skillLevels.rom_boc}` : ''}`}
                     variant="green"
@@ -330,6 +334,7 @@ export default function CampaignPlayerHUD({
 
                 {/* NÉ */}
                 <CircleSkillBtn
+                    className={`campaign-skill-btn campaign-skill-btn-green${skillWarning && hasDodgeMana ? ' campaign-skill-btn-dodge-active' : ''}`}
                     icon="🏃"
                     label={`NÉ (${manaDodgeCost})`}
                     variant="run"
@@ -341,6 +346,7 @@ export default function CampaignPlayerHUD({
 
                 {/* ULT */}
                 <CircleSkillBtn
+                    className="campaign-skill-btn campaign-skill-btn-ult"
                     icon="⚡"
                     label={ultReady ? 'ULT ⚡' : `ULT, ${boss.ultCharge ?? 0}%`}
                     variant="ult"

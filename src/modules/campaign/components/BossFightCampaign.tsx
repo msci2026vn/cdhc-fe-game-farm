@@ -330,6 +330,7 @@ export default function BossFightCampaign({
 
       {/* ── Forest decorative layers (from HTML mockup) ── */}
       <div className="campaign-trees-layer z-[1]" />
+      <div className="campaign-fireflies" aria-hidden="true" />
       {/* Center green glow */}
       <div className="absolute pointer-events-none z-[2]" style={{
         top: '3%', left: '50%', transform: 'translateX(-50%)',

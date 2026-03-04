@@ -46,7 +46,7 @@ export default function CampaignMatch3Board({
             <FloatingCombatText data={floatingTexts} />
 
             {/* ── Wooden frame wrapper (matching HTML mockup .grid-frame) ── */}
-            <div className="relative w-full h-full flex flex-col" style={{
+            <div className="campaign-grid-frame relative w-full h-full flex flex-col" style={{
                 background: 'linear-gradient(180deg,#284e10 0%,#183208 100%)',
                 border: '4px solid #a06018',
                 borderRadius: 14,
