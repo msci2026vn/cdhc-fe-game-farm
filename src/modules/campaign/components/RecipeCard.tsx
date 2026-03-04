@@ -105,7 +105,7 @@ export default function RecipeCard({ recipe, playerFragments, onCraft, isCraftin
             Crafting...
           </span>
         ) : (
-          'Che Tao'
+          'Chế Tạo'
         )}
       </button>
     </div>

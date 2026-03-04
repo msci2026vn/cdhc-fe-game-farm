@@ -114,8 +114,8 @@ export function LevelUpOverlay() {
             {showStatPrompt && freePoints > 0 && autoEnabled && (
               <div className="mt-4 animate-fade-in">
                 <p className="text-sm text-green-300 font-bold">
-                  🤖 Da tu dong phan bo theo{' '}
-                  {statInfo?.autoPreset === 'attack' ? 'Tan cong' : statInfo?.autoPreset === 'defense' ? 'Phong thu' : 'Can bang'}
+                  🤖 Đã tự động phân bổ theo{' '}
+                  {statInfo?.autoPreset === 'attack' ? 'Tấn công' : statInfo?.autoPreset === 'defense' ? 'Phòng thủ' : 'Cân bằng'}
                 </p>
               </div>
             )}

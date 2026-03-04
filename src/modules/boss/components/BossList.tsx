@@ -239,7 +239,7 @@ export default function BossList({ onSelect }: Props) {
                 {isWeekly && !locked && (
                   <span className="absolute -bottom-1 -left-1 text-[9px] px-1 py-0.5 rounded font-bold text-white"
                     style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-                    TUAN
+                    TUẦN
                   </span>
                 )}
               </div>

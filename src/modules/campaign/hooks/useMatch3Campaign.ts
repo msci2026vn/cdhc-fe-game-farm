@@ -533,7 +533,7 @@ export function useMatch3Campaign(
       if (milestones.hasSuperMana) {
         if (prev.ultCooldown > 0) { addPopup(`ULT CD: ${prev.ultCooldown} turn`, '#e74c3c'); return prev; }
       } else {
-        if (prev.mana < manaUltCost) { addPopup(`Thieu mana! (${manaUltCost})`, '#e74c3c'); return prev; }
+        if (prev.mana < manaUltCost) { addPopup(`Thiếu mana! (${manaUltCost})`, '#e74c3c'); return prev; }
       }
       setUltActive(true);
       playSound('ult_fire');

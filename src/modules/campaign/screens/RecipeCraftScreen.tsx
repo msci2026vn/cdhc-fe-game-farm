@@ -120,7 +120,7 @@ export default function RecipeCraftScreen() {
           >
             &larr;
           </button>
-          <h1 className="font-heading font-bold text-lg text-white">Cong Thuc</h1>
+          <h1 className="font-heading font-bold text-lg text-white">Công Thức</h1>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
             style={{ background: 'rgba(253,203,110,0.15)', border: '1px solid rgba(253,203,110,0.2)' }}>
             <span className="text-sm">💰</span>
@@ -496,7 +496,7 @@ function ConfirmModal({
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white/60 bg-white/5 active:scale-95 transition-transform"
           >
-            Huy
+            Huỷ
           </button>
           <button
             onClick={onConfirm}

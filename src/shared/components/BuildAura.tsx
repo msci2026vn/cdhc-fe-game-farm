@@ -38,25 +38,25 @@ const AURA_CONFIGS: Record<AuraType, AuraConfig> = {
     gradient: 'radial-gradient(circle, rgba(85,239,196,0.3) 0%, rgba(85,239,196,0) 70%)',
     shadow: '0 0 20px rgba(85,239,196,0.5)',
     particles: ['💚', '🌿'],
-    label: 'Thien nhien',
+    label: 'Thiên nhiên',
   },
   frost: {
     gradient: 'radial-gradient(circle, rgba(116,185,255,0.3) 0%, rgba(116,185,255,0) 70%)',
     shadow: '0 0 20px rgba(116,185,255,0.5)',
     particles: ['🛡️', '❄️'],
-    label: 'Bang gia',
+    label: 'Băng giá',
   },
   arcane: {
     gradient: 'radial-gradient(circle, rgba(162,155,254,0.3) 0%, rgba(162,155,254,0) 70%)',
     shadow: '0 0 20px rgba(162,155,254,0.5)',
     particles: ['✨', '💜'],
-    label: 'Huyen bi',
+    label: 'Huyền bí',
   },
   balance: {
     gradient: 'radial-gradient(circle, rgba(253,203,110,0.3) 0%, rgba(253,203,110,0) 70%)',
     shadow: '0 0 20px rgba(253,203,110,0.5)',
     particles: ['⭐', '✨'],
-    label: 'Can bang',
+    label: 'Cân bằng',
   },
 };
 

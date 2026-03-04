@@ -45,9 +45,9 @@ export function applyCampaignBossDamageImpl(
 
     // Fort milestone: immune every 10 turns
     if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
-      addPopup('🏰 Mien nhiem!', '#74b9ff');
-      addCombatNotif('fort', '🏰 Thanh Tri bat!', '#74b9ff');
-      setBossAttackMsg({ text: 'Thanh Tri bat!', emoji: '🏰' });
+      addPopup('🏰 Miễn nhiễm!', '#74b9ff');
+      addCombatNotif('fort', '🏰 Thành Trì bất!', '#74b9ff');
+      setBossAttackMsg({ text: 'Thành Trì bất!', emoji: '🏰' });
       setTimeout(() => setBossAttackMsg(null), 1000);
       return prev;
     }
@@ -88,8 +88,8 @@ export function applyCampaignBossDamageImpl(
     // Immortal milestone: revive once
     if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
       newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
-      addPopup('👼 Bat Tu!', '#a29bfe');
-      addCombatNotif('immortal', '👼 Bat Tu kich hoat!', '#a29bfe');
+      addPopup('👼 Bất Tử!', '#a29bfe');
+      addCombatNotif('immortal', '👼 Bất Tử kích hoạt!', '#a29bfe');
       return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
     }
 
@@ -116,8 +116,8 @@ export function applyCampaignBossDamageImpl(
       if (reflectDmg > 0) {
         setTotalDmgDealt(d => d + reflectDmg);
         setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));
-        addPopup(`🛡️ Phan -${reflectDmg}`, '#74b9ff');
-        addCombatNotif('reflect', `🛡️ Phan xa ${reflectDmg} DMG!`, '#74b9ff');
+        addPopup(`🛡️ Phản -${reflectDmg}`, '#74b9ff');
+        addCombatNotif('reflect', `🛡️ Phản xạ ${reflectDmg} DMG!`, '#74b9ff');
       }
     }
 

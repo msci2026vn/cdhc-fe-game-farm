@@ -78,7 +78,7 @@ export function fireUltimateImpl(deps: UltimateDeps): void {
     } else {
       // Normal: check mana cost
       if (prev.mana < manaUltCost) {
-        addPopup(`Thieu mana! (${manaUltCost})`, '#e74c3c');
+        addPopup(`Thiếu mana! (${manaUltCost})`, '#e74c3c');
         return prev;
       }
     }

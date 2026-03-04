@@ -7,7 +7,7 @@ export function AttackButton({ battleState, onAttack }: Props) {
   if (battleState === 'fighting') {
     return (
       <button className="w-full py-4 bg-gray-500 text-gray-200 text-xl font-bold rounded-xl" style={{ minHeight: 56 }} disabled>
-        Dang chien dau...
+        Đang chiến đấu...
       </button>
     );
   }
@@ -18,7 +18,7 @@ export function AttackButton({ battleState, onAttack }: Props) {
       style={{ minHeight: 56 }}
       onClick={onAttack}
     >
-      Tan Cong
+      Tấn Công
     </button>
   );
 }

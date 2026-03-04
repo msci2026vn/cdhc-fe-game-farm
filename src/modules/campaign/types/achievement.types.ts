@@ -56,11 +56,11 @@ export interface ComboLeaderboardEntry {
 export type LeaderboardPeriod = 'weekly' | 'monthly' | 'alltime';
 
 export const CATEGORY_CONFIG: Record<AchievementCategory, { emoji: string; color: string; label: string }> = {
-  campaign:   { emoji: '\u2694\ufe0f', color: '#ef4444', label: 'Chien Dich' },
-  combat:     { emoji: '\ud83d\udca5', color: '#f59e0b', label: 'Chien Dau' },
-  collection: { emoji: '\ud83e\udde9', color: '#3b82f6', label: 'Suu Tap' },
-  farming:    { emoji: '\ud83c\udf3e', color: '#22c55e', label: 'Nong Trai' },
-  social:     { emoji: '\ud83d\udc65', color: '#a855f7', label: 'Xa Hoi' },
+  campaign:   { emoji: '\u2694\ufe0f', color: '#ef4444', label: 'Chiến Dịch' },
+  combat:     { emoji: '\ud83d\udca5', color: '#f59e0b', label: 'Chiến Đấu' },
+  collection: { emoji: '\ud83e\udde9', color: '#3b82f6', label: 'Sưu Tập' },
+  farming:    { emoji: '\ud83c\udf3e', color: '#22c55e', label: 'Nông Trại' },
+  social:     { emoji: '\ud83d\udc65', color: '#a855f7', label: 'Xã Hội' },
 };
 
 export const STREAK_MILESTONES = [
@@ -69,7 +69,7 @@ export const STREAK_MILESTONES = [
   { day: 7,  ogn: 200,  fragment: { tier: 'common', count: 1 } },
   { day: 14, ogn: 500,  fragment: { tier: 'rare', count: 1 } },
   { day: 21, ogn: 1000, fragment: { tier: 'rare', count: 2 } },
-  { day: 28, ogn: 2000, fragment: { tier: 'legendary', count: 1 }, title: 'Kien Tri' },
+  { day: 28, ogn: 2000, fragment: { tier: 'legendary', count: 1 }, title: 'Kiên Trì' },
 ] as const;
 
 export const DAILY_OGN = 30;
