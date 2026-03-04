@@ -111,24 +111,13 @@ export default function CampaignPlayerHUD({
             )}
 
             {/* Auto-play toggle + expiry warning */}
-            <div className="flex flex-col gap-1 mb-0.5">
-                {daysUntilExpiry !== null && daysUntilExpiry <= 2 && (
-                    <ExpiryBanner daysLeft={daysUntilExpiry} />
-                )}
-                <div className="flex justify-end">
-                    <AutoPlayToggle
-                        isActive={autoPlay.isActive}
-                        onToggle={autoPlay.toggle}
-                        vipLevel={autoPlay.vipLevel}
-                        dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-                        currentSituation={autoPlay.currentSituation}
-                    />
-                </div>
-            </div>
+            {daysUntilExpiry !== null && daysUntilExpiry <= 2 && (
+                <ExpiryBanner daysLeft={daysUntilExpiry} />
+            )}
 
             <div className="flex-1" />
 
-            {/* Player skill buttons row */}
+            {/* Player skill buttons row — Ớt | Rơm | [NÉ + ULT] | AutoAI */}
             <div className="flex items-center gap-1 mt-0.5 pt-2">
                 <CampaignSkillButton
                     skillId="ot_hiem"
@@ -165,6 +154,15 @@ export default function CampaignPlayerHUD({
                         onUlt={fireUltimate}
                     />
                 </div>
+                {/* Auto AI — inline in skill row */}
+                <AutoPlayToggle
+                    isActive={autoPlay.isActive}
+                    onToggle={autoPlay.toggle}
+                    vipLevel={autoPlay.vipLevel}
+                    dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+                    currentSituation={autoPlay.currentSituation}
+                    compact
+                />
             </div>
         </>
     );

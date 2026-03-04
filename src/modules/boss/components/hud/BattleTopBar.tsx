@@ -76,21 +76,25 @@ export default function BattleTopBar({
   return (
     <>
       <div className="flex justify-between items-center mb-1 z-10">
-        {/* Left: TurnCounter (weekly) or Timer (campaign) */}
+        {/* Left: TurnCounter (weekly) or Timer + Sound (campaign) */}
         {isCampaign ? (
-          <div className={`flex items-center gap-1 ${timerColor}`}>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg" style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <span className="text-sm">⏱️</span>
-            <span className="font-mono font-heading text-sm font-bold">
+            <span className={`font-mono font-heading text-sm font-bold ${timerColor}`}>
               {formatTime(elapsedSeconds ?? 0)}
             </span>
+            <span className="text-white/20 text-xs mx-0.5">|</span>
+            <SoundToggle />
           </div>
         ) : (
-          <TurnCounter current={turn} max={maxTurns} />
+          <div className="flex items-center gap-1.5">
+            <TurnCounter current={turn} max={maxTurns} />
+            <SoundToggle />
+          </div>
         )}
 
         {/* Right: stats + retreat */}
         <div className="flex items-center gap-1.5">
-          <SoundToggle />
           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
             style={{ color: '#ff6b6b', background: 'rgba(255,107,107,0.15)' }}>
             ⚔️{atk}

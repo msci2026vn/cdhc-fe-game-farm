@@ -9,6 +9,8 @@ interface Props {
   vipLevel: number;           // 1-5
   dodgeFreeRemaining: number;
   currentSituation?: string;
+  /** Compact mode: smaller button for inline use in skill bar row */
+  compact?: boolean;
 }
 
 interface LevelConfig {
@@ -104,9 +106,52 @@ const LEVEL_CONFIG: Record<number, LevelConfig> = {
 };
 
 export default function AutoPlayToggle({
-  isActive, onToggle, vipLevel, dodgeFreeRemaining, currentSituation,
+  isActive, onToggle, vipLevel, dodgeFreeRemaining, currentSituation, compact,
 }: Props) {
   const cfg = LEVEL_CONFIG[vipLevel] ?? LEVEL_CONFIG[1];
+
+  // --- COMPACT OFF state ---
+  if (compact && !isActive) {
+    return (
+      <button
+        onClick={onToggle}
+        className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95"
+        style={{
+          width: 52,
+          minHeight: 42,
+          background: cfg.bg,
+          border: `1.5px dashed ${cfg.border}60`,
+          padding: '4px 6px',
+        }}
+      >
+        <span className="text-base" style={{ color: cfg.border }}>{cfg.icon}</span>
+        <span className="text-[9px] font-bold mt-0.5" style={{ color: `${cfg.border}CC` }}>AI</span>
+      </button>
+    );
+  }
+
+  // --- COMPACT ON state ---
+  if (compact && isActive) {
+    return (
+      <button
+        onClick={onToggle}
+        className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 relative overflow-hidden"
+        style={{
+          width: 52,
+          minHeight: 42,
+          background: cfg.bgActive,
+          border: `2px solid ${cfg.borderActive}`,
+          boxShadow: cfg.glow,
+          padding: '4px 6px',
+          color: 'white',
+          ...(cfg.pulseSpeed ? { animation: `auto-pulse ${cfg.pulseSpeed} ease-in-out infinite` } : {}),
+        }}
+      >
+        <span className="text-base relative z-10">{cfg.iconActive}</span>
+        <span className="text-[9px] font-black relative z-10">AI</span>
+      </button>
+    );
+  }
 
   // --- OFF state ---
   if (!isActive) {
@@ -189,9 +234,8 @@ export default function AutoPlayToggle({
           {cfg.algorithm}
         </span>
         {cfg.showDodge && (
-          <span className={`px-1.5 py-0.5 rounded ${
-            dodgeFreeRemaining > 0 ? 'bg-green-500/30 text-green-200' : 'bg-red-500/30 text-red-200'
-          }`}>
+          <span className={`px-1.5 py-0.5 rounded ${dodgeFreeRemaining > 0 ? 'bg-green-500/30 text-green-200' : 'bg-red-500/30 text-red-200'
+            }`}>
             {dodgeFreeRemaining > 0 ? '\u{1F7E2}' : '\u{1F534}'} {dodgeFreeRemaining}
           </span>
         )}
@@ -201,10 +245,10 @@ export default function AutoPlayToggle({
       {vipLevel >= 3 && currentSituation && currentSituation !== 'normal' && (
         <span className="text-[8px] font-medium mt-0.5 relative z-10 opacity-75 truncate max-w-[120px]">
           {currentSituation === 'tank' ? '\u{1F6E1}\uFE0F tank \u2192 \u2B50 Star'
-           : currentSituation === 'heal' ? '\u{1FA79} heal \u2192 \u2694\uFE0F rush'
-           : currentSituation === 'assassin' ? '\u{1F5E1}\uFE0F assassin \u2192 \u{1F6E1}\uFE0F DEF'
-           : currentSituation === 'enrage' ? '\u{1F525} enrage \u2192 \u26A1 burst'
-           : currentSituation}
+            : currentSituation === 'heal' ? '\u{1FA79} heal \u2192 \u2694\uFE0F rush'
+              : currentSituation === 'assassin' ? '\u{1F5E1}\uFE0F assassin \u2192 \u{1F6E1}\uFE0F DEF'
+                : currentSituation === 'enrage' ? '\u{1F525} enrage \u2192 \u26A1 burst'
+                  : currentSituation}
         </span>
       )}
     </button>
