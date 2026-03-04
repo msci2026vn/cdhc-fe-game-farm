@@ -93,7 +93,8 @@
    trong CampaignMatch3Board.tsx (xem APPLY_GUIDE.md bước 2)    */
 .campaign-grid-frame {
   border: 5px solid var(--c-wood-border) !important;
-  background: linear-gradient(180deg, #284e10 0%, #183208 100%) !important;
+  /* Nâu gỗ tối — không dùng xanh để các màu gem nổi bật */
+  background: linear-gradient(180deg, #2a1500 0%, #0d0804 100%) !important;
   border-radius: 16px !important;
   box-shadow:
     0 0 0 3px var(--c-wood-dark),
@@ -125,20 +126,19 @@
   pointer-events: none;
 }
 
-/* Grid cells */
+/* Grid cells — KHÔNG set background ở đây để GEM_STYLES inline có hiệu lực */
 .campaign-grid-frame .grid > * {
-  background: linear-gradient(135deg, #1e4810 0%, #112808 100%) !important;
   border-radius: 8px !important;
-  border: 1.5px solid rgba(55,110,28,0.4) !important;
+  border: 1.5px solid rgba(80,60,40,0.5) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.07),
-    inset 0 -2px 0 rgba(0,0,0,0.3) !important;
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -2px 0 rgba(0,0,0,0.35) !important;
   transition: transform 0.12s ease, filter 0.12s ease, border-color 0.12s ease !important;
 }
 .campaign-grid-frame .grid > *:hover {
   transform: scale(1.13) !important;
-  filter: brightness(1.38) !important;
-  border-color: rgba(150,255,100,0.65) !important;
+  filter: brightness(1.35) !important;
+  border-color: rgba(255,255,255,0.55) !important;
   z-index: 3;
 }
 
