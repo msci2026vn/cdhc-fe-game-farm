@@ -1,19 +1,19 @@
 import { useSensorLatest } from '@/shared/hooks/useSensor';
 
 const indicatorColor = {
-  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', bar: 'bg-green-500', label: 'Tot' },
-  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', bar: 'bg-yellow-500', label: 'Canh bao' },
-  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', bar: 'bg-red-500', label: 'Nguy hiem' },
+  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', bar: 'bg-green-500', label: 'Tốt' },
+  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', bar: 'bg-yellow-500', label: 'Cảnh báo' },
+  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', bar: 'bg-red-500', label: 'Nguy hiểm' },
 } as const;
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds} giay truoc`;
+  if (seconds < 60) return `${seconds} giây trước`;
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} phut truoc`;
+  if (minutes < 60) return `${minutes} phút trước`;
   const hours = Math.floor(minutes / 60);
-  return `${hours} gio truoc`;
+  return `${hours} giờ trước`;
 }
 
 function MetricCard({ icon, label, value, unit, indicator }: {
@@ -68,7 +68,7 @@ export default function SensorDashboard() {
     return (
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <p className="text-sm text-gray-500 text-center py-4">
-          Khong the tai du lieu cam bien
+          Không thể tải dữ liệu cảm biến
         </p>
       </div>
     );
@@ -82,10 +82,10 @@ export default function SensorDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-bold text-farm-brown-dark flex items-center gap-1.5">
-            <span className="text-lg">📡</span> Cam bien Vuon
+            <span className="text-lg">📡</span> Cảm biến Vườn
           </h3>
           <p className="text-xs text-gray-400 mt-0.5">
-            {reading.deviceId} &middot; Dang hoat dong
+            {reading.deviceId} &middot; Đang hoạt động
           </p>
         </div>
         <span className="text-[10px] text-gray-400">
@@ -97,27 +97,27 @@ export default function SensorDashboard() {
       <div className="grid grid-cols-2 gap-2.5">
         <MetricCard
           icon="🌡️"
-          label="Nhiet do"
+          label="Nhiệt độ"
           value={reading.temperature}
           unit="°C"
           indicator={ind?.temperature}
         />
         <MetricCard
           icon="💧"
-          label="Do am"
+          label="Độ ẩm"
           value={reading.humidity}
           unit="%"
           indicator={ind?.humidity}
         />
         <MetricCard
           icon="☀️"
-          label="Anh sang"
+          label="Ánh sáng"
           value={reading.lightLevel}
           unit="lux"
         />
         <MetricCard
           icon="🌱"
-          label="pH Dat"
+          label="pH Đất"
           value={reading.soilPh}
           unit=""
           indicator={ind?.soilPh}
@@ -127,7 +127,7 @@ export default function SensorDashboard() {
       {/* Soil moisture - full width */}
       <MetricCard
         icon="💦"
-        label="Do am dat"
+        label="Độ ẩm đất"
         value={reading.soilMoisture}
         unit="%"
       />

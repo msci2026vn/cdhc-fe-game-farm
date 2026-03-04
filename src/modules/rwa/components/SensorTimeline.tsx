@@ -2,19 +2,19 @@ import { useState, useMemo } from 'react';
 import { useSensorHourly, useSensorDates, useSensorLatest } from '@/shared/hooks/useSensor';
 
 const indicatorStyle = {
-  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: 'Tot' },
-  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Canh bao' },
-  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', label: 'Nguy hiem' },
+  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: 'Tốt' },
+  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Cảnh báo' },
+  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', label: 'Nguy hiểm' },
 } as const;
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds} giay truoc`;
+  if (seconds < 60) return `${seconds} giây trước`;
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} phut truoc`;
+  if (minutes < 60) return `${minutes} phút trước`;
   const hours = Math.floor(minutes / 60);
-  return `${hours} gio truoc`;
+  return `${hours} giờ trước`;
 }
 
 function MetricCard({ icon, label, value, unit, indicator, fullWidth }: {
@@ -98,7 +98,7 @@ export default function SensorTimeline() {
         <div className="flex items-center gap-2">
           <span className="text-lg">📡</span>
           <div className="text-left">
-            <h3 className="font-bold text-farm-brown-dark text-sm">Cam bien Vuon</h3>
+            <h3 className="font-bold text-farm-brown-dark text-sm">Cảm biến Vườn</h3>
             <p className="text-[10px] text-gray-400">
               {latestReading ? `${latestReading.deviceId} · ${timeAgo(latestReading.recordedAt)}` : 'mock-sensor-001'}
             </p>
@@ -129,7 +129,7 @@ export default function SensorTimeline() {
                 onClick={() => selectDateAndReset(today)}
                 className="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-lg border border-green-200"
               >
-                Hom nay
+                Hôm nay
               </button>
             )}
           </div>
@@ -195,13 +195,13 @@ export default function SensorTimeline() {
           {!isLoading && !currentHourData && (
             <div className="text-center py-6">
               <span className="material-symbols-outlined text-gray-300 text-4xl block mb-2">sensors_off</span>
-              <p className="text-sm text-gray-400">Khong co du lieu cho gio nay</p>
+              <p className="text-sm text-gray-400">Không có dữ liệu cho giờ này</p>
               {hoursWithData.length > 0 && (
                 <button
                   onClick={() => setSelectedHour(hoursWithData[0])}
                   className="mt-2 text-xs text-green-600 font-medium underline"
                 >
-                  Chuyen den gio co du lieu
+                  Chuyển đến giờ có dữ liệu
                 </button>
               )}
             </div>
@@ -213,27 +213,27 @@ export default function SensorTimeline() {
               <div className="grid grid-cols-2 gap-2.5">
                 <MetricCard
                   icon="🌡️"
-                  label="Nhiet do"
+                  label="Nhiệt độ"
                   value={currentHourData.avgTemperature !== null ? currentHourData.avgTemperature.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'}
                   unit="°C"
                   indicator={currentHourData.indicators?.temperature}
                 />
                 <MetricCard
                   icon="💧"
-                  label="Do am"
+                  label="Độ ẩm"
                   value={currentHourData.avgHumidity !== null ? currentHourData.avgHumidity.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'}
                   unit="%"
                   indicator={currentHourData.indicators?.humidity}
                 />
                 <MetricCard
                   icon="☀️"
-                  label="Anh sang"
+                  label="Ánh sáng"
                   value={currentHourData.avgLightLevel !== null ? currentHourData.avgLightLevel.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) : '--'}
                   unit="lux"
                 />
                 <MetricCard
                   icon="🌱"
-                  label="pH Dat"
+                  label="pH Đất"
                   value={currentHourData.avgSoilPh !== null ? String(currentHourData.avgSoilPh) : '--'}
                   unit=""
                   indicator={currentHourData.indicators?.soilPh}
@@ -241,7 +241,7 @@ export default function SensorTimeline() {
               </div>
               <MetricCard
                 icon="💦"
-                label="Do am dat"
+                label="Độ ẩm đất"
                 value={currentHourData.avgSoilMoisture !== null ? currentHourData.avgSoilMoisture.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'}
                 unit="%"
                 fullWidth
@@ -249,7 +249,7 @@ export default function SensorTimeline() {
 
               {/* Reading count */}
               <p className="text-[10px] text-gray-400 text-center">
-                {currentHourData.readingCount} lan do trong gio nay
+                {currentHourData.readingCount} lần đo trong giờ này
                 {selectedDate === today && ' · ' + formatDateVN(selectedDate)}
               </p>
             </>

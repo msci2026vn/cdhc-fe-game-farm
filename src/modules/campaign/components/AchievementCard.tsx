@@ -29,7 +29,7 @@ export default function AchievementCard({ achievement: a, onClaim, isClaiming }:
           <span className="text-xl">❓</span>
           <div className="flex-1">
             <span className="text-[13px] font-bold text-white/40">???</span>
-            <span className="block text-[10px] text-white/20">Thanh tuu an — tiep tuc choi!</span>
+            <span className="block text-[10px] text-white/20">Thành tựu ẩn — tiếp tục chơi!</span>
           </div>
           <span className="text-white/20">🔒</span>
         </div>
@@ -48,7 +48,7 @@ export default function AchievementCard({ achievement: a, onClaim, isClaiming }:
           <span className="text-xl">{catCfg.emoji}</span>
           <div className="flex-1 min-w-0">
             <span className="text-[13px] font-bold text-white/60 truncate block">{a.name}</span>
-            <span className="text-[10px] text-green-400/50">✓ Da nhan</span>
+            <span className="text-[10px] text-green-400/50">✓ Đã nhận</span>
           </div>
           <span className="text-lg">🏆</span>
         </div>
@@ -121,7 +121,7 @@ export default function AchievementCard({ achievement: a, onClaim, isClaiming }:
             {isClaiming ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
             ) : (
-              'Nhan'
+              'Nhận'
             )}
           </button>
         )}

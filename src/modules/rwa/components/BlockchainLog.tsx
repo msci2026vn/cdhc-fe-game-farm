@@ -15,10 +15,10 @@ function formatDate(dateStr: string | null): string {
 }
 
 const statusConfig = {
-  confirmed: { icon: '✅', label: 'Da xac nhan', border: 'border-green-200', bg: 'bg-green-50' },
-  submitted: { icon: '⏳', label: 'Dang xu ly', border: 'border-yellow-200', bg: 'bg-yellow-50' },
-  pending: { icon: '🕐', label: 'Cho xu ly', border: 'border-gray-200', bg: 'bg-gray-50' },
-  failed: { icon: '❌', label: 'That bai', border: 'border-red-200', bg: 'bg-red-50' },
+  confirmed: { icon: '✅', label: 'Đã xác nhận', border: 'border-green-200', bg: 'bg-green-50' },
+  submitted: { icon: '⏳', label: 'Đang xử lý', border: 'border-yellow-200', bg: 'bg-yellow-50' },
+  pending: { icon: '🕐', label: 'Chờ xử lý', border: 'border-gray-200', bg: 'bg-gray-50' },
+  failed: { icon: '❌', label: 'Thất bại', border: 'border-red-200', bg: 'bg-red-50' },
 } as const;
 
 function CopyButton({ text }: { text: string }) {
@@ -34,7 +34,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       onClick={handleCopy}
       className="text-gray-400 hover:text-gray-600 transition-colors text-xs"
-      title="Sao chep"
+      title="Sao chép"
     >
       {copied ? '✓' : '📋'}
     </button>
@@ -62,7 +62,7 @@ export default function BlockchainLog() {
       {/* Header */}
       <div>
         <h3 className="font-bold text-farm-brown-dark flex items-center gap-1.5">
-          <span className="text-lg">⛓️</span> Nhat ky Blockchain
+          <span className="text-lg">⛓️</span> Nhật ký Blockchain
         </h3>
         <p className="text-xs text-gray-400 mt-0.5">
           Avalanche C-Chain &middot; {logs?.length ?? 0} batch{(logs?.length ?? 0) !== 1 ? 'es' : ''}
@@ -104,7 +104,7 @@ export default function BlockchainLog() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs mt-1"
                     >
-                      🔗 Xem tren Snowtrace
+                      🔗 Xem trên Snowtrace
                     </a>
                   )}
                 </div>
@@ -113,14 +113,14 @@ export default function BlockchainLog() {
           })}
         </div>
       ) : (
-        <p className="text-sm text-gray-400 text-center py-3">Chua co batch nao</p>
+        <p className="text-sm text-gray-400 text-center py-3">Chưa có batch nào</p>
       )}
 
       {/* Contract stats */}
       {stats && (
         <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 space-y-1.5">
           <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-            📊 Thong ke Contract
+            📊 Thống kê Contract
           </h4>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
             <span>Merkle roots:</span>

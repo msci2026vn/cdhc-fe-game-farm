@@ -38,7 +38,7 @@ export function CustodialWalletCard() {
     if (wallet?.address) {
       navigator.clipboard.writeText(wallet.address);
       setCopied(true);
-      toast.success('Da sao chep dia chi vi');
+      toast.success('Đã sao chép địa chỉ ví');
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -52,7 +52,7 @@ export function CustodialWalletCard() {
         const data = await exportKey({});
         setExportedKey(data.privateKey);
       } catch {
-        toast.error('Khong the export vi');
+        toast.error('Không thể export ví');
       }
       return;
     }
@@ -74,7 +74,7 @@ export function CustodialWalletCard() {
       const data = await exportKey({});
       setExportedKey(data.privateKey);
     } catch {
-      toast.error('Khong the export vi');
+      toast.error('Không thể export ví');
     }
   };
 
@@ -131,7 +131,7 @@ export function CustodialWalletCard() {
         const data = await exportKey({ pin });
         setExportedKey(data.privateKey);
       } catch {
-        toast.error('Export that bai');
+        toast.error('Export thất bại');
       }
     }
 
@@ -155,7 +155,7 @@ export function CustodialWalletCard() {
       await setPinApi(pin);
       await refetchSecurity();
       security.setShowPinSetup(false);
-      toast.success('Da cai ma PIN thanh cong!');
+      toast.success('Đã cài mã PIN thành công!');
 
       // Sau setup -> tiep tuc action bang PIN vua tao
       if (pinAction === 'export') {
@@ -163,7 +163,7 @@ export function CustodialWalletCard() {
           const data = await exportKey({ pin });
           setExportedKey(data.privateKey);
         } catch {
-          toast.error('Export that bai');
+          toast.error('Export thất bại');
         }
       } else if (pinAction === 'withdraw') {
         try {
@@ -177,7 +177,7 @@ export function CustodialWalletCard() {
       }
       setPinAction(null);
     } catch (err: any) {
-      toast.error(err?.message || 'Cai PIN that bai');
+      toast.error(err?.message || 'Cài PIN thất bại');
     }
   };
 
@@ -191,7 +191,7 @@ export function CustodialWalletCard() {
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <div className="flex items-center justify-center py-4">
           <div className="w-5 h-5 border-2 border-farm-green-dark/30 border-t-farm-green-dark rounded-full animate-spin" />
-          <span className="ml-2 text-sm text-farm-brown-dark/60">Dang tai vi...</span>
+          <span className="ml-2 text-sm text-farm-brown-dark/60">Đang tải ví...</span>
         </div>
       </div>
     );
@@ -206,10 +206,10 @@ export function CustodialWalletCard() {
           Vi FARMVERSE
         </h3>
         <p className="text-[10px] text-gray-600 mb-3">
-          Chua co vi. Vi se duoc tao tu dong khi ban dang nhap lai.
+          Chưa có ví. Ví sẽ được tạo tự động khi bạn đăng nhập lại.
         </p>
         <p className="text-[9px] text-gray-400 text-center flex items-center justify-center gap-1">
-          Mien phi · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span>
+          Miễn phí · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span>
         </p>
       </div>
     );
@@ -224,14 +224,14 @@ export function CustodialWalletCard() {
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
           Vi FARMVERSE
         </h3>
-        <button onClick={() => refetch()} className="p-1 rounded-lg hover:bg-white/50 transition-colors" title="Lam moi">
+        <button onClick={() => refetch()} className="p-1 rounded-lg hover:bg-white/50 transition-colors" title="Làm mới">
           <span className="material-symbols-outlined text-sm text-gray-400 hover:text-farm-green-dark">refresh</span>
         </button>
       </div>
 
       {/* Address */}
       <div className="mb-3">
-        <p className="text-[10px] text-gray-500 mb-1">Dia chi vi</p>
+        <p className="text-[10px] text-gray-500 mb-1">Địa chỉ ví</p>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg bg-[#fefae0] px-3 py-2 text-xs text-farm-brown-dark font-mono truncate border border-[#e9c46a]">
             {wallet?.address}
@@ -250,13 +250,13 @@ export function CustodialWalletCard() {
       {/* Balance + Network */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-[10px] text-gray-500">So du</p>
+          <p className="text-[10px] text-gray-500">Số dư</p>
           <p className="text-base font-heading font-bold text-farm-brown-dark">
             {parseFloat(wallet?.balance || '0').toFixed(6)} <span className="text-xs text-gray-500">AVAX</span>
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          <p className="text-[10px] text-gray-500 mb-0.5">Mang</p>
+          <p className="text-[10px] text-gray-500 mb-0.5">Mạng</p>
           <div className="flex items-center gap-1.5 bg-white/50 px-2 py-0.5 rounded-lg border border-white/20">
             <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" />
             <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
@@ -266,12 +266,12 @@ export function CustodialWalletCard() {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-4 gap-2 mb-3">
-        {/* Nap tien — Dialog */}
+        {/* Nạp tiền — Dialog */}
         <Dialog>
           <DialogTrigger asChild>
             <button className="flex flex-col items-center gap-1 p-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 active:scale-95 transition-all min-h-[56px]">
               <span className="material-symbols-outlined text-lg">download</span>
-              <span className="text-[10px] font-bold">Nap tien</span>
+              <span className="text-[10px] font-bold">Nạp tiền</span>
             </button>
           </DialogTrigger>
           <DialogContent className="!w-[calc(100vw-24px)] !max-w-[380px] !p-0 !gap-0 !rounded-2xl !bg-[#3d2b1f] border !border-white/10 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.7)] overflow-hidden">
@@ -392,14 +392,14 @@ export function CustodialWalletCard() {
           <span className="text-[10px] font-bold whitespace-nowrap">Nạp Visa</span>
         </button>
 
-        {/* Rut tien */}
+        {/* Rút tiền */}
         <button
           onClick={() => { setShowWithdraw(!showWithdraw); setShowExport(false); setExportedKey(''); }}
           className={`flex flex-col items-center gap-1 p-3 rounded-xl border active:scale-95 transition-all min-h-[56px] ${showWithdraw ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
             }`}
         >
           <span className="material-symbols-outlined text-lg">upload</span>
-          <span className="text-[10px] font-bold">Rut tien</span>
+          <span className="text-[10px] font-bold">Rút tiền</span>
         </button>
 
         {/* Export */}
@@ -416,17 +416,17 @@ export function CustodialWalletCard() {
       {/* WITHDRAW PANEL */}
       {showWithdraw && (
         <div className="border-t border-[#e9c46a]/30 pt-3 space-y-3 animate-fade-in">
-          <p className="text-xs text-gray-600 font-bold">Rut AVAX ra vi ngoai</p>
+          <p className="text-xs text-gray-600 font-bold">Rút AVAX ra ví ngoài</p>
           <input
             type="text"
-            placeholder="Dia chi nhan (0x...)"
+            placeholder="Địa chỉ nhận (0x...)"
             value={withdrawTo}
             onChange={(e) => setWithdrawTo(e.target.value)}
             className="w-full px-3 py-3 border border-[#e9c46a] rounded-xl text-xs font-mono bg-[#fefae0] focus:outline-none focus:ring-2 focus:ring-farm-green-dark/50"
           />
           <input
             type="number"
-            placeholder="So luong AVAX"
+            placeholder="Số lượng AVAX"
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}
             step="0.001"
@@ -441,16 +441,16 @@ export function CustodialWalletCard() {
             {isSending || security.isVerifying ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {security.isVerifying ? 'Dang xac nhan...' : 'Dang gui...'}
+                {security.isVerifying ? 'Đang xác nhận...' : 'Đang gửi...'}
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-base">send</span>
-                Xac nhan rut tien
+                Xác nhận rút tiền
               </>
             )}
           </button>
-          <p className="text-[9px] text-gray-400 text-center">Phi gas se duoc tru tu so du vi</p>
+          <p className="text-[9px] text-gray-400 text-center">Phí gas sẽ được trừ từ số dư ví</p>
         </div>
       )}
 
@@ -462,7 +462,7 @@ export function CustodialWalletCard() {
               <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2 items-start">
                 <span className="material-symbols-outlined text-red-500 text-base mt-0.5 shrink-0">warning</span>
                 <p className="text-xs text-red-600 leading-relaxed">
-                  Private key cho phep toan quyen truy cap vi. <strong>KHONG chia se voi ai.</strong>
+                  Private key cho phép toàn quyền truy cập ví. <strong>KHÔNG chia sẻ với ai.</strong>
                 </p>
               </div>
               <button
@@ -473,25 +473,25 @@ export function CustodialWalletCard() {
                 {isExporting || security.isVerifying ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {security.isVerifying ? 'Dang xac nhan...' : 'Dang lay...'}
+                    {security.isVerifying ? 'Đang xác nhận...' : 'Đang lấy...'}
                   </>
                 ) : (
                   <>
                     <span className="material-symbols-outlined text-base">visibility</span>
-                    Hien Private Key
+                    Hiện Private Key
                   </>
                 )}
               </button>
             </>
           ) : (
             <>
-              <p className="text-xs text-gray-600">Import vao MetaMask hoac Trust Wallet:</p>
+              <p className="text-xs text-gray-600">Import vào MetaMask hoặc Trust Wallet:</p>
               <div className="bg-red-50 p-3 rounded-xl break-all text-[10px] font-mono border border-red-200 select-all">
                 {exportedKey}
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => { navigator.clipboard.writeText(exportedKey); toast.success('Da copy Private Key'); }}
+                  onClick={() => { navigator.clipboard.writeText(exportedKey); toast.success('Đã copy Private Key'); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-farm-brown bg-[#fefae0] border border-[#e9c46a] active:scale-95 transition-all flex items-center justify-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">content_copy</span>
@@ -501,7 +501,7 @@ export function CustodialWalletCard() {
                   onClick={() => { setExportedKey(''); setShowExport(false); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 border border-gray-200 active:scale-95 transition-all"
                 >
-                  An
+                  Ẩn
                 </button>
               </div>
             </>
@@ -514,7 +514,7 @@ export function CustodialWalletCard() {
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 text-xs flex items-center gap-1">
             <span className="material-symbols-outlined text-sm">shield</span>
-            Bao mat vi
+            Bảo mật ví
           </span>
           <div className="flex gap-2">
             {securityStatus?.hasPin && (
@@ -524,12 +524,12 @@ export function CustodialWalletCard() {
             )}
             {securityStatus?.hasPasskey && (
               <span className="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
-                Van tay
+                Vân tay
               </span>
             )}
             {!securityStatus?.hasPin && !securityStatus?.hasPasskey && (
               <span className="text-orange-500 text-[10px] font-bold bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">
-                Chua cai dat
+                Chưa cài đặt
               </span>
             )}
           </div>
@@ -545,7 +545,7 @@ export function CustodialWalletCard() {
           className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-bold mt-3"
         >
           <span className="material-symbols-outlined text-sm">open_in_new</span>
-          Xem tren Snowtrace
+          Xem trên Snowtrace
         </a>
       )}
 

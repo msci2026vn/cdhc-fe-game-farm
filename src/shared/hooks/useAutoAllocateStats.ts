@@ -15,14 +15,14 @@ export function useAutoAllocateStats() {
       queryClient.invalidateQueries({ queryKey: PLAYER_PROFILE_KEY });
 
       useUIStore.getState().addToast(
-        'Tu dong phan bo thanh cong!',
+        'Tự động phân bổ thành công!',
         'success',
         '✅'
       );
     },
     onError: (error) => {
       useUIStore.getState().addToast(
-        error.message || 'Khong the tu dong phan bo',
+        error.message || 'Không thể tự động phân bổ',
         'error'
       );
     },

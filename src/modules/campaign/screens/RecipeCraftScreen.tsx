@@ -21,13 +21,13 @@ type TabKey = 'craft' | 'inventory' | 'buffs';
 type TierFilter = 'all' | FragmentTier;
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'craft', label: 'Che Tao' },
+  { key: 'craft', label: 'Chế Tạo' },
   { key: 'inventory', label: 'Kho CT' },
   { key: 'buffs', label: 'Buff' },
 ];
 
 const TIER_FILTERS: { key: TierFilter; label: string }[] = [
-  { key: 'all', label: 'Tat ca' },
+  { key: 'all', label: 'Tất cả' },
   { key: 'common', label: '\u2b1c' },
   { key: 'rare', label: '\ud83d\udfe6' },
   { key: 'legendary', label: '\ud83d\udfea' },
@@ -93,7 +93,7 @@ export default function RecipeCraftScreen() {
       }
     } catch {
       playSound('damage_dealt');
-      toast.error('Thao tac that bai. Vui long thu lai.');
+      toast.error('Thao tác thất bại. Vui lòng thử lại.');
     } finally {
       setCraftingKey(null);
     }
@@ -262,7 +262,7 @@ function CraftTab({
       {isLoading ? (
         <LoadingSpinner />
       ) : definitions.length === 0 ? (
-        <EmptyState emoji="📜" text="Khong co cong thuc" sub="Thu doi tier hoac zone" />
+        <EmptyState emoji="📜" text="Không có công thức" sub="Thử đổi tier hoặc zone" />
       ) : (
         <div className="space-y-3">
           {definitions.map(d => (
@@ -295,7 +295,7 @@ function InventoryTab({
   activeBuffCount: number;
 }) {
   if (isLoading) return <LoadingSpinner />;
-  if (recipes.length === 0) return <EmptyState emoji="📦" text="Kho trong" sub="Che tao cong thuc de su dung!" />;
+  if (recipes.length === 0) return <EmptyState emoji="📦" text="Kho trống" sub="Chế tạo công thức để sử dụng!" />;
 
   return (
     <div className="space-y-2">
@@ -339,13 +339,13 @@ function InventoryTab({
                     : 'bg-green-600 text-white'
                 }`}
               >
-                Dung
+                Dùng
               </button>
               <button
                 onClick={() => onSell(r.recipeKey, r.name)}
                 className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-yellow-600/80 text-white transition-all active:scale-95"
               >
-                Ban
+                Bán
               </button>
             </div>
           </div>
@@ -394,7 +394,7 @@ function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: bo
       </div>
 
       {buffs.length === 0 ? (
-        <EmptyState emoji="✨" text="Chua co buff" sub="Dung cong thuc da che tao de nhan buff!" />
+        <EmptyState emoji="✨" text="Chưa có buff" sub="Dùng công thức đã chế tạo để nhận buff!" />
       ) : (
         <div className="space-y-2">
           {buffs.map(buff => {
@@ -449,7 +449,7 @@ function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: bo
                     />
                   </div>
                   <span className={`text-xs font-mono font-bold ${expired ? 'text-red-400' : 'text-white/70'}`}>
-                    {expired ? 'Het han' : `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`}
+                    {expired ? 'Hết hạn' : `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`}
                   </span>
                 </div>
               </div>
@@ -475,9 +475,9 @@ function ConfirmModal({
   onCancel: () => void;
 }) {
   const labels = {
-    craft: { title: 'Xac nhan Che Tao', desc: `Che tao "${action.name}"?`, btn: 'Che Tao', color: 'bg-amber-600' },
-    sell: { title: 'Xac nhan Ban', desc: `Ban "${action.name}"?`, btn: 'Ban', color: 'bg-yellow-600' },
-    use: { title: 'Xac nhan Su Dung', desc: `Dung "${action.name}" lam buff nong trai?`, btn: 'Dung', color: 'bg-green-600' },
+    craft: { title: 'Xác nhận Chế Tạo', desc: `Chế tạo "${action.name}"?`, btn: 'Chế Tạo', color: 'bg-amber-600' },
+    sell: { title: 'Xác nhận Bán', desc: `Bán "${action.name}"?`, btn: 'Bán', color: 'bg-yellow-600' },
+    use: { title: 'Xác nhận Sử Dụng', desc: `Dùng "${action.name}" làm buff nông trại?`, btn: 'Dùng', color: 'bg-green-600' },
   };
 
   const cfg = labels[action.type];

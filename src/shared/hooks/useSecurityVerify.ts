@@ -96,7 +96,7 @@ export function useSecurityVerify() {
 
       setState(s => ({
         ...s,
-        pinError: 'Ma PIN khong dung',
+        pinError: 'Mã PIN không đúng',
         attemptsRemaining: data.attemptsRemaining,
         blocked: data.blocked,
       }));
@@ -105,7 +105,7 @@ export function useSecurityVerify() {
       const isBlocked = err?.status === 429;
       setState(s => ({
         ...s,
-        pinError: isBlocked ? 'Da nhap sai qua 5 lan' : 'Xac nhan that bai',
+        pinError: isBlocked ? 'Đã nhập sai quá 5 lần' : 'Xác nhận thất bại',
         blocked: isBlocked,
       }));
       return false;

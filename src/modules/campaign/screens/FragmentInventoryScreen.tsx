@@ -87,7 +87,7 @@ export default function FragmentInventoryScreen() {
         {isLoading && (
           <div className="flex flex-col items-center justify-center h-60">
             <div className="w-10 h-10 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-3" />
-            <p className="text-white/40 text-sm">Dang tai...</p>
+            <p className="text-white/40 text-sm">Đang tải...</p>
           </div>
         )}
 
@@ -95,8 +95,8 @@ export default function FragmentInventoryScreen() {
         {isError && !isLoading && (
           <div className="flex flex-col items-center justify-center h-60 text-center">
             <span className="text-4xl mb-3">😿</span>
-            <p className="text-white/50 font-medium">Khong tai duoc du lieu</p>
-            <p className="text-white/30 text-sm mt-1">Vui long thu lai sau</p>
+            <p className="text-white/50 font-medium">Không tải được dữ liệu</p>
+            <p className="text-white/30 text-sm mt-1">Vui lòng thử lại sau</p>
           </div>
         )}
 
@@ -104,13 +104,13 @@ export default function FragmentInventoryScreen() {
         {!isLoading && filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center h-60 text-center">
             <span className="text-5xl mb-3">{'\ud83e\udde9'}</span>
-            <p className="text-white/50 font-medium">Chua co manh nao</p>
-            <p className="text-white/30 text-sm mt-1">Danh boss de nhan manh!</p>
+            <p className="text-white/50 font-medium">Chưa có mảnh nào</p>
+            <p className="text-white/30 text-sm mt-1">Đánh boss để nhận mảnh!</p>
             <button
               onClick={() => navigate('/campaign')}
               className="mt-4 px-5 py-2 bg-purple-600 text-white rounded-full text-sm font-bold active:scale-95 transition-transform"
             >
-              Di danh boss
+              Đi đánh boss
             </button>
           </div>
         )}

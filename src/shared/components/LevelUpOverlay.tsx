@@ -99,13 +99,13 @@ export function LevelUpOverlay() {
             {showStatPrompt && freePoints > 0 && !autoEnabled && (
               <div className="mt-4 animate-fade-in">
                 <p className="text-sm text-yellow-300 font-bold mb-2">
-                  +{freePoints} diem chi so moi!
+                  +{freePoints} điểm chỉ số mới!
                 </p>
                 <button
                   onClick={handleAllocateNow}
                   className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 active:scale-95 shadow-lg"
                 >
-                  Phan bo ngay
+                  Phân bổ ngay
                 </button>
               </div>
             )}

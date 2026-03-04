@@ -73,8 +73,8 @@ export default function FriendsScreen() {
                 ) : isError ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
                         <span className="text-5xl mb-3">😿</span>
-                        <h3 className="font-heading text-lg font-bold text-red-700 mb-2">Khong tai duoc du lieu</h3>
-                        <p className="text-sm text-gray-500">Vui long thu lai sau</p>
+                        <h3 className="font-heading text-lg font-bold text-red-700 mb-2">Không tải được dữ liệu</h3>
+                        <p className="text-sm text-gray-500">Vui lòng thử lại sau</p>
                     </div>
                 ) : friends.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">

@@ -17,13 +17,13 @@ type HubTab = 'achievements' | 'streak' | 'leaderboard';
 type CatFilter = 'all' | AchievementCategory;
 
 const HUB_TABS: { key: HubTab; label: string; icon: string }[] = [
-  { key: 'achievements', label: 'Thanh Tuu', icon: '\ud83c\udfc6' },
-  { key: 'streak', label: 'Diem Danh', icon: '\ud83d\udcc5' },
+  { key: 'achievements', label: 'Thành Tựu', icon: '\ud83c\udfc6' },
+  { key: 'streak', label: 'Điểm Danh', icon: '\ud83d\udcc5' },
   { key: 'leaderboard', label: 'BXH', icon: '\ud83e\udd47' },
 ];
 
 const CAT_FILTERS: { key: CatFilter; label: string }[] = [
-  { key: 'all', label: 'Tat ca' },
+  { key: 'all', label: 'Tất cả' },
   ...Object.entries(CATEGORY_CONFIG).map(([k, v]) => ({
     key: k as CatFilter,
     label: `${v.emoji} ${v.label}`,
@@ -31,9 +31,9 @@ const CAT_FILTERS: { key: CatFilter; label: string }[] = [
 ];
 
 const PERIOD_TABS: { key: LeaderboardPeriod; label: string; icon: string }[] = [
-  { key: 'weekly', label: 'Tuan', icon: '\ud83d\udcc5' },
-  { key: 'monthly', label: 'Thang', icon: '\ud83d\udcc6' },
-  { key: 'alltime', label: 'Moi luc', icon: '\ud83c\udfc6' },
+  { key: 'weekly', label: 'Tuần', icon: '\ud83d\udcc5' },
+  { key: 'monthly', label: 'Tháng', icon: '\ud83d\udcc6' },
+  { key: 'alltime', label: 'Mọi lúc', icon: '\ud83c\udfc6' },
 ];
 
 export default function AchievementsHubScreen() {
@@ -69,7 +69,7 @@ export default function AchievementsHubScreen() {
           >
             &larr;
           </button>
-          <h1 className="font-heading font-bold text-lg text-white">Thanh Tuu</h1>
+          <h1 className="font-heading font-bold text-lg text-white">Thành Tựu</h1>
           <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl"
             style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.2)' }}>
             <span className="text-sm">🏆</span>
@@ -209,17 +209,17 @@ function AchievementsTab({
           {isClaimingAll ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Dang nhan...
+              Đang nhận...
             </span>
           ) : (
-            `Nhan Tat Ca (${claimableCount})`
+            `Nhận Tất Cả (${claimableCount})`
           )}
         </button>
       )}
 
       {/* Cards */}
       {sorted.length === 0 ? (
-        <EmptyState emoji="🏆" text="Chua co thanh tuu" sub="Choi game de mo thanh tuu!" />
+        <EmptyState emoji="🏆" text="Chưa có thành tựu" sub="Chơi game để mở thành tựu!" />
       ) : (
         <div className="space-y-2">
           {sorted.map(a => (
@@ -236,7 +236,7 @@ function AchievementsTab({
       {/* Summary */}
       {achievements.length > 0 && (
         <div className="text-center mt-4 py-3 text-[10px] text-white/30">
-          Tong thuong: {totalRewardOgn.toLocaleString()} OGN + {titleCount} danh hieu
+          Tổng thưởng: {totalRewardOgn.toLocaleString()} OGN + {titleCount} danh hiệu
         </div>
       )}
     </>
@@ -249,7 +249,7 @@ function AchievementsTab({
 
 function StreakTab({ streak, isLoading }: { streak: import('../types/achievement.types').LoginStreak | null; isLoading: boolean }) {
   if (isLoading) return <LoadingSpinner />;
-  if (!streak) return <EmptyState emoji="📅" text="Dang nhap hang ngay" sub="He thong chua san sang" />;
+  if (!streak) return <EmptyState emoji="📅" text="Đăng nhập hàng ngày" sub="Hệ thống chưa sẵn sàng" />;
 
   return <LoginStreakCalendar streak={streak} />;
 }
@@ -284,7 +284,7 @@ function LeaderboardTab() {
       {/* My rank (sticky) */}
       {myRank && (
         <div className="mb-3">
-          <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1 px-1">Hang cua ban</div>
+          <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1 px-1">Hạng của bạn</div>
           <LeaderboardRow entry={myRank} isMe />
         </div>
       )}
@@ -294,7 +294,7 @@ function LeaderboardTab() {
           className="rounded-xl p-3 mb-3 text-center text-[11px] text-white/40"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
         >
-          Chua co du lieu — danh boss de len bang!
+          Chưa có dữ liệu — đánh boss để lên bảng!
         </div>
       )}
 
@@ -302,7 +302,7 @@ function LeaderboardTab() {
       {isLoading ? (
         <LoadingSpinner />
       ) : !leaderboard || leaderboard.length === 0 ? (
-        <EmptyState emoji="🥇" text="Chua co du lieu" sub="Danh boss de len bang xep hang!" />
+        <EmptyState emoji="🥇" text="Chưa có dữ liệu" sub="Đánh boss để lên bảng xếp hạng!" />
       ) : (
         <div className="space-y-1.5">
           {leaderboard.map(entry => (

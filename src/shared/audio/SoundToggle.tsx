@@ -49,7 +49,7 @@ export function SoundToggle({ className = '', showSettings = false }: SoundToggl
         onPointerCancel={handlePointerUp}
         className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${muted ? 'opacity-50' : 'opacity-100'} ${className}`}
         style={{ background: 'rgba(255,255,255,0.15)' }}
-        title={muted ? 'Bat am thanh' : 'Tat am thanh'}
+        title={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
       >
         <span className="material-symbols-outlined text-[18px] text-white">
           {muted ? 'volume_off' : 'volume_up'}
@@ -61,7 +61,7 @@ export function SoundToggle({ className = '', showSettings = false }: SoundToggl
           onClick={() => setSettingsOpen(!settingsOpen)}
           className="w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90 ml-1"
           style={{ background: 'rgba(255,255,255,0.1)' }}
-          title="Cai dat am thanh"
+          title="Cài đặt âm thanh"
         >
           <span className="material-symbols-outlined text-[14px] text-white/70">
             tune

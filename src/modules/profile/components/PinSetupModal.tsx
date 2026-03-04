@@ -66,12 +66,12 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
           </div>
         </div>
         <h3 className="text-lg font-heading font-bold text-center mb-1 text-farm-brown-dark">
-          {step === 'enter' ? 'Tao ma PIN' : 'Xac nhan ma PIN'}
+          {step === 'enter' ? 'Tạo mã PIN' : 'Xác nhận mã PIN'}
         </h3>
         <p className="text-sm text-gray-500 text-center mb-4">
           {step === 'enter'
-            ? 'Nhap ma PIN 6 so de bao ve vi'
-            : 'Nhap lai ma PIN de xac nhan'}
+            ? 'Nhập mã PIN 6 số để bảo vệ ví'
+            : 'Nhập lại mã PIN để xác nhận'}
         </p>
 
         {/* Step indicator */}
@@ -104,7 +104,7 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
 
         {/* Mismatch error */}
         {mismatch && (
-          <p className="text-sm text-red-500 text-center mb-3">Ma PIN khong khop. Thu lai.</p>
+          <p className="text-sm text-red-500 text-center mb-3">Mã PIN không khớp. Thử lại.</p>
         )}
 
         {/* Server error */}
@@ -115,7 +115,7 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
         {isLoading && (
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-4 h-4 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" />
-            <p className="text-sm text-green-600">Dang cai dat...</p>
+            <p className="text-sm text-green-600">Đang cài đặt...</p>
           </div>
         )}
 
@@ -126,14 +126,14 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
               onClick={handleBack}
               className="flex-1 py-3 text-blue-500 text-sm rounded-xl hover:bg-blue-50 transition-colors font-medium"
             >
-              Nhap lai
+              Nhập lại
             </button>
           )}
           <button
             onClick={onClose}
             className="flex-1 py-3 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-colors"
           >
-            Huy
+            Huỷ
           </button>
         </div>
       </div>

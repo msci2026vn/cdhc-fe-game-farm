@@ -66,10 +66,10 @@ export function LevelUpButton() {
               <p className="text-sm text-gray-600 mb-3">{info.title}</p>
 
               <div className="bg-amber-50 rounded-xl p-3 mb-4">
-                <p className="text-xs text-amber-700 font-bold mb-1">Chi phi len cap</p>
+                <p className="text-xs text-amber-700 font-bold mb-1">Chi phí lên cấp</p>
                 <p className="text-2xl font-black text-amber-600">{formatOGN(info.levelUpFee)} OGN</p>
                 <p className="text-[10px] text-amber-500 mt-1">
-                  So du: {formatOGN(info.ogn)} OGN
+                  Số dư: {formatOGN(info.ogn)} OGN
                 </p>
               </div>
 
@@ -78,7 +78,7 @@ export function LevelUpButton() {
                   onClick={() => { playSound('ui_back'); setShowConfirm(false); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
                 >
-                  Huy
+                  Huỷ
                 </button>
                 <button
                   onClick={() => {
@@ -89,7 +89,7 @@ export function LevelUpButton() {
                   disabled={levelUp.isPending}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 active:scale-95 shadow-lg disabled:opacity-50"
                 >
-                  {levelUp.isPending ? '...' : 'Xac nhan'}
+                  {levelUp.isPending ? '...' : 'Xác nhận'}
                 </button>
               </div>
             </div>

@@ -63,7 +63,7 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
           <>
             {/* Title */}
             <div className="text-lg font-heading font-bold text-white mb-3">
-              CHIEN LOI PHAM
+              CHIẾN LỢI PHẨM
             </div>
 
             {/* Fragment card */}
@@ -91,7 +91,7 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
         ) : (
           <div className="mb-3">
             <span className="text-3xl block mb-2">📦</span>
-            <div className="text-sm font-bold text-white/70">Khong co manh roi lan nay</div>
+            <div className="text-sm font-bold text-white/70">Không có mảnh rơi lần này</div>
           </div>
         )}
 
@@ -123,8 +123,8 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
           </div>
           <div className="text-[10px] mt-1" style={{ color: drop.guaranteedIn <= 5 ? '#f39c12' : 'rgba(255,255,255,0.4)' }}>
             {drop.guaranteedIn <= 0
-              ? 'Guaranteed roi!'
-              : `Con ${drop.guaranteedIn} tran guaranteed`}
+              ? 'Guaranteed rồi!'
+              : `Còn ${drop.guaranteedIn} trận guaranteed`}
             {drop.guaranteedIn <= 5 && drop.guaranteedIn > 0 ? ' 🔥' : ''}
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
             pointerEvents: phase === 'ready' ? 'auto' : 'none',
           }}
         >
-          Tiep tuc
+          Tiếp tục
         </button>
       </div>
     </div>

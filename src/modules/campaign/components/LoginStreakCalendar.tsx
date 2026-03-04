@@ -46,17 +46,17 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
         <div className="text-center">
           <div className="text-2xl mb-0.5">🔥</div>
           <div className="text-lg font-bold text-amber-400">{currentStreak}</div>
-          <div className="text-[9px] text-white/40">Lien tiep</div>
+          <div className="text-[9px] text-white/40">Liên tiếp</div>
         </div>
         <div className="text-center">
           <div className="text-2xl mb-0.5">📅</div>
           <div className="text-lg font-bold text-white">Ngay {monthlyDay}</div>
-          <div className="text-[9px] text-white/40">Thang nay</div>
+          <div className="text-[9px] text-white/40">Tháng này</div>
         </div>
         <div className="text-center">
           <div className="text-2xl mb-0.5">🏆</div>
           <div className="text-lg font-bold text-purple-400">{longestStreak}</div>
-          <div className="text-[9px] text-white/40">Ky luc</div>
+          <div className="text-[9px] text-white/40">Kỷ lục</div>
         </div>
       </div>
 
@@ -130,23 +130,23 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
       >
         {todayReward ? (
           <div className="text-[12px]">
-            <span className="text-white/50">Hom nay: </span>
+            <span className="text-white/50">Hôm nay:</span>
             <span className="font-bold text-yellow-400">+{todayReward.ogn} OGN</span>
             {todayReward.fragment && (
               <span className="text-purple-400 ml-1">+ 🧩</span>
             )}
-            <span className="ml-2 text-green-400 text-[10px]">✅ Da nhan</span>
+            <span className="ml-2 text-green-400 text-[10px]">✅ Đã nhận</span>
           </div>
         ) : (
           <div className="text-[12px] text-white/40">
-            Dang nhap moi ngay de nhan thuong!
+            Đăng nhập mỗi ngày để nhận thưởng!
           </div>
         )}
       </div>
 
       {/* Milestone legend */}
       <div className="space-y-1 px-1">
-        <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1">Moc thuong</div>
+        <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1">Mốc thưởng</div>
         {STREAK_MILESTONES.map(m => (
           <div key={m.day} className="flex items-center gap-2 text-[10px]">
             <span className="text-white/20 w-6 text-right">D{m.day}</span>

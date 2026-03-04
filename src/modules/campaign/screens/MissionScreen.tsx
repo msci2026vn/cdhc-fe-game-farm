@@ -14,8 +14,8 @@ import { toast } from 'sonner';
 type TabKey = 'daily' | 'weekly';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'daily', label: 'Hang Ngay', icon: '\ud83d\udcc5' },
-  { key: 'weekly', label: 'Hang Tuan', icon: '\ud83d\udcc6' },
+  { key: 'daily', label: 'Hàng Ngày', icon: '\ud83d\udcc5' },
+  { key: 'weekly', label: 'Hàng Tuần', icon: '\ud83d\udcc6' },
 ];
 
 export default function MissionScreen() {
@@ -59,7 +59,7 @@ export default function MissionScreen() {
       playSound('coin_collect');
     } catch {
       playSound('damage_dealt');
-      toast.error('Nhan thuong that bai. Vui long thu lai.');
+      toast.error('Nhận thưởng thất bại. Vui lòng thử lại.');
     } finally {
       setClaimingId(null);
     }
@@ -72,7 +72,7 @@ export default function MissionScreen() {
       playSound('level_up');
     } catch {
       playSound('damage_dealt');
-      toast.error('Nhan thuong that bai. Vui long thu lai.');
+      toast.error('Nhận thưởng thất bại. Vui lòng thử lại.');
     }
   };
 
@@ -91,7 +91,7 @@ export default function MissionScreen() {
           >
             &larr;
           </button>
-          <h1 className="font-heading font-bold text-lg text-white">Nhiem Vu</h1>
+          <h1 className="font-heading font-bold text-lg text-white">Nhiệm Vụ</h1>
           <div className="w-10" />
         </div>
 
@@ -137,8 +137,8 @@ export default function MissionScreen() {
         ) : sortedMissions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <span className="text-5xl mb-3">📋</span>
-            <p className="text-white/50 font-medium">Chua co nhiem vu</p>
-            <p className="text-white/30 text-sm mt-1">Quay lai sau!</p>
+            <p className="text-white/50 font-medium">Chưa có nhiệm vụ</p>
+            <p className="text-white/30 text-sm mt-1">Quay lại sau!</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -162,10 +162,10 @@ export default function MissionScreen() {
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <div className="text-[11px]">
-              <span className="text-white/40">Tong: </span>
+              <span className="text-white/40">Tổng:</span>
               <span className="font-bold text-yellow-400">{totalRewardOgn} OGN</span>
               <span className="text-white/20 mx-1.5">|</span>
-              <span className="text-white/40">Da nhan: </span>
+              <span className="text-white/40">Đã nhận:</span>
               <span className="font-bold text-green-400">{claimedOgn} OGN</span>
             </div>
 
@@ -178,7 +178,7 @@ export default function MissionScreen() {
                 {claimAllMutation.isPending ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
                 ) : (
-                  `Nhan Tat Ca (${claimable.length})`
+                  `Nhận Tất Cả (${claimable.length})`
                 )}
               </button>
             )}
@@ -235,7 +235,7 @@ function ResetTimer({ type }: { type: 'daily' | 'weekly' }) {
   return (
     <div className="flex items-center justify-center gap-2 py-1">
       <span className="text-[10px] text-white/30">
-        {type === 'daily' ? 'Reset hang ngay' : 'Reset hang tuan'}:
+        {type === 'daily' ? 'Reset hàng ngày' : 'Reset hàng tuần'}:
       </span>
       <span className="text-[12px] font-mono font-bold text-amber-400">{remaining}</span>
     </div>

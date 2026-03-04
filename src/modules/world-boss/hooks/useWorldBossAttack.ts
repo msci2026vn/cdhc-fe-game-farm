@@ -97,7 +97,7 @@ export function useWorldBossAttack(eventId: string | undefined) {
         setState('cooldown');
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Loi ket noi');
+      setError(err instanceof Error ? err.message : 'Lỗi kết nối');
       setState('error');
     }
   }, [eventId, queryClient]);

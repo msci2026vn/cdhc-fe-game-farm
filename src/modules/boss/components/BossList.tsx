@@ -131,7 +131,7 @@ export default function BossList({ onSelect }: Props) {
             <span style={{ color: '#55efc4' }}>💀 Ha: {totalKills}</span>
           </div>
           <span className={`px-2 py-0.5 rounded-lg ${noFightsLeft ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white/70'}`}>
-            {fightsUsed}/{fightsMax} tran
+            {fightsUsed}/{fightsMax} trận
           </span>
         </div>
 
@@ -140,7 +140,7 @@ export default function BossList({ onSelect }: Props) {
           <div className="mt-2 px-3 py-2 rounded-xl text-center"
             style={{ background: 'rgba(108,92,231,0.15)', border: '1px solid rgba(108,92,231,0.3)' }}>
             <span className="text-[11px] font-bold text-white/60">
-              Nghi ngoi: <span className="text-white font-mono">{formatTime(cooldown)}</span>
+              Nghỉ ngơi: <span className="text-white font-mono">{formatTime(cooldown)}</span>
             </span>
           </div>
         )}
@@ -150,7 +150,7 @@ export default function BossList({ onSelect }: Props) {
           <div className="mt-2 px-3 py-2 rounded-xl text-center"
             style={{ background: 'rgba(255,107,107,0.15)', border: '1px solid rgba(255,107,107,0.3)' }}>
             <span className="text-[11px] font-bold text-red-400">
-              Het {fightsMax} luot hom nay. Quay lai ngay mai!
+              Hết {fightsMax} lượt hôm nay. Quay lại ngày mai!
             </span>
           </div>
         )}
@@ -165,19 +165,19 @@ export default function BossList({ onSelect }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-lg">{weeklyBoss.bossEmoji}</span>
                 <div>
-                  <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Boss tuan nay</div>
+                  <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Boss tuần này</div>
                   <div className="font-heading text-sm font-bold text-white">{weeklyBoss.bossName}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[9px] text-white/40">Ket thuc</div>
+                <div className="text-[9px] text-white/40">Kết thúc</div>
                 <div className="font-mono text-xs font-bold text-white/80">{weeklyCountdown}</div>
               </div>
             </div>
             <div className="flex items-center gap-3 text-[10px] font-bold">
-              <span style={{ color: '#fdcb6e' }}>x{weeklyBoss.rewardMultiplier} thuong</span>
+              <span style={{ color: '#fdcb6e' }}>x{weeklyBoss.rewardMultiplier} thưởng</span>
               <span style={{ color: '#a29bfe' }}>
-                Diem yeu: {WEAKNESS_LABELS[weeklyBoss.weakness]?.emoji} {WEAKNESS_LABELS[weeklyBoss.weakness]?.label}
+                Điểm yếu: {WEAKNESS_LABELS[weeklyBoss.weakness]?.emoji} {WEAKNESS_LABELS[weeklyBoss.weakness]?.label}
               </span>
             </div>
           </div>
@@ -191,9 +191,9 @@ export default function BossList({ onSelect }: Props) {
               <span className="text-lg">🎯</span>
               <div className="flex-1">
                 <p className="text-[11px] font-bold text-yellow-300">
-                  Ban co {statInfo.freePoints} diem chi so chua phan bo!
+                  Bạn có {statInfo.freePoints} điểm chỉ số chưa phân bổ!
                 </p>
-                <p className="text-[10px] text-white/50">Vao Profile &rarr; Chi so de tang suc manh.</p>
+                <p className="text-[10px] text-white/50">Vào Profile &rarr; Chỉ số để tăng sức mạnh.</p>
               </div>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function BossList({ onSelect }: Props) {
                   {kills > 0 && <span className="text-[10px]">✅</span>}
                 </div>
                 {locked ? (
-                  <p className="text-[11px] text-white/40">Can Level {boss.unlockLevel}</p>
+                  <p className="text-[11px] text-white/40">Cần Level {boss.unlockLevel}</p>
                 ) : (
                   <>
                     <p className="text-[11px] text-white/50 mb-1">{boss.description}</p>
@@ -266,7 +266,7 @@ export default function BossList({ onSelect }: Props) {
                     </div>
                     {/* Stat preview: estimated turns */}
                     <div className="mt-1 text-[9px] font-bold text-white/30">
-                      ~{turns} luot de ha
+                      ~{turns} lượt để hạ
                     </div>
                   </>
                 )}

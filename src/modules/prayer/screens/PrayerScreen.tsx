@@ -78,7 +78,7 @@ export default function PrayerScreen() {
           }
         },
         onError: () => {
-          import('sonner').then(({ toast }) => toast.error('Gui loi cau nguyen that bai. Vui long thu lai.'));
+          import('sonner').then(({ toast }) => toast.error('Gửi lời cầu nguyện thất bại. Vui lòng thử lại.'));
         },
       }
     );
@@ -102,7 +102,7 @@ export default function PrayerScreen() {
           }
         },
         onError: () => {
-          import('sonner').then(({ toast }) => toast.error('Gui loi cau nguyen that bai. Vui long thu lai.'));
+          import('sonner').then(({ toast }) => toast.error('Gửi lời cầu nguyện thất bại. Vui lòng thử lại.'));
         },
       },
     );
@@ -125,7 +125,7 @@ export default function PrayerScreen() {
             }
           },
           onError: () => {
-            import('sonner').then(({ toast }) => toast.error('Gui loi cau nguyen that bai. Vui long thu lai.'));
+            import('sonner').then(({ toast }) => toast.error('Gửi lời cầu nguyện thất bại. Vui lòng thử lại.'));
           },
         }
       );

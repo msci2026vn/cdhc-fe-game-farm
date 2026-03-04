@@ -15,8 +15,8 @@ interface PinInputModalProps {
 
 export function PinInputModal({
   open, onClose, onSubmit,
-  title = 'Nhap ma PIN',
-  description = 'Nhap ma PIN 6 so de xac nhan',
+  title = 'Nhập mã PIN',
+  description = 'Nhập mã PIN 6 số để xác nhận',
   error, attemptsRemaining, blocked, isLoading,
 }: PinInputModalProps) {
   const [value, setValue] = useState('');
@@ -85,14 +85,14 @@ export function PinInputModal({
         )}
         {attemptsRemaining !== undefined && attemptsRemaining < 5 && !blocked && (
           <p className="text-sm text-orange-500 text-center mb-3">
-            Con {attemptsRemaining} lan thu
+            Còn {attemptsRemaining} lần thử
           </p>
         )}
         {blocked && (
           <div className="text-center mb-3 p-3 bg-red-50 rounded-xl border border-red-200">
             <span className="material-symbols-outlined text-red-500 text-xl mb-1">block</span>
-            <p className="text-sm text-red-600 font-bold">Da bi khoa</p>
-            <p className="text-xs text-red-500">Thu lai sau 1 gio</p>
+            <p className="text-sm text-red-600 font-bold">Đã bị khoá</p>
+            <p className="text-xs text-red-500">Thử lại sau 1 giờ</p>
           </div>
         )}
 
@@ -100,7 +100,7 @@ export function PinInputModal({
         {isLoading && (
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-            <p className="text-sm text-blue-500">Dang xac nhan...</p>
+            <p className="text-sm text-blue-500">Đang xác nhận...</p>
           </div>
         )}
 
@@ -109,7 +109,7 @@ export function PinInputModal({
           onClick={onClose}
           className="w-full py-3 text-gray-500 text-sm mt-2 rounded-xl hover:bg-gray-50 transition-colors"
         >
-          Huy
+          Huỷ
         </button>
       </div>
     </div>

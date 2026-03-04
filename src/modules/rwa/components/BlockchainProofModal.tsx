@@ -42,7 +42,7 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-blue-800 flex items-center justify-center gap-2">
-            <span>🔗</span> Chung nhan Blockchain
+            <span>🔗</span> Chứng nhận Blockchain
           </DialogTitle>
         </div>
 
@@ -58,8 +58,8 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
           {proof?.status === 'not_delivered' && (
             <div className="text-center py-6 space-y-2">
               <span className="text-3xl">📦</span>
-              <p className="text-sm text-stone-600">Chua nhan hang</p>
-              <p className="text-xs text-stone-400">Nhan hang truoc khi xem chung nhan blockchain</p>
+              <p className="text-sm text-stone-600">Chưa nhận hàng</p>
+              <p className="text-xs text-stone-400">Nhận hàng trước khi xem chứng nhận blockchain</p>
             </div>
           )}
 
@@ -68,8 +68,8 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
             <div className="space-y-3">
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center space-y-1">
                 <span className="text-2xl">⏳</span>
-                <p className="text-sm font-medium text-amber-700">Dang cho ghi blockchain</p>
-                <p className="text-xs text-amber-600">Du lieu se duoc ghi len chain trong vong 12h</p>
+                <p className="text-sm font-medium text-amber-700">Đang chờ ghi blockchain</p>
+                <p className="text-xs text-amber-600">Dữ liệu sẽ được ghi lên chain trong vòng 12h</p>
               </div>
 
               {proof.deliveryData && (
@@ -136,7 +136,7 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-sm rounded-xl border border-blue-200 transition-colors mt-2"
                   >
-                    🔗 Xem tren Snowtrace
+                    🔗 Xem trên Snowtrace
                     <span className="material-symbols-outlined text-sm">open_in_new</span>
                   </a>
                 </div>
@@ -149,7 +149,7 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
             onClick={onClose}
             className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
           >
-            Dong
+            Đóng
           </button>
         </div>
       </DialogContent>
@@ -165,12 +165,12 @@ function DeliveryInfo({ data, weekNumber }: {
     <div className="bg-white/80 border border-stone-200 rounded-xl p-3 space-y-1.5">
       <div className="flex items-center gap-2 text-sm">
         <span>📦</span>
-        <span className="font-medium text-stone-700">Hop Tuan {weekNumber}</span>
+        <span className="font-medium text-stone-700">Hộp Tuần {weekNumber}</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
         <span>✅</span>
         <span className="text-stone-600">
-          Da nhan: {new Date(data.deliveredAt).toLocaleString('vi-VN', {
+          Đã nhận: {new Date(data.deliveredAt).toLocaleString('vi-VN', {
             hour: '2-digit', minute: '2-digit',
             day: '2-digit', month: '2-digit', year: 'numeric',
           })}

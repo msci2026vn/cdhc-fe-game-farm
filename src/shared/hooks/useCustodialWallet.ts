@@ -63,11 +63,11 @@ export function useCustodialWallet() {
   const createMutation = useMutation({
     mutationFn: () => gameApi.createCustodialWallet(),
     onSuccess: (data) => {
-      toast.success(`Tao vi thanh cong! ${data.address.slice(0, 6)}...${data.address.slice(-4)}`);
+      toast.success(`Tạo ví thành công! ${data.address.slice(0, 6)}...${data.address.slice(-4)}`);
       queryClient.invalidateQueries({ queryKey: ['custodial-wallet'] });
     },
     onError: (err: any) => {
-      toast.error(err.message || 'Khong the tao vi');
+      toast.error(err.message || 'Không thể tạo ví');
     },
   });
 
@@ -76,11 +76,11 @@ export function useCustodialWallet() {
     mutationFn: ({ to, amount, pin }: { to: string; amount: string; pin?: string }) =>
       gameApi.sendCustodialTransaction(to, amount, pin),
     onSuccess: (data) => {
-      toast.success(`Da gui ${data.amount} AVAX`);
+      toast.success(`Đã gửi ${data.amount} AVAX`);
       queryClient.invalidateQueries({ queryKey: ['custodial-wallet'] });
     },
     onError: (err: any) => {
-      toast.error(err.message || 'Gui that bai');
+      toast.error(err.message || 'Gửi thất bại');
     },
   });
 
