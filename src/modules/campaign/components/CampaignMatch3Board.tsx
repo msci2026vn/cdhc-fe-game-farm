@@ -9,22 +9,23 @@ import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
 
 // Fix: Tailwind JIT purge-safe gem colors — inline styles bypass dynamic class scanning
+// ⚔️ atk  = đỏ (red)   💛 star = vàng (gold)   🛡️ def = xanh nước biển   💚 hp = xanh lá
 const GEM_STYLES: Record<string, React.CSSProperties> = {
     atk: {
-        background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
-        boxShadow: '0 3px 10px rgba(231, 76, 60, 0.3)',
+        background: 'linear-gradient(145deg, #ff3b2f 0%, #c0150a 100%)',
+        boxShadow: '0 2px 8px rgba(220, 38, 38, 0.55), inset 0 1px 0 rgba(255,180,180,0.3)',
     },
     hp: {
-        background: 'linear-gradient(135deg, #2ecc71, #27ae60)',
-        boxShadow: '0 3px 10px rgba(46, 204, 113, 0.3)',
+        background: 'linear-gradient(145deg, #22c55e 0%, #15803d 100%)',
+        boxShadow: '0 2px 8px rgba(34, 197, 94, 0.5), inset 0 1px 0 rgba(180,255,200,0.3)',
     },
     def: {
-        background: 'linear-gradient(135deg, #3498db, #2980b9)',
-        boxShadow: '0 3px 10px rgba(52, 152, 219, 0.3)',
+        background: 'linear-gradient(145deg, #38bdf8 0%, #1d4ed8 100%)',
+        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.55), inset 0 1px 0 rgba(180,220,255,0.3)',
     },
     star: {
-        background: 'linear-gradient(135deg, #f39c12, #e67e22)',
-        boxShadow: '0 3px 10px rgba(243, 156, 18, 0.3)',
+        background: 'linear-gradient(145deg, #fde047 0%, #ca8a04 100%)',
+        boxShadow: '0 2px 8px rgba(234, 179, 8, 0.6), inset 0 1px 0 rgba(255,255,180,0.4)',
     },
 };
 
@@ -67,7 +68,7 @@ export default function CampaignMatch3Board({
 
             {/* ── Wooden frame wrapper (matching HTML mockup .grid-frame) ── */}
             <div className="campaign-grid-frame relative w-full h-full flex flex-col" style={{
-                background: 'linear-gradient(180deg,#284e10 0%,#183208 100%)',
+                background: 'linear-gradient(180deg, #2a1500 0%, #0d0804 100%)',
                 border: '4px solid #a06018',
                 borderRadius: 14,
                 padding: 5,
@@ -94,7 +95,7 @@ export default function CampaignMatch3Board({
                             ? '2px solid rgba(231,76,60,0.5)'
                             : romBocActive
                                 ? '2px solid rgba(39,174,96,0.5)'
-                                : '1px solid rgba(55,110,28,0.35)',
+                                : '1px solid rgba(120,80,30,0.4)',
                         boxShadow: otHiemActive
                             ? '0 0 18px rgba(231,76,60,0.25), inset 0 0 8px rgba(231,76,60,0.1)'
                             : romBocActive
