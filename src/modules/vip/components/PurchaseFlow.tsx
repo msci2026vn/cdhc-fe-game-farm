@@ -84,18 +84,18 @@ export function PurchaseFlow() {
       setStep('processing');
       setProgress(2);
 
-      // 2. Pay via custodial wallet
+      // 2. Pay via custodial wallet (BE sends TX + waits receipt + activates VIP)
       const payResult = await gameApi.payVipCustodial(newOrder.orderId);
-      setProgress(3);
+      setProgress(5);
 
-      // 3. Verify payment
-      const verifyResult = await verifyPayment.mutateAsync({
+      // payVipCustodial already verifies + activates — map to VipVerifyResult
+      setResult({
+        status: payResult.status,
         orderId: newOrder.orderId,
         txHash: payResult.txHash,
-      });
-      setProgress(4);
-
-      setResult(verifyResult);
+        subscription: (payResult as any).subscription,
+        explorerUrl: (payResult as any).explorerUrl,
+      } as any);
       setStep('success');
       toast.success('VIP đã kích hoạt!');
     } catch (err: any) {

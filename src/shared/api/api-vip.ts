@@ -80,7 +80,7 @@ export const vipApi = {
     return json.data;
   },
 
-  payVipCustodial: async (orderId: string): Promise<{ txHash: string; from: string; to: string; amount: string; status: string }> => {
+  payVipCustodial: async (orderId: string): Promise<{ txHash: string; from: string; to: string; amount: string; status: string; orderId?: string; blockNumber?: number; subscription?: { id: string; tier: string; expiresAt: string }; explorerUrl?: string }> => {
     const url = `${API_BASE_URL}/api/vip/orders/${orderId}/pay-custodial`;
     const response = await fetch(url, {
       method: 'POST',
