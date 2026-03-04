@@ -136,7 +136,11 @@ export function WorldBossScreen() {
       {/* Non-scrollable: boss info + attack button (only when active) */}
       {mainTab === 'arena' && data?.active && boss && (
         <div style={{ flexShrink: 0, borderBottom: '1px solid #1f2937' }}>
-          <BossDisplay boss={boss} />
+          <BossDisplay
+            boss={boss}
+            onRanking={() => setPopup('leaderboard')}
+            onBattle={() => setPopup('feed')}
+          />
 
           <HpBar
             currentHp={boss.currentHp}
@@ -191,27 +195,7 @@ export function WorldBossScreen() {
         ) : !data?.active || !boss ? (
           <BossWaiting onShowHistory={() => setMainTab('history')} />
         ) : (
-          /* 2 nút mở popup */
-          <div className="px-4 pt-3 pb-4 grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setPopup('leaderboard')}
-              className="flex flex-col items-center gap-2 py-4 rounded-2xl border border-yellow-500/40 active:scale-95 transition-transform"
-              style={{ background: 'rgba(234,179,8,0.08)' }}
-            >
-              <span className="text-2xl">🏆</span>
-              <span className="text-sm font-bold text-yellow-400">Xếp hạng</span>
-              <span className="text-xs text-gray-400">{boss.leaderboard?.length ?? 0} người</span>
-            </button>
-            <button
-              onClick={() => setPopup('feed')}
-              className="flex flex-col items-center gap-2 py-4 rounded-2xl border border-blue-500/40 active:scale-95 transition-transform"
-              style={{ background: 'rgba(59,130,246,0.08)' }}
-            >
-              <span className="text-2xl">⚔️</span>
-              <span className="text-sm font-bold text-blue-400">Trận chiến</span>
-              <span className="text-xs text-gray-400">Live feed</span>
-            </button>
-          </div>
+          <div />
         )}
       </div>
 

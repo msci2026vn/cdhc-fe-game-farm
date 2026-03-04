@@ -25,26 +25,28 @@ const SPRITE_MAP: Record<string, string> = {
 };
 
 const ELEMENT_CONFIG: Record<string, { label: string; icon: string; color: string; auraColor: string }> = {
-  fire:   { label: 'Lửa',   icon: '🔥', color: 'text-orange-400', auraColor: 'rgba(255,107,53,0.4)' },
-  ice:    { label: 'Băng',  icon: '❄️', color: 'text-blue-300',   auraColor: 'rgba(79,195,247,0.4)' },
-  water:  { label: 'Nước',  icon: '💧', color: 'text-blue-500',   auraColor: 'rgba(25,118,210,0.4)' },
-  wind:   { label: 'Gió',   icon: '🌀', color: 'text-green-400',  auraColor: 'rgba(102,187,106,0.4)' },
-  poison: { label: 'Độc',   icon: '☠️', color: 'text-purple-400', auraColor: 'rgba(171,71,188,0.4)' },
-  chaos:  { label: 'Hỗn loạn', icon: '💥', color: 'text-red-400', auraColor: 'rgba(244,67,54,0.4)' },
+  fire: { label: 'Lửa', icon: '🔥', color: 'text-orange-400', auraColor: 'rgba(255,107,53,0.4)' },
+  ice: { label: 'Băng', icon: '❄️', color: 'text-blue-300', auraColor: 'rgba(79,195,247,0.4)' },
+  water: { label: 'Nước', icon: '💧', color: 'text-blue-500', auraColor: 'rgba(25,118,210,0.4)' },
+  wind: { label: 'Gió', icon: '🌀', color: 'text-green-400', auraColor: 'rgba(102,187,106,0.4)' },
+  poison: { label: 'Độc', icon: '☠️', color: 'text-purple-400', auraColor: 'rgba(171,71,188,0.4)' },
+  chaos: { label: 'Hỗn loạn', icon: '💥', color: 'text-red-400', auraColor: 'rgba(244,67,54,0.4)' },
 };
 
 const DIFFICULTY_CONFIG: Record<string, { label: string; bg: string }> = {
-  normal:       { label: 'BÌNH THƯỜNG', bg: 'bg-gray-600' },
-  hard:         { label: 'KHÓ',         bg: 'bg-yellow-600' },
-  extreme:      { label: 'CỰC KHÓ',    bg: 'bg-orange-600' },
-  catastrophic: { label: 'THẢM HỌA',   bg: 'bg-red-700' },
+  normal: { label: 'BÌNH THƯỜNG', bg: 'bg-gray-600' },
+  hard: { label: 'KHÓ', bg: 'bg-yellow-600' },
+  extreme: { label: 'CỰC KHÓ', bg: 'bg-orange-600' },
+  catastrophic: { label: 'THẢM HỌA', bg: 'bg-red-700' },
 };
 
 interface BossDisplayProps {
   boss: WorldBossInfo;
+  onRanking?: () => void;
+  onBattle?: () => void;
 }
 
-export function BossDisplay({ boss }: BossDisplayProps) {
+export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
   const [showStory, setShowStory] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
@@ -64,35 +66,63 @@ export function BossDisplay({ boss }: BossDisplayProps) {
         </span>
       </div>
 
-      {/* Sprite — tap to show boss info */}
-      <button
-        onClick={() => setShowInfo(true)}
-        className="w-48 h-48 flex items-center justify-center rounded-full relative"
-        style={{
-          boxShadow: `0 0 40px ${element.auraColor}, 0 0 80px ${element.auraColor}`,
-          animation: 'worldBossAura 2s ease-in-out infinite alternate',
-        }}
-      >
-        {spriteSrc ? (
-          <img
-            src={spriteSrc}
-            alt={boss.bossName}
-            className="w-40 h-40 object-contain"
-            style={{ transform: `scale(${boss.visualVariant?.scale ?? 1})` }}
-          />
-        ) : (
-          <div
-            className="w-40 h-40 rounded-full flex items-center justify-center text-6xl"
-            style={{ background: `radial-gradient(circle, ${element.auraColor} 0%, transparent 70%)` }}
+      {/* Avatar row: [Xep hang] [Boss sprite] [Tran chien] */}
+      <div className="flex items-center justify-center gap-3 w-full">
+
+        {/* Nút Xếp hạng bên trái */}
+        {onRanking && (
+          <button
+            onClick={onRanking}
+            className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl active:scale-95 transition-transform"
+            style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)', minWidth: 64 }}
           >
-            🐛
-          </div>
+            <span className="text-xl">🏆</span>
+            <span className="text-[10px] font-bold text-yellow-400 leading-tight text-center">Xếp{"\n"}hạng</span>
+          </button>
         )}
-        {/* Info hint */}
-        <span className="absolute bottom-1 right-1 text-xs bg-black/50 rounded-full px-1.5 py-0.5 text-gray-300">
-          ℹ️
-        </span>
-      </button>
+
+        {/* Sprite — tap to show boss info */}
+        <button
+          onClick={() => setShowInfo(true)}
+          className="w-44 h-44 flex items-center justify-center rounded-full relative flex-shrink-0"
+          style={{
+            boxShadow: `0 0 40px ${element.auraColor}, 0 0 80px ${element.auraColor}`,
+            animation: 'worldBossAura 2s ease-in-out infinite alternate',
+          }}
+        >
+          {spriteSrc ? (
+            <img
+              src={spriteSrc}
+              alt={boss.bossName}
+              className="w-36 h-36 object-contain"
+              style={{ transform: `scale(${boss.visualVariant?.scale ?? 1})` }}
+            />
+          ) : (
+            <div
+              className="w-36 h-36 rounded-full flex items-center justify-center text-6xl"
+              style={{ background: `radial-gradient(circle, ${element.auraColor} 0%, transparent 70%)` }}
+            >
+              🐛
+            </div>
+          )}
+          {/* Info hint */}
+          <span className="absolute bottom-1 right-1 text-xs bg-black/50 rounded-full px-1.5 py-0.5 text-gray-300">
+            ℹ️
+          </span>
+        </button>
+
+        {/* Nút Trận chiến bên phải */}
+        {onBattle && (
+          <button
+            onClick={onBattle}
+            className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl active:scale-95 transition-transform"
+            style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', minWidth: 64 }}
+          >
+            <span className="text-xl">⚔️</span>
+            <span className="text-[10px] font-bold text-blue-400 leading-tight text-center">Trận{"\n"}chiến</span>
+          </button>
+        )}
+      </div>
 
       {/* Name + title */}
       <div className="text-center">
