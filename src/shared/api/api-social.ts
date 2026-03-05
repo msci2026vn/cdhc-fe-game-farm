@@ -10,6 +10,10 @@ import type {
   FriendFarmData,
   ReferralInfoResult,
   SyncResult,
+  FriendRequestsResult,
+  SearchUsersResult,
+  FriendActionResult,
+  AddFriendPendingResult,
 } from '../types/game-api.types';
 
 export const socialApi = {
@@ -99,12 +103,13 @@ export const socialApi = {
   },
 
   /**
-   * Add friend by friend ID or referral code (bước 20 — real API)
+   * Send friend request by friend ID or referral code (2026-03-05 — pending flow)
    * BE Zod: { friendId?: string uuid, referralCode?: string }
+   * NOTE: BE now returns pending status — target must accept to confirm.
    */
   addFriend: async (
     data: { friendId?: string; referralCode?: string }
-  ): Promise<{ friend: FriendData; referralCode: string }> => {
+  ): Promise<AddFriendPendingResult> => {
     const url = API_BASE_URL + '/api/game/social/add-friend';
     console.log('[FARM-DEBUG] gameApi.addFriend():', { url, data });
 
@@ -188,6 +193,143 @@ export const socialApi = {
 
     const json = await response.json();
     console.log('[FARM-DEBUG] gameApi.getReferralInfo() SUCCESS:', json);
+    return json.data;
+  },
+
+  /**
+   * Get incoming pending friend requests (2026-03-05)
+   */
+  getFriendRequests: async (): Promise<FriendRequestsResult> => {
+    const url = API_BASE_URL + '/api/game/social/friend-requests';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('getFriendRequests');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.error?.message || `Failed to get friend requests: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Search users by name, returns friendStatus for each result (2026-03-05)
+   */
+  searchUsers: async (q: string, limit = 20): Promise<SearchUsersResult> => {
+    const params = new URLSearchParams({ q, limit: String(limit) });
+    const url = `${API_BASE_URL}/api/game/social/search?${params}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('searchUsers');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.error?.message || `Failed to search users: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Accept an incoming pending friend request (2026-03-05)
+   */
+  acceptFriend: async (fromId: string): Promise<FriendActionResult> => {
+    const url = `${API_BASE_URL}/api/game/social/accept-friend/${fromId}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('acceptFriend');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const err = new Error(error?.error?.message || `Failed to accept friend: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Decline an incoming pending friend request (2026-03-05)
+   */
+  declineFriend: async (fromId: string): Promise<FriendActionResult> => {
+    const url = `${API_BASE_URL}/api/game/social/decline-friend/${fromId}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('declineFriend');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const err = new Error(error?.error?.message || `Failed to decline friend: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
+    return json.data;
+  },
+
+  /**
+   * Remove an accepted friendship (2026-03-05)
+   */
+  unfriend: async (friendId: string): Promise<FriendActionResult> => {
+    const url = `${API_BASE_URL}/api/game/social/unfriend/${friendId}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized('unfriend');
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const err = new Error(error?.error?.message || `Failed to unfriend: ${response.status}`);
+      (err as any).code = error?.error?.code;
+      throw err;
+    }
+
+    const json = await response.json();
     return json.data;
   },
 

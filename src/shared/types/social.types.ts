@@ -97,6 +97,52 @@ export interface ReferralInfoResult {
   recentCommissions: CommissionTransaction[];
 }
 
+// ═══ FRIEND REQUESTS & SEARCH (2026-03-05) ═══
+
+export type FriendStatus =
+  | 'none'
+  | 'request_sent'      // mình đã gửi lời mời
+  | 'request_received'  // họ đã gửi lời mời cho mình
+  | 'friends'
+  | 'blocked';
+
+export interface FriendRequest {
+  fromId: string;
+  fromName: string;
+  fromPicture: string | null;
+  fromLevel: number;
+  createdAt: string;
+}
+
+export interface FriendRequestsResult {
+  requests: FriendRequest[];
+}
+
+export interface UserSearchResult {
+  id: string;
+  name: string;
+  picture: string | null;
+  level: number;
+  friendStatus: FriendStatus;
+}
+
+export interface SearchUsersResult {
+  results: UserSearchResult[];
+  total: number;
+}
+
+export interface FriendActionResult {
+  success: boolean;
+  message: string;
+}
+
+export interface AddFriendPendingResult {
+  friendId: string;
+  friendName: string;
+  status: 'pending';
+  message: string;
+}
+
 // ═══ LEADERBOARD ═══
 
 export interface LeaderboardEntry {
