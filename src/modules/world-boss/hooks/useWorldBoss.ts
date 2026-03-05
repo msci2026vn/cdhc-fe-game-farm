@@ -16,15 +16,15 @@ export function useWorldBoss() {
   });
 }
 
-/** Battle polling — lite data every 3s (2s when boss HP < 10%) */
+/** Battle polling — lite data every 2s (1.5s when boss HP < 10%) */
 export function useWorldBossLite(enabled: boolean) {
   const query = useQuery<WorldBossLiteData>({
     queryKey: WORLD_BOSS_LITE_KEY,
     queryFn: worldBossApi.getLite,
     refetchInterval: (query) => {
       const hp = query.state.data?.hpPercent;
-      if (hp !== undefined && hp < 0.1) return 2_000;
-      return 3_000;
+      if (hp !== undefined && hp < 0.1) return 1_500;
+      return 2_000;
     },
     refetchIntervalInBackground: false,
     staleTime: 1_000,

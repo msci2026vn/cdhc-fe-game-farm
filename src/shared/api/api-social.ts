@@ -65,7 +65,7 @@ export const socialApi = {
 
   /**
    * Interact with friend's garden (bước 20 — real API)
-   * BE Zod: { friendId: string uuid, type: enum['water','like','comment','gift'], data?: { comment?, giftId? } }
+   * BE Zod: { friendId: string uuid, type: enum['water','like','gift'] }
    */
   interactFriend: async (
     friendId: string,
@@ -219,7 +219,18 @@ export const socialApi = {
     }
 
     const json = await response.json();
-    return json.data;
+    // Map BE fields → FE FriendRequest type
+    // BE: fromUserId, fromUserName, fromUserPicture, fromUserLevel
+    // FE: fromId, fromName, fromPicture, fromLevel
+    const raw = json.data?.requests ?? [];
+    const requests = raw.map((r: Record<string, unknown>) => ({
+      fromId:      r.fromUserId,
+      fromName:    (r.fromUserName as string) || 'Unknown',
+      fromPicture: (r.fromUserPicture as string) ?? null,
+      fromLevel:   (r.fromUserLevel as number) ?? 1,
+      createdAt:   r.createdAt as string,
+    }));
+    return { requests };
   },
 
   /**
@@ -284,7 +295,8 @@ export const socialApi = {
     }
 
     const json = await response.json();
-    return json.data;
+    // BE returns { friendId, friendName, message } — normalize to FriendActionResult
+    return { message: json.data?.message ?? '', success: true };
   },
 
   /**
@@ -312,7 +324,8 @@ export const socialApi = {
     }
 
     const json = await response.json();
-    return json.data;
+    // BE returns { message } — normalize to FriendActionResult
+    return { message: json.data?.message ?? '', success: true };
   },
 
   /**
@@ -340,7 +353,8 @@ export const socialApi = {
     }
 
     const json = await response.json();
-    return json.data;
+    // BE returns { message } — normalize to FriendActionResult
+    return { message: json.data?.message ?? '', success: true };
   },
 
   /**

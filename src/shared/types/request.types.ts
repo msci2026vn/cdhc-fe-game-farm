@@ -5,7 +5,7 @@
 import type { SyncAction } from './gameplay.types';
 
 export type PlantTypeId = 'tomato' | 'carrot' | 'chili' | 'wheat';
-export type InteractType = 'water' | 'like' | 'comment' | 'gift';
+export type InteractType = 'water' | 'like' | 'gift';
 
 export interface PlantRequest {
   plantTypeId: PlantTypeId;

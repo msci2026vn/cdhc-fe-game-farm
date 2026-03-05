@@ -168,7 +168,7 @@ export function useInteractFriend() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { friendId: string; type: 'water' | 'like' | 'comment' | 'gift'; data?: { comment?: string; giftId?: string } }) =>
+    mutationFn: (data: { friendId: string; type: 'water' | 'like' | 'gift'; data?: { giftId?: string } }) =>
       gameApi.interactFriend(data.friendId, data.type, data.data),
 
     retry: false, // Don't retry interactions

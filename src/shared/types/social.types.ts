@@ -132,7 +132,7 @@ export interface SearchUsersResult {
 }
 
 export interface FriendActionResult {
-  success: boolean;
+  success?: boolean;
   message: string;
 }
 
