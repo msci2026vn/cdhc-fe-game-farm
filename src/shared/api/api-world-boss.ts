@@ -36,6 +36,7 @@ export const worldBossApi = {
         hits: data.hits,
         maxCombo: data.maxCombo,
         final: data.final ?? false,
+        username: data.username,
       }),
     });
     if (response.status === 401) {

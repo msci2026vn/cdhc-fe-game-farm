@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useWorldBossBattle, type WorldBossSessionResult } from '../hooks/useWorldBossBattle';
 import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useGemPointer, useComboParticles } from '@/shared/match3';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
@@ -34,6 +35,7 @@ interface Props {
 
 export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   const { data: statInfo } = usePlayerStats();
+  const { data: authData } = useAuth();
   const combatStats: PlayerCombatStats = statInfo ? {
     atk: statInfo.effectiveStats.atk,
     hp: statInfo.effectiveStats.hp,
@@ -60,6 +62,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     combatStats,
     worldBoss.id,
     handleSessionEnd,
+    authData?.user?.name ?? undefined,
   );
 
   // Lite polling — detect boss death/expiry while fighting

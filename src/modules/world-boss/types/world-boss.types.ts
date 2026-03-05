@@ -77,6 +77,7 @@ export interface WorldBossAttackPayload {
   hits: number
   maxCombo: number
   final?: boolean
+  username?: string
 }
 
 export interface WorldBossLiteData {

@@ -16,8 +16,8 @@ export interface WorldBossSessionResult {
 type BattleState = 'idle' | 'fighting' | 'ended';
 
 const DEFAULT_SKILL_LEVELS: PlayerSkillLevels = { sam_dong: 1, ot_hiem: 0, rom_boc: 0 };
-const BATCH_INTERVAL_MS = 3000;
-const BATCH_INTERVAL_URGENT_MS = 2000;
+const BATCH_INTERVAL_MS = 2000;
+const BATCH_INTERVAL_URGENT_MS = 1500;
 const HP_URGENT_THRESHOLD = 0.1;
 
 /**
@@ -37,6 +37,7 @@ export function useWorldBossBattle(
   playerStats: PlayerCombatStats,
   eventId: string,
   onSessionEnd?: (result: WorldBossSessionResult) => void,
+  username?: string,
 ) {
   const [battleState, setBattleState] = useState<BattleState>('idle');
   const [sessionStats, setSessionStats] = useState({
@@ -54,9 +55,11 @@ export function useWorldBossBattle(
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sendingRef = useRef(false);
   const battleStateRef = useRef<BattleState>('idle');
+  const usernameRef = useRef(username);
 
-  // Keep ref in sync
+  // Keep refs in sync
   battleStateRef.current = battleState;
+  usernameRef.current = username;
 
   // Adapt boss data (stable reference)
   const campaignBossData = useMemo(
@@ -92,6 +95,7 @@ export function useWorldBossBattle(
         hits: hitCountRef.current,
         maxCombo: engine.maxCombo ?? 0,
         final: isFinal,
+        username: usernameRef.current,
       });
 
       lastSentDamageRef.current = currentDamage;
@@ -183,6 +187,7 @@ export function useWorldBossBattle(
             hits: hitCountRef.current,
             maxCombo: engine.maxCombo ?? 0,
             final: true,
+            username: usernameRef.current,
           }).catch(() => {});
         }
       }
