@@ -246,7 +246,17 @@ export const socialApi = {
     }
 
     const json = await response.json();
-    return json.data;
+    // BE returns { userId, name, picture, level, friendStatus }
+    // Map userId → id to match UserSearchResult interface
+    const raw = json.data?.results ?? [];
+    const results = raw.map((u: Record<string, unknown>) => ({
+      id: u.userId,
+      name: u.name,
+      picture: u.picture ?? null,
+      level: u.level ?? 1,
+      friendStatus: u.friendStatus ?? 'none',
+    }));
+    return { results, total: json.data?.total ?? results.length };
   },
 
   /**
