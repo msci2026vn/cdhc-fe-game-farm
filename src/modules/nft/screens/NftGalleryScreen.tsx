@@ -36,10 +36,14 @@ function CardGrid({ cards, onSelect }: { cards: NftCard[]; onSelect: (c: NftCard
             className={`rounded-2xl border ${r.border} ${r.bg} overflow-hidden text-left transition-transform active:scale-95`}
           >
             {card.nftCardImageUrl ? (
-              <img src={card.nftCardImageUrl} alt={card.bossName} className="w-full aspect-[2/3] object-cover" />
-            ) : (
-              <div className="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-5xl">🎴</div>
-            )}
+              <img
+                src={card.nftCardImageUrl}
+                alt={card.bossName}
+                className="w-full aspect-[2/3] object-cover"
+                onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }}
+              />
+            ) : null}
+            <div className={`w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-5xl${card.nftCardImageUrl ? ' hidden' : ''}`}>🎴</div>
             <div className="px-3 py-2 space-y-1">
               <p className="text-white text-xs font-bold truncate">{card.bossName || 'Boss'}</p>
               <div className="flex items-center justify-between">
@@ -109,10 +113,9 @@ function SellModal({
 
             <div className="flex justify-center">
               {card.nftCardImageUrl ? (
-                <img src={card.nftCardImageUrl} alt={card.bossName} className="w-32 rounded-xl" />
-              ) : (
-                <div className="w-32 h-48 bg-gray-700 rounded-xl flex items-center justify-center text-4xl">🎴</div>
-              )}
+                <img src={card.nftCardImageUrl} alt={card.bossName} className="w-32 rounded-xl" onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }} />
+              ) : null}
+              <div className={`w-32 h-48 bg-gray-700 rounded-xl flex items-center justify-center text-4xl${card.nftCardImageUrl ? ' hidden' : ''}`}>🎴</div>
             </div>
 
             <p className={`text-center font-bold text-sm ${r.color}`}>{card.bossName} — {r.label}</p>
@@ -231,10 +234,9 @@ function WithdrawModal({
 
             <div className="flex justify-center">
               {card.nftCardImageUrl ? (
-                <img src={card.nftCardImageUrl} alt={card.bossName} className="w-28 rounded-xl" />
-              ) : (
-                <div className="w-28 h-40 bg-gray-700 rounded-xl flex items-center justify-center text-4xl">🎴</div>
-              )}
+                <img src={card.nftCardImageUrl} alt={card.bossName} className="w-28 rounded-xl" onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }} />
+              ) : null}
+              <div className={`w-28 h-40 bg-gray-700 rounded-xl flex items-center justify-center text-4xl${card.nftCardImageUrl ? ' hidden' : ''}`}>🎴</div>
             </div>
             <p className="text-center text-white font-bold text-sm">{card.bossName}</p>
 
@@ -307,10 +309,9 @@ function CardDetail({
           style={{ width: 260, height: 380 }}
         >
           {card.nftCardImageUrl ? (
-            <img src={card.nftCardImageUrl} alt={card.bossName} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center text-6xl">🎴</div>
-          )}
+            <img src={card.nftCardImageUrl} alt={card.bossName} className="w-full h-full object-cover" onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }} />
+          ) : null}
+          <div className={`w-full h-full bg-gray-800 flex items-center justify-center text-6xl${card.nftCardImageUrl ? ' hidden' : ''}`}>🎴</div>
         </div>
 
         {/* Info */}

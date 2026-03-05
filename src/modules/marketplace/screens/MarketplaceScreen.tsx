@@ -117,10 +117,9 @@ function BuyConfirmModal({
 
             <div className="flex justify-center">
               {listing.nft.imageUrl ? (
-                <img src={listing.nft.imageUrl} alt={listing.boss.name} className="w-40 rounded-xl" />
-              ) : (
-                <div className="w-40 h-60 bg-gray-700 rounded-xl flex items-center justify-center text-5xl">🎴</div>
-              )}
+                <img src={listing.nft.imageUrl} alt={listing.boss.name} className="w-40 rounded-xl" onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }} />
+              ) : null}
+              <div className={`w-40 h-60 bg-gray-700 rounded-xl flex items-center justify-center text-5xl${listing.nft.imageUrl ? ' hidden' : ''}`}>🎴</div>
             </div>
 
             <p className={`text-center font-bold ${r.color}`}>{listing.boss.name} — {r.label}</p>
@@ -179,10 +178,9 @@ function ListingDetail({
       <div className="w-full max-w-sm flex flex-col items-center gap-5" onClick={e => e.stopPropagation()}>
         <div className={`rounded-2xl overflow-hidden border-2 ${r.border}`} style={{ width: 260, height: 380 }}>
           {listing.nft.imageUrl ? (
-            <img src={listing.nft.imageUrl} alt={listing.boss.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center text-6xl">🎴</div>
-          )}
+            <img src={listing.nft.imageUrl} alt={listing.boss.name} className="w-full h-full object-cover" onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }} />
+          ) : null}
+          <div className={`w-full h-full bg-gray-800 flex items-center justify-center text-6xl${listing.nft.imageUrl ? ' hidden' : ''}`}>🎴</div>
         </div>
 
         <div className="w-full space-y-3">
@@ -335,6 +333,12 @@ export default function MarketplaceScreen() {
             <div className="text-6xl">🏪</div>
             <p className="text-gray-300 font-semibold text-lg">Chưa có NFT nào đang bán</p>
             <p className="text-gray-500 text-sm">Hãy là người đầu tiên rao bán!</p>
+            <button
+              onClick={() => navigate('/nft-gallery')}
+              className="mt-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white text-sm font-bold transition-colors"
+            >
+              🎴 Đến Bộ Sưu Tập để Đăng Bán
+            </button>
           </div>
         ) : (
           <>
@@ -350,10 +354,9 @@ export default function MarketplaceScreen() {
                     className={`rounded-2xl border ${r.border} ${r.bg} overflow-hidden text-left transition-transform active:scale-95`}
                   >
                     {listing.nft.imageUrl ? (
-                      <img src={listing.nft.imageUrl} alt={listing.boss.name} className="w-full aspect-[2/3] object-cover" />
-                    ) : (
-                      <div className="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-5xl">🎴</div>
-                    )}
+                      <img src={listing.nft.imageUrl} alt={listing.boss.name} className="w-full aspect-[2/3] object-cover" onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }} />
+                    ) : null}
+                    <div className={`w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-5xl${listing.nft.imageUrl ? ' hidden' : ''}`}>🎴</div>
                     <div className="px-3 py-2 space-y-1">
                       <p className="text-white text-xs font-bold truncate">{listing.boss.name}</p>
                       <div className="flex items-center justify-between">
