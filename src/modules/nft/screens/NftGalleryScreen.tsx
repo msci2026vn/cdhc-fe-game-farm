@@ -564,6 +564,7 @@ export default function NftGalleryScreen() {
   const handleSellSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['nft', 'my-cards'] });
     queryClient.invalidateQueries({ queryKey: ['marketplace', 'listings'] });
+    queryClient.invalidateQueries({ queryKey: ['marketplace', 'my-listings'] });
   };
 
   const handleWithdrawSuccess = () => {
