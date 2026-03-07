@@ -35,30 +35,28 @@ export function BossSprite({
   isBurning = false,
   className = '',
 }: BossSpriteProps) {
-  // Build CSS filter from external buff/rage states
-  const filters: string[] = [];
-
+  // Simplified: use a single lightweight border glow instead of expensive drop-shadow filters
+  // drop-shadow is one of the most expensive CSS filters on mobile GPU
+  let borderGlow = 'none';
   if (enrageMultiplier >= 1.3) {
-    const intensity = Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4);
-    filters.push(`drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${intensity}))`);
-  } else {
-    filters.push('drop-shadow(0 0 20px rgba(231,76,60,0.5))');
+    const intensity = Math.min(0.6, (enrageMultiplier - 1.3) * 2 + 0.3);
+    borderGlow = `0 0 15px rgba(231,76,60,${intensity})`;
   }
-
-  if (shieldBuff) filters.push('drop-shadow(0 0 15px rgba(116,185,255,0.7))');
-  if (reflectBuff) filters.push('drop-shadow(0 0 15px rgba(168,85,247,0.7))');
+  if (shieldBuff) borderGlow += ', 0 0 12px rgba(116,185,255,0.5)';
+  if (reflectBuff) borderGlow += ', 0 0 12px rgba(168,85,247,0.5)';
 
   // For bosses WITHOUT multi-state sprites, keep old CSS animation classes
   const wrapperClasses = hasSprites
-    ? (isBurning ? 'animate-fire-flicker' : '') // SVG has internal idle animation; attack/dead handled by src swap
+    ? (isBurning ? 'animate-fire-flicker' : '')
     : `animate-boss-idle ${bossDead ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''} ${isBurning ? 'animate-fire-flicker' : ''}`;
 
   return (
     <div
       className={`${wrapperClasses} ${className}`}
       style={{
-        filter: filters.join(' '),
-        transition: 'filter 1s ease',
+        // Use box-shadow instead of filter: drop-shadow (much cheaper)
+        filter: bossDead ? 'grayscale(1) opacity(0.3)' : undefined,
+        transition: 'box-shadow 1s ease',
       }}
     >
       {src ? (
@@ -66,7 +64,8 @@ export function BossSprite({
           key={src}
           src={src}
           alt={name}
-          className="w-40 h-40 object-contain drop-shadow-xl select-none pointer-events-none"
+          className="w-40 h-40 object-contain select-none pointer-events-none"
+          style={borderGlow !== 'none' ? { filter: `drop-shadow(${borderGlow.split(',')[0].trim()})` } : undefined}
           draggable={false}
         />
       ) : (

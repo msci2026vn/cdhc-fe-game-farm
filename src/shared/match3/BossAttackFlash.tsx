@@ -23,10 +23,10 @@ export default function BossAttackFlash({ text, emoji }: Props) {
           <span className="text-sm">{text}</span>
         </div>
       </div>
-      {!isDodge && Array.from({ length: 8 }).map((_, i) => (
+      {!isDodge && Array.from({ length: 3 }).map((_, i) => (
         <span key={i} className="absolute animate-sparkle-up text-xl pointer-events-none"
-          style={{ left: `${15 + Math.random() * 70}%`, top: `${30 + Math.random() * 40}%`, animationDelay: `${i * 0.05}s` }}>
-          {['💥', '🔥', '⚡', '💢'][i % 4]}
+          style={{ left: `${20 + i * 25}%`, top: `${35 + (i % 2) * 20}%`, animationDelay: `${i * 0.1}s` }}>
+          {['💥', '🔥', '⚡'][i]}
         </span>
       ))}
     </div>

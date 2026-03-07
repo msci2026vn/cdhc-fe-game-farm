@@ -29,7 +29,7 @@
     linear-gradient(180deg, #060e04 0%, #091a06 25%, #071308 55%, #030a02 100%) !important;
 }
 
-/* Center green glow overlay */
+/* Center green glow overlay — static, no animation to save GPU */
 .campaign-battle-gradient::before {
   content: '';
   position: absolute;
@@ -39,12 +39,7 @@
   background: radial-gradient(ellipse, rgba(50,180,30,0.16) 0%, transparent 68%);
   pointer-events: none;
   z-index: 2;
-  animation: campaign-glow-breathe 4s ease-in-out infinite;
-}
-
-@keyframes campaign-glow-breathe {
-  0%,100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
-  50%      { opacity: 1;    transform: translateX(-50%) scale(1.18); }
+  opacity: 0.75;
 }
 
 /* ── 4. TREES LAYER ──────────────────────────────────────── */
@@ -105,14 +100,13 @@
   position: relative;
 }
 
-/* Vine corner decorations */
+/* Vine corner decorations — removed drop-shadow filters */
 .campaign-grid-frame::before {
   content: '🌿';
   position: absolute;
   top: -13px; left: -9px;
   font-size: 19px;
   transform: rotate(-22deg);
-  filter: drop-shadow(0 0 5px rgba(40,180,30,0.55));
   z-index: 3;
   pointer-events: none;
 }
@@ -121,7 +115,6 @@
   position: absolute;
   bottom: -11px; right: -9px;
   font-size: 17px;
-  filter: drop-shadow(0 0 5px rgba(40,180,30,0.55));
   z-index: 3;
   pointer-events: none;
 }
@@ -265,12 +258,12 @@
 .campaign-boss-banner::after  { right: -8px; }
 
 /* ── 11. COMBAT NOTIFICATIONS ────────────────────────────── */
+/* Removed backdrop-filter: blur — expensive on mobile */
 .campaign-combat-notif {
-  background: rgba(10,25,8,0.88) !important;
+  background: rgba(10,25,8,0.92) !important;
   border: 1px solid rgba(80,180,50,0.4) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-  backdrop-filter: blur(4px) !important;
 }
 
 /* ── 12. WARNING BANNERS ─────────────────────────────────── */
@@ -340,13 +333,13 @@
 }
 
 /* ── 14. DAMAGE POPUP POLISH ─────────────────────────────── */
+/* Removed drop-shadow filter — text-shadow is sufficient */
 .damage-popup {
   font-family: 'Cinzel', serif !important;
   font-weight: 900 !important;
   text-shadow:
     0 0 10px currentColor,
     2px 2px 4px rgba(0,0,0,0.8) !important;
-  filter: drop-shadow(0 0 6px currentColor) !important;
 }
 
 /* ── 15. ENRAGE TIMER (blink đỏ khi enrage) ─────────────── */

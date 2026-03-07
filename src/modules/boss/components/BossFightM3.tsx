@@ -339,8 +339,8 @@ export default function BossFightM3({
           <div className={`animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''}`}
             style={{
               filter: enrageMultiplier >= 1.3
-                ? `drop-shadow(0 0 20px rgba(231,76,60,0.5)) drop-shadow(0 0 10px rgba(255,50,50,${Math.min(0.8, (enrageMultiplier - 1.3) * 2 + 0.4)}))`
-                : 'drop-shadow(0 0 20px rgba(231,76,60,0.5))',
+                ? `drop-shadow(0 0 15px rgba(231,76,60,${Math.min(0.6, (enrageMultiplier - 1.3) * 2 + 0.3)}))`
+                : undefined,
               transition: 'filter 1s ease',
             }}>
             {bossInfo.image ? (

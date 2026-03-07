@@ -155,25 +155,13 @@ export function processCampaignMatchesImpl(
         else if (g.special === 'striped_v') deps.addBlastVfx('col', idx % 8);
       }
 
-      // Trigger Particle Burst
-      if (deps.addParticleBurst) {
-        let color = '#ffffff';
-        let burstType: 'burst' | 'fire' | 'heal' = 'burst';
-        let floatingText = '';
-
-        if (g.special === 'rainbow') { color = '#a855f7'; } // Purple
-        else if (g.type === 'atk') {
-          color = '#ef4444'; // Red (Fire)
-          burstType = 'fire';
-        }
-        else if (g.type === 'def') { color = '#3b82f6'; } // Blue (Shield)
-        else if (g.type === 'hp') {
-          color = '#22c55e'; // Green (Heal)
-          burstType = 'heal';
-        }
-        else if (g.type === 'star') { color = '#eab308'; } // Yellow (Star)
-
-        deps.addParticleBurst(idx, color, burstType);
+      // Trigger Particle Burst — only for special gems to reduce lag
+      if (deps.addParticleBurst && g.special) {
+        const color = g.special === 'rainbow' ? '#a855f7'
+          : g.type === 'atk' ? '#ef4444'
+          : g.type === 'star' ? '#eab308'
+          : '#ffffff';
+        deps.addParticleBurst(idx, color, 'burst');
       }
     }
   });

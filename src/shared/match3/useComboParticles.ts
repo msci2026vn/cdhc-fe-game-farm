@@ -17,16 +17,20 @@ export function useComboParticles(combo: number, showCombo: boolean) {
     const vfx = COMBO_VFX[comboInfo.label];
     if (!vfx) return;
 
-    const particles = vfx.particles.flatMap((char) =>
-      Array.from({ length: 2 }, () => ({
-        id: particleId.current++,
-        char,
-        x: 20 + Math.random() * 60,
-        y: 10 + Math.random() * 30,
-        expiresAt: Date.now() + 1200,
-      }))
-    );
-    setComboParticles(prev => [...prev, ...particles]);
+    // Only use first 2 particle chars and 1 instance each to reduce DOM elements
+    const chars = vfx.particles.slice(0, 2);
+    const particles = chars.map((char) => ({
+      id: particleId.current++,
+      char,
+      x: 20 + Math.random() * 60,
+      y: 10 + Math.random() * 30,
+      expiresAt: Date.now() + 1000,
+    }));
+    setComboParticles(prev => {
+      // Cap max particles to prevent accumulation
+      const next = prev.length > 6 ? prev.slice(-4) : prev;
+      return [...next, ...particles];
+    });
   }, [combo, showCombo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ GC Ticker ═══
