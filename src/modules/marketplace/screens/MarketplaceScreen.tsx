@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import type { NavigateFunction } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { marketplaceApi, type MarketplaceListing } from '@/shared/api/api-marketplace';
 import BottomNav from '@/shared/components/BottomNav';
@@ -52,15 +53,17 @@ function BuyConfirmModal({
   listing,
   onClose,
   onSuccess,
+  navigate,
 }: {
   listing: MarketplaceListing;
   onClose: () => void;
   onSuccess: () => void;
+  navigate: NavigateFunction;
 }) {
   const r = RARITY[listing.boss.difficulty] || RARITY.hard;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState<{ snowscan: string } | null>(null);
+  const [success, setSuccess] = useState<{ snowscan: string; feePercent: number; feeAvax: string } | null>(null);
 
   const handleBuy = async () => {
     setLoading(true);
@@ -69,7 +72,11 @@ function BuyConfirmModal({
       const result = await marketplaceApi.buyNft(listing.id);
       if (result.ok) {
         playSound('ui_click');
-        setSuccess({ snowscan: result.sale?.snowscanNft || '' });
+        setSuccess({
+          snowscan: result.sale?.snowscan?.nft || '',
+          feePercent: result.sale?.feePercent ?? 5,
+          feeAvax: result.sale?.feeAvax ?? '',
+        });
         onSuccess();
       } else {
         setError(result.error || 'Mua thất bại');
@@ -86,8 +93,24 @@ function BuyConfirmModal({
         {success ? (
           <div className="text-center space-y-3">
             <div className="text-5xl">🎉</div>
-            <h3 className="text-green-400 text-lg font-bold">Mua thành công!</h3>
-            <p className="text-gray-300 text-sm">Card đã vào Bộ Sưu Tập của bạn</p>
+            <h3 className="text-green-400 text-lg font-bold">Mua NFT thành công!</h3>
+            <p className={`text-sm font-bold ${r.color}`}>{listing.boss.name} — {r.label}</p>
+            <div className="bg-gray-700/60 rounded-xl p-3 space-y-1.5 text-left">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Đã trả:</span>
+                <span className="text-emerald-400 font-bold">{listing.priceAvax} AVAX</span>
+              </div>
+              {success.feeAvax && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Phí GD ({success.feePercent}%):</span>
+                  <span className="text-yellow-400">{success.feeAvax} AVAX</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">NFT đã về bộ sưu tập</span>
+                <span className="text-green-400">✅</span>
+              </div>
+            </div>
             {success.snowscan && (
               <a
                 href={success.snowscan}
@@ -95,9 +118,15 @@ function BuyConfirmModal({
                 rel="noopener noreferrer"
                 className="block py-2 bg-blue-600/20 border border-blue-500/40 rounded-xl text-blue-400 text-sm font-medium hover:bg-blue-600/30 transition-colors"
               >
-                🔗 Xem trên Snowscan
+                🔍 Xem trên Snowscan ↗
               </a>
             )}
+            <button
+              onClick={() => { onClose(); navigate('/nft-gallery'); }}
+              className="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white text-sm font-bold transition-colors"
+            >
+              🎴 Đến Bộ Sưu Tập
+            </button>
             <button
               onClick={onClose}
               className="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium"
@@ -485,6 +514,7 @@ export default function MarketplaceScreen() {
           listing={buyTarget}
           onClose={() => setBuyTarget(null)}
           onSuccess={handleBuySuccess}
+          navigate={navigate}
         />
       )}
     </div>

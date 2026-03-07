@@ -50,7 +50,7 @@ export const marketplaceApi = {
     return response.json();
   },
 
-  buyNft: async (listingId: string): Promise<{ ok: boolean; sale?: { nftTxHash: string; avaxTxHash: string; snowscanNft: string }; error?: string }> => {
+  buyNft: async (listingId: string): Promise<{ ok: boolean; sale?: { tokenId: number; priceAvax: string; feePercent: number; feeAvax: string; sellerReceives: string; nftTxHash: string; paymentTxHash: string; snowscan: { nft: string; payment: string | null; fee: string | null; seller: string | null } }; error?: string }> => {
     const response = await fetch(API_BASE_URL + `/api/marketplace/buy/${listingId}`, {
       method: 'POST',
       credentials: 'include',
