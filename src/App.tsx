@@ -61,6 +61,7 @@ const WorldBossScreen = lazyWithRetry(() => import('@/modules/world-boss/screens
 const NftGalleryScreen = lazyWithRetry(() => import('@/modules/nft/screens/NftGalleryScreen'));
 const MarketplaceScreen = lazyWithRetry(() => import('@/modules/marketplace/screens/MarketplaceScreen'));
 const AdminMarketplaceScreen = lazyWithRetry(() => import('@/modules/admin/screens/AdminMarketplaceScreen'));
+const AdminWalletMonitorScreen = lazyWithRetry(() => import('@/modules/admin/screens/AdminWalletMonitorScreen'));
 const AuctionLobbyScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionLobbyScreen'));
 const AuctionHistoryScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionHistoryScreen'));
 const AuctionRoomScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionRoomScreen'));
@@ -139,6 +140,7 @@ const AuthenticatedApp = () => {
         <Route path="/nft-gallery" element={<NftGalleryScreen />} />
         <Route path="/marketplace" element={<MarketplaceScreen />} />
         <Route path="/admin/marketplace" element={<AdminMarketplaceScreen />} />
+        <Route path="/admin/wallets" element={<AdminWalletMonitorScreen />} />
         <Route path="/auction" element={<AuctionLobbyScreen />} />
         <Route path="/auction/history" element={<AuctionHistoryScreen />} />
         <Route path="/auction/:id" element={<AuctionRoomScreen />} />
