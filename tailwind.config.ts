@@ -208,8 +208,9 @@ export default {
           "100%": { transform: "translateY(-30px) scale(0.3)", opacity: "0" },
         },
         "ult-glow": {
-          "0%, 100%": { boxShadow: "0 4px 15px rgba(108,92,231,0.4)" },
-          "50%": { boxShadow: "0 4px 25px rgba(108,92,231,0.7)" },
+          // Removed box-shadow animation — constant GPU compositing. Use opacity only.
+          "0%, 100%": { opacity: "0.7" },
+          "50%": { opacity: "1" },
         },
         "gem-pop": {
           // Simplified: removed scale-up and rotate — saves GPU compositing on 20+ gems
@@ -250,9 +251,9 @@ export default {
           "100%": { transform: "rotate(360deg) scale(0)", opacity: "0" },
         },
         "gem-hint": {
-          // Removed filter:brightness — expensive CSS filter on infinite animation
-          "0%, 100%": { transform: "scale(1)", opacity: "0.85" },
-          "50%": { transform: "scale(1.1)", opacity: "1" },
+          // Simplified: opacity-only pulse — no transform to avoid 64-gem layout thrash
+          "0%, 100%": { opacity: "0.7" },
+          "50%": { opacity: "1" },
         },
         "bug-wiggle": {
           "0%, 100%": { transform: "rotate(-8deg) scale(1)" },
@@ -330,8 +331,9 @@ export default {
           "100%": { background: "rgba(108,92,231,0.1)" },
         },
         "dodge-pulse": {
-          "0%, 100%": { transform: "scale(1.1)", boxShadow: "0 0 15px rgba(243,156,18,0.5)" },
-          "50%": { transform: "scale(1.2)", boxShadow: "0 0 30px rgba(243,156,18,0.8)" },
+          // Removed box-shadow animation — constant GPU repaint. Transform + opacity only.
+          "0%, 100%": { transform: "scale(1.1)", opacity: "0.8" },
+          "50%": { transform: "scale(1.2)", opacity: "1" },
         },
         "prayer-ascend": {
           "0%": { transform: "translateY(0) scale(1)", opacity: "1" },
@@ -339,8 +341,9 @@ export default {
           "100%": { transform: "translateY(-120px) scale(0.5)", opacity: "0" },
         },
         "prayer-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(168,85,247,0.3)" },
-          "50%": { boxShadow: "0 0 20px 10px rgba(168,85,247,0.5)" },
+          // Removed box-shadow animation — constant GPU repaint. Opacity only.
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "1" },
         },
         "button-vibrate": {
           "0%, 100%": { transform: "translateX(0)" },
@@ -355,10 +358,11 @@ export default {
           "100%": { transform: "scale(1)" },
         },
         "gem-spawn": {
+          // Removed filter:brightness — expensive CSS filter per spawning gem
           "0%": { transform: "scale(0)", opacity: "0" },
-          "50%": { transform: "scale(1.3)", opacity: "1", filter: "brightness(1.5)" },
+          "50%": { transform: "scale(1.3)", opacity: "1" },
           "70%": { transform: "scale(0.9)" },
-          "100%": { transform: "scale(1)", filter: "brightness(1)" },
+          "100%": { transform: "scale(1)" },
         },
         "combat-float-up": {
           "0%": { transform: "translateY(0) scale(0.8)", opacity: "0" },
@@ -367,8 +371,9 @@ export default {
           "100%": { transform: "translateY(-60px) scale(0.9)", opacity: "0" },
         },
         "fire-flicker": {
-          "0%": { filter: "drop-shadow(0 0 4px #ff2200) drop-shadow(0 0 10px #ff4400)" },
-          "100%": { filter: "drop-shadow(0 0 8px #ff6600) drop-shadow(0 0 20px #ffaa00)" },
+          // Removed drop-shadow filter — extremely expensive on mobile. Opacity only.
+          "0%": { opacity: "0.8" },
+          "100%": { opacity: "1" },
         },
 
         "screen-shake-violent": {
@@ -388,14 +393,16 @@ export default {
           "100%": { opacity: "0.8" },
         },
         "bolt-flash": {
+          // Removed filter:brightness — expensive per lightning bolt
           "0%": { opacity: "0" },
-          "10%": { opacity: "1", filter: "brightness(2)" },
+          "10%": { opacity: "1" },
           "100%": { opacity: "0" },
         },
         "heal-pulse": {
-          "0%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.8)" },
-          "50%": { boxShadow: "0 0 20px 8px rgba(34, 197, 94, 0.6)" },
-          "100%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0)" },
+          // Removed box-shadow animation — expensive GPU repaint. Opacity only.
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "50%": { opacity: "1", transform: "scale(1.05)" },
+          "100%": { opacity: "0", transform: "scale(1)" },
         },
         "hp-damage-flash": {
           "0%": { backgroundColor: "rgba(239, 68, 68, 0.6)", borderColor: "rgba(239, 68, 68, 0.8)" },
