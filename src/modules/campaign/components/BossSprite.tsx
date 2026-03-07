@@ -54,9 +54,7 @@ export function BossSprite({
     <div
       className={`${wrapperClasses} ${className}`}
       style={{
-        // Use box-shadow instead of filter: drop-shadow (much cheaper)
-        filter: bossDead ? 'grayscale(1) opacity(0.3)' : undefined,
-        transition: 'box-shadow 1s ease',
+        opacity: bossDead ? 0.3 : undefined,
       }}
     >
       {src ? (
@@ -65,7 +63,7 @@ export function BossSprite({
           src={src}
           alt={name}
           className="w-40 h-40 object-contain select-none pointer-events-none"
-          style={borderGlow !== 'none' ? { filter: `drop-shadow(${borderGlow.split(',')[0].trim()})` } : undefined}
+          /* Removed filter:drop-shadow — too expensive on mobile GPU */
           draggable={false}
         />
       ) : (

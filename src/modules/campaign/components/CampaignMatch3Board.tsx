@@ -6,25 +6,21 @@ import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
 import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
 
-// Fix: Tailwind JIT purge-safe gem colors — inline styles bypass dynamic class scanning
-// ⚔️ atk  = đỏ (red)   💛 star = vàng (gold)   🛡️ def = xanh nước biển   💚 hp = xanh lá
+// ═══ Candy Crush-style gem colors ═══
+// Bright, vibrant flat gradients — no box-shadow per gem (saves 64 GPU compositing layers)
+// ⚔️ atk = đỏ tươi   💛 star = vàng rực   🛡️ def = xanh biển   💚 hp = xanh lá
 const GEM_STYLES: Record<string, React.CSSProperties> = {
-    atk: {
-        background: 'linear-gradient(145deg, #ff3b2f 0%, #c0150a 100%)',
-        boxShadow: '0 2px 6px rgba(220, 38, 38, 0.4)',
-    },
-    hp: {
-        background: 'linear-gradient(145deg, #22c55e 0%, #15803d 100%)',
-        boxShadow: '0 2px 6px rgba(34, 197, 94, 0.4)',
-    },
-    def: {
-        background: 'linear-gradient(145deg, #38bdf8 0%, #1d4ed8 100%)',
-        boxShadow: '0 2px 6px rgba(59, 130, 246, 0.4)',
-    },
-    star: {
-        background: 'linear-gradient(145deg, #fde047 0%, #ca8a04 100%)',
-        boxShadow: '0 2px 6px rgba(234, 179, 8, 0.4)',
-    },
+    atk: { background: 'linear-gradient(160deg, #ff6b6b 0%, #ee5a24 100%)' },
+    hp:  { background: 'linear-gradient(160deg, #55efc4 0%, #00b894 100%)' },
+    def: { background: 'linear-gradient(160deg, #74b9ff 0%, #0984e3 100%)' },
+    star:{ background: 'linear-gradient(160deg, #ffeaa7 0%, #fdcb6e 100%)' },
+};
+
+// Pre-computed grid styles to avoid creating new objects every render
+const GRID_STYLES = {
+    normal: { background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(120,80,30,0.3)', touchAction: 'none' as const, borderRadius: 10, padding: 2, flex: 1 },
+    otHiem: { background: 'rgba(231,76,60,0.08)', border: '2px solid rgba(231,76,60,0.5)', touchAction: 'none' as const, borderRadius: 10, padding: 2, flex: 1 },
+    romBoc: { background: 'rgba(39,174,96,0.08)', border: '2px solid rgba(39,174,96,0.5)', touchAction: 'none' as const, borderRadius: 10, padding: 2, flex: 1 },
 };
 
 interface Props {
@@ -67,34 +63,13 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
             <FloatingCombatText data={floatingTexts} />
 
             {/* ── Wooden frame wrapper (matching HTML mockup .grid-frame) ── */}
-            <div className="campaign-grid-frame relative w-full h-full flex flex-col" style={{
-                background: 'linear-gradient(180deg, #2a1500 0%, #0d0804 100%)',
-                border: '4px solid #a06018',
-                borderRadius: 14,
-                padding: 5,
-                boxShadow: '0 0 0 2px #3d1f08, 0 8px 28px rgba(0,0,0,0.7)',
-            }}>
+            <div className="campaign-grid-frame relative w-full h-full flex flex-col" style={{ padding: 4 }}>
                 {showCombo && combo >= 3 && (
                     <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
                 )}
-                <div className={`grid grid-cols-8 gap-[3px] rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''}`}
+                <div className={`grid grid-cols-8 gap-[2px] rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''}`}
                     onPointerMove={handlePointerMove}
-                    style={{
-                        background: otHiemActive
-                            ? 'rgba(231,76,60,0.08)'
-                            : romBocActive
-                                ? 'rgba(39,174,96,0.08)'
-                                : 'rgba(0,0,0,0.25)',
-                        border: otHiemActive
-                            ? '2px solid rgba(231,76,60,0.5)'
-                            : romBocActive
-                                ? '2px solid rgba(39,174,96,0.5)'
-                                : '1px solid rgba(120,80,30,0.4)',
-                        touchAction: 'none',
-                        borderRadius: 10,
-                        padding: 3,
-                        flex: 1,
-                    }}>
+                    style={otHiemActive ? GRID_STYLES.otHiem : romBocActive ? GRID_STYLES.romBoc : GRID_STYLES.normal}>
                     {grid.map((gem, i) => {
                         const meta = GEM_META[gem.type];
                         const isSelected = selected === i;
@@ -106,7 +81,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                                 onPointerDown={(e: any) => handlePointerDown(i, e)}
                                 onPointerUp={handlePointerUp}
                                 style={sp !== 'rainbow' ? GEM_STYLES[gem.type] ?? GEM_STYLES.atk : undefined}
-                                className={`aspect-square rounded-md flex items-center justify-center text-[16px] cursor-pointer relative gem-shine
+                                className={`aspect-square rounded-lg flex items-center justify-center text-[19px] cursor-pointer relative
                 ${sp === 'rainbow' ? 'gem-rainbow' : ''}
                 ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
                 ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}
@@ -114,10 +89,10 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                 ${sp === 'rainbow' ? 'gem-special-rainbow' : ''}
                 ${spawningGems.has(gem.id) ? 'gem-special-spawn' : ''}
                 ${isSelected ? 'ring-2 ring-white scale-110 z-10' : 'active:scale-[0.88]'}
-                ${isMatched ? `animate-gem-pop gem-match-burst gem-${gem.type}` : ''}
+                ${isMatched ? `animate-gem-pop gem-${gem.type}` : ''}
                 ${animating && !isMatched ? 'pointer-events-none' : ''}
                 ${lockedGems.has(i) ? 'opacity-50 ring-1 ring-gray-500' : ''}
-                ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
+                ${highlightedGem === i ? 'ring-2 ring-yellow-400 z-10' : ''}
                 ${isHinted && !animating ? 'animate-gem-hint z-20' : ''}
               `}>
                                 {sp === 'rainbow' ? '🌈' : meta.emoji}

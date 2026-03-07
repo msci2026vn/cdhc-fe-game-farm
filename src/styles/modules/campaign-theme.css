@@ -87,16 +87,10 @@
 /* Cần thêm className="campaign-grid-frame" vào div wooden frame
    trong CampaignMatch3Board.tsx (xem APPLY_GUIDE.md bước 2)    */
 .campaign-grid-frame {
-  border: 5px solid var(--c-wood-border) !important;
-  /* Nâu gỗ tối — không dùng xanh để các màu gem nổi bật */
-  background: linear-gradient(180deg, #2a1500 0%, #0d0804 100%) !important;
-  border-radius: 16px !important;
-  box-shadow:
-    0 0 0 3px var(--c-wood-dark),
-    0 0 0 6px rgba(140,80,15,0.35),
-    0 12px 36px rgba(0,0,0,0.78),
-    inset 0 1px 0 rgba(255,200,80,0.12),
-    inset 0 0 22px rgba(0,0,0,0.35) !important;
+  border: 4px solid var(--c-wood-border) !important;
+  background: linear-gradient(180deg, #1a0e00 0%, #0a0604 100%) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 0 0 2px var(--c-wood-dark), 0 8px 24px rgba(0,0,0,0.6) !important;
   position: relative;
 }
 
@@ -119,15 +113,11 @@
   pointer-events: none;
 }
 
-/* Grid cells — KHÔNG set background ở đây để GEM_STYLES inline có hiệu lực */
-/* Removed transition on 64 gems — was 192 CSS transitions running simultaneously */
-/* Removed hover filter:brightness — expensive CSS filter on mobile */
+/* Grid cells — flat, clean, no heavy shadows */
+/* Removed: inset box-shadows (128 GPU layers), transitions, hover filters */
 .campaign-grid-frame .grid > * {
   border-radius: 8px !important;
-  border: 1.5px solid rgba(80,60,40,0.5) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 -2px 0 rgba(0,0,0,0.35) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
 }
 
 /* ── 8. PLAYER HUD AREA ──────────────────────────────────── */
