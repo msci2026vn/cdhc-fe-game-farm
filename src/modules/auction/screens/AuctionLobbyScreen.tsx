@@ -4,6 +4,7 @@ import { useAuctionList, useNextSession, useCancelQueueItem, useMyQueue } from '
 import { AuctionCountdown } from '../components/AuctionCountdown';
 import { AuctionNftCard } from '../components/AuctionNftCard';
 import BottomNav from '@/shared/components/BottomNav';
+import { ConfirmModal } from '@/shared/components/ConfirmModal';
 import { playSound } from '@/shared/audio';
 import type { AuctionQueueItem } from '../types/auction.types';
 
@@ -24,6 +25,7 @@ const auctionSubTabs: { key: SubTab; label: string }[] = [
 export default function AuctionLobbyScreen() {
   const [mainTab, setMainTab] = useState<MainTab>('auction');
   const [subTab, setSubTab] = useState<SubTab>('spotlight');
+  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
   const navigate = useNavigate();
   const { data: nextSession } = useNextSession();
   const { data: auctions, isLoading } = useAuctionList(
@@ -183,11 +185,7 @@ export default function AuctionLobbyScreen() {
                     </span>
                     {item.status === 'queued' && (
                       <button
-                        onClick={() => {
-                          if (confirm('Rút NFT khỏi hàng chờ?')) {
-                            cancelQueue.mutate(item.id);
-                          }
-                        }}
+                        onClick={() => setCancelTarget(item.id)}
                         disabled={cancelQueue.isPending}
                         className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
                       >
@@ -209,6 +207,25 @@ export default function AuctionLobbyScreen() {
       </div>
 
       <div className="z-50 shrink-0"><BottomNav /></div>
+
+      <ConfirmModal
+        isOpen={!!cancelTarget}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={() => {
+          if (cancelTarget) {
+            cancelQueue.mutate(cancelTarget, {
+              onSettled: () => setCancelTarget(null),
+            });
+          }
+        }}
+        title="Rút NFT khỏi hàng chờ?"
+        message="NFT sẽ được trả về Bộ Sưu Tập của bạn. Bạn có thể gửi lại bất cứ lúc nào."
+        confirmText="Rút về"
+        cancelText="Huỷ"
+        confirmColor="red"
+        icon="↩️"
+        isLoading={cancelQueue.isPending}
+      />
     </div>
   );
 }

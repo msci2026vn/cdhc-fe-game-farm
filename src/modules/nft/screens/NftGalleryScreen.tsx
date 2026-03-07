@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { nftApi, type NftCard } from '@/shared/api/api-nft';
 import { marketplaceApi } from '@/shared/api/api-marketplace';
 import { CreateAuctionModal } from '@/modules/auction/components/CreateAuctionModal';
+import { useMyQueue } from '@/modules/auction/hooks/useAuction';
 import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
+import type { AuctionQueueItem } from '@/modules/auction/types/auction.types';
 
 const RARITY: Record<string, { color: string; bg: string; border: string; label: string }> = {
   normal: { color: 'text-gray-400', bg: 'bg-gray-500/20', border: 'border-gray-500/40', label: 'Common' },
@@ -24,18 +26,44 @@ const ELEMENT_ICON: Record<string, string> = {
   fire: '🔥', ice: '❄️', water: '💧', wind: '🌪️', poison: '☠️', chaos: '🌀',
 };
 
-function CardGrid({ cards, onSelect }: { cards: NftCard[]; onSelect: (c: NftCard) => void }) {
+function CardGrid({
+  cards,
+  onSelect,
+  queueMap,
+  onAuctionBadgeClick,
+}: {
+  cards: NftCard[];
+  onSelect: (c: NftCard) => void;
+  queueMap: Record<number, AuctionQueueItem>;
+  onAuctionBadgeClick: () => void;
+}) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {cards.map((card) => {
         const r = RARITY[card.bossDifficulty || 'hard'] || RARITY.hard;
         const ct = CARD_TYPE[card.nftCardType] || CARD_TYPE.last_hit;
+        const queueItem = card.nftTokenId ? queueMap[card.nftTokenId] : undefined;
+        const isInQueue = !!queueItem;
+
         return (
           <button
             key={`${card.eventId}-${card.nftCardType}`}
-            onClick={() => { playSound('ui_click'); onSelect(card); }}
-            className={`rounded-2xl border ${r.border} ${r.bg} overflow-hidden text-left transition-transform active:scale-95`}
+            onClick={() => {
+              playSound('ui_click');
+              if (isInQueue) {
+                onAuctionBadgeClick();
+                return;
+              }
+              onSelect(card);
+            }}
+            className={`rounded-2xl border ${r.border} ${r.bg} overflow-hidden text-left transition-transform active:scale-95 relative`}
           >
+            {/* Auction badge */}
+            {isInQueue && (
+              <div className="absolute top-2 left-2 z-10 bg-yellow-500/90 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-tight">
+                ⚡ Đang đấu giá
+              </div>
+            )}
             {card.nftCardImageUrl ? (
               <img
                 src={card.nftCardImageUrl}
@@ -417,12 +445,24 @@ export default function NftGalleryScreen() {
     queryFn: () => nftApi.getMyCards(),
     staleTime: 30_000,
   });
+  const { data: myQueue } = useMyQueue();
   const [selected, setSelected] = useState<NftCard | null>(null);
   const [sellCard, setSellCard] = useState<NftCard | null>(null);
   const [withdrawCard, setWithdrawCard] = useState<NftCard | null>(null);
   const [auctionCard, setAuctionCard] = useState<NftCard | null>(null);
 
   const mintedCards = cards.filter(c => c.nftMintStatus === 'minted');
+
+  const queueMap = useMemo(() => {
+    if (!myQueue) return {} as Record<number, AuctionQueueItem>;
+    const map: Record<number, AuctionQueueItem> = {};
+    for (const item of myQueue) {
+      if (['queued', 'assigned', 'active'].includes(item.status)) {
+        map[item.tokenId] = item;
+      }
+    }
+    return map;
+  }, [myQueue]);
 
   const handleSellRequest = (card: NftCard) => {
     setSelected(null);
@@ -491,7 +531,12 @@ export default function NftGalleryScreen() {
         ) : (
           <>
             <p className="text-gray-400 text-xs mb-3">{mintedCards.length} thẻ</p>
-            <CardGrid cards={mintedCards} onSelect={setSelected} />
+            <CardGrid
+              cards={mintedCards}
+              onSelect={setSelected}
+              queueMap={queueMap}
+              onAuctionBadgeClick={() => { playSound('ui_click'); navigate('/auction'); }}
+            />
           </>
         )}
       </main>
