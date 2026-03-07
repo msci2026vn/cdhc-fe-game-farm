@@ -57,7 +57,7 @@ export default function ManaBar({ mana, maxMana, dodgeCost, ultCost, ultCharge =
             boxShadow: ultReady
               ? '0 0 10px rgba(253,121,168,0.5)'
               : '0 0 6px rgba(108,92,231,0.3)',
-            animation: ultReady ? 'pulse 1.5s ease-in-out infinite' : undefined,
+            // Removed infinite pulse animation — GPU repaint every frame
           }} />
 
         {/* Dodge cost marker */}

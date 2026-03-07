@@ -122,7 +122,7 @@ function CircleSkillBtn({
     return (
         <div className={`flex flex-col items-center gap-1.5 cursor-pointer ${className ?? ''}`} onClick={() => { if (canClick) { playSound('ui_click'); onClick(); } }}>
             <div
-                className="relative flex items-center justify-center active:scale-95 transition-transform"
+                className="relative flex items-center justify-center active:scale-95"
                 style={{
                     width: dim,
                     height: dim,
@@ -131,24 +131,19 @@ function CircleSkillBtn({
                     background: bgStyle,
                     boxShadow: shadowStyle,
                     opacity: isLocked ? 0.5 : onCooldown && !isActive ? 0.65 : 1,
-                    animation: isUlt && ultReady
-                        ? 'ult-glow-pulse 2s ease-in-out infinite'
-                        : isDodgeWindow && !onCooldown
-                            ? 'dodge-danger-pulse 0.7s ease-in-out infinite'
-                            : undefined,
+                    // Removed infinite animations ult-glow-pulse + dodge-danger-pulse — constant GPU box-shadow repaints
                 }}
             >
-                {/* ULT arc progress */}
-                {isUlt && (ultChargePct ?? 0) < 100 && (
-                    <div className="absolute inset-[-4px] rounded-full pointer-events-none" style={{
-                        background: `conic-gradient(rgba(180,120,255,0.55) 0deg, rgba(200,140,255,0.65) ${(ultChargePct ?? 0) * 3.6}deg, rgba(255,255,255,0.06) ${(ultChargePct ?? 0) * 3.6}deg)`,
-                    }} />
+                {/* ULT charge indicator — simple border opacity instead of conic-gradient */}
+                {isUlt && (ultChargePct ?? 0) < 100 && (ultChargePct ?? 0) > 0 && (
+                    <div className="absolute inset-[-4px] rounded-full pointer-events-none"
+                        style={{ border: '3px solid rgba(180,120,255,0.5)', opacity: (ultChargePct ?? 0) / 100 }} />
                 )}
 
                 {/* Cooldown overlay */}
                 {onCooldown && (
                     <div className="absolute inset-0 rounded-full flex items-center justify-center z-10"
-                        style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(1px)' }}>
+                        style={{ background: 'rgba(0,0,0,0.78)' }}>
                         <span className="text-white font-bold text-sm">{cooldownSec}s</span>
                     </div>
                 )}
@@ -162,15 +157,15 @@ function CircleSkillBtn({
                 )}
 
                 {/* Icon */}
-                <span className="text-2xl relative z-10 select-none drop-shadow-md"
-                    style={{ filter: isLocked || (onCooldown && !isActive) ? 'grayscale(80%)' : undefined }}>
+                <span className="text-2xl relative z-10 select-none"
+                    style={{ opacity: isLocked || (onCooldown && !isActive) ? 0.4 : 1 }}>
                     {icon}
                 </span>
 
                 {/* Active duration bar (bottom arc) */}
                 {isActive && (
                     <div className="absolute inset-0 rounded-full pointer-events-none"
-                        style={{ border: `2px solid rgba(255,255,255,0.4)`, animation: 'pulse 1.2s ease-in-out infinite' }} />
+                        style={{ border: `2px solid rgba(255,255,255,0.4)` }} />
                 )}
 
                 {/* "top shine" gloss */}
@@ -219,6 +214,8 @@ export default function CampaignPlayerHUD({
     const hasDodgeMana = boss.mana >= manaDodgeCost;
     const hasUltMana = boss.mana >= manaUltCost;
     const ultOnCooldown = (boss.ultCooldown ?? 0) > 0;
+    // Pre-compute burn check once instead of 2x .some() in JSX
+    const isBurning = activeDebuffs.length > 0 && activeDebuffs.some(d => d.type === 'burn');
 
     return (
         <>
@@ -226,7 +223,7 @@ export default function CampaignPlayerHUD({
             {activeDebuffs.length > 0 && (
                 <div className="flex gap-1.5 mb-1 flex-wrap">
                     {activeDebuffs.map((d, i) => (
-                        <span key={`${d.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
+                        <span key={`${d.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                             style={{
                                 background: d.type === 'burn' ? 'rgba(231,76,60,0.3)' :
                                     d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' :
@@ -245,8 +242,7 @@ export default function CampaignPlayerHUD({
             )}
 
             {/* Player HP bar */}
-            <div className={`relative ${activeDebuffs.some(d => d.type === 'burn') ? 'ring-1 ring-orange-500/50' : ''}`}
-                style={activeDebuffs.some(d => d.type === 'burn') ? { boxShadow: '0 0 12px rgba(231,76,60,0.3), inset 0 0 8px rgba(231,76,60,0.15)' } : {}}>
+            <div className={`relative ${isBurning ? 'ring-1 ring-orange-500/50' : ''}`}>
                 <PlayerHPBar
                     hp={boss.playerHp}
                     maxHp={boss.playerMaxHp}
@@ -275,7 +271,7 @@ export default function CampaignPlayerHUD({
 
             {/* Skill warning inline */}
             {skillWarning && (
-                <div className="text-center py-1 pointer-events-none animate-pulse">
+                <div className="text-center py-1 pointer-events-none">
                     <span className="bg-red-900/80 text-red-300 px-4 py-1 rounded-full text-sm font-bold">
                         ⚡ Đòn mạnh đang đến!
                     </span>
