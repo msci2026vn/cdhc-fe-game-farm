@@ -25,7 +25,7 @@ export const auctionKeys = {
 // QUERIES (6)
 // ══════════════════════════════════
 
-/** Danh sach auction (lobby) — poll 10s */
+/** Danh sách auction (lobby) — poll 10s */
 export function useAuctionList(sessionId?: string, status?: string) {
   return useQuery({
     queryKey: auctionKeys.list(sessionId, status),
@@ -43,7 +43,7 @@ export function useNextSession() {
   });
 }
 
-/** Chi tiet auction — polling rieng boi useAuctionPolling */
+/** Chi tiết auction — polling riêng bởi useAuctionPolling */
 export function useAuctionDetail(id: string, enabled = true) {
   return useQuery({
     queryKey: auctionKeys.detail(id),
@@ -53,7 +53,7 @@ export function useAuctionDetail(id: string, enabled = true) {
   });
 }
 
-/** Danh sach auction da bid */
+/** Danh sách auction đã bid */
 export function useMyBids(enabled = true) {
   return useQuery({
     queryKey: auctionKeys.myBids,
@@ -62,7 +62,7 @@ export function useMyBids(enabled = true) {
   });
 }
 
-/** Danh sach auction da dang ban */
+/** Danh sách auction đã đăng bán */
 export function useMyListings(enabled = true) {
   return useQuery({
     queryKey: auctionKeys.myListings,
@@ -124,7 +124,7 @@ export function useCancelAuction() {
       useUIStore.getState().addToast('Đã hủy đấu giá', 'success');
     },
     onError: (error: any) => {
-      useUIStore.getState().addToast(error.message || 'Khong the huy', 'error');
+      useUIStore.getState().addToast(error.message || 'Không thể hủy', 'error');
     },
   });
 }
@@ -136,10 +136,10 @@ export function useWithdrawBid() {
     mutationFn: (auctionId: string) => auctionApi.withdraw(auctionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: auctionKeys.all });
-      useUIStore.getState().addToast('Da rut ve thanh cong', 'success');
+      useUIStore.getState().addToast('Đã rút về thành công', 'success');
     },
     onError: (error: Error) => {
-      useUIStore.getState().addToast(error.message || 'Khong the rut', 'error');
+      useUIStore.getState().addToast(error.message || 'Không thể rút', 'error');
     },
   });
 }
