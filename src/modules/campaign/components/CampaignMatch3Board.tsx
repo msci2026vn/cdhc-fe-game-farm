@@ -6,14 +6,14 @@ import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
 import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
 
-// ═══ Candy Crush-style gem colors — SOLID FLAT (maximum GPU performance) ═══
-// No gradient, no shadow, no 3D — just bright solid colors
-// ⚔️ atk = đỏ tươi   💛 star = vàng rực   🛡️ def = xanh biển   💚 hp = xanh lá
+// ═══ Candy Crush-style gem colors — static gradient (painted once, no GPU repaint) ═══
+// Static linear-gradient is fine — expensive only when ANIMATED
+// ⚔️ atk = đỏ   💚 hp = xanh lá   🛡️ def = xanh biển   ⭐ star = vàng
 const GEM_STYLES: Record<string, React.CSSProperties> = {
-    atk: { background: '#ff6b6b' },
-    hp:  { background: '#55efc4' },
-    def: { background: '#74b9ff' },
-    star:{ background: '#ffeaa7' },
+    atk: { background: 'linear-gradient(150deg, #ff7070 0%, #cc1a1a 100%)' },
+    hp:  { background: 'linear-gradient(150deg, #55dd77 0%, #1f8c3a 100%)' },
+    def: { background: 'linear-gradient(150deg, #5599ff 0%, #1a44cc 100%)' },
+    star:{ background: 'linear-gradient(150deg, #ffdd33 0%, #cc8800 100%)' },
 };
 
 // Pre-computed grid styles to avoid creating new objects every render
@@ -81,7 +81,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                                 onPointerDown={(e: any) => handlePointerDown(i, e)}
                                 onPointerUp={handlePointerUp}
                                 style={sp !== 'rainbow' ? GEM_STYLES[gem.type] ?? GEM_STYLES.atk : undefined}
-                                className={`aspect-square rounded-md flex items-center justify-center text-[22px] cursor-pointer relative
+                                className={`aspect-square rounded-xl flex items-center justify-center text-[22px] cursor-pointer relative
                 ${sp === 'rainbow' ? 'gem-rainbow' : ''}
                 ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
                 ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}

@@ -340,12 +340,10 @@ export default function BossFightM3({
 
         {/* Boss sprite + damage popups + combo */}
         <div className="flex-1 flex items-center justify-center relative z-10">
-          <div className={`animate-boss-idle ${boss.bossHp <= 0 ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''}`}
+          {/* Removed grayscale filter (expensive GPU) + drop-shadow filter. Use opacity + border glow. */}
+          <div className={`animate-boss-idle ${skillWarning ? 'animate-boss-attack' : ''}`}
             style={{
-              filter: enrageMultiplier >= 1.3
-                ? `drop-shadow(0 0 15px rgba(231,76,60,${Math.min(0.6, (enrageMultiplier - 1.3) * 2 + 0.3)}))`
-                : undefined,
-              transition: 'filter 1s ease',
+              opacity: boss.bossHp <= 0 ? 0.3 : 1,
             }}>
             {bossInfo.image ? (
               <img src={bossInfo.image} alt={bossInfo.name} className="w-40 h-40 object-contain" />

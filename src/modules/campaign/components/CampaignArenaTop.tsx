@@ -113,7 +113,7 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                 {/* Egg */}
                 {egg && (
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center animate-scale-in">
-                        <span className={`text-4xl ${egg.countdown <= 3 ? 'animate-pulse' : 'animate-boss-idle'}`}>🥚</span>
+                        <span className={`text-4xl ${egg.countdown <= 3 ? 'opacity-100' : 'opacity-90'}`}>🥚</span>
                         <div className="w-12 h-1.5 rounded-full bg-gray-700 mt-1 overflow-hidden">
                             <div className="h-full rounded-full transition-all duration-300"
                                 style={{
