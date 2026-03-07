@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { marketplaceApi, type MarketplaceListing } from '@/shared/api/api-marketplace';
@@ -164,10 +165,14 @@ function ListingDetail({
   listing,
   onClose,
   onBuy,
+  onCancel,
+  currentUserId,
 }: {
   listing: MarketplaceListing;
   onClose: () => void;
   onBuy: (l: MarketplaceListing) => void;
+  onCancel: (l: MarketplaceListing) => void;
+  currentUserId?: string;
 }) {
   const r = RARITY[listing.boss.difficulty] || RARITY.hard;
   const ct = CARD_TYPE[listing.nft.cardType] || CARD_TYPE.last_hit;
@@ -220,12 +225,21 @@ function ListingDetail({
             </a>
           )}
 
-          <button
-            onClick={() => { playSound('ui_click'); onBuy(listing); }}
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
-          >
-            Mua — {listing.priceAvax} AVAX
-          </button>
+          {currentUserId === listing.seller.id ? (
+            <button
+              onClick={() => { playSound('ui_click'); onCancel(listing); }}
+              className="w-full py-3 bg-red-600/20 border border-red-500/50 hover:bg-red-600/30 rounded-xl text-red-400 text-sm font-bold transition-colors active:scale-95"
+            >
+              ↩️ Rút về — Huỷ đăng bán
+            </button>
+          ) : (
+            <button
+              onClick={() => { playSound('ui_click'); onBuy(listing); }}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+            >
+              Mua — {listing.priceAvax} AVAX
+            </button>
+          )}
         </div>
 
         <button
@@ -242,6 +256,8 @@ function ListingDetail({
 export default function MarketplaceScreen() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: authData } = useAuth();
+  const currentUserId = authData?.user?.id;
   const { data: listings = [], isLoading } = useQuery({
     queryKey: ['marketplace', 'listings'],
     queryFn: () => marketplaceApi.getListings(),
@@ -250,6 +266,9 @@ export default function MarketplaceScreen() {
 
   const [selected, setSelected] = useState<MarketplaceListing | null>(null);
   const [buyTarget, setBuyTarget] = useState<MarketplaceListing | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<MarketplaceListing | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('all');
   const [sort, setSort] = useState('newest');
 
@@ -272,6 +291,33 @@ export default function MarketplaceScreen() {
   const handleBuySuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['marketplace', 'listings'] });
     queryClient.invalidateQueries({ queryKey: ['nft', 'my-cards'] });
+  };
+
+  const handleCancelRequest = (listing: MarketplaceListing) => {
+    setSelected(null);
+    setCancelTarget(listing);
+    setCancelError('');
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!cancelTarget) return;
+    setCancelLoading(true);
+    setCancelError('');
+    try {
+      const result = await marketplaceApi.cancelListing(cancelTarget.id);
+      if (result.ok) {
+        playSound('ui_click');
+        setCancelTarget(null);
+        queryClient.invalidateQueries({ queryKey: ['marketplace', 'listings'] });
+        queryClient.invalidateQueries({ queryKey: ['marketplace', 'my-listings'] });
+        queryClient.invalidateQueries({ queryKey: ['nft', 'my-cards'] });
+      } else {
+        setCancelError(result.error || 'Rút về thất bại');
+      }
+    } catch {
+      setCancelError('Lỗi kết nối, vui lòng thử lại');
+    }
+    setCancelLoading(false);
   };
 
   return (
@@ -397,7 +443,41 @@ export default function MarketplaceScreen() {
           listing={selected}
           onClose={() => setSelected(null)}
           onBuy={handleBuyRequest}
+          onCancel={handleCancelRequest}
+          currentUserId={currentUserId}
         />
+      )}
+
+      {/* Cancel / Rút về confirm modal */}
+      {cancelTarget && (
+        <div className="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4" onClick={() => setCancelTarget(null)}>
+          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="text-center space-y-2">
+              <div className="text-4xl">🏷️</div>
+              <h3 className="text-white font-bold text-lg">Rút NFT khỏi Chợ?</h3>
+              <p className="text-gray-400 text-sm">NFT sẽ trở về Bộ Sưu Tập. Bạn có thể đăng lại bất cứ lúc nào.</p>
+            </div>
+            {cancelError && (
+              <p className="text-red-400 text-sm text-center bg-red-500/10 rounded-lg py-2">{cancelError}</p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setCancelTarget(null)}
+                disabled={cancelLoading}
+                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                Huỷ
+              </button>
+              <button
+                onClick={handleCancelConfirm}
+                disabled={cancelLoading}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white text-sm font-bold transition-colors disabled:opacity-50"
+              >
+                {cancelLoading ? 'Đang rút...' : '↩️ Rút về'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {buyTarget && (

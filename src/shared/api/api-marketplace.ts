@@ -4,6 +4,7 @@ export interface MarketplaceListing {
   id: string;
   tokenId: number;
   priceAvax: string;
+  status?: string;
   listedAt: string;
   seller: { id: string; name: string };
   nft: {

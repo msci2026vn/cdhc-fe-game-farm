@@ -30,12 +30,16 @@ function CardGrid({
   cards,
   onSelect,
   queueMap,
+  listingMap,
   onAuctionBadgeClick,
+  onListingBadgeClick,
 }: {
   cards: NftCard[];
   onSelect: (c: NftCard) => void;
   queueMap: Record<number, AuctionQueueItem>;
+  listingMap: Record<number, { id: string; priceAvax: string }>;
   onAuctionBadgeClick: () => void;
+  onListingBadgeClick: () => void;
 }) {
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -43,25 +47,28 @@ function CardGrid({
         const r = RARITY[card.bossDifficulty || 'hard'] || RARITY.hard;
         const ct = CARD_TYPE[card.nftCardType] || CARD_TYPE.last_hit;
         const queueItem = card.nftTokenId ? queueMap[card.nftTokenId] : undefined;
+        const listingItem = card.nftTokenId ? listingMap[card.nftTokenId] : undefined;
         const isInQueue = !!queueItem;
+        const isListed = !!listingItem;
+        const isLocked = isInQueue || isListed;
 
         return (
           <button
             key={`${card.eventId}-${card.nftCardType}`}
             onClick={() => {
               playSound('ui_click');
-              if (isInQueue) {
-                onAuctionBadgeClick();
-                return;
-              }
+              if (isInQueue) { onAuctionBadgeClick(); return; }
+              if (isListed) { onListingBadgeClick(); return; }
               onSelect(card);
             }}
             className={`rounded-2xl border ${r.border} ${r.bg} overflow-hidden text-left transition-transform active:scale-95 relative`}
           >
-            {/* Auction badge */}
-            {isInQueue && (
-              <div className="absolute top-2 left-2 z-10 bg-yellow-500/90 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-tight">
-                ⚡ Đang đấu giá
+            {/* Lock overlay */}
+            {isLocked && (
+              <div className="absolute inset-0 bg-black/40 z-10 flex items-end justify-center pb-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isInQueue ? 'bg-yellow-500/90 text-black' : 'bg-purple-500/90 text-white'}`}>
+                  {isInQueue ? '⚡ Đang đấu giá' : '🏷️ Đang bán'}
+                </span>
               </div>
             )}
             {card.nftCardImageUrl ? (
@@ -320,12 +327,20 @@ function CardDetail({
   onSell,
   onWithdraw,
   onAuction,
+  isInQueue,
+  isListed,
+  onGoToAuction,
+  onGoToMarket,
 }: {
   card: NftCard;
   onClose: () => void;
   onSell: (c: NftCard) => void;
   onWithdraw: (c: NftCard) => void;
   onAuction: () => void;
+  isInQueue?: boolean;
+  isListed?: boolean;
+  onGoToAuction?: () => void;
+  onGoToMarket?: () => void;
 }) {
   const r = RARITY[card.bossDifficulty || 'hard'] || RARITY.hard;
   const ct = CARD_TYPE[card.nftCardType] || CARD_TYPE.last_hit;
@@ -404,24 +419,48 @@ function CardDetail({
           {/* Action buttons — only for minted cards with tokenId */}
           {card.nftMintStatus === 'minted' && card.nftTokenId && (
             <div className="space-y-2">
-              <button
-                onClick={() => { playSound('ui_click'); onSell(card); }}
-                className="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
-              >
-                🏪 Bán NFT này
-              </button>
-              <button
-                onClick={() => { playSound('ui_click'); onAuction(); }}
-                className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
-              >
-                ⚡ Đưa vào Đấu Giá
-              </button>
-              <button
-                onClick={() => { playSound('ui_click'); onWithdraw(card); }}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
-              >
-                📤 Rút về ví MetaMask
-              </button>
+              {isInQueue ? (
+                <>
+                  <div className="text-center py-2 text-yellow-400 text-xs font-bold">⚡ NFT đang trong hàng chờ Đấu Giá</div>
+                  <button
+                    onClick={() => { playSound('ui_click'); onGoToAuction?.(); onClose(); }}
+                    className="w-full py-3 bg-yellow-600/30 border border-yellow-500/50 rounded-xl text-yellow-300 text-sm font-bold transition-colors active:scale-95"
+                  >
+                    Xem hàng chờ Đấu Giá →
+                  </button>
+                </>
+              ) : isListed ? (
+                <>
+                  <div className="text-center py-2 text-purple-400 text-xs font-bold">🏷️ NFT đang được đăng bán trên Chợ</div>
+                  <button
+                    onClick={() => { playSound('ui_click'); onGoToMarket?.(); onClose(); }}
+                    className="w-full py-3 bg-purple-600/30 border border-purple-500/50 rounded-xl text-purple-300 text-sm font-bold transition-colors active:scale-95"
+                  >
+                    Xem trên Chợ NFT →
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { playSound('ui_click'); onSell(card); }}
+                    className="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+                  >
+                    🏪 Bán NFT này
+                  </button>
+                  <button
+                    onClick={() => { playSound('ui_click'); onAuction(); }}
+                    className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+                  >
+                    ⚡ Đưa vào Đấu Giá
+                  </button>
+                  <button
+                    onClick={() => { playSound('ui_click'); onWithdraw(card); }}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+                  >
+                    📤 Rút về ví MetaMask
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -446,6 +485,11 @@ export default function NftGalleryScreen() {
     staleTime: 30_000,
   });
   const { data: myQueue } = useMyQueue();
+  const { data: myListings = [] } = useQuery({
+    queryKey: ['marketplace', 'my-listings'],
+    queryFn: () => marketplaceApi.getMyListings(),
+    staleTime: 30_000,
+  });
   const [selected, setSelected] = useState<NftCard | null>(null);
   const [sellCard, setSellCard] = useState<NftCard | null>(null);
   const [withdrawCard, setWithdrawCard] = useState<NftCard | null>(null);
@@ -457,12 +501,22 @@ export default function NftGalleryScreen() {
     if (!myQueue) return {} as Record<number, AuctionQueueItem>;
     const map: Record<number, AuctionQueueItem> = {};
     for (const item of myQueue) {
-      if (['queued', 'assigned', 'active'].includes(item.status)) {
+      if ([\'queued\', \'assigned\', \'active\'].includes(item.status)) {
         map[item.tokenId] = item;
       }
     }
     return map;
   }, [myQueue]);
+
+  const listingMap = useMemo(() => {
+    const map: Record<number, { id: string; priceAvax: string }> = {};
+    for (const item of myListings) {
+      if ((item as any).status === \'active\' && item.tokenId) {
+        map[item.tokenId] = { id: item.id, priceAvax: item.priceAvax };
+      }
+    }
+    return map;
+  }, [myListings]);
 
   const handleSellRequest = (card: NftCard) => {
     setSelected(null);
@@ -535,7 +589,9 @@ export default function NftGalleryScreen() {
               cards={mintedCards}
               onSelect={setSelected}
               queueMap={queueMap}
+              listingMap={listingMap}
               onAuctionBadgeClick={() => { playSound('ui_click'); navigate('/auction'); }}
+              onListingBadgeClick={() => { playSound('ui_click'); navigate('/marketplace'); }}
             />
           </>
         )}
@@ -550,6 +606,10 @@ export default function NftGalleryScreen() {
           onSell={handleSellRequest}
           onWithdraw={handleWithdrawRequest}
           onAuction={() => { setSelected(null); setAuctionCard(selected); }}
+          isInQueue={selected.nftTokenId ? !!queueMap[selected.nftTokenId] : false}
+          isListed={selected.nftTokenId ? !!listingMap[selected.nftTokenId] : false}
+          onGoToAuction={() => navigate('/auction')}
+          onGoToMarket={() => navigate('/marketplace')}
         />
       )}
 
