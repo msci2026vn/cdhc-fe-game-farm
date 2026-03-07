@@ -30,5 +30,8 @@
 @import './styles/modules/prayer.css';
 @import './styles/modules/pwa-prompt.css';
 
-/* 6. Shared utilities & animations */
+/* 6. Page transitions (View Transitions API) */
+@import './styles/modules/page-transitions.css';
+
+/* 7. Shared utilities & animations */
 @import './styles/utilities.css';
