@@ -16,6 +16,7 @@ import { campaignApi } from './api-campaign';
 import { conversionApi } from './api-conversion';
 import { walletApi } from './api-wallet';
 import { vipApi } from './api-vip';
+import { telegramApi } from './api-telegram';
 
 // Re-export utils
 export { resetRedirectLock } from './api-utils';
@@ -39,6 +40,7 @@ export const gameApi = {
   ...conversionApi,
   ...walletApi,
   ...vipApi,
+  ...telegramApi,
 };
 
 // ═══════════════════════════════════════════════════════════════
