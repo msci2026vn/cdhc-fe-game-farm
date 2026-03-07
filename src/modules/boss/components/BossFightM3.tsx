@@ -421,11 +421,11 @@ export default function BossFightM3({
                 <div key={gem.id}
                   onPointerDown={(e) => handlePointerDown(i, e)}
                   onPointerUp={handlePointerUp}
-                  className={`aspect-square rounded-md flex items-center justify-center text-[16px] cursor-pointer relative gem-shine transition-all duration-200 ${meta.css}
+                  className={`aspect-square rounded-md flex items-center justify-center text-[19px] cursor-pointer relative ${meta.css}
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}
-                    ${highlightedGem === i ? 'ring-2 ring-yellow-400 animate-pulse z-10' : ''}
+                    ${highlightedGem === i ? 'ring-2 ring-yellow-300 z-10' : ''}
                   `}>
                   {meta.emoji}
                 </div>

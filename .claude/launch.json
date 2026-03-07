@@ -4,7 +4,7 @@
     {
       "name": "cdhc-game-vite",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "8080"],
+      "runtimeArgs": ["../../../node_modules/vite/bin/vite.js", "--port", "8080"],
       "port": 8080
     }
   ]

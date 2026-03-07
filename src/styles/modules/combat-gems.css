@@ -1,10 +1,27 @@
 @layer components {
 
-  /* ═══ Gem types — match GEM_STYLES inline colors (pop animation state) ═══ */
-  .gem-atk { background: linear-gradient(150deg, #ff7070 0%, #cc1a1a 100%); }
-  .gem-hp  { background: linear-gradient(150deg, #55dd77 0%, #1f8c3a 100%); }
-  .gem-def { background: linear-gradient(150deg, #5599ff 0%, #1a44cc 100%); }
-  .gem-star{ background: linear-gradient(150deg, #ffdd33 0%, #cc8800 100%); }
+  /* ═══ Gem types — Candy glass: oval white highlight at top + deep color gradient ═══ */
+  /* 2 static bg layers painted once → no GPU repaint when not animated */
+  .gem-atk {
+    background:
+      radial-gradient(ellipse 68% 44% at 50% 13%, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0) 100%),
+      linear-gradient(160deg, #ff5566 0%, #ee2233 45%, #aa0011 100%);
+  }
+  .gem-hp  {
+    background:
+      radial-gradient(ellipse 68% 44% at 50% 13%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%),
+      linear-gradient(160deg, #44ee77 0%, #22bb44 45%, #0d7722 100%);
+  }
+  .gem-def {
+    background:
+      radial-gradient(ellipse 68% 44% at 50% 13%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%),
+      linear-gradient(160deg, #5588ff 0%, #2255ee 45%, #0d33aa 100%);
+  }
+  .gem-star{
+    background:
+      radial-gradient(ellipse 68% 44% at 50% 13%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0) 100%),
+      linear-gradient(160deg, #ffee33 0%, #ffbb00 45%, #aa7700 100%);
+  }
 
   /* ═══ Special gem visuals — minimal ═══ */
   .gem-rainbow {
