@@ -7,15 +7,15 @@ import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
 const RARITY: Record<string, { color: string; bg: string; border: string; label: string }> = {
-  normal:       { color: 'text-gray-400',   bg: 'bg-gray-500/20',   border: 'border-gray-500/40',  label: 'Common' },
-  hard:         { color: 'text-amber-400',  bg: 'bg-amber-500/20',  border: 'border-amber-500/40', label: 'Rare' },
-  extreme:      { color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/40', label: 'Epic' },
-  catastrophic: { color: 'text-red-400',    bg: 'bg-red-500/20',    border: 'border-red-500/40',   label: 'Legendary' },
+  normal: { color: 'text-gray-400', bg: 'bg-gray-500/20', border: 'border-gray-500/40', label: 'Common' },
+  hard: { color: 'text-amber-400', bg: 'bg-amber-500/20', border: 'border-amber-500/40', label: 'Rare' },
+  extreme: { color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/40', label: 'Epic' },
+  catastrophic: { color: 'text-red-400', bg: 'bg-red-500/20', border: 'border-red-500/40', label: 'Legendary' },
 };
 
 const CARD_TYPE: Record<string, { icon: string; label: string }> = {
-  last_hit:      { icon: '⚔️', label: 'Người Hạ Gục Boss' },
-  top_damage:    { icon: '💥', label: 'Chiến Binh Mạnh Nhất' },
+  last_hit: { icon: '⚔️', label: 'Người Hạ Gục Boss' },
+  top_damage: { icon: '💥', label: 'Chiến Binh Mạnh Nhất' },
   dual_champion: { icon: '👑', label: 'Dual Champion' },
 };
 
@@ -444,12 +444,27 @@ export default function NftGalleryScreen() {
   return (
     <div className="h-[100dvh] max-w-[430px] mx-auto bg-gradient-to-b from-gray-900 to-gray-950 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center px-4 pt-safe pb-3 border-b border-gray-800">
-        <button onClick={() => { playSound('ui_back'); navigate(-1); }} className="w-8 h-8 flex items-center justify-center text-gray-400">
-          <span className="material-symbols-outlined text-xl">arrow_back</span>
-        </button>
-        <h1 className="flex-1 text-center text-white font-bold text-lg">🎴 Bộ Sưu Tập NFT</h1>
-        <div className="w-8" />
+      <div className="flex-shrink-0 flex flex-col px-4 pt-safe border-b border-gray-800 bg-gray-900/50">
+        <div className="flex items-center justify-between py-3">
+          <button onClick={() => { playSound('ui_back'); navigate(-1); }} className="w-8 h-8 flex items-center justify-center text-gray-400">
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
+          </button>
+          <h1 className="flex-1 text-center text-white font-bold text-lg">Bộ Sưu Tập NFT</h1>
+          <div className="w-8" />
+        </div>
+
+        {/* TABS */}
+        <div className="flex w-full mb-3 bg-gray-800 p-1 rounded-xl">
+          <button
+            onClick={() => { playSound('ui_click'); navigate('/inventory'); }}
+            className="flex-1 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 transition-all"
+          >
+            🌾 Nông sản
+          </button>
+          <button className="flex-1 py-1.5 rounded-lg text-sm font-bold bg-gray-700 text-white shadow-sm transition-all border border-gray-600/50">
+            🎴 Thẻ NFT
+          </button>
+        </div>
       </div>
 
       {/* Content */}

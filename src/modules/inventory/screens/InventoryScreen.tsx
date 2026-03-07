@@ -21,9 +21,32 @@ export default function InventoryScreen() {
     <div className="h-[100dvh] max-w-[430px] mx-auto bg-gradient-to-b from-amber-50 to-orange-50 flex flex-col overflow-hidden">
 
       {/* HEADER */}
-      <div className="flex-shrink-0 flex justify-between items-center px-5 pt-safe pb-3 bg-white/80 backdrop-blur-sm border-b border-amber-100">
-        <h1 className="font-bold text-xl">🌾 Kho đồ</h1>
-        <span className="text-sm text-gray-500">{items.length} nông sản</span>
+      <div className="flex-shrink-0 flex flex-col px-5 pt-safe bg-white/80 backdrop-blur-sm border-b border-amber-100">
+        <div className="flex items-center justify-between py-3">
+          <button
+            onClick={() => { playSound('ui_back'); window.history.back(); }}
+            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div className="flex flex-col items-center">
+            <h1 className="font-bold text-xl">Kho đồ</h1>
+          </div>
+          <div className="w-8"></div>
+        </div>
+
+        {/* TABS */}
+        <div className="flex w-full mb-3 bg-gray-100/80 p-1 rounded-xl">
+          <button className="flex-1 py-1.5 rounded-lg text-sm font-bold bg-white text-gray-900 shadow-sm transition-all border border-gray-200/50">
+            🌾 Nông sản
+          </button>
+          <button
+            onClick={() => { playSound('ui_click'); window.location.href = '/nft-gallery'; }}
+            className="flex-1 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all"
+          >
+            🎴 Thẻ NFT
+          </button>
+        </div>
       </div>
 
       {/* THÔNG BÁO NÔNG SẢN HÉO/HẾN HẠN */}
@@ -76,11 +99,10 @@ export default function InventoryScreen() {
                 <div key={item.id} className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 relative">
 
                   {/* Season tag */}
-                  <span className={`absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                    item.seasonTag.includes('Đúng')
+                  <span className={`absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${item.seasonTag.includes('Đúng')
                       ? 'bg-green-100 text-green-700'
                       : 'bg-orange-100 text-orange-700'
-                  }`}>
+                    }`}>
                     {item.seasonTag}
                   </span>
 
@@ -112,11 +134,10 @@ export default function InventoryScreen() {
                   <button
                     onClick={() => { if (!isSelling) { playSound('shop_buy'); sellMutation.mutate(item.id); } }}
                     disabled={isSelling}
-                    className={`w-full mt-2 py-1.5 rounded-xl text-sm font-bold text-white transition-all ${
-                      isSelling
+                    className={`w-full mt-2 py-1.5 rounded-xl text-sm font-bold text-white transition-all ${isSelling
                         ? 'bg-gray-300'
                         : 'bg-amber-500 hover:bg-amber-600 active:scale-95'
-                    }`}
+                      }`}
                   >
                     {isSelling ? '⏳ Đang bán...' : '💰 Bán'}
                   </button>
