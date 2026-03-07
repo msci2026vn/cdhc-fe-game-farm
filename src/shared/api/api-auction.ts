@@ -6,10 +6,12 @@ import { API_BASE_URL, handleUnauthorized } from './api-utils';
 import type {
   AuctionDetail,
   AuctionListItem,
+  AuctionQueueItem,
   AuctionSession,
   BidPackInfo,
   CreateAuctionInput,
   PlaceBidResult,
+  SubmitToQueueInput,
 } from '@/modules/auction/types/auction.types';
 
 async function auctionFetch<T>(
@@ -41,10 +43,11 @@ async function auctionFetch<T>(
 
 export const auctionApi = {
   // GET /api/auction/list
-  getList: async (sessionId?: string, status?: string): Promise<AuctionListItem[]> => {
+  getList: async (sessionId?: string, status?: string, type?: string): Promise<AuctionListItem[]> => {
     const params = new URLSearchParams();
     if (sessionId) params.set('sessionId', sessionId);
     if (status) params.set('status', status);
+    if (type) params.set('type', type);
     const query = params.toString() ? `?${params}` : '';
     const data = await auctionFetch<{ ok: boolean; data: AuctionListItem[] }>(
       `/api/auction/list${query}`,
@@ -118,5 +121,27 @@ export const auctionApi = {
       `/api/auction/bidpack/${sessionId}`,
     );
     return data.data;
+  },
+
+  // POST /api/auction/queue/submit
+  submitToQueue: async (input: SubmitToQueueInput): Promise<{ ok: boolean; queueId: string; escrowTxHash: string }> => {
+    return auctionFetch<{ ok: boolean; queueId: string; escrowTxHash: string }>(
+      '/api/auction/queue/submit',
+      { method: 'POST', body: JSON.stringify(input) },
+    );
+  },
+
+  // GET /api/auction/queue/my
+  getMyQueue: async (): Promise<AuctionQueueItem[]> => {
+    const res = await auctionFetch<{ ok: boolean; data: AuctionQueueItem[] }>('/api/auction/queue/my');
+    return res.data;
+  },
+
+  // POST /api/auction/queue/cancel/:queueId
+  cancelQueueItem: async (queueId: string): Promise<{ ok: boolean; message: string; refundTxHash: string }> => {
+    return auctionFetch<{ ok: boolean; message: string; refundTxHash: string }>(
+      `/api/auction/queue/cancel/${queueId}`,
+      { method: 'POST' },
+    );
   },
 };

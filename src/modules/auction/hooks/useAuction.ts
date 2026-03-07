@@ -6,19 +6,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { auctionApi } from '@/shared/api/api-auction';
 import { useUIStore } from '@/shared/stores/uiStore';
-import type { CreateAuctionInput } from '../types/auction.types';
+import type { CreateAuctionInput, SubmitToQueueInput } from '../types/auction.types';
 
 // ── Query Key Factory ──
 
 export const auctionKeys = {
   all: ['auction'] as const,
-  list: (sessionId?: string, status?: string) =>
-    ['auction', 'list', sessionId, status] as const,
+  list: (sessionId?: string, status?: string, auctionType?: string) =>
+    ['auction', 'list', sessionId, status, auctionType] as const,
   detail: (id: string) => ['auction', 'detail', id] as const,
   nextSession: ['auction', 'session', 'next'] as const,
   myBids: ['auction', 'my-bids'] as const,
   myListings: ['auction', 'my-listings'] as const,
   bidPack: (sessionId: string) => ['auction', 'bidpack', sessionId] as const,
+  myQueue: ['auction', 'queue', 'my'] as const,
 };
 
 // ══════════════════════════════════
@@ -26,10 +27,10 @@ export const auctionKeys = {
 // ══════════════════════════════════
 
 /** Danh sách auction (lobby) — poll 10s */
-export function useAuctionList(sessionId?: string, status?: string) {
+export function useAuctionList(sessionId?: string, status?: string, auctionType?: string) {
   return useQuery({
-    queryKey: auctionKeys.list(sessionId, status),
-    queryFn: () => auctionApi.getList(sessionId, status),
+    queryKey: auctionKeys.list(sessionId, status, auctionType),
+    queryFn: () => auctionApi.getList(sessionId, status, auctionType),
     refetchInterval: 10_000,
   });
 }
@@ -140,6 +141,46 @@ export function useWithdrawBid() {
     },
     onError: (error: Error) => {
       useUIStore.getState().addToast(error.message || 'Không thể rút', 'error');
+    },
+  });
+}
+
+/** Danh sách queue của tôi */
+export function useMyQueue() {
+  return useQuery({
+    queryKey: auctionKeys.myQueue,
+    queryFn: () => auctionApi.getMyQueue(),
+  });
+}
+
+/** Gửi NFT vào hàng chờ đấu giá */
+export function useSubmitToQueue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SubmitToQueueInput) => auctionApi.submitToQueue(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['auction', 'queue'] });
+      qc.invalidateQueries({ queryKey: ['auction', 'my-listings'] });
+      useUIStore.getState().addToast('NFT đã gửi vào hàng chờ đấu giá!', 'success', '📦');
+    },
+    onError: (err: Error) => {
+      useUIStore.getState().addToast(err.message || 'Lỗi gửi NFT vào hàng chờ', 'error');
+    },
+  });
+}
+
+/** Rút NFT khỏi hàng chờ */
+export function useCancelQueueItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (queueId: string) => auctionApi.cancelQueueItem(queueId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['auction', 'queue'] });
+      qc.invalidateQueries({ queryKey: ['auction', 'my-listings'] });
+      useUIStore.getState().addToast('Đã rút NFT khỏi hàng chờ', 'success', '↩️');
+    },
+    onError: (err: Error) => {
+      useUIStore.getState().addToast(err.message || 'Lỗi rút NFT', 'error');
     },
   });
 }

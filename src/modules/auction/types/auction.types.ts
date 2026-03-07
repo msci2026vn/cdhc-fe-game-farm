@@ -28,6 +28,7 @@ export interface AuctionListItem {
   endTime: string;
   sessionName: string;
   sellerName: string;
+  auctionType?: 'spotlight' | 'side';
 }
 
 export interface AuctionDetail {
@@ -46,6 +47,7 @@ export interface AuctionDetail {
   winnerName: string | null;
   finalPriceAvax: string | null;
   leaderboard: LeaderboardEntry[] | null;
+  auctionType?: 'spotlight' | 'side';
 }
 
 export interface LeaderboardEntry {
@@ -75,4 +77,28 @@ export interface CreateAuctionInput {
   tokenId: number;
   sessionId: string;
   startPriceAvax: string;
+}
+
+export interface AuctionQueueItem {
+  id: string;
+  sellerUserId: string;
+  tokenId: number;
+  nftImageUrl: string | null;
+  nftName: string | null;
+  nftRarity: string | null;
+  startPriceAvax: string;
+  status: 'queued' | 'assigned' | 'active' | 'ended' | 'cancelled';
+  assignedType: 'spotlight' | 'side' | null;
+  assignedSessionId: string | null;
+  escrowTxHash: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmitToQueueInput {
+  tokenId: number;
+  startPriceAvax: string;
+  nftImageUrl?: string | null;
+  nftName?: string | null;
+  nftRarity?: string | null;
 }
