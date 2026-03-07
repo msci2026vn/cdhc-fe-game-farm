@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuctionList, useNextSession } from '../hooks/useAuction';
+import { useAuctionList, useNextSession, useMyListings } from '../hooks/useAuction';
 import { AuctionCountdown } from '../components/AuctionCountdown';
 import { AuctionNftCard } from '../components/AuctionNftCard';
 import BottomNav from '@/shared/components/BottomNav';
@@ -25,6 +25,7 @@ export default function AuctionLobbyScreen() {
   const navigate = useNavigate();
   const { data: nextSession } = useNextSession();
   const { data: auctions, isLoading } = useAuctionList(undefined, tab);
+  const { data: myListings } = useMyListings();
 
   const showFomo = nextSession?.status === 'scheduled' &&
     new Date(nextSession.startTime).getTime() - Date.now() < 900_000;
@@ -54,6 +55,48 @@ export default function AuctionLobbyScreen() {
               <span>🃏 {nextSession.slotCount} NFT</span>
               <span>⏱ {nextSession.durationMinutes} phút</span>
               <span>💰 {nextSession.bidCostOgn} OGN/bid</span>
+            </div>
+          </div>
+        )}
+
+        {/* My listings section */}
+        {myListings && myListings.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm font-bold text-amber-400 mb-2">NFT của tôi đang đấu giá</h3>
+            <div className="space-y-2">
+              {myListings.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => { playSound('ui_click'); navigate(`/auction/${item.id}`); }}
+                  className="w-full flex items-center gap-3 bg-gray-800/50 rounded-xl p-3 text-left border border-gray-700 active:scale-[0.98] transition-transform"
+                >
+                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
+                    {item.nftImageUrl ? (
+                      <img src={item.nftImageUrl} alt={`#${item.tokenId}`} className="w-full h-full object-cover"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xl">🎴</div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-white truncate">NFT #{item.tokenId}</div>
+                    <div className="text-xs text-gray-500">{item.sessionName}</div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${item.status === 'active' ? 'bg-amber-900/80 text-amber-300' :
+                        item.status === 'pending' ? 'bg-gray-700 text-gray-300' :
+                          item.status === 'ended' ? 'bg-green-900/80 text-green-300' :
+                            'bg-gray-700 text-gray-400'
+                      }`}>{
+                        item.status === 'active' ? 'Đang diễn ra' :
+                          item.status === 'pending' ? 'Chờ phiên' :
+                            item.status === 'ended' ? 'Kết thúc' : 'Đã hủy'
+                      }</span>
+                    <div className="text-xs text-gray-500 mt-1">{item.bidCount} bid</div>
+                  </div>
+                  <span className="text-gray-600 text-sm">&rarr;</span>
+                </button>
+              ))}
             </div>
           </div>
         )}

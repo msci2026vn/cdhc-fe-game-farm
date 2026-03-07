@@ -27,7 +27,7 @@ const statusLabels: Record<string, string> = {
   active: 'Dang dien ra',
   sudden_death: 'Sudden Death',
   ended: 'Ket thuc',
-  cancelled: 'Da huy',
+  cancelled: 'Đã hủy',
 };
 
 export default function AuctionRoomScreen() {

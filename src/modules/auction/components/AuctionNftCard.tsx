@@ -24,7 +24,7 @@ const statusBadge: Record<string, { bg: string; label: string }> = {
   sudden_death: { bg: 'bg-red-600', label: 'SD!' },
   ended: { bg: 'bg-gray-600', label: 'End' },
   pending: { bg: 'bg-gray-700', label: 'Soon' },
-  cancelled: { bg: 'bg-gray-700', label: 'Huy' },
+  cancelled: { bg: 'bg-gray-700', label: 'Hủy' },
 };
 
 export function AuctionNftCard({

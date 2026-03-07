@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { nftApi, type NftCard } from '@/shared/api/api-nft';
 import { marketplaceApi } from '@/shared/api/api-marketplace';
+import { CreateAuctionModal } from '@/modules/auction/components/CreateAuctionModal';
 import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
@@ -419,6 +420,7 @@ export default function NftGalleryScreen() {
   const [selected, setSelected] = useState<NftCard | null>(null);
   const [sellCard, setSellCard] = useState<NftCard | null>(null);
   const [withdrawCard, setWithdrawCard] = useState<NftCard | null>(null);
+  const [auctionCard, setAuctionCard] = useState<NftCard | null>(null);
 
   const mintedCards = cards.filter(c => c.nftMintStatus === 'minted');
 
@@ -502,7 +504,7 @@ export default function NftGalleryScreen() {
           onClose={() => setSelected(null)}
           onSell={handleSellRequest}
           onWithdraw={handleWithdrawRequest}
-          onAuction={() => { setSelected(null); navigate('/auction'); }}
+          onAuction={() => { setSelected(null); setAuctionCard(selected); }}
         />
       )}
 
@@ -519,6 +521,17 @@ export default function NftGalleryScreen() {
           card={withdrawCard}
           onClose={() => setWithdrawCard(null)}
           onSuccess={handleWithdrawSuccess}
+        />
+      )}
+
+      {auctionCard && auctionCard.nftTokenId && (
+        <CreateAuctionModal
+          isOpen={!!auctionCard}
+          onClose={() => setAuctionCard(null)}
+          tokenId={auctionCard.nftTokenId}
+          nftImageUrl={auctionCard.nftCardImageUrl}
+          nftName={auctionCard.bossName || 'Boss'}
+          nftRarity={RARITY[auctionCard.bossDifficulty || 'hard']?.label || 'Rare'}
         />
       )}
     </div>

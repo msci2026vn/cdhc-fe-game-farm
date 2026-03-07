@@ -10,6 +10,7 @@ export interface AuctionSession {
   name: string;
   status: SessionStatus;
   slotCount: number;
+  slotUsed: number;
   startTime: string;
   endTime: string;
   durationMinutes: number;
