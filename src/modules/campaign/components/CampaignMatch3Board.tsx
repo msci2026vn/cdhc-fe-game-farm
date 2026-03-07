@@ -6,21 +6,21 @@ import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
 import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
 
-// ═══ Candy Crush-style gem colors ═══
-// Bright, vibrant flat gradients — no box-shadow per gem (saves 64 GPU compositing layers)
+// ═══ Candy Crush-style gem colors — SOLID FLAT (maximum GPU performance) ═══
+// No gradient, no shadow, no 3D — just bright solid colors
 // ⚔️ atk = đỏ tươi   💛 star = vàng rực   🛡️ def = xanh biển   💚 hp = xanh lá
 const GEM_STYLES: Record<string, React.CSSProperties> = {
-    atk: { background: 'linear-gradient(160deg, #ff6b6b 0%, #ee5a24 100%)' },
-    hp:  { background: 'linear-gradient(160deg, #55efc4 0%, #00b894 100%)' },
-    def: { background: 'linear-gradient(160deg, #74b9ff 0%, #0984e3 100%)' },
-    star:{ background: 'linear-gradient(160deg, #ffeaa7 0%, #fdcb6e 100%)' },
+    atk: { background: '#ff6b6b' },
+    hp:  { background: '#55efc4' },
+    def: { background: '#74b9ff' },
+    star:{ background: '#ffeaa7' },
 };
 
 // Pre-computed grid styles to avoid creating new objects every render
 const GRID_STYLES = {
-    normal: { background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(120,80,30,0.3)', touchAction: 'none' as const, borderRadius: 10, padding: 2, flex: 1 },
-    otHiem: { background: 'rgba(231,76,60,0.08)', border: '2px solid rgba(231,76,60,0.5)', touchAction: 'none' as const, borderRadius: 10, padding: 2, flex: 1 },
-    romBoc: { background: 'rgba(39,174,96,0.08)', border: '2px solid rgba(39,174,96,0.5)', touchAction: 'none' as const, borderRadius: 10, padding: 2, flex: 1 },
+    normal: { background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(120,80,30,0.3)', touchAction: 'none' as const, borderRadius: 8, padding: 1, flex: 1 },
+    otHiem: { background: 'rgba(231,76,60,0.08)', border: '2px solid rgba(231,76,60,0.5)', touchAction: 'none' as const, borderRadius: 8, padding: 1, flex: 1 },
+    romBoc: { background: 'rgba(39,174,96,0.08)', border: '2px solid rgba(39,174,96,0.5)', touchAction: 'none' as const, borderRadius: 8, padding: 1, flex: 1 },
 };
 
 interface Props {
@@ -63,11 +63,11 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
             <FloatingCombatText data={floatingTexts} />
 
             {/* ── Wooden frame wrapper (matching HTML mockup .grid-frame) ── */}
-            <div className="campaign-grid-frame relative w-full h-full flex flex-col" style={{ padding: 4 }}>
+            <div className="campaign-grid-frame relative w-full h-full flex flex-col" style={{ padding: 2 }}>
                 {showCombo && combo >= 3 && (
                     <div key={`flash-${combo}`} className={`combo-flash-overlay combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
                 )}
-                <div className={`grid grid-cols-8 gap-[2px] rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''}`}
+                <div className={`grid grid-cols-8 gap-[1px] rounded-lg h-full ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''}`}
                     onPointerMove={handlePointerMove}
                     style={otHiemActive ? GRID_STYLES.otHiem : romBocActive ? GRID_STYLES.romBoc : GRID_STYLES.normal}>
                     {grid.map((gem, i) => {
@@ -81,7 +81,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                                 onPointerDown={(e: any) => handlePointerDown(i, e)}
                                 onPointerUp={handlePointerUp}
                                 style={sp !== 'rainbow' ? GEM_STYLES[gem.type] ?? GEM_STYLES.atk : undefined}
-                                className={`aspect-square rounded-lg flex items-center justify-center text-[19px] cursor-pointer relative
+                                className={`aspect-square rounded-md flex items-center justify-center text-[22px] cursor-pointer relative
                 ${sp === 'rainbow' ? 'gem-rainbow' : ''}
                 ${sp === 'striped_h' ? 'gem-special-striped-h' : ''}
                 ${sp === 'striped_v' ? 'gem-special-striped-v' : ''}
@@ -118,7 +118,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                     <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg"
                         style={{ background: 'rgba(0,0,0,0.6)' }}>
                         <div className="text-center animate-scale-in">
-                            <span className="text-5xl block" style={{ animation: 'spin 1s linear infinite' }}>💫</span>
+                            <span className="text-5xl block">💫</span>
                             <span className="text-white font-heading font-bold text-xl block mt-2"
                                 style={{ textShadow: '0 0 20px rgba(253,203,110,0.8)' }}>
                                 CHOÁNG!

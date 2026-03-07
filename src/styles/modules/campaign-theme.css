@@ -113,11 +113,9 @@
   pointer-events: none;
 }
 
-/* Grid cells — flat, clean, no heavy shadows */
-/* Removed: inset box-shadows (128 GPU layers), transitions, hover filters */
+/* Grid cells — maximum flat, NO border (saves 64 GPU border paints per frame) */
 .campaign-grid-frame .grid > * {
-  border-radius: 8px !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 6px !important;
 }
 
 /* ── 8. PLAYER HUD AREA ──────────────────────────────────── */
