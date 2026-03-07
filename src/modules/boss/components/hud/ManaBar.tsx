@@ -48,7 +48,7 @@ export default function ManaBar({ mana, maxMana, dodgeCost, ultCost, ultCharge =
       </div>
       <div className="h-1.5 rounded-md overflow-hidden relative"
         style={{ background: 'rgba(255,255,255,0.1)' }}>
-        <div className="h-full rounded-md transition-all duration-500"
+        <div className="h-full rounded-md transition-[width] duration-500"
           style={{
             width: `${pct}%`,
             background: ultReady

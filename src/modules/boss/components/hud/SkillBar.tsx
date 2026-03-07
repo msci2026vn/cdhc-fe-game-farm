@@ -39,7 +39,7 @@ export default function SkillBar({
       <div className="flex-1 flex flex-col gap-0.5">
         <div className="h-2 rounded-lg overflow-hidden relative"
           style={{ background: 'rgba(255,255,255,0.1)' }}>
-          <div className={`h-full rounded-lg transition-all duration-500 ${ultReady ? 'animate-pulse' : ''}`}
+          <div className={`h-full rounded-lg transition-[width] duration-500 ${ultReady ? 'animate-ult-glow' : ''}`}
             style={{
               width: `${ultCharge}%`,
               background: ultReady

@@ -30,7 +30,7 @@ export default function BossSkillWarning({ warning, bossName, bossEmoji, manaCos
       const remaining = Math.max(0, warning.countdown - elapsed);
       setCountdown(remaining);
       if (remaining <= 0) clearInterval(timer);
-    }, 50);
+    }, 100); // 10fps display — smooth enough for countdown, halves re-renders vs 50ms
     return () => clearInterval(timer);
   }, [warning.countdown]);
 
@@ -53,12 +53,12 @@ export default function BossSkillWarning({ warning, bossName, bossEmoji, manaCos
         }}
       >
         {/* Pulse ring */}
-        <div className="absolute -inset-1 rounded-2xl animate-pulse opacity-50"
+        <div className="absolute -inset-1 rounded-2xl opacity-50"
           style={{ border: '2px solid rgba(255,107,107,0.6)' }} />
 
         {/* Header: warning icon + boss name */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xl animate-pulse">⚠️</span>
+          <span className="text-2xl">⚠️</span>
           <div className="flex-1">
             <div className="text-white/60 text-[10px] font-bold uppercase tracking-wider">
               {bossEmoji} {bossName}
@@ -92,7 +92,7 @@ export default function BossSkillWarning({ warning, bossName, bossEmoji, manaCos
             onDodge();
           }}
           disabled={!canDodge}
-          className={`w-full py-3 rounded-xl font-heading text-base font-bold text-white flex items-center justify-center gap-2 transition-all active:scale-95 ${
+          className={`w-full py-3 rounded-xl font-heading text-base font-bold text-white flex items-center justify-center gap-2 transition-transform active:scale-95 ${
             canDodge
               ? 'bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/30'
               : 'bg-gray-600 opacity-50 cursor-not-allowed'
