@@ -3,27 +3,27 @@ import { useQuery } from '@tanstack/react-query';
 import { marketplaceApi, type MarketplaceTransaction } from '@/shared/api/api-marketplace';
 
 const RARITY: Record<string, { color: string; label: string }> = {
-  normal:       { color: 'text-gray-400',   label: 'Common' },
-  hard:         { color: 'text-amber-400',  label: 'Rare' },
-  extreme:      { color: 'text-purple-400', label: 'Epic' },
-  catastrophic: { color: 'text-red-400',    label: 'Legendary' },
+  normal: { color: 'text-gray-400', label: 'Common' },
+  hard: { color: 'text-amber-400', label: 'Rare' },
+  extreme: { color: 'text-purple-400', label: 'Epic' },
+  catastrophic: { color: 'text-red-400', label: 'Legendary' },
 };
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'vua xong';
-  if (mins < 60) return `${mins} phut truoc`;
+  if (mins < 1) return 'Vừa xong';
+  if (mins < 60) return `${mins} phút trước`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} gio truoc`;
-  return `${Math.floor(hrs / 24)} ngay truoc`;
+  if (hrs < 24) return `${hrs} giờ trước`;
+  return `${Math.floor(hrs / 24)} ngày trước`;
 }
 
 function TransactionCard({ tx }: { tx: MarketplaceTransaction }) {
   const isBuy = tx.role === 'buy';
   const r = RARITY[tx.boss_difficulty || 'hard'] || RARITY.hard;
-  const price   = parseFloat(tx.price_avax || '0');
-  const fee     = parseFloat(tx.fee_avax || '0');
+  const price = parseFloat(tx.price_avax || '0');
+  const fee = parseFloat(tx.fee_avax || '0');
   const feeRate = parseFloat(tx.fee_percent || '5');
   const received = parseFloat(tx.seller_receives_avax || '0');
 
@@ -31,7 +31,7 @@ function TransactionCard({ tx }: { tx: MarketplaceTransaction }) {
     <div className={`rounded-xl border p-3 ${isBuy ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-orange-500/30 bg-orange-500/5'}`}>
       <div className="flex items-center gap-2 mb-2">
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isBuy ? 'bg-emerald-500 text-white' : 'bg-orange-500 text-white'}`}>
-          {isBuy ? 'DA MUA' : 'DA BAN'}
+          {isBuy ? 'ĐÃ MUA' : 'ĐÃ BÁN'}
         </span>
         <span className="text-[10px] text-gray-500">{timeAgo(tx.created_at)}</span>
       </div>
@@ -51,21 +51,21 @@ function TransactionCard({ tx }: { tx: MarketplaceTransaction }) {
           <p className="text-white font-bold truncate">{tx.boss_name || `NFT #${tx.token_id}`}</p>
           <p className={`${r.color} font-medium`}>{r.label}</p>
           <p className="text-gray-400 truncate">
-            {isBuy ? `Mua tu: ${tx.partner_name || '?'}` : `Ban cho: ${tx.partner_name || '?'}`}
+            {isBuy ? `Mua từ: ${tx.partner_name || '?'}` : `Bán cho: ${tx.partner_name || '?'}`}
           </p>
 
           <div className="space-y-0.5 pt-1">
             <div className="flex justify-between">
-              <span className="text-gray-500">Gia:</span>
+              <span className="text-gray-500">Giá:</span>
               <span className="text-white font-mono">{price.toFixed(4)} AVAX</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Phi ({feeRate.toFixed(0)}%):</span>
+              <span className="text-gray-500">Phí ({feeRate.toFixed(0)}%):</span>
               <span className="text-red-400 font-mono">-{fee.toFixed(6)} AVAX</span>
             </div>
             {!isBuy && (
               <div className="flex justify-between border-t border-gray-700/50 pt-0.5">
-                <span className="text-gray-400">Ban nhan:</span>
+                <span className="text-gray-400">Bạn nhận:</span>
                 <span className="text-emerald-400 font-mono font-bold">{received.toFixed(6)} AVAX</span>
               </div>
             )}
@@ -116,15 +116,14 @@ export default function MyTransactionList() {
           <button
             key={f}
             onClick={() => setTypeFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
-              typeFilter === f
-                ? f === 'buy'   ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400'
-                : f === 'sell'  ? 'bg-orange-500/20 border border-orange-500/50 text-orange-400'
-                                : 'bg-white/10 border border-white/20 text-white'
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${typeFilter === f
+                ? f === 'buy' ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400'
+                  : f === 'sell' ? 'bg-orange-500/20 border border-orange-500/50 text-orange-400'
+                    : 'bg-white/10 border border-white/20 text-white'
                 : 'bg-gray-800/50 text-gray-500 hover:text-gray-300'
-            }`}
+              }`}
           >
-            {f === 'all' ? 'Tat ca' : f === 'buy' ? 'Da mua' : 'Da ban'}
+            {f === 'all' ? 'Tất cả' : f === 'buy' ? 'Đã mua' : 'Đã bán'}
           </button>
         ))}
       </div>
@@ -137,8 +136,8 @@ export default function MyTransactionList() {
       ) : transactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <div className="text-5xl">📋</div>
-          <p className="text-gray-300 font-semibold">Chua co giao dich nao</p>
-          <p className="text-gray-500 text-sm">Mua hoac ban NFT de xem lich su</p>
+          <p className="text-gray-300 font-semibold">Chưa có giao dịch nào</p>
+          <p className="text-gray-500 text-sm">Mua hoặc bán NFT để xem lịch sử</p>
         </div>
       ) : (
         <div className="space-y-3">
