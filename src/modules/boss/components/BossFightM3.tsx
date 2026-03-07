@@ -23,6 +23,7 @@ import { useGemPointer, useComboParticles } from '@/shared/match3';
 import UltimateFlash from '@/shared/match3/UltimateFlash';
 import BossAttackFlash from '@/shared/match3/BossAttackFlash';
 import ComboParticles from '@/shared/match3/ComboParticles';
+import FpsCounter from '@/shared/components/FpsCounter';
 
 // HUD components
 import {
@@ -260,6 +261,9 @@ export default function BossFightM3({
 
   return (
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
+      {/* FPS Counter — test độ mượt */}
+      <FpsCounter />
+
       {/* Ultimate fullscreen flash */}
       {ultActive && <UltimateFlash />}
 

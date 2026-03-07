@@ -25,6 +25,7 @@ import { useGemPointer, useComboParticles } from '@/shared/match3';
 import UltimateFlash from '@/shared/match3/UltimateFlash';
 import BossAttackFlash from '@/shared/match3/BossAttackFlash';
 import ComboParticles from '@/shared/match3/ComboParticles';
+import FpsCounter from '@/shared/components/FpsCounter';
 
 // Local extracted hooks
 import { useDeathAnimation } from './hooks/useDeathAnimation';
@@ -327,6 +328,9 @@ export default function BossFightCampaign({
 
   return (
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative campaign-battle-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''} ${result === 'victory' && deathPhase === 'dying' ? 'animate-screen-shake-violent' : ''}`}>
+
+      {/* FPS Counter — test độ mượt */}
+      <FpsCounter />
 
       {/* ── Forest decorative layers (simplified for performance) ── */}
       <div className="campaign-trees-layer z-[1]" />
