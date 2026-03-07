@@ -243,8 +243,17 @@ export function processCampaignMatchesImpl(
         }
       }
 
+      // Pre-scan boss buffs once (avoid multiple .some()/.find() O(n) scans)
+      const buffs = activeBossBuffsRef.current;
+      let hasShield = false;
+      let hasReflect = false;
+      for (let bi = 0; bi < buffs.length; bi++) {
+        if (buffs[bi].type === 'shield') hasShield = true;
+        else if (buffs[bi].type === 'reflect') hasReflect = true;
+      }
+
       // 2. Boss shield: 80% damage reduction
-      if (activeBossBuffsRef.current.some(b => b.type === 'shield') && actualDmg > 0) {
+      if (hasShield && actualDmg > 0) {
         actualDmg = Math.floor(actualDmg * 0.2);
         addPopup('🛡️ Giảm 80%!', '#74b9ff');
       }
@@ -253,8 +262,7 @@ export function processCampaignMatchesImpl(
       bossHp = Math.max(0, bossHp - actualDmg);
 
       // 4. Reflect
-      const reflectBuff = activeBossBuffsRef.current.find(b => b.type === 'reflect');
-      if (reflectBuff && dmgAfterDef > 0) {
+      if (hasReflect && dmgAfterDef > 0) {
         const reflectDmg = Math.round(dmgAfterDef * 0.3);
         if (reflectDmg > 0) {
           playerHp = Math.max(0, playerHp - reflectDmg);
@@ -262,11 +270,16 @@ export function processCampaignMatchesImpl(
         }
       }
 
-      // Heal & shield
-      const isHealBlocked = activeDebuffsRef.current.some(d => d.type === 'heal_block');
+      // Heal & shield — pre-scan debuffs once instead of 2x .some()
+      const debuffs = activeDebuffsRef.current;
+      let isHealBlocked = false;
+      let isArmorBrokenMatch = false;
+      for (let di = 0; di < debuffs.length; di++) {
+        if (debuffs[di].type === 'heal_block') isHealBlocked = true;
+        else if (debuffs[di].type === 'armor_break') isArmorBrokenMatch = true;
+      }
       const healAmt = isHealBlocked ? 0 : Math.round(hpCount * hpHealPerGem * comboInfo.mult);
       playerHp = Math.min(prev.playerMaxHp, playerHp + healAmt);
-      const isArmorBrokenMatch = activeDebuffsRef.current.some(d => d.type === 'armor_break');
       const shieldAmt = isArmorBrokenMatch ? 0 : Math.round(defCount * shieldGainPerGem * comboInfo.mult);
       shield = Math.min(shield + shieldAmt, prev.playerMaxHp);
 
@@ -310,9 +323,13 @@ export function processCampaignMatchesImpl(
     });
 
     // Build new grid: remove matched+triggered cells, place special gems at spawn positions
+    // Pre-build spawn position map for O(1) lookup instead of O(n) find() per cell
+    const spawnMap = new Map<number, typeof spawnEntries[0]>();
+    for (const entry of spawnEntries) spawnMap.set(entry.pos, entry);
+
     const newGrid = currentGrid.map((g, i) => {
       // Spawn special gem at this position
-      const spawn = spawnEntries.find(s => s.pos === i);
+      const spawn = spawnMap.get(i);
       if (spawn) return { ...g, special: spawn.special } as Gem;
       // Remove if in allRemove
       if (allRemove.has(i)) return null;

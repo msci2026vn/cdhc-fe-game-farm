@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BossHPBar, BattleTopBar, ComboDisplay, DamagePopupLayer } from '@/modules/boss/components/hud';
 import { BossStatsBadges, BossBuffsBadges } from './BossStatsDisplay';
 import { BossSprite } from './BossSprite';
@@ -32,13 +32,18 @@ interface Props {
     comboInfo: any;
 }
 
-export default function CampaignArenaTop({
+const CampaignArenaTop = React.memo(function CampaignArenaTop({
     boss, bossData, level, combatStats, onBack, elapsedSeconds, enrageLevel,
     pauseBattle, resumeBattle, zoneName, archetype, archetypeIcon,
     currentPhase, totalPhases, activeBossStats, activeBossBuffs,
     spriteSrc, spriteState, hasSprites, enrageMultiplier, skillWarning,
     egg, popups, combo, showCombo, comboInfo
 }: Props) {
+    // Memoize .some() calls — avoid O(n) scan on every render
+    const shieldBuff = useMemo(() => activeBossBuffs.some((b: any) => b.type === 'shield'), [activeBossBuffs]);
+    const reflectBuff = useMemo(() => activeBossBuffs.some((b: any) => b.type === 'reflect'), [activeBossBuffs]);
+    const isBurning = useMemo(() => activeBossBuffs.some((b: { type: string }) => b.type === 'burn') || activeBossStats.burnActive, [activeBossBuffs, activeBossStats.burnActive]);
+
     return (
         <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden z-[5]">
             <div className="absolute inset-0" style={{
@@ -98,9 +103,9 @@ export default function CampaignArenaTop({
                     emoji={bossData.emoji}
                     name={bossData.name}
                     enrageMultiplier={enrageMultiplier}
-                    shieldBuff={activeBossBuffs.some((b: any) => b.type === 'shield')}
-                    reflectBuff={activeBossBuffs.some((b: any) => b.type === 'reflect')}
-                    isBurning={activeBossBuffs.some((b: { type: string; }) => b.type === 'burn') || activeBossStats.burnActive}
+                    shieldBuff={shieldBuff}
+                    reflectBuff={reflectBuff}
+                    isBurning={isBurning}
                     skillWarning={!!skillWarning}
                     bossDead={boss.bossHp <= 0}
                 />
@@ -135,4 +140,6 @@ export default function CampaignArenaTop({
             </div>
         </div>
     );
-}
+});
+
+export default CampaignArenaTop;

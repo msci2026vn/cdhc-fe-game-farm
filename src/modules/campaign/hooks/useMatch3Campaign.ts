@@ -233,42 +233,27 @@ export function useMatch3Campaign(
   }, []);
 
   // ═══ GC Ticker for Popups, Notifs, and Blasts ═══
+  // Helper: filter expired items, return same ref if nothing changed (avoids re-render)
+  const gcFilter = useCallback(<T extends { expiresAt?: number }>(prev: T[], now: number): T[] => {
+    if (prev.length === 0) return prev;
+    const next = prev.filter(p => !p.expiresAt || p.expiresAt > now);
+    return next.length !== prev.length ? next : prev;
+  }, []);
+
   useEffect(() => {
     const gcInterval = setInterval(() => {
       const now = Date.now();
-      setPopups(prev => {
-        if (prev.length === 0) return prev;
-        const next = prev.filter(p => !p.expiresAt || p.expiresAt > now);
-        return next.length !== prev.length ? next : prev;
-      });
-      setCombatNotifs(prev => {
-        if (prev.length === 0) return prev;
-        const next = prev.filter(n => !n.expiresAt || n.expiresAt > now);
-        return next.length !== prev.length ? next : prev;
-      });
-      setBlastVfxs(prev => {
-        if (prev.length === 0) return prev;
-        const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
-        return next.length !== prev.length ? next : prev;
-      });
-      setParticleBursts(prev => {
-        if (prev.length === 0) return prev;
-        const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
-        return next.length !== prev.length ? next : prev;
-      });
-      setChainLightnings(prev => {
-        if (prev.length === 0) return prev;
-        const next = prev.filter(b => !b.expiresAt || b.expiresAt > now);
-        return next.length !== prev.length ? next : prev;
-      });
-      setFloatingTexts(prev => {
-        if (prev.length === 0) return prev;
-        const next = prev.filter(t => !t.expiresAt || t.expiresAt > now);
-        return next.length !== prev.length ? next : prev;
-      });
-    }, 750);
+      // React 18 auto-batches these setState calls inside setTimeout/setInterval
+      // Only call setState for arrays that likely have items (check refs would add complexity)
+      setPopups(prev => gcFilter(prev, now));
+      setCombatNotifs(prev => gcFilter(prev, now));
+      setBlastVfxs(prev => gcFilter(prev, now));
+      setParticleBursts(prev => gcFilter(prev, now));
+      setChainLightnings(prev => gcFilter(prev, now));
+      setFloatingTexts(prev => gcFilter(prev, now));
+    }, 1000); // Slowed from 750ms to 1000ms — less frequent GC saves CPU
     return () => clearInterval(gcInterval);
-  }, []);
+  }, [gcFilter]);
 
   // ═══ Elapsed seconds timer ═══
   useEffect(() => {

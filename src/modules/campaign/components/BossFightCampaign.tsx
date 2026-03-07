@@ -4,7 +4,7 @@
 // Weekly boss uses original BossFightM3 — UNTOUCHED
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useMatch3Campaign, CampaignBossData } from '../hooks/useMatch3Campaign';
 import { campaignApi } from '@/shared/api/api-campaign';
 import { useLevel } from '@/shared/hooks/usePlayerProfile';
@@ -354,17 +354,8 @@ export default function BossFightCampaign({
       {/* Phase transition overlay */}
       <PhaseTransitionOverlay phase={showPhaseTransition} />
 
-      {/* Combat notifications */}
-      {combatNotifs.length > 0 && (
-        <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
-          {combatNotifs.slice(-3).map((n: any) => (
-            <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
-              style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
-              {n.text}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Combat notifications — memoized slice to avoid new array every render */}
+      <CombatNotifList notifs={combatNotifs} />
 
       {/* Red vignette flash when player takes damage */}
       <DamageVignette screenShake={screenShake} ultActive={ultActive} />
@@ -418,3 +409,19 @@ export default function BossFightCampaign({
     </div>
   );
 }
+
+// Extracted to avoid .slice(-3) creating new array on every parent render
+const CombatNotifList = React.memo(function CombatNotifList({ notifs }: { notifs: any[] }) {
+  if (notifs.length === 0) return null;
+  const visible = notifs.length <= 3 ? notifs : notifs.slice(-3);
+  return (
+    <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
+      {visible.map((n: any) => (
+        <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
+          style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
+          {n.text}
+        </div>
+      ))}
+    </div>
+  );
+});
