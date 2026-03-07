@@ -23,43 +23,8 @@
 
   /* Removed gem-shine::after pseudo-element — was 64 extra paint layers */
 
-  /* ═══ Gem Match Explosion Ring ═══ */
-  .gem-match-burst::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    border: 2px solid currentColor;
-    animation: match-ring 0.4s ease-out forwards;
-    pointer-events: none;
-    z-index: 20;
-  }
-
-  /* Removed gem-match-burst::after — redundant with ::before */
-
-  .gem-atk.gem-match-burst {
-    color: #ff6b6b;
-  }
-
-  .gem-hp.gem-match-burst {
-    color: #55efc4;
-  }
-
-  .gem-def.gem-match-burst {
-    color: #74b9ff;
-  }
-
-  .gem-star.gem-match-burst {
-    color: #fdcb6e;
-  }
-
-  .gem-mana.gem-match-burst {
-    color: #a29bfe;
-  }
-
-  .gem-heal.gem-match-burst {
-    color: #55efc4;
-  }
+  /* gem-match-burst::before ring removed — 20-40 concurrent CSS animations quá nặng */
+  /* Visual feedback chỉ dùng animate-gem-pop (fade + scale nhỏ) */
 
   /* ═══ Special gem visuals ═══ */
   .gem-rainbow {
@@ -417,15 +382,11 @@
     }
   }
 
-  /* GPU hints only for elements that actually animate (NOT all gems) */
-  .gem-match-burst,
-  .gem-landed,
-  .gem-special-spawn,
+  /* GPU hints chỉ cho blast VFX và flash — KHÔNG cho gem-match-burst (tạo 20+ GPU layers) */
   .combo-flash-overlay,
-  .combo-ring-burst,
   .blast-row,
   .blast-col {
-    will-change: transform, opacity;
+    will-change: opacity;
     backface-visibility: hidden;
   }
 

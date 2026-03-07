@@ -212,9 +212,9 @@ export default {
           "50%": { boxShadow: "0 4px 25px rgba(108,92,231,0.7)" },
         },
         "gem-pop": {
+          // Simplified: removed scale-up and rotate — saves GPU compositing on 20+ gems
           "0%": { transform: "scale(1)", opacity: "1" },
-          "30%": { transform: "scale(1.25) rotate(-5deg)", opacity: "1" },
-          "100%": { transform: "scale(0) rotate(15deg)", opacity: "0" },
+          "100%": { transform: "scale(0.6)", opacity: "0" },
         },
         "gem-land": {
           "0%": { transform: "translateY(-15px) scale(0.8)", opacity: "0" },
@@ -250,8 +250,9 @@ export default {
           "100%": { transform: "rotate(360deg) scale(0)", opacity: "0" },
         },
         "gem-hint": {
-          "0%, 100%": { transform: "scale(1)", filter: "brightness(1)" },
-          "50%": { transform: "scale(1.12)", filter: "brightness(1.25)" },
+          // Removed filter:brightness — expensive CSS filter on infinite animation
+          "0%, 100%": { transform: "scale(1)", opacity: "0.85" },
+          "50%": { transform: "scale(1.1)", opacity: "1" },
         },
         "bug-wiggle": {
           "0%, 100%": { transform: "rotate(-8deg) scale(1)" },

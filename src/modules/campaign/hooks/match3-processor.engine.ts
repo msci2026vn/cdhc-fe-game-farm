@@ -155,14 +155,8 @@ export function processCampaignMatchesImpl(
         else if (g.special === 'striped_v') deps.addBlastVfx('col', idx % 8);
       }
 
-      // Trigger Particle Burst — only for special gems to reduce lag
-      if (deps.addParticleBurst && g.special) {
-        const color = g.special === 'rainbow' ? '#a855f7'
-          : g.type === 'atk' ? '#ef4444'
-          : g.type === 'star' ? '#eab308'
-          : '#ffffff';
-        deps.addParticleBurst(idx, color, 'burst');
-      }
+      // Particle Burst disabled — canvas rAF loop quá nặng trên mobile
+      // CSS gem-match-burst::before ring animation đủ feedback cho người chơi
     }
   });
 

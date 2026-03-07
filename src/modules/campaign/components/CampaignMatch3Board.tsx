@@ -51,7 +51,7 @@ interface Props {
     chainLightnings?: ChainLightningData[];
 }
 
-export default function CampaignMatch3Board({
+const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
     grid, selected, matchedCells, spawningGems, lockedGems, highlightedGem,
     isStunned, animating, handlePointerDown, handlePointerMove, handlePointerUp,
     combo, showCombo, otHiemActive, romBocActive, GEM_META,
@@ -154,4 +154,6 @@ export default function CampaignMatch3Board({
             </div>{/* end wooden frame */}
         </div>
     );
-}
+});
+
+export default CampaignMatch3Board;
