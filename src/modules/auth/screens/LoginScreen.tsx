@@ -8,6 +8,10 @@ import { API_BASE_URL } from '@/shared/utils/constants';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 import { LanguageSwitcher } from '@/modules/language';
+import { useTelegramAuth } from '@/shared/hooks/useTelegramAuth';
+import { TelegramLoginButton } from '../components/TelegramLoginButton';
+
+const TELEGRAM_BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'cdhcvn_bot';
 
 // Google Client ID từ BE .env
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '572363325691-nj5r43cqfncrmh4jc548uvhc6kavvpqe.apps.googleusercontent.com';
@@ -115,7 +119,16 @@ function LoginScreenContent() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Default to muted to avoid browser autoplay blocks
+  const [showWalletModal, setShowWalletModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Telegram auth
+  const { isLoading: isTgLoading, error: tgError, isMiniApp, autoLoginMiniApp, loginWithWidget } = useTelegramAuth();
+
+  // Mini App auto-login — chạy ngay khi mount nếu đang trong Telegram
+  useEffect(() => {
+    if (isMiniApp) autoLoginMiniApp();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Audio setup
   useEffect(() => {
@@ -242,8 +255,32 @@ function LoginScreenContent() {
     }
   };
 
-  // Wallet modal
-  const [showWalletModal, setShowWalletModal] = useState(false);
+  // Mini App — đang auto-login
+  if (isMiniApp && isTgLoading) {
+    return (
+      <div className="min-h-[100dvh] w-full bg-[#1e1e1e] flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-gray-400">Đang đăng nhập qua Telegram...</p>
+      </div>
+    );
+  }
+
+  // Mini App — auto-login thất bại
+  if (isMiniApp && tgError) {
+    return (
+      <div className="min-h-[100dvh] w-full bg-[#1e1e1e] flex flex-col items-center justify-center gap-4 px-6">
+        <p className="text-red-400 text-sm text-center">{tgError}</p>
+        <button
+          onClick={() => autoLoginMiniApp()}
+          className="px-6 py-2 bg-green-600 text-white text-sm rounded-lg active:scale-95 transition-transform"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="min-h-[100dvh] w-full bg-[#1e1e1e] flex flex-col items-center justify-center font-sans antialiased overflow-hidden">
@@ -319,6 +356,24 @@ function LoginScreenContent() {
                   <img src="/assets/login/btn-g.png" alt="Login with Google" className="w-full h-auto object-contain drop-shadow-sm" />
                 </div>
               </div>
+
+              {/* Telegram Login Button — chỉ hiện khi không phải Mini App */}
+              {!isMiniApp && (
+                <div className="w-full mt-1">
+                  <div className="flex items-center gap-3 my-2">
+                    <div className="flex-1 h-px bg-white/20" />
+                    <span className="text-[11px] text-white/40">hoặc</span>
+                    <div className="flex-1 h-px bg-white/20" />
+                  </div>
+                  <TelegramLoginButton
+                    botName={TELEGRAM_BOT_USERNAME}
+                    onAuth={(user) => loginWithWidget(user)}
+                  />
+                  {tgError && (
+                    <p className="text-red-400 text-xs text-center mt-2">{tgError}</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

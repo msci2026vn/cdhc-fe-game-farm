@@ -21,6 +21,8 @@ import { CustodialWalletCard } from '../components/CustodialWalletCard';
 import { useWalletAuth } from '@/shared/hooks/useWalletAuth';
 import { WalletSelectModal } from '@/shared/components/WalletSelectModal';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
+import { telegramApi } from '@/shared/api/api-telegram';
+import { isTelegramMiniApp, getTelegramInitData } from '@/shared/hooks/useTelegramAuth';
 
 type Tab = 'wallet' | 'stats' | 'achievements';
 
@@ -55,6 +57,29 @@ export default function ProfileScreen() {
 
   // Resolve walletAddress from multiple sources
   const walletAddress = profile?.walletAddress || (auth?.user as any)?.walletAddress || walletStatus?.walletAddress || null;
+
+  // Telegram link status
+  const { data: tgStatus, refetch: refetchTgStatus } = useQuery({
+    queryKey: ['telegram-status'],
+    queryFn: () => telegramApi.getLinkStatus(),
+    staleTime: 30_000,
+  });
+  const tgLinked = tgStatus?.data?.linked ?? false;
+  const tgUsername = tgStatus?.data?.telegramUsername;
+
+  const handleLinkTelegram = async () => {
+    const initData = getTelegramInitData();
+    if (!initData) {
+      alert('Mở game trong Telegram để liên kết tài khoản.');
+      return;
+    }
+    try {
+      await telegramApi.link(initData);
+      refetchTgStatus();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Liên kết thất bại');
+    }
+  };
 
   const isLoading = isProfileLoading || isAuthLoading;
 
@@ -233,6 +258,37 @@ export default function ProfileScreen() {
             <div className="animate-fade-in space-y-4">
               {/* Custodial Wallet (FARMVERSE) */}
               <CustodialWalletCard />
+
+              {/* Telegram Account */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
+                <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
+                  <span className="text-base">✈️</span>
+                  Telegram
+                </h3>
+                {tgLinked ? (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-green-600 font-medium">Đã liên kết</p>
+                      {tgUsername && <p className="text-xs text-gray-500 mt-0.5">@{tgUsername}</p>}
+                    </div>
+                    <span className="text-green-500 text-xl">✓</span>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">Liên kết để đăng nhập nhanh hơn qua Telegram</p>
+                    {isTelegramMiniApp() ? (
+                      <button
+                        onClick={handleLinkTelegram}
+                        className="w-full py-2 bg-blue-500 text-white text-sm rounded-xl font-medium active:scale-95 transition-transform"
+                      >
+                        Liên kết Telegram
+                      </button>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">Mở game trong Telegram để liên kết</p>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Wallet and Logout */}
               <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm mb-4">
