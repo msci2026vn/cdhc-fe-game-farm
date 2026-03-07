@@ -15,15 +15,17 @@ export function AuctionBanner() {
   const urgent = diff < 300_000;
 
   return (
-    <button
+    <div
+      className="bg-black/60 border border-amber-500/50 backdrop-blur-sm rounded-xl px-4 py-2 flex items-center justify-between cursor-pointer active:scale-95 transition-transform shadow-lg"
       onClick={() => { playSound('ui_click'); navigate('/auction'); }}
-      className={`w-full bg-gradient-to-r from-amber-900/60 to-orange-900/60 border rounded-xl px-3 py-2 flex items-center justify-between ${
-        urgent ? 'border-amber-500 animate-pulse' : 'border-amber-700/50'
-      }`}
     >
-      <span className="text-amber-400 text-xs font-bold">⚡ Dau gia sau</span>
+      <div className="flex flex-col">
+        <span className="text-amber-400 text-xs font-bold">⚡ Đấu giá sau</span>
+        <span className="text-white font-bold text-sm tracking-wide">{session.name}</span>
+      </div>
       <AuctionCountdown endTime={session.startTime} size="sm" />
       <span className="text-gray-400 text-xs">&rarr;</span>
-    </button>
+    </div>
   );
 }
+```

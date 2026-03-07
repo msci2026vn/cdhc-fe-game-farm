@@ -9,15 +9,15 @@ import { playSound } from '@/shared/audio';
 type TabKey = 'active' | 'scheduled' | 'ended';
 
 const tabs: { key: TabKey; label: string }[] = [
-  { key: 'active', label: '🔥 Dang dien ra' },
-  { key: 'scheduled', label: '📅 Sap toi' },
-  { key: 'ended', label: '✅ Ket thuc' },
+  { key: 'active', label: '🔥 Đang diễn ra' },
+  { key: 'scheduled', label: '📅 Sắp tới' },
+  { key: 'ended', label: '✅ Kết thúc' },
 ];
 
 const emptyMessages: Record<TabKey, string> = {
-  active: 'Chua co phien nao dang dien ra',
-  scheduled: 'Chua co phien nao sap toi',
-  ended: 'Chua co lich su dau gia',
+  active: 'Chưa có phiên nào đang diễn ra',
+  scheduled: 'Chưa có phiên nào sắp tới',
+  ended: 'Chưa có lịch sử đấu giá',
 };
 
 export default function AuctionLobbyScreen() {
@@ -47,12 +47,12 @@ export default function AuctionLobbyScreen() {
         {nextSession && nextSession.status === 'scheduled' && (
           <div className={`bg-gradient-to-r from-amber-900/40 to-orange-900/40 border rounded-2xl p-4 mb-4 ${showFomo ? 'border-amber-500 animate-pulse' : 'border-amber-700/50'
             }`}>
-            <div className="text-xs text-amber-400 uppercase tracking-wide">Phien tiep theo</div>
+            <div className="text-xs text-amber-400 uppercase tracking-wide">Phiên tiếp theo</div>
             <div className="text-lg font-bold text-white mt-1">{nextSession.name}</div>
             <AuctionCountdown endTime={nextSession.startTime} size="lg" />
             <div className="flex gap-3 mt-2 text-sm text-gray-400">
               <span>🃏 {nextSession.slotCount} NFT</span>
-              <span>⏱ {nextSession.durationMinutes} phut</span>
+              <span>⏱ {nextSession.durationMinutes} phút</span>
               <span>💰 {nextSession.bidCostOgn} OGN/bid</span>
             </div>
           </div>

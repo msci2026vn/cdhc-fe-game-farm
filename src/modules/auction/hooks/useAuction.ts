@@ -90,11 +90,11 @@ export function useCreateAuction() {
   return useMutation({
     mutationFn: (input: CreateAuctionInput) => auctionApi.create(input),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: auctionKeys.all });
-      useUIStore.getState().addToast('Da dang NFT vao phien dau gia!', 'success', '🏷️');
+      qc.invalidateQueries({ queryKey: ['auction', 'list'] });
+      useUIStore.getState().addToast('Đã đăng NFT vào phiên đấu giá!', 'success', '🏷️');
     },
-    onError: (error: Error) => {
-      useUIStore.getState().addToast(error.message || 'Khong the tao dau gia', 'error');
+    onError: (error: any) => {
+      useUIStore.getState().addToast(error.message || 'Không thể tạo đấu giá', 'error');
     },
   });
 }
@@ -120,10 +120,10 @@ export function useCancelAuction() {
   return useMutation({
     mutationFn: (auctionId: string) => auctionApi.cancel(auctionId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: auctionKeys.all });
-      useUIStore.getState().addToast('Da huy dau gia', 'success');
+      qc.invalidateQueries({ queryKey: ['auction'] });
+      useUIStore.getState().addToast('Đã hủy đấu giá', 'success');
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       useUIStore.getState().addToast(error.message || 'Khong the huy', 'error');
     },
   });

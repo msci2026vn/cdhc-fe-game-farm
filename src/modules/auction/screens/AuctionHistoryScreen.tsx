@@ -24,12 +24,12 @@ export default function AuctionHistoryScreen() {
   return (
     <div className="h-[100dvh] max-w-[430px] mx-auto bg-gradient-to-b from-gray-900 to-gray-950 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center px-4 pt-4 pb-2">
-        <button onClick={() => { playSound('ui_back'); navigate(-1); }}>
-          <span className="material-symbols-outlined text-xl text-gray-400">arrow_back</span>
+      <div className="flex-shrink-0 flex items-center px-4 pt-safe pb-2 mt-2">
+        <button onClick={() => { playSound('ui_back'); navigate(-1); }} className="w-8 h-8 flex items-center justify-center text-gray-400">
+          <span className="material-symbols-outlined text-xl">arrow_back</span>
         </button>
-        <h1 className="flex-1 text-center text-lg font-bold text-white">Lich su Dau Gia</h1>
-        <div className="w-10" />
+        <h1 className="flex-1 text-center text-lg font-bold text-white">Lịch sử Đấu Giá</h1>
+        <div className="w-8" />
       </div>
 
       {/* Tab filter */}
@@ -38,9 +38,8 @@ export default function AuctionHistoryScreen() {
           <button
             key={t.key}
             onClick={() => { playSound('ui_tab'); setTab(t.key); }}
-            className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
-              tab === t.key ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-400'
-            }`}
+            className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${tab === t.key ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-400'
+              }`}
           >
             {t.label}
           </button>
@@ -55,9 +54,9 @@ export default function AuctionHistoryScreen() {
           </div>
         ) : !items?.length ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-            <span className="text-4xl">{tab === 'bids' ? '🎯' : '🏷️'}</span>
+            <span className="text-4xl">📜</span>
             <p className="text-gray-500">
-              {tab === 'bids' ? 'Chua co phien nao ban da bid' : 'Chua co NFT nao ban da dang'}
+              {tab === 'bids' ? 'Chưa có phiên nào bạn đã bid' : 'Chưa có NFT nào bạn đã đăng'}
             </p>
           </div>
         ) : (

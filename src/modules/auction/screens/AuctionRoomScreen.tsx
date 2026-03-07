@@ -86,8 +86,8 @@ export default function AuctionRoomScreen() {
         <button onClick={() => { playSound('ui_back'); navigate(-1); }}>
           <span className="material-symbols-outlined text-xl text-gray-400">arrow_back</span>
         </button>
-        <h1 className="flex-1 text-center text-lg font-bold text-white">
-          {status === 'sudden_death' ? 'Sudden Death' : 'Dau Gia'}
+        <h1 className="flex-1 text-center font-bold text-white uppercase tracking-wider text-sm">
+          {status === 'sudden_death' ? 'Sudden Death' : 'Đấu Giá'}
         </h1>
         <span className={`text-xs px-2 py-1 rounded-full ${statusColors[status] || ''}`}>
           {statusLabels[status] || status}
@@ -145,9 +145,9 @@ export default function AuctionRoomScreen() {
         <div className="px-4 pb-6 pt-2">
           <button
             onClick={() => { playSound('ui_click'); cancelAuction.mutate(id!); }}
-            className="w-full py-3 rounded-xl bg-red-900/50 border border-red-700 text-red-400 font-medium"
+            className="px-4 py-2 bg-red-900 border border-red-500 rounded-xl text-red-200 font-bold active:scale-95"
           >
-            Huy dau gia
+            Hủy đấu giá
           </button>
         </div>
       )}

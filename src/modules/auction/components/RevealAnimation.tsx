@@ -65,13 +65,13 @@ export function RevealAnimation({ leaderboard, winnerName, finalPriceAvax, onRev
     <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center overflow-hidden">
       {/* Countdown */}
       {phase === 'countdown' && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-amber-400 text-lg font-bold tracking-widest uppercase">
-            REVEAL
+        <div className="text-center z-10 animate-fade-in delay-500 mt-28">
+          <div className="text-amber-400 font-bold uppercase tracking-widest text-sm drop-shadow-md">
+            🏆 Kết quả Đấu Giá
           </div>
           <div
-            key={countdown}
-            className="text-7xl font-black text-white animate-bounce"
+            key={countdown} // Keep the key for animation
+            className="text-7xl font-black text-white animate-bounce mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]"
           >
             {countdown || '!'}
           </div>
