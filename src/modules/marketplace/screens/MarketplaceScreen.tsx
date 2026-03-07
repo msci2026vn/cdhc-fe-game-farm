@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { NavigateFunction } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { marketplaceApi, type MarketplaceListing } from '@/shared/api/api-marketplace';
+import MyTransactionList from '@/modules/marketplace/components/MyTransactionList';
 import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
@@ -287,6 +288,7 @@ export default function MarketplaceScreen() {
   const queryClient = useQueryClient();
   const { data: authData } = useAuth();
   const currentUserId = authData?.user?.id;
+  const [activeTab, setActiveTab] = useState<'listings' | 'history'>('listings');
   const { data: listings = [], isLoading } = useQuery({
     queryKey: ['marketplace', 'listings'],
     queryFn: () => marketplaceApi.getListings(),
@@ -375,44 +377,64 @@ export default function MarketplaceScreen() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex-shrink-0 px-4 py-3 space-y-2 border-b border-gray-800/50">
-        <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {DIFFICULTY_FILTERS.map(f => {
-            const active = filterDifficulty === f.key;
-            const r = f.key !== 'all' ? RARITY[f.key] : null;
-            return (
-              <button
-                key={f.key}
-                onClick={() => { playSound('ui_tab'); setFilterDifficulty(f.key); }}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${active
-                  ? r ? `${r.bg} ${r.border} border ${r.color}` : 'bg-white/20 border border-white/30 text-white'
-                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-                  }`}
-              >
-                {f.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-xs">Sắp xếp:</span>
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            className="bg-gray-800 text-gray-300 text-xs rounded-lg px-2 py-1 border border-gray-700 outline-none"
-          >
-            {SORT_OPTIONS.map(o => (
-              <option key={o.key} value={o.key}>{o.label}</option>
-            ))}
-          </select>
-        </div>
+      {/* Tabs: Đang bán / Lịch sử */}
+      <div className="flex px-4 mt-2 mb-0 gap-1">
+        <button
+          onClick={() => { playSound('ui_tab'); setActiveTab('listings'); }}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors ${activeTab === 'listings' ? 'bg-purple-600/30 border border-purple-500/50 text-purple-300' : 'text-gray-500 hover:text-gray-300'}`}
+        >
+          Đang bán {listings.length > 0 ? `(${listings.length})` : ''}
+        </button>
+        <button
+          onClick={() => { playSound('ui_tab'); setActiveTab('history'); }}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors ${activeTab === 'history' ? 'bg-emerald-600/30 border border-emerald-500/50 text-emerald-300' : 'text-gray-500 hover:text-gray-300'}`}
+        >
+          Lịch sử của tôi
+        </button>
       </div>
+
+      {/* Filters — only show for listings tab */}
+      {activeTab === 'listings' && (
+        <div className="flex-shrink-0 px-4 py-3 space-y-2 border-b border-gray-800/50">
+          <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {DIFFICULTY_FILTERS.map(f => {
+              const active = filterDifficulty === f.key;
+              const r = f.key !== 'all' ? RARITY[f.key] : null;
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => { playSound('ui_tab'); setFilterDifficulty(f.key); }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${active
+                    ? r ? `${r.bg} ${r.border} border ${r.color}` : 'bg-white/20 border border-white/30 text-white'
+                    : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                    }`}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500 text-xs">Sắp xếp:</span>
+            <select
+              value={sort}
+              onChange={e => setSort(e.target.value)}
+              className="bg-gray-800 text-gray-300 text-xs rounded-lg px-2 py-1 border border-gray-700 outline-none"
+            >
+              {SORT_OPTIONS.map(o => (
+                <option key={o.key} value={o.key}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <main className="flex-1 min-h-0 overflow-y-auto pb-28 px-4 py-4">
-        {isLoading ? (
+        {activeTab === 'history' ? (
+          <MyTransactionList />
+        ) : isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="animate-spin w-8 h-8 border-3 border-purple-400 border-t-transparent rounded-full" />
             <span className="text-gray-400 text-sm">Đang tải...</span>
