@@ -10,8 +10,7 @@ export function ChainLightningContainer({ strikes = [] }: Props) {
 
     return (
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-40"
-            viewBox="0 0 100 100" preserveAspectRatio="none"
-            style={{ filter: 'drop-shadow(0 0 3px #00f0ff)' }}>
+            viewBox="0 0 100 100" preserveAspectRatio="none">
             {strikes.map(strike => (
                 <LightningStrike key={strike.id} strike={strike} />
             ))}

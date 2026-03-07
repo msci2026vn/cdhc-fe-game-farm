@@ -120,19 +120,14 @@
 }
 
 /* Grid cells — KHÔNG set background ở đây để GEM_STYLES inline có hiệu lực */
+/* Removed transition on 64 gems — was 192 CSS transitions running simultaneously */
+/* Removed hover filter:brightness — expensive CSS filter on mobile */
 .campaign-grid-frame .grid > * {
   border-radius: 8px !important;
   border: 1.5px solid rgba(80,60,40,0.5) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.12),
     inset 0 -2px 0 rgba(0,0,0,0.35) !important;
-  transition: transform 0.12s ease, filter 0.12s ease, border-color 0.12s ease !important;
-}
-.campaign-grid-frame .grid > *:hover {
-  transform: scale(1.13) !important;
-  filter: brightness(1.35) !important;
-  border-color: rgba(255,255,255,0.55) !important;
-  z-index: 3;
 }
 
 /* ── 8. PLAYER HUD AREA ──────────────────────────────────── */
@@ -193,11 +188,7 @@
     0 5px 16px rgba(0,0,0,0.65),
     inset 0 2px 5px rgba(255,255,255,0.18),
     inset 0 -3px 6px rgba(0,0,0,0.4) !important;
-  animation: campaign-ult-pulse 2.2s ease-in-out infinite !important;
-}
-@keyframes campaign-ult-pulse {
-  0%,100% { box-shadow: 0 0 26px var(--c-purple-glow), 0 5px 16px rgba(0,0,0,0.65), inset 0 2px 5px rgba(255,255,255,0.18), inset 0 -3px 6px rgba(0,0,0,0.4); }
-  50%      { box-shadow: 0 0 44px rgba(180,100,255,1),  0 5px 16px rgba(0,0,0,0.65), inset 0 2px 5px rgba(255,255,255,0.18), inset 0 -3px 6px rgba(0,0,0,0.4); }
+  /* Removed infinite animation campaign-ult-pulse — constant GPU box-shadow repaint */
 }
 
 /* NÉ dodge window — nổi bật khi boss ra đòn */
@@ -207,11 +198,7 @@
     0 0 0 3px rgba(255,255,80,0.6),
     0 0 20px rgba(255,255,80,0.8),
     0 5px 16px rgba(0,0,0,0.65) !important;
-  animation: campaign-dodge-flash 0.5s ease-in-out infinite !important;
-}
-@keyframes campaign-dodge-flash {
-  0%,100% { border-color: #ffff44; }
-  50%      { border-color: #ff8800; }
+  /* Removed infinite animation campaign-dodge-flash — constant border repaint */
 }
 
 /* Wood log platform under skill bar */
@@ -272,64 +259,14 @@
   background: linear-gradient(90deg, rgba(180,20,20,0.9), rgba(220,50,50,0.85)) !important;
   border: 1px solid rgba(255,80,80,0.6) !important;
   box-shadow: 0 0 20px rgba(220,50,50,0.5) !important;
-  animation: campaign-warning-pulse 0.7s ease-in-out infinite !important;
-}
-@keyframes campaign-warning-pulse {
-  0%,100% { box-shadow: 0 0 20px rgba(220,50,50,0.5); }
-  50%      { box-shadow: 0 0 36px rgba(255,80,80,0.9); }
+  /* Removed infinite animation campaign-warning-pulse — constant GPU box-shadow repaint */
 }
 
-/* ── 13. FIREFLY PARTICLES (pure CSS) ────────────────────── */
-/* Thêm vào decorative layer trong BossFightCampaign.tsx:
-   <div className="campaign-fireflies" aria-hidden="true" />    */
+/* ── 13. FIREFLY PARTICLES — DISABLED ────────────────────── */
+/* Removed: 2 pseudo-elements with 8 box-shadows each + infinite animations
+   were causing constant GPU compositing. Static opacity is sufficient. */
 .campaign-fireflies {
-  position: absolute; inset: 0;
-  pointer-events: none; z-index: 3;
-  overflow: hidden;
-}
-.campaign-fireflies::before,
-.campaign-fireflies::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-}
-.campaign-fireflies::before {
-  width: 3px; height: 3px;
-  background: #afffb0;
-  box-shadow:
-    30px  80px 0 rgba(175,255,176,0.9),
-    80px  50px 0 rgba(255,255,140,0.8),
-    140px 90px 0 rgba(120,255,200,0.85),
-    200px 40px 0 rgba(175,255,176,0.7),
-    260px 70px 0 rgba(255,255,140,0.9),
-    320px 55px 0 rgba(120,255,200,0.75),
-    60px 120px 0 rgba(175,255,176,0.6),
-    180px 35px 0 rgba(255,255,140,0.8);
-  animation: ff-drift-a 7s ease-in-out infinite;
-}
-.campaign-fireflies::after {
-  width: 2px; height: 2px;
-  background: #ffffaa;
-  box-shadow:
-    50px 100px 0 rgba(255,255,170,0.7),
-    110px 60px 0 rgba(175,255,176,0.8),
-    170px 110px 0 rgba(120,255,200,0.6),
-    230px 45px 0 rgba(255,255,170,0.85),
-    290px 80px 0 rgba(175,255,176,0.65),
-    350px 65px 0 rgba(120,255,200,0.9),
-    20px  140px 0 rgba(255,255,170,0.7),
-    150px 130px 0 rgba(175,255,176,0.6);
-  animation: ff-drift-b 9s ease-in-out infinite;
-}
-@keyframes ff-drift-a {
-  0%,100% { opacity:0.4; transform:translate(0,0); }
-  25%      { opacity:1;   transform:translate(6px,-12px); }
-  75%      { opacity:0.6; transform:translate(-4px,-8px); }
-}
-@keyframes ff-drift-b {
-  0%,100% { opacity:0.5; transform:translate(0,0); }
-  33%      { opacity:0.9; transform:translate(-8px,-10px); }
-  66%      { opacity:0.6; transform:translate(5px,-14px); }
+  display: none;
 }
 
 /* ── 14. DAMAGE POPUP POLISH ─────────────────────────────── */
@@ -345,9 +282,5 @@
 /* ── 15. ENRAGE TIMER (blink đỏ khi enrage) ─────────────── */
 .campaign-timer-enrage {
   color: #ff4444 !important;
-  animation: campaign-enrage-blink 0.6s ease-in-out infinite !important;
-}
-@keyframes campaign-enrage-blink {
-  0%,100% { opacity:1; text-shadow: 0 0 8px rgba(255,50,50,0.8); }
-  50%      { opacity:0.6; text-shadow: 0 0 20px rgba(255,80,80,1); }
+  /* Removed infinite animation campaign-enrage-blink — constant text-shadow repaint */
 }
