@@ -108,7 +108,7 @@ export default function ShopScreen() {
 
       {/* Main Shop Tabs */}
       <div className="flex w-full px-5 mb-2">
-        <div className="flex w-full bg-white/40 p-1 rounded-2xl backdrop-blur-md border border-white/50">
+        <div className="flex w-[66.6%] bg-white/40 p-1 rounded-2xl backdrop-blur-md border border-white/50">
           <button className="flex-1 py-2 rounded-xl text-xs font-bold bg-white text-green-700 shadow-sm transition-all border border-green-200">
             🏪 Chợ OGN
           </button>
@@ -117,12 +117,6 @@ export default function ShopScreen() {
             className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-600 hover:text-gray-900 transition-all"
           >
             🎴 Chợ NFT
-          </button>
-          <button
-            onClick={() => { playSound('ui_click'); window.location.href = '/auction'; }}
-            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-600 hover:text-gray-900 transition-all"
-          >
-            ⚡ Đấu giá
           </button>
         </div>
       </div>

@@ -40,27 +40,6 @@ export default function AuctionLobbyScreen() {
         <div className="w-8" />
       </div>
 
-      {/* Main Shop Tabs */}
-      <div className="flex-shrink-0 flex w-full px-4 mb-2">
-        <div className="flex w-full bg-gray-800/80 p-1 rounded-2xl border border-gray-700/50">
-          <button
-            onClick={() => { playSound('ui_click'); window.location.href = '/shop'; }}
-            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-200 transition-all"
-          >
-            🏪 Chợ OGN
-          </button>
-          <button
-            onClick={() => { playSound('ui_click'); window.location.href = '/marketplace'; }}
-            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-200 transition-all"
-          >
-            🎴 Chợ NFT
-          </button>
-          <button className="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-700 text-amber-500 shadow-sm transition-all border border-gray-600/50">
-            ⚡ Đấu giá
-          </button>
-        </div>
-      </div>
-
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 pb-24">
 
