@@ -53,21 +53,23 @@ export function ParticleOverlay({ bursts }: Props) {
                 const cx = (col + 0.5) * (width / 8);
                 const cy = (row + 0.5) * (height / 8);
 
-                const particleCount = b.type === 'burst' ? 15 + Math.random() * 8 : b.type === 'fire' ? 12 : 8; // Fewer particles for fire/heal
+                // Cap total particles to prevent lag
+                if (particlesRef.current.length > 80) return;
+
+                const particleCount = b.type === 'burst' ? 5 : b.type === 'fire' ? 4 : 3;
 
                 for (let i = 0; i < particleCount; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    let speed = 2 + Math.random() * 8;
+                    let speed = 2 + Math.random() * 5;
                     let vx = Math.cos(angle) * speed;
                     let vy = Math.sin(angle) * speed;
 
-                    // Custom fire/heal initialization
                     if (b.type === 'fire') {
-                        vx = (Math.random() - 0.5) * 4;
-                        vy = -(2 + Math.random() * 3); // upward
-                    } else if (b.type === 'heal') {
                         vx = (Math.random() - 0.5) * 3;
-                        vy = -(1 + Math.random() * 2); // upward slowly
+                        vy = -(2 + Math.random() * 2);
+                    } else if (b.type === 'heal') {
+                        vx = (Math.random() - 0.5) * 2;
+                        vy = -(1 + Math.random() * 1.5);
                     }
 
                     particlesRef.current.push({
@@ -75,10 +77,10 @@ export function ParticleOverlay({ bursts }: Props) {
                         y: cy,
                         vx,
                         vy,
-                        radius: b.type === 'burst' ? 2 + Math.random() * 4 : 3 + Math.random() * 5,
+                        radius: 2 + Math.random() * 3,
                         color: b.color,
                         life: 0,
-                        maxLife: b.type === 'burst' ? 30 + Math.random() * 20 : 40 + Math.random() * 30,
+                        maxLife: 20 + Math.random() * 15,
                         type: b.type,
                     });
                 }

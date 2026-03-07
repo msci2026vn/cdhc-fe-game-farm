@@ -29,8 +29,13 @@ export function setupDebuffTicker(deps: DebuffTickerDeps): () => void {
   const ticker = setInterval(() => {
     if (isPausedRef.current) return;
 
-    // === Player debuffs ===
+    // Early exit: skip all work when nothing active
     const debuffs = activeDebuffsRef.current;
+    const buffs = activeBossBuffsRef.current;
+    const currentEgg = eggRef.current;
+    if (debuffs.length === 0 && buffs.length === 0 && !currentEgg) return;
+
+    // === Player debuffs ===
     if (debuffs.length > 0) {
       // Apply burn DOT
       const burn = debuffs.find(d => d.type === 'burn');
@@ -51,7 +56,6 @@ export function setupDebuffTicker(deps: DebuffTickerDeps): () => void {
     }
 
     // === Boss buffs (shield/reflect countdown) ===
-    const buffs = activeBossBuffsRef.current;
     if (buffs.length > 0) {
       activeBossBuffsRef.current = buffs
         .map(b => ({ ...b, remainingSec: b.remainingSec - 1 }))
@@ -60,7 +64,6 @@ export function setupDebuffTicker(deps: DebuffTickerDeps): () => void {
     }
 
     // === Egg countdown ===
-    const currentEgg = eggRef.current;
     if (currentEgg) {
       const newCountdown = currentEgg.countdown - 1;
       if (newCountdown <= 0) {

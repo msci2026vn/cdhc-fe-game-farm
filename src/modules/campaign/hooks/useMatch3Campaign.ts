@@ -266,7 +266,7 @@ export function useMatch3Campaign(
         const next = prev.filter(t => !t.expiresAt || t.expiresAt > now);
         return next.length !== prev.length ? next : prev;
       });
-    }, 500);
+    }, 750);
     return () => clearInterval(gcInterval);
   }, []);
 
@@ -401,25 +401,27 @@ export function useMatch3Campaign(
     if (result !== 'fighting') return;
     const interval = setInterval(() => {
       if (isPausedRef.current) return;
-      // Ớt Hiểm cooldown
-      setOtHiemCooldown(c => Math.max(0, c - 1));
+      // Ớt Hiểm cooldown — only setState when value > 0
+      setOtHiemCooldown(c => c > 0 ? c - 1 : c);
       setOtHiemDuration(d => {
+        if (d <= 0) return d;
         if (d <= 1 && otHiemActiveRef.current) {
           otHiemActiveRef.current = false;
           setOtHiemActive(false);
           return 0;
         }
-        return Math.max(0, d - 1);
+        return d - 1;
       });
-      // Rơm Bọc cooldown + HoT
-      setRomBocCooldown(c => Math.max(0, c - 1));
+      // Rơm Bọc cooldown — only setState when value > 0
+      setRomBocCooldown(c => c > 0 ? c - 1 : c);
       setRomBocDuration(d => {
+        if (d <= 0) return d;
         if (d <= 1 && romBocActiveRef.current) {
           romBocActiveRef.current = false;
           setRomBocActive(false);
           return 0;
         }
-        return Math.max(0, d - 1);
+        return d - 1;
       });
       // Rơm Bọc HoT (Lv3+)
       if (romBocActiveRef.current) {

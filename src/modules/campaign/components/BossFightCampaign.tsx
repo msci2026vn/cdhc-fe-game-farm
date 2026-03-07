@@ -328,42 +328,8 @@ export default function BossFightCampaign({
   return (
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative campaign-battle-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''} ${result === 'victory' && deathPhase === 'dying' ? 'animate-screen-shake-violent' : ''}`}>
 
-      {/* ── Forest decorative layers (from HTML mockup) ── */}
+      {/* ── Forest decorative layers (simplified for performance) ── */}
       <div className="campaign-trees-layer z-[1]" />
-      <div className="campaign-fireflies" aria-hidden="true" />
-      {/* Center green glow */}
-      <div className="absolute pointer-events-none z-[2]" style={{
-        top: '3%', left: '50%', transform: 'translateX(-50%)',
-        width: 220, height: 220,
-        background: 'radial-gradient(ellipse, rgba(50,180,30,0.18) 0%, transparent 70%)',
-        animation: 'glow-breathe 4s ease-in-out infinite',
-      }} />
-      {/* Fireflies */}
-      {[
-        { bg: '#afffb0', l: '28%', t: '42%', d: '4.2s', delay: '0s', s: 3 },
-        { bg: '#ffff99', l: '58%', t: '32%', d: '5.5s', delay: '1.2s', s: 2 },
-        { bg: '#77ffcc', l: '44%', t: '52%', d: '3.7s', delay: '2.1s', s: 3 },
-        { bg: '#aaffaa', l: '18%', t: '58%', d: '6.1s', delay: '0.7s', s: 2 },
-        { bg: '#ffffaa', l: '73%', t: '48%', d: '4.7s', delay: '1.9s', s: 3 },
-      ].map((ff, i) => (
-        <div key={i} className="absolute rounded-full pointer-events-none z-[3] animate-[ff-float_linear_infinite]"
-          style={{
-            width: ff.s, height: ff.s, background: ff.bg, left: ff.l, top: ff.t,
-            boxShadow: `0 0 5px ${ff.bg}`, animationDuration: ff.d, animationDelay: ff.delay
-          }} />
-      ))}
-      {/* Mushrooms bottom */}
-      {[
-        { s: 'left:2px;bottom:110px;font-size:30px', delay: '0s' },
-        { s: 'left:20px;bottom:88px;font-size:20px', delay: '0.5s' },
-        { s: 'right:4px;bottom:104px;font-size:26px', delay: '1s' },
-        { s: 'right:24px;bottom:82px;font-size:18px', delay: '1.5s' },
-      ].map((m, i) => (
-        <div key={i} className="absolute z-[11] pointer-events-none"
-          style={{ filter: 'brightness(0.45) saturate(0.7)', animation: `mush-sway 5s ease-in-out infinite`, animationDelay: m.delay, ...(Object.fromEntries(m.s.split(';').map(p => { const [k, v] = p.split(':'); return [k?.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase()), v?.trim()]; }).filter(([k]) => k))) }}>🍄</div>
-      ))}
-      {/* Bottom fog */}
-      <div className="campaign-bottom-fog z-[10]" />
 
       {/* Victory Boss Death Flash */}
       {result === 'victory' && deathPhase === 'dying' && (

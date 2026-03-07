@@ -13,10 +13,10 @@ export default function UltimateFlash() {
           ⚡ ULTIMATE! ⚡
         </div>
       </div>
-      {Array.from({ length: 12 }).map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <span key={i} className="absolute animate-sparkle-up text-2xl pointer-events-none"
-          style={{ left: `${10 + Math.random() * 80}%`, top: `${20 + Math.random() * 50}%`, animationDelay: `${i * 0.1}s` }}>
-          {['⚡', '💜', '✨', '💎'][i % 4]}
+          style={{ left: `${15 + i * 20}%`, top: `${25 + (i % 2) * 30}%`, animationDelay: `${i * 0.15}s` }}>
+          {['⚡', '💜', '✨', '💎'][i]}
         </span>
       ))}
     </div>
