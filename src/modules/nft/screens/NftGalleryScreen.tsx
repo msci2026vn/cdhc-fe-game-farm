@@ -94,6 +94,9 @@ function CardGrid({
   );
 }
 
+const MIN_PRICE_AVAX = 0.01;
+const GAS_FUND_AVAX = 0.002;
+
 function SellModal({
   card,
   onClose,
@@ -109,8 +112,15 @@ function SellModal({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const priceNum = parseFloat(price) || 0;
+  const feeRate = 0.05; // shown as 5% (max, non-VIP)
+  const feeAmt = priceNum * feeRate;
+  const willReceive = Math.max(0, priceNum - feeAmt - GAS_FUND_AVAX);
+  const isBelowMin = priceNum > 0 && priceNum < MIN_PRICE_AVAX;
+  const canSell = priceNum >= MIN_PRICE_AVAX && !loading;
+
   const handleSell = async () => {
-    if (!card.nftTokenId || !price) return;
+    if (!card.nftTokenId || !canSell) return;
     setLoading(true);
     setError('');
     try {
@@ -161,16 +171,39 @@ function SellModal({
               <input
                 type="number"
                 step="0.01"
-                min="0.01"
-                placeholder="VD: 2.5"
+                min={MIN_PRICE_AVAX}
+                placeholder={`Tối thiểu ${MIN_PRICE_AVAX} AVAX`}
                 value={price}
                 onChange={e => setPrice(e.target.value)}
-                className="w-full p-3 bg-gray-700 rounded-xl text-white text-lg border border-gray-600 focus:border-emerald-500 outline-none transition-colors"
+                className={`w-full p-3 bg-gray-700 rounded-xl text-white text-lg border outline-none transition-colors ${isBelowMin ? 'border-red-500 focus:border-red-400' : 'border-gray-600 focus:border-emerald-500'}`}
               />
-              {price && parseFloat(price) > 0 && (
-                <p className="text-gray-500 text-xs mt-1">~ ${(parseFloat(price) * 9).toFixed(2)} USD</p>
+              {isBelowMin && (
+                <p className="text-red-400 text-xs mt-1">Giá tối thiểu là {MIN_PRICE_AVAX} AVAX</p>
               )}
             </div>
+
+            {/* Fee breakdown preview */}
+            {priceNum >= MIN_PRICE_AVAX && (
+              <div className="bg-gray-900/60 border border-gray-700 rounded-xl p-3 space-y-1.5 text-xs">
+                <div className="flex justify-between text-gray-400">
+                  <span>Giá bán</span>
+                  <span className="text-white font-medium">{priceNum.toFixed(4)} AVAX</span>
+                </div>
+                <div className="flex justify-between text-gray-400">
+                  <span>Phí giao dịch (5%)</span>
+                  <span className="text-red-400">−{feeAmt.toFixed(4)} AVAX</span>
+                </div>
+                <div className="flex justify-between text-gray-400">
+                  <span>Phí mạng (gas)</span>
+                  <span className="text-red-400">−{GAS_FUND_AVAX} AVAX</span>
+                </div>
+                <div className="border-t border-gray-700 pt-1.5 flex justify-between">
+                  <span className="text-gray-300 font-medium">Thực nhận</span>
+                  <span className="text-emerald-400 font-bold">{willReceive.toFixed(4)} AVAX</span>
+                </div>
+                <p className="text-gray-600 text-center pt-0.5">≈ ${(willReceive * 9).toFixed(2)} USD</p>
+              </div>
+            )}
 
             {error && (
               <p className="text-red-400 text-sm text-center bg-red-500/10 rounded-lg py-2">{error}</p>
@@ -186,7 +219,7 @@ function SellModal({
               </button>
               <button
                 onClick={handleSell}
-                disabled={!price || parseFloat(price) <= 0 || loading}
+                disabled={!canSell}
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Đang đăng...' : `Bán ${price || '?'} AVAX`}
