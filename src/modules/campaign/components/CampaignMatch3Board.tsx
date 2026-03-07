@@ -6,14 +6,15 @@ import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
 import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
 
-// ═══ Candy Crush-style gem colors — static gradient (painted once, no GPU repaint) ═══
-// Static linear-gradient is fine — expensive only when ANIMATED
+// ═══ Candy glass gem colors — oval white highlight at top + deep color base ═══
+// 2 static bg layers: painted once, no GPU repaint. Must match .gem-* CSS classes.
 // ⚔️ atk = đỏ   💚 hp = xanh lá   🛡️ def = xanh biển   ⭐ star = vàng
+const HIGHLIGHT = 'radial-gradient(ellipse 68% 44% at 50% 13%, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0) 100%)';
 const GEM_STYLES: Record<string, React.CSSProperties> = {
-    atk: { background: 'linear-gradient(150deg, #ff7070 0%, #cc1a1a 100%)' },
-    hp:  { background: 'linear-gradient(150deg, #55dd77 0%, #1f8c3a 100%)' },
-    def: { background: 'linear-gradient(150deg, #5599ff 0%, #1a44cc 100%)' },
-    star:{ background: 'linear-gradient(150deg, #ffdd33 0%, #cc8800 100%)' },
+    atk:  { background: `${HIGHLIGHT}, linear-gradient(160deg, #ff5566 0%, #ee2233 45%, #aa0011 100%)` },
+    hp:   { background: `${HIGHLIGHT.replace('0.58','0.55')}, linear-gradient(160deg, #44ee77 0%, #22bb44 45%, #0d7722 100%)` },
+    def:  { background: `${HIGHLIGHT.replace('0.58','0.55')}, linear-gradient(160deg, #5588ff 0%, #2255ee 45%, #0d33aa 100%)` },
+    star: { background: `${HIGHLIGHT.replace('0.58','0.62')}, linear-gradient(160deg, #ffee33 0%, #ffbb00 45%, #aa7700 100%)` },
 };
 
 // Pre-computed grid styles to avoid creating new objects every render
