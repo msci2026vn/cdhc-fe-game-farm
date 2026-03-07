@@ -8,8 +8,8 @@ import { playSound } from '@/shared/audio';
 type TabKey = 'bids' | 'listings';
 
 const tabs: { key: TabKey; label: string }[] = [
-  { key: 'bids', label: '🎯 Da bid' },
-  { key: 'listings', label: '🏷️ Da ban' },
+  { key: 'bids', label: '🎯 Đã bid' },
+  { key: 'listings', label: '🏷️ Đã bán' },
 ];
 
 export default function AuctionHistoryScreen() {
@@ -120,8 +120,8 @@ function StatusBadge({ status }: { status: string }) {
     active: 'Live',
     sudden_death: 'SD',
     ended: 'End',
-    pending: 'Cho',
-    cancelled: 'Huy',
+    pending: 'Chờ',
+    cancelled: 'Huỷ',
   };
   return (
     <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${styles[status] || styles.pending}`}>

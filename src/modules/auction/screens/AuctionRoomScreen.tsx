@@ -23,10 +23,10 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  pending: 'Cho',
-  active: 'Dang dien ra',
+  pending: 'Chờ',
+  active: 'Đang diễn ra',
   sudden_death: 'Sudden Death',
-  ended: 'Ket thuc',
+  ended: 'Kết thúc',
   cancelled: 'Đã hủy',
 };
 
@@ -108,13 +108,13 @@ export default function AuctionRoomScreen() {
         {isLive && (
           <div className="text-center my-4">
             <div className="text-xs text-gray-500 mb-1">
-              {status === 'sudden_death' ? 'Sudden Death con' : 'Con lai'}
+              {status === 'sudden_death' ? 'Sudden Death còn' : 'Còn lại'}
             </div>
             <AuctionCountdown endTime={auction.endTime} size="lg" />
           </div>
         )}
         {status === 'ended' && (
-          <div className="text-center my-4 text-green-400 font-bold">Da ket thuc</div>
+          <div className="text-center my-4 text-green-400 font-bold">Đã kết thúc</div>
         )}
 
         {/* Sealed Bid Panel */}
@@ -124,7 +124,7 @@ export default function AuctionRoomScreen() {
         {bidPack && isLive && (
           <div className="flex justify-center gap-4 text-xs text-gray-500 my-3">
             <span>🎁 Free: {bidPack.freeBidsRemaining}/3</span>
-            <span>📊 Da dung: {bidPack.totalBidsUsed}/{bidPack.maxBidsPerSession}</span>
+            <span>📊 Đã dùng: {bidPack.totalBidsUsed}/{bidPack.maxBidsPerSession}</span>
           </div>
         )}
       </div>
