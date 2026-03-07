@@ -7,10 +7,6 @@ interface Props {
     error: string | null;
     isPending: boolean;
     manualMode: boolean;
-    hasWallet: boolean;
-    walletStatus: any;
-    canPayWithSmartWallet: boolean;
-    handlePrepareSmartWallet: () => void;
     hasCustodialWallet: boolean;
     custodialWallet: any;
     canPayWithCustodial: boolean;
@@ -33,10 +29,6 @@ export function StepConfirmPayment({
     error,
     isPending,
     manualMode,
-    hasWallet,
-    walletStatus,
-    canPayWithSmartWallet,
-    handlePrepareSmartWallet,
     hasCustodialWallet,
     custodialWallet,
     canPayWithCustodial,
@@ -109,34 +101,7 @@ export function StepConfirmPayment({
                 {/* Payment methods */}
                 {!manualMode ? (
                     <div className="mt-4 space-y-2">
-                        {/* Option 1: Smart Wallet (highest priority) */}
-                        {hasWallet && walletStatus?.address && (
-                            <button
-                                onClick={handlePrepareSmartWallet}
-                                disabled={isPending || !canPayWithSmartWallet}
-                                className="w-full py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                                {isPending ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Đang chuẩn bị...
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className="material-symbols-outlined text-base">fingerprint</span>
-                                        Gửi {selectedPlan.priceAvax} AVAX (Smart Wallet)
-                                    </>
-                                )}
-                            </button>
-                        )}
-
-                        {/* Smart wallet balance info */}
-                        {hasWallet && walletStatus?.address && (
-                            <p className={`text-[10px] text-center ${canPayWithSmartWallet ? 'text-green-600' : 'text-red-500'}`}>
-                                Số dư Smart Wallet: {walletStatus.balance || '0'} AVAX
-                                {!canPayWithSmartWallet && ' (không đủ)'}
-                            </p>
-                        )}
+                        {/* Smart wallet balance info removed per user request */}
 
                         {/* Option 1.5: Custodial Wallet (Ví FARMVERSE) */}
                         {hasCustodialWallet && custodialWallet?.address && (

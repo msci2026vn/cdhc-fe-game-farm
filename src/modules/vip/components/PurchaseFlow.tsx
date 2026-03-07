@@ -3,20 +3,18 @@ import { toast } from 'sonner';
 import type { VipPlan, VipOrder, VipVerifyResult } from '@/shared/types/game-api.types';
 import { useVipStatus } from '@/shared/hooks/useVipStatus';
 import { useVipPlans, useCreateVipOrder, useVerifyVipPayment } from '@/shared/hooks/useVipPayment';
-import { useSmartWallet } from '@/shared/hooks/useSmartWallet';
+
 import { useCustodialWallet } from '@/shared/hooks/useCustodialWallet';
 import { gameApi } from '@/shared/api/game-api';
 import {
   hasWalletExtension,
   sendViaWalletExtension,
-  prepareSmartWalletOp,
-  signAndSubmitSmartWalletOp,
 } from '../utils/sendAvaxPayment';
 
 // Flow steps
 import { StepSelectPlan } from './flow-steps/StepSelectPlan';
 import { StepConfirmPayment } from './flow-steps/StepConfirmPayment';
-import { StepSigningWallet } from './flow-steps/StepSigningWallet';
+
 import { StepProcessing } from './flow-steps/StepProcessing';
 import { StepSuccess } from './flow-steps/StepSuccess';
 
@@ -38,30 +36,19 @@ export function PurchaseFlow() {
   const [manualMode, setManualMode] = useState(false);
   const [manualTxHash, setManualTxHash] = useState('');
 
-  // Smart wallet countdown state
-  const [userOpHash, setUserOpHash] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [isPreparing, setIsPreparing] = useState(false);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const expiresAtRef = useRef<number>(0);
+
 
   const { plans, isVip, tier, isLoading: isStatusLoading } = useVipStatus();
   const { isLoading: isPlansLoading } = useVipPlans();
   const createOrder = useCreateVipOrder();
   const verifyPayment = useVerifyVipPayment();
-  const { walletStatus, hasWallet } = useSmartWallet();
+
   const { wallet: custodialWallet, hasWallet: hasCustodialWallet } = useCustodialWallet();
   const [isPayingCustodial, setIsPayingCustodial] = useState(false);
 
   const isLoading = isStatusLoading || isPlansLoading;
 
-  // Smart wallet has enough balance?
-  const smartWalletBalance = parseFloat(walletStatus?.balance || '0');
-  const canPayWithSmartWallet =
-    hasWallet &&
-    walletStatus?.address &&
-    selectedPlan &&
-    smartWalletBalance >= parseFloat(selectedPlan.priceAvax);
+
 
   // Custodial wallet has enough balance?
   const custodialBalance = parseFloat(custodialWallet?.balance || '0');
@@ -106,37 +93,7 @@ export function PurchaseFlow() {
     }
   };
 
-  // Cleanup countdown on unmount
-  useEffect(() => {
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, []);
 
-  const stopCountdown = useCallback(() => {
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-      countdownRef.current = null;
-    }
-    setCountdown(null);
-  }, []);
-
-  const startCountdown = useCallback((expiresAtMs: number) => {
-    stopCountdown();
-    expiresAtRef.current = expiresAtMs;
-
-    const tick = () => {
-      const remaining = Math.max(0, Math.floor((expiresAtRef.current - Date.now()) / 1000));
-      setCountdown(remaining);
-      if (remaining <= 0) {
-        if (countdownRef.current) clearInterval(countdownRef.current);
-        countdownRef.current = null;
-      }
-    };
-
-    tick(); // immediate first tick
-    countdownRef.current = setInterval(tick, 1000);
-  }, [stopCountdown]);
 
   // Step 1: Select plan
   const handleSelectPlan = (planId: string) => {
@@ -147,94 +104,7 @@ export function PurchaseFlow() {
     setStep('confirm');
   };
 
-  // Smart Wallet: Prepare UserOp + start countdown
-  const handlePrepareSmartWallet = async () => {
-    if (!selectedPlan) return;
-    setIsPreparing(true);
-    setError(null);
 
-    try {
-      // 1. Create order
-      const newOrder = await createOrder.mutateAsync(selectedPlan.id);
-      setOrder(newOrder);
-
-      // 2. Prepare UserOp
-      const prepResult = await prepareSmartWalletOp(
-        newOrder.receiverAddress,
-        newOrder.amountAvax
-      );
-
-      setUserOpHash(prepResult.userOpHash);
-      startCountdown(prepResult.expiresAt);
-      setStep('signing');
-    } catch (err: any) {
-      setError(err.message || 'Không thể tạo giao dịch');
-    } finally {
-      setIsPreparing(false);
-    }
-  };
-
-  // Smart Wallet: Re-prepare (when expired)
-  const handleRePrepare = async () => {
-    if (!order) return;
-    setIsPreparing(true);
-    setError(null);
-
-    try {
-      const prepResult = await prepareSmartWalletOp(
-        order.receiverAddress,
-        order.amountAvax
-      );
-
-      setUserOpHash(prepResult.userOpHash);
-      startCountdown(prepResult.expiresAt);
-      toast.success('Giao dịch đã được tạo lại');
-    } catch (err: any) {
-      setError(err.message || 'Không thể tạo lại giao dịch');
-    } finally {
-      setIsPreparing(false);
-    }
-  };
-
-  // Smart Wallet: Sign with passkey + submit
-  const handleSignAndSubmit = async () => {
-    if (!userOpHash || !order) return;
-    setStep('processing');
-    setProgress(2);
-    setError(null);
-    stopCountdown();
-
-    try {
-      const txHash = await signAndSubmitSmartWalletOp(userOpHash);
-      setProgress(3);
-
-      // Verify payment
-      const verifyResult = await verifyPayment.mutateAsync({
-        orderId: order.orderId,
-        txHash,
-      });
-      setProgress(4);
-
-      setResult(verifyResult);
-      setStep('success');
-      toast.success('VIP đã kích hoạt!');
-    } catch (err: any) {
-      const msg = err.message || '';
-      if (msg.includes('hủy') || msg.includes('denied') || msg.includes('User rejected')) {
-        setError('Bạn đã hủy xác thực vân tay');
-        setStep('signing'); // Go back to signing step, countdown still valid
-        startCountdown(expiresAtRef.current); // Resume countdown
-      } else if (msg.includes('hết hạn') || msg.includes('EXPIRED') || msg.includes('expired')) {
-        setError('Giao dịch đã hết hạn. Bấm "Tạo lại" để thử lại.');
-        setStep('signing');
-        setCountdown(0);
-      } else {
-        setError(msg || 'Lỗi Smart Wallet');
-        setStep('signing');
-        startCountdown(expiresAtRef.current);
-      }
-    }
-  };
 
   // Generic purchase handler (for MetaMask/Core only)
   const executePurchase = async (
@@ -326,7 +196,6 @@ export function PurchaseFlow() {
   };
 
   const handleReset = () => {
-    stopCountdown();
     setStep('select');
     setSelectedPlan(null);
     setOrder(null);
@@ -335,10 +204,9 @@ export function PurchaseFlow() {
     setError(null);
     setManualMode(false);
     setManualTxHash('');
-    setUserOpHash(null);
   };
 
-  const isPending = createOrder.isPending || verifyPayment.isPending || isPreparing;
+  const isPending = createOrder.isPending || verifyPayment.isPending;
 
   // ─── Step 1: SELECT PLAN ───
   if (step === 'select') {
@@ -362,10 +230,6 @@ export function PurchaseFlow() {
         error={error}
         isPending={isPending}
         manualMode={manualMode}
-        hasWallet={hasWallet}
-        walletStatus={walletStatus}
-        canPayWithSmartWallet={!!canPayWithSmartWallet}
-        handlePrepareSmartWallet={handlePrepareSmartWallet}
         hasCustodialWallet={hasCustodialWallet}
         custodialWallet={custodialWallet}
         canPayWithCustodial={!!canPayWithCustodial}
@@ -384,22 +248,7 @@ export function PurchaseFlow() {
     );
   }
 
-  // ─── Step 2.5: SIGNING (Smart Wallet — countdown + fingerprint) ───
-  if (step === 'signing' && selectedPlan) {
-    return (
-      <StepSigningWallet
-        selectedPlan={selectedPlan}
-        order={order}
-        countdown={countdown}
-        error={error}
-        isPreparing={isPreparing}
-        handleRePrepare={handleRePrepare}
-        handleSignAndSubmit={handleSignAndSubmit}
-        handleReset={handleReset}
-        formatCountdown={formatCountdown}
-      />
-    );
-  }
+
 
   // ─── Step 3: PROCESSING ───
   if (step === 'processing') {
