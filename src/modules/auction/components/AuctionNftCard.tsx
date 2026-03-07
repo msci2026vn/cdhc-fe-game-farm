@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { AuctionStatus } from '../types/auction.types';
 import { AuctionCountdown } from './AuctionCountdown';
 
@@ -27,6 +28,15 @@ const statusBadge: Record<string, { bg: string; label: string }> = {
   cancelled: { bg: 'bg-gray-700', label: 'Hủy' },
 };
 
+/** Convert ipfs:// → public HTTP gateway so browsers can load the image */
+function resolveImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('ipfs://')) {
+    return 'https://ipfs.io/ipfs/' + url.slice(7);
+  }
+  return url;
+}
+
 export function AuctionNftCard({
   imageUrl,
   tokenId,
@@ -39,24 +49,26 @@ export function AuctionNftCard({
   const border = borderColors[status] || 'border-gray-700';
   const badge = statusBadge[status] || statusBadge.pending;
 
+  // Use React state for image error — more reliable than direct DOM manipulation
+  const [imgError, setImgError] = useState(false);
+  const resolvedUrl = resolveImageUrl(imageUrl);
+  const showImage = !!resolvedUrl && !imgError;
+
   if (variant === 'hero') {
     return (
       <div className={`rounded-2xl border-2 ${border} overflow-hidden bg-gray-800 mx-auto max-w-[260px]`}>
-        {imageUrl ? (
+        {showImage ? (
           <img
-            src={imageUrl}
+            src={resolvedUrl!}
             alt={`NFT #${tokenId}`}
             className="w-full aspect-[2/3] object-cover"
-            onError={e => {
-              const img = e.target as HTMLImageElement;
-              img.style.display = 'none';
-              (img.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-            }}
+            onError={() => setImgError(true)}
           />
-        ) : null}
-        <div className={`w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-6xl${imageUrl ? ' hidden' : ''}`}>
-          🎴
-        </div>
+        ) : (
+          <div className="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-6xl">
+            🎴
+          </div>
+        )}
         <div className="px-3 py-2 text-center">
           <span className="text-gray-400 text-xs">Token #{tokenId}</span>
         </div>
@@ -70,21 +82,18 @@ export function AuctionNftCard({
       className={`rounded-2xl border ${border} bg-gray-800/60 overflow-hidden text-left transition-transform active:scale-95`}
     >
       <div className="relative">
-        {imageUrl ? (
+        {showImage ? (
           <img
-            src={imageUrl}
+            src={resolvedUrl!}
             alt={`NFT #${tokenId}`}
             className="w-full aspect-[2/3] object-cover"
-            onError={e => {
-              const img = e.target as HTMLImageElement;
-              img.style.display = 'none';
-              (img.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-            }}
+            onError={() => setImgError(true)}
           />
-        ) : null}
-        <div className={`w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-5xl${imageUrl ? ' hidden' : ''}`}>
-          🎴
-        </div>
+        ) : (
+          <div className="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-5xl">
+            🎴
+          </div>
+        )}
 
         {/* Status badge */}
         <span className={`absolute top-2 left-2 ${badge.bg} text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md`}>
