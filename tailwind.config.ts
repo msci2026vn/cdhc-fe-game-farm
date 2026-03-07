@@ -188,8 +188,9 @@ export default {
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
         "boss-idle": {
-          "0%, 100%": { transform: "translateY(0) scale(1)" },
-          "50%": { transform: "translateY(-8px) scale(1.02)" },
+          // Removed scale() — causes recomposite. translateY only = pure compositor layer.
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
         },
         "damage-float": {
           "0%": { transform: "translateY(0)", opacity: "1" },
@@ -421,8 +422,8 @@ export default {
         "float-leaf": "float-leaf 6s ease-in-out infinite",
         "slide-up": "slide-up 0.4s ease-out",
         "fade-in-up": "fade-in-up 0.4s ease-out both",
-        "boss-idle": "boss-idle 2s ease-in-out infinite",
-        "damage-float": "damage-float 1.5s ease-out infinite",
+        "boss-idle": "boss-idle 3s ease-in-out infinite",
+        "damage-float": "damage-float 1.2s ease-out forwards",
         "event-pulse": "event-pulse 2s ease-in-out infinite",
         "sun-pulse": "sun-pulse 3s ease-in-out infinite",
         "sparkle-up": "sparkle-up 1s ease-out forwards",

@@ -1,11 +1,10 @@
 @layer components {
 
-  /* ═══ Gem types — FLAT, no shadow, no gradient (maximum performance) ═══ */
-  /* Used only during animate-gem-pop (matched state). Inline styles handle normal state. */
-  .gem-atk { background: #ff6b6b; }
-  .gem-hp  { background: #55efc4; }
-  .gem-def { background: #74b9ff; }
-  .gem-star { background: #ffeaa7; }
+  /* ═══ Gem types — match GEM_STYLES inline colors (pop animation state) ═══ */
+  .gem-atk { background: linear-gradient(150deg, #ff7070 0%, #cc1a1a 100%); }
+  .gem-hp  { background: linear-gradient(150deg, #55dd77 0%, #1f8c3a 100%); }
+  .gem-def { background: linear-gradient(150deg, #5599ff 0%, #1a44cc 100%); }
+  .gem-star{ background: linear-gradient(150deg, #ffdd33 0%, #cc8800 100%); }
 
   /* ═══ Special gem visuals — minimal ═══ */
   .gem-rainbow {

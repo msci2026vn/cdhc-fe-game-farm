@@ -46,9 +46,11 @@ export function BossSprite({
   if (reflectBuff) borderGlow += ', 0 0 12px rgba(168,85,247,0.5)';
 
   // For bosses WITHOUT multi-state sprites, keep old CSS animation classes
+  // Removed grayscale class — CSS filter:grayscale is very expensive on mobile GPU
+  // Dead state handled by opacity inline style below
   const wrapperClasses = hasSprites
     ? (isBurning ? 'animate-fire-flicker' : '')
-    : `animate-boss-idle ${bossDead ? 'opacity-30 grayscale' : ''} ${skillWarning ? 'animate-boss-attack' : ''} ${isBurning ? 'animate-fire-flicker' : ''}`;
+    : `animate-boss-idle ${skillWarning ? 'animate-boss-attack' : ''} ${isBurning ? 'animate-fire-flicker' : ''}`;
 
   return (
     <div
