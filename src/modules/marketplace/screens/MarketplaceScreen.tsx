@@ -353,11 +353,13 @@ function CancelModal({ listing, onClose, onSuccess }: {
 
 // ── My Listings Tab ───────────────────────────────────
 function MyListingsTab({ onCancel }: { onCancel: (l: MarketplaceListing) => void }) {
-  const { data: listings = [], isLoading } = useQuery({
+  const { data: rawListings = [], isLoading } = useQuery({
     queryKey: ['marketplace', 'my-listings'],
     queryFn: () => marketplaceApi.getMyListings(),
-    staleTime: 30_000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
+  const listings = rawListings.filter((l: MarketplaceListing) => l.status === 'active');
 
   if (isLoading) {
     return (
@@ -379,7 +381,7 @@ function MyListingsTab({ onCancel }: { onCancel: (l: MarketplaceListing) => void
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      <p className="text-white/30 text-xs">{listings.length} NFT đang rao bán</p>
+      <p className="text-white/30 text-xs">{listings.length} NFT đang chờ bán</p>
       {listings.map(listing => {
         const r = getRarity(listing.boss.difficulty);
         const elIcon = ELEMENT_ICON[listing.boss.element] ?? '';
