@@ -290,11 +290,13 @@ function CardDetail({
   onClose,
   onSell,
   onWithdraw,
+  onAuction,
 }: {
   card: NftCard;
   onClose: () => void;
   onSell: (c: NftCard) => void;
   onWithdraw: (c: NftCard) => void;
+  onAuction: () => void;
 }) {
   const r = RARITY[card.bossDifficulty || 'hard'] || RARITY.hard;
   const ct = CARD_TYPE[card.nftCardType] || CARD_TYPE.last_hit;
@@ -378,6 +380,12 @@ function CardDetail({
                 className="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
               >
                 🏪 Bán NFT này
+              </button>
+              <button
+                onClick={() => { playSound('ui_click'); onAuction(); }}
+                className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl text-white text-sm font-bold transition-colors active:scale-95"
+              >
+                ⚡ Đưa vào Đấu Giá
               </button>
               <button
                 onClick={() => { playSound('ui_click'); onWithdraw(card); }}
@@ -479,6 +487,7 @@ export default function NftGalleryScreen() {
           onClose={() => setSelected(null)}
           onSell={handleSellRequest}
           onWithdraw={handleWithdrawRequest}
+          onAuction={() => { setSelected(null); navigate('/auction'); }}
         />
       )}
 

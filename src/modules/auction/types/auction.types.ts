@@ -31,6 +31,8 @@ export interface AuctionListItem {
 
 export interface AuctionDetail {
   id: string;
+  sessionId: string;
+  sellerUserId: string;
   tokenId: number;
   nftImageUrl: string | null;
   status: AuctionStatus;

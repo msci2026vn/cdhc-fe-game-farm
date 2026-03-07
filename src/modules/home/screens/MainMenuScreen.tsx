@@ -5,6 +5,7 @@ import { useBossStatus } from '@/shared/hooks/useBossStatus';
 import { playSound, audioManager } from '@/shared/audio';
 import { SoundToggle } from '@/shared/audio';
 import { WorldBossMarquee } from '@/modules/world-boss/components/WorldBossMarquee';
+import { AuctionBanner } from '@/modules/auction/components/AuctionBanner';
 import { HomeParticles } from '../components/HomeParticles';
 
 // Shared text label style — bold white with dark shadow, readable on any background
@@ -14,7 +15,7 @@ const labelClass = 'absolute left-0 right-0 text-center font-black text-white le
 const miniCards = [
   { emoji: '🛒', label: 'Chợ',    route: '/market' },
   { emoji: '🎒', label: 'Túi đồ', route: '/inventory' },
-  { emoji: '👥', label: 'Bạn bè', route: '/friends' },
+  { emoji: '⚡', label: 'Đấu Giá', route: '/auction' },
 ];
 
 /** Simple inline gear SVG — no external dependency */
@@ -91,6 +92,11 @@ export default function MainMenuScreen() {
         {/* World Boss marquee */}
         <div className="absolute z-40 top-16 w-full pointer-events-none">
           <WorldBossMarquee />
+        </div>
+
+        {/* Auction banner — when session starting < 1h */}
+        <div className="absolute z-30 w-full px-4" style={{ top: '12.5%' }}>
+          <AuctionBanner />
         </div>
 
         {/* ── CARD: Trồng cây ── */}
