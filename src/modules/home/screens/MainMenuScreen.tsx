@@ -13,7 +13,7 @@ const labelClass = 'absolute left-0 right-0 text-center font-black text-white le
   + ' drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] [text-shadow:0_2px_6px_rgba(0,0,0,0.9)]';
 
 const miniCards = [
-  { emoji: '🛒', label: 'Chợ',    route: '/market' },
+  { emoji: '🛒', label: 'Chợ', route: '/shop' },
   { emoji: '🎒', label: 'Túi đồ', route: '/inventory' },
   { emoji: '⚡', label: 'Đấu Giá', route: '/auction' },
 ];
@@ -39,9 +39,9 @@ export default function MainMenuScreen() {
   }, []);
 
   const avatar = profile?.picture ?? '/assets/home/ava.png';
-  const level  = profile?.level  ?? 1;
-  const name   = profile?.name   ?? 'Nông Dân';
-  const ogn    = profile?.ogn    ?? 0;
+  const level = profile?.level ?? 1;
+  const name = profile?.name ?? 'Nông Dân';
+  const ogn = profile?.ogn ?? 0;
 
   return (
     <div className="bg-[#111] min-h-[100dvh] flex items-center justify-center select-none font-body text-farm-brown-dark">

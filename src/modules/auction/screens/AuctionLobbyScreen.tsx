@@ -32,12 +32,33 @@ export default function AuctionLobbyScreen() {
   return (
     <div className="h-[100dvh] max-w-[430px] mx-auto bg-gradient-to-b from-gray-900 to-gray-950 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center px-4 pt-4 pb-2">
-        <button onClick={() => { playSound('ui_back'); navigate(-1); }}>
-          <span className="material-symbols-outlined text-xl text-gray-400">arrow_back</span>
+      <div className="flex-shrink-0 flex items-center px-4 pt-safe pb-2 mt-2">
+        <button onClick={() => { playSound('ui_back'); navigate(-1); }} className="w-8 h-8 flex items-center justify-center text-gray-400">
+          <span className="material-symbols-outlined text-xl">arrow_back</span>
         </button>
-        <h1 className="flex-1 text-center text-lg font-bold text-white">Dau Gia NFT</h1>
-        <div className="w-10" />
+        <h1 className="flex-1 text-center text-lg font-bold text-white">Đấu Giá NFT</h1>
+        <div className="w-8" />
+      </div>
+
+      {/* Main Shop Tabs */}
+      <div className="flex-shrink-0 flex w-full px-4 mb-2">
+        <div className="flex w-full bg-gray-800/80 p-1 rounded-2xl border border-gray-700/50">
+          <button
+            onClick={() => { playSound('ui_click'); window.location.href = '/shop'; }}
+            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-200 transition-all"
+          >
+            🏪 Chợ OGN
+          </button>
+          <button
+            onClick={() => { playSound('ui_click'); window.location.href = '/marketplace'; }}
+            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-200 transition-all"
+          >
+            🎴 Chợ NFT
+          </button>
+          <button className="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-700 text-amber-500 shadow-sm transition-all border border-gray-600/50">
+            ⚡ Đấu giá
+          </button>
+        </div>
       </div>
 
       {/* Scrollable content */}
@@ -45,9 +66,8 @@ export default function AuctionLobbyScreen() {
 
         {/* Next session banner */}
         {nextSession && nextSession.status === 'scheduled' && (
-          <div className={`bg-gradient-to-r from-amber-900/40 to-orange-900/40 border rounded-2xl p-4 mb-4 ${
-            showFomo ? 'border-amber-500 animate-pulse' : 'border-amber-700/50'
-          }`}>
+          <div className={`bg-gradient-to-r from-amber-900/40 to-orange-900/40 border rounded-2xl p-4 mb-4 ${showFomo ? 'border-amber-500 animate-pulse' : 'border-amber-700/50'
+            }`}>
             <div className="text-xs text-amber-400 uppercase tracking-wide">Phien tiep theo</div>
             <div className="text-lg font-bold text-white mt-1">{nextSession.name}</div>
             <AuctionCountdown endTime={nextSession.startTime} size="lg" />
@@ -65,9 +85,8 @@ export default function AuctionLobbyScreen() {
             <button
               key={t.key}
               onClick={() => { playSound('ui_tab'); setTab(t.key); }}
-              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
-                tab === t.key ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-400'
-              }`}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${tab === t.key ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-400'
+                }`}
             >
               {t.label}
             </button>

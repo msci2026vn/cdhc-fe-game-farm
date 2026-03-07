@@ -6,15 +6,15 @@ import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
 const RARITY: Record<string, { color: string; bg: string; border: string; label: string }> = {
-  normal:       { color: 'text-gray-400',   bg: 'bg-gray-500/20',   border: 'border-gray-500/40',  label: 'Common' },
-  hard:         { color: 'text-amber-400',  bg: 'bg-amber-500/20',  border: 'border-amber-500/40', label: 'Rare' },
-  extreme:      { color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/40', label: 'Epic' },
-  catastrophic: { color: 'text-red-400',    bg: 'bg-red-500/20',    border: 'border-red-500/40',   label: 'Legendary' },
+  normal: { color: 'text-gray-400', bg: 'bg-gray-500/20', border: 'border-gray-500/40', label: 'Common' },
+  hard: { color: 'text-amber-400', bg: 'bg-amber-500/20', border: 'border-amber-500/40', label: 'Rare' },
+  extreme: { color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/40', label: 'Epic' },
+  catastrophic: { color: 'text-red-400', bg: 'bg-red-500/20', border: 'border-red-500/40', label: 'Legendary' },
 };
 
 const CARD_TYPE: Record<string, { icon: string; label: string }> = {
-  last_hit:      { icon: '⚔️', label: 'Người Hạ Gục Boss' },
-  top_damage:    { icon: '💥', label: 'Chiến Binh Mạnh Nhất' },
+  last_hit: { icon: '⚔️', label: 'Người Hạ Gục Boss' },
+  top_damage: { icon: '💥', label: 'Chiến Binh Mạnh Nhất' },
   dual_champion: { icon: '👑', label: 'Dual Champion' },
 };
 
@@ -285,6 +285,27 @@ export default function MarketplaceScreen() {
         <div className="w-8" />
       </div>
 
+      {/* Main Shop Tabs */}
+      <div className="flex w-full px-4 mt-3 mb-1">
+        <div className="flex w-full bg-gray-800/80 p-1 rounded-2xl border border-gray-700/50">
+          <button
+            onClick={() => { playSound('ui_click'); window.location.href = '/shop'; }}
+            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-200 transition-all"
+          >
+            🏪 Chợ OGN
+          </button>
+          <button className="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-700 text-purple-400 shadow-sm transition-all border border-gray-600/50">
+            🎴 Chợ NFT
+          </button>
+          <button
+            onClick={() => { playSound('ui_click'); window.location.href = '/auction'; }}
+            className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-200 transition-all"
+          >
+            ⚡ Đấu giá
+          </button>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="flex-shrink-0 px-4 py-3 space-y-2 border-b border-gray-800/50">
         <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
@@ -295,11 +316,10 @@ export default function MarketplaceScreen() {
               <button
                 key={f.key}
                 onClick={() => { playSound('ui_tab'); setFilterDifficulty(f.key); }}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
-                  active
+                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${active
                     ? r ? `${r.bg} ${r.border} border ${r.color}` : 'bg-white/20 border border-white/30 text-white'
                     : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-                }`}
+                  }`}
               >
                 {f.label}
               </button>
