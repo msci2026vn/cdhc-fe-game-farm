@@ -1,10 +1,10 @@
-import { useNavigate } from 'react-router-dom';
+import { useNav } from '@/shared/hooks/useNav';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import { playSound } from '@/shared/audio';
 
 export default function Header() {
-  const navigate = useNavigate();
+  const navigate = useNav();
   const ogn = useOgn(); // TanStack Query single source of truth
 
   return (

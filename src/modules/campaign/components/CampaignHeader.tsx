@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNav } from '@/shared/hooks/useNav';
 import { playSound } from '@/shared/audio';
 
 interface CampaignHeaderProps {
@@ -9,7 +9,7 @@ interface CampaignHeaderProps {
 }
 
 export default function CampaignHeader({ title, stars, maxStars, backTo = '/farm' }: CampaignHeaderProps) {
-  const navigate = useNavigate();
+  const navigate = useNav();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 safe-top">

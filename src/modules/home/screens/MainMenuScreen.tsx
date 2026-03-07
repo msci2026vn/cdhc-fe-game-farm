@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNav } from '@/shared/hooks/useNav';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useBossStatus } from '@/shared/hooks/useBossStatus';
 import { playSound, audioManager } from '@/shared/audio';
@@ -28,7 +28,7 @@ function GearIcon() {
 }
 
 export default function MainMenuScreen() {
-  const navigate = useNavigate();
+  const navigate = useNav();
   const { data: profile } = usePlayerProfile();
   useBossStatus();
 

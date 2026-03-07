@@ -1,4 +1,5 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useNav } from '@/shared/hooks/useNav';
 import { playSound } from '@/shared/audio';
 
 const tabs = [
@@ -11,7 +12,7 @@ const tabs = [
 
 export default function BottomNav() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigate = useNav();
 
   return (
     <nav className="fixed left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50" style={{ bottom: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}>

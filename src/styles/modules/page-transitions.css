@@ -1,0 +1,46 @@
+/* ═══════════════════════════════════════════════════════════════
+   PAGE TRANSITIONS — View Transitions API (iOS-smooth, 60fps)
+   ═══════════════════════════════════════════════════════════════
+   Requires: useNav() hook wrapping navigate() with startViewTransition().
+   Fallback: if browser doesn't support VT → instant navigation (no jank).
+
+   Rule vàng:
+   - Chỉ animate transform + opacity  → compositor only, zero GPU paint
+   - Không dùng will-change toàn cục → tốn GPU memory trên 64 node
+   - prefers-reduced-motion: skip animation cho accessibility
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* Old page exits: fade out + scale down slightly (goes "behind") */
+  ::view-transition-old(root) {
+    animation: 180ms cubic-bezier(0.4, 0, 1, 1) both vt-page-out;
+  }
+
+  /* New page enters: fade in + scale up to full (comes "to front") */
+  ::view-transition-new(root) {
+    animation: 260ms cubic-bezier(0, 0, 0.2, 1) both vt-page-in;
+  }
+}
+
+/* Reduce motion: instant, no animation */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+@keyframes vt-page-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes vt-page-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
