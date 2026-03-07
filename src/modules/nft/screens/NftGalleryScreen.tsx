@@ -501,7 +501,7 @@ export default function NftGalleryScreen() {
     if (!myQueue) return {} as Record<number, AuctionQueueItem>;
     const map: Record<number, AuctionQueueItem> = {};
     for (const item of myQueue) {
-      if ([\'queued\', \'assigned\', \'active\'].includes(item.status)) {
+      if (['queued', 'assigned', 'active'].includes(item.status)) {
         map[item.tokenId] = item;
       }
     }
@@ -511,7 +511,7 @@ export default function NftGalleryScreen() {
   const listingMap = useMemo(() => {
     const map: Record<number, { id: string; priceAvax: string }> = {};
     for (const item of myListings) {
-      if ((item as any).status === \'active\' && item.tokenId) {
+      if ((item as any).status === 'active' && item.tokenId) {
         map[item.tokenId] = { id: item.id, priceAvax: item.priceAvax };
       }
     }
