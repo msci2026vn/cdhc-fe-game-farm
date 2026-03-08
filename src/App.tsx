@@ -65,6 +65,7 @@ const AdminWalletMonitorScreen = lazyWithRetry(() => import('@/modules/admin/scr
 const AuctionLobbyScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionLobbyScreen'));
 const AuctionHistoryScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionHistoryScreen'));
 const AuctionRoomScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionRoomScreen'));
+const PvpTestScreen = lazyWithRetry(() => import('@/modules/pvp/PvpTestScreen'));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -173,6 +174,7 @@ const App = () => {
               <Routes>
                 {/* Public — NO AuthGuard, NO game hooks */}
                 <Route path="/login" element={<LoginScreen />} />
+                <Route path="/pvp-test" element={<PvpTestScreen />} />
 
                 {/* Protected — AuthGuard first, then game hooks */}
                 <Route path="/*" element={
