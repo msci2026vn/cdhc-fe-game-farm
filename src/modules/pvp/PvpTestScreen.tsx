@@ -199,8 +199,10 @@ function ManaBar({ current, max }: { current: number; max: number }) {
 export default function PvpTestScreen() {
   const { data: auth } = useAuth();
   const [searchParams] = useSearchParams();
+  const urlRoomCode = searchParams.get('roomId') ?? '';
   const clientRef = useRef<Client | null>(null);
   const roomRef = useRef<Room | null>(null);
+  const autoJoinedRef = useRef(false);
 
   const [inRoom, setInRoom] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -428,9 +430,9 @@ export default function PvpTestScreen() {
     }
   };
 
-  const handleJoin = async () => {
+  const handleJoin = async (roomIdOverride?: string) => {
     if (!clientRef.current) return;
-    const code = inputCode.trim();
+    const code = (roomIdOverride || inputCode).trim();
     if (!code) return;
     setError('');
     setConnecting(true);
@@ -501,6 +503,18 @@ export default function PvpTestScreen() {
     roomRef.current.send('kick', { sessionId });
     addLog(`Gửi: Kick ${sessionId.slice(0, 6)}...`);
   };
+
+  // ── Auto-join khi có roomId trên URL ──
+  useEffect(() => {
+    if (urlRoomCode && !inRoom && !autoJoinedRef.current) {
+      autoJoinedRef.current = true;
+      const timer = setTimeout(() => {
+        handleJoin(urlRoomCode);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlRoomCode]);
 
   // ── Derived state ──
   const phase = roomState?.phase ?? 'waiting';
@@ -861,36 +875,54 @@ export default function PvpTestScreen() {
         {/* ── ENTRY VIEW (not in room) ── */}
         {!inRoom && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
-            <button onClick={handleCreate} disabled={connecting} style={{
-              padding: '14px', background: connecting ? '#333' : '#e94560',
-              color: '#fff', border: 'none', borderRadius: 8,
-              fontSize: 16, fontWeight: 700, cursor: connecting ? 'not-allowed' : 'pointer',
-              opacity: connecting ? 0.7 : 1,
-            }}>
-              {connecting ? '⏳ Đang xử lý...' : '🏠 Tạo Phòng Mới'}
-            </button>
+            {/* Khi có urlRoomCode → hiện loading, ẩn Create + manual Join */}
+            {urlRoomCode ? (
+              <div style={{
+                textAlign: 'center', padding: '24px 16px',
+                background: '#0d1b2a', borderRadius: 8, border: '1px solid #1e4d78',
+              }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
+                <div style={{ fontSize: 15, color: '#4fc3f7', fontWeight: 700 }}>
+                  Đang vào phòng...
+                </div>
+                <div style={{ fontSize: 11, color: '#555', marginTop: 4 }}>
+                  {urlRoomCode}
+                </div>
+              </div>
+            ) : (
+              <>
+                <button onClick={handleCreate} disabled={connecting} style={{
+                  padding: '14px', background: connecting ? '#333' : '#e94560',
+                  color: '#fff', border: 'none', borderRadius: 8,
+                  fontSize: 16, fontWeight: 700, cursor: connecting ? 'not-allowed' : 'pointer',
+                  opacity: connecting ? 0.7 : 1,
+                }}>
+                  {connecting ? '⏳ Đang xử lý...' : '🏠 Tạo Phòng Mới'}
+                </button>
 
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="text"
-                value={inputCode}
-                onChange={e => setInputCode(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleJoin()}
-                placeholder="Nhập Room ID để join..."
-                style={{
-                  flex: 1, padding: '12px 14px', background: '#0d0d1a',
-                  border: '1px solid #444', color: '#fff', borderRadius: 8,
-                  fontSize: 13, outline: 'none',
-                }}
-              />
-              <button onClick={handleJoin} disabled={connecting || !inputCode.trim()} style={{
-                padding: '12px 18px', background: inputCode.trim() && !connecting ? '#4fc3f7' : '#333',
-                color: '#000', border: 'none', borderRadius: 8,
-                fontSize: 13, fontWeight: 700,
-                cursor: !inputCode.trim() || connecting ? 'not-allowed' : 'pointer',
-                opacity: !inputCode.trim() || connecting ? 0.5 : 1, whiteSpace: 'nowrap',
-              }}>Join</button>
-            </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    value={inputCode}
+                    onChange={e => setInputCode(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleJoin()}
+                    placeholder="Nhập Room ID để join..."
+                    style={{
+                      flex: 1, padding: '12px 14px', background: '#0d0d1a',
+                      border: '1px solid #444', color: '#fff', borderRadius: 8,
+                      fontSize: 13, outline: 'none',
+                    }}
+                  />
+                  <button onClick={() => handleJoin()} disabled={connecting || !inputCode.trim()} style={{
+                    padding: '12px 18px', background: inputCode.trim() && !connecting ? '#4fc3f7' : '#333',
+                    color: '#000', border: 'none', borderRadius: 8,
+                    fontSize: 13, fontWeight: 700,
+                    cursor: !inputCode.trim() || connecting ? 'not-allowed' : 'pointer',
+                    opacity: !inputCode.trim() || connecting ? 0.5 : 1, whiteSpace: 'nowrap',
+                  }}>Join</button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
