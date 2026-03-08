@@ -258,11 +258,24 @@ export function collectTriggeredCells(
 export function applyGravity(grid: Gem[]): Gem[] {
   const newGrid = [...grid];
   for (let c = 0; c < COLS; c++) {
-    const col: Gem[] = [];
-    for (let r = ROWS - 1; r >= 0; r--) { const g = newGrid[r * COLS + c]; if (g) col.push(g); }
-    for (let r = ROWS - 1; r >= 0; r--) {
-      const fromBottom = ROWS - 1 - r;
-      newGrid[r * COLS + c] = fromBottom < col.length ? col[fromBottom] : randomGem();
+    // Two-pointer approach for in-place gravity shift per column
+    // Pointer 'writeIdx' points to the lowest available empty slot
+    let writeRow = ROWS - 1;
+    // Pointer 'readRow' scans upwards for gems
+    for (let readRow = ROWS - 1; readRow >= 0; readRow--) {
+      const g = newGrid[readRow * COLS + c];
+      if (g) {
+        if (writeRow !== readRow) {
+          // Move gem down to the lowest empty slot
+          newGrid[writeRow * COLS + c] = g;
+          newGrid[readRow * COLS + c] = null as unknown as Gem; // Will be properly filled later
+        }
+        writeRow--;
+      }
+    }
+    // Fill remaining empty slots at the top with new random gems
+    for (let r = writeRow; r >= 0; r--) {
+      newGrid[r * COLS + c] = randomGem();
     }
   }
   return newGrid;
@@ -281,15 +294,22 @@ export function areAdjacent(a: number, b: number): boolean {
  * Returns the indices of the matched gems if a move is found, otherwise null.
  */
 export function findPossibleMove(grid: Gem[]): number[] | null {
-  // We use a simplified check: swap, check findMatches, return the match set if > 0
+  // We use an in-place swap to avoid allocating [...grid] on every single check
+  // This drastically reduces Garbage Collection overhead running in the background.
+  const tempGrid = [...grid]; // Clone ONCE for the whole function
+
   const trySwap = (idx1: number, idx2: number): number[] | null => {
-    // Clone grid just enough to swap
-    const tempGrid = [...grid];
+    // In-place swap
     const temp = tempGrid[idx1];
     tempGrid[idx1] = tempGrid[idx2];
     tempGrid[idx2] = temp;
 
     const matches = findMatches(tempGrid);
+
+    // Swap back
+    tempGrid[idx2] = tempGrid[idx1];
+    tempGrid[idx1] = temp;
+
     if (matches.size >= 3) {
       return Array.from(matches);
     }

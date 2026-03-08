@@ -3,8 +3,8 @@
     /* Stat chip */
     .stat-chip {
         @apply flex items-center gap-2 rounded-2xl px-3 py-2.5;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        /* Removed backdrop-filter: blur() as it causes heavy GPU strain when multiple appear on screen */
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 

@@ -61,17 +61,17 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
           style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.06)' }}>
 
           {/* Ghost bar (damage drain effect — red, fades behind real HP) */}
-          <div className="absolute inset-y-0 left-0 rounded-md hp-ghost-bar"
+          <div className="absolute inset-y-0 left-0 w-full rounded-md hp-ghost-bar"
             style={{
-              width: `${ghostHp}%`,
+              transform: `scaleX(${ghostHp / 100})`,
               background: 'linear-gradient(90deg, #e74c3c, #ff6b6b)',
               opacity: ghostHp > hpPct ? 0.6 : 0,
             }} />
 
           {/* Real HP fill */}
-          <div className="h-full rounded-md relative z-[1] hp-bar-fill"
+          <div className="h-full w-full rounded-md relative z-[1] hp-bar-fill"
             style={{
-              width: `${hpPct}%`,
+              transform: `scaleX(${hpPct / 100})`,
               background: hpPct > 60
                 ? 'linear-gradient(90deg, #00b894, #55efc4)'
                 : hpPct > 30
@@ -94,9 +94,9 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
         </div>
         <div className="h-2.5 rounded-md overflow-hidden relative"
           style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="h-full rounded-md hp-bar-fill"
+          <div className="h-full w-full rounded-md hp-bar-fill"
             style={{
-              width: `${shieldPct}%`,
+              transform: `scaleX(${shieldPct / 100})`,
               background: 'linear-gradient(90deg, #0984e3, #74b9ff)',
             }} />
           <div className="absolute inset-x-0 top-0 h-1/2"
