@@ -16,6 +16,7 @@ interface PlayerInfo {
   id: string;
   name: string;
   ready: boolean;
+  score?: number;
 }
 
 interface RoomStateBroadcast {
@@ -37,44 +38,74 @@ async function fetchPvpToken(): Promise<string> {
   return json.data.token;
 }
 
-// ─── Mini Board (opponent, 20px cells) ────────────────────────────────────────
-function MiniBoard({ tiles }: { tiles: number[] }) {
-  if (!tiles.length) return null;
-  return (
-    <div style={{
-      display: 'grid', gridTemplateColumns: 'repeat(8, 20px)',
-      gap: 1, background: '#111',
-    }}>
-      {tiles.map((gem, i) => (
-        <div key={i} style={{
-          width: 20, height: 20, borderRadius: 3,
-          background: GEM_COLORS[gem] ?? '#333',
-        }} />
-      ))}
-    </div>
-  );
+// ─── Interactive Board ─────────────────────────────────────────────────────────
+interface GameBoardProps {
+  tiles: number[];
+  mini?: boolean;
+  onSwap?: (from: number, to: number) => void;
 }
 
-// ─── Main Board (my board, 40px cells) ────────────────────────────────────────
-function MainBoard({ tiles }: { tiles: number[] }) {
+function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const size = mini ? 20 : 44;
+
+  const handleClick = (idx: number) => {
+    if (!onSwap || mini) return;
+    if (selected === null) {
+      setSelected(idx);
+      return;
+    }
+    if (selected === idx) {
+      setSelected(null);
+      return;
+    }
+    onSwap(selected, idx);
+    setSelected(null);
+  };
+
   if (!tiles.length) return null;
+
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: 'repeat(8, 40px)',
-      gap: 2, background: '#0d1b2a', padding: 4, borderRadius: 8,
-      border: '1px solid #1e4d78',
+      display: 'grid',
+      gridTemplateColumns: `repeat(8, ${size}px)`,
+      gap: mini ? 1 : 2,
+      background: mini ? '#111' : '#0d1b2a',
+      padding: mini ? 0 : 4,
+      borderRadius: mini ? 0 : 8,
+      border: mini ? 'none' : '1px solid #1e4d78',
     }}>
-      {tiles.map((gem, i) => (
-        <div key={i} style={{
-          width: 40, height: 40, borderRadius: 6,
-          background: GEM_COLORS[gem] ?? '#333',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 18, userSelect: 'none',
-          boxShadow: `0 2px 6px ${GEM_COLORS[gem] ?? '#000'}66`,
-        }}>
-          {GEM_LABELS[gem]}
-        </div>
-      ))}
+      {tiles.map((gem, idx) => {
+        const isSelected = selected === idx;
+        const isEmpty = gem === -1;
+        return (
+          <div
+            key={idx}
+            onClick={() => handleClick(idx)}
+            style={{
+              width: size,
+              height: size,
+              borderRadius: mini ? 3 : 6,
+              background: isEmpty ? '#1f2937' : (GEM_COLORS[gem] ?? '#333'),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: mini ? 8 : 18,
+              userSelect: 'none',
+              cursor: onSwap && !mini ? 'pointer' : 'default',
+              border: isSelected ? '2px solid #fff' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: isSelected
+                ? '0 0 8px rgba(255,255,255,0.5)'
+                : isEmpty ? 'none' : `0 2px 6px ${GEM_COLORS[gem] ?? '#000'}44`,
+              transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+              transition: 'transform 0.12s, border 0.12s, box-shadow 0.12s',
+              opacity: isEmpty ? 0.2 : 1,
+            }}
+          >
+            {!mini && !isEmpty && GEM_LABELS[gem]}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -99,6 +130,12 @@ function CountdownOverlay({ count }: { count: number }) {
           0%   { transform: scale(2.2); opacity: 1; }
           100% { transform: scale(0.7); opacity: 0; }
         }
+        @keyframes comboFlash {
+          0%   { transform: translateX(-50%) scale(0.5); opacity: 0; }
+          20%  { transform: translateX(-50%) scale(1.1); opacity: 1; }
+          80%  { transform: translateX(-50%) scale(1); opacity: 1; }
+          100% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+        }
       `}</style>
     </div>
   );
@@ -120,6 +157,9 @@ export default function PvpTestScreen() {
   const [myReady, setMyReady] = useState(false);
   const [myBoard, setMyBoard] = useState<number[]>([]);
   const [opponentBoard, setOpponentBoard] = useState<number[]>([]);
+  const [myScore, setMyScore] = useState(0);
+  const [opponentScore, setOpponentScore] = useState(0);
+  const [comboText, setComboText] = useState('');
   const [opponentLeft, setOpponentLeft] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState('');
@@ -133,6 +173,12 @@ export default function PvpTestScreen() {
     addLog(`Client → ${WS_URL}`);
     return () => { roomRef.current?.leave(); };
   }, [addLog]);
+
+  // ── Swap handler ──
+  const handleSwap = useCallback((from: number, to: number) => {
+    if (!roomRef.current) return;
+    roomRef.current.send('swap', { from, to });
+  }, []);
 
   const attachHandlers = useCallback((r: Room) => {
     roomRef.current = r;
@@ -156,7 +202,25 @@ export default function PvpTestScreen() {
     r.onMessage('game_start', (data: { myBoard: number[]; opponentBoard: number[] }) => {
       setMyBoard(data.myBoard);
       setOpponentBoard(data.opponentBoard);
+      setMyScore(0);
+      setOpponentScore(0);
+      setComboText('');
       addLog('Board nhận thành công → Game bắt đầu!');
+    });
+
+    r.onMessage('board_update', (data: { tiles: number[]; score: number; combo: number; gained: number }) => {
+      setMyBoard(data.tiles);
+      setMyScore(data.score);
+      if (data.combo > 1) {
+        setComboText(`COMBO x${data.combo}! +${data.gained}`);
+        setTimeout(() => setComboText(''), 1500);
+      }
+      addLog(`Score: ${data.score} (+${data.gained})${data.combo > 1 ? ` COMBO x${data.combo}` : ''}`);
+    });
+
+    r.onMessage('opponent_update', (data: { tiles: number[]; score: number }) => {
+      setOpponentBoard(data.tiles);
+      setOpponentScore(data.score);
     });
 
     r.onError((code, msg) => {
@@ -173,6 +237,9 @@ export default function PvpTestScreen() {
       setMyReady(false);
       setMyBoard([]);
       setOpponentBoard([]);
+      setMyScore(0);
+      setOpponentScore(0);
+      setComboText('');
       if (code === 4001) {
         setOpponentLeft(false);
         setError('Bạn đã bị đuổi khỏi phòng!');
@@ -246,6 +313,9 @@ export default function PvpTestScreen() {
     setMyReady(false);
     setMyBoard([]);
     setOpponentBoard([]);
+    setMyScore(0);
+    setOpponentScore(0);
+    setComboText('');
     addLog('Đã rời phòng');
   };
 
@@ -274,19 +344,13 @@ export default function PvpTestScreen() {
   const playersArr = roomState ? Object.entries(roomState.players) : [];
   const hostSessionId = roomState?.hostId ?? '';
 
-  // Find opponent sessionId
   const opponentEntry = playersArr.find(([sid]) => sid !== mySessionId);
-  const opponentSessionId = opponentEntry?.[0] ?? '';
   const opponentPlayer = opponentEntry?.[1];
-
-  // My player info
   const myPlayer = mySessionId ? roomState?.players[mySessionId] : undefined;
 
-  // Can host start? all non-host players must be ready
   const canStart = isHost && playersArr.length === 2 &&
     playersArr.every(([sid, p]) => sid === hostSessionId || p.ready);
 
-  // Is board visible?
   const showBoard = phase === 'playing' && myBoard.length === 64;
   const showCountdown = phase === 'playing' && countdown > 0;
 
@@ -300,6 +364,22 @@ export default function PvpTestScreen() {
     }}>
       {/* Countdown overlay */}
       {showCountdown && <CountdownOverlay count={countdown} />}
+
+      {/* Combo flash */}
+      {comboText && (
+        <div style={{
+          position: 'fixed', top: '30%', left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+          color: '#fff', padding: '12px 28px',
+          borderRadius: 14, fontSize: 24, fontWeight: 900, zIndex: 100,
+          animation: 'comboFlash 1.5s ease-out forwards',
+          textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+          pointerEvents: 'none',
+        }}>
+          {comboText}
+        </div>
+      )}
 
       <div style={{ maxWidth: 520, margin: '0 auto' }}>
 
@@ -338,7 +418,7 @@ export default function PvpTestScreen() {
         {/* ── BOARD VIEW (phase=playing, board loaded) ── */}
         {inRoom && showBoard && (
           <div style={{ marginBottom: 16 }}>
-            {/* Player HUDs */}
+            {/* Player HUDs with live scores */}
             <div style={{
               display: 'flex', justifyContent: 'space-between', marginBottom: 8,
               background: '#0d1b2a', borderRadius: 8, padding: '8px 12px',
@@ -346,24 +426,40 @@ export default function PvpTestScreen() {
             }}>
               <div>
                 <div style={{ fontSize: 12, color: '#aaa' }}>⚔️ {myPlayer?.name ?? 'Tôi'}</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#4caf50' }}>0</div>
+                <div style={{
+                  fontSize: 22, fontWeight: 900, color: '#4caf50',
+                  transition: 'all 0.3s',
+                }}>
+                  {myScore.toLocaleString()}
+                </div>
+              </div>
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                fontSize: 14, color: '#555', fontWeight: 700,
+              }}>
+                VS
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 12, color: '#aaa' }}>{opponentPlayer?.name ?? 'Đối thủ'} 🛡️</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#e94560' }}>0</div>
+                <div style={{
+                  fontSize: 22, fontWeight: 900, color: '#e94560',
+                  transition: 'all 0.3s',
+                }}>
+                  {opponentScore.toLocaleString()}
+                </div>
               </div>
             </div>
 
-            {/* My board (big) */}
+            {/* My board (interactive) */}
             <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>BOARD CỦA BẠN</div>
-              <MainBoard tiles={myBoard} />
+              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>BOARD CỦA BẠN — click 2 gem kề nhau để swap</div>
+              <GameBoard tiles={myBoard} onSwap={handleSwap} />
             </div>
 
             {/* Opponent board (mini) */}
             <div>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>BOARD ĐỐI THỦ (preview)</div>
-              <MiniBoard tiles={opponentBoard} />
+              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>BOARD ĐỐI THỦ</div>
+              <GameBoard tiles={opponentBoard} mini />
             </div>
 
             {/* Leave button */}
@@ -375,7 +471,7 @@ export default function PvpTestScreen() {
           </div>
         )}
 
-        {/* ── LOBBY VIEW (not playing, or playing but board not ready yet) ── */}
+        {/* ── LOBBY VIEW ── */}
         {inRoom && !showBoard && roomState && (
           <div style={{ background: '#0d1b2a', border: '1px solid #1e4d78', borderRadius: 8, padding: 14, marginBottom: 12 }}>
 
@@ -429,7 +525,6 @@ export default function PvpTestScreen() {
                         </div>
                       )}
                     </div>
-                    {/* Kick button — only host sees, only for opponent */}
                     {p && isHost && sid !== mySessionId && (
                       <button onClick={() => handleKick(sid)} style={{
                         padding: '4px 10px', background: '#5c1a1a', border: '1px solid #c62828',
@@ -443,7 +538,6 @@ export default function PvpTestScreen() {
 
             {/* Action buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {/* Non-host: Ready button */}
               {!isHost && (
                 <button onClick={handleReady} disabled={myReady} style={{
                   padding: '11px', borderRadius: 6, fontSize: 14, fontWeight: 700, cursor: myReady ? 'default' : 'pointer',
@@ -454,7 +548,6 @@ export default function PvpTestScreen() {
                 </button>
               )}
 
-              {/* Host: Start button */}
               {isHost && (
                 <button onClick={handleStart} disabled={!canStart} style={{
                   padding: '11px', borderRadius: 6, fontSize: 14, fontWeight: 700,
@@ -466,7 +559,6 @@ export default function PvpTestScreen() {
                 </button>
               )}
 
-              {/* Leave */}
               <button onClick={handleLeave} style={{
                 padding: '10px', background: 'transparent', border: '1px solid #e94560',
                 color: '#e94560', borderRadius: 6, fontSize: 13, cursor: 'pointer',
@@ -540,6 +632,16 @@ export default function PvpTestScreen() {
           </div>
         </div>
       </div>
+
+      {/* Global keyframes for combo flash */}
+      <style>{`
+        @keyframes comboFlash {
+          0%   { transform: translateX(-50%) scale(0.5); opacity: 0; }
+          20%  { transform: translateX(-50%) scale(1.1); opacity: 1; }
+          80%  { transform: translateX(-50%) scale(1); opacity: 1; }
+          100% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }
