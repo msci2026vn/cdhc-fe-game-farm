@@ -62,7 +62,7 @@ export default function PvpTestScreen() {
     r.onMessage('room_info', (data: { roomId: string; roomCode: string }) => {
       setRoomId(data.roomId);
       setRoomCode(data.roomCode);
-      addLog(`Vào phòng thành công | roomCode: ${data.roomCode}`);
+      addLog(`Vào phòng thành công | roomId: ${data.roomId}`);
     });
 
     r.onMessage('state_update', (data: RoomState) => {
@@ -102,6 +102,7 @@ export default function PvpTestScreen() {
       const token = await fetchPvpToken();
       addLog('Đang tạo phòng...');
       const r = await clientRef.current.create('pvp_room', { token });
+      setRoomId(r.roomId);
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -198,14 +199,14 @@ export default function PvpTestScreen() {
             {/* Room header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
               <div>
-                <div style={{ fontSize: 10, color: '#666', marginBottom: 2 }}>MÃ PHÒNG (dùng để Join)</div>
+                <div style={{ fontSize: 10, color: '#666', marginBottom: 2 }}>ROOM ID (dùng để Join)</div>
                 <div style={{
-                  fontSize: 20, fontWeight: 800, letterSpacing: 3, color: '#e94560',
-                  cursor: 'pointer', userSelect: 'all',
-                }} title="Click để copy" onClick={() => { navigator.clipboard?.writeText(roomId); addLog('Đã copy mã phòng'); }}>
-                  {roomCode || roomId}
+                  fontSize: 14, fontWeight: 800, letterSpacing: 1, color: '#e94560',
+                  cursor: 'pointer', userSelect: 'all', wordBreak: 'break-all',
+                }} title="Click để copy" onClick={() => { navigator.clipboard?.writeText(roomId); addLog('Đã copy Room ID'); }}>
+                  {roomId}
                 </div>
-                <div style={{ fontSize: 10, color: '#444', marginTop: 2 }}>ID: {roomId}</div>
+                {roomCode && <div style={{ fontSize: 10, color: '#444', marginTop: 2 }}>Code: {roomCode}</div>}
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 10, color: '#666', marginBottom: 2 }}>PHASE</div>
