@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function SuddenDeathModal({ auction }: Props) {
-  const { t } = useTranslation(); auction }: Props) {
+  const { t } = useTranslation();
   const prevBidCount = useRef(auction.bidCount);
   const [rivalFlash, setRivalFlash] = useState(false);
 

@@ -6,7 +6,7 @@ interface Props {
 }
 
 export function SealedBidPanel({ auction }: Props) {
-  const { t } = useTranslation(); auction }: Props) {
+  const { t } = useTranslation();
   const isActive = auction.status === 'active' || auction.status === 'sudden_death';
   const isEnded = auction.status === 'ended';
 
@@ -51,8 +51,8 @@ export function SealedBidPanel({ auction }: Props) {
           <div
             key={entry.rank}
             className={`rounded-xl p-3 flex items-center gap-3 ${entry.isWinner
-                ? 'bg-amber-900/50 border border-amber-500'
-                : 'bg-gray-800/50'
+              ? 'bg-amber-900/50 border border-amber-500'
+              : 'bg-gray-800/50'
               }`}
           >
             <span className="text-lg font-bold text-gray-400 w-8 text-center">

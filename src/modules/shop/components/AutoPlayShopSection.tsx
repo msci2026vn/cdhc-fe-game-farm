@@ -333,7 +333,7 @@ export default function AutoPlayShopSection() {
             onClick={() => setShowLearning(!showLearning)}
             className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-600 active:scale-95 transition-transform"
           >
-            {showLearning ? '{t('hide')}' : '{t('ai_learning_btn')}'}
+            {showLearning ? t('hide') : t('ai_learning_btn')}
           </button>
         )}
       </div>
@@ -362,18 +362,18 @@ export default function AutoPlayShopSection() {
 
       {/* Tab switcher */}
       <div className="flex gap-1.5 p-1 bg-gray-100 rounded-xl">
-        {(['rent', 'buy'] as const).map(t => (
+        {(['rent', 'buy'] as const).map(tabKey => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className="flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-            style={tab === t ? {
+            style={tab === tabKey ? {
               background: 'white',
               color: '#4b5563',
               boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
             } : { color: '#9ca3af' }}
           >
-            {t === 'rent' ? t('rent_ogn_tab') : t('buy_avax_tab')}
+            {tabKey === 'rent' ? t('rent_ogn_tab') : t('buy_avax_tab')}
           </button>
         ))}
       </div>
@@ -416,7 +416,7 @@ export default function AutoPlayShopSection() {
               <p className="font-bold mt-1" style={{ color: confirmRent.color }}>
                 Lv.{confirmRent.level} {confirmRent.name}
               </p>
-              <p className="text-[10px] text-gray-500">{confirmRent.nameVi}</p>
+              <p className="text-[10px] text-gray-500">{t(confirmRent.nameKey)}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3 space-y-1.5 mb-4 text-[11px]">
               <div className="flex justify-between">

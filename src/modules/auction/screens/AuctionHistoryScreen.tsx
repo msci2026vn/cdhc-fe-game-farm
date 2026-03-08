@@ -1,6 +1,6 @@
 import i18n from '@/i18n';
 import { useState } from 'react';
-import { useTranslation } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMyBids, useMyListings } from '../hooks/useAuction';
 import { AuctionNftCard } from '../components/AuctionNftCard';
@@ -119,10 +119,10 @@ function StatusBadge({ status }: { status: string }) {
     pending: 'bg-gray-700 text-gray-300',
     cancelled: 'bg-gray-700 text-gray-400',
   };
-  const labels: Record<string, string> = { active: i18n.t('status_live'), sudden_death: i18n.t('status_sd'), ended: i18n.t('status_end'), pending: i18n.t('status_pending'), cancelled: i18n.t('status_cancelled') }; //
-    active: 'Live',
-    sudden_death: 'SD',
-    ended: 'End',
+  const labels: Record<string, string> = {
+    active: i18n.t('status_live'),
+    sudden_death: i18n.t('status_sd'),
+    ended: i18n.t('status_end'),
     pending: i18n.t('status_pending'),
     cancelled: i18n.t('status_cancelled'),
   };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTranslation } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSubmitToQueue } from '../hooks/useAuction';
 import { playSound } from '@/shared/audio';
 
@@ -20,7 +20,7 @@ const RARITY_STYLE: Record<string, string> = {
 };
 
 export function CreateAuctionModal({ isOpen, onClose, tokenId, nftImageUrl, nftName, nftRarity }: Props) {
-  const { t } = useTranslation(); isOpen, onClose, tokenId, nftImageUrl, nftName, nftRarity }: Props) {
+  const { t } = useTranslation();
   const { mutate: submitQueue, isPending } = useSubmitToQueue();
   const [startPrice, setStartPrice] = useState('');
   const [error, setError] = useState('');
