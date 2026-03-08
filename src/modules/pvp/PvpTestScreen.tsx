@@ -8,9 +8,9 @@ const WS_URL = import.meta.env.DEV
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn';
 
-// 5 gem colours: 0=red 1=blue 2=yellow 3=green 4=junk(gray)
-const GEM_COLORS = ['#e53935', '#1e88e5', '#fdd835', '#43a047', '#6b7280'];
-const GEM_LABELS = ['🔴', '🔵', '🟡', '🟢', '🪨'];
+// 5 gem types: 0=atk(sword) 1=hp(heart) 2=def(shield) 3=star 4=junk
+const GEM_COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#eab308', '#6b7280'];
+const GEM_LABELS = ['⚔️', '💚', '🛡️', '⭐', '🪨'];
 
 interface PlayerInfo {
   id: string;
