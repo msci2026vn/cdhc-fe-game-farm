@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { pvpApi } from '@/shared/api/api-pvp';
 import type { PvpEvent, PvpInvite } from '@/shared/api/api-pvp';
@@ -373,6 +374,7 @@ function QuickMatchModal({
 // ─── Main PvpLobby ────────────────────────────────────────────────────────────
 export default function PvpLobby() {
   const navigate = useNavigate();
+  const { t } = useTranslation('pvp');
   const { data: auth } = useAuth();
   const qc = useQueryClient();
 
@@ -573,30 +575,30 @@ export default function PvpLobby() {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <div>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Rating của bạn</div>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>{t('lobby.rating')}</div>
             <div style={{ fontSize: 36, fontWeight: 900, color: '#f59e0b' }}>
               {rating?.rating ?? 1000}
             </div>
             <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
-              {rating?.rank ? `Hạng #${rating.rank}` : '—'}
+              {rating?.rank ? t('lobby.rank', { rank: rating.rank }) : '—'}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ display: 'flex', gap: 12, marginBottom: 6 }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#22c55e' }}>{rating?.wins ?? 0}</div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>Thắng</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>{t('lobby.wins')}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#ef4444' }}>{rating?.losses ?? 0}</div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>Thua</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>{t('lobby.losses')}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#94a3b8' }}>{rating?.draws ?? 0}</div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>Hoà</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>{t('lobby.draws')}</div>
               </div>
             </div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Tỷ lệ thắng: {winRate}%</div>
+            <div style={{ fontSize: 12, color: '#64748b' }}>{t('lobby.winRate', { rate: winRate })}</div>
           </div>
         </div>
 
@@ -613,7 +615,7 @@ export default function PvpLobby() {
             }}
           >
             <div style={{ fontSize: 26, marginBottom: 6 }}>👥</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Mời Bạn</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.inviteFriend')}</div>
           </button>
 
           {/* Tìm trận */}
@@ -629,7 +631,7 @@ export default function PvpLobby() {
             }}
           >
             <div style={{ fontSize: 26, marginBottom: 6 }}>🔍</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Tìm Trận</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.findMatch')}</div>
           </button>
 
           {/* Danh sách phòng */}
@@ -643,7 +645,7 @@ export default function PvpLobby() {
             }}
           >
             <div style={{ fontSize: 26, marginBottom: 6 }}>📋</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Danh Sách Phòng</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.roomList')}</div>
           </button>
 
           {/* Tạo phòng */}
@@ -657,19 +659,19 @@ export default function PvpLobby() {
             }}
           >
             <div style={{ fontSize: 26, marginBottom: 6 }}>➕</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Tạo Phòng</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.createRoom')}</div>
           </button>
         </div>
 
         {/* History shortcut */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8' }}>Trận gần đây</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8' }}>{t('lobby.recentMatches')}</span>
             <button
               onClick={() => navigate('/pvp/history')}
               style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}
             >
-              Xem tất cả →
+              {t('lobby.viewAll')}
             </button>
           </div>
 
@@ -679,7 +681,7 @@ export default function PvpLobby() {
               borderRadius: 10, padding: '20px', textAlign: 'center',
               color: '#64748b', fontSize: 13,
             }}>
-              Chưa có trận đấu nào. Hãy thách đấu ngay!
+              {t('lobby.noMatches')}
             </div>
           ) : (
             historyData.matches.map(m => (
@@ -714,7 +716,7 @@ export default function PvpLobby() {
                   background: m.result === 'win' ? '#14532d' : m.result === 'draw' ? '#1e293b' : '#450a0a',
                   color: m.result === 'win' ? '#22c55e' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
                 }}>
-                  {m.result === 'win' ? 'Thắng' : m.result === 'draw' ? 'Hoà' : 'Thua'}
+                  {m.result === 'win' ? t('history.win') : m.result === 'draw' ? t('history.draw') : t('history.lose')}
                 </div>
               </div>
             ))

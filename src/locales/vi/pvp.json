@@ -1,0 +1,61 @@
+{
+  "result": {
+    "win": "🏆 HẠ GỤC ĐỐI THỦ!",
+    "lose": "💀 BỊ HẠ GỤC!",
+    "draw": "🤝 HÒA!",
+    "hpRemaining": "HP còn lại:",
+    "totalDamage": "Tổng dame:",
+    "ratingWin": "🔺 Rating +~20",
+    "ratingDraw": "Rating ±0",
+    "ratingLoss": "🔻 Rating -~20",
+    "returnLobby": "🏠 Về Lobby",
+    "quit": "🚪 Thoát"
+  },
+  "room": {
+    "createNew": "🏠 Tạo Phòng Mới",
+    "inputPlaceholder": "Nhập Room ID để join...",
+    "joining": "Đang vào phòng...",
+    "opponentLeft": "⚠️ Đối thủ đã rời phòng",
+    "join": "Join",
+    "noRooms": "Chưa có phòng nào đang chờ",
+    "refresh": "🔄 Làm mới",
+    "waiting": "Phòng Đang Chờ"
+  },
+  "lobby": {
+    "title": "⚔️ PVP Arena",
+    "rating": "Rating của bạn",
+    "rank": "Hạng #{{rank}}",
+    "winRate": "Tỷ lệ thắng: {{rate}}%",
+    "wins": "Thắng",
+    "losses": "Thua",
+    "draws": "Hoà",
+    "inviteFriend": "Mời Bạn",
+    "findMatch": "Tìm Trận",
+    "roomList": "Danh Sách Phòng",
+    "createRoom": "Tạo Phòng",
+    "recentMatches": "Trận gần đây",
+    "viewAll": "Xem tất cả →",
+    "noMatches": "Chưa có trận đấu nào. Hãy thách đấu ngay!",
+    "creating": "Đang tạo phòng..."
+  },
+  "invite": {
+    "title": "Lời mời PVP",
+    "from": "mời bạn vào trận đấu",
+    "accept": "✅ Đồng Ý",
+    "reject": "❌ Từ Chối",
+    "selectFriend": "👥 Chọn Bạn Để Mời",
+    "noFriends": "Chưa có bạn bè. Thêm bạn từ màn hình Bạn Bè!",
+    "send": "Mời",
+    "sending": "..."
+  },
+  "matchmaking": {
+    "searching": "Đang Tìm Đối Thủ...",
+    "waitTime": "Thời gian chờ:",
+    "cancel": "Hủy"
+  },
+  "history": {
+    "win": "Thắng",
+    "lose": "Thua",
+    "draw": "Hoà"
+  }
+}

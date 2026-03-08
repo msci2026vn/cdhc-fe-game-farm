@@ -1,0 +1,61 @@
+{
+  "result": {
+    "win": "🏆 OPPONENT DEFEATED!",
+    "lose": "💀 DEFEATED!",
+    "draw": "🤝 DRAW!",
+    "hpRemaining": "HP remaining:",
+    "totalDamage": "Total damage:",
+    "ratingWin": "🔺 Rating +~20",
+    "ratingDraw": "Rating ±0",
+    "ratingLoss": "🔻 Rating -~20",
+    "returnLobby": "🏠 Return to Lobby",
+    "quit": "🚪 Quit"
+  },
+  "room": {
+    "createNew": "🏠 Create New Room",
+    "inputPlaceholder": "Enter Room ID to join...",
+    "joining": "Joining room...",
+    "opponentLeft": "⚠️ Opponent left the room",
+    "join": "Join",
+    "noRooms": "No rooms available",
+    "refresh": "🔄 Refresh",
+    "waiting": "Waiting Rooms"
+  },
+  "lobby": {
+    "title": "⚔️ PVP Arena",
+    "rating": "Your Rating",
+    "rank": "Rank #{{rank}}",
+    "winRate": "Win rate: {{rate}}%",
+    "wins": "Wins",
+    "losses": "Losses",
+    "draws": "Draws",
+    "inviteFriend": "Invite Friend",
+    "findMatch": "Find Match",
+    "roomList": "Room List",
+    "createRoom": "Create Room",
+    "recentMatches": "Recent Matches",
+    "viewAll": "View all →",
+    "noMatches": "No matches yet. Challenge someone!",
+    "creating": "Creating room..."
+  },
+  "invite": {
+    "title": "PVP Invite",
+    "from": "challenges you to a match",
+    "accept": "✅ Accept",
+    "reject": "❌ Decline",
+    "selectFriend": "👥 Select Friend to Invite",
+    "noFriends": "No friends yet. Add friends from the Friends screen!",
+    "send": "Invite",
+    "sending": "..."
+  },
+  "matchmaking": {
+    "searching": "Searching for Opponent...",
+    "waitTime": "Wait time:",
+    "cancel": "Cancel"
+  },
+  "history": {
+    "win": "Win",
+    "lose": "Loss",
+    "draw": "Draw"
+  }
+}

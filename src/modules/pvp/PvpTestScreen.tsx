@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Client, type Room } from '@colyseus/sdk';
 import { useAuth } from '@/shared/hooks/useAuth';
 
@@ -198,6 +199,8 @@ function ManaBar({ current, max }: { current: number; max: number }) {
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function PvpTestScreen() {
   const { data: auth } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useTranslation('pvp');
   const [searchParams] = useSearchParams();
   const urlRoomCode = searchParams.get('roomId') ?? '';
   const clientRef = useRef<Client | null>(null);
@@ -410,7 +413,9 @@ export default function PvpTestScreen() {
     setInRoom(true);
     setOpponentLeft(false);
     setMyReady(false);
-  }, [addLog]);
+    // Strip ?roomId= from URL to prevent "Đang vào phòng..." spinner after game ends
+    navigate('/pvp-test', { replace: true });
+  }, [addLog, navigate]);
 
   const handleCreate = async () => {
     if (!clientRef.current) return;
@@ -613,15 +618,15 @@ export default function PvpTestScreen() {
             fontSize: 40, marginBottom: 8,
             animation: 'cdPop 0.85s ease-out forwards',
           }}>
-            {isWinner ? '🏆 HẠ GỤC ĐỐI THỦ!' : isDraw ? '🤝 HÒA!' : '💀 BỊ HẠ GỤC!'}
+            {isWinner ? t('result.win') : isDraw ? t('result.draw') : t('result.lose')}
           </div>
 
           <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 4 }}>
-            HP còn lại:{' '}
+            {t('result.hpRemaining')}{' '}
             <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{myHp}/{myMaxHp}</span>
           </div>
           <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 16 }}>
-            Tổng dame:{' '}
+            {t('result.totalDamage')}{' '}
             <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>{myScore.toLocaleString()}</span>
           </div>
 
@@ -645,16 +650,25 @@ export default function PvpTestScreen() {
             color: isWinner ? '#22c55e' : isDraw ? '#94a3b8' : '#ef4444',
             fontSize: 16, marginTop: 12, marginBottom: 24,
           }}>
-            {isWinner ? '🔺 Rating +~20' : isDraw ? 'Rating ±0' : '🔻 Rating -~20'}
+            {isWinner ? t('result.ratingWin') : isDraw ? t('result.ratingDraw') : t('result.ratingLoss')}
           </div>
 
-          <button onClick={handleLeave} style={{
-            padding: '12px 32px', background: '#3b82f6',
-            color: 'white', borderRadius: 8, fontSize: 16,
-            border: 'none', cursor: 'pointer', fontWeight: 700,
-          }}>
-            🏠 Về Lobby
-          </button>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={() => { handleLeave(); navigate('/pvp'); }} style={{
+              padding: '12px 24px', background: '#3b82f6',
+              color: 'white', borderRadius: 8, fontSize: 15,
+              border: 'none', cursor: 'pointer', fontWeight: 700,
+            }}>
+              {t('result.returnLobby')}
+            </button>
+            <button onClick={() => navigate('/')} style={{
+              padding: '12px 24px', background: 'transparent',
+              color: '#94a3b8', borderRadius: 8, fontSize: 15,
+              border: '1px solid #4b5563', cursor: 'pointer', fontWeight: 700,
+            }}>
+              {t('result.quit')}
+            </button>
+          </div>
         </div>
       )}
 
@@ -883,7 +897,7 @@ export default function PvpTestScreen() {
               }}>
                 <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
                 <div style={{ fontSize: 15, color: '#4fc3f7', fontWeight: 700 }}>
-                  Đang vào phòng...
+                  {t('room.joining')}
                 </div>
                 <div style={{ fontSize: 11, color: '#555', marginTop: 4 }}>
                   {urlRoomCode}
@@ -897,7 +911,7 @@ export default function PvpTestScreen() {
                   fontSize: 16, fontWeight: 700, cursor: connecting ? 'not-allowed' : 'pointer',
                   opacity: connecting ? 0.7 : 1,
                 }}>
-                  {connecting ? '⏳ Đang xử lý...' : '🏠 Tạo Phòng Mới'}
+                  {connecting ? '⏳ ' + t('lobby.creating') : t('room.createNew')}
                 </button>
 
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -906,7 +920,7 @@ export default function PvpTestScreen() {
                     value={inputCode}
                     onChange={e => setInputCode(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleJoin()}
-                    placeholder="Nhập Room ID để join..."
+                    placeholder={t('room.inputPlaceholder')}
                     style={{
                       flex: 1, padding: '12px 14px', background: '#0d0d1a',
                       border: '1px solid #444', color: '#fff', borderRadius: 8,
@@ -919,7 +933,7 @@ export default function PvpTestScreen() {
                     fontSize: 13, fontWeight: 700,
                     cursor: !inputCode.trim() || connecting ? 'not-allowed' : 'pointer',
                     opacity: !inputCode.trim() || connecting ? 0.5 : 1, whiteSpace: 'nowrap',
-                  }}>Join</button>
+                  }}>{t('room.join')}</button>
                 </div>
               </>
             )}
