@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { PlayerHPBar, ManaBar } from '@/modules/boss/components/hud';
 import ExpiryBanner from '@/shared/components/ExpiryBanner';
 import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
@@ -50,7 +50,7 @@ interface CircleSkillBtnProps {
     size?: 'sm' | 'md' | 'lg';
 }
 
-function CircleSkillBtn({
+const CircleSkillBtn = memo(function CircleSkillBtn({
     icon, label, sublabel,
     className,
     variant = 'green',
@@ -201,7 +201,7 @@ function CircleSkillBtn({
             )}
         </div>
     );
-}
+});
 
 export default function CampaignPlayerHUD({
     activeDebuffs, boss, shieldMax, combatStats, lastPlayerDamage,

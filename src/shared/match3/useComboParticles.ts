@@ -35,6 +35,9 @@ export function useComboParticles(combo: number, showCombo: boolean) {
 
   // ═══ GC Ticker ═══
   useEffect(() => {
+    // Only run the GC timer if there are active particles on screen
+    if (comboParticles.length === 0) return;
+
     const gcInterval = setInterval(() => {
       const now = Date.now();
       setComboParticles(prev => {
@@ -44,7 +47,7 @@ export function useComboParticles(combo: number, showCombo: boolean) {
       });
     }, 500);
     return () => clearInterval(gcInterval);
-  }, []);
+  }, [comboParticles.length]);
 
   return comboParticles;
 }
