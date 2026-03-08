@@ -8,8 +8,10 @@ import { ChangePinModal } from '../components/ChangePinModal';
 import { startRegistration } from '@simplewebauthn/browser';
 import { toast } from 'sonner';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsScreen() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { showPinSetup, setShowPinSetup } = useSecurityVerify();
@@ -35,9 +37,9 @@ export default function SettingsScreen() {
                 await document.exitFullscreen();
             }
         } catch (err) {
-            toast.error('Trình duyệt không hỗ trợ toàn màn hình');
+            toast.error(t('browser_no_fullscreen_support'));
         }
-    }, []);
+    }, [t]);
 
     // Fetch security status
     const { data: securityStatus, isLoading } = useQuery({
@@ -59,11 +61,11 @@ export default function SettingsScreen() {
         mutationFn: (pin: string) => gameApi.setWalletPin(pin),
         onSuccess: () => {
             setShowPinSetup(false);
-            toast.success('Thiết lập mã PIN thành công!');
+            toast.success(t('pin_setup_success'));
             queryClient.invalidateQueries({ queryKey: ['security-status'] });
         },
         onError: (error: any) => {
-            setPinError(error.message || 'Lỗi thiết lập mã PIN');
+            setPinError(error.message || t('pin_setup_error'));
         }
     });
 
@@ -72,11 +74,11 @@ export default function SettingsScreen() {
         mutationFn: ({ oldPin, newPin }: { oldPin: string, newPin: string }) => gameApi.changeWalletPin(oldPin, newPin),
         onSuccess: () => {
             setShowChangePin(false);
-            toast.success('Đổi mã PIN thành công!');
+            toast.success(t('pin_change_success'));
             queryClient.invalidateQueries({ queryKey: ['security-status'] });
         },
         onError: (error: any) => {
-            setPinError(error.message || 'Mã PIN cũ không đúng hoặc bị lỗi');
+            setPinError(error.message || t('pin_change_error'));
         }
     });
 
@@ -92,7 +94,7 @@ export default function SettingsScreen() {
 
     const registerPasskey = useCallback(async () => {
         if (securityStatus?.hasPasskey) {
-            toast.info('Bạn đã đăng ký sinh trắc học rồi.');
+            toast.info(t('biometric_already_registered'));
             return;
         }
 
@@ -109,15 +111,15 @@ export default function SettingsScreen() {
             (credential as any).friendlyName = `${navigator.platform} ${navigator.userAgent.split(' ')[0]}`;
             await gameApi.registerPasskey(credential);
 
-            toast.success('Đăng ký sinh trắc học thành công!');
+            toast.success(t('biometric_register_success'));
             queryClient.invalidateQueries({ queryKey: ['security-status'] });
         } catch (err: any) {
             console.error('Passkey registration failed:', err);
             // Filter out user cancellation errors from showing as big errors
             if (err.name === 'NotAllowedError') {
-                toast.error('Đăng ký bị hủy');
+                toast.error(t('registration_cancelled'));
             } else {
-                toast.error(err.message || 'Lỗi đăng ký sinh trắc học');
+                toast.error(err.message || t('biometric_register_error'));
             }
         } finally {
             setIsProcessing(false);
@@ -151,7 +153,7 @@ export default function SettingsScreen() {
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <div className="font-heading font-black text-xl text-farm-brown-dark tracking-wide">
-                        Cài đặt
+                        {t('settings')}
                     </div>
                     <div className="w-10" /> {/* Spacer for centering */}
                 </div>
@@ -163,7 +165,7 @@ export default function SettingsScreen() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-farm-brown/20 shadow-sm overflow-hidden">
                         <div className="bg-green-50 px-4 py-3 flex items-center gap-2 border-b-2 border-farm-brown/10">
                             <span className="material-symbols-outlined text-green-600">display_settings</span>
-                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">Hiển thị</h2>
+                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">{t('display')}</h2>
                         </div>
 
                         {/* Fullscreen toggle */}
@@ -178,9 +180,9 @@ export default function SettingsScreen() {
                                     </span>
                                 </div>
                                 <div>
-                                    <div className="font-bold text-farm-brown-dark">Toàn màn hình</div>
+                                    <div className="font-bold text-farm-brown-dark">{t('fullscreen')}</div>
                                     <div className="text-xs text-gray-500">
-                                        {isFullscreen ? 'Đang bật — nhấn để tắt' : 'Nhấn để bật toàn màn hình'}
+                                        {isFullscreen ? t('enabled_click_to_disable') : t('click_to_enable_fullscreen')}
                                     </div>
                                 </div>
                             </div>
@@ -206,7 +208,7 @@ export default function SettingsScreen() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-farm-brown/20 shadow-sm overflow-hidden">
                         <div className="bg-orange-50 px-4 py-3 flex items-center gap-2 border-b-2 border-farm-brown/10">
                             <span className="material-symbols-outlined text-orange-500">security</span>
-                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">Cài đặt bảo mật</h2>
+                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">{t('security_settings')}</h2>
                         </div>
 
                         <div className="divide-y-2 divide-farm-brown/5">
@@ -227,17 +229,17 @@ export default function SettingsScreen() {
                                         <span className="material-symbols-outlined text-blue-600">dialpad</span>
                                     </div>
                                     <div>
-                                        <div className="font-bold text-farm-brown-dark">Mã PIN</div>
+                                        <div className="font-bold text-farm-brown-dark">{t('pin_code')}</div>
                                         <div className="text-xs text-gray-500">
-                                            {securityStatus?.hasPin ? 'Đã thiết lập' : 'Chưa thiết lập'}
+                                            {securityStatus?.hasPin ? t('configured') : t('not_configured')}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {securityStatus?.hasPin ? (
-                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold">Đã bật</span>
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold">{t('enabled')}</span>
                                     ) : (
-                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-bold">Tắt</span>
+                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-bold">{t('disabled')}</span>
                                     )}
                                     <span className="material-symbols-outlined text-gray-400">chevron_right</span>
                                 </div>
@@ -254,17 +256,17 @@ export default function SettingsScreen() {
                                         <span className="material-symbols-outlined text-purple-600">fingerprint</span>
                                     </div>
                                     <div>
-                                        <div className="font-bold text-farm-brown-dark">Vân tay / Sinh trắc học</div>
+                                        <div className="font-bold text-farm-brown-dark">{t('fingerprint_biometric')}</div>
                                         <div className="text-xs text-gray-500">
-                                            {securityStatus?.hasPasskey ? 'Đã liên kết' : 'Sử dụng Touch ID / Face ID'}
+                                            {securityStatus?.hasPasskey ? t('linked') : t('use_touch_face_id')}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {securityStatus?.hasPasskey ? (
-                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold">Đã bật</span>
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold">{t('enabled')}</span>
                                     ) : (
-                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-bold">Tắt</span>
+                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-bold">{t('disabled')}</span>
                                     )}
                                     {isProcessing ? (
                                         <span className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -280,15 +282,15 @@ export default function SettingsScreen() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-farm-brown/20 shadow-sm overflow-hidden">
                         <div className="bg-blue-50 px-4 py-3 flex items-center gap-2 border-b-2 border-farm-brown/10">
                             <span className="material-symbols-outlined text-blue-500">info</span>
-                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">Thông tin ứng dụng</h2>
+                            <h2 className="font-heading font-bold text-farm-brown-dark text-lg">{t('app_info')}</h2>
                         </div>
                         <div className="px-4 py-4">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-bold text-farm-brown-dark">Phiên bản</span>
+                                <span className="text-sm font-bold text-farm-brown-dark">{t('version')}</span>
                                 <span className="text-sm text-gray-500 font-mono">v1.2.0</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-farm-brown-dark">Nhà phát triển</span>
+                                <span className="text-sm font-bold text-farm-brown-dark">{t('developer')}</span>
                                 <span className="text-sm text-gray-500">Farmverse Team</span>
                             </div>
                         </div>
@@ -307,7 +309,7 @@ export default function SettingsScreen() {
                         className="w-full py-3 rounded-xl font-heading text-base font-bold text-red-600 bg-red-50 border border-red-200 active:scale-[0.98] active:bg-red-100 transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
                     >
                         <span className="material-symbols-outlined text-lg">logout</span>
-                        {loggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                        {loggingOut ? t('logging_out') : t('logout')}
                     </button>
                 </div>
 

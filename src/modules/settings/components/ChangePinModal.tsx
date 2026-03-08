@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { useTranslation } from 'react-i18next';
 
 interface ChangePinModalProps {
     open: boolean;
@@ -10,6 +11,7 @@ interface ChangePinModalProps {
 }
 
 export function ChangePinModal({ open, onClose, onSubmit, isLoading, error }: ChangePinModalProps) {
+    const { t } = useTranslation();
     const [step, setStep] = useState<'old' | 'new' | 'confirm'>('old');
     const [oldPin, setOldPin] = useState('');
     const [newPin, setNewPin] = useState('');
@@ -70,12 +72,12 @@ export function ChangePinModal({ open, onClose, onSubmit, isLoading, error }: Ch
                     </div>
                 </div>
                 <h3 className="text-lg font-heading font-bold text-center mb-1 text-farm-brown-dark">
-                    Đổi mã PIN
+                    {t('change_pin')}
                 </h3>
                 <p className="text-sm text-gray-500 text-center mb-4">
-                    {step === 'old' && 'Nhập mã PIN hiện tại'}
-                    {step === 'new' && 'Nhập mã PIN mới (6 số)'}
-                    {step === 'confirm' && 'Xác nhận lại mã PIN mới'}
+                    {step === 'old' && t('enter_current_pin')}
+                    {step === 'new' && t('enter_new_pin')}
+                    {step === 'confirm' && t('confirm_new_pin')}
                 </p>
 
                 {/* Step indicator */}
@@ -108,13 +110,13 @@ export function ChangePinModal({ open, onClose, onSubmit, isLoading, error }: Ch
                 </div>
 
                 {/* Mismatch / Error */}
-                {mismatch && <p className="text-sm text-red-500 text-center mb-3">Mã PIN mới không khớp. Thử lại.</p>}
+                {mismatch && <p className="text-sm text-red-500 text-center mb-3">{t('new_pin_mismatch')}</p>}
                 {error && <p className="text-sm text-red-500 text-center mb-3">{error}</p>}
 
                 {isLoading && (
                     <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-                        <p className="text-sm text-blue-600">Đang cập nhật...</p>
+                        <p className="text-sm text-blue-600">{t('updating')}</p>
                     </div>
                 )}
 
@@ -124,14 +126,14 @@ export function ChangePinModal({ open, onClose, onSubmit, isLoading, error }: Ch
                             onClick={handleBack}
                             className="flex-1 py-3 text-blue-500 text-sm rounded-xl hover:bg-blue-50 transition-colors font-medium"
                         >
-                            Quay lại
+                            {t('back')}
                         </button>
                     )}
                     <button
                         onClick={onClose}
                         className="flex-1 py-3 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-colors"
                     >
-                        Hủy
+                        {t('cancel')}
                     </button>
                 </div>
             </div>
