@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FarmPlot } from '@/shared/hooks/useFarmPlots';
 import type { GrowthState } from '@/shared/hooks/useGrowthTimer';
 
@@ -29,6 +30,8 @@ export default function FarmPlotRow({
   onPlant, onWater, onHarvest, onClear, onLocked,
   isWatering, isClearing,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <>
       {slotGrid.map((slot, i) => {
@@ -58,7 +61,7 @@ export default function FarmPlotRow({
             >
               <div className="plot-empty-action">
                 <span className="plot-plus">+</span>
-                <span className="plot-plant-label">Trồng cây</span>
+                <span className="plot-plant-label">{t('farming.plot.plant')}</span>
               </div>
             </div>
           );
@@ -76,13 +79,13 @@ export default function FarmPlotRow({
           return (
             <div key={slot.index} className={`farm-plot ${posClass}`}>
               <span className="farm-plot-emoji" style={{ filter: 'grayscale(0.7)', opacity: 0.7 }}>🥀</span>
-              <span className="plot-timer" style={{ color: '#fca5a5' }}>Đã héo</span>
+              <span className="plot-timer" style={{ color: '#fca5a5' }}>{t('farming.plot.dead')}</span>
               <button
                 className="plot-clear-btn"
                 disabled={isClearing}
                 onClick={(e) => { e.stopPropagation(); onClear(i); }}
               >
-                🗑 Dọn
+                🗑 {t('farming.plot.clear')}
               </button>
             </div>
           );
@@ -93,12 +96,12 @@ export default function FarmPlotRow({
           return (
             <div key={slot.index} className={`farm-plot farm-plot--ready ${posClass}`}>
               <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
-              <span className="plot-timer" style={{ color: '#fde047' }}>Thu hoạch!</span>
+              <span className="plot-timer" style={{ color: '#fde047' }}>{t('farming.plot.harvest_ready')}</span>
               <button
                 className="plot-harvest-btn ready-glow"
                 onClick={(e) => { e.stopPropagation(); onHarvest(i); }}
               >
-                ✅ Thu hoạch
+                ✅ {t('farming.plot.harvest_short')}
               </button>
             </div>
           );
@@ -141,10 +144,10 @@ export default function FarmPlotRow({
             {/* Status badges — bottom, only when growing */}
             <div className="plot-status-badges">
               {isHealthy && (
-                <span className="plot-badge plot-badge--healthy">✅ Khỏe mạnh</span>
+                <span className="plot-badge plot-badge--healthy">✅ {t('farming.plot.healthy')}</span>
               )}
               {!needsWater && (
-                <span className="plot-badge plot-badge--water">💧 Đủ nước</span>
+                <span className="plot-badge plot-badge--water">💧 {t('farming.plot.watered')}</span>
               )}
             </div>
 

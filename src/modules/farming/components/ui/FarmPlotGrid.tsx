@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FarmPlot } from '@/shared/hooks/useFarmPlots';
 
 interface SlotData {
@@ -20,6 +21,8 @@ interface Props {
 export default function FarmPlotGrid({
     slotGrid, plots, activePlotIndex, plantSlotIndex, growthMap, handleSlotClick, setActivePlotIndex
 }: Props) {
+    const { t } = useTranslation();
+
     return (
         <div className="px-4 py-2 shrink-0 z-30">
             <div className="flex gap-2.5 justify-center w-full max-w-[350px] mx-auto bg-green-900/10 p-2.5 rounded-3xl border border-green-900/5 backdrop-blur-sm">
@@ -37,7 +40,7 @@ export default function FarmPlotGrid({
                                 className="flex-1 aspect-square max-h-[75px] rounded-2xl bg-gray-900/40 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center transition-transform active:scale-95"
                             >
                                 <span className="material-symbols-outlined text-white/40 text-[20px] mb-1">lock</span>
-                                <span className="text-[8px] font-black text-white/50 uppercase tracking-wider">Mở VIP</span>
+                                <span className="text-[8px] font-black text-white/50 uppercase tracking-wider">{t('farming.plot.open_vip')}</span>
                             </button>
                         );
                     }
@@ -51,7 +54,7 @@ export default function FarmPlotGrid({
                                 className={`flex-1 aspect-square max-h-[75px] rounded-2xl backdrop-blur-md border border-dashed flex flex-col items-center justify-center transition-all active:scale-95 ${plantSlotIndex === slot.index ? 'bg-white/60 border-green-500 shadow-sm ring-2 ring-green-400' : 'bg-white/30 border-green-700/40 hover:bg-white/40'}`}
                             >
                                 <span className="material-symbols-outlined text-green-700 text-[24px]">add</span>
-                                <span className="text-[9px] font-bold text-green-800 mt-0.5">Trống</span>
+                                <span className="text-[9px] font-bold text-green-800 mt-0.5">{t('farming.plot.empty')}</span>
                             </button>
                         );
                     }
@@ -76,7 +79,7 @@ export default function FarmPlotGrid({
                                 </div>
                             )}
                             {slot.plot.isDead && (
-                                <span className="absolute bottom-1.5 text-[7px] text-white font-bold bg-red-500 px-1 rounded shadow-sm">Chết</span>
+                                <span className="absolute bottom-1.5 text-[7px] text-white font-bold bg-red-500 px-1 rounded shadow-sm">{t('farming.plot.dead_short')}</span>
                             )}
                             {growth?.isReady && !slot.plot.isDead && (
                                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-400 border border-white rounded-full flex items-center justify-center text-[10px] animate-pulse">🌾</span>

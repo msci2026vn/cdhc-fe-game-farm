@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   onHome: () => void;
@@ -7,15 +8,16 @@ interface Props {
   onKhoDo: () => void;
 }
 
-const BUTTONS = [
-  { key: 'home', icon: '🏠', label: 'Trang Chủ', cls: 'farm-action-btn--home' },
-  { key: 'dugia', icon: '📈', label: 'Dự Giá', cls: 'farm-action-btn--dugia' },
-  { key: 'shop', icon: '🛒', label: 'Cửa Hàng', cls: 'farm-action-btn--shop' },
-  { key: 'kho', icon: '🎒', label: 'Kho Đồ', cls: 'farm-action-btn--kho' },
-] as const;
-
 export default function FarmActionBar({ onHome, onDuGia, onShop, onKhoDo }: Props) {
+  const { t } = useTranslation();
   const handlers = [onHome, onDuGia, onShop, onKhoDo];
+
+  const BUTTONS = [
+    { key: 'home', icon: '🏠', label: t('farming.action_bar.home'), cls: 'farm-action-btn--home' },
+    { key: 'dugia', icon: '📈', label: t('farming.action_bar.forecast'), cls: 'farm-action-btn--dugia' },
+    { key: 'shop', icon: '🛒', label: t('farming.action_bar.shop'), cls: 'farm-action-btn--shop' },
+    { key: 'kho', icon: '🎒', label: t('farming.action_bar.inventory'), cls: 'farm-action-btn--kho' },
+  ] as const;
 
   return (
     <>

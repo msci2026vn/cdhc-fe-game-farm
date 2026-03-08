@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 
 interface Props {
@@ -19,6 +20,7 @@ export default function FarmHeader({
     temperature, locationName, currentDate,
     isNightLocal, isMuted, toggleMute
 }: Props) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const textColor = isNightLocal ? 'text-white' : 'text-gray-800';
@@ -51,7 +53,7 @@ export default function FarmHeader({
                     </div>
                     <div className="flex flex-col min-w-0 py-0.5">
                         <h1 className="font-black text-[12px] text-gray-800 leading-none mb-1 truncate">
-                            {auth?.user?.name || profile?.name || 'Nông dân'}
+                            {auth?.user?.name || profile?.name || t('farming.default_farmer')}
                         </h1>
                         <div className="flex items-center gap-1.5">
                             <span className="bg-yellow-400 text-yellow-900 text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm border border-yellow-500 uppercase leading-none">Lv.{profile?.level || 1}</span>
@@ -115,7 +117,7 @@ export default function FarmHeader({
                 {/* Minimap Region */}
                 <div className="snap-start shrink-0 bg-green-100 border border-green-300 rounded-xl px-3 py-1.5 flex items-center gap-1 cursor-pointer active:scale-95 transition-transform shadow-sm mr-4">
                     <span className="material-symbols-outlined text-green-600 text-[14px]">map</span>
-                    <span className="text-[9px] font-black text-green-800 uppercase">Vùng 1</span>
+                    <span className="text-[9px] font-black text-green-800 uppercase">{t('farming.zone_1')}</span>
                 </div>
             </div>
         </header>

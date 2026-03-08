@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import PlantSeedModal from '../components/PlantSeedModal';
@@ -37,6 +38,7 @@ import '@/styles/modules/farm-redesign.css';
 const MAX_DISPLAY_SLOTS = 3;
 
 export default function FarmingScreen() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { data: plots, totalSlots, isLoading: plotsLoading, error: plotsError } = useTransformedFarmPlots();
     const { data: profile } = usePlayerProfile();
@@ -133,8 +135,8 @@ export default function FarmingScreen() {
         plantSeedZustand(plantType, currentLength);
         setShowPlantModal(false);
         setActivePlotIndex(currentLength);
-        addToast(`Đã trồng ${plantType.name} ${plantType.emoji}!`, 'success');
-    }, [plantSeedZustand, addToast, plots.length]);
+        addToast(t('farming.messages.planted', { plantName: plantType.name, emoji: plantType.emoji }), 'success');
+    }, [plantSeedZustand, addToast, plots.length, t]);
 
     // Loading
     if (plotsLoading) {
@@ -143,7 +145,7 @@ export default function FarmingScreen() {
                 <div className="farm-bg" />
                 <div style={{ textAlign: 'center', zIndex: 10 }}>
                     <div style={{ fontSize: 40, marginBottom: 8 }} className="animate-pulse">🌱</div>
-                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>Đang tải vườn...</p>
+                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{t('farming.messages.loading')}</p>
                 </div>
             </div>
         );
@@ -156,7 +158,7 @@ export default function FarmingScreen() {
                 <div className="farm-bg" />
                 <div style={{ textAlign: 'center', zIndex: 10, padding: 16 }}>
                     <div style={{ fontSize: 40, marginBottom: 8 }}>😵</div>
-                    <p style={{ color: '#ef5350', fontSize: 13 }}>Lỗi tải vườn</p>
+                    <p style={{ color: '#ef5350', fontSize: 13 }}>{t('farming.messages.error_load')}</p>
                     <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 4 }}>{String(plotsError)}</p>
                 </div>
             </div>
@@ -171,8 +173,8 @@ export default function FarmingScreen() {
             {/* TOP-LEFT: Character HUD */}
             <FarmCharacterHUD
                 avatarUrl={auth?.user?.picture || profile?.picture}
-                name={auth?.user?.name || profile?.name || 'Nông dân'}
-                title="Thông Thiên Kỳ"
+                name={auth?.user?.name || profile?.name || t('farming.default_farmer')}
+                title={t('farming.title')}
                 level={profile?.level || 1}
                 hp={profile?.hp ?? 100}
                 maxHp={profile?.maxHp ?? 100}
@@ -193,7 +195,7 @@ export default function FarmingScreen() {
             <RwaFarmBanner isVip={isVip} />
 
             {/* Breadcrumb */}
-            <div className="farm-breadcrumb">My Garden &gt; Vùng 1</div>
+            <div className="farm-breadcrumb">{t('farming.breadcrumb')}</div>
 
             {/* 3 Plot Row — all interactions built-in */}
             <FarmPlotRow

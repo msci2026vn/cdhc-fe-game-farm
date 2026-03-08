@@ -15,5 +15,67 @@
         "iot_garden": "IoT Smart Garden",
         "vip_upgrade": "VIP Upgrade",
         "farmer_title": "Farmer"
+    },
+    "farming": {
+        "messages": {
+            "planted": "Planted {{plantName}} {{emoji}}!",
+            "loading": "Loading garden...",
+            "error_load": "Error loading garden",
+            "harvest_success": "Successfully harvested<br />{{plantName}}!"
+        },
+        "default_farmer": "Farmer",
+        "title": "Divine Era",
+        "breadcrumb": "My Garden > Zone 1",
+        "weather": {
+            "title": "Weather Information",
+            "summary": "Weather & Time",
+            "auto_sync": "Auto synced from API",
+            "current_location": "Current Location",
+            "temperature": "Temperature",
+            "humidity": "Humidity",
+            "wind": "Wind",
+            "time_cycle": "Time Cycle",
+            "weather_type": "Weather",
+            "updated_at": "Updated at:"
+        },
+        "plot": {
+            "plant": "Plant",
+            "dead": "Wilted",
+            "dead_short": "Dead",
+            "clear": "Clear",
+            "harvest_ready": "Harvest!",
+            "harvest_short": "Harvest",
+            "water": "Water",
+            "healthy": "Healthy",
+            "watered": "Watered",
+            "open_vip": "Unlock VIP",
+            "empty": "Empty"
+        },
+        "zone_1": "Zone 1",
+        "active_plot": {
+            "no_plant": "No Plant Yet!",
+            "instruction": "Select an empty plot below to plant seeds.",
+            "plant_now": "Plant Now",
+            "status_wilted": "Wilted",
+            "status_healthy": "Healthy",
+            "status_thirsty": "Thirsty",
+            "status_completed": "Completed",
+            "status_dead": "Dead"
+        },
+        "action_bar": {
+            "home": "Home",
+            "forecast": "Forecast",
+            "shop": "Shop",
+            "inventory": "Inventory"
+        },
+        "plant_status": {
+            "harvest_now": "Harvest Now! ✨",
+            "growing": "Growing 📈"
+        },
+        "seed_modal": {
+            "title": "Select Seed",
+            "plant_now": "Plant Now! 🌱",
+            "select_one": "Select a seed"
+        }
     }
 }

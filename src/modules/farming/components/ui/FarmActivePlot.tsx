@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FarmPlot } from '@/shared/hooks/useFarmPlots';
 import { calculateStage, getPlantSprite } from '../../utils/growth';
 
@@ -16,28 +17,35 @@ interface Props {
     isClearing: boolean;
 }
 
-const STAGE_LABELS: Record<string, string> = {
-    seed: 'Giai đoạn 1/5', sprout: 'Giai đoạn 2/5', seedling: 'Giai đoạn 3/5', mature: 'Giai đoạn 4/5', dead: 'Đã chết',
-};
+
 
 export default function FarmActivePlot({
     activePlot, growthMap, showWaterEffect,
     canWater, getCooldownRemaining, handleWater, handleHarvest, handleClear, handleEmptySlotClick,
     isWatering, isClearing
 }: Props) {
+    const { t } = useTranslation();
+
+    const STAGE_LABELS: Record<string, string> = {
+        seed: t('farming.active_plot.stage_1', 'Giai đoạn 1/5'),
+        sprout: t('farming.active_plot.stage_2', 'Giai đoạn 2/5'),
+        seedling: t('farming.active_plot.stage_3', 'Giai đoạn 3/5'),
+        mature: t('farming.active_plot.stage_4', 'Giai đoạn 4/5'),
+        dead: t('farming.active_plot.status_dead'),
+    };
 
     if (!activePlot) {
         return (
             <div className="flex flex-col items-center justify-center p-8 bg-white/50 backdrop-blur-md rounded-[32px] border border-white/60 shadow-xl mb-auto mt-20 w-[85%] max-w-[300px]">
                 <span className="text-6xl mb-3 animate-bounce">🌱</span>
-                <p className="font-heading font-black text-xl text-green-900 leading-tight">Chưa có cây!</p>
-                <p className="text-xs text-green-800/80 mt-1 mb-5 text-center px-4">Hãy chọn ô đất trống bên dưới để gieo hạt giống nhé.</p>
+                <p className="font-heading font-black text-xl text-green-900 leading-tight">{t('farming.active_plot.no_plant')}</p>
+                <p className="text-xs text-green-800/80 mt-1 mb-5 text-center px-4">{t('farming.active_plot.instruction')}</p>
                 <button
                     onClick={handleEmptySlotClick}
                     className="px-6 py-3 rounded-xl bg-gradient-to-b from-green-500 to-green-600 text-white font-black text-sm shadow-[0_4px_0_#1b5e20] active:translate-y-1 active:shadow-none transition-all w-full border border-green-700 flex items-center justify-center gap-2"
                 >
                     <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                    Trồng cây ngay
+                    {t('farming.active_plot.plant_now')}
                 </button>
             </div>
         );
@@ -54,12 +62,12 @@ export default function FarmActivePlot({
             <div className="absolute top-4 w-full flex justify-center gap-3 z-30 pointer-events-none">
                 <div className={`bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md border flex items-center gap-1 text-[9px] font-black uppercase tracking-wider ${activePlot.isDead ? 'border-red-300 text-red-600' : 'border-green-300 text-green-700'}`}>
                     <span className="material-symbols-outlined text-[12px]">{activePlot.isDead ? 'sentiment_dissatisfied' : 'check_circle'}</span>
-                    {activePlot.isDead ? 'Héo Úa' : 'Khỏe Mạnh'}
+                    {activePlot.isDead ? t('farming.active_plot.status_wilted') : t('farming.active_plot.status_healthy')}
                 </div>
                 {!activePlot.isDead && (
                     <div className={`bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md border flex items-center gap-1 text-[9px] font-black uppercase tracking-wider ${activePlot.happiness >= 50 ? 'border-blue-300 text-blue-600' : 'border-amber-300 text-amber-600'}`}>
                         <span className="material-symbols-outlined text-[12px]">{activePlot.happiness >= 50 ? 'water_drop' : 'opacity'}</span>
-                        {activePlot.happiness >= 50 ? 'Đủ Nước' : 'Khát Nước'}
+                        {activePlot.happiness >= 50 ? t('farming.plot.watered') : t('farming.active_plot.status_thirsty')}
                     </div>
                 )}
             </div>
@@ -68,7 +76,7 @@ export default function FarmActivePlot({
             {harvestReady && !activePlot.isDead && (
                 <div className="absolute top-16 z-30 pointer-events-none animate-bounce flex flex-col items-center">
                     <div className="bg-yellow-400 text-yellow-900 border-2 border-white px-4 py-1.5 rounded-full font-black text-sm shadow-lg flex items-center gap-1 drop-shadow-md">
-                        <span className="text-lg">🌾</span> Thu hoạch ngay!
+                        <span className="text-lg">🌾</span> {t('farming.plant_status.harvest_now')?.replace(' ✨', '')}
                     </div>
                 </div>
             )}
@@ -86,7 +94,7 @@ export default function FarmActivePlot({
                     <span className="uppercase tracking-wide">{STAGE_LABELS[stage]}</span>
                     <span className="flex items-center gap-0.5 text-amber-700">
                         <span className="material-symbols-outlined text-[12px]">timer</span>
-                        {activePlot.isDead ? 'Đã chết' : harvestReady ? 'Hoàn thành' : activeGrowth?.remainingText || '...'}
+                        {activePlot.isDead ? t('farming.active_plot.status_dead') : harvestReady ? t('farming.active_plot.status_completed') : activeGrowth?.remainingText || '...'}
                     </span>
                 </div>
             </div>

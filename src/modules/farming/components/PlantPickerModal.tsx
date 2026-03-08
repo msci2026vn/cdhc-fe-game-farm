@@ -8,6 +8,7 @@
  */
 import { X } from 'lucide-react';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 // Plant types data — match BE seed data
 // TODO Step 21: Lấy từ API thay vì hardcode
@@ -23,6 +24,7 @@ interface PlantPickerModalProps {
 }
 
 export default function PlantPickerModal({ onSelect, onClose, isPlanting }: PlantPickerModalProps) {
+  const { t } = useTranslation();
   const { data: shopData } = useShopItems();
   const shopItems = shopData?.items || [];
 
@@ -59,7 +61,7 @@ export default function PlantPickerModal({ onSelect, onClose, isPlanting }: Plan
       <div className="relative w-full max-w-md bg-gray-900 rounded-t-3xl p-5 pb-8 animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-white">🌱 Chọn cây trồng</h3>
+          <h3 className="text-lg font-bold text-white">🌱 {t('farming.seed_modal.title')}</h3>
           <button
             onClick={handleClose}
             className="p-1 rounded-full hover:bg-white/10"
@@ -101,7 +103,7 @@ export default function PlantPickerModal({ onSelect, onClose, isPlanting }: Plan
         {/* Loading indicator */}
         {isPlanting && (
           <div className="absolute inset-0 bg-black/40 rounded-t-3xl flex items-center justify-center">
-            <div className="text-white text-sm animate-pulse">🌱 Đang trồng...</div>
+            <div className="text-white text-sm animate-pulse">🌱 {t('farming.seed_modal.planting', 'Đang trồng...')}</div>
           </div>
         )}
       </div>

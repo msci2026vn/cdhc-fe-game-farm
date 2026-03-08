@@ -15,5 +15,67 @@
         "iot_garden": "IoT — Vườn thông minh",
         "vip_upgrade": "VIP — Nâng cấp",
         "farmer_title": "Nông Dân"
+    },
+    "farming": {
+        "messages": {
+            "planted": "Đã trồng {{plantName}} {{emoji}}!",
+            "loading": "Đang tải vườn...",
+            "error_load": "Lỗi tải vườn",
+            "harvest_success": "Thu hoạch thành công<br />{{plantName}}!"
+        },
+        "default_farmer": "Nông dân",
+        "title": "Thông Thiên Kỳ",
+        "breadcrumb": "My Garden > Vùng 1",
+        "weather": {
+            "title": "Thông tin thời tiết",
+            "summary": "Thời tiết & Thời gian",
+            "auto_sync": "Tự động đồng bộ từ API",
+            "current_location": "Vị trí hiện tại",
+            "temperature": "Nhiệt độ",
+            "humidity": "Độ ẩm",
+            "wind": "Cấp gió",
+            "time_cycle": "Chu kỳ thời gian",
+            "weather_type": "Hình thái thời tiết",
+            "updated_at": "Cập nhật lúc:"
+        },
+        "plot": {
+            "plant": "Trồng cây",
+            "dead": "Đã héo",
+            "dead_short": "Chết",
+            "clear": "Dọn",
+            "harvest_ready": "Thu hoạch!",
+            "harvest_short": "Thu hoạch",
+            "water": "Tưới nước",
+            "healthy": "Khỏe mạnh",
+            "watered": "Đủ nước",
+            "open_vip": "Mở VIP",
+            "empty": "Trống"
+        },
+        "zone_1": "Vùng 1",
+        "active_plot": {
+            "no_plant": "Chưa có cây!",
+            "instruction": "Hãy chọn ô đất trống bên dưới để gieo hạt giống nhé.",
+            "plant_now": "Trồng cây ngay",
+            "status_wilted": "Héo Úa",
+            "status_healthy": "Khỏe Mạnh",
+            "status_thirsty": "Khát Nước",
+            "status_completed": "Hoàn thành",
+            "status_dead": "Đã chết"
+        },
+        "action_bar": {
+            "home": "Trang Chủ",
+            "forecast": "Dự Giá",
+            "shop": "Cửa Hàng",
+            "inventory": "Kho Đồ"
+        },
+        "plant_status": {
+            "harvest_now": "Thu hoạch ngay! ✨",
+            "growing": "Đang lớn 📈"
+        },
+        "seed_modal": {
+            "title": "Chọn loại cây",
+            "plant_now": "Trồng ngay! 🌱",
+            "select_one": "Chọn một loại cây"
+        }
     }
 }
