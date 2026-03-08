@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Download, Copy } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
+import { useTranslation } from 'react-i18next';
 
 export function SmartWalletCard() {
+  const { t } = useTranslation();
   const {
     walletStatus,
     hasPasskey,
@@ -27,7 +29,7 @@ export function SmartWalletCard() {
     if (walletStatus?.address) {
       navigator.clipboard.writeText(walletStatus.address);
       setCopied(true);
-      toast.success('Đã sao chép địa chỉ ví');
+      toast.success(t('address_copied'));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -41,7 +43,7 @@ export function SmartWalletCard() {
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <div className="flex items-center justify-center py-4">
           <div className="w-5 h-5 border-2 border-farm-green-dark/30 border-t-farm-green-dark rounded-full animate-spin" />
-          <span className="ml-2 text-sm text-farm-brown-dark/60">Đang tải ví...</span>
+          <span className="ml-2 text-sm text-farm-brown-dark/60">{t('loading_wallet')}</span>
         </div>
       </div>
     );
@@ -53,22 +55,22 @@ export function SmartWalletCard() {
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
-          Ví Thông Minh
+          {t('smart_wallet')}
         </h3>
         <p className="text-[10px] text-gray-600 mb-3">
-          Tạo ví blockchain bằng vân tay. Không cần MetaMask, không cần seed phrase.
+          {t('smart_wallet_desc')}
         </p>
 
         <div className="flex items-center gap-2 text-xs mb-3">
           {hasPasskey ? (
             <span className="flex items-center gap-1 text-green-600 font-bold">
               <span className="material-symbols-outlined text-sm">verified_user</span>
-              Passkey đã tạo
+              {t('passkey_created')}
             </span>
           ) : (
             <span className="flex items-center gap-1 text-gray-500">
               <span className="material-symbols-outlined text-sm">fingerprint</span>
-              Chưa có Passkey — sẽ tạo cùng lúc
+              {t('no_passkey_msg')}
             </span>
           )}
         </div>
@@ -81,20 +83,20 @@ export function SmartWalletCard() {
           {isCreating ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              {isRegisteringPasskey ? 'Đang tạo Passkey...' :
-                isCreatingWallet ? 'Đang tạo ví...' :
-                  'Đang xử lý...'}
+              {isRegisteringPasskey ? t('creating_passkey') :
+                isCreatingWallet ? t('creating_wallet') :
+                  t('processing')}
             </>
           ) : (
             <>
               <span className="material-symbols-outlined text-base">fingerprint</span>
-              {hasPasskey ? 'Tạo Ví Thông Minh' : 'Quét vân tay & Tạo Ví'}
+              {hasPasskey ? t('create_smart_wallet') : t('scan_fingerprint_create')}
             </>
           )}
         </button>
 
         <p className="text-[9px] text-gray-400 text-center mt-2 flex items-center justify-center gap-1">
-          Miễn phí gas · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span> · ERC-4337
+          {t('free_gas')} · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span> · ERC-4337
         </p>
       </div>
     );
@@ -106,19 +108,19 @@ export function SmartWalletCard() {
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-heading text-sm font-bold flex items-center gap-2">
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
-          Ví Thông Minh
+          {t('smart_wallet')}
         </h3>
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${walletStatus?.isDeployed
           ? 'bg-green-100 text-green-700 border border-green-200'
           : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
           }`}>
-          {walletStatus?.isDeployed ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
+          {walletStatus?.isDeployed ? t('activated') : t('not_activated')}
         </span>
       </div>
 
       {/* Address */}
       <div className="mb-3">
-        <p className="text-[10px] text-gray-500 mb-1">Địa chỉ ví</p>
+        <p className="text-[10px] text-gray-500 mb-1">{t('wallet_address')}</p>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg bg-[#fefae0] px-3 py-2 text-xs text-farm-brown-dark font-mono truncate border border-[#e9c46a]">
             {walletStatus?.address}
@@ -137,13 +139,13 @@ export function SmartWalletCard() {
       {/* Balance + Network */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-[10px] text-gray-500">Số dư</p>
+          <p className="text-[10px] text-gray-500">{t('balance')}</p>
           <p className="text-base font-heading font-bold text-farm-brown-dark">
             {walletStatus?.balance || '0'} <span className="text-xs text-gray-500">AVAX</span>
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          <p className="text-[10px] text-gray-500 mb-0.5">Mạng</p>
+          <p className="text-[10px] text-gray-500 mb-0.5">{t('network')}</p>
           <div className="flex items-center gap-1.5 bg-white/50 px-2 py-0.5 rounded-lg border border-white/20">
             <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" />
             <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
@@ -157,7 +159,7 @@ export function SmartWalletCard() {
           <DialogTrigger asChild>
             <Button variant="outline" className="w-full h-10 rounded-xl border-[#e9c46a] text-farm-brown-dark hover:bg-[#fefae0]">
               <Download className="mr-2 h-4 w-4" />
-              Nạp tiền vào ví
+              {t('deposit_to_wallet')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md w-[95vw] overflow-hidden bg-[#4A3629] border-2 border-[#8B5E3C] shadow-2xl p-0 gap-0">
@@ -170,12 +172,12 @@ export function SmartWalletCard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-inner">
                   <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-6 h-6 object-contain brightness-0 invert" />
                 </div>
-                <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">Nạp AVAX vào ví</DialogTitle>
+                <DialogTitle className="text-xl font-bold tracking-tight text-white m-0">{t('deposit_avax_to_wallet')}</DialogTitle>
               </div>
             </DialogHeader>
             <div className="px-6 pb-2 text-center relative z-10">
               <p className="text-[#D4B483] text-sm leading-relaxed">
-                Gửi AVAX tới địa chỉ bên dưới. Hãy chọn đúng mạng <span className="text-white font-semibold">Avalanche C-Chain</span>.
+                {t('send_avax_instruction')} <span className="text-white font-semibold">Avalanche C-Chain</span>.
               </p>
             </div>
             <div className="px-6 space-y-5 pb-6 relative z-10">
@@ -208,7 +210,7 @@ export function SmartWalletCard() {
                             }}
                           />
                         ) : (
-                          <div className="w-[180px] h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">Đang tải...</div>
+                          <div className="w-[180px] h-[180px] bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs">{t('loading')}</div>
                         )}
                       </div>
                     </div>
@@ -218,12 +220,12 @@ export function SmartWalletCard() {
                     onClick={async () => {
                       const element = document.getElementById('vip-card-template');
                       if (!element) {
-                        toast.error('Không tìm thấy template Thẻ VIP');
+                        toast.error(t('vip_template_not_found'));
                         return;
                       }
 
                       try {
-                        const toastId = toast.loading('Đang khởi tạo thẻ VIP...');
+                        const toastId = toast.loading(t('initializing_vip_card'));
 
                         await document.fonts.ready;
 
@@ -241,21 +243,21 @@ export function SmartWalletCard() {
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
                         document.body.removeChild(downloadLink);
-                        toast.success("Đã tải ảnh QR VIP", { id: toastId });
+                        toast.success(t('vip_qr_downloaded'), { id: toastId });
                       } catch (err) {
-                        toast.error('Có lỗi xảy ra khi tạo ảnh QR');
+                        toast.error(t('qr_error'));
                         console.error(err);
                       }
                     }}
                     className="mb-8 flex items-center gap-2 px-6 py-2.5 rounded-full bg-black/30 border border-[#8B5E3C] hover:bg-black/50 transition-all text-[#D4B483] hover:text-white text-sm font-semibold group-hover:border-[#D4B483]/50 shadow-inner"
                   >
                     <span className="material-symbols-outlined text-lg">download</span>
-                    Tải ảnh QR
+                    {t('download_qr_image')}
                   </button>
 
                   <div className="flex w-full items-center justify-between mb-2">
                     <label className="text-[11px] uppercase tracking-wider text-[#D4B483] font-bold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">qr_code_2</span> ĐỊA CHỈ VÍ NHẬN
+                      <span className="material-symbols-outlined text-sm">qr_code_2</span> {t('receive_address_upper')}
                     </label>
                   </div>
                   <div className="flex items-center bg-[#4A3629] rounded-lg border border-[#8B5E3C]/50 p-3 shadow-inner w-full">
@@ -270,14 +272,14 @@ export function SmartWalletCard() {
               <div className="rounded-xl bg-[#5D3A29]/80 border border-orange-500/30 p-4 flex gap-3 items-start text-left shadow-inner">
                 <span className="material-symbols-outlined text-orange-400 mt-0.5 flex-shrink-0 text-xl">warning</span>
                 <div>
-                  <h4 className="text-orange-200 text-sm font-bold mb-1">Chọn đúng mạng: Avalanche C-Chain</h4>
-                  <p className="text-orange-200/70 text-xs leading-snug">Gửi sai mạng sẽ mất tiền và không thể khôi phục.</p>
+                  <h4 className="text-orange-200 text-sm font-bold mb-1">{t('choose_correct_network')}</h4>
+                  <p className="text-orange-200/70 text-xs leading-snug">{t('wrong_network_warning')}</p>
                 </div>
               </div>
 
               <div>
                 <p className="text-[#D4B483]/70 text-xs mb-3 flex items-center gap-2 before:content-[''] before:h-px before:w-6 before:bg-[#D4B483]/10 after:content-[''] after:h-px after:flex-1 after:bg-[#D4B483]/10">
-                  Bạn có thể gửi AVAX từ
+                  {t('can_send_avax_from')}
                 </p>
                 <div className="flex justify-between gap-2">
                   {[
@@ -300,11 +302,11 @@ export function SmartWalletCard() {
 
             <div className="relative z-20 bg-black/40 px-6 py-4 border-t border-[#8B5E3C]/30 backdrop-blur-sm rounded-b-[10px]">
               <div className="flex items-center justify-between text-[#D4B483]/80 text-sm font-medium">
-                <span>Số dư hiện tại:</span>
+                <span>{t('current_balance_upper')}:</span>
                 <span className="text-white font-bold flex items-center gap-1">
                   {walletStatus?.balance || '0'} AVAX
                   {Number(walletStatus?.balance || 0) === 0 && (
-                    <span className="material-symbols-outlined text-red-500 text-base" title="Cần nạp thêm">error</span>
+                    <span className="material-symbols-outlined text-red-500 text-base" title={t('deposit')}>error</span>
                   )}
                 </span>
               </div>
@@ -326,7 +328,7 @@ export function SmartWalletCard() {
           className="w-full h-10 rounded-xl border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100"
         >
           <span className="material-symbols-outlined mr-2 text-[18px]">credit_card</span>
-          Nạp thẻ Visa
+          {t('topup_visa')}
         </Button>
       </div>
 
@@ -339,13 +341,13 @@ export function SmartWalletCard() {
           className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-bold"
         >
           <span className="material-symbols-outlined text-sm">open_in_new</span>
-          Xem trên Snowtrace
+          {t('view_on_snowtrace')}
         </a>
       )}
 
       {!walletStatus?.isDeployed && (
         <p className="text-[9px] text-gray-400 mt-2">
-          Ví sẽ tự kích hoạt khi bạn thực hiện giao dịch đầu tiên (miễn phí gas).
+          {t('wallet_auto_activate_msg')}
         </p>
       )}
 
@@ -404,18 +406,18 @@ export function SmartWalletCard() {
                   }}
                 />
               ) : (
-                <div className="w-[200px] h-[200px] bg-gray-100 flex items-center justify-center text-gray-400 text-xs rounded-[6px]">Đang tải...</div>
+                <div className="w-[200px] h-[200px] bg-gray-100 flex items-center justify-center text-gray-400 text-xs rounded-[6px]">{t('loading')}</div>
               )}
             </div>
             <div className="flex items-center gap-2 text-[10px] font-semibold tracking-[0.12em] uppercase text-[#5A8A6A] before:content-[''] before:w-[18px] before:h-px before:bg-[#119DA4]/40 after:content-[''] after:w-[18px] after:h-px after:bg-[#119DA4]/40">
-              Quét mã để gửi AVAX
+              {t('scan_to_send_avax')}
             </div>
           </div>
 
           {/* Address Box */}
           <div className="px-6 pb-[18px]">
             <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[#5A8A6A] mb-1.5 pl-0.5 flex items-center gap-1">
-              <span className="text-[#D4A017] material-symbols-outlined text-[12px] -rotate-45">key</span> ĐỊA CHỈ VÍ NHẬN
+              <span className="text-[#D4A017] material-symbols-outlined text-[12px] -rotate-45">key</span> {t('receive_address_upper')}
             </div>
             <div className="bg-white/80 border-[1.5px] border-[#119DA4]/20 rounded-xl p-3 shadow-[0_2px_10px_rgba(17,157,164,0.08)] flex items-center gap-2 relative">
               <code className="font-mono text-[12.5px] text-[#1A3A28] tracking-[0.03em] break-all leading-[1.65] flex-1 pr-2">{walletStatus?.address}</code>
@@ -426,8 +428,8 @@ export function SmartWalletCard() {
           <div className="mx-6 mb-[18px] py-3 px-3.5 bg-[#FDE789]/35 border-y border-r border-[#D4A017]/30 border-l-[3px] border-l-[#D4A017] rounded-r-[10px] flex gap-2.5 items-start">
             <span className="material-symbols-outlined text-[15px] shrink-0 mt-px text-[#D4A017]">warning</span>
             <div>
-              <h4 className="text-[11px] font-bold text-[#7A5500] mb-0.5">Chỉ gửi trên Avalanche C-Chain</h4>
-              <p className="text-[10px] text-[#9A7010] leading-relaxed">Gửi sai mạng sẽ dẫn đến mất tiền vĩnh viễn và không thể hoàn lại.</p>
+              <h4 className="text-[11px] font-bold text-[#7A5500] mb-0.5">{t('send_only_on_avax')}</h4>
+              <p className="text-[10px] text-[#9A7010] leading-relaxed">{t('wrong_network_loss_warning')}</p>
             </div>
           </div>
 
@@ -435,7 +437,7 @@ export function SmartWalletCard() {
           <div className="px-6 pb-2">
             <div className="flex items-center gap-2 mb-3">
               <div className="flex-1 h-px bg-[#119DA4]/20"></div>
-              <h4 className="text-[9px] font-bold tracking-[0.14em] uppercase text-[#5A8A6A] text-center shrink-0">CÓ THỂ GỬI TỪ</h4>
+              <h4 className="text-[9px] font-bold tracking-[0.14em] uppercase text-[#5A8A6A] text-center shrink-0">{t('can_send_from')}</h4>
               <div className="flex-1 h-px bg-[#119DA4]/20"></div>
             </div>
             <div className="flex flex-wrap justify-center gap-1.5">

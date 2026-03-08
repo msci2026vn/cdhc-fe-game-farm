@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { useTranslation } from 'react-i18next';
 
 interface PinSetupModalProps {
   open: boolean;
@@ -10,6 +11,7 @@ interface PinSetupModalProps {
 }
 
 export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: PinSetupModalProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<'enter' | 'confirm'>('enter');
   const [pin, setPin] = useState('');
   const [value, setValue] = useState('');
@@ -66,12 +68,12 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
           </div>
         </div>
         <h3 className="text-lg font-heading font-bold text-center mb-1 text-farm-brown-dark">
-          {step === 'enter' ? 'Tạo mã PIN' : 'Xác nhận mã PIN'}
+          {step === 'enter' ? t('create_pin') : t('confirm_pin')}
         </h3>
         <p className="text-sm text-gray-500 text-center mb-4">
           {step === 'enter'
-            ? 'Nhập mã PIN 6 số để bảo vệ ví'
-            : 'Nhập lại mã PIN để xác nhận'}
+            ? t('enter_pin_protect_desc')
+            : t('re_enter_pin_desc')}
         </p>
 
         {/* Step indicator */}
@@ -104,7 +106,7 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
 
         {/* Mismatch error */}
         {mismatch && (
-          <p className="text-sm text-red-500 text-center mb-3">Mã PIN không khớp. Thử lại.</p>
+          <p className="text-sm text-red-500 text-center mb-3">{t('pin_mismatch')}</p>
         )}
 
         {/* Server error */}
@@ -115,7 +117,7 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
         {isLoading && (
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-4 h-4 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" />
-            <p className="text-sm text-green-600">Đang cài đặt...</p>
+            <p className="text-sm text-green-600">{t('setting_up')}</p>
           </div>
         )}
 
@@ -126,14 +128,14 @@ export function PinSetupModal({ open, onClose, onSubmit, isLoading, error }: Pin
               onClick={handleBack}
               className="flex-1 py-3 text-blue-500 text-sm rounded-xl hover:bg-blue-50 transition-colors font-medium"
             >
-              Nhập lại
+              {t('re_enter')}
             </button>
           )}
           <button
             onClick={onClose}
             className="flex-1 py-3 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-colors"
           >
-            Huỷ
+            {t('cancel')}
           </button>
         </div>
       </div>

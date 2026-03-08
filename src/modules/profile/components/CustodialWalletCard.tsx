@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { QRCodeCanvas } from 'qrcode.react';
 import { PinInputModal } from './PinInputModal';
 import { PinSetupModal } from './PinSetupModal';
+import { useTranslation } from 'react-i18next';
 
 export function CustodialWalletCard() {
+  const { t } = useTranslation();
   const {
     wallet,
     isLoading,
@@ -38,7 +40,7 @@ export function CustodialWalletCard() {
     if (wallet?.address) {
       navigator.clipboard.writeText(wallet.address);
       setCopied(true);
-      toast.success('Đã sao chép địa chỉ ví');
+      toast.success(t('address_copied'));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -52,7 +54,7 @@ export function CustodialWalletCard() {
         const data = await exportKey({});
         setExportedKey(data.privateKey);
       } catch {
-        toast.error('Không thể export ví');
+        toast.error(t('export_failed'));
       }
       return;
     }
@@ -74,7 +76,7 @@ export function CustodialWalletCard() {
       const data = await exportKey({});
       setExportedKey(data.privateKey);
     } catch {
-      toast.error('Không thể export ví');
+      toast.error(t('export_failed'));
     }
   };
 
@@ -131,7 +133,7 @@ export function CustodialWalletCard() {
         const data = await exportKey({ pin });
         setExportedKey(data.privateKey);
       } catch {
-        toast.error('Export thất bại');
+        toast.error(t('export_failed'));
       }
     }
 
@@ -155,7 +157,7 @@ export function CustodialWalletCard() {
       await setPinApi(pin);
       await refetchSecurity();
       security.setShowPinSetup(false);
-      toast.success('Đã cài mã PIN thành công!');
+      toast.success(t('pin_setup_success'));
 
       // Sau setup -> tiep tuc action bang PIN vua tao
       if (pinAction === 'export') {
@@ -163,7 +165,7 @@ export function CustodialWalletCard() {
           const data = await exportKey({ pin });
           setExportedKey(data.privateKey);
         } catch {
-          toast.error('Export thất bại');
+          toast.error(t('export_failed'));
         }
       } else if (pinAction === 'withdraw') {
         try {
@@ -177,7 +179,7 @@ export function CustodialWalletCard() {
       }
       setPinAction(null);
     } catch (err: any) {
-      toast.error(err?.message || 'Cài PIN thất bại');
+      toast.error(err?.message || t('pin_setup_failed'));
     }
   };
 
@@ -191,7 +193,7 @@ export function CustodialWalletCard() {
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <div className="flex items-center justify-center py-4">
           <div className="w-5 h-5 border-2 border-farm-green-dark/30 border-t-farm-green-dark rounded-full animate-spin" />
-          <span className="ml-2 text-sm text-farm-brown-dark/60">Đang tải ví...</span>
+          <span className="ml-2 text-sm text-farm-brown-dark/60">{t('loading_wallet')}</span>
         </div>
       </div>
     );
@@ -203,13 +205,13 @@ export function CustodialWalletCard() {
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <h3 className="font-heading text-sm font-bold flex items-center gap-2 mb-2">
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
-          Vi FARMVERSE
+          {t('farmverse_wallet')}
         </h3>
         <p className="text-[10px] text-gray-600 mb-3">
-          Chưa có ví. Ví sẽ được tạo tự động khi bạn đăng nhập lại.
+          {t('no_wallet_msg')}
         </p>
         <p className="text-[9px] text-gray-400 text-center flex items-center justify-center gap-1">
-          Miễn phí · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span>
+          {t('free')} · <span className="bg-white/80 px-1 py-0.5 rounded flex items-center gap-1 text-farm-brown-dark font-bold"><img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-2.5 h-2.5 object-contain" /> Avalanche C-Chain</span>
         </p>
       </div>
     );
@@ -222,7 +224,7 @@ export function CustodialWalletCard() {
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-heading text-sm font-bold flex items-center gap-2">
           <span className="material-symbols-outlined text-base text-farm-green-dark">account_balance_wallet</span>
-          Vi FARMVERSE
+          {t('farmverse_wallet')}
         </h3>
         <button onClick={() => refetch()} className="p-1 rounded-lg hover:bg-white/50 transition-colors" title="Làm mới">
           <span className="material-symbols-outlined text-sm text-gray-400 hover:text-farm-green-dark">refresh</span>
@@ -231,7 +233,7 @@ export function CustodialWalletCard() {
 
       {/* Address */}
       <div className="mb-3">
-        <p className="text-[10px] text-gray-500 mb-1">Địa chỉ ví</p>
+        <p className="text-[10px] text-gray-500 mb-1">{t('wallet_address')}</p>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg bg-[#fefae0] px-3 py-2 text-xs text-farm-brown-dark font-mono truncate border border-[#e9c46a]">
             {wallet?.address}
@@ -250,13 +252,13 @@ export function CustodialWalletCard() {
       {/* Balance + Network */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-[10px] text-gray-500">Số dư</p>
+          <p className="text-[10px] text-gray-500">{t('balance')}</p>
           <p className="text-base font-heading font-bold text-farm-brown-dark">
             {parseFloat(wallet?.balance || '0').toFixed(6)} <span className="text-xs text-gray-500">AVAX</span>
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          <p className="text-[10px] text-gray-500 mb-0.5">Mạng</p>
+          <p className="text-[10px] text-gray-500 mb-0.5">{t('network')}</p>
           <div className="flex items-center gap-1.5 bg-white/50 px-2 py-0.5 rounded-lg border border-white/20">
             <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-4 h-4 object-contain" />
             <p className="text-xs font-bold text-farm-brown-dark">Avalanche C-Chain</p>
@@ -271,7 +273,7 @@ export function CustodialWalletCard() {
           <DialogTrigger asChild>
             <button className="flex flex-col items-center gap-1 p-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 active:scale-95 transition-all min-h-[56px]">
               <span className="material-symbols-outlined text-lg">download</span>
-              <span className="text-[10px] font-bold">Nạp tiền</span>
+              <span className="text-[10px] font-bold">{t('deposit')}</span>
             </button>
           </DialogTrigger>
           <DialogContent className="!w-[calc(100vw-24px)] !max-w-[380px] !p-0 !gap-0 !rounded-2xl !bg-[#3d2b1f] border !border-white/10 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.7)] overflow-hidden">
@@ -282,7 +284,7 @@ export function CustodialWalletCard() {
             <div className="flex items-center justify-between px-4 pt-3 pb-2 flex-shrink-0">
               <DialogTitle className="text-base font-bold tracking-tight text-white m-0 flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-green-400">account_balance_wallet</span>
-                Nạp AVAX
+                {t('deposit_avax')}
               </DialogTitle>
               <DialogClose asChild>
                 <button className="flex h-9 w-9 items-center justify-center rounded-full active:bg-white/10 transition-colors text-white/70">
@@ -317,7 +319,7 @@ export function CustodialWalletCard() {
                           }}
                         />
                       ) : (
-                        <div className="w-40 h-40 bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs rounded-lg">Đang tải...</div>
+                        <div className="w-40 h-40 bg-gray-200 animate-pulse flex items-center justify-center text-gray-400 text-xs rounded-lg">{t('loading')}</div>
                       )}
                     </div>
                     <button
@@ -332,15 +334,15 @@ export function CustodialWalletCard() {
                           document.body.appendChild(downloadLink);
                           downloadLink.click();
                           document.body.removeChild(downloadLink);
-                          toast.success('Đã tải ảnh QR');
+                          toast.success(t('qr_downloaded'));
                         } catch {
-                          toast.error('Có lỗi khi tạo ảnh QR');
+                          toast.error(t('qr_error'));
                         }
                       }}
                       className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#8B5E3C]/30 border border-[#8B5E3C] active:bg-[#8B5E3C]/60 transition-all text-[#D4B483] text-xs font-semibold min-h-[36px]"
                     >
                       <span className="material-symbols-outlined text-sm">download</span>
-                      Tải mã QR
+                      {t('download_qr')}
                     </button>
                   </div>
                 </div>
@@ -348,13 +350,13 @@ export function CustodialWalletCard() {
                 {/* Warning */}
                 <div className="flex items-center justify-center gap-1.5 text-xs text-orange-200/90 bg-orange-900/25 py-2 px-3 rounded-xl border border-orange-500/25">
                   <span className="material-symbols-outlined text-sm text-orange-400 flex-shrink-0">warning</span>
-                  <span>Chỉ gửi qua mạng <strong>Avalanche C-Chain</strong></span>
+                  <span>{t('send_only_avax_network')} <strong>Avalanche C-Chain</strong></span>
                 </div>
 
                 {/* Address */}
                 <div className="bg-black/30 rounded-xl border border-[#8B5E3C]/40 p-3 flex items-center gap-2">
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] text-[#D4B483] uppercase tracking-wider font-semibold block mb-1">Địa chỉ ví nhận</span>
+                    <span className="text-[10px] text-[#D4B483] uppercase tracking-wider font-semibold block mb-1">{t('receive_address')}</span>
                     <code className="text-white font-mono text-[11px] break-all leading-relaxed select-all">{wallet?.address}</code>
                   </div>
                   <button
@@ -369,11 +371,11 @@ export function CustodialWalletCard() {
 
             {/* Footer: balance */}
             <div className="bg-black/40 px-4 py-3 border-t border-white/5 flex items-center justify-between flex-shrink-0">
-              <span className="text-slate-400 text-xs font-medium">Số dư hiện tại</span>
+              <span className="text-slate-400 text-xs font-medium">{t('current_balance')}</span>
               <span className="text-white text-sm font-bold flex items-center gap-1.5">
                 {parseFloat(wallet?.balance || '0').toFixed(6)} AVAX
                 {Number(wallet?.balance || 0) === 0 && (
-                  <span className="material-symbols-outlined text-red-400 text-base" title="Cần nạp thêm">error</span>
+                  <span className="material-symbols-outlined text-red-400 text-base" title={t('deposit')}>error</span>
                 )}
               </span>
             </div>
@@ -389,7 +391,7 @@ export function CustodialWalletCard() {
           className="flex flex-col items-center gap-1 p-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 active:scale-95 transition-all min-h-[56px]"
         >
           <span className="material-symbols-outlined text-lg">credit_card</span>
-          <span className="text-[10px] font-bold whitespace-nowrap">Nạp Visa</span>
+          <span className="text-[10px] font-bold whitespace-nowrap">{t('topup_visa')}</span>
         </button>
 
         {/* Rút tiền */}
@@ -399,7 +401,7 @@ export function CustodialWalletCard() {
             }`}
         >
           <span className="material-symbols-outlined text-lg">upload</span>
-          <span className="text-[10px] font-bold">Rút tiền</span>
+          <span className="text-[10px] font-bold">{t('withdraw')}</span>
         </button>
 
         {/* Export */}
@@ -416,17 +418,17 @@ export function CustodialWalletCard() {
       {/* WITHDRAW PANEL */}
       {showWithdraw && (
         <div className="border-t border-[#e9c46a]/30 pt-3 space-y-3 animate-fade-in">
-          <p className="text-xs text-gray-600 font-bold">Rút AVAX ra ví ngoài</p>
+          <p className="text-xs text-gray-600 font-bold">{t('withdraw_avax_out')}</p>
           <input
             type="text"
-            placeholder="Địa chỉ nhận (0x...)"
+            placeholder={t('receive_address_placeholder')}
             value={withdrawTo}
             onChange={(e) => setWithdrawTo(e.target.value)}
             className="w-full px-3 py-3 border border-[#e9c46a] rounded-xl text-xs font-mono bg-[#fefae0] focus:outline-none focus:ring-2 focus:ring-farm-green-dark/50"
           />
           <input
             type="number"
-            placeholder="Số lượng AVAX"
+            placeholder={t('amount_avax')}
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}
             step="0.001"
@@ -441,16 +443,16 @@ export function CustodialWalletCard() {
             {isSending || security.isVerifying ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {security.isVerifying ? 'Đang xác nhận...' : 'Đang gửi...'}
+                {security.isVerifying ? t('confirming') : t('sending')}
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-base">send</span>
-                Xác nhận rút tiền
+                {t('confirm_withdraw')}
               </>
             )}
           </button>
-          <p className="text-[9px] text-gray-400 text-center">Phí gas sẽ được trừ từ số dư ví</p>
+          <p className="text-[9px] text-gray-400 text-center">{t('gas_fee_deducted')}</p>
         </div>
       )}
 
@@ -462,7 +464,7 @@ export function CustodialWalletCard() {
               <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2 items-start">
                 <span className="material-symbols-outlined text-red-500 text-base mt-0.5 shrink-0">warning</span>
                 <p className="text-xs text-red-600 leading-relaxed">
-                  Private key cho phép toàn quyền truy cập ví. <strong>KHÔNG chia sẻ với ai.</strong>
+                  {t('private_key_warning')}
                 </p>
               </div>
               <button
@@ -473,35 +475,35 @@ export function CustodialWalletCard() {
                 {isExporting || security.isVerifying ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {security.isVerifying ? 'Đang xác nhận...' : 'Đang lấy...'}
+                    {security.isVerifying ? t('confirming') : t('fetching')}
                   </>
                 ) : (
                   <>
                     <span className="material-symbols-outlined text-base">visibility</span>
-                    Hiện Private Key
+                    {t('show_private_key')}
                   </>
                 )}
               </button>
             </>
           ) : (
             <>
-              <p className="text-xs text-gray-600">Import vào MetaMask hoặc Trust Wallet:</p>
+              <p className="text-xs text-gray-600">{t('import_metamask_msg')}</p>
               <div className="bg-red-50 p-3 rounded-xl break-all text-[10px] font-mono border border-red-200 select-all">
                 {exportedKey}
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => { navigator.clipboard.writeText(exportedKey); toast.success('Đã copy Private Key'); }}
+                  onClick={() => { navigator.clipboard.writeText(exportedKey); toast.success(t('private_key_copied')); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-farm-brown bg-[#fefae0] border border-[#e9c46a] active:scale-95 transition-all flex items-center justify-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">content_copy</span>
-                  Copy
+                  {t('copy')}
                 </button>
                 <button
                   onClick={() => { setExportedKey(''); setShowExport(false); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 border border-gray-200 active:scale-95 transition-all"
                 >
-                  Ẩn
+                  {t('hide')}
                 </button>
               </div>
             </>
@@ -514,22 +516,22 @@ export function CustodialWalletCard() {
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 text-xs flex items-center gap-1">
             <span className="material-symbols-outlined text-sm">shield</span>
-            Bảo mật ví
+            {t('wallet_security')}
           </span>
           <div className="flex gap-2">
             {securityStatus?.hasPin && (
               <span className="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
-                PIN
+                {t('pin')}
               </span>
             )}
             {securityStatus?.hasPasskey && (
               <span className="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
-                Vân tay
+                {t('fingerprint')}
               </span>
             )}
             {!securityStatus?.hasPin && !securityStatus?.hasPasskey && (
               <span className="text-orange-500 text-[10px] font-bold bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">
-                Chưa cài đặt
+                {t('not_setup')}
               </span>
             )}
           </div>
@@ -545,7 +547,7 @@ export function CustodialWalletCard() {
           className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-bold mt-3"
         >
           <span className="material-symbols-outlined text-sm">open_in_new</span>
-          Xem trên Snowtrace
+          {t('view_on_snowtrace')}
         </a>
       )}
 

@@ -2,10 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useOgnHistory } from '@/shared/hooks/useOgnHistory';
 import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 const OgnHistoryScreen = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const ognBalance = useOgn();
     const { data: transactions, isLoading, error, refetch } = useOgnHistory(50);
@@ -42,7 +44,7 @@ const OgnHistoryScreen = () => {
                 >
                     <span className="material-icons-round">arrow_back</span>
                 </button>
-                <h1 className="text-xl font-black text-[#5D4037] drop-shadow-sm uppercase tracking-wide">Lịch sử OGN</h1>
+                <h1 className="text-xl font-black text-[#5D4037] drop-shadow-sm uppercase tracking-wide">{t('ogn_history')}</h1>
                 <button
                     onClick={() => { playSound('ui_click'); refetch(); }}
                     className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#E6D690] text-[#E6D690] shadow-wood-button active:translate-y-1 active:shadow-none transition-all flex items-center justify-center"
@@ -58,7 +60,7 @@ const OgnHistoryScreen = () => {
                     <span className="material-icons-round absolute -bottom-4 -right-2 text-green-700/20 text-5xl transform rotate-45">spa</span>
                     <div className="bg-[#FFFDF5] border-2 border-[#DEB887] rounded-3xl p-6 flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
                         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDIwIDIwIiBmaWxsPSJub25lIiBzdHJva2U9IiM4QjQ1MTMiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMjBMMjAgME0xMCAyMEwyMCAxME0wIDEwTDEwIDA1IiBzdHJva2Utb3BhY2l0eT0iMC4yIi8+PC9zdmc+')]"></div>
-                        <span className="text-[#8B4513] font-black text-xs uppercase tracking-widest mb-2 z-10 opacity-70">Số dư hiện tại</span>
+                        <span className="text-[#8B4513] font-black text-xs uppercase tracking-widest mb-2 z-10 opacity-70">{t('current_balance_upper')}</span>
                         <div className="flex items-center gap-3 z-10">
                             <div className="bg-yellow-100 p-2 rounded-full border-2 border-yellow-300 shadow-sm">
                                 <span className="material-icons-round text-yellow-600 text-3xl">monetization_on</span>
@@ -75,30 +77,30 @@ const OgnHistoryScreen = () => {
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-12 space-y-4">
                         <div className="w-12 h-12 border-4 border-[#8B4513] border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[#8B4513] font-bold text-sm">Đang tải...</p>
+                        <p className="text-[#8B4513] font-bold text-sm">{t('loading')}</p>
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center py-12 space-y-4">
                         <span className="material-icons-round text-red-500 text-5xl">error_outline</span>
-                        <p className="text-red-600 font-bold text-sm">Lỗi tải dữ liệu</p>
+                        <p className="text-red-600 font-bold text-sm">{t('error_loading_data')}</p>
                         <button
                             onClick={() => refetch()}
                             className="px-6 py-2 rounded-full bg-[#8B4513] text-[#E6D690] font-bold text-sm shadow-wood-button active:translate-y-1 active:shadow-none transition-all"
                         >
-                            Thử lại
+                            {t('retry')}
                         </button>
                     </div>
                 ) : !transactions || transactions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 space-y-4">
                         <span className="material-icons-round text-[#8B4513] text-5xl opacity-50">receipt_long</span>
-                        <p className="text-[#8B4513] font-bold text-sm opacity-70">Chưa có giao dịch nào</p>
+                        <p className="text-[#8B4513] font-bold text-sm opacity-70">{t('no_transactions_yet')}</p>
                     </div>
                 ) : (
                     <>
                         {/* Today */}
                         {todayTransactions.length > 0 && (
                             <div>
-                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest">Hôm nay</h3>
+                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest">{t('today')}</h3>
                                 <div className="space-y-3">
                                     {todayTransactions.map((tx) => (
                                         <TransactionItem key={tx.id} {...tx} />
@@ -110,7 +112,7 @@ const OgnHistoryScreen = () => {
                         {/* Yesterday */}
                         {yesterdayTransactions.length > 0 && (
                             <div>
-                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">Hôm qua</h3>
+                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">{t('yesterday')}</h3>
                                 <div className="space-y-3">
                                     {yesterdayTransactions.map((tx) => (
                                         <TransactionItem key={tx.id} {...tx} />
@@ -122,7 +124,7 @@ const OgnHistoryScreen = () => {
                         {/* Older */}
                         {olderTransactions.length > 0 && (
                             <div>
-                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">Cũ hơn</h3>
+                                <h3 className="text-[#8B4513] font-black text-xs ml-2 mb-3 opacity-60 uppercase tracking-widest mt-4">{t('older')}</h3>
                                 <div className="space-y-3">
                                     {olderTransactions.map((tx) => (
                                         <TransactionItem key={tx.id} {...tx} />
@@ -148,23 +150,24 @@ interface TransactionItemProps {
 }
 
 const TransactionItem = ({ amount, type, description, createdAt }: TransactionItemProps) => {
+    const { t, i18n } = useTranslation();
     const isPositive = amount >= 0;
     const amountStr = (amount >= 0 ? '+' : '') + amount;
 
     // Map transaction type to icon and color
     const getIconAndColor = (type: string) => {
         const map: Record<string, { icon: string; color: string; category: string }> = {
-            'plant_seed': { icon: 'agriculture', color: 'red', category: 'Trồng' },
-            'harvest_sell': { icon: 'spa', color: 'green', category: 'Bán' },
-            'shop_buy': { icon: 'shopping_basket', color: 'red', category: 'Mua' },
-            'boss_reward': { icon: 'military_tech', color: 'amber', category: 'Boss' },
-            'quiz_reward': { icon: 'quiz', color: 'pink', category: 'Quiz' },
-            'daily_login': { icon: 'card_giftcard', color: 'pink', category: 'Hệ thống' },
-            'referral': { icon: 'people', color: 'blue', category: 'Giới thiệu' },
-            'social_interact': { icon: 'favorite', color: 'pink', category: 'Xã hội' },
-            'system': { icon: 'settings', color: 'blue', category: 'Hệ thống' },
+            'plant_seed': { icon: 'agriculture', color: 'red', category: t('plant') },
+            'harvest_sell': { icon: 'spa', color: 'green', category: t('sell') },
+            'shop_buy': { icon: 'shopping_basket', color: 'red', category: t('buy') },
+            'boss_reward': { icon: 'military_tech', color: 'amber', category: t('boss') },
+            'quiz_reward': { icon: 'quiz', color: 'pink', category: t('quiz') },
+            'daily_login': { icon: 'card_giftcard', color: 'pink', category: t('system') },
+            'referral': { icon: 'people', color: 'blue', category: t('referral') },
+            'social_interact': { icon: 'favorite', color: 'pink', category: t('social') },
+            'system': { icon: 'settings', color: 'blue', category: t('system') },
         };
-        return map[type] || { icon: 'receipt', color: 'blue', category: 'Khác' };
+        return map[type] || { icon: 'receipt', color: 'blue', category: t('other') };
     };
 
     const { icon, color, category } = getIconAndColor(type);
@@ -185,7 +188,7 @@ const TransactionItem = ({ amount, type, description, createdAt }: TransactionIt
         pink: 'bg-pink-50 border-pink-100 text-pink-700',
     };
 
-    const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: vi });
+    const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: i18n.language === 'vi' ? vi : enUS });
 
     return (
         <div className="parchment-card rounded-2xl p-4 flex items-center justify-between relative group active:scale-[0.98] transition-transform duration-200">

@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useVipStatus } from '../../../shared/hooks/useVipStatus';
+import { useTranslation } from 'react-i18next';
 
 export function VipBadge() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { isVip, tier, ognMultiplier, daysRemaining, isLoading } = useVipStatus();
 
@@ -21,8 +23,8 @@ export function VipBadge() {
                     <div className="flex items-center gap-2">
                         <span className="text-lg">🌱</span>
                         <div>
-                            <p className="font-semibold text-stone-700 text-sm">Nông dân tập sự</p>
-                            <p className="text-xs text-stone-500">OGN x1 • Miễn phí</p>
+                            <p className="font-semibold text-stone-700 text-sm">{t('junior_farmer')}</p>
+                            <p className="text-xs text-stone-500">OGN x1 • {t('free_text')}</p>
                         </div>
                     </div>
                     <span className="px-2 py-1 bg-stone-200 text-stone-600 text-xs font-medium rounded-full">
@@ -33,7 +35,7 @@ export function VipBadge() {
                     onClick={() => navigate('/vip/purchase')}
                     className="w-full mt-3 py-2 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 active:bg-green-800 transition-all shadow-md active:scale-[0.98]"
                 >
-                    Nâng cấp VIP
+                    {t('upgrade_vip')}
                 </button>
             </div>
         );
@@ -44,7 +46,7 @@ export function VipBadge() {
         standard: {
             emoji: '⭐',
             label: 'VIP Standard',
-            sublabel: 'Nông dân chuyên nghiệp',
+            sublabel: t('professional_farmer'),
             gradient: 'from-amber-50 to-yellow-50',
             border: 'border-amber-300',
             badge: 'bg-amber-400 text-white',
@@ -53,7 +55,7 @@ export function VipBadge() {
         premium: {
             emoji: '👑',
             label: 'VIP Premium',
-            sublabel: 'Nông dân huyền thoại',
+            sublabel: t('legendary_farmer'),
             gradient: 'from-purple-50 to-pink-50',
             border: 'border-purple-300',
             badge: 'bg-purple-500 text-white',
@@ -71,7 +73,7 @@ export function VipBadge() {
                     <div>
                         <p className={`font-semibold text-sm ${config.text}`}>{config.sublabel}</p>
                         <p className="text-xs text-stone-500">
-                            OGN x{ognMultiplier} • Còn {daysRemaining} ngày
+                            {t('ogn_multiplier_days', { multiplier: ognMultiplier, days: daysRemaining })}
                         </p>
                     </div>
                 </div>
@@ -84,14 +86,14 @@ export function VipBadge() {
                     onClick={() => navigate('/rwa/my-garden')}
                     className="flex-1 py-2 rounded-xl text-xs font-bold text-green-700 bg-green-100 border border-green-300 hover:bg-green-200 transition-all active:scale-[0.98] flex items-center justify-center gap-1"
                 >
-                    <span>🌿</span> Vườn Của Tôi
+                    <span>🌿</span> {t('my_garden')}
                 </button>
                 {daysRemaining <= 7 && (
                     <button
                         onClick={() => navigate('/vip/purchase')}
                         className="flex-1 py-2 rounded-xl text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 hover:bg-amber-200 transition-all active:scale-[0.98]"
                     >
-                        Gia hạn VIP
+                        {t('renew_vip')}
                     </button>
                 )}
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { useTranslation } from 'react-i18next';
 
 interface PinInputModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ export function PinInputModal({
   description = 'Nhập mã PIN 6 số để xác nhận',
   error, attemptsRemaining, blocked, isLoading,
 }: PinInputModalProps) {
+  const { t } = useTranslation();
   const [value, setValue] = useState('');
 
   // Reset khi mo
@@ -55,8 +57,8 @@ export function PinInputModal({
             <span className="material-symbols-outlined text-2xl text-blue-600">lock</span>
           </div>
         </div>
-        <h3 className="text-lg font-heading font-bold text-center mb-1 text-farm-brown-dark">{title}</h3>
-        <p className="text-sm text-gray-500 text-center mb-6">{description}</p>
+        <h3 className="text-lg font-heading font-bold text-center mb-1 text-farm-brown-dark">{title === 'Nhập mã PIN' ? t('enter_pin') : title}</h3>
+        <p className="text-sm text-gray-500 text-center mb-6">{description === 'Nhập mã PIN 6 số để xác nhận' ? t('enter_pin_desc') : description}</p>
 
         {/* PIN Input: 6 o */}
         <div className="flex justify-center mb-4">
@@ -85,14 +87,14 @@ export function PinInputModal({
         )}
         {attemptsRemaining !== undefined && attemptsRemaining < 5 && !blocked && (
           <p className="text-sm text-orange-500 text-center mb-3">
-            Còn {attemptsRemaining} lần thử
+            {t('attempts_remaining', { count: attemptsRemaining })}
           </p>
         )}
         {blocked && (
           <div className="text-center mb-3 p-3 bg-red-50 rounded-xl border border-red-200">
             <span className="material-symbols-outlined text-red-500 text-xl mb-1">block</span>
-            <p className="text-sm text-red-600 font-bold">Đã bị khoá</p>
-            <p className="text-xs text-red-500">Thử lại sau 1 giờ</p>
+            <p className="text-sm text-red-600 font-bold">{t('locked')}</p>
+            <p className="text-xs text-red-500">{t('retry_after_1_hour')}</p>
           </div>
         )}
 
@@ -100,7 +102,7 @@ export function PinInputModal({
         {isLoading && (
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-            <p className="text-sm text-blue-500">Đang xác nhận...</p>
+            <p className="text-sm text-blue-500">{t('confirming')}</p>
           </div>
         )}
 
@@ -109,7 +111,7 @@ export function PinInputModal({
           onClick={onClose}
           className="w-full py-3 text-gray-500 text-sm mt-2 rounded-xl hover:bg-gray-50 transition-colors"
         >
-          Huỷ
+          {t('cancel')}
         </button>
       </div>
     </div>

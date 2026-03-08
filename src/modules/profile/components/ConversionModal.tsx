@@ -3,6 +3,7 @@ import { useConversionTiers, useConversionHistory, useConvert } from '@/shared/h
 import type { ConversionDirection, ConversionTierStatus } from '@/shared/types/game-api.types';
 import { formatOGN } from '@/shared/utils/format';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 // Tier display info (matches backend SEED_TO_OGN_TIERS / OGN_TO_SEED_TIERS)
 const SEED_TO_OGN_DISPLAY = [
@@ -27,6 +28,7 @@ interface ConversionModalProps {
 }
 
 export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ConversionDirection>('seed_to_ogn');
   const [confirmTier, setConfirmTier] = useState<{ direction: ConversionDirection; tierId: number } | null>(null);
 
@@ -113,7 +115,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
     if (isFrozen) {
       return (
         <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-red-400 bg-red-50 px-2 py-1 rounded-lg">
-          🚫 Dừng
+          🚫 {t('stopped')}
         </span>
       );
     }
@@ -129,7 +131,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
     if (!ts.canConvert && ts.remainingToday === 0) {
       return (
         <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
-          ⏳ Hết lượt
+          ⏳ {t('out_of_turns')}
         </span>
       );
     }
@@ -137,7 +139,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
     if (!ts.canConvert) {
       return (
         <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-lg">
-          ⚠️ Thiếu {direction === 'seed_to_ogn' ? 'Hạt' : 'OGN'}
+          ⚠️ {direction === 'seed_to_ogn' ? t('missing_seed') : t('missing_ogn')}
         </span>
       );
     }
@@ -148,7 +150,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
         disabled={convert.isPending}
         className="inline-flex items-center gap-0.5 text-[9px] font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1.5 rounded-lg active:scale-95 transition-all shadow-sm disabled:opacity-50"
       >
-        ✅ ĐỔI
+        ✅ {t('convert_btn')}
       </button>
     );
   }
@@ -162,7 +164,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
       >
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 className="font-heading text-lg font-bold text-[#5D4037]">🔄 Đổi Hạt ↔ OGN</h2>
+          <h2 className="font-heading text-lg font-bold text-[#5D4037]">🔄 {t('convert_seed_ogn_title')}</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-bold active:bg-gray-300"
@@ -176,7 +178,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
           {isLoading ? (
             <div className="text-center py-10">
               <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-xs text-gray-500 font-bold">Đang tải...</p>
+              <p className="text-xs text-gray-500 font-bold">{t('loading')}</p>
             </div>
           ) : (
             <>
@@ -184,7 +186,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
               {isFrozen && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-3">
                   <p className="text-[10px] font-bold text-red-600 text-center">
-                    🚫 {systemFrozen ? 'Hệ thống tạm dừng chuyển đổi' : 'Tài khoản bị tạm dừng chuyển đổi'}
+                    🚫 {systemFrozen ? t('system_frozen_msg') : t('user_frozen_msg')}
                   </p>
                 </div>
               )}
@@ -194,7 +196,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                 <div className="bg-white rounded-xl p-3 border border-[#E8D5C4] text-center">
                   <span className="text-lg block">🌱</span>
                   <span className="font-heading text-sm font-bold text-[#5D4037] block">{formatOGN(seedBalance)}</span>
-                  <span className="text-[9px] font-semibold text-gray-400">Hạt (Seed)</span>
+                  <span className="text-[9px] font-semibold text-gray-400">{t('seed_label')}</span>
                 </div>
                 <div className="bg-white rounded-xl p-3 border border-[#E8D5C4] text-center">
                   <span className="text-lg block">🪙</span>
@@ -206,7 +208,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
               {/* Status bar */}
               <div className="flex items-center justify-between bg-white rounded-xl px-3 py-2 border border-[#E8D5C4] mb-3">
                 <span className="text-[9px] font-bold text-gray-500">
-                  ⏱️ Cooldown: {cooldown > 0 ? <span className="text-orange-500">{cooldown}s</span> : <span className="text-green-600">Sẵn sàng</span>}
+                  ⏱️ Cooldown: {cooldown > 0 ? <span className="text-orange-500">{cooldown}s</span> : <span className="text-green-600">{t('ready')}</span>}
                 </span>
                 <span className="text-[9px] font-bold text-gray-500">
                   📊 Hôm nay: {dailyUsed}/15
@@ -220,23 +222,21 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
               <div className="flex gap-1 mb-3">
                 <button
                   onClick={() => { setActiveTab('seed_to_ogn'); playSound('ui_tab'); }}
-                  className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${
-                    activeTab === 'seed_to_ogn'
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
-                      : 'bg-white text-gray-500 border border-[#E8D5C4]'
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${activeTab === 'seed_to_ogn'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
+                    : 'bg-white text-gray-500 border border-[#E8D5C4]'
+                    }`}
                 >
-                  🌱 → 🪙 Hạt → OGN
+                  {t('seed_to_ogn_tab')}
                 </button>
                 <button
                   onClick={() => { setActiveTab('ogn_to_seed'); playSound('ui_tab'); }}
-                  className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${
-                    activeTab === 'ogn_to_seed'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                      : 'bg-white text-gray-500 border border-[#E8D5C4]'
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${activeTab === 'ogn_to_seed'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
+                    : 'bg-white text-gray-500 border border-[#E8D5C4]'
+                    }`}
                 >
-                  🪙 → 🌱 OGN → Hạt
+                  {t('ogn_to_seed_tab')}
                 </button>
               </div>
 
@@ -248,9 +248,8 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                   return (
                     <div
                       key={tier.id}
-                      className={`flex items-center gap-2 bg-white rounded-xl p-2.5 border transition-all ${
-                        isLocked ? 'opacity-50 border-gray-200' : 'border-[#E8D5C4]'
-                      }`}
+                      className={`flex items-center gap-2 bg-white rounded-xl p-2.5 border transition-all ${isLocked ? 'opacity-50 border-gray-200' : 'border-[#E8D5C4]'
+                        }`}
                     >
                       <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-xs font-bold text-amber-700">
                         {tier.id}
@@ -260,9 +259,9 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                           {tier.from} → {tier.to}
                         </p>
                         <p className="text-[8px] text-gray-400 font-semibold">
-                          Phí 5% · Lv.{tier.minLevel}+
+                          {t('fee_5_percent')} · Lv.{tier.minLevel}+
                           {ts && ts.unlocked && ts.remainingToday >= 0 && (
-                            <> · {ts.remainingToday === -1 ? '' : `${ts.remainingToday} lượt`}</>
+                            <> · {ts.remainingToday === -1 ? '' : `${ts.remainingToday} ${t('turns')}`}</>
                           )}
                         </p>
                       </div>
@@ -277,16 +276,16 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
               {/* Rate info */}
               <div className="bg-amber-50 rounded-xl p-2.5 mb-4 border border-amber-100">
                 <p className="text-[9px] text-amber-700 font-semibold text-center">
-                  💡 Tỷ giá: 1,000 Hạt = 1 OGN · Phí 5% mỗi lần đổi
+                  {t('rate_info')}
                 </p>
               </div>
 
               {/* History */}
               <div>
-                <p className="text-[10px] font-bold text-gray-400 mb-1.5">📜 Lịch sử gần đây</p>
+                <p className="text-[10px] font-bold text-gray-400 mb-1.5">{t('recent_history')}</p>
                 {!history?.conversions?.length ? (
                   <div className="bg-white rounded-xl p-3 border border-[#E8D5C4] text-center">
-                    <p className="text-[10px] text-gray-400">(Chưa có giao dịch nào)</p>
+                    <p className="text-[10px] text-gray-400">{t('no_transactions_yet')}</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -303,7 +302,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                             }
                           </p>
                           <p className="text-[8px] text-gray-400">
-                            Phí: {c.direction === 'seed_to_ogn' ? formatOGN(c.feeAmount) + ' Hạt' : (c.feeAmount / 100).toFixed(2) + ' OGN'}
+                            {t('fee_label')} {c.direction === 'seed_to_ogn' ? formatOGN(c.feeAmount) + ' Hạt' : (c.feeAmount / 100).toFixed(2) + ' OGN'}
                           </p>
                         </div>
                         <span className="text-[8px] text-gray-400 font-semibold whitespace-nowrap">
@@ -324,7 +323,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
             <div className="bg-white rounded-2xl p-5 max-w-[300px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="text-center">
                 <div className="text-4xl mb-2">🔄</div>
-                <h3 className="font-heading text-base font-bold mb-1">Xác nhận đổi?</h3>
+                <h3 className="font-heading text-base font-bold mb-1">{t('confirm_convert_title')}</h3>
                 {(() => {
                   const display = confirmTier.direction === 'seed_to_ogn'
                     ? SEED_TO_OGN_DISPLAY.find((t) => t.id === confirmTier.tierId)
@@ -333,7 +332,7 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                     <p className="text-sm text-gray-600 mb-4">
                       {display?.from} → {display?.to}
                       <br />
-                      <span className="text-[10px] text-gray-400">(Phí 5% đã tính)</span>
+                      <span className="text-[10px] text-gray-400">{t('fee_calculated_note')}</span>
                     </p>
                   );
                 })()}
@@ -342,14 +341,14 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                     onClick={() => setConfirmTier(null)}
                     className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
                   >
-                    Hủy
+                    {t('cancel')}
                   </button>
                   <button
                     onClick={executeConvert}
                     disabled={convert.isPending}
                     className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 active:scale-95 shadow-lg disabled:opacity-50"
                   >
-                    {convert.isPending ? '...' : 'Đổi ngay'}
+                    {convert.isPending ? '...' : t('convert_now')}
                   </button>
                 </div>
               </div>
