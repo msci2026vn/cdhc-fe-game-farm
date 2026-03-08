@@ -1,21 +1,19 @@
 {
-    "common": {
-        "close": "Close",
-        "confirm": "Confirm",
-        "success": "Success",
-        "error": "Error",
-        "cancel": "Cancel",
-        "menu": {
-            "shop": "Market",
-            "inventory": "Inventory",
-            "auction": "Auction",
-            "farm": "Farming",
-            "world_boss": "World Boss",
-            "campaign": "Campaign",
-            "quiz": "Quiz",
-            "iot_garden": "IoT — Smart Garden",
-            "vip_upgrade": "VIP — Upgrade",
-            "farmer_title": "Farmer"
-        }
+    "close": "Close",
+    "confirm": "Confirm",
+    "success": "Success",
+    "error": "Error",
+    "cancel": "Cancel",
+    "menu": {
+        "shop": "Market",
+        "inventory": "Inventory",
+        "auction": "Auction",
+        "farm": "Farming",
+        "world_boss": "World Boss",
+        "campaign": "Campaign",
+        "quiz": "Quiz",
+        "iot_garden": "IoT Smart Garden",
+        "vip_upgrade": "VIP Upgrade",
+        "farmer_title": "Farmer"
     }
 }
