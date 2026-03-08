@@ -8,9 +8,9 @@ const WS_URL = import.meta.env.DEV
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn';
 
-// 4 gem colours: 0=red 1=blue 2=yellow 3=green
-const GEM_COLORS = ['#e53935', '#1e88e5', '#fdd835', '#43a047'];
-const GEM_LABELS = ['🔴', '🔵', '🟡', '🟢'];
+// 5 gem colours: 0=red 1=blue 2=yellow 3=green 4=junk(gray)
+const GEM_COLORS = ['#e53935', '#1e88e5', '#fdd835', '#43a047', '#6b7280'];
+const GEM_LABELS = ['🔴', '🔵', '🟡', '🟢', '🪨'];
 
 interface PlayerInfo {
   id: string;
@@ -20,11 +20,13 @@ interface PlayerInfo {
 }
 
 interface RoomStateBroadcast {
-  phase: 'waiting' | 'ready' | 'playing' | 'finished';
+  phase: 'waiting' | 'ready' | 'playing' | 'sudden_death' | 'finished';
   roomCode: string;
   hostId: string;
   countdown: number;
   players: Record<string, PlayerInfo>;
+  timeLeft?: number;
+  winnerId?: string;
 }
 
 async function fetchPvpToken(): Promise<string> {
@@ -161,6 +163,12 @@ export default function PvpTestScreen() {
   const [opponentScore, setOpponentScore] = useState(0);
   const [comboText, setComboText] = useState('');
   const [opponentLeft, setOpponentLeft] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [isSuddenDeath, setIsSuddenDeath] = useState(false);
+  const [winnerId, setWinnerId] = useState('');
+  const [winnerSessionId, setWinnerSessionId] = useState('');
+  const [gameOverPlayers, setGameOverPlayers] = useState<Array<{ userId: string; name: string; score: number }>>([]);
+  const [junkAlert, setJunkAlert] = useState('');
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState('');
 
@@ -195,8 +203,9 @@ export default function PvpTestScreen() {
     r.onMessage('state_update', (data: RoomStateBroadcast) => {
       setRoomState(data);
       setOpponentLeft(false);
+      if (data.timeLeft !== undefined) setTimeLeft(data.timeLeft);
       const names = Object.values(data.players).map(p => p.name).join(', ');
-      addLog(`State: [${data.phase}] cd:${data.countdown} | ${names || '(trống)'}`);
+      addLog(`State: [${data.phase}] cd:${data.countdown} t:${data.timeLeft ?? '-'}s | ${names || '(trống)'}`);
     });
 
     r.onMessage('game_start', (data: { myBoard: number[]; opponentBoard: number[] }) => {
@@ -205,22 +214,46 @@ export default function PvpTestScreen() {
       setMyScore(0);
       setOpponentScore(0);
       setComboText('');
+      setTimeLeft(60);
+      setIsSuddenDeath(false);
+      setWinnerId('');
+      setWinnerSessionId('');
+      setGameOverPlayers([]);
+      setJunkAlert('');
       addLog('Board nhận thành công → Game bắt đầu!');
     });
 
-    r.onMessage('board_update', (data: { tiles: number[]; score: number; combo: number; gained: number }) => {
+    r.onMessage('board_update', (data: { tiles: number[]; score: number; combo: number; gained: number; junkReceived?: number }) => {
       setMyBoard(data.tiles);
       setMyScore(data.score);
       if (data.combo > 1) {
         setComboText(`COMBO x${data.combo}! +${data.gained}`);
         setTimeout(() => setComboText(''), 1500);
       }
-      addLog(`Score: ${data.score} (+${data.gained})${data.combo > 1 ? ` COMBO x${data.combo}` : ''}`);
+      if (data.junkReceived && data.junkReceived > 0) {
+        setJunkAlert(`+${data.junkReceived} JUNK!`);
+        setTimeout(() => setJunkAlert(''), 1500);
+      }
+      addLog(`Score: ${data.score} (+${data.gained})${data.combo > 1 ? ` COMBO x${data.combo}` : ''}${data.junkReceived ? ` JUNK:${data.junkReceived}` : ''}`);
     });
 
     r.onMessage('opponent_update', (data: { tiles: number[]; score: number }) => {
       setOpponentBoard(data.tiles);
       setOpponentScore(data.score);
+    });
+
+    r.onMessage('game_over', (data: { winnerId: string; winnerSessionId: string; players: Array<{ userId: string; name: string; score: number }>; isSuddenDeath: boolean }) => {
+      setWinnerId(data.winnerId);
+      setWinnerSessionId(data.winnerSessionId);
+      setGameOverPlayers(data.players);
+      setIsSuddenDeath(data.isSuddenDeath);
+      addLog(`Game Over! Winner: ${data.winnerId === 'draw' ? 'DRAW' : data.players.find(p => p.userId === data.winnerId)?.name || data.winnerId}`);
+    });
+
+    r.onMessage('sudden_death', () => {
+      setIsSuddenDeath(true);
+      setTimeLeft(15);
+      addLog('SUDDEN DEATH! +15s, combo x1.5');
     });
 
     r.onError((code, msg) => {
@@ -240,6 +273,12 @@ export default function PvpTestScreen() {
       setMyScore(0);
       setOpponentScore(0);
       setComboText('');
+      setTimeLeft(60);
+      setIsSuddenDeath(false);
+      setWinnerId('');
+      setWinnerSessionId('');
+      setGameOverPlayers([]);
+      setJunkAlert('');
       if (code === 4001) {
         setOpponentLeft(false);
         setError('Bạn đã bị đuổi khỏi phòng!');
@@ -316,6 +355,12 @@ export default function PvpTestScreen() {
     setMyScore(0);
     setOpponentScore(0);
     setComboText('');
+    setTimeLeft(60);
+    setIsSuddenDeath(false);
+    setWinnerId('');
+    setWinnerSessionId('');
+    setGameOverPlayers([]);
+    setJunkAlert('');
     addLog('Đã rời phòng');
   };
 
@@ -351,8 +396,12 @@ export default function PvpTestScreen() {
   const canStart = isHost && playersArr.length === 2 &&
     playersArr.every(([sid, p]) => sid === hostSessionId || p.ready);
 
-  const showBoard = phase === 'playing' && myBoard.length === 64;
+  const isPlaying = phase === 'playing' || phase === 'sudden_death';
+  const showBoard = isPlaying && myBoard.length === 64;
   const showCountdown = phase === 'playing' && countdown > 0;
+  const showResult = phase === 'finished' && winnerId !== '';
+  const isWinner = winnerSessionId === mySessionId;
+  const isDraw = winnerId === 'draw';
 
   return (
     <div style={{
@@ -378,6 +427,82 @@ export default function PvpTestScreen() {
           pointerEvents: 'none',
         }}>
           {comboText}
+        </div>
+      )}
+
+      {/* Junk alert */}
+      {junkAlert && (
+        <div style={{
+          position: 'fixed', top: '40%', left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, #6b7280, #374151)',
+          color: '#fbbf24', padding: '10px 24px',
+          borderRadius: 12, fontSize: 20, fontWeight: 900, zIndex: 101,
+          animation: 'comboFlash 1.5s ease-out forwards',
+          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+          pointerEvents: 'none',
+          border: '2px solid #ef4444',
+        }}>
+          {junkAlert}
+        </div>
+      )}
+
+      {/* Sudden Death overlay flash */}
+      {isSuddenDeath && phase === 'sudden_death' && timeLeft >= 13 && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99,
+          background: 'rgba(168, 85, 247, 0.15)',
+          pointerEvents: 'none',
+          animation: 'sdFlash 2s ease-out forwards',
+        }} />
+      )}
+
+      {/* Game Over / Result screen */}
+      {showResult && (
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.92)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          zIndex: 200,
+        }}>
+          <div style={{
+            fontSize: 48, marginBottom: 16,
+            animation: 'cdPop 0.85s ease-out forwards',
+          }}>
+            {isWinner ? '🏆 CHIẾN THẮNG!' : isDraw ? '🤝 HÒA!' : '💀 THẤT BẠI'}
+          </div>
+
+          {gameOverPlayers.map((p, i) => (
+            <div key={i} style={{
+              fontSize: i === 0 ? 24 : 20,
+              color: i === 0 ? '#f59e0b' : '#94a3b8',
+              marginBottom: 6,
+            }}>
+              {i === 0 ? '🥇' : '🥈'} {p.name}: {p.score.toLocaleString()}
+            </div>
+          ))}
+
+          {isSuddenDeath && (
+            <div style={{ color: '#a855f7', fontSize: 14, marginTop: 8, marginBottom: 4 }}>
+              Sudden Death
+            </div>
+          )}
+
+          <div style={{
+            color: isWinner ? '#22c55e' : isDraw ? '#94a3b8' : '#ef4444',
+            fontSize: 16, marginTop: 12, marginBottom: 24,
+          }}>
+            {isWinner ? '🔺 Rating +~20' : isDraw ? 'Rating ±0' : '🔻 Rating -~20'}
+          </div>
+
+          <button onClick={handleLeave} style={{
+            padding: '12px 32px', background: '#3b82f6',
+            color: 'white', borderRadius: 8, fontSize: 16,
+            border: 'none', cursor: 'pointer', fontWeight: 700,
+          }}>
+            🏠 Về Lobby
+          </button>
         </div>
       )}
 
@@ -434,10 +559,25 @@ export default function PvpTestScreen() {
                 </div>
               </div>
               <div style={{
-                display: 'flex', alignItems: 'center',
-                fontSize: 14, color: '#555', fontWeight: 700,
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', gap: 2,
               }}>
-                VS
+                <div style={{
+                  fontSize: timeLeft <= 10 ? 28 : 20,
+                  fontWeight: 900,
+                  color: timeLeft <= 10 ? '#ef4444' : isSuddenDeath ? '#a855f7' : '#f59e0b',
+                  animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
+                  lineHeight: 1,
+                }}>
+                  {timeLeft}s
+                </div>
+                <div style={{
+                  fontSize: 9, fontWeight: 700,
+                  color: isSuddenDeath ? '#a855f7' : '#555',
+                  textTransform: 'uppercase',
+                }}>
+                  {isSuddenDeath ? 'SUDDEN DEATH' : 'VS'}
+                </div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 12, color: '#aaa' }}>{opponentPlayer?.name ?? 'Đối thủ'} 🛡️</div>
@@ -633,13 +773,21 @@ export default function PvpTestScreen() {
         </div>
       </div>
 
-      {/* Global keyframes for combo flash */}
+      {/* Global keyframes */}
       <style>{`
         @keyframes comboFlash {
           0%   { transform: translateX(-50%) scale(0.5); opacity: 0; }
           20%  { transform: translateX(-50%) scale(1.1); opacity: 1; }
           80%  { transform: translateX(-50%) scale(1); opacity: 1; }
           100% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+        }
+        @keyframes sdFlash {
+          0%   { opacity: 0.6; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
