@@ -4,6 +4,18 @@
         "confirm": "Xác nhận",
         "success": "Thành công",
         "error": "Lỗi",
-        "cancel": "Hủy"
+        "cancel": "Hủy",
+        "menu": {
+            "shop": "Chợ",
+            "inventory": "Túi đồ",
+            "auction": "Đấu Giá",
+            "farm": "Trồng cây",
+            "world_boss": "World Boss",
+            "campaign": "Chiến dịch",
+            "quiz": "Học tập",
+            "iot_garden": "IoT — Vườn thông minh",
+            "vip_upgrade": "VIP — Nâng cấp",
+            "farmer_title": "Nông Dân"
+        }
     }
 }

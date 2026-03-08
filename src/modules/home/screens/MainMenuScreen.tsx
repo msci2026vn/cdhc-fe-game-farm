@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNav } from '@/shared/hooks/useNav';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { useBossStatus } from '@/shared/hooks/useBossStatus';
@@ -9,14 +10,9 @@ import { AuctionBanner } from '@/modules/auction/components/AuctionBanner';
 import { HomeParticles } from '../components/HomeParticles';
 
 // Shared text label style — bold white with dark shadow, readable on any background
+// Shared text label style — bold white with dark shadow, readable on any background
 const labelClass = 'absolute left-0 right-0 text-center font-black text-white leading-tight pointer-events-none z-10'
   + ' drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] [text-shadow:0_2px_6px_rgba(0,0,0,0.9)]';
-
-const miniCards = [
-  { emoji: '🛒', label: 'Chợ', route: '/shop' },
-  { emoji: '🎒', label: 'Túi đồ', route: '/inventory' },
-  { emoji: '⚡', label: 'Đấu Giá', route: '/auction' },
-];
 
 /** Simple inline gear SVG — no external dependency */
 function GearIcon() {
@@ -28,6 +24,7 @@ function GearIcon() {
 }
 
 export default function MainMenuScreen() {
+  const { t } = useTranslation();
   const navigate = useNav();
   const { data: profile } = usePlayerProfile();
   useBossStatus();
@@ -40,8 +37,14 @@ export default function MainMenuScreen() {
 
   const avatar = profile?.picture ?? '/assets/home/ava.png';
   const level = profile?.level ?? 1;
-  const name = profile?.name ?? 'Nông Dân';
+  const name = profile?.name ?? t('menu.farmer_title');
   const ogn = profile?.ogn ?? 0;
+
+  const miniCards = [
+    { emoji: '🛒', label: t('menu.shop'), route: '/shop' },
+    { emoji: '🎒', label: t('menu.inventory'), route: '/inventory' },
+    { emoji: '⚡', label: t('menu.auction'), route: '/auction' },
+  ];
 
   return (
     <div className="bg-[#111] min-h-[100dvh] flex items-center justify-center select-none font-body text-farm-brown-dark">
@@ -106,7 +109,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/farm'); }}
         >
           <img src="/assets/home/3.png" alt="nong-trai" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>🌱 Trồng cây</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>🌱 {t('menu.farm')}</span>
         </div>
 
         {/* ── CARD: World Boss ── */}
@@ -116,7 +119,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/world-boss'); }}
         >
           <img src="/assets/home/2.png" alt="boss-word" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>👹 World Boss</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>👹 {t('menu.world_boss')}</span>
         </div>
 
         {/* ── CARD: Chiến dịch ── */}
@@ -126,7 +129,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/campaign'); }}
         >
           <img src="/assets/home/1.png" alt="camping" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>⚔️ Chiến dịch</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>⚔️ {t('menu.campaign')}</span>
         </div>
 
         {/* ── CARD: Học tập ── */}
@@ -136,7 +139,7 @@ export default function MainMenuScreen() {
           onClick={() => { playSound('ui_click'); navigate('/quiz'); }}
         >
           <img src="/assets/home/4.png" alt="quizz" className="absolute inset-0 w-full h-full object-fill" />
-          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>📚 Học tập</span>
+          <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>📚 {t('menu.quiz')}</span>
         </div>
 
         {/* ── MINI CARDS: Chợ / Túi đồ / Bạn bè ── */}
@@ -174,7 +177,7 @@ export default function MainMenuScreen() {
         >
           <img src="/assets/home/5.png" alt="iot" className="absolute inset-0 w-full h-full object-fill" />
           <span className={`${labelClass} text-[12px]`} style={{ top: '50%', transform: 'translateY(-50%)' }}>
-            📡 IoT — Vườn thông minh
+            📡 {t('menu.iot_garden')}
           </span>
         </div>
 
@@ -186,7 +189,7 @@ export default function MainMenuScreen() {
         >
           <img src="/assets/home/6.png" alt="vip" className="absolute inset-0 w-full h-full object-fill" />
           <span className={`${labelClass} text-[12px]`} style={{ top: '50%', transform: 'translateY(-50%)' }}>
-            👑 VIP — Nâng cấp
+            👑 {t('menu.vip_upgrade')}
           </span>
         </div>
 
@@ -232,7 +235,7 @@ export default function MainMenuScreen() {
               className="font-bold text-yellow-300 leading-tight"
               style={{ fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
             >
-              Lv.{level} Nông Dân
+              Lv.{level} {t('menu.farmer_title')}
             </span>
           </div>
         </div>
