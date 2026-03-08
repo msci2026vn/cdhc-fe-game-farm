@@ -2,12 +2,14 @@ import { usePlayerProfile, useOgn } from '@/shared/hooks/usePlayerProfile';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { LEVEL_CONFIG, getLevelTitle, getLevelIcon } from '@/shared/stores/playerStore';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
+import { useTranslation } from 'react-i18next';
 
 interface PlayerCardProps {
   compact?: boolean;
 }
 
 export default function PlayerCard({ compact }: PlayerCardProps) {
+  const { t } = useTranslation();
   const { data: profile, isLoading: isProfileLoading } = usePlayerProfile();
   const { data: auth, isLoading: isAuthLoading } = useAuth();
   const ogn = useOgn();
@@ -37,7 +39,7 @@ export default function PlayerCard({ compact }: PlayerCardProps) {
   const icon = getLevelIcon(level);
 
   const user = auth?.user;
-  const displayName = user?.name || (user as any)?.fullName || profile.name || (profile as any)?.fullName || 'Nông dân';
+  const displayName = user?.name || (user as any)?.fullName || profile.name || (profile as any)?.fullName || t('farmer');
   const displayPicture = user?.picture || (user as any)?.avatar || (user as any)?.avatarUrl || profile.picture || (profile as any)?.avatar || (profile as any)?.avatarUrl;
 
   const xpInLevel = LEVEL_CONFIG.getXpInLevel(xp);

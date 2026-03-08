@@ -32,31 +32,31 @@ const AURA_CONFIGS: Record<AuraType, AuraConfig> = {
     gradient: 'radial-gradient(circle, rgba(231,76,60,0.3) 0%, rgba(231,76,60,0) 70%)',
     shadow: '0 0 20px rgba(231,76,60,0.5)',
     particles: ['🔥', '⚔️'],
-    label: 'Lua',
+    label: 'fire',
   },
   nature: {
     gradient: 'radial-gradient(circle, rgba(85,239,196,0.3) 0%, rgba(85,239,196,0) 70%)',
     shadow: '0 0 20px rgba(85,239,196,0.5)',
     particles: ['💚', '🌿'],
-    label: 'Thiên nhiên',
+    label: 'nature',
   },
   frost: {
     gradient: 'radial-gradient(circle, rgba(116,185,255,0.3) 0%, rgba(116,185,255,0) 70%)',
     shadow: '0 0 20px rgba(116,185,255,0.5)',
     particles: ['🛡️', '❄️'],
-    label: 'Băng giá',
+    label: 'frost',
   },
   arcane: {
     gradient: 'radial-gradient(circle, rgba(162,155,254,0.3) 0%, rgba(162,155,254,0) 70%)',
     shadow: '0 0 20px rgba(162,155,254,0.5)',
     particles: ['✨', '💜'],
-    label: 'Huyền bí',
+    label: 'arcane',
   },
   balance: {
     gradient: 'radial-gradient(circle, rgba(253,203,110,0.3) 0%, rgba(253,203,110,0) 70%)',
     shadow: '0 0 20px rgba(253,203,110,0.5)',
     particles: ['⭐', '✨'],
-    label: 'Cân bằng',
+    label: 'balance',
   },
 };
 

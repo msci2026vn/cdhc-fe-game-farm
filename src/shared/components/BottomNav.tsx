@@ -1,16 +1,18 @@
 import { useLocation } from 'react-router-dom';
 import { useNav } from '@/shared/hooks/useNav';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 const tabs = [
-  { to: '/', icon: 'home', label: 'Menu' },
-  { to: '/farm', icon: 'spa', label: 'Nông trại' },
-  { to: '/shop', icon: 'storefront', label: 'Cửa hàng' },
-  { to: '/inventory', icon: 'inventory_2', label: 'Kho đồ' },
-  { to: '/friends', icon: 'group', label: 'Bạn bè' },
+  { to: '/', icon: 'home', label: 'menu' },
+  { to: '/farm', icon: 'spa', label: 'farm' },
+  { to: '/shop', icon: 'storefront', label: 'shop' },
+  { to: '/inventory', icon: 'inventory_2', label: 'inventory' },
+  { to: '/friends', icon: 'group', label: 'friends' },
 ];
 
 export default function BottomNav() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNav();
 
@@ -44,7 +46,7 @@ export default function BottomNav() {
               )}
               <span className={`text-[8px] font-bold ${isActive ? 'font-black text-[#5D4037] uppercase tracking-tighter' : 'text-[#8B4513]'
                 }`}>
-                {tab.label}
+                {t(tab.label)}
               </span>
             </button>
           );

@@ -9,8 +9,10 @@ import { useLevelInfo } from '../hooks/useLevelInfo';
 import { useLevelUp } from '../hooks/useLevelUp';
 import { formatOGN } from '../utils/format';
 import { playSound } from '../audio';
+import { useTranslation } from 'react-i18next';
 
 export function LevelUpButton() {
+  const { t } = useTranslation();
   const { data: info, isLoading } = useLevelInfo();
   const levelUp = useLevelUp();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -37,11 +39,10 @@ export function LevelUpButton() {
       <button
         onClick={() => { if (canAfford) { playSound('ui_modal_open'); setShowConfirm(true); } }}
         disabled={!canAfford || levelUp.isPending}
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${
-          canAfford
-            ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 active:scale-95 animate-pulse'
-            : 'bg-white/10 text-white/40'
-        }`}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${canAfford
+          ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 active:scale-95 animate-pulse'
+          : 'bg-white/10 text-white/40'
+          }`}
       >
         {canAfford ? (
           <>
@@ -66,10 +67,10 @@ export function LevelUpButton() {
               <p className="text-sm text-gray-600 mb-3">{info.title}</p>
 
               <div className="bg-amber-50 rounded-xl p-3 mb-4">
-                <p className="text-xs text-amber-700 font-bold mb-1">Chi phí lên cấp</p>
+                <p className="text-xs text-amber-700 font-bold mb-1">{t('level_up_cost')}</p>
                 <p className="text-2xl font-black text-amber-600">{formatOGN(info.levelUpFee)} OGN</p>
                 <p className="text-[10px] text-amber-500 mt-1">
-                  Số dư: {formatOGN(info.ogn)} OGN
+                  {t('balance_amount')}: {formatOGN(info.ogn)} OGN
                 </p>
               </div>
 
@@ -78,7 +79,7 @@ export function LevelUpButton() {
                   onClick={() => { playSound('ui_back'); setShowConfirm(false); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 active:bg-gray-200"
                 >
-                  Huỷ
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={() => {
@@ -89,7 +90,7 @@ export function LevelUpButton() {
                   disabled={levelUp.isPending}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 active:scale-95 shadow-lg disabled:opacity-50"
                 >
-                  {levelUp.isPending ? '...' : 'Xác nhận'}
+                  {levelUp.isPending ? '...' : t('confirm')}
                 </button>
               </div>
             </div>

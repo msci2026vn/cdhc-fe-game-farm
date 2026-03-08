@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDisplay } from '../hooks/useAppDisplay';
+import { useTranslation, Trans } from 'react-i18next';
 
 export const AppDisplayPrompt = () => {
     const {
@@ -7,6 +8,7 @@ export const AppDisplayPrompt = () => {
         canInstallPWA, showFullscreenPrompt, showIOSGuide,
         installPWA, enterFullscreen, dismissFullscreen,
     } = useAppDisplay();
+    const { t } = useTranslation();
 
     const [show, setShow] = useState(false);
     const [iosGuide, setIosGuide] = useState(false);
@@ -26,22 +28,22 @@ export const AppDisplayPrompt = () => {
         <div className="fs-backdrop" onClick={() => setShow(false)}>
             <div className="fs-popup" onClick={e => e.stopPropagation()}>
                 <div className="fs-icon">📱</div>
-                <h2>Cài FARMVERSE</h2>
+                <h2>{t('install_farmverse')}</h2>
                 <div className="ios-steps">
                     <div className="ios-step">
                         <span className="step-num">1</span>
-                        <span>Nhấn nút <strong>⎙ Chia sẻ</strong> ở thanh dưới Safari</span>
+                        <span><Trans i18nKey="ios_install_step1">Nhấn nút <strong>⎙ Chia sẻ</strong> ở thanh dưới Safari</Trans></span>
                     </div>
                     <div className="ios-step">
                         <span className="step-num">2</span>
-                        <span>Chọn <strong>"Thêm vào Màn hình chính"</strong></span>
+                        <span><Trans i18nKey="ios_install_step2">Chọn <strong>"Thêm vào Màn hình chính"</strong></Trans></span>
                     </div>
                     <div className="ios-step">
                         <span className="step-num">3</span>
-                        <span>Nhấn <strong>Thêm</strong> → mở icon FARMVERSE</span>
+                        <span><Trans i18nKey="ios_install_step3">Nhấn <strong>Thêm</strong> → mở icon FARMVERSE</Trans></span>
                     </div>
                 </div>
-                <button className="fs-no" onClick={() => setShow(false)}>Đóng</button>
+                <button className="fs-no" onClick={() => setShow(false)}>{t('close')}</button>
             </div>
         </div>
     );
@@ -51,20 +53,20 @@ export const AppDisplayPrompt = () => {
         <div className="fs-backdrop">
             <div className="fs-popup">
                 <div className="fs-icon">🌾</div>
-                <h2>Cài FARMVERSE</h2>
-                <p>Chơi như app thật — full màn hình, nhanh hơn, không cần mạng lần sau</p>
+                <h2>{t('install_farmverse')}</h2>
+                <p>{t('pwa_benefits_desc')}</p>
 
                 <div className="pwa-benefits">
-                    <div className="benefit">⚡<span>Nhanh hơn</span></div>
-                    <div className="benefit">🖥️<span>Full màn hình</span></div>
-                    <div className="benefit">📴<span>Offline</span></div>
+                    <div className="benefit">⚡<span>{t('faster')}</span></div>
+                    <div className="benefit">🖥️<span>{t('fullscreen')}</span></div>
+                    <div className="benefit">📴<span>{t('offline')}</span></div>
                 </div>
 
                 <button className="fs-yes" onClick={async () => {
                     const ok = await installPWA();
                     if (!ok) setShow(false);
                 }}>
-                    📲 Cài Ngay — Miễn Phí
+                    📲 {t('install_now_free')}
                 </button>
                 <button className="fs-no" onClick={() => {
                     localStorage.setItem('pwa_dismissed', 'true');
@@ -72,7 +74,7 @@ export const AppDisplayPrompt = () => {
                     enterFullscreen();
                     setShow(false);
                 }}>
-                    Không cần, chơi luôn
+                    {t('no_thanks_play_now')}
                 </button>
             </div>
         </div>
@@ -83,26 +85,26 @@ export const AppDisplayPrompt = () => {
         <div className="fs-backdrop">
             <div className="fs-popup">
                 <div className="fs-icon">🎮</div>
-                <h2>Chơi Toàn Màn Hình?</h2>
-                <p>Ẩn thanh trình duyệt để board game hiển thị rộng hơn</p>
+                <h2>{t('play_fullscreen_q')}</h2>
+                <p>{t('fullscreen_desc')}</p>
 
                 <button className="fs-yes" onClick={() => {
                     enterFullscreen();
                     setShow(false);
                 }}>
-                    ⛶ Bật Toàn Màn Hình
+                    ⛶ {t('enable_fullscreen')}
                 </button>
                 <button className="fs-no" onClick={() => {
                     dismissFullscreen();
                     setShow(false);
                 }}>
-                    Thôi không cần
+                    {t('no_thanks')}
                 </button>
 
                 {/* Gợi iOS nếu cần */}
                 {isIOS && (
                     <button className="fs-ios-hint" onClick={() => setIosGuide(true)}>
-                        📱 iOS? Cài như app →
+                        📱 iOS? {t('install_like_app')} →
                     </button>
                 )}
             </div>

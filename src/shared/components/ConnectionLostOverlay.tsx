@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useTranslation } from 'react-i18next';
 
 const ConnectionLostOverlay = () => {
+    const { t } = useTranslation();
     const isOnline = useOnlineStatus();
     const isApiDisconnected = useUIStore(s => s.isApiDisconnected);
     const [startTime, setStartTime] = useState<number | null>(null);
@@ -57,7 +59,7 @@ const ConnectionLostOverlay = () => {
                 {/* Warning Banner */}
                 <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 z-30">
                     <div className="bg-[#e74c3c] text-white font-black text-sm py-2 px-8 rounded-b-xl shadow-md border-x-2 border-b-2 border-[#c0392b] uppercase tracking-wider relative">
-                        Mất kết nối!
+                        {t('connection_lost')}
                         <div className="absolute top-0 left-0 w-full h-full bg-white opacity-10 rounded-b-xl pointer-events-none"></div>
                     </div>
                 </div>
@@ -110,11 +112,11 @@ const ConnectionLostOverlay = () => {
                         className="w-full bg-[#7CB342] hover:bg-[#689F38] active:scale-95 transition-all duration-200 text-white font-black text-lg py-3 rounded-xl shadow-[0_5px_0_#33691E,0_8px_10px_rgba(0,0,0,0.2)] border-t border-[#AED581] relative overflow-hidden group mb-2"
                     >
                         <div className="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                        <span className="drop-shadow-md">Đăng nhập lại</span>
+                        <span className="drop-shadow-md">{t('relogin')}</span>
                     </button>
 
                     <p className="mt-2 text-[10px] text-gray-500 font-extrabold text-center uppercase tracking-tighter opacity-70">
-                        {isApiDisconnected ? 'Không thể kết nối với máy chủ.' : 'Vui lòng kiểm tra đường truyền internet của bạn.'}
+                        {isApiDisconnected ? t('cannot_connect_server') : t('check_internet')}
                     </p>
                 </div>
             </div>

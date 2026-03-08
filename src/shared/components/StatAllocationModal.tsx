@@ -5,6 +5,7 @@ import { STAT_CONFIG } from '../utils/stat-constants';
 import { MilestonePopup } from './MilestonePopup';
 import type { MilestoneNextInfo, MilestoneInfo, AllocateStatsResponse } from '../types/game-api.types';
 import { playSound } from '../audio';
+import { useTranslation } from 'react-i18next';
 
 interface StatAllocationModalProps {
   isOpen: boolean;
@@ -26,10 +27,10 @@ const STAT_META: { key: StatKey; emoji: string; label: string; color: string; bg
   { key: 'mana', emoji: '✨', label: 'Mana', color: '#9b59b6', bg: 'linear-gradient(135deg, #f0d4ff, #d4a8f0)', perPoint: STAT_CONFIG.PER_POINT.MANA },
 ];
 
-const PRESETS: { key: 'attack' | 'defense' | 'balance'; emoji: string; label: string }[] = [
-  { key: 'attack', emoji: '⚔️', label: 'Tấn công' },
-  { key: 'defense', emoji: '🛡️', label: 'Phòng thủ' },
-  { key: 'balance', emoji: '✨', label: 'Cân bằng' },
+const PRESETS: { key: 'attack' | 'defense' | 'balance'; emoji: string; labelKey: string }[] = [
+  { key: 'attack', emoji: '⚔️', labelKey: 'attack' },
+  { key: 'defense', emoji: '🛡️', labelKey: 'defense' },
+  { key: 'balance', emoji: '✨', labelKey: 'balance' },
 ];
 
 /**
@@ -98,6 +99,7 @@ export function StatAllocationModal({
   const [milestonePopup, setMilestonePopup] = useState<MilestoneInfo | null>(null);
   const [errorModal, setErrorModal] = useState<{ message: string; code: string } | null>(null);
 
+  const { t } = useTranslation();
   const allocateStats = useAllocateStats();
   const autoAllocateStats = useAutoAllocateStats();
 
@@ -148,7 +150,7 @@ export function StatAllocationModal({
 
     const onError = (err: any) => {
       setErrorModal({
-        message: err.message || 'Không thể phân bổ chỉ số',
+        message: err.message || t('cannot_allocate_stats'),
         code: err.code || 'UNKNOWN'
       });
     };
@@ -179,9 +181,9 @@ export function StatAllocationModal({
 
           {/* Header */}
           <div className="bg-[#8c6239] p-4 text-center border-b-4 border-[#5d4037] relative">
-            <h2 className="font-display font-bold text-xl text-[#fefae0] text-outline tracking-wider">Phân bổ chỉ số</h2>
+            <h2 className="font-display font-bold text-xl text-[#fefae0] text-outline tracking-wider">{t('allocate_stats_title')}</h2>
             <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-[#fefae0] px-4 py-1 rounded-full border-2 border-[#8c6239] shadow-sm z-10 w-max">
-              <span className="text-sm font-bold text-farm-brown-dark whitespace-nowrap">🎯 Còn lại: <span className="text-farm-carrot">{remaining}</span> điểm</span>
+              <span className="text-sm font-bold text-farm-brown-dark whitespace-nowrap">🎯 {t('remaining')}: <span className="text-farm-carrot">{remaining}</span> {t('points')}</span>
             </div>
           </div>
 
@@ -238,7 +240,7 @@ export function StatAllocationModal({
                   {milestone ? (
                     <div className="flex items-center gap-1 text-[10px] text-gray-500 font-bold ml-2">
                       <span className="material-symbols-outlined text-sm text-yellow-500">lightbulb</span>
-                      Còn {milestone.remaining} → <span className="text-farm-brown">{milestone.name}</span>
+                      {t('milestone_remaining', { count: milestone.remaining })} → <span className="text-farm-brown">{milestone.name}</span>
                     </div>
                   ) : (
                     <div className="h-2"></div>
@@ -251,7 +253,7 @@ export function StatAllocationModal({
             <div className="mt-2">
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-px bg-[#d4c5a3] flex-1"></div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nhanh</span>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('quick')}</span>
                 <div className="h-px bg-[#d4c5a3] flex-1"></div>
               </div>
               <div className="flex justify-between gap-2">
@@ -266,11 +268,11 @@ export function StatAllocationModal({
                       onClick={() => handlePreset(p.key)}
                       disabled={isPending}
                       className={`flex-1 py-1.5 border border-[#d4c5a3] rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1 ${selectedPreset === p.key
-                          ? 'bg-farm-green-light text-white border-farm-green-dark'
-                          : 'bg-[#fefae0] text-farm-brown-dark hover:bg-white'
+                        ? 'bg-farm-green-light text-white border-farm-green-dark'
+                        : 'bg-[#fefae0] text-farm-brown-dark hover:bg-white'
                         }`}
                     >
-                      <span>{icon}</span> {p.label}
+                      <span>{icon}</span> {t(p.labelKey)}
                     </button>
                   );
                 })}
@@ -284,14 +286,14 @@ export function StatAllocationModal({
                 disabled={isPending}
                 className="flex-1 py-3 rounded-xl font-bold font-display text-farm-brown-dark bg-[#e5e7eb] border-b-4 border-[#9ca3af] active:border-b-2 active:translate-y-[2px] transition-all"
               >
-                Đóng
+                {t('close')}
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={totalPending === 0 || isPending}
                 className="flex-1 py-3 rounded-xl font-bold font-display text-[#fefae0] bg-farm-green-light border-b-4 border-farm-green-dark active:border-b-2 active:translate-y-[2px] transition-all shadow-lg disabled:opacity-50"
               >
-                {isPending ? '...' : 'Xác nhận'}
+                {isPending ? '...' : t('confirm')}
               </button>
             </div>
           </div>
@@ -316,17 +318,17 @@ export function StatAllocationModal({
           <div className="bg-white rounded-2xl p-6 max-w-[320px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="text-4xl mb-3">⚠️</div>
-              <h3 className="font-heading text-lg font-bold mb-2">Lỗi phân bổ</h3>
+              <h3 className="font-heading text-lg font-bold mb-2">{t('allocation_error')}</h3>
               <p className="text-sm text-gray-600 mb-6">
                 {errorModal.code === 'INSUFFICIENT_OGN'
-                  ? 'Bạn không có đủ OGN để thực hiện thao tác này.'
+                  ? t('insufficient_ogn')
                   : errorModal.message}
               </p>
               <button
                 onClick={() => setErrorModal(null)}
                 className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-gray-500 to-gray-600 active:scale-95 shadow-lg"
               >
-                Đóng
+                {t('close')}
               </button>
             </div>
           </div>

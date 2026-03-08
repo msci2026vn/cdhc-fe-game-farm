@@ -2,8 +2,10 @@ import { useNav } from '@/shared/hooks/useNav';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
+  const { t } = useTranslation();
   const navigate = useNav();
   const ogn = useOgn(); // TanStack Query single source of truth
 
@@ -14,7 +16,7 @@ export default function Header() {
           <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-sm font-bold">
             🧑‍🌾
           </div>
-          <span className="font-heading font-semibold text-sm">Nông dân</span>
+          <span className="font-heading font-semibold text-sm">{t('farmer')}</span>
         </div>
 
         <div className="flex items-center gap-1.5 bg-primary-foreground/15 rounded-full px-3 py-1.5">

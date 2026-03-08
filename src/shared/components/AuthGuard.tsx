@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gameApi } from '@/shared/api/game-api';
 import { handleUnauthorized } from '@/shared/api/api-utils';
+import { useTranslation } from 'react-i18next';
 
 type AuthState = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -18,6 +19,7 @@ interface AuthGuardProps {
  * 4. Do NOT use useMemo on children (causes re-mount)
  */
 export function AuthGuard({ children }: AuthGuardProps) {
+  const { t } = useTranslation();
   const [authState, setAuthState] = useState<AuthState>('loading');
   const navigate = useNavigate();
   const location = useLocation();
@@ -95,7 +97,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       <div className="fixed inset-0 z-[100] flex items-center justify-center splash-gradient">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-          <p className="text-white/80 font-semibold">Đang kiểm tra đăng nhập...</p>
+          <p className="text-white/80 font-semibold">{t('checking_auth')}</p>
         </div>
       </div>
     );

@@ -4,12 +4,14 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   daysLeft: number;
 }
 
 export default function ExpiryBanner({ daysLeft }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const urgent = daysLeft <= 0;
 
@@ -22,14 +24,14 @@ export default function ExpiryBanner({ daysLeft }: Props) {
       }}
     >
       <span>
-        ⚠️ Auto AI {urgent ? 'đã hết hạn' : `hết hạn trong ${daysLeft} ngày`}
+        ⚠️ {urgent ? t('auto_ai_expired') : t('auto_ai_expires_in', { days: daysLeft })}
       </span>
       <button
         onClick={() => navigate('/shop')}
         className="ml-2 px-2 py-0.5 rounded active:opacity-75 transition-opacity"
         style={{ background: 'rgba(255,255,255,0.2)' }}
       >
-        Gia hạn
+        {t('renew')}
       </button>
     </div>
   );

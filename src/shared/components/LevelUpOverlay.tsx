@@ -13,6 +13,7 @@ import { usePlayerStats, PLAYER_STATS_KEY } from '@/shared/hooks/usePlayerStats'
 import { StatAllocationModal } from './StatAllocationModal';
 import { useQueryClient } from '@tanstack/react-query';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface LevelUpEventDetail {
   oldLevel: number;
@@ -20,6 +21,7 @@ interface LevelUpEventDetail {
 }
 
 export function LevelUpOverlay() {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const [showStatPrompt, setShowStatPrompt] = useState(false);
   const [showStatModal, setShowStatModal] = useState(false);
@@ -99,13 +101,13 @@ export function LevelUpOverlay() {
             {showStatPrompt && freePoints > 0 && !autoEnabled && (
               <div className="mt-4 animate-fade-in">
                 <p className="text-sm text-yellow-300 font-bold mb-2">
-                  +{freePoints} điểm chỉ số mới!
+                  +{freePoints} {t('new_stat_points')}
                 </p>
                 <button
                   onClick={handleAllocateNow}
                   className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-yellow-500 to-amber-500 active:scale-95 shadow-lg"
                 >
-                  Phân bổ ngay
+                  {t('allocate_now')}
                 </button>
               </div>
             )}
@@ -114,8 +116,8 @@ export function LevelUpOverlay() {
             {showStatPrompt && freePoints > 0 && autoEnabled && (
               <div className="mt-4 animate-fade-in">
                 <p className="text-sm text-green-300 font-bold">
-                  🤖 Đã tự động phân bổ theo{' '}
-                  {statInfo?.autoPreset === 'attack' ? 'Tấn công' : statInfo?.autoPreset === 'defense' ? 'Phòng thủ' : 'Cân bằng'}
+                  🤖 {t('auto_allocated_by')}{' '}
+                  {statInfo?.autoPreset === 'attack' ? t('attack') : statInfo?.autoPreset === 'defense' ? t('defense') : t('balance')}
                 </p>
               </div>
             )}

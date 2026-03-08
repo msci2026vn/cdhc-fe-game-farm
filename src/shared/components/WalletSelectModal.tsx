@@ -1,5 +1,6 @@
 import { useWalletAuth, type WalletId } from '@/shared/hooks/useWalletAuth';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 interface WalletSelectModalProps {
   mode: 'login' | 'link';
@@ -8,6 +9,7 @@ interface WalletSelectModalProps {
 }
 
 export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModalProps) {
+  const { t } = useTranslation();
   const {
     detectedWallets,
     loginWithWallet,
@@ -31,11 +33,11 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
   };
 
   const loadingText = state.isConnecting
-    ? 'Kết nối ví...'
+    ? t('connecting_wallet')
     : state.isSigning
-      ? 'Chờ ký xác thực...'
+      ? t('waiting_for_signature')
       : state.isVerifying
-        ? 'Xác thực on-chain...'
+        ? t('verifying_on_chain')
         : '';
 
   return (
@@ -59,7 +61,7 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
               <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-xl font-bold tracking-tight text-white">
-              {mode === 'login' ? 'Chọn ví đăng nhập' : 'Chọn ví liên kết'}
+              {mode === 'login' ? t('select_wallet_login') : t('select_wallet_link')}
             </h2>
           </div>
           {!isLoading && (
@@ -76,9 +78,9 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
         <div className="px-6 pb-6">
           <p className="text-slate-300 text-sm leading-relaxed">
             {mode === 'login' ? (
-              <>Chọn ví để đăng nhập vào <span className="text-[#ec5b13] font-bold">FARMVERSE</span> qua mạng Avalanche C-Chain.</>
+              <>{t('select_wallet_to_login')} <span className="text-[#ec5b13] font-bold">FARMVERSE</span> {t('wallet_network_desc')}</>
             ) : (
-              <>Chọn ví để liên kết với tài khoản <span className="text-[#ec5b13] font-bold">FARMVERSE</span> của bạn.</>
+              <>{t('select_wallet_to_link')} <span className="text-[#ec5b13] font-bold">FARMVERSE</span> {t('of_yours')}</>
             )}
           </p>
         </div>
@@ -128,14 +130,14 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
                       <span className="text-base truncate max-w-[140px] sm:max-w-[200px]">{wallet.name}</span>
                       {wallet.installed && (
                         <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-[10px] uppercase tracking-wider text-green-400 font-bold border border-green-500/30 flex-shrink-0">
-                          Đã cài
+                          {t('installed')}
                         </span>
                       )}
                     </div>
                     {wallet.id === 'walletconnect' ? (
-                      <p className="text-slate-400 text-xs mt-0.5">Quét mã QR</p>
+                      <p className="text-slate-400 text-xs mt-0.5">{t('scan_qr')}</p>
                     ) : (
-                      <p className="text-slate-400 text-xs mt-0.5">Tiện ích trình duyệt</p>
+                      <p className="text-slate-400 text-xs mt-0.5">{t('browser_extension')}</p>
                     )}
                   </div>
                 </div>
@@ -159,11 +161,11 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
                     <div className="text-slate-300 font-semibold flex items-center gap-2">
                       <span className="text-base truncate">{wallet.name}</span>
                       {!wallet.isDeepLink && (
-                        <span className="text-slate-500 text-[10px] font-normal flex-shrink-0 italic">Chưa cài đặt</span>
+                        <span className="text-slate-500 text-[10px] font-normal flex-shrink-0 italic">{t('not_installed')}</span>
                       )}
                     </div>
                     <p className="text-slate-500 text-xs mt-0.5 truncate">
-                      {wallet.isDeepLink ? 'Mở trong ứng dụng' : 'Dành cho Avalanche'}
+                      {wallet.isDeepLink ? t('open_in_app') : t('for_avalanche')}
                     </p>
                   </div>
                 </div>
@@ -174,7 +176,7 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
                   onClick={(e) => e.stopPropagation()}
                   className="bg-[#ec5b13] hover:bg-[#ec5b13]/80 text-white text-xs font-bold px-4 py-2 rounded-lg flex-shrink-0 ml-2 transition-colors shadow-lg shadow-[#ec5b13]/20 whitespace-nowrap"
                 >
-                  {wallet.isDeepLink ? 'Mở App' : 'Tải về'}
+                  {wallet.isDeepLink ? t('open_app') : t('download')}
                 </a>
               </div>
             );
@@ -187,10 +189,10 @@ export function WalletSelectModal({ mode, onSuccess, onClose }: WalletSelectModa
             <div className="flex items-center gap-2 text-[11px] text-slate-400 uppercase tracking-widest font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
               <img src="/icons/avalanche-avax-logo.png" alt="AVAX" className="w-3.5 h-3.5 object-contain" />
-              Mạng: Avalanche C-Chain
+              {t('network')}: Avalanche C-Chain
             </div>
             <div className="text-[10px] text-slate-500">
-              Bảo mật bởi SIWE (EIP-4361)
+              {t('secured_by_siwe')}
             </div>
           </div>
         </div>

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,6 +31,8 @@ export function ConfirmModal({
   icon,
   isLoading = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -52,7 +56,7 @@ export function ConfirmModal({
             disabled={isLoading}
             className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
-            {cancelText}
+            {cancelText === 'Huỷ' ? t('cancel') : cancelText}
           </button>
           <button
             onClick={onConfirm}
@@ -62,9 +66,9 @@ export function ConfirmModal({
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Đang xử lý...
+                {t('processing')}
               </span>
-            ) : confirmText}
+            ) : (confirmText === 'Xác nhận' ? t('confirm') : confirmText)}
           </button>
         </div>
       </div>
