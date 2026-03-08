@@ -101,7 +101,7 @@ export default function PvpTestScreen() {
     try {
       const token = await fetchPvpToken();
       addLog('Đang tạo phòng...');
-      const r = await clientRef.current.create('pvp_room', {}, { token });
+      const r = await clientRef.current.create('pvp_room', { token });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -121,7 +121,7 @@ export default function PvpTestScreen() {
     try {
       const token = await fetchPvpToken();
       addLog(`Đang join: ${code}...`);
-      const r = await clientRef.current.joinById(code, {}, { token });
+      const r = await clientRef.current.joinById(code, { token });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
