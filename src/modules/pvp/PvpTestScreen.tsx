@@ -228,6 +228,7 @@ export default function PvpTestScreen() {
   const [opponentHp, setOpponentHp] = useState(1000);
   const [opponentMaxHp] = useState(1000);
   const [opponentArmor, setOpponentArmor] = useState(0);
+  const [damageFlash, setDamageFlash] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState('');
 
@@ -292,30 +293,42 @@ export default function PvpTestScreen() {
       tiles: number[]; score: number; combo: number; gained: number;
       junkReceived?: number; hp?: number; armor?: number; mana?: number;
       damageDealt?: number;
+      effects?: { atk: number; hp: number; def: number; star: number };
+      junkSent?: number;
     }) => {
       setMyBoard(data.tiles);
       setMyScore(data.score);
       if (data.hp !== undefined) setMyHp(data.hp);
       if (data.armor !== undefined) setMyArmor(data.armor);
       if (data.mana !== undefined) setMyMana(data.mana);
+
+      // Effect log
+      const parts: string[] = [];
+      if (data.effects?.atk && data.effects.atk > 0) parts.push(`⚔️×${data.effects.atk}`);
+      if (data.effects?.hp && data.effects.hp > 0) parts.push(`💚×${data.effects.hp}`);
+      if (data.effects?.def && data.effects.def > 0) parts.push(`🛡️×${data.effects.def}`);
+      if (data.effects?.star && data.effects.star > 0) parts.push(`⭐×${data.effects.star}`);
+      const effectStr = parts.join(' ');
+
       if (data.combo > 1) {
-        setComboText(`COMBO x${data.combo}! +${data.gained}`);
+        setComboText(`COMBO x${data.combo}! ${effectStr}`);
         setTimeout(() => setComboText(''), 1500);
       }
       if (data.junkReceived && data.junkReceived > 0) {
         setJunkAlert(`+${data.junkReceived} JUNK!`);
         setTimeout(() => setJunkAlert(''), 1500);
       }
-      addLog(`Score: ${data.score} (+${data.gained}) HP:${data.hp ?? '?'}${data.damageDealt ? ` DMG:${data.damageDealt}` : ''}${data.combo > 1 ? ` COMBO x${data.combo}` : ''}${data.junkReceived ? ` JUNK:${data.junkReceived}` : ''}`);
+      addLog(`Score: ${data.score} DMG:${data.damageDealt ?? 0} ${effectStr}${data.combo > 1 ? ` COMBO×${data.combo}` : ''}${data.junkReceived ? ` JUNK:${data.junkReceived}` : ''}`);
     });
 
     r.onMessage('opponent_update', (data: {
-      tiles: number[]; score: number;
-      opponentHp?: number; opponentArmor?: number; opponentMana?: number;
-      myHp?: number; myArmor?: number; myMana?: number;
+      tiles?: number[]; score?: number;
+      opponentHp?: number; opponentMaxHp?: number; opponentArmor?: number; opponentMana?: number; opponentScore?: number;
+      myHp?: number; myMaxHp?: number; myArmor?: number; myMana?: number;
     }) => {
-      setOpponentBoard(data.tiles);
-      setOpponentScore(data.score);
+      if (data.tiles) setOpponentBoard(data.tiles);
+      if (data.score !== undefined) setOpponentScore(data.score);
+      if (data.opponentScore !== undefined) setOpponentScore(data.opponentScore);
       if (data.opponentHp !== undefined) setOpponentHp(data.opponentHp);
       if (data.opponentArmor !== undefined) setOpponentArmor(data.opponentArmor);
       // Update own stats (may have taken damage from opponent)
@@ -324,12 +337,25 @@ export default function PvpTestScreen() {
       if (data.myMana !== undefined) setMyMana(data.myMana);
     });
 
-    r.onMessage('game_over', (data: { winnerId: string; winnerSessionId: string; players: Array<{ userId: string; name: string; score: number }>; isSuddenDeath: boolean }) => {
+    // combat_hit — mình bị đánh
+    r.onMessage('combat_hit', (data: {
+      damage: number; absorbed: number; remainingHp: number; remainingArmor: number;
+    }) => {
+      setDamageFlash(true);
+      setTimeout(() => setDamageFlash(false), 300);
+      setMyHp(data.remainingHp);
+      setMyArmor(data.remainingArmor);
+      addLog(`💥 Nhận ${data.damage} damage${data.absorbed > 0 ? ` (🛡️${data.absorbed} absorbed)` : ''}! HP: ${data.remainingHp}`);
+    });
+
+    r.onMessage('game_over', (data: { winnerId: string; winnerSessionId: string; players: Array<{ userId: string; name: string; score: number; hp?: number }>; isSuddenDeath: boolean }) => {
       setWinnerId(data.winnerId);
       setWinnerSessionId(data.winnerSessionId);
       setGameOverPlayers(data.players);
       setIsSuddenDeath(data.isSuddenDeath);
-      addLog(`Game Over! Winner: ${data.winnerId === 'draw' ? 'DRAW' : data.players.find(p => p.userId === data.winnerId)?.name || data.winnerId}`);
+      const iWon = data.winnerSessionId === mySessionId;
+      const isDr = data.winnerId === 'draw';
+      addLog(`Kết thúc! ${iWon ? '🏆 Thắng!' : isDr ? '🤝 Hoà' : '💀 Thua'}`);
     });
 
     r.onMessage('sudden_death', () => {
@@ -544,7 +570,17 @@ export default function PvpTestScreen() {
         }} />
       )}
 
-      {/* Game Over / Result screen */}
+      {/* Damage flash overlay */}
+      {damageFlash && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 98,
+          background: 'rgba(239, 68, 68, 0.2)',
+          pointerEvents: 'none',
+          animation: 'dmgFlash 0.3s ease-out forwards',
+        }} />
+      )}
+
+      {/* Game Over / Result screen — HP-based */}
       {showResult && (
         <div style={{
           position: 'fixed', inset: 0,
@@ -554,19 +590,28 @@ export default function PvpTestScreen() {
           zIndex: 200,
         }}>
           <div style={{
-            fontSize: 48, marginBottom: 16,
+            fontSize: 40, marginBottom: 8,
             animation: 'cdPop 0.85s ease-out forwards',
           }}>
-            {isWinner ? '🏆 CHIẾN THẮNG!' : isDraw ? '🤝 HÒA!' : '💀 THẤT BẠI'}
+            {isWinner ? '🏆 HẠ GỤC ĐỐI THỦ!' : isDraw ? '🤝 HÒA!' : '💀 BỊ HẠ GỤC!'}
+          </div>
+
+          <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 4 }}>
+            HP còn lại:{' '}
+            <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{myHp}/{myMaxHp}</span>
+          </div>
+          <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 16 }}>
+            Tổng dame:{' '}
+            <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>{myScore.toLocaleString()}</span>
           </div>
 
           {gameOverPlayers.map((p, i) => (
             <div key={i} style={{
-              fontSize: i === 0 ? 24 : 20,
+              fontSize: i === 0 ? 20 : 18,
               color: i === 0 ? '#f59e0b' : '#94a3b8',
               marginBottom: 6,
             }}>
-              {i === 0 ? '🥇' : '🥈'} {p.name}: {p.score.toLocaleString()}
+              {i === 0 ? '🥇' : '🥈'} {p.name}: HP {(p as { hp?: number }).hp ?? '?'} | DMG {p.score.toLocaleString()}
             </div>
           ))}
 
@@ -685,8 +730,14 @@ export default function PvpTestScreen() {
             </div>
 
             {/* My board (interactive) */}
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>BOARD CỦA BẠN — click 2 gem kề nhau để swap</div>
+            <div style={{
+              marginBottom: 10,
+              border: damageFlash ? '3px solid #ef4444' : '2px solid rgba(255,255,255,0.1)',
+              borderRadius: 8,
+              transition: 'border 0.1s',
+              padding: 2,
+            }}>
+              <div style={{ fontSize: 10, color: '#666', marginBottom: 4, paddingLeft: 4 }}>BOARD CỦA BẠN — click 2 gem kề nhau để swap</div>
               <GameBoard tiles={myBoard} onSwap={handleSwap} />
             </div>
 
@@ -881,6 +932,10 @@ export default function PvpTestScreen() {
         }
         @keyframes sdFlash {
           0%   { opacity: 0.6; }
+          100% { opacity: 0; }
+        }
+        @keyframes dmgFlash {
+          0%   { opacity: 0.5; }
           100% { opacity: 0; }
         }
       `}</style>
