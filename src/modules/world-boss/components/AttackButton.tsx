@@ -3,11 +3,14 @@ interface Props {
   onAttack: () => void;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function AttackButton({ battleState, onAttack }: Props) {
+  const { t } = useTranslation();
   if (battleState === 'fighting') {
     return (
       <button className="w-full py-4 bg-gray-500 text-gray-200 text-xl font-bold rounded-xl" style={{ minHeight: 56 }} disabled>
-        Đang chiến đấu...
+        {t('world_boss.attack.attacking', 'ĐANG ĐÁNH...')}
       </button>
     );
   }
@@ -18,7 +21,7 @@ export function AttackButton({ battleState, onAttack }: Props) {
       style={{ minHeight: 56 }}
       onClick={onAttack}
     >
-      Tấn Công
+      {t('world_boss.attack.enter', 'Tấn Công')}
     </button>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CountdownTimerProps {
   startedAt: string;
@@ -16,6 +17,7 @@ function formatTime(ms: number) {
 }
 
 export function CountdownTimer({ startedAt, durationMinutes }: CountdownTimerProps) {
+  const { t } = useTranslation();
   const endTime = new Date(startedAt).getTime() + durationMinutes * 60 * 1000;
   const [remaining, setRemaining] = useState(() => endTime - Date.now());
 
@@ -31,7 +33,7 @@ export function CountdownTimer({ startedAt, durationMinutes }: CountdownTimerPro
     <div className={`flex items-center justify-center gap-2 py-2 text-sm font-mono font-bold
       ${isCritical ? 'text-red-400 animate-pulse' : isUrgent ? 'text-orange-400' : 'text-gray-300'}`}>
       <span>⏰</span>
-      <span>{remaining > 0 ? formatTime(remaining) : 'Hết giờ'} còn lại</span>
+      <span>{remaining > 0 ? formatTime(remaining) : t('world_boss.info.time_out', 'Hết giờ')} {t('world_boss.info.left', 'còn lại')}</span>
     </div>
   );
 }

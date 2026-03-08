@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorldBoss } from '../hooks/useWorldBoss';
 import { useAuth } from '../../../shared/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { BossDisplay } from '../components/BossDisplay';
 import { HpBar } from '../components/HpBar';
 import { CountdownTimer } from '../components/CountdownTimer';
@@ -34,6 +35,7 @@ function LoadingSkeleton() {
 
 export function WorldBossScreen() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useWorldBoss();
   const { data: authData } = useAuth();
   const boss = data?.boss;
@@ -119,7 +121,7 @@ export function WorldBossScreen() {
               : 'text-gray-400'
               }`}
           >
-            Đấu trường
+            {t('world_boss.screen.arena')}
           </button>
           <button
             onClick={() => setMainTab('history')}
@@ -128,7 +130,7 @@ export function WorldBossScreen() {
               : 'text-gray-400'
               }`}
           >
-            Lịch sử
+            {t('world_boss.screen.history')}
           </button>
         </div>
       </div>
@@ -161,7 +163,7 @@ export function WorldBossScreen() {
           </div>
 
           <div className="flex items-center justify-between px-4 pb-1 text-xs text-gray-400">
-            <span>{boss.participantCount} người tham gia</span>
+            <span>{t('world_boss.screen.participants_count', { count: boss.participantCount })}</span>
           </div>
         </div>
       )}
@@ -183,13 +185,13 @@ export function WorldBossScreen() {
         ) : isError ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 gap-4 text-center">
             <div className="text-5xl">!</div>
-            <h2 className="text-lg font-bold text-red-400">Không thể kết nối server</h2>
-            <p className="text-gray-400 text-sm max-w-xs">Đang có sự cố kết nối. Boss có thể đang hoạt động — thử lại sau vài giây.</p>
+            <h2 className="text-lg font-bold text-red-400">{t('world_boss.screen.error_connect_title')}</h2>
+            <p className="text-gray-400 text-sm max-w-xs">{t('world_boss.screen.error_connect_desc')}</p>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white text-sm font-bold rounded-lg transition-colors"
             >
-              Thử lại
+              {t('world_boss.screen.retry')}
             </button>
           </div>
         ) : !data?.active || !boss ? (
@@ -215,7 +217,7 @@ export function WorldBossScreen() {
             </div>
             {/* Header */}
             <div className="flex items-center justify-between px-4 pb-3">
-              <h2 className="text-lg font-bold text-yellow-400">🏆 Xếp hạng</h2>
+              <h2 className="text-lg font-bold text-yellow-400">{t('world_boss.screen.ranking_title')}</h2>
               <button onClick={() => setPopup(null)} className="text-gray-400 text-2xl leading-none">×</button>
             </div>
             {/* Content */}
@@ -240,7 +242,7 @@ export function WorldBossScreen() {
               <div style={{ width: 40, height: 4, borderRadius: 2, background: '#4b5563' }} />
             </div>
             <div className="flex items-center justify-between px-4 pb-3">
-              <h2 className="text-lg font-bold text-blue-400">⚔️ Trận chiến</h2>
+              <h2 className="text-lg font-bold text-blue-400">{t('world_boss.screen.battle_title')}</h2>
               <button onClick={() => setPopup(null)} className="text-gray-400 text-2xl leading-none">×</button>
             </div>
             <div style={{ flex: 1, overflowY: 'scroll', WebkitOverflowScrolling: 'touch' }}>

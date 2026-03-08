@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { WorldBossInfo } from '../types/world-boss.types';
 import { StoryDrawer } from './StoryDrawer';
 import { BossInfoPanel } from './BossInfoPanel';
+import { useTranslation } from 'react-i18next';
 
 const SPRITE_MAP: Record<string, string> = {
   ray_nau: '/assets/bosses/ray-nau.svg',
@@ -24,20 +25,26 @@ const SPRITE_MAP: Record<string, string> = {
   rong_lua: '/assets/bosses/rong-lua.svg',
 };
 
-const ELEMENT_CONFIG: Record<string, { label: string; icon: string; color: string; auraColor: string }> = {
-  fire: { label: 'Lửa', icon: '🔥', color: 'text-orange-400', auraColor: 'rgba(255,107,53,0.4)' },
-  ice: { label: 'Băng', icon: '❄️', color: 'text-blue-300', auraColor: 'rgba(79,195,247,0.4)' },
-  water: { label: 'Nước', icon: '💧', color: 'text-blue-500', auraColor: 'rgba(25,118,210,0.4)' },
-  wind: { label: 'Gió', icon: '🌀', color: 'text-green-400', auraColor: 'rgba(102,187,106,0.4)' },
-  poison: { label: 'Độc', icon: '☠️', color: 'text-purple-400', auraColor: 'rgba(171,71,188,0.4)' },
-  chaos: { label: 'Hỗn loạn', icon: '💥', color: 'text-red-400', auraColor: 'rgba(244,67,54,0.4)' },
+const getElementConfig = (element: string, t: any) => {
+  const configs: Record<string, { label: string; icon: string; color: string; auraColor: string }> = {
+    fire: { label: t('world_boss.marquee.fire', 'Lửa'), icon: '🔥', color: 'text-orange-400', auraColor: 'rgba(255,107,53,0.4)' },
+    ice: { label: t('world_boss.marquee.ice', 'Băng'), icon: '❄️', color: 'text-blue-300', auraColor: 'rgba(79,195,247,0.4)' },
+    water: { label: t('world_boss.marquee.water', 'Nước'), icon: '💧', color: 'text-blue-500', auraColor: 'rgba(25,118,210,0.4)' },
+    wind: { label: t('world_boss.marquee.wind', 'Gió'), icon: '🌀', color: 'text-green-400', auraColor: 'rgba(102,187,106,0.4)' },
+    poison: { label: t('world_boss.marquee.poison', 'Độc'), icon: '☠️', color: 'text-purple-400', auraColor: 'rgba(171,71,188,0.4)' },
+    chaos: { label: t('world_boss.marquee.chaos', 'Hỗn loạn'), icon: '💥', color: 'text-red-400', auraColor: 'rgba(244,67,54,0.4)' },
+  };
+  return configs[element] || configs.chaos;
 };
 
-const DIFFICULTY_CONFIG: Record<string, { label: string; bg: string }> = {
-  normal: { label: 'BÌNH THƯỜNG', bg: 'bg-gray-600' },
-  hard: { label: 'KHÓ', bg: 'bg-yellow-600' },
-  extreme: { label: 'CỰC KHÓ', bg: 'bg-orange-600' },
-  catastrophic: { label: 'THẢM HỌA', bg: 'bg-red-700' },
+const getDifficultyConfig = (diff: string, t: any) => {
+  const configs: Record<string, { label: string; bg: string }> = {
+    normal: { label: t('world_boss.info.diff_normal', 'Bình thường').toUpperCase(), bg: 'bg-gray-600' },
+    hard: { label: t('world_boss.info.diff_hard', 'Khó').toUpperCase(), bg: 'bg-yellow-600' },
+    extreme: { label: t('world_boss.info.diff_extreme', 'Cực khó').toUpperCase(), bg: 'bg-orange-600' },
+    catastrophic: { label: t('world_boss.info.diff_catastrophic', 'Thảm họa').toUpperCase(), bg: 'bg-red-700' },
+  };
+  return configs[diff] || configs.normal;
 };
 
 interface BossDisplayProps {
@@ -47,11 +54,12 @@ interface BossDisplayProps {
 }
 
 export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
+  const { t } = useTranslation();
   const [showStory, setShowStory] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  const element = ELEMENT_CONFIG[boss.element] ?? ELEMENT_CONFIG.chaos;
-  const difficulty = DIFFICULTY_CONFIG[boss.difficulty] ?? DIFFICULTY_CONFIG.normal;
+  const element = getElementConfig(boss.element, t);
+  const difficulty = getDifficultyConfig(boss.difficulty, t);
   const spriteSrc = SPRITE_MAP[boss.baseSprite];
 
   return (
@@ -62,7 +70,7 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
           {element.icon} {element.label}
         </span>
         <span className="text-sm text-gray-400">
-          💧 Yếu: {boss.weakness}
+          💧 {t('world_boss.display.weakness')}: {boss.weakness}
         </span>
       </div>
 
@@ -77,7 +85,7 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
             style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)', minWidth: 64 }}
           >
             <span className="text-xl">🏆</span>
-            <span className="text-[10px] font-bold text-yellow-400 leading-tight text-center">Xếp{"\n"}hạng</span>
+            <span className="text-[10px] font-bold text-yellow-400 leading-tight text-center whitespace-pre-line">{t('world_boss.display.ranking')}</span>
           </button>
         )}
 
@@ -119,7 +127,7 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
             style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', minWidth: 64 }}
           >
             <span className="text-xl">⚔️</span>
-            <span className="text-[10px] font-bold text-blue-400 leading-tight text-center">Trận{"\n"}chiến</span>
+            <span className="text-[10px] font-bold text-blue-400 leading-tight text-center whitespace-pre-line">{t('world_boss.display.battle')}</span>
           </button>
         )}
       </div>
@@ -144,7 +152,7 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
           <p className="text-xs text-gray-400 leading-relaxed italic">
             "{boss.storyPreview}"
           </p>
-          <span className="text-xs text-blue-400 mt-1 block">📖 Đọc tiếp</span>
+          <span className="text-xs text-blue-400 mt-1 block">📖 {t('world_boss.display.read_more')}</span>
         </button>
       )}
 

@@ -77,5 +77,133 @@
             "plant_now": "Trồng ngay! 🌱",
             "select_one": "Chọn một loại cây"
         }
+    },
+    "world_boss": {
+        "screen": {
+            "arena": "Đấu trường",
+            "history": "Lịch sử",
+            "participants_count": "{{count}} người tham gia",
+            "error_connect_title": "Không thể kết nối server",
+            "error_connect_desc": "Đang có sự cố kết nối. Boss có thể đang hoạt động — thử lại sau vài giây.",
+            "retry": "Thử lại",
+            "ranking_title": "🏆 Xếp hạng",
+            "battle_title": "⚔️ Trận chiến",
+            "error_default": "Lỗi kết nối"
+        },
+        "marquee": {
+            "fire": "Lửa",
+            "ice": "Băng",
+            "water": "Nước",
+            "wind": "Gió",
+            "poison": "Độc",
+            "chaos": "Hỗn Loạn",
+            "appear_message": "⚠️ {{icon}} {{bossName}} ({{label}}) xuất hiện! Mau vào đánh boss bảo vệ mùa màng!"
+        },
+        "result": {
+            "session_ended": "Phiên Đấu Kết Thúc",
+            "defeated": "Bạn đã bị hạ gục!",
+            "time_label": "Thời gian",
+            "exit": "Thoát",
+            "continue_attack": "Đánh Tiếp"
+        },
+        "story": {
+            "title": "📖 Truyền thuyết",
+            "empty": "Chưa có truyền thuyết.",
+            "biology_control": "🌿 Phòng trừ sinh học"
+        },
+        "rewards": {
+            "tier_a": "Hạng A",
+            "tier_b": "Hạng B",
+            "tier_c": "Hạng C",
+            "tier_d": "Tham gia",
+            "victory": "⚔️ CHIẾN THẮNG!",
+            "boss_escaped": "⏰ Boss đã biến mất",
+            "loading_results": "Đang tải kết quả...",
+            "not_participated_title": "Bạn không tham gia trận này",
+            "not_participated_desc": "Hãy tấn công boss lần sau để nhận thưởng!",
+            "mvp": "👑 MVP — Chiến binh xuất sắc nhất!",
+            "rank_label": "Xếp hạng <1>#{{rank}}</1>",
+            "total_damage": "Tổng damage: ",
+            "rewards_title": "🎁 Phần thưởng",
+            "bonus_msg": "🎁 ×1.5 bonus (Boss bị hạ gục!)",
+            "view_leaderboard": "🏆 Xem bảng xếp hạng →",
+            "close": "Đóng",
+            "loading_leaderboard": "Đang tải...",
+            "nft_received": "Bạn đã nhận được 1 thẻ NFT!",
+            "nft_open": "Nhấn để mở thẻ"
+        },
+        "nft_reveal": {
+            "step_1": "Đang triệu hồi nghệ nhân AI...",
+            "step_2": "Nghệ nhân đang quan sát trận chiến của bạn...",
+            "step_3": "Đang phác thảo khoảnh khắc chiến thắng...",
+            "step_4": "Đang tô màu khung thẻ {{rarity}}...",
+            "step_5": "Đang khắc tên bạn lên thẻ...",
+            "step_6": "Đang upload lên IPFS...",
+            "step_7": "Đang ghi vào blockchain Avalanche...",
+            "step_8": "Sắp xong rồi... hồi hộp chưa?",
+            "step_9": "Thẻ của bạn đã sẵn sàng!",
+            "achievement_lasthit": "Người Hạ Gục Boss",
+            "achievement_topdamage": "Chiến Binh Mạnh Nhất",
+            "error_title": "Có lỗi xảy ra",
+            "error_desc": "Không thể tạo thẻ NFT. Vui lòng liên hệ admin.",
+            "generating": "Đang tạo thẻ NFT...",
+            "skip": "Bỏ qua",
+            "rank": "🏆 Hạng #{{rank}}",
+            "view_blockchain": "🔗 Xem trên Blockchain"
+        },
+        "leaderboard": {
+            "participants": "👥 {{count}} người tham gia",
+            "no_attacks": "Chưa có ai tấn công",
+            "top_server": "TOP SERVER",
+            "title": "BẢNG XẾP HẠNG",
+            "rank_col": "Hạng",
+            "player_col": "Chiến binh",
+            "damage_col": "Sát thương",
+            "unnamed_player": "Người chơi chưa có tên"
+        },
+        "live_feed": {
+            "just_now": "vừa xong",
+            "seconds_ago": "{{time}}s trước",
+            "minutes_ago": "{{time}}p trước",
+            "hours_ago": "{{time}}h trước",
+            "no_activity": "Chưa có hoạt động"
+        },
+        "history": {
+            "just_now": "vừa xong",
+            "minutes_ago": "{{time}} phút trước",
+            "hours_ago": "{{time}} giờ trước",
+            "days_ago": "{{time}} ngày trước",
+            "no_data": "Chưa có dữ liệu",
+            "defeated": "💀 Bị hạ gục",
+            "escaped": "⏰ Biến mất"
+        },
+        "info": {
+            "calculating": "Đang tính toán...",
+            "waiting_notice": "Sẽ có thông báo khi Boss xuất hiện trở lại.",
+            "view_history": "Xem Lịch Sử",
+            "stats": "CHỈ SỐ",
+            "rewards": "PHẦN THƯỞNG",
+            "skills": "KỸ NĂNG",
+            "unknown": "CHƯA RÕ",
+            "api_error": "Không thể kết nối API",
+            "player_buffs_hint": "Bấm để xem buff người chơi",
+            "stats_hint": "Bấm để xem chỉ số chi tiết",
+            "immune_hint": "Boss đang miễn nhiễm sát thương",
+            "damage_reduction_hint": "Sát thương từ người chơi sẽ bị giảm",
+            "no_skills": "Chưa có thông tin kỹ năng.",
+            "time_left": "Thời gian còn lại"
+        },
+        "attack": {
+            "attacking": "ĐANG ĐÁNH...",
+            "enter": "VÀO ĐÁNH"
+        },
+        "display": {
+            "boss_defeated": "Boss đã bị hạ gục!",
+            "calculating_rewards": "Đang tính toán phần thưởng...",
+            "weakness": "Yếu",
+            "ranking": "Xếp\nhạng",
+            "battle": "Trận\nchiến",
+            "read_more": "Đọc tiếp"
+        }
     }
 }

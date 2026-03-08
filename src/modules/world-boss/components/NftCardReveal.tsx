@@ -1,43 +1,47 @@
 import { useState, useEffect, useCallback } from 'react';
 import { nftApi, type NftCard } from '@/shared/api/api-nft';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface NftCardRevealProps {
   eventId: string;
   onClose: () => void;
 }
 
-const TEASERS = [
-  { max: 15, text: 'Đang triệu hồi nghệ nhân AI...' },
-  { max: 30, text: 'Nghệ nhân đang quan sát trận chiến của bạn...' },
-  { max: 45, text: 'Đang phác thảo khoảnh khắc chiến thắng...' },
-  { max: 55, text: 'Đang tô màu khung thẻ {rarity}...' },
-  { max: 65, text: 'Đang khắc tên bạn lên thẻ...' },
-  { max: 75, text: 'Đang upload lên IPFS...' },
-  { max: 85, text: 'Đang ghi vào blockchain Avalanche...' },
-  { max: 95, text: 'Sắp xong rồi... hồi hộp chưa?' },
-  { max: 100, text: 'Thẻ của bạn đã sẵn sàng!' },
-];
-
 const RARITY_MAP: Record<string, { glow: string; label: string; gradient: string }> = {
-  normal:       { glow: 'rgba(158,158,158,0.6)', label: 'Common',    gradient: 'from-gray-400 to-gray-500' },
-  hard:         { glow: 'rgba(255,143,0,0.6)',   label: 'Rare',      gradient: 'from-amber-500 to-yellow-400' },
-  extreme:      { glow: 'rgba(123,31,162,0.6)',  label: 'Epic',      gradient: 'from-purple-600 to-purple-400' },
-  catastrophic: { glow: 'rgba(211,47,47,0.6)',   label: 'Legendary', gradient: 'from-red-600 to-orange-500' },
+  normal: { glow: 'rgba(158,158,158,0.6)', label: 'Common', gradient: 'from-gray-400 to-gray-500' },
+  hard: { glow: 'rgba(255,143,0,0.6)', label: 'Rare', gradient: 'from-amber-500 to-yellow-400' },
+  extreme: { glow: 'rgba(123,31,162,0.6)', label: 'Epic', gradient: 'from-purple-600 to-purple-400' },
+  catastrophic: { glow: 'rgba(211,47,47,0.6)', label: 'Legendary', gradient: 'from-red-600 to-orange-500' },
 };
 
-const CARD_TYPE_LABELS: Record<string, { icon: string; label: string }> = {
-  last_hit:      { icon: '⚔️', label: 'Người Hạ Gục Boss' },
-  top_damage:    { icon: '💥', label: 'Chiến Binh Mạnh Nhất' },
-  dual_champion: { icon: '👑', label: 'Dual Champion' },
-};
+function getCardType(type: string | undefined, t: any) {
+  const configs: Record<string, { icon: string; label: string }> = {
+    last_hit: { icon: '⚔️', label: t('world_boss.nft_reveal.achievement_lasthit') },
+    top_damage: { icon: '💥', label: t('world_boss.nft_reveal.achievement_topdamage') },
+    dual_champion: { icon: '👑', label: 'Dual Champion' },
+  };
+  return configs[type || 'last_hit'] || configs['last_hit'];
+}
 
-function getTeaser(pct: number, difficulty?: string) {
+function getTeaser(pct: number, difficulty: string | undefined, t: any) {
   const rarity = RARITY_MAP[difficulty || 'hard']?.label || 'Rare';
-  const msg = TEASERS.find(t => pct <= t.max)?.text || TEASERS[0].text;
-  return msg.replace('{rarity}', rarity);
+  const keys = [
+    { max: 15, key: 'step_1' },
+    { max: 30, key: 'step_2' },
+    { max: 45, key: 'step_3' },
+    { max: 55, key: 'step_4' },
+    { max: 65, key: 'step_5' },
+    { max: 75, key: 'step_6' },
+    { max: 85, key: 'step_7' },
+    { max: 95, key: 'step_8' },
+    { max: 100, key: 'step_9' },
+  ];
+  const item = keys.find(k => pct <= k.max) || keys[0];
+  return t(`world_boss.nft_reveal.${item.key}`, { rarity });
 }
 
 export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState(0);
   const [mintStatus, setMintStatus] = useState<string>('pending');
   const [cardData, setCardData] = useState<NftCard | null>(null);
@@ -104,17 +108,17 @@ export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
 
   const difficulty = cardData?.bossDifficulty || 'hard';
   const rarity = RARITY_MAP[difficulty] || RARITY_MAP.hard;
-  const cardType = CARD_TYPE_LABELS[cardData?.nftCardType || 'last_hit'];
+  const cardType = getCardType(cardData?.nftCardType, t);
   const pct = Math.min(Math.round(progress), 100);
 
   if (mintStatus === 'failed') {
     return (
       <div className="fixed inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center px-6">
         <div className="text-5xl mb-4">😔</div>
-        <p className="text-white text-lg font-semibold mb-2">Có lỗi xảy ra</p>
-        <p className="text-gray-400 text-sm text-center mb-6">Không thể tạo thẻ NFT. Vui lòng liên hệ admin.</p>
+        <p className="text-white text-lg font-semibold mb-2">{t('world_boss.nft_reveal.error_title')}</p>
+        <p className="text-gray-400 text-sm text-center mb-6">{t('world_boss.nft_reveal.error_desc')}</p>
         <button onClick={onClose} className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm">
-          Đóng
+          {t('world_boss.rewards.close', 'Đóng')}
         </button>
       </div>
     );
@@ -126,7 +130,7 @@ export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
         /* ═══ LOADING SCREEN ═══ */
         <div className="w-full max-w-sm flex flex-col items-center gap-6">
           <div className="text-5xl nft-card-icon-pulse">🎴</div>
-          <p className="text-white text-lg font-semibold">Đang tạo thẻ NFT...</p>
+          <p className="text-white text-lg font-semibold">{t('world_boss.nft_reveal.generating')}</p>
 
           {/* Progress bar */}
           <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
@@ -139,11 +143,11 @@ export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
 
           {/* Teaser */}
           <p className="text-gray-300 text-sm text-center italic min-h-[40px]">
-            "{getTeaser(pct, difficulty)}"
+            "{getTeaser(pct, difficulty, t)}"
           </p>
 
           <button onClick={onClose} className="mt-4 text-gray-500 text-xs hover:text-gray-400">
-            Bỏ qua
+            {t('world_boss.nft_reveal.skip')}
           </button>
         </div>
       ) : (
@@ -195,7 +199,9 @@ export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
               )}
               {cardData?.rank != null && (
                 <span className="text-blue-400">
-                  🏆 Hạng #{cardData.rank}
+                  <Trans i18nKey="world_boss.nft_reveal.rank" values={{ rank: cardData.rank }}>
+                    🏆 Hạng #{cardData.rank}
+                  </Trans>
                 </span>
               )}
             </div>
@@ -209,7 +215,7 @@ export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
               rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 px-5 py-2.5 bg-blue-600/20 border border-blue-500/40 rounded-xl text-blue-400 text-sm font-medium hover:bg-blue-600/30 transition-colors"
             >
-              🔗 Xem trên Blockchain
+              {t('world_boss.nft_reveal.view_blockchain')}
               <span className="text-xs text-blue-500/70">
                 {cardData.nftTokenId != null ? `Token #${cardData.nftTokenId} • ` : ''}Avalanche C-Chain
               </span>
@@ -222,7 +228,7 @@ export function NftCardReveal({ eventId, onClose }: NftCardRevealProps) {
               onClick={onClose}
               className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium"
             >
-              Đóng
+              {t('world_boss.rewards.close', 'Đóng')}
             </button>
           </div>
         </div>

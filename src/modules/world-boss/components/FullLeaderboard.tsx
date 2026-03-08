@@ -1,4 +1,5 @@
 import type { WorldBossLeaderboardEntry } from '../types/world-boss.types';
+import { useTranslation } from 'react-i18next';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -8,6 +9,7 @@ interface FullLeaderboardProps {
 }
 
 export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardProps) {
+  const { t } = useTranslation();
   const currentUserEntry = leaderboard.find(e => e.userId === currentUserId);
   const currentUserRank = currentUserEntry
     ? leaderboard.findIndex(e => e.userId === currentUserId) + 1
@@ -18,7 +20,7 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
     <div>
       <div>
         {leaderboard.length === 0 ? (
-          <p className="text-xs text-gray-500 text-center py-4">Chưa có ai tấn công</p>
+          <p className="text-xs text-gray-500 text-center py-4">{t('world_boss.leaderboard.no_attacks')}</p>
         ) : (
           <div className="flex flex-col gap-0.5 px-4 py-2">
             {leaderboard.slice(0, 10).map((entry, i) => {
@@ -36,7 +38,7 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
                     </span>
                     <span className="truncate text-xs font-mono">
                       {entry.userId.slice(0, 10)}
-                      {isCurrentUser && <span className="text-blue-400 ml-1">(bạn)</span>}
+                      {isCurrentUser && <span className="text-blue-400 ml-1">({t('common.you', 'bạn')})</span>}
                     </span>
                   </span>
                   <span className="text-yellow-400 font-mono text-xs flex-shrink-0 ml-2">
@@ -53,7 +55,7 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
       {currentUserEntry && !currentUserInTop && (
         <div className="px-4 pb-2 border-t border-gray-700/50 pt-2 flex-shrink-0">
           <div className="flex items-center justify-between text-xs text-gray-400 bg-blue-900/20 px-2 py-1.5 rounded border border-blue-700/30">
-            <span>Bạn: #{currentUserRank}</span>
+            <span>{t('common.you', 'Bạn')}: #{currentUserRank}</span>
             <span className="text-yellow-400">{currentUserEntry.damage.toLocaleString()} dmg</span>
           </div>
         </div>

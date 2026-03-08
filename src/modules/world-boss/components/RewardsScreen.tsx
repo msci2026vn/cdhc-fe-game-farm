@@ -5,6 +5,7 @@ import { BottomDrawer } from './BottomDrawer';
 import { NftCardReveal } from './NftCardReveal';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { nftApi } from '@/shared/api/api-nft';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface RewardsScreenProps {
   eventId: string;
@@ -15,12 +16,15 @@ interface RewardsScreenProps {
   onClose: () => void;
 }
 
-const TIER_CONFIG: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
-  S: { label: 'MVP',      color: 'text-yellow-300', bgColor: 'bg-yellow-600/30 border-yellow-500', icon: '👑' },
-  A: { label: 'Hạng A',  color: 'text-purple-300', bgColor: 'bg-purple-600/30 border-purple-500', icon: '🏅' },
-  B: { label: 'Hạng B',  color: 'text-blue-300',   bgColor: 'bg-blue-600/30 border-blue-500',     icon: '🎖️' },
-  C: { label: 'Hạng C',  color: 'text-green-300',  bgColor: 'bg-green-600/30 border-green-500',   icon: '🏷️' },
-  D: { label: 'Tham gia', color: 'text-gray-300',  bgColor: 'bg-gray-600/30 border-gray-500',     icon: '📋' },
+const getTierConfig = (tier: string, t: any) => {
+  const configs: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
+    S: { label: t('world_boss.rewards.mvp'), color: 'text-yellow-300', bgColor: 'bg-yellow-600/30 border-yellow-500', icon: '👑' },
+    A: { label: t('world_boss.rewards.tier_a'), color: 'text-purple-300', bgColor: 'bg-purple-600/30 border-purple-500', icon: '🏅' },
+    B: { label: t('world_boss.rewards.tier_b'), color: 'text-blue-300', bgColor: 'bg-blue-600/30 border-blue-500', icon: '🎖️' },
+    C: { label: t('world_boss.rewards.tier_c'), color: 'text-green-300', bgColor: 'bg-green-600/30 border-green-500', icon: '🏷️' },
+    D: { label: t('world_boss.rewards.tier_d'), color: 'text-gray-300', bgColor: 'bg-gray-600/30 border-gray-500', icon: '📋' },
+  };
+  return configs[tier] ?? configs['D'];
 };
 
 function useCountUp(target: number, duration = 1000): number {
@@ -62,6 +66,7 @@ function RewardNumbers({ xpAmount, ognAmount }: { xpAmount: number; ognAmount: n
 }
 
 export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }: RewardsScreenProps) {
+  const { t } = useTranslation();
   const { data: rewardsData, isLoading } = useWorldBossRewards(eventId);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const { data: lbData } = useWorldBossHistoryLeaderboard(showLeaderboard ? eventId : null);
@@ -90,7 +95,7 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
   const reward = rewardsData?.rewards?.[0];
   const participation = rewardsData?.participation;
   const tier = reward?.rewardTier ?? 'D';
-  const tierCfg = TIER_CONFIG[tier] ?? TIER_CONFIG['D'];
+  const tierCfg = getTierConfig(tier, t);
   const isMVP = tier === 'S';
 
   const DIFFICULTY_LABELS: Record<string, string> = {
@@ -104,9 +109,9 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
         {/* Title */}
         <div className="text-center">
           {isDefeated ? (
-            <h1 className="text-2xl font-bold text-yellow-400">⚔️ CHIẾN THẮNG!</h1>
+            <h1 className="text-2xl font-bold text-yellow-400">{t('world_boss.rewards.victory')}</h1>
           ) : (
-            <h1 className="text-2xl font-bold text-gray-400">⏰ Boss đã biến mất</h1>
+            <h1 className="text-2xl font-bold text-gray-400">{t('world_boss.rewards.boss_escaped')}</h1>
           )}
           <p className="text-white font-semibold mt-1">{bossName}</p>
           {difficulty && (
@@ -119,32 +124,33 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
         {isLoading ? (
           <div className="flex items-center gap-2 text-gray-400 mt-8">
             <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" />
-            <span>Đang tải kết quả...</span>
+            <span>{t('world_boss.rewards.loading_results')}</span>
           </div>
         ) : !participation ? (
           /* No participation */
           <div className="bg-gray-800 rounded-2xl p-6 text-center w-full max-w-sm">
             <div className="text-3xl mb-3">😶</div>
-            <p className="text-gray-300 font-medium">Bạn không tham gia trận này</p>
-            <p className="text-gray-500 text-sm mt-1">Hãy tấn công boss lần sau để nhận thưởng!</p>
+            <p className="text-gray-300 font-medium">{t('world_boss.rewards.not_participated_title')}</p>
+            <p className="text-gray-500 text-sm mt-1">{t('world_boss.rewards.not_participated_desc')}</p>
           </div>
         ) : (
           <>
             {/* Tier badge */}
             <div
-              className={`w-full max-w-sm rounded-2xl border-2 p-5 text-center ${tierCfg.bgColor} ${
-                isMVP ? 'wb-mvp-glow' : ''
-              }`}
+              className={`w-full max-w-sm rounded-2xl border-2 p-5 text-center ${tierCfg.bgColor} ${isMVP ? 'wb-mvp-glow' : ''
+                }`}
             >
               <div className="text-4xl mb-2">{tierCfg.icon}</div>
               <div className={`text-2xl font-black ${tierCfg.color}`}>
-                {isMVP ? '👑 MVP — Chiến binh xuất sắc nhất!' : tierCfg.label}
+                {tierCfg.label}
               </div>
               <div className="text-gray-400 text-sm mt-2">
-                Xếp hạng <span className="text-white font-bold">#{participation.rank}</span>
+                <Trans i18nKey="world_boss.rewards.rank_label" values={{ rank: participation.rank }}>
+                  Xếp hạng <span className="text-white font-bold">#{participation.rank}</span>
+                </Trans>
               </div>
               <div className="text-gray-400 text-sm mt-1">
-                Tổng damage:{' '}
+                {t('world_boss.rewards.total_damage')}
                 <span className="text-yellow-400 font-bold">
                   {participation.totalDamage.toLocaleString()}
                 </span>
@@ -153,14 +159,14 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
 
             {/* Rewards */}
             <div className="bg-gray-800 rounded-2xl p-5 w-full max-w-sm">
-              <h3 className="text-sm font-semibold text-gray-300 mb-3">🎁 Phần thưởng</h3>
+              <h3 className="text-sm font-semibold text-gray-300 mb-3">{t('world_boss.rewards.rewards_title')}</h3>
               <RewardNumbers
                 xpAmount={reward?.xpAmount ?? 0}
                 ognAmount={reward?.ognAmount ?? 0}
               />
               {isDefeated && (
                 <div className="mt-3 bg-yellow-900/20 border border-yellow-700/40 rounded-lg px-3 py-2 text-xs text-yellow-400">
-                  🎁 ×1.5 bonus (Boss bị hạ gục!)
+                  {t('world_boss.rewards.bonus_msg')}
                 </div>
               )}
             </div>
@@ -173,13 +179,13 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
             onClick={() => setShowLeaderboard(true)}
             className="w-full py-3 rounded-xl bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition-colors"
           >
-            🏆 Xem bảng xếp hạng →
+            {t('world_boss.rewards.view_leaderboard')}
           </button>
           <button
             onClick={onClose}
             className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
           >
-            Đóng
+            {t('world_boss.rewards.close')}
           </button>
         </div>
       </div>
@@ -199,7 +205,7 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
             currentUserId={null}
           />
         ) : (
-          <div className="text-center py-8 text-gray-400">Đang tải...</div>
+          <div className="text-center py-8 text-gray-400">{t('world_boss.rewards.loading_leaderboard')}</div>
         )}
       </BottomDrawer>
 
@@ -212,8 +218,8 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
           <div className="bg-gradient-to-r from-indigo-900 to-indigo-800 rounded-2xl px-5 py-4 flex items-center gap-3 border border-indigo-500/40 shadow-lg">
             <span className="text-3xl">🎴</span>
             <div className="flex-1">
-              <p className="text-white font-bold text-sm">Bạn đã nhận được 1 thẻ NFT!</p>
-              <p className="text-indigo-300 text-xs mt-0.5">Nhấn để mở thẻ</p>
+              <p className="text-white font-bold text-sm">{t('world_boss.rewards.nft_received')}</p>
+              <p className="text-indigo-300 text-xs mt-0.5">{t('world_boss.rewards.nft_open')}</p>
             </div>
             <span className="text-indigo-300 text-lg">→</span>
           </div>

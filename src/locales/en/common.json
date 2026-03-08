@@ -77,5 +77,133 @@
             "plant_now": "Plant Now! 🌱",
             "select_one": "Select a seed"
         }
+    },
+    "world_boss": {
+        "screen": {
+            "arena": "Arena",
+            "history": "History",
+            "participants_count": "{{count}} participants",
+            "error_connect_title": "Connection Error",
+            "error_connect_desc": "Cannot connect to server. Boss might be active — try again in a few seconds.",
+            "retry": "Retry",
+            "ranking_title": "🏆 Ranking",
+            "battle_title": "⚔️ Battle",
+            "error_default": "Connection error"
+        },
+        "marquee": {
+            "fire": "Fire",
+            "ice": "Ice",
+            "water": "Water",
+            "wind": "Wind",
+            "poison": "Poison",
+            "chaos": "Chaos",
+            "appear_message": "⚠️ {{icon}} {{bossName}} ({{label}}) has appeared! Defeat the boss to protect the harvest!"
+        },
+        "result": {
+            "session_ended": "Session Ended",
+            "defeated": "You have been defeated!",
+            "time_label": "Duration",
+            "exit": "Exit",
+            "continue_attack": "Continue"
+        },
+        "story": {
+            "title": "📖 Legends",
+            "empty": "No legends available.",
+            "biology_control": "🌿 Biological Control"
+        },
+        "rewards": {
+            "tier_a": "Tier A",
+            "tier_b": "Tier B",
+            "tier_c": "Tier C",
+            "tier_d": "Participated",
+            "victory": "⚔️ VICTORY!",
+            "boss_escaped": "⏰ Boss Escaped",
+            "loading_results": "Loading results...",
+            "not_participated_title": "You did not participate",
+            "not_participated_desc": "Attack the boss next time to get rewards!",
+            "mvp": "👑 MVP — Outstanding Warrior!",
+            "rank_label": "Rank <1>#{{rank}}</1>",
+            "total_damage": "Total damage: ",
+            "rewards_title": "🎁 Rewards",
+            "bonus_msg": "🎁 x1.5 bonus (Boss defeated!)",
+            "view_leaderboard": "🏆 View Leaderboard →",
+            "close": "Close",
+            "loading_leaderboard": "Loading...",
+            "nft_received": "You received 1 NFT Card!",
+            "nft_open": "Tap to open card"
+        },
+        "nft_reveal": {
+            "step_1": "Summoning AI artist...",
+            "step_2": "Artist is observing your battle...",
+            "step_3": "Sketching the victory moment...",
+            "step_4": "Coloring the {{rarity}} card frame...",
+            "step_5": "Engraving your name...",
+            "step_6": "Uploading to IPFS...",
+            "step_7": "Writing to Avalanche blockchain...",
+            "step_8": "Almost done... excited?",
+            "step_9": "Your card is ready!",
+            "achievement_lasthit": "Boss Slayer",
+            "achievement_topdamage": "Strongest Warrior",
+            "error_title": "An error occurred",
+            "error_desc": "Could not create NFT card. Please contact admin.",
+            "generating": "Generating NFT card...",
+            "skip": "Skip",
+            "rank": "🏆 Rank #{{rank}}",
+            "view_blockchain": "🔗 View on Blockchain"
+        },
+        "leaderboard": {
+            "participants": "👥 {{count}} participants",
+            "no_attacks": "No attacks yet",
+            "top_server": "SERVER TOP",
+            "title": "LEADERBOARD",
+            "rank_col": "Rank",
+            "player_col": "Warrior",
+            "damage_col": "Damage",
+            "unnamed_player": "Unnamed Player"
+        },
+        "live_feed": {
+            "just_now": "just now",
+            "seconds_ago": "{{time}}s ago",
+            "minutes_ago": "{{time}}m ago",
+            "hours_ago": "{{time}}h ago",
+            "no_activity": "No activity yet"
+        },
+        "history": {
+            "just_now": "just now",
+            "minutes_ago": "{{time}} minutes ago",
+            "hours_ago": "{{time}} hours ago",
+            "days_ago": "{{time}} days ago",
+            "no_data": "No data available",
+            "defeated": "💀 Defeated",
+            "escaped": "⏰ Escaped"
+        },
+        "info": {
+            "calculating": "Calculating...",
+            "waiting_notice": "You will be notified when the Boss reappears.",
+            "view_history": "View History",
+            "stats": "STATS",
+            "rewards": "REWARDS",
+            "skills": "SKILLS",
+            "unknown": "UNKNOWN",
+            "api_error": "Cannot connect to API",
+            "player_buffs_hint": "Tap to view player buffs",
+            "stats_hint": "Tap to view detailed stats",
+            "immune_hint": "Boss is immune to damage",
+            "damage_reduction_hint": "Damage from players will be reduced",
+            "no_skills": "No skill information available.",
+            "time_left": "Time Left"
+        },
+        "attack": {
+            "attacking": "ATTACKING...",
+            "enter": "ATTACK"
+        },
+        "display": {
+            "boss_defeated": "Boss Defeated!",
+            "calculating_rewards": "Calculating rewards...",
+            "weakness": "Weakness",
+            "ranking": "Rank",
+            "battle": "Battle",
+            "read_more": "Read more"
+        }
     }
 }

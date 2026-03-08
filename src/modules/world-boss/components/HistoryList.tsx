@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWorldBossHistory, useWorldBossHistoryLeaderboard } from '../hooks/useWorldBossHistory';
 import { BottomDrawer } from './BottomDrawer';
 import type { WorldBossHistoryEntry } from '../types/world-boss.types';
+import { useTranslation } from 'react-i18next';
 
 const ELEMENT_ICONS: Record<string, string> = {
   fire: '🔥', ice: '❄️', water: '💧', wind: '🌪️', poison: '☠️', chaos: '💫',
@@ -13,16 +14,16 @@ const DIFFICULTY_LABELS: Record<string, string> = {
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: any): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return 'vừa xong';
-  if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
-  if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
-  if (diff < 604800) return Math.floor(diff / 86400) + ' ngày trước';
+  if (diff < 60) return t('world_boss.history.just_now', 'vừa xong');
+  if (diff < 3600) return t('world_boss.history.minutes_ago', { time: Math.floor(diff / 60) });
+  if (diff < 86400) return t('world_boss.history.hours_ago', { time: Math.floor(diff / 3600) });
+  if (diff < 604800) return t('world_boss.history.days_ago', { time: Math.floor(diff / 86400) });
   return new Date(dateStr).toLocaleDateString('vi-VN');
 }
 
-function HistoryLeaderboardContent({ eventId }: { eventId: string }) {
+function HistoryLeaderboardContent({ eventId, t }: { eventId: string, t: any }) {
   const { data, isLoading } = useWorldBossHistoryLeaderboard(eventId);
   if (isLoading) {
     return (
@@ -33,7 +34,7 @@ function HistoryLeaderboardContent({ eventId }: { eventId: string }) {
   }
   const entries = data?.leaderboard ?? [];
   if (entries.length === 0) {
-    return <p className="text-xs text-gray-500 text-center py-4">Chưa có dữ liệu</p>;
+    return <p className="text-xs text-gray-500 text-center py-4">{t('world_boss.history.no_data', 'Chưa có dữ liệu')}</p>;
   }
   return (
     <div className="flex flex-col gap-0.5">
@@ -62,9 +63,11 @@ function HistoryLeaderboardContent({ eventId }: { eventId: string }) {
 function HistoryCard({
   boss,
   onSelect,
+  t
 }: {
   boss: WorldBossHistoryEntry;
   onSelect: (boss: WorldBossHistoryEntry) => void;
+  t: any;
 }) {
   const isDefeated = boss.status === 'defeated';
   const elementIcon = ELEMENT_ICONS[boss.element] ?? '⚡';
@@ -85,13 +88,13 @@ function HistoryCard({
                 {diffLabel}
               </span>
               <span className={`text-xs ${isDefeated ? 'text-red-400' : 'text-gray-500'}`}>
-                {isDefeated ? '💀 Bị hạ gục' : '⏰ Biến mất'}
+                {isDefeated ? t('world_boss.history.defeated') : t('world_boss.history.escaped')}
               </span>
             </div>
           </div>
         </div>
         <div className="text-right flex-shrink-0 text-xs text-gray-500">
-          {boss.endedAt ? timeAgo(boss.endedAt) : ''}
+          {boss.endedAt ? timeAgo(boss.endedAt, t) : ''}
         </div>
       </div>
       <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
@@ -103,6 +106,7 @@ function HistoryCard({
 }
 
 export function HistoryList() {
+  const { t } = useTranslation();
   const { data, isLoading } = useWorldBossHistory(10);
   const [selected, setSelected] = useState<WorldBossHistoryEntry | null>(null);
 
@@ -118,11 +122,11 @@ export function HistoryList() {
         ) : bosses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
             <div className="text-4xl">📜</div>
-            <p className="text-gray-400 text-sm">Chưa có boss nào kết thúc</p>
+            <p className="text-gray-400 text-sm">{t('world_boss.history.no_data', 'Chưa có dữ liệu')}</p>
           </div>
         ) : (
           bosses.map(boss => (
-            <HistoryCard key={boss.id} boss={boss} onSelect={setSelected} />
+            <HistoryCard key={boss.id} boss={boss} onSelect={setSelected} t={t} />
           ))
         )}
       </div>
@@ -132,7 +136,7 @@ export function HistoryList() {
         onClose={() => setSelected(null)}
         title={selected ? `🏆 ${selected.bossName}` : '🏆'}
       >
-        {selected && <HistoryLeaderboardContent eventId={selected.id} />}
+        {selected && <HistoryLeaderboardContent eventId={selected.id} t={t} />}
       </BottomDrawer>
     </div>
   );

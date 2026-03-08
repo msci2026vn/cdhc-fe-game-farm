@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { BottomDrawer } from './BottomDrawer';
 
 const ORGANIC_KEYWORDS = [
@@ -24,14 +25,15 @@ interface StoryDrawerProps {
 }
 
 export function StoryDrawer({ isOpen, onClose, storyFull, bossName }: StoryDrawerProps) {
+  const { t } = useTranslation();
   const parts = storyFull ? parseStory(storyFull) : [];
 
   return (
-    <BottomDrawer isOpen={isOpen} onClose={onClose} title={`📖 Truyền thuyết`}>
+    <BottomDrawer isOpen={isOpen} onClose={onClose} title={t('world_boss.story.title')}>
       <p className="text-sm text-yellow-400 italic mb-4">{bossName}</p>
 
       {parts.length === 0 ? (
-        <p className="text-sm text-gray-500">Chưa có truyền thuyết.</p>
+        <p className="text-sm text-gray-500">{t('world_boss.story.empty')}</p>
       ) : (
         <div className="flex flex-col gap-4">
           {parts.map((part, i) => {
@@ -41,7 +43,7 @@ export function StoryDrawer({ isOpen, onClose, storyFull, bossName }: StoryDrawe
                 key={i}
                 className="border-l-4 border-green-500 bg-green-900/20 rounded-r-lg pl-3 pr-2 py-2"
               >
-                <p className="text-xs text-green-400 font-bold mb-1">🌿 Phòng trừ sinh học</p>
+                <p className="text-xs text-green-400 font-bold mb-1">{t('world_boss.story.biology_control')}</p>
                 <p className="text-sm text-gray-200 leading-relaxed">{part}</p>
               </div>
             ) : (

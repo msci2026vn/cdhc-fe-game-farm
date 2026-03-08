@@ -1,18 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useWorldBoss } from '../hooks/useWorldBoss';
-
-const ELEMENT_CONFIG: Record<string, { icon: string; label: string }> = {
-  fire:   { icon: '🔥', label: 'Lửa' },
-  ice:    { icon: '❄️', label: 'Băng' },
-  water:  { icon: '💧', label: 'Nước' },
-  wind:   { icon: '🌀', label: 'Gió' },
-  poison: { icon: '☠️', label: 'Độc' },
-  chaos:  { icon: '💥', label: 'Hỗn Loạn' },
-};
 
 export function WorldBossMarquee() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data } = useWorldBoss();
   const [isAnimating, setIsAnimating] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -24,9 +17,21 @@ export function WorldBossMarquee() {
 
   if (!data?.active || !data.boss) return null;
 
+  const getElementLabel = (type: string) => {
+    switch (type) {
+      case 'fire': return { icon: '🔥', label: t('world_boss.marquee.fire') };
+      case 'ice': return { icon: '❄️', label: t('world_boss.marquee.ice') };
+      case 'water': return { icon: '💧', label: t('world_boss.marquee.water') };
+      case 'wind': return { icon: '🌀', label: t('world_boss.marquee.wind') };
+      case 'poison': return { icon: '☠️', label: t('world_boss.marquee.poison') };
+      case 'chaos': return { icon: '💥', label: t('world_boss.marquee.chaos') };
+      default: return { icon: '⚠️', label: type };
+    }
+  };
+
   const boss = data.boss;
-  const el = ELEMENT_CONFIG[boss.element] ?? { icon: '⚠️', label: boss.element };
-  const message = `⚠️ ${el.icon} ${boss.bossName} (${el.label}) xuất hiện! Mau vào đánh boss bảo vệ mùa màng!`;
+  const el = getElementLabel(boss.element);
+  const message = t('world_boss.marquee.appear_message', { icon: el.icon, bossName: boss.bossName, label: el.label });
 
   const handleAnimationEnd = () => {
     setIsAnimating(false);

@@ -1,12 +1,13 @@
 import { useRef, useEffect } from 'react';
 import type { WorldBossFeedEntry } from '../types/world-boss.types';
+import { useTranslation } from 'react-i18next';
 
-function timeAgo(timestamp: number): string {
+function timeAgo(timestamp: number, t: any): string {
   const diff = Math.floor((Date.now() - timestamp) / 1000);
-  if (diff < 5) return 'vừa xong';
-  if (diff < 60) return diff + 's trước';
-  if (diff < 3600) return Math.floor(diff / 60) + 'p trước';
-  return Math.floor(diff / 3600) + 'h trước';
+  if (diff < 5) return t('world_boss.live_feed.just_now');
+  if (diff < 60) return t('world_boss.live_feed.seconds_ago', { time: diff });
+  if (diff < 3600) return t('world_boss.live_feed.minutes_ago', { time: Math.floor(diff / 60) });
+  return t('world_boss.live_feed.hours_ago', { time: Math.floor(diff / 3600) });
 }
 
 interface LiveFeedProps {
@@ -14,6 +15,7 @@ interface LiveFeedProps {
 }
 
 export function LiveFeed({ feed }: LiveFeedProps) {
+  const { t } = useTranslation();
   const feedRef = useRef<HTMLDivElement>(null);
   const prevFirstKey = useRef('');
 
@@ -34,7 +36,7 @@ export function LiveFeed({ feed }: LiveFeedProps) {
       className="px-4 py-2"
     >
       {visible.length === 0 ? (
-        <p className="text-xs text-gray-500 text-center py-4">Chưa có hoạt động</p>
+        <p className="text-xs text-gray-500 text-center py-4">{t('world_boss.live_feed.no_activity')}</p>
       ) : (
         <div className="flex flex-col gap-0.5">
           {visible.map((entry, i) => {
@@ -58,7 +60,7 @@ export function LiveFeed({ feed }: LiveFeedProps) {
                 </span>
                 <span className="flex items-center gap-2 flex-shrink-0 ml-1">
                   <span className="text-yellow-400 font-mono">{entry.damage.toLocaleString()}</span>
-                  <span className="text-gray-500 text-xs">{timeAgo(entry.timestamp)}</span>
+                  <span className="text-gray-500 text-xs">{timeAgo(entry.timestamp, t)}</span>
                 </span>
               </div>
             );
