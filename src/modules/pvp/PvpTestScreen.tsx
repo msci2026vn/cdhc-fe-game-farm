@@ -8,7 +8,8 @@ const WS_URL = import.meta.env.DEV
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn';
 
-// 5 gem types: 0=atk(sword) 1=hp(heart) 2=def(shield) 3=star 4=junk
+// Gem visual — aligned with campaign GEM_META (src/shared/match3/board.utils.ts)
+// 0=atk(⚔️) 1=hp(💚) 2=def(🛡️) 3=star(⭐) 4=junk(🪨)
 const GEM_COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#eab308', '#6b7280'];
 const GEM_LABELS = ['⚔️', '💚', '🛡️', '⭐', '🪨'];
 
@@ -143,6 +144,56 @@ function CountdownOverlay({ count }: { count: number }) {
   );
 }
 
+// ─── HP Bar — aligned with campaign PlayerHPBar ────────────────────────────────
+function HpBar({ current, max, armor, color = '#22c55e', label }: {
+  current: number; max: number; armor: number;
+  color?: string; label: string;
+}) {
+  const hpPct = Math.max(0, (current / max) * 100);
+  const armorPct = Math.min(100, (armor / max) * 100);
+  return (
+    <div style={{ marginBottom: 4 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
+        <span>{label}</span>
+        <span style={{ color: current < max * 0.3 ? '#ef4444' : 'white' }}>
+          {current}/{max}{armor > 0 ? ` 🛡️${armor}` : ''}
+        </span>
+      </div>
+      <div style={{ height: 10, background: '#1f2937', borderRadius: 5, overflow: 'hidden', position: 'relative' }}>
+        <div style={{
+          width: `${hpPct}%`, height: '100%',
+          background: current < max * 0.3 ? '#ef4444' : color,
+          transition: 'width 0.3s',
+        }} />
+        {armor > 0 && (
+          <div style={{
+            position: 'absolute', right: 0, top: 0,
+            width: `${armorPct}%`, height: '100%',
+            background: '#3b82f6', opacity: 0.6,
+          }} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Mana Bar ──────────────────────────────────────────────────────────────────
+function ManaBar({ current, max }: { current: number; max: number }) {
+  return (
+    <div style={{ marginBottom: 6 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
+        <span>⭐ Mana</span><span>{current}/{max}</span>
+      </div>
+      <div style={{ height: 6, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{
+          width: `${(current / max) * 100}%`, height: '100%',
+          background: '#eab308', transition: 'width 0.3s',
+        }} />
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function PvpTestScreen() {
   const { data: auth } = useAuth();
@@ -169,6 +220,14 @@ export default function PvpTestScreen() {
   const [winnerSessionId, setWinnerSessionId] = useState('');
   const [gameOverPlayers, setGameOverPlayers] = useState<Array<{ userId: string; name: string; score: number }>>([]);
   const [junkAlert, setJunkAlert] = useState('');
+  // Combat stats — aligned with campaign BossState
+  const [myHp, setMyHp] = useState(1000);
+  const [myMaxHp] = useState(1000);
+  const [myArmor, setMyArmor] = useState(0);
+  const [myMana, setMyMana] = useState(0);
+  const [opponentHp, setOpponentHp] = useState(1000);
+  const [opponentMaxHp] = useState(1000);
+  const [opponentArmor, setOpponentArmor] = useState(0);
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState('');
 
@@ -220,12 +279,25 @@ export default function PvpTestScreen() {
       setWinnerSessionId('');
       setGameOverPlayers([]);
       setJunkAlert('');
+      // Reset combat stats
+      setMyHp(1000);
+      setMyArmor(0);
+      setMyMana(0);
+      setOpponentHp(1000);
+      setOpponentArmor(0);
       addLog('Board nhận thành công → Game bắt đầu!');
     });
 
-    r.onMessage('board_update', (data: { tiles: number[]; score: number; combo: number; gained: number; junkReceived?: number }) => {
+    r.onMessage('board_update', (data: {
+      tiles: number[]; score: number; combo: number; gained: number;
+      junkReceived?: number; hp?: number; armor?: number; mana?: number;
+      damageDealt?: number;
+    }) => {
       setMyBoard(data.tiles);
       setMyScore(data.score);
+      if (data.hp !== undefined) setMyHp(data.hp);
+      if (data.armor !== undefined) setMyArmor(data.armor);
+      if (data.mana !== undefined) setMyMana(data.mana);
       if (data.combo > 1) {
         setComboText(`COMBO x${data.combo}! +${data.gained}`);
         setTimeout(() => setComboText(''), 1500);
@@ -234,12 +306,22 @@ export default function PvpTestScreen() {
         setJunkAlert(`+${data.junkReceived} JUNK!`);
         setTimeout(() => setJunkAlert(''), 1500);
       }
-      addLog(`Score: ${data.score} (+${data.gained})${data.combo > 1 ? ` COMBO x${data.combo}` : ''}${data.junkReceived ? ` JUNK:${data.junkReceived}` : ''}`);
+      addLog(`Score: ${data.score} (+${data.gained}) HP:${data.hp ?? '?'}${data.damageDealt ? ` DMG:${data.damageDealt}` : ''}${data.combo > 1 ? ` COMBO x${data.combo}` : ''}${data.junkReceived ? ` JUNK:${data.junkReceived}` : ''}`);
     });
 
-    r.onMessage('opponent_update', (data: { tiles: number[]; score: number }) => {
+    r.onMessage('opponent_update', (data: {
+      tiles: number[]; score: number;
+      opponentHp?: number; opponentArmor?: number; opponentMana?: number;
+      myHp?: number; myArmor?: number; myMana?: number;
+    }) => {
       setOpponentBoard(data.tiles);
       setOpponentScore(data.score);
+      if (data.opponentHp !== undefined) setOpponentHp(data.opponentHp);
+      if (data.opponentArmor !== undefined) setOpponentArmor(data.opponentArmor);
+      // Update own stats (may have taken damage from opponent)
+      if (data.myHp !== undefined) setMyHp(data.myHp);
+      if (data.myArmor !== undefined) setMyArmor(data.myArmor);
+      if (data.myMana !== undefined) setMyMana(data.myMana);
     });
 
     r.onMessage('game_over', (data: { winnerId: string; winnerSessionId: string; players: Array<{ userId: string; name: string; score: number }>; isSuddenDeath: boolean }) => {
@@ -361,6 +443,11 @@ export default function PvpTestScreen() {
     setWinnerSessionId('');
     setGameOverPlayers([]);
     setJunkAlert('');
+    setMyHp(1000);
+    setMyArmor(0);
+    setMyMana(0);
+    setOpponentHp(1000);
+    setOpponentArmor(0);
     addLog('Đã rời phòng');
   };
 
@@ -543,50 +630,57 @@ export default function PvpTestScreen() {
         {/* ── BOARD VIEW (phase=playing, board loaded) ── */}
         {inRoom && showBoard && (
           <div style={{ marginBottom: 16 }}>
-            {/* Player HUDs with live scores */}
+            {/* Timer */}
+            <div style={{ textAlign: 'center', marginBottom: 6 }}>
+              <span style={{
+                fontSize: timeLeft <= 10 ? 28 : 20,
+                fontWeight: 900,
+                color: timeLeft <= 10 ? '#ef4444' : isSuddenDeath ? '#a855f7' : '#f59e0b',
+                animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
+              }}>
+                {timeLeft}s
+              </span>
+              {isSuddenDeath && (
+                <span style={{ fontSize: 10, color: '#a855f7', marginLeft: 6, fontWeight: 700 }}>
+                  SUDDEN DEATH
+                </span>
+              )}
+            </div>
+
+            {/* Player HUDs with HP/Mana — campaign-aligned */}
             <div style={{
-              display: 'flex', justifyContent: 'space-between', marginBottom: 8,
+              display: 'flex', gap: 12, marginBottom: 8,
               background: '#0d1b2a', borderRadius: 8, padding: '8px 12px',
               border: '1px solid #1e4d78',
             }}>
-              <div>
-                <div style={{ fontSize: 12, color: '#aaa' }}>⚔️ {myPlayer?.name ?? 'Tôi'}</div>
-                <div style={{
-                  fontSize: 22, fontWeight: 900, color: '#4caf50',
-                  transition: 'all 0.3s',
-                }}>
-                  {myScore.toLocaleString()}
+              {/* Me */}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ color: '#f59e0b', fontSize: 12, fontWeight: 'bold' }}>
+                    ⚔️ {myPlayer?.name ?? 'Tôi'}
+                  </span>
+                  <span style={{ color: '#4caf50', fontSize: 11, fontWeight: 700 }}>
+                    {myScore.toLocaleString()}
+                  </span>
                 </div>
+                <HpBar current={myHp} max={myMaxHp} armor={myArmor} label="HP" />
+                <ManaBar current={myMana} max={200} />
               </div>
-              <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                justifyContent: 'center', gap: 2,
-              }}>
-                <div style={{
-                  fontSize: timeLeft <= 10 ? 28 : 20,
-                  fontWeight: 900,
-                  color: timeLeft <= 10 ? '#ef4444' : isSuddenDeath ? '#a855f7' : '#f59e0b',
-                  animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
-                  lineHeight: 1,
-                }}>
-                  {timeLeft}s
+
+              <div style={{ color: '#64748b', fontSize: 11, alignSelf: 'center' }}>VS</div>
+
+              {/* Opponent */}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ color: '#ef4444', fontSize: 12, fontWeight: 'bold' }}>
+                    🛡️ {opponentPlayer?.name ?? 'Đối thủ'}
+                  </span>
+                  <span style={{ color: '#e94560', fontSize: 11, fontWeight: 700 }}>
+                    {opponentScore.toLocaleString()}
+                  </span>
                 </div>
-                <div style={{
-                  fontSize: 9, fontWeight: 700,
-                  color: isSuddenDeath ? '#a855f7' : '#555',
-                  textTransform: 'uppercase',
-                }}>
-                  {isSuddenDeath ? 'SUDDEN DEATH' : 'VS'}
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 12, color: '#aaa' }}>{opponentPlayer?.name ?? 'Đối thủ'} 🛡️</div>
-                <div style={{
-                  fontSize: 22, fontWeight: 900, color: '#e94560',
-                  transition: 'all 0.3s',
-                }}>
-                  {opponentScore.toLocaleString()}
-                </div>
+                <HpBar current={opponentHp} max={opponentMaxHp} armor={opponentArmor}
+                  color="#ef4444" label="HP" />
               </div>
             </div>
 
