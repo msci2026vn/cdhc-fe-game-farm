@@ -1,0 +1,9 @@
+{
+    "common": {
+        "close": "Đóng",
+        "confirm": "Xác nhận",
+        "success": "Thành công",
+        "error": "Lỗi",
+        "cancel": "Hủy"
+    }
+}

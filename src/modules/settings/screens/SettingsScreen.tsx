@@ -7,6 +7,7 @@ import { PinSetupModal } from '@/modules/profile/components/PinSetupModal';
 import { ChangePinModal } from '../components/ChangePinModal';
 import { startRegistration } from '@simplewebauthn/browser';
 import { toast } from 'sonner';
+import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 
 export default function SettingsScreen() {
     const navigate = useNavigate();
@@ -168,7 +169,7 @@ export default function SettingsScreen() {
                         {/* Fullscreen toggle */}
                         <button
                             onClick={toggleFullscreen}
-                            className="w-full px-4 py-4 flex items-center justify-between hover:bg-black/5 active:bg-black/10 transition-colors text-left"
+                            className="w-full px-4 py-4 flex items-center justify-between hover:bg-black/5 active:bg-black/10 transition-colors text-left border-b-2 border-farm-brown/5"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
@@ -196,6 +197,9 @@ export default function SettingsScreen() {
                                 </div>
                             </div>
                         </button>
+
+                        {/* Language Switcher */}
+                        <LanguageSwitcher />
                     </div>
 
                     {/* Section: Security Details */}
