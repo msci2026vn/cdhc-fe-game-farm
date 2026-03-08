@@ -364,6 +364,10 @@ export default function PvpTestScreen() {
       addLog('SUDDEN DEATH! +15s, combo x1.5');
     });
 
+    r.onMessage('timer_tick', (data: { timeLeft: number }) => {
+      setTimeLeft(data.timeLeft);
+    });
+
     r.onError((code, msg) => {
       addLog(`❌ Lỗi room: ${msg} (${code})`);
       setError(`${code}: ${msg}`);
