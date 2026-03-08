@@ -7,6 +7,7 @@ import type { PlayerCombatStats, ActiveMilestones } from '@/shared/utils/combat-
 import { ultDamage as calcUltDamage } from '@/shared/utils/combat-formulas';
 import type { BossState, CombatStats, CombatNotifType, SkillWarning, BossAttackWarning } from '@/shared/match3/combat.types';
 import { playSound } from '@/shared/audio';
+import i18n from '@/i18n';
 
 export interface DodgeDeps {
   skillWarning: SkillWarning | null;
@@ -32,14 +33,14 @@ export function handleDodgeImpl(deps: DodgeDeps): void {
   if (!skillWarning && attackWarning?.phase !== 'dodge_window' && attackWarning?.phase !== 'warning') return;
   setBoss(prev => {
     if (prev.mana < manaDodgeCost) {
-      addPopup(`Thiếu mana! (${manaDodgeCost})`, '#e74c3c');
+      addPopup(i18n.t('not_enough_mana_short', { cost: manaDodgeCost }), '#e74c3c');
       return prev;
     }
     dodgedRef.current = true;
     setAttackWarning(null);
     setSkillWarning(null);
     setCombatStatsTracker(s => ({ ...s, dodgeCount: s.dodgeCount + 1 }));
-    addCombatNotif('dodge', '🏃 Né thành công!', '#55efc4');
+    addCombatNotif('dodge', i18n.t('dodge_success'), '#55efc4');
     playSound('dodge_success');
     return { ...prev, mana: prev.mana - manaDodgeCost };
   });
@@ -78,7 +79,7 @@ export function fireUltimateImpl(deps: UltimateDeps): void {
     } else {
       // Normal: check mana cost
       if (prev.mana < manaUltCost) {
-        addPopup(`Thiếu mana! (${manaUltCost})`, '#e74c3c');
+        addPopup(i18n.t('not_enough_mana_short', { cost: manaUltCost }), '#e74c3c');
         return prev;
       }
     }

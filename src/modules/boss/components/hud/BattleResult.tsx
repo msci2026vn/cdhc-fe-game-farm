@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import type { CombatStats } from '../../hooks/useMatch3';
 import type { BossCompleteResult } from '@/shared/types/game-api.types';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface BattleResultProps {
   won: boolean;
@@ -54,6 +55,7 @@ export default function BattleResult({
   leveledUp, newLevel,
   combatStars = 0, durationSeconds = 0, maxCombo = 0,
 }: BattleResultProps) {
+  const { t } = useTranslation();
   const [showLevelUp, setShowLevelUp] = useState(false);
   // Use server-validated stars if available, else use FE combat stars
   const stars = won ? (serverData?.stars ?? combatStars) : 0;
@@ -92,10 +94,10 @@ export default function BattleResult({
         {/* Result icon */}
         <div className="text-[72px] mb-3">{won ? '🏆' : '💀'}</div>
         <h2 className="font-heading text-2xl font-bold text-white mb-1">
-          {won ? 'Chiến thắng!' : 'Thất bại!'}
+          {won ? t('victory') : t('defeat')}
         </h2>
         <p className="text-white/60 text-sm mb-1">
-          {won ? `Đã tiêu diệt ${bossName}!` : `${bossName} đã đánh bại bạn!`}
+          {won ? t('you_defeated_boss', { bossName }) : t('boss_defeated_you', { bossName })}
         </p>
 
         {/* Stars (all victories) */}
@@ -112,13 +114,13 @@ export default function BattleResult({
         {isCampaign && serverData?.zoneProgress && (
           <div className="rounded-xl p-2.5 mb-2"
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="text-[10px] text-white/40 mb-1">Tiến độ vùng</div>
+            <div className="text-[10px] text-white/40 mb-1">{t('zone_progress')}</div>
             <div className="flex items-center justify-between text-xs text-white font-bold">
-              <span>{serverData.zoneProgress.bossesCleared}/{serverData.zoneProgress.totalBosses} boss</span>
+              <span>{t('boss_count_progress', { cleared: serverData.zoneProgress.bossesCleared, total: serverData.zoneProgress.totalBosses })}</span>
               <span>⭐ {serverData.zoneProgress.totalStars}/{serverData.zoneProgress.maxStars}</span>
             </div>
             {serverData.isFirstClear && (
-              <div className="text-[10px] text-yellow-300 mt-1 font-bold">🎉 Lần đầu clear!</div>
+              <div className="text-[10px] text-yellow-300 mt-1 font-bold">{t('first_clear_bonus')}</div>
             )}
           </div>
         )}
@@ -144,7 +146,7 @@ export default function BattleResult({
           <div className="rounded-xl p-2.5 mb-2"
             style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.2)' }}>
             <div className="text-[10px] text-red-300/80 font-bold mb-0.5">
-              ⚡ Hết lượt full reward ({serverData.dailyFightsUsed ?? '?'}/{serverData.dailyFightsMax ?? serverData.dailyBattlesMax ?? 20})
+              ⚡ {t('out_of_full_reward_turns', { used: serverData.dailyFightsUsed ?? '?', max: serverData.dailyFightsMax ?? serverData.dailyBattlesMax ?? 20 })}
             </div>
             <div className="flex items-center gap-3 text-[11px]">
               <span className="text-white/60">XP ×{Math.round((serverData.xpMultiplier ?? 0.5) * 100)}%</span>
@@ -156,41 +158,41 @@ export default function BattleResult({
         {/* Remaining battles indicator */}
         {isCampaign && !serverData?.isReducedReward && serverData?.remainingBattles !== undefined && (
           <div className="text-center text-[10px] text-white/40 mb-1">
-            Còn {serverData.remainingBattles}/{serverData.dailyFightsMax ?? serverData.dailyBattlesMax ?? 20} trận thưởng đầy đủ hôm nay
+            {t('remaining_full_reward_battles', { remaining: serverData.remainingBattles, max: serverData.dailyFightsMax ?? serverData.dailyBattlesMax ?? 20 })}
           </div>
         )}
 
         {/* Server adjusted result */}
         {serverData?.wasAdjusted && (
           <p className="text-center text-[10px] text-orange-400/60 mb-1">
-            * Kết quả đã được server xác nhận
+            {t('server_confirmed_result')}
           </p>
         )}
 
         {/* DMG row */}
         <div className="flex items-center justify-center gap-4 my-3 text-sm font-bold flex-wrap">
-          <span style={{ color: '#ff6b6b' }}>⚔️ {totalDmgDealt.toLocaleString()} DMG</span>
+          <span style={{ color: '#ff6b6b' }}>⚔️ {totalDmgDealt.toLocaleString()} {t('dmg')}</span>
         </div>
 
         {/* Combat stats summary */}
         <div className="grid grid-cols-3 gap-2 mb-3 px-1">
           {combatStats.critCount > 0 && (
-            <StatChip emoji="💥" label={`${combatStats.critCount} Crit`} color="#ff6b6b" />
+            <StatChip emoji="💥" label={`${combatStats.critCount} ${t('stat_crit')}`} color="#ff6b6b" />
           )}
           {combatStats.dodgeCount > 0 && (
-            <StatChip emoji="🏃" label={`${combatStats.dodgeCount} Né`} color="#55efc4" />
+            <StatChip emoji="🏃" label={`${combatStats.dodgeCount} ${t('stat_dodge')}`} color="#55efc4" />
           )}
           {combatStats.ultCount > 0 && (
-            <StatChip emoji="⚡" label={`${combatStats.ultCount} ULT`} color="#a29bfe" />
+            <StatChip emoji="⚡" label={`${combatStats.ultCount} ${t('stat_ult')}`} color="#a29bfe" />
           )}
           {combatStats.reflectTotal > 0 && (
-            <StatChip emoji="🛡️" label={`${combatStats.reflectTotal} Phản`} color="#74b9ff" />
+            <StatChip emoji="🛡️" label={`${combatStats.reflectTotal} ${t('stat_reflect')}`} color="#74b9ff" />
           )}
           {combatStats.totalHealed > 0 && (
-            <StatChip emoji="💚" label={`${combatStats.totalHealed} Hồi`} color="#55efc4" />
+            <StatChip emoji="💚" label={`${combatStats.totalHealed} ${t('stat_heal')}`} color="#55efc4" />
           )}
           {combatStats.turnsPlayed > 0 && (
-            <StatChip emoji="🔄" label={`${combatStats.turnsPlayed} Lượt`} color="#fdcb6e" />
+            <StatChip emoji="🔄" label={`${combatStats.turnsPlayed} ${t('stat_turn')}`} color="#fdcb6e" />
           )}
         </div>
 
@@ -200,11 +202,11 @@ export default function BattleResult({
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="grid grid-cols-2 gap-2 text-[11px]">
               <div className="text-left">
-                <span className="text-white/40">Lượt:</span>{' '}
+                <span className="text-white/40">{t('stat_turn')}:</span>{' '}
                 <span className="font-bold text-white">{turnUsed}/{turnMax}</span>
               </div>
               <div className="text-right">
-                <span className="text-white/40">Max combo:</span>{' '}
+                <span className="text-white/40">{t('max_combo')}</span>{' '}
                 <span className="font-bold text-white">×{maxCombo || 1}</span>
               </div>
             </div>
@@ -231,7 +233,7 @@ export default function BattleResult({
         {!won && archetypeTip && (
           <div className="rounded-xl p-3 mb-4 text-left"
             style={{ background: 'rgba(253,203,110,0.1)', border: '1px solid rgba(253,203,110,0.2)' }}>
-            <div className="text-[10px] font-bold text-yellow-300/80 uppercase tracking-wider mb-1">💡 Mẹo</div>
+            <div className="text-[10px] font-bold text-yellow-300/80 uppercase tracking-wider mb-1">💡 {t('tip_label')}</div>
             <p className="text-[11px] text-white/70">{archetypeTip}</p>
           </div>
         )}
@@ -247,12 +249,12 @@ export default function BattleResult({
               border: isCampaign ? '1px solid rgba(255,255,255,0.2)' : 'none',
               boxShadow: isCampaign ? 'none' : '0 6px 20px rgba(45,138,78,0.3)',
             }}>
-            {isCampaign ? '📋 Về Map' : 'Quay lại'}
+            {isCampaign ? `📋 ${t('back_to_map')}` : t('go_back')}
           </button>
           {onRetry && (
             <button onClick={() => { playSound('ui_click'); onRetry(); }}
               className="flex-1 py-3.5 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform btn-green">
-              🔄 {won ? 'Đánh lại' : 'Thử lại'}
+              🔄 {won ? t('retry_battle') : t('try_again')}
             </button>
           )}
         </div>

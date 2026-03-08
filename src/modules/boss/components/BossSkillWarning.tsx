@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import type { SkillWarning } from '../hooks/useMatch3';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   warning: SkillWarning;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function BossSkillWarning({ warning, bossName, bossEmoji, manaCost, currentMana, onDodge }: Props) {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState(warning.countdown);
   const canDodge = currentMana >= manaCost;
 
@@ -92,20 +94,19 @@ export default function BossSkillWarning({ warning, bossName, bossEmoji, manaCos
             onDodge();
           }}
           disabled={!canDodge}
-          className={`w-full py-3 rounded-xl font-heading text-base font-bold text-white flex items-center justify-center gap-2 transition-transform active:scale-95 ${
-            canDodge
+          className={`w-full py-3 rounded-xl font-heading text-base font-bold text-white flex items-center justify-center gap-2 transition-transform active:scale-95 ${canDodge
               ? 'bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/30'
               : 'bg-gray-600 opacity-50 cursor-not-allowed'
-          }`}
+            }`}
         >
           <span className="text-xl">🛡️</span>
-          NÉ
+          {t('dodge')}
           <span className="text-xs opacity-80">({manaCost} 💎)</span>
         </button>
 
         {!canDodge && (
           <p className="text-center text-[10px] text-red-200 mt-1">
-            Thiếu mana! Cần {manaCost} 💎
+            {t('not_enough_mana', { manaCost })}
           </p>
         )}
       </div>

@@ -12,6 +12,7 @@ import { ZONE_META } from '@/modules/campaign/data/zones';
 import type { BossInfo } from '../data/bosses';
 import type { ZoneBoss } from '@/modules/campaign/types/campaign.types';
 import BossFightM3 from './BossFightM3';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   bossId: string;
@@ -32,6 +33,7 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): BossInfo {
     id: String(boss.id),
     name: boss.name,
     emoji,
+    image: '',
     hp: boss.hp,
     attack: detail?.atk ?? boss.attack,
     reward: boss.reward,
@@ -45,6 +47,7 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): BossInfo {
 }
 
 export default function CampaignBattleLoader({ bossId }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const zoneName = searchParams.get('zoneName') || '';
@@ -62,7 +65,7 @@ export default function CampaignBattleLoader({ bossId }: Props) {
       <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/80 font-heading font-bold text-sm">Đang tải boss...</p>
+          <p className="text-white/80 font-heading font-bold text-sm">{t('loading_boss')}</p>
         </div>
       </div>
     );
@@ -75,7 +78,7 @@ export default function CampaignBattleLoader({ bossId }: Props) {
         <div className="text-center">
           <span className="text-5xl mb-4 block">😵</span>
           <p className="text-red-300 font-heading font-bold mb-2">
-            {error ? 'Lỗi tải boss' : 'Boss không tìm thấy'}
+            {error ? t('error_loading_boss') : t('boss_not_found')}
           </p>
           <p className="text-white/40 text-xs mb-4">
             {error ? String(error) : `Boss ID: ${bossId}`}
@@ -84,7 +87,7 @@ export default function CampaignBattleLoader({ bossId }: Props) {
             onClick={() => navigate(`/campaign/${zoneNumber}`)}
             className="btn-gold px-6 py-2 rounded-xl font-heading font-bold text-sm text-white"
           >
-            Về Map
+            {t('back_to_map')}
           </button>
         </div>
       </div>

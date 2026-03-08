@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { autoPlayApi } from '@/shared/api/api-autoplay';
@@ -25,7 +26,7 @@ import {
 interface PkgMeta {
   level: number;
   name: string;
-  nameVi: string;
+  nameKey: string;
   algorithm: string;
   features: string[];
   color: string;
@@ -35,33 +36,33 @@ interface PkgMeta {
 
 const PACKAGES: PkgMeta[] = [
   {
-    level: 2, name: 'Basic', nameVi: 'Thông minh', algorithm: 'Greedy',
+    level: 2, name: 'Basic', nameKey: 'autoplay_smart', algorithm: 'Greedy',
     features: ['Weighted scoring', 'Situation awareness'],
     color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', icon: '🧠',
   },
   {
-    level: 3, name: 'Advanced', nameVi: 'Nâng cao', algorithm: 'Cascade',
-    features: ['Cascade simulation', 'Auto-dodge', 'Auto kỹ năng'],
+    level: 3, name: 'Advanced', nameKey: 'autoplay_advanced', algorithm: 'Cascade',
+    features: ['Cascade simulation', 'Auto-dodge', 'Auto skill'],
     color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', icon: '⚡',
   },
   {
-    level: 4, name: 'Pro', nameVi: 'Chuyên gia', algorithm: 'MCTS 30',
+    level: 4, name: 'Pro', nameKey: 'autoplay_expert', algorithm: 'MCTS 30',
     features: ['Monte Carlo search', 'Auto-ULT timing', '30 simulations'],
     color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)', icon: '🎯',
   },
   {
-    level: 5, name: 'Elite', nameVi: 'Tối thượng', algorithm: 'MCTS 80',
-    features: ['80 simulations', 'Toàn bộ kỹ năng', 'Self-learning AI'],
+    level: 5, name: 'Elite', nameKey: 'autoplay_ultimate', algorithm: 'MCTS 80',
+    features: ['80 simulations', 'All skills', 'Self-learning AI'],
     color: '#ec4899', gradient: 'linear-gradient(135deg, #ef4444, #ec4899, #8b5cf6)', icon: '🧠✨',
   },
 ];
 
-const LEVEL_INFO: Record<number, { nameVi: string; icon: string; color: string }> = {
-  1: { nameVi: 'Cơ bản', icon: '🤖', color: '#9ca3af' },
-  2: { nameVi: 'Thông minh', icon: '🧠', color: '#3b82f6' },
-  3: { nameVi: 'Nâng cao', icon: '⚡', color: '#8b5cf6' },
-  4: { nameVi: 'Chuyên gia', icon: '🎯', color: '#f59e0b' },
-  5: { nameVi: 'Tối thượng', icon: '🧠✨', color: '#ec4899' },
+const LEVEL_INFO: Record<number, { nameKey: string; icon: string; color: string }> = {
+  1: { nameKey: 'autoplay_basic', icon: '🤖', color: '#9ca3af' },
+  2: { nameKey: 'autoplay_smart', icon: '🧠', color: '#3b82f6' },
+  3: { nameKey: 'autoplay_advanced', icon: '⚡', color: '#8b5cf6' },
+  4: { nameKey: 'autoplay_expert', icon: '🎯', color: '#f59e0b' },
+  5: { nameKey: 'autoplay_ultimate', icon: '🧠✨', color: '#ec4899' },
 };
 
 type BuyStep = 'options' | 'signing' | 'processing';
@@ -69,6 +70,7 @@ type BuyStep = 'options' | 'signing' | 'processing';
 // ─── Main component ───────────────────────────────────────────────
 
 export default function AutoPlayShopSection() {
+  const { t } = useTranslation();
   const {
     effectiveLevel, purchasedLevel, rentedLevel, daysUntilExpiry,
   } = useAutoPlayLevel();
@@ -132,7 +134,7 @@ export default function AutoPlayShopSection() {
     buy.mutate({ level: buyTarget.level }, {
       onSuccess: () => closeBuyModal(),
       onError: (err: any) => {
-        setBuyError(err.message || 'Thanh toán thất bại');
+        setBuyError(err.message || t('payment_failed'));
         setBuyStep('options');
       },
     });
@@ -148,7 +150,7 @@ export default function AutoPlayShopSection() {
       setUserOpHash(prep.userOpHash);
       setBuyStep('signing');
     } catch (err: any) {
-      setBuyError(err.message || 'Không thể chuẩn bị giao dịch');
+      setBuyError(err.message || t('prepare_tx_error'));
     } finally {
       setIsPreparing(false);
     }
@@ -163,12 +165,12 @@ export default function AutoPlayShopSection() {
       buy.mutate({ level: buyTarget.level, txHash }, {
         onSuccess: () => closeBuyModal(),
         onError: (err: any) => {
-          setBuyError(err.message || 'Lỗi xác nhận giao dịch');
+          setBuyError(err.message || t('verify_tx_error'));
           setBuyStep('options');
         },
       });
     } catch (err: any) {
-      setBuyError(err.message || 'Lỗi Smart Wallet');
+      setBuyError(err.message || t('smart_wallet_error'));
       setBuyStep('options');
     }
   };
@@ -183,12 +185,12 @@ export default function AutoPlayShopSection() {
       buy.mutate({ level: buyTarget.level, txHash }, {
         onSuccess: () => closeBuyModal(),
         onError: (err: any) => {
-          setBuyError(err.message || 'Lỗi xác nhận giao dịch');
+          setBuyError(err.message || t('verify_tx_error'));
           setBuyStep('options');
         },
       });
     } catch (err: any) {
-      setBuyError(err.message || 'Giao dịch thất bại');
+      setBuyError(err.message || t('tx_failed'));
       setBuyStep('options');
     }
   };
@@ -200,7 +202,7 @@ export default function AutoPlayShopSection() {
     buy.mutate({ level: buyTarget.level, txHash: manualTxHash.trim() }, {
       onSuccess: () => closeBuyModal(),
       onError: (err: any) => {
-        setBuyError(err.message || 'Xác minh thất bại');
+        setBuyError(err.message || t('verify_failed'));
         setBuyStep('options');
       },
     });
@@ -221,23 +223,23 @@ export default function AutoPlayShopSection() {
 
     if (owned) return (
       <div className="w-full py-1.5 rounded-lg text-[10px] font-bold text-center bg-green-50 text-green-700 border border-green-200">
-        Đã mua vĩnh viễn ✅
+        {t('purchased_permanently')}
       </div>
     );
     if (rented) return (
       <div className="w-full py-1.5 rounded-lg text-[10px] font-bold text-center"
         style={{ background: `${pkg.color}15`, color: pkg.color, border: `1px solid ${pkg.color}40` }}>
-        Đang thuê ✅{daysUntilExpiry !== null ? ` (${daysUntilExpiry}d)` : ''}
+        {t('renting_status', { daysText: daysUntilExpiry !== null ? ` (${daysUntilExpiry}d)` : '' })}
       </div>
     );
     return (
       <button
-        onClick={() => canAfford ? setConfirmRent(pkg) : toast.error('Không đủ OGN')}
+        onClick={() => canAfford ? setConfirmRent(pkg) : toast.error(t('not_enough_ogn'))}
         disabled={rent.isPending}
         className="w-full py-1.5 rounded-lg text-[10px] font-bold text-white transition-all active:scale-95 disabled:opacity-50"
         style={{ background: canAfford ? pkg.gradient : '#9ca3af' }}
       >
-        {canAfford ? `Thuê 7 ngày` : 'Không đủ OGN'}
+        {canAfford ? t('rent_7_days') : t('not_enough_ogn')}
       </button>
     );
   };
@@ -248,7 +250,7 @@ export default function AutoPlayShopSection() {
     const owned = isPurchased(pkg.level);
     if (owned) return (
       <div className="w-full py-1.5 rounded-lg text-[10px] font-bold text-center bg-green-50 text-green-700 border border-green-200">
-        Đã mua ✅
+        {t('purchased_status')}
       </div>
     );
     const avaxPrice = prices?.buy[pkg.level] ?? '...';
@@ -258,7 +260,7 @@ export default function AutoPlayShopSection() {
         className="w-full py-1.5 rounded-lg text-[10px] font-bold text-white transition-all active:scale-95"
         style={{ background: pkg.gradient }}
       >
-        {avaxPrice} AVAX — Vĩnh viễn
+        {t('price_permanent', { price: avaxPrice })}
       </button>
     );
   };
@@ -286,7 +288,7 @@ export default function AutoPlayShopSection() {
           <span className="font-heading text-sm font-bold block" style={{ color: pkg.color }}>
             Lv.{pkg.level} {pkg.name}
           </span>
-          <span className="text-[9px] text-gray-400">{pkg.algorithm} — {pkg.nameVi}</span>
+          <span className="text-[9px] text-gray-400">{pkg.algorithm} — {t(pkg.nameKey)}</span>
         </div>
         <ul className="space-y-0.5 mb-2.5">
           {pkg.features.map((f, i) => (
@@ -297,7 +299,7 @@ export default function AutoPlayShopSection() {
         </ul>
         {tab === 'rent' && (
           <div className="text-center text-[9px] text-gray-400 mb-1.5">
-            🪙 {prices?.rent[pkg.level]?.toLocaleString() ?? '—'} OGN / tuần
+            {t('rent_price_per_week', { price: prices?.rent[pkg.level]?.toLocaleString() ?? '—' })}
           </div>
         )}
         {renderBtn(pkg)}
@@ -317,12 +319,12 @@ export default function AutoPlayShopSection() {
             {currentInfo.icon} Auto-Play AI
           </h2>
           <p className="text-[11px] font-bold mt-0.5" style={{ color: currentInfo.color }}>
-            Đang dùng: Lv.{effectiveLevel} {currentInfo.nameVi} {currentInfo.icon}
+            {t('current_using', { level: effectiveLevel, name: t(currentInfo.nameKey), icon: currentInfo.icon })}
             {rentedLevel && daysUntilExpiry !== null && (
-              <span className="text-gray-400 font-normal"> · Thuê còn {daysUntilExpiry}d</span>
+              <span className="text-gray-400 font-normal"> {t('rent_remaining_days', { days: daysUntilExpiry })}</span>
             )}
             {purchasedLevel && (
-              <span className="text-gray-400 font-normal"> · Mua: Lv.{purchasedLevel}</span>
+              <span className="text-gray-400 font-normal"> {t('purchased_level_info', { level: purchasedLevel })}</span>
             )}
           </p>
         </div>
@@ -331,7 +333,7 @@ export default function AutoPlayShopSection() {
             onClick={() => setShowLearning(!showLearning)}
             className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-600 active:scale-95 transition-transform"
           >
-            {showLearning ? 'Hide' : '📚 AI Learning'}
+            {showLearning ? '{t('hide')}' : '{t('ai_learning_btn')}'}
           </button>
         )}
       </div>
@@ -340,7 +342,7 @@ export default function AutoPlayShopSection() {
       {showLearning && learningSummary && (
         <div className="bg-gray-50 rounded-xl p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-gray-700">Self-Learning Data</span>
+            <span className="text-[11px] font-bold text-gray-700">{t('self_learning_data')}</span>
             <button
               onClick={() => { resetWeights(); setShowLearning(false); }}
               className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-500 active:scale-95 transition-transform"
@@ -371,7 +373,7 @@ export default function AutoPlayShopSection() {
               boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
             } : { color: '#9ca3af' }}
           >
-            {t === 'rent' ? '🪙 Thuê OGN' : '💎 Mua AVAX'}
+            {t === 'rent' ? t('rent_ogn_tab') : t('buy_avax_tab')}
           </button>
         ))}
       </div>
@@ -379,7 +381,7 @@ export default function AutoPlayShopSection() {
       {/* OGN balance (rent tab) */}
       {tab === 'rent' && (
         <div className="flex items-center justify-end gap-1 text-[10px] font-bold text-gray-500">
-          OGN hiện có: 🪙 {ogn.toLocaleString()}
+          {t('current_ogn_balance', { balance: ogn.toLocaleString() })}
         </div>
       )}
 
@@ -418,17 +420,17 @@ export default function AutoPlayShopSection() {
             </div>
             <div className="bg-gray-50 rounded-xl p-3 space-y-1.5 mb-4 text-[11px]">
               <div className="flex justify-between">
-                <span className="text-gray-500">Trừ:</span>
+                <span className="text-gray-500">{t('deduct_label')}</span>
                 <span className="font-bold text-orange-600">
                   🪙 {(prices?.rent[confirmRent.level] ?? 0).toLocaleString()} OGN
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Thời hạn:</span>
-                <span className="font-bold">7 ngày</span>
+                <span className="text-gray-500">{t('duration_label')}</span>
+                <span className="font-bold">{t('duration_7_days')}</span>
               </div>
               <div className="flex justify-between border-t border-gray-200 pt-1.5">
-                <span className="text-gray-500">OGN còn lại:</span>
+                <span className="text-gray-500">{t('remaining_ogn_label')}</span>
                 <span className="font-bold">
                   🪙 {(ogn - (prices?.rent[confirmRent.level] ?? 0)).toLocaleString()}
                 </span>
@@ -436,7 +438,7 @@ export default function AutoPlayShopSection() {
             </div>
             {rentedLevel && rentedLevel !== confirmRent.level && (
               <p className="text-[10px] text-amber-600 bg-amber-50 rounded-lg p-2 mb-3 text-center">
-                ⚠️ Sẽ thay thế thuê Lv.{rentedLevel} hiện tại
+                {t('replace_renting_warning', { level: rentedLevel })}
               </p>
             )}
             <div className="flex gap-2">
@@ -452,7 +454,7 @@ export default function AutoPlayShopSection() {
                 className="flex-1 py-2.5 rounded-xl text-[12px] font-bold text-white active:scale-95 transition-transform disabled:opacity-50"
                 style={{ background: confirmRent.gradient }}
               >
-                {rent.isPending ? '...' : '✅ Xác nhận'}
+                {rent.isPending ? '...' : t('confirm_btn_action')}
               </button>
             </div>
           </div>
@@ -486,14 +488,14 @@ export default function AutoPlayShopSection() {
             {buyStep === 'processing' && (
               <div className="text-center py-6">
                 <div className="w-10 h-10 border-3 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-[12px] text-gray-600">Đang xử lý thanh toán...</p>
+                <p className="text-[12px] text-gray-600">{t('processing_payment')}</p>
               </div>
             )}
 
             {buyStep === 'signing' && userOpHash && (
               <div className="space-y-3">
                 <p className="text-[11px] text-gray-600 text-center">
-                  Xác thực vân tay để gửi {prices?.buy[buyTarget.level]} AVAX
+                  {t('fingerprint_auth_prompt', { amount: prices?.buy[buyTarget.level] })}
                 </p>
                 <button
                   onClick={handleSignSmartWallet}
@@ -521,10 +523,10 @@ export default function AutoPlayShopSection() {
                       style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
                     >
                       <span className="material-symbols-outlined text-base">account_balance_wallet</span>
-                      Ví FARMVERSE ({parseFloat(custodialWallet.balance || '0').toFixed(4)} AVAX)
+                      {t('farmverse_wallet', { balance: parseFloat(custodialWallet.balance || '0').toFixed(4) })}
                     </button>
                     {parseFloat(custodialWallet.balance || '0') < parseFloat(prices?.buy[buyTarget.level] ?? '0') && (
-                      <p className="text-[10px] text-red-500 text-center">Số dư ví không đủ</p>
+                      <p className="text-[10px] text-red-500 text-center">{t('insufficient_wallet_balance')}</p>
                     )}
                   </>
                 )}
@@ -538,9 +540,9 @@ export default function AutoPlayShopSection() {
                     style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}
                   >
                     {isPreparing ? (
-                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Đang chuẩn bị...</>
+                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('preparing_status')}</>
                     ) : (
-                      <><span className="material-symbols-outlined text-base">fingerprint</span>Smart Wallet</>
+                      <><span className="material-symbols-outlined text-base">fingerprint</span>{t('smart_wallet_btn')}</>
                     )}
                   </button>
                 )}
@@ -576,7 +578,7 @@ export default function AutoPlayShopSection() {
                 {prices?.receiverAddress && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-[10px]">
                     <p className="font-bold text-green-700 mb-1">
-                      Bước 1: Gửi {prices.buy[buyTarget.level]} AVAX đến:
+                      {t('manual_step1', { amount: prices.buy[buyTarget.level] })}
                     </p>
                     <code className="block bg-white rounded p-2 break-all text-gray-600 font-mono">
                       {prices.receiverAddress}
@@ -584,7 +586,7 @@ export default function AutoPlayShopSection() {
                   </div>
                 )}
                 <div>
-                  <p className="text-[10px] font-bold text-gray-600 mb-1">Bước 2: Nhập Transaction Hash:</p>
+                  <p className="text-[10px] font-bold text-gray-600 mb-1">{t('manual_step2')}</p>
                   <input
                     type="text"
                     value={manualTxHash}
@@ -599,7 +601,7 @@ export default function AutoPlayShopSection() {
                   className="w-full py-2.5 rounded-xl text-white font-bold text-[12px] active:scale-95 transition-transform disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
                 >
-                  {buy.isPending ? 'Đang xác nhận...' : 'Xác nhận giao dịch'}
+                  {buy.isPending ? t('verifying_status') : t('verify_tx_btn')}
                 </button>
                 <button
                   onClick={() => setShowManual(false)}

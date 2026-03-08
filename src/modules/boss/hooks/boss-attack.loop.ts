@@ -9,6 +9,7 @@ import {
   getBossSkillName, getEnrageMultiplier,
 } from '@/shared/match3/combat.config';
 import { playSound } from '@/shared/audio';
+import i18n from '@/i18n';
 
 export interface BossAttackLoopDeps {
   bossAttack: number;
@@ -53,7 +54,7 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
         setSkillWarning(null);
 
         if (dodgedRef.current) {
-          setBossAttackMsg({ text: 'NÉ THÀNH CÔNG! 🏃', emoji: '💨' });
+          setBossAttackMsg({ text: i18n.t('dodge_success'), emoji: '💨' });
           setTimeout(() => setBossAttackMsg(null), 1000);
           return;
         }
@@ -65,7 +66,7 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
       // ══ NORMAL ATTACK: instant, no warning, no dodge ══
       playSound('boss_attack');
       const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.2)));
-      applyBossDamageToPlayer(normalDmg, 'Boss tấn công!', '💥');
+      applyBossDamageToPlayer(normalDmg, i18n.t('boss_attacks'), '💥');
     }
   }, BOSS_ATK_INTERVAL);
 

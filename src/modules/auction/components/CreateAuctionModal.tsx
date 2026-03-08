@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react';
 import { useSubmitToQueue } from '../hooks/useAuction';
 import { playSound } from '@/shared/audio';
 
@@ -19,6 +20,7 @@ const RARITY_STYLE: Record<string, string> = {
 };
 
 export function CreateAuctionModal({ isOpen, onClose, tokenId, nftImageUrl, nftName, nftRarity }: Props) {
+  const { t } = useTranslation(); isOpen, onClose, tokenId, nftImageUrl, nftName, nftRarity }: Props) {
   const { mutate: submitQueue, isPending } = useSubmitToQueue();
   const [startPrice, setStartPrice] = useState('');
   const [error, setError] = useState('');
@@ -55,7 +57,7 @@ export function CreateAuctionModal({ isOpen, onClose, tokenId, nftImageUrl, nftN
     <div className="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <h3 className="text-white font-bold text-lg text-center">Đưa vào Đấu Giá</h3>
+        <h3 className="text-white font-bold text-lg text-center">{t('create_auction_title')}</h3>
 
         {/* NFT preview */}
         <div className="flex justify-center">
@@ -77,12 +79,12 @@ export function CreateAuctionModal({ isOpen, onClose, tokenId, nftImageUrl, nftN
 
         {/* Price input */}
         <div>
-          <label className="text-gray-400 text-xs mb-1 block">Giá khởi điểm (AVAX)</label>
+          <label className="text-gray-400 text-xs mb-1 block">{t('start_price_label')}</label>
           <input
             type="number"
             step="0.01"
             min="0.01"
-            placeholder="VD: 0.5"
+            placeholder={t('start_price_placeholder')}
             value={startPrice}
             onChange={e => setStartPrice(e.target.value)}
             className="w-full p-3 bg-gray-700 rounded-xl text-white text-lg border border-gray-600 focus:border-amber-500 outline-none transition-colors"
@@ -116,7 +118,7 @@ export function CreateAuctionModal({ isOpen, onClose, tokenId, nftImageUrl, nftN
             disabled={!canSubmit}
             className="flex-1 py-3 bg-orange-600 hover:bg-orange-500 rounded-xl text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending ? 'Đang đăng ký...' : 'Xác nhận đăng ký'}
+            {isPending ? t('create_auction_submitting') : t('create_auction_submit_btn')}
           </button>
         </div>
       </div>

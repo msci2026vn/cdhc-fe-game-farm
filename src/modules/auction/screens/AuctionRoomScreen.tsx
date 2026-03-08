@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import i18n from '@/i18n';
+import { useState } from 'react';
+import { useTranslation, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuctionDetail, useBidPack, useCancelAuction } from '../hooks/useAuction';
 import { useAuctionLivePolling } from '../hooks/useAuctionPolling';
@@ -23,14 +25,15 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  pending: 'Chờ',
-  active: 'Đang diễn ra',
+  pending: i18n.t('status_pending'),
+  active: i18n.t('room_status_active'),
   sudden_death: 'Sudden Death',
-  ended: 'Kết thúc',
-  cancelled: 'Đã hủy',
+  ended: i18n.t('room_status_ended'),
+  cancelled: i18n.t('status_cancelled'),
 };
 
 export default function AuctionRoomScreen() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: profile } = usePlayerProfile();
@@ -87,7 +90,7 @@ export default function AuctionRoomScreen() {
           <span className="material-symbols-outlined text-xl text-gray-400">arrow_back</span>
         </button>
         <h1 className="flex-1 text-center font-bold text-white uppercase tracking-wider text-sm">
-          {status === 'sudden_death' ? 'Sudden Death' : 'Đấu Giá'}
+          {status === 'sudden_death' ? 'Sudden Death' : t('room_title_normal')}
         </h1>
         <span className={`text-xs px-2 py-1 rounded-full ${statusColors[status] || ''}`}>
           {statusLabels[status] || status}
@@ -108,13 +111,13 @@ export default function AuctionRoomScreen() {
         {isLive && (
           <div className="text-center my-4">
             <div className="text-xs text-gray-500 mb-1">
-              {status === 'sudden_death' ? 'Sudden Death còn' : 'Còn lại'}
+              {status === 'sudden_death' ? t('sd_time_remaining') : t('time_remaining')}
             </div>
             <AuctionCountdown endTime={auction.endTime} size="lg" />
           </div>
         )}
         {status === 'ended' && (
-          <div className="text-center my-4 text-green-400 font-bold">Đã kết thúc</div>
+          <div className="text-center my-4 text-green-400 font-bold">{t('room_status_ended_label')}</div>
         )}
 
         {/* Sealed Bid Panel */}
@@ -123,8 +126,8 @@ export default function AuctionRoomScreen() {
         {/* Bid pack info */}
         {bidPack && isLive && (
           <div className="flex justify-center gap-4 text-xs text-gray-500 my-3">
-            <span>🎁 Free: {bidPack.freeBidsRemaining}/3</span>
-            <span>📊 Đã dùng: {bidPack.totalBidsUsed}/{bidPack.maxBidsPerSession}</span>
+            <span>{t('free_bids_remaining', { rem: bidPack.freeBidsRemaining })}</span>
+            <span>{t('bids_used_info', { used: bidPack.totalBidsUsed, max: bidPack.maxBidsPerSession })}</span>
           </div>
         )}
       </div>

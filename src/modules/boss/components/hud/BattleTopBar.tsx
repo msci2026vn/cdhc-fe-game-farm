@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import TurnCounter from './TurnCounter';
 import { SoundToggle, playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface BattleTopBarProps {
   turn: number;
@@ -38,6 +39,7 @@ export default function BattleTopBar({
   elapsedSeconds, enrageLevel,
   onPause, onResume,
 }: BattleTopBarProps) {
+  const { t } = useTranslation();
   const [showRetreatConfirm, setShowRetreatConfirm] = useState(false);
 
   // Pause/resume combat when confirm dialog opens/closes
@@ -109,7 +111,7 @@ export default function BattleTopBar({
           </div>
           <button onClick={handleRetreatClick}
             className="text-white/40 text-sm font-bold active:scale-95 px-1.5 py-1 rounded hover:text-white/60 transition-colors"
-            title={isCampaign ? 'Thoát' : 'Rút lui'}>
+            title={isCampaign ? t('exit') : t('retreat')}>
             {isCampaign ? '✕' : '🏃'}
           </button>
         </div>
@@ -123,23 +125,23 @@ export default function BattleTopBar({
             style={{ background: 'linear-gradient(180deg, #2d1b4e, #1a0a2e)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <span className="text-4xl block mb-3">{isCampaign ? '⚔️' : '🏃'}</span>
             <h3 className="font-heading text-lg font-bold text-white mb-1">
-              {isCampaign ? 'Thoát trận đấu?' : 'Rút lui?'}
+              {isCampaign ? t('exit_battle_q') : t('retreat_q')}
             </h3>
             <p className="text-white/60 text-sm mb-5">
               {isCampaign
-                ? 'Tiến trình trận này sẽ không được lưu'
-                : 'Bạn chắc chắn muốn rút lui? Trận đấu sẽ tính là thua.'}
+                ? t('exit_battle_desc')
+                : t('retreat_desc')}
             </p>
             <div className="flex gap-3">
               <button onClick={dismissRetreat}
                 className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-95 transition-transform"
                 style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                {isCampaign ? 'Tiếp tục' : 'Ở lại'}
+                {isCampaign ? t('continue') : t('stay')}
               </button>
               <button onClick={confirmRetreat}
                 className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-95 transition-transform"
                 style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)' }}>
-                {isCampaign ? 'Thoát' : 'Rút lui'}
+                {isCampaign ? t('exit') : t('retreat')}
               </button>
             </div>
           </div>

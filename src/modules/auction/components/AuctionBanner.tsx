@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useNextSession } from '../hooks/useAuction';
 import { AuctionCountdown } from './AuctionCountdown';
 import { playSound } from '@/shared/audio';
 
 export function AuctionBanner() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: session } = useNextSession();
 
@@ -20,7 +22,7 @@ export function AuctionBanner() {
       onClick={() => { playSound('ui_click'); navigate('/auction'); }}
     >
       <div className="flex flex-col">
-        <span className="text-amber-400 text-xs font-bold">⚡ Đấu giá sau</span>
+        <span className="text-amber-400 text-xs font-bold">{t('auction_starting_soon')}</span>
         <span className="text-white font-bold text-sm tracking-wide">{session.name}</span>
       </div>
       <AuctionCountdown endTime={session.startTime} size="sm" />

@@ -9,14 +9,15 @@ import { useOgn, useXp, useLevel } from '@/shared/hooks/usePlayerProfile';
 import { useUIStore } from '@/shared/stores/uiStore';
 import { playSound, audioManager } from '@/shared/audio';
 import AutoPlayShopSection from '../components/AutoPlayShopSection';
+import { useTranslation } from 'react-i18next';
 
 type ShopTab = 'seed' | 'tool' | 'card' | 'nft' | 'autoplay';
 
-const TABS: { key: ShopTab; label: string }[] = [
-  { key: 'seed', label: 'Hạt giống' },
-  { key: 'tool', label: 'Dụng cụ' },
-  { key: 'card', label: 'Thẻ TP' },
-  { key: 'autoplay', label: 'Auto AI' },
+const TABS: { key: ShopTab; labelKey: string }[] = [
+  { key: 'seed', labelKey: 'shop_seed' },
+  { key: 'tool', labelKey: 'shop_tool' },
+  { key: 'card', labelKey: 'shop_card' },
+  { key: 'autoplay', labelKey: 'shop_autoplay' },
 ];
 
 const RARITY_STYLES: Record<string, { border: string; badge: string; badgeText: string }> = {
@@ -27,6 +28,7 @@ const RARITY_STYLES: Record<string, { border: string; badge: string; badgeText: 
 };
 
 export default function ShopScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ShopTab>('seed');
 
@@ -54,7 +56,7 @@ export default function ShopScreen() {
 
   const handleBuyClick = (_item: any) => {
     playSound('ui_click');
-    addToast('Chức năng đang phát triển 🚀', 'info');
+    addToast(t('feature_in_development'), 'info');
   };
 
   const confirmBuy = () => {
@@ -70,10 +72,10 @@ export default function ShopScreen() {
           setBuyAnim(item.id);
           setTimeout(() => setBuyAnim(null), 800);
           showFlyUp(`-${data.ognSpent} OGN 🛒`);
-          addToast(`Đã mua ${item.name} ${item.emoji} thành công!`, 'success');
+          addToast(t('buy_success', { name: item.name, emoji: item.emoji }), 'success');
         },
         onError: (error: any) => {
-          addToast(error.message || 'Không thể mua vật phẩm', 'error');
+          addToast(error.message || t('buy_error_generic'), 'error');
         },
       }
     );
@@ -84,7 +86,7 @@ export default function ShopScreen() {
       <div className="h-[100dvh] max-w-[430px] mx-auto relative shop-gradient flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-bounce">🛒</div>
-          <p className="text-white font-heading">Đang tải cửa hàng...</p>
+          <p className="text-white font-heading">{t('loading_shop')}</p>
         </div>
       </div>
     );
@@ -97,7 +99,7 @@ export default function ShopScreen() {
         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center text-xl header-btn-glass">
           ←
         </button>
-        <h1 className="font-heading text-[22px] font-bold">🛒 Cửa hàng</h1>
+        <h1 className="font-heading text-[22px] font-bold">{t('shop_title')}</h1>
         <div className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] glass-card">
           <span>🪙</span>
           <span className="font-heading text-base font-bold" style={{ color: '#d49a1a' }}>
@@ -110,13 +112,13 @@ export default function ShopScreen() {
       <div className="flex w-full px-5 mb-2">
         <div className="flex w-[66.6%] bg-white/40 p-1 rounded-2xl backdrop-blur-md border border-white/50">
           <button className="flex-1 py-2 rounded-xl text-xs font-bold bg-white text-green-700 shadow-sm transition-all border border-green-200">
-            🏪 Chợ OGN
+            {t('ogn_market')}
           </button>
           <button
             onClick={() => { playSound('ui_click'); window.location.href = '/marketplace'; }}
             className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-600 hover:text-gray-900 transition-all"
           >
-            🎴 Chợ NFT
+            {t('nft_market')}
           </button>
         </div>
       </div>
@@ -135,7 +137,7 @@ export default function ShopScreen() {
                 : { boxShadow: '0 4px 12px rgba(45,138,78,0.3)' }
             }
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -189,12 +191,12 @@ export default function ShopScreen() {
               {/* Season tag */}
               {item.seasonStatus === 'off_season' && (
                 <span className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                  Trái vụ ⚠️
+                  {t('off_season_tag')}
                 </span>
               )}
               {item.seasonStatus === 'in_season' && (
                 <span className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
-                  Đúng vụ ✅
+                  {t('in_season_tag')}
                 </span>
               )}
 
@@ -223,7 +225,7 @@ export default function ShopScreen() {
                   boxShadow: 'none',
                 }}
               >
-                Đang phát triển
+                {t('feature_in_development').replace(' 🚀', '')}
               </button>
             </div>
           );
@@ -249,7 +251,7 @@ export default function ShopScreen() {
             </div>
 
             <p className="text-[11px] text-muted-foreground mb-4">
-              Số dư sau mua: 🪙 {((ogn || 0) - (confirmItem.price || 0)).toLocaleString('vi-VN')} OGN
+              {t('balance_after_purchase', { amount: ((ogn || 0) - (confirmItem.price || 0)).toLocaleString('vi-VN') })}
             </p>
 
             <div className="flex gap-3">
@@ -257,7 +259,7 @@ export default function ShopScreen() {
                 onClick={() => setConfirmItem(null)}
                 className="flex-1 py-2.5 rounded-xl font-heading text-sm font-bold bg-muted text-muted-foreground active:scale-95 transition-transform"
               >
-                Hủy
+                {t('cancel')}
               </button>
               <button
                 onClick={confirmBuy}
@@ -267,7 +269,7 @@ export default function ShopScreen() {
                   boxShadow: '0 4px 15px rgba(240,180,41,0.3)',
                 }}
               >
-                Xác nhận mua
+                {t('confirm_buy')}
               </button>
             </div>
           </div>

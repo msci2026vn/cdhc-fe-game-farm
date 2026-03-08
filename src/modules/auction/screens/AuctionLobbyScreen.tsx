@@ -1,4 +1,6 @@
+import i18n from '@/i18n';
 import { useState } from 'react';
+import { useTranslation } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuctionList, useNextSession, useCancelQueueItem, useMyQueue } from '../hooks/useAuction';
 import { AuctionCountdown } from '../components/AuctionCountdown';
@@ -12,17 +14,18 @@ type MainTab = 'auction' | 'queue' | 'history';
 type SubTab = 'spotlight' | 'side';
 
 const mainTabs: { key: MainTab; label: string }[] = [
-  { key: 'auction', label: '⚡ Đấu giá' },
-  { key: 'queue', label: '📦 Hàng chờ' },
-  { key: 'history', label: '📋 Lịch sử' },
+  { key: 'auction', label: i18n.t('tab_auction') },
+  { key: 'queue', label: i18n.t('tab_queue') },
+  { key: 'history', label: i18n.t('tab_history') },
 ];
 
 const auctionSubTabs: { key: SubTab; label: string }[] = [
-  { key: 'spotlight', label: '⭐ Spotlight' },
-  { key: 'side', label: '🏷️ Phiên phụ' },
+  { key: 'spotlight', label: i18n.t('tab_spotlight') },
+  { key: 'side', label: i18n.t('tab_side_session') },
 ];
 
 export default function AuctionLobbyScreen() {
+  const { t } = useTranslation();
   const [mainTab, setMainTab] = useState<MainTab>('auction');
   const [subTab, setSubTab] = useState<SubTab>('spotlight');
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export default function AuctionLobbyScreen() {
         <button onClick={() => { playSound('ui_back'); navigate(-1); }} className="w-8 h-8 flex items-center justify-center text-gray-400">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
         </button>
-        <h1 className="flex-1 text-center text-lg font-bold text-white">Đấu Giá NFT</h1>
+        <h1 className="flex-1 text-center text-lg font-bold text-white">{t('auction_lobby_title')}</h1>
         <div className="w-8" />
       </div>
 
@@ -103,13 +106,13 @@ export default function AuctionLobbyScreen() {
             {nextSession && nextSession.status === 'scheduled' && (
               <div className={`bg-gradient-to-r from-amber-900/40 to-orange-900/40 border rounded-2xl p-4 mb-4 ${showFomo ? 'border-amber-500 animate-pulse' : 'border-amber-700/50'
                 }`}>
-                <div className="text-xs text-amber-400 uppercase tracking-wide">Phiên tiếp theo</div>
+                <div className="text-xs text-amber-400 uppercase tracking-wide">{t('next_session_title')}</div>
                 <div className="text-lg font-bold text-white mt-1">{nextSession.name}</div>
                 <AuctionCountdown endTime={nextSession.startTime} size="lg" />
                 <div className="flex gap-3 mt-2 text-sm text-gray-400">
-                  <span>🃏 {nextSession.slotCount} NFT</span>
-                  <span>⏱ {nextSession.durationMinutes} phút</span>
-                  <span>💰 {nextSession.bidCostOgn} OGN/bid</span>
+                  <span>{t('nft_count_label', { count: nextSession.slotCount })}</span>
+                  <span>{t('minutes_label', { mins: nextSession.durationMinutes })}</span>
+                  <span>{t('ogn_per_bid', { cost: nextSession.bidCostOgn })}</span>
                 </div>
               </div>
             )}
@@ -123,7 +126,7 @@ export default function AuctionLobbyScreen() {
               <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
                 <span className="text-4xl">🎯</span>
                 <p className="text-gray-500">
-                  Chưa có {subTab === 'spotlight' ? 'Spotlight' : 'phiên phụ'} nào đang diễn ra
+                  {subTab === 'spotlight' ? t('no_active_spotlight') : t('no_active_side')}
                 </p>
               </div>
             ) : (
@@ -178,10 +181,10 @@ export default function AuctionLobbyScreen() {
                       item.status === 'active' ? 'bg-red-500/20 text-red-400' :
                       'bg-gray-500/20 text-gray-400'
                     }`}>
-                      {item.status === 'queued' ? 'Đang chờ' :
-                       item.status === 'assigned' ? 'Đã vào phiên' :
-                       item.status === 'active' ? 'Đang đấu giá' :
-                       item.status === 'ended' ? 'Đã kết thúc' : 'Đã rút'}
+                      {item.status === 'queued' ? t('queue_status_waiting') :
+                       item.status === 'assigned' ? t('queue_status_assigned') :
+                       item.status === 'active' ? t('queue_status_active') :
+                       item.status === 'ended' ? t('queue_status_ended') : t('queue_status_withdrawn')}
                     </span>
                     {item.status === 'queued' && (
                       <button
@@ -198,8 +201,8 @@ export default function AuctionLobbyScreen() {
             ) : (
               <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
                 <span className="text-4xl">📦</span>
-                <p className="text-gray-500">Bạn chưa gửi NFT nào</p>
-                <p className="text-xs text-gray-600">Vào Bộ Sưu Tập để gửi NFT đấu giá!</p>
+                <p className="text-gray-500">{t('no_queued_nfts')}</p>
+                <p className="text-xs text-gray-600">{t('go_to_collection_hint')}</p>
               </div>
             )}
           </div>
@@ -218,10 +221,10 @@ export default function AuctionLobbyScreen() {
             });
           }
         }}
-        title="Rút NFT khỏi hàng chờ?"
-        message="NFT sẽ được trả về Bộ Sưu Tập của bạn. Bạn có thể gửi lại bất cứ lúc nào."
-        confirmText="Rút về"
-        cancelText="Huỷ"
+        title={t('confirm_withdraw_queue_title')}
+        message={t('confirm_withdraw_queue_msg')}
+        confirmText={t('confirm_withdraw_queue_btn')}
+        cancelText={t('cancel')}
         confirmColor="red"
         icon="↩️"
         isLoading={cancelQueue.isPending}

@@ -1,4 +1,6 @@
+import i18n from '@/i18n';
 import { useState } from 'react';
+import { useTranslation } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMyBids, useMyListings } from '../hooks/useAuction';
 import { AuctionNftCard } from '../components/AuctionNftCard';
@@ -8,11 +10,12 @@ import { playSound } from '@/shared/audio';
 type TabKey = 'bids' | 'listings';
 
 const tabs: { key: TabKey; label: string }[] = [
-  { key: 'bids', label: '🎯 Đã bid' },
-  { key: 'listings', label: '🏷️ Đã bán' },
+  { key: 'bids', label: i18n.t('tab_bids') },
+  { key: 'listings', label: i18n.t('tab_listings') },
 ];
 
 export default function AuctionHistoryScreen() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<TabKey>('bids');
   const navigate = useNavigate();
   const { data: myBids, isLoading: loadingBids } = useMyBids(tab === 'bids');
@@ -28,7 +31,7 @@ export default function AuctionHistoryScreen() {
         <button onClick={() => { playSound('ui_back'); navigate(-1); }} className="w-8 h-8 flex items-center justify-center text-gray-400">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
         </button>
-        <h1 className="flex-1 text-center text-lg font-bold text-white">Lịch sử Đấu Giá</h1>
+        <h1 className="flex-1 text-center text-lg font-bold text-white">{t('auction_history_title')}</h1>
         <div className="w-8" />
       </div>
 
@@ -56,7 +59,7 @@ export default function AuctionHistoryScreen() {
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
             <span className="text-4xl">📜</span>
             <p className="text-gray-500">
-              {tab === 'bids' ? 'Chưa có phiên nào bạn đã bid' : 'Chưa có NFT nào bạn đã đăng'}
+              {tab === 'bids' ? t('no_bids_history') : t('no_listings_history')}
             </p>
           </div>
         ) : (
@@ -93,7 +96,7 @@ export default function AuctionHistoryScreen() {
                     <StatusBadge status={item.status} />
                   </div>
                   <p className="text-gray-500 text-xs mt-0.5">{item.sessionName}</p>
-                  <p className="text-gray-400 text-xs">{item.bidCount} bids</p>
+                  <p className="text-gray-400 text-xs">{t('bids_count', { count: item.bidCount })}</p>
                 </div>
 
                 <span className="text-gray-600 text-sm">&rarr;</span>
@@ -116,12 +119,12 @@ function StatusBadge({ status }: { status: string }) {
     pending: 'bg-gray-700 text-gray-300',
     cancelled: 'bg-gray-700 text-gray-400',
   };
-  const labels: Record<string, string> = {
+  const labels: Record<string, string> = { active: i18n.t('status_live'), sudden_death: i18n.t('status_sd'), ended: i18n.t('status_end'), pending: i18n.t('status_pending'), cancelled: i18n.t('status_cancelled') }; //
     active: 'Live',
     sudden_death: 'SD',
     ended: 'End',
-    pending: 'Chờ',
-    cancelled: 'Huỷ',
+    pending: i18n.t('status_pending'),
+    cancelled: i18n.t('status_cancelled'),
   };
   return (
     <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${styles[status] || styles.pending}`}>

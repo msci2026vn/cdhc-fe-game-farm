@@ -16,6 +16,7 @@ import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner'
 import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
 import ExpiryBanner from '@/shared/components/ExpiryBanner';
+import { useTranslation } from 'react-i18next';
 // useVipStatus removed — auto-play level is based on purchase, not VIP
 
 // Shared match-3 components & hooks
@@ -54,6 +55,7 @@ export default function BossFightM3({
   turnLimit = 0, healPerTurn = 0,
   onRetry,
 }: Props) {
+  const { t } = useTranslation();
   const { data: statInfo } = usePlayerStats();
 
   // Compute effective combat stats from stat info (or use defaults)
@@ -125,7 +127,7 @@ export default function BossFightM3({
       .then(() => setSessionReady(true))
       .catch(err => {
         console.error('[BATTLE] Failed to start battle session:', err);
-        setSessionError(err.message || 'Không thể bắt đầu trận đấu');
+        setSessionError(err.message || t('cannot_enter_battle'));
       });
   }, [campaignBossId, bossInfo.id]);
 
@@ -234,13 +236,13 @@ export default function BossFightM3({
       <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex flex-col items-center justify-center px-6 overflow-hidden">
         <div className="text-center animate-fade-in">
           <div className="text-[56px] mb-3">⚔️</div>
-          <h2 className="font-heading text-xl font-bold text-red-400 mb-2">Không thể vào trận</h2>
+          <h2 className="font-heading text-xl font-bold text-red-400 mb-2">{t('cannot_enter_battle')}</h2>
           <p className="text-white/70 text-sm mb-6">{sessionError}</p>
           <button
             onClick={onBack}
             className="px-6 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-[0.97] transition-transform"
             style={{ background: 'linear-gradient(135deg, hsl(35,80%,45%), hsl(35,90%,55%))', boxShadow: '0 4px 15px rgba(200,150,50,0.3)' }}>
-            ← Quay lại
+            ← {t('go_back')}
           </button>
         </div>
       </div>
@@ -253,7 +255,7 @@ export default function BossFightM3({
       <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
         <div className="text-center animate-fade-in">
           <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-white/70 font-heading font-bold text-sm">Đang chuẩn bị trận đấu...</p>
+          <p className="text-white/70 font-heading font-bold text-sm">{t('preparing_battle')}</p>
         </div>
       </div>
     );

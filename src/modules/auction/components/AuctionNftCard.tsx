@@ -1,4 +1,6 @@
+import i18n from '@/i18n';
 import { useState } from 'react';
+import { useTranslation } from 'react';
 import type { AuctionStatus } from '../types/auction.types';
 import { AuctionCountdown } from './AuctionCountdown';
 
@@ -24,8 +26,8 @@ const statusBadge: Record<string, { bg: string; label: string }> = {
   active: { bg: 'bg-amber-600', label: 'Live' },
   sudden_death: { bg: 'bg-red-600', label: 'SD!' },
   ended: { bg: 'bg-gray-600', label: 'End' },
-  pending: { bg: 'bg-gray-700', label: 'Soon' },
-  cancelled: { bg: 'bg-gray-700', label: 'Hủy' },
+  pending: { bg: 'bg-gray-700', label: i18n.t('status_pending_short') },
+  cancelled: { bg: 'bg-gray-700', label: i18n.t('status_cancelled') },
 };
 
 /** Convert ipfs:// → public HTTP gateway so browsers can load the image */
@@ -46,6 +48,7 @@ export function AuctionNftCard({
   onClick,
   variant = 'grid',
 }: Props) {
+  const { t } = useTranslation();
   const border = borderColors[status] || 'border-gray-700';
   const badge = statusBadge[status] || statusBadge.pending;
 
@@ -103,7 +106,7 @@ export function AuctionNftCard({
         {/* Bid count */}
         {bidCount != null && (
           <span className="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded-md">
-            {bidCount} bids
+            {t('bids_count', { count: bidCount })}
           </span>
         )}
       </div>

@@ -2,6 +2,8 @@
 // TurnCounter — Turn N/Max with 3 urgency levels
 // ═══════════════════════════════════════════════════════════════
 
+import { useTranslation } from 'react-i18next';
+
 interface TurnCounterProps {
   current: number;
   max: number;
@@ -23,6 +25,7 @@ const URGENCY_STYLES = {
 } as const;
 
 export default function TurnCounter({ current, max }: TurnCounterProps) {
+  const { t } = useTranslation();
   const urgency = getUrgency(current, max);
   const style = URGENCY_STYLES[urgency];
   const remaining = max - current;
@@ -36,13 +39,13 @@ export default function TurnCounter({ current, max }: TurnCounterProps) {
       {urgency === 'critical' && remaining > 0 && (
         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
           style={{ background: 'rgba(255,107,107,0.2)', color: '#ff6b6b' }}>
-          Còn {remaining}!
+          {t('remaining_turns_warning', { remaining })}
         </span>
       )}
       {remaining <= 0 && max > 0 && (
         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
           style={{ background: 'rgba(255,107,107,0.3)', color: '#ff6b6b' }}>
-          HẾT LƯỢT
+          {t('out_of_turns')}
         </span>
       )}
     </div>

@@ -7,6 +7,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { actualBossDamage } from '@/shared/utils/combat-formulas';
 import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
 import type { BossState, CombatStats, CombatNotifType } from '@/shared/match3/combat.types';
+import i18n from '@/i18n';
 
 export interface BossDamageDeps {
   milestones: ActiveMilestones;
@@ -36,9 +37,9 @@ export function applyBossDamageImpl(
 
     // Fort milestone: immune every 10 turns
     if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
-      addPopup('🏰 Miễn nhiễm!', '#74b9ff');
-      addCombatNotif('fort', '🏰 Thành Trì bất!', '#74b9ff');
-      setBossAttackMsg({ text: 'Thành Trì bất!', emoji: '🏰' });
+      addPopup(i18n.t('immune_popup'), '#74b9ff');
+      addCombatNotif('fort', i18n.t('immune_combat_notif'), '#74b9ff');
+      setBossAttackMsg({ text: i18n.t('immune_attack_msg'), emoji: '🏰' });
       setTimeout(() => setBossAttackMsg(null), 1000);
       return prev;
     }
@@ -58,8 +59,8 @@ export function applyBossDamageImpl(
     // Immortal milestone: revive once
     if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
       newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
-      addPopup('👼 Bất Tử!', '#a29bfe');
-      addCombatNotif('immortal', '👼 Bất Tử kích hoạt!', '#a29bfe');
+      addPopup(i18n.t('immortal_popup'), '#a29bfe');
+      addCombatNotif('immortal', i18n.t('immortal_combat_notif'), '#a29bfe');
       return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
     }
 
@@ -71,8 +72,8 @@ export function applyBossDamageImpl(
       if (reflectDmg > 0) {
         setTotalDmgDealt(d => d + reflectDmg);
         setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));
-        addPopup(`🛡️ Phản -${reflectDmg}`, '#74b9ff');
-        addCombatNotif('reflect', `🛡️ Phản xạ ${reflectDmg} DMG!`, '#74b9ff');
+        addPopup(i18n.t('reflect_popup', { dmg: reflectDmg }), '#74b9ff');
+        addCombatNotif('reflect', i18n.t('reflect_combat_notif', { dmg: reflectDmg }), '#74b9ff');
       }
     }
 

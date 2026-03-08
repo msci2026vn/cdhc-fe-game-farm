@@ -10,6 +10,7 @@ import { usePlayerStats } from '@/shared/hooks/usePlayerStats';
 import { atkGemDamage, starGemDamage } from '@/shared/utils/combat-formulas';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   onSelect: (boss: BossInfo) => void;
@@ -23,6 +24,7 @@ const WEAKNESS_LABELS: Record<string, { label: string; emoji: string }> = {
 };
 
 export default function BossList({ onSelect }: Props) {
+  const { t } = useTranslation();
   const { data: bossProgress } = useBossProgress();
   const { data: bossStatus } = useBossStatus();
   const { data: weeklyBoss } = useWeeklyBoss();
@@ -102,7 +104,7 @@ export default function BossList({ onSelect }: Props) {
       <div className="flex-shrink-0 px-5 pt-safe pb-3">
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-heading text-xl font-bold text-white flex items-center gap-2">
-            ⚔️ Chọn Boss
+            ⚔️ {t('select_boss')}
           </h1>
           <div className="flex items-center gap-2">
             <div className="px-3 py-1.5 rounded-xl font-heading text-sm font-bold text-white"
@@ -116,7 +118,7 @@ export default function BossList({ onSelect }: Props) {
         <div className="mb-2">
           <div className="flex justify-between text-[10px] font-bold mb-1">
             <span style={{ color: '#a29bfe' }}>XP: {xpProgressText}</span>
-            <span className="text-white/40">Level {level} &rarr; {level + 1}</span>
+            <span className="text-white/40">{t('level_up_progress', { level, nextLevel: level + 1 })}</span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <div className="h-full rounded-full transition-all duration-700"
@@ -127,30 +129,28 @@ export default function BossList({ onSelect }: Props) {
         {/* Stats + daily fights */}
         <div className="flex items-center justify-between text-[11px] font-bold">
           <div className="flex items-center gap-3">
-            <span style={{ color: '#ff6b6b' }}>⚔️ DMG: {totalDmgDealt.toLocaleString()}</span>
-            <span style={{ color: '#55efc4' }}>💀 Ha: {totalKills}</span>
+            <span style={{ color: '#ff6b6b' }}>⚔️ {t('dmg')}: {totalDmgDealt.toLocaleString()}</span>
+            <span style={{ color: '#55efc4' }}>💀 {t('kills')}: {totalKills}</span>
           </div>
           <span className={`px-2 py-0.5 rounded-lg ${noFightsLeft ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white/70'}`}>
-            {fightsUsed}/{fightsMax} trận
+            {t('daily_fights', { used: fightsUsed, max: fightsMax })}
           </span>
         </div>
 
-        {/* Cooldown banner */}
         {onCooldown && !noFightsLeft && (
           <div className="mt-2 px-3 py-2 rounded-xl text-center"
             style={{ background: 'rgba(108,92,231,0.15)', border: '1px solid rgba(108,92,231,0.3)' }}>
             <span className="text-[11px] font-bold text-white/60">
-              Nghỉ ngơi: <span className="text-white font-mono">{formatTime(cooldown)}</span>
+              {t('resting')}<span className="text-white font-mono">{formatTime(cooldown)}</span>
             </span>
           </div>
         )}
 
-        {/* No fights left banner */}
         {noFightsLeft && (
           <div className="mt-2 px-3 py-2 rounded-xl text-center"
             style={{ background: 'rgba(255,107,107,0.15)', border: '1px solid rgba(255,107,107,0.3)' }}>
             <span className="text-[11px] font-bold text-red-400">
-              Hết {fightsMax} lượt hôm nay. Quay lại ngày mai!
+              {t('no_fights_left', { max: fightsMax })}
             </span>
           </div>
         )}
@@ -165,19 +165,19 @@ export default function BossList({ onSelect }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-lg">{weeklyBoss.bossEmoji}</span>
                 <div>
-                  <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Boss tuần này</div>
+                  <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">{t('weekly_boss')}</div>
                   <div className="font-heading text-sm font-bold text-white">{weeklyBoss.bossName}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[9px] text-white/40">Kết thúc</div>
+                <div className="text-[9px] text-white/40">{t('ends_in')}</div>
                 <div className="font-mono text-xs font-bold text-white/80">{weeklyCountdown}</div>
               </div>
             </div>
             <div className="flex items-center gap-3 text-[10px] font-bold">
-              <span style={{ color: '#fdcb6e' }}>x{weeklyBoss.rewardMultiplier} thưởng</span>
+              <span style={{ color: '#fdcb6e' }}>{t('reward_multiplier', { mult: weeklyBoss.rewardMultiplier })}</span>
               <span style={{ color: '#a29bfe' }}>
-                Điểm yếu: {WEAKNESS_LABELS[weeklyBoss.weakness]?.emoji} {WEAKNESS_LABELS[weeklyBoss.weakness]?.label}
+                {t('weakness')}: {WEAKNESS_LABELS[weeklyBoss.weakness]?.emoji} {WEAKNESS_LABELS[weeklyBoss.weakness]?.label}
               </span>
             </div>
           </div>
@@ -191,9 +191,9 @@ export default function BossList({ onSelect }: Props) {
               <span className="text-lg">🎯</span>
               <div className="flex-1">
                 <p className="text-[11px] font-bold text-yellow-300">
-                  Bạn có {statInfo.freePoints} điểm chỉ số chưa phân bổ!
+                  {t('unallocated_points', { points: statInfo.freePoints })}
                 </p>
-                <p className="text-[10px] text-white/50">Vào Profile &rarr; Chỉ số để tăng sức mạnh.</p>
+                <p className="text-[10px] text-white/50">{t('unallocated_desc')}</p>
               </div>
             </div>
           </div>
@@ -239,7 +239,7 @@ export default function BossList({ onSelect }: Props) {
                 {isWeekly && !locked && (
                   <span className="absolute -bottom-1 -left-1 text-[9px] px-1 py-0.5 rounded font-bold text-white"
                     style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-                    TUẦN
+                    {t('week')}
                   </span>
                 )}
               </div>
@@ -254,19 +254,19 @@ export default function BossList({ onSelect }: Props) {
                   {kills > 0 && <span className="text-[10px]">✅</span>}
                 </div>
                 {locked ? (
-                  <p className="text-[11px] text-white/40">Cần Level {boss.unlockLevel}</p>
+                  <p className="text-[11px] text-white/40">{t('requires_level', { level: boss.unlockLevel })}</p>
                 ) : (
                   <>
                     <p className="text-[11px] text-white/50 mb-1">{boss.description}</p>
                     <div className="flex items-center gap-3 text-[10px] font-bold">
-                      <span style={{ color: '#ff6b6b' }}>HP {boss.hp.toLocaleString()}</span>
-                      <span style={{ color: '#fdcb6e' }}>ATK {boss.attack}</span>
-                      <span style={{ color: '#55efc4' }}>+{boss.reward} OGN</span>
-                      <span style={{ color: '#a29bfe' }}>+{boss.xpReward} XP</span>
+                      <span style={{ color: '#ff6b6b' }}>{t('hp_stat')} {boss.hp.toLocaleString()}</span>
+                      <span style={{ color: '#fdcb6e' }}>{t('atk_stat')} {boss.attack}</span>
+                      <span style={{ color: '#55efc4' }}>{t('ogn_reward', { amount: boss.reward })}</span>
+                      <span style={{ color: '#a29bfe' }}>{t('xp_reward', { amount: boss.xpReward })}</span>
                     </div>
                     {/* Stat preview: estimated turns */}
                     <div className="mt-1 text-[9px] font-bold text-white/30">
-                      ~{turns} lượt để hạ
+                      {t('estimated_turns', { turns })}
                     </div>
                   </>
                 )}

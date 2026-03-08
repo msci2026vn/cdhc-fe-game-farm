@@ -3,8 +3,10 @@
 // Queries (6) + Mutations (4) + Key factory
 // ═══════════════════════════════════════════════════
 
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { auctionApi } from '@/shared/api/api-auction';
+import i18n from '@/i18n';
 import { useUIStore } from '@/shared/stores/uiStore';
 import type { CreateAuctionInput, SubmitToQueueInput } from '../types/auction.types';
 
@@ -92,10 +94,10 @@ export function useCreateAuction() {
     mutationFn: (input: CreateAuctionInput) => auctionApi.create(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['auction', 'list'] });
-      useUIStore.getState().addToast('Đã đăng NFT vào phiên đấu giá!', 'success', '🏷️');
+      useUIStore.getState().addToast(i18n.t('auction_created_success'), 'success');
     },
     onError: (error: any) => {
-      useUIStore.getState().addToast(error.message || 'Không thể tạo đấu giá', 'error');
+      useUIStore.getState().addToast(error.message || i18n.t('auction_create_error'), 'error');
     },
   });
 }
@@ -110,7 +112,7 @@ export function usePlaceBid(auctionId: string) {
       qc.invalidateQueries({ queryKey: ['auction', 'bidpack'] });
     },
     onError: (error: Error) => {
-      useUIStore.getState().addToast(error.message || 'Bid that bai', 'error');
+      useUIStore.getState().addToast(error.message || i18n.t('bid_failed_error'), 'error');
     },
   });
 }
@@ -122,10 +124,10 @@ export function useCancelAuction() {
     mutationFn: (auctionId: string) => auctionApi.cancel(auctionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['auction'] });
-      useUIStore.getState().addToast('Đã hủy đấu giá', 'success');
+      useUIStore.getState().addToast(i18n.t('auction_cancelled_success'), 'success');
     },
     onError: (error: any) => {
-      useUIStore.getState().addToast(error.message || 'Không thể hủy', 'error');
+      useUIStore.getState().addToast(error.message || i18n.t('auction_cancel_error'), 'error');
     },
   });
 }
@@ -137,10 +139,10 @@ export function useWithdrawBid() {
     mutationFn: (auctionId: string) => auctionApi.withdraw(auctionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: auctionKeys.all });
-      useUIStore.getState().addToast('Đã rút về thành công', 'success');
+      useUIStore.getState().addToast(i18n.t('auction_withdraw_success'), 'success');
     },
     onError: (error: Error) => {
-      useUIStore.getState().addToast(error.message || 'Không thể rút', 'error');
+      useUIStore.getState().addToast(error.message || i18n.t('auction_withdraw_error'), 'error');
     },
   });
 }
@@ -161,10 +163,10 @@ export function useSubmitToQueue() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['auction', 'queue'] });
       qc.invalidateQueries({ queryKey: ['auction', 'my-listings'] });
-      useUIStore.getState().addToast('NFT đã gửi vào hàng chờ đấu giá!', 'success', '📦');
+      useUIStore.getState().addToast(i18n.t('queue_submit_success'), 'success');
     },
     onError: (err: Error) => {
-      useUIStore.getState().addToast(err.message || 'Lỗi gửi NFT vào hàng chờ', 'error');
+      useUIStore.getState().addToast(err.message || i18n.t('queue_submit_error'), 'error');
     },
   });
 }
@@ -177,10 +179,10 @@ export function useCancelQueueItem() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['auction', 'queue'] });
       qc.invalidateQueries({ queryKey: ['auction', 'my-listings'] });
-      useUIStore.getState().addToast('Đã rút NFT khỏi hàng chờ', 'success', '↩️');
+      useUIStore.getState().addToast(i18n.t('queue_cancel_success'), 'success');
     },
     onError: (err: Error) => {
-      useUIStore.getState().addToast(err.message || 'Lỗi rút NFT', 'error');
+      useUIStore.getState().addToast(err.message || i18n.t('queue_cancel_error'), 'error');
     },
   });
 }

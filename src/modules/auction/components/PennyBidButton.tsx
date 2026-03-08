@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { usePlaceBid, useBidPack } from '../hooks/useAuction';
 import { playSound } from '@/shared/audio';
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function PennyBidButton({ auctionId, sessionId, disabled, isSellerView }: Props) {
+  const { t } = useTranslation(); auctionId, sessionId, disabled, isSellerView }: Props) {
   const { mutate: bid, isPending } = usePlaceBid(auctionId);
   const { data: bidPack } = useBidPack(sessionId, !!sessionId);
 
@@ -17,17 +19,13 @@ export function PennyBidButton({ auctionId, sessionId, disabled, isSellerView }:
 
   if (isSellerView) {
     return (
-      <div className="w-full py-4 rounded-xl bg-gray-700 text-gray-400 text-center font-medium">
-        Ban la nguoi ban
-      </div>
+      <div className="w-full py-4 rounded-xl bg-gray-700 text-gray-400 text-center font-medium">{t('you_are_seller_msg')}</div>
     );
   }
 
   if (isMaxed) {
     return (
-      <div className="w-full py-4 rounded-xl bg-gray-700 text-gray-400 text-center font-medium">
-        Het luot bid ({bidPack.totalBidsUsed}/{bidPack.maxBidsPerSession})
-      </div>
+      <div className="w-full py-4 rounded-xl bg-gray-700 text-gray-400 text-center font-medium">{t('out_of_bids_msg', { used: bidPack.totalBidsUsed, max: bidPack.maxBidsPerSession })}</div>
     );
   }
 
@@ -49,18 +47,16 @@ export function PennyBidButton({ auctionId, sessionId, disabled, isSellerView }:
     >
       {isPending ? (
         <span className="flex items-center justify-center gap-2">
-          <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-          Dang bid...
-        </span>
+          <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />{t('bidding_status')}</span>
       ) : (
         <span>
-          BID! {isFree ? '(Mien phi 🎁)' : '(-10 OGN)'}
+          BID! {isFree ? t('bid_btn_free') : t('bid_btn_cost')}
         </span>
       )}
       {bidPack && (
         <div className="text-xs font-normal mt-1 opacity-80">
-          Luot: {bidPack.totalBidsUsed}/{bidPack.maxBidsPerSession}
-          {bidPack.freeBidsRemaining > 0 && ` • Free: ${bidPack.freeBidsRemaining}/3`}
+          {t('bid_count_label', { used: bidPack.totalBidsUsed, max: bidPack.maxBidsPerSession })}
+          {bidPack.freeBidsRemaining > 0 && t('free_bid_count_label', { rem: bidPack.freeBidsRemaining })}
         </div>
       )}
     </button>
