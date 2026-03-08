@@ -44,6 +44,7 @@ export default function MainMenuScreen() {
     { emoji: '🛒', label: t('menu.shop'), route: '/shop' },
     { emoji: '🎒', label: t('menu.inventory'), route: '/inventory' },
     { emoji: '⚡', label: t('menu.auction'), route: '/auction' },
+    { emoji: '⚔️', label: t('menu.pvp'), route: '/pvp' },
   ];
 
   return (
@@ -147,7 +148,7 @@ export default function MainMenuScreen() {
           <div
             key={route}
             className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
-            style={{ left: `${9 + i * 28.7}%`, top: '68.5%', width: '25%', height: '13%' }}
+            style={{ left: `${9 + i * 21}%`, top: '68.5%', width: '19%', height: '13%' }}
             onClick={() => { playSound('ui_click'); navigate(route); }}
           >
             <div
@@ -158,7 +159,7 @@ export default function MainMenuScreen() {
                 boxShadow: 'inset 0 1px 0 rgba(255,230,130,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.55)',
               }}
             >
-              <span className="text-[26px] leading-none drop-shadow-md">{emoji}</span>
+              <span className="text-[22px] leading-none drop-shadow-md">{emoji}</span>
               <span
                 className="text-[11px] font-black text-white leading-none"
                 style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)', letterSpacing: '0.02em' }}
