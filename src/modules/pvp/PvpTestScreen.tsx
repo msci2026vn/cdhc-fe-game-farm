@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Client, type Room } from '@colyseus/sdk';
 import { useAuth } from '@/shared/hooks/useAuth';
 
@@ -197,13 +198,14 @@ function ManaBar({ current, max }: { current: number; max: number }) {
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function PvpTestScreen() {
   const { data: auth } = useAuth();
+  const [searchParams] = useSearchParams();
   const clientRef = useRef<Client | null>(null);
   const roomRef = useRef<Room | null>(null);
 
   const [inRoom, setInRoom] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [roomId, setRoomId] = useState('');
-  const [inputCode, setInputCode] = useState('');
+  const [inputCode, setInputCode] = useState(() => searchParams.get('roomId') ?? '');
   const [roomState, setRoomState] = useState<RoomStateBroadcast | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [mySessionId, setMySessionId] = useState('');

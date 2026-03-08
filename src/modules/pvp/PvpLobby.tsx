@@ -7,6 +7,154 @@ import { usePvpSSE } from './hooks/usePvpSSE';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { socialApi } from '@/shared/api/api-social';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn';
+
+interface RoomInfo {
+  roomId: string;
+  roomCode: string;
+  hostName: string;
+  clients: number;
+  maxClients: number;
+  createdAt: string | null;
+}
+
+// ─── Room List Modal ──────────────────────────────────────────────────────────
+function RoomListModal({
+  onClose,
+  onJoin,
+}: {
+  onClose: () => void;
+  onJoin: (roomId: string, roomCode: string) => void;
+}) {
+  const [rooms, setRooms] = useState<RoomInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const fetchRooms = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/pvp/rooms`, { credentials: 'include' });
+      if (res.ok) {
+        const data = (await res.json()) as { rooms?: RoomInfo[] };
+        setRooms(data.rooms ?? []);
+      }
+    } catch {
+      setRooms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { void fetchRooms(); }, []);
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 250,
+        background: 'rgba(0,0,0,0.65)',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'linear-gradient(180deg,#1a1a2e,#0f1624)',
+          border: '1px solid #1e4d78',
+          borderRadius: '16px 16px 0 0',
+          width: '100%', maxWidth: 480,
+          maxHeight: '75vh', overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{
+          padding: '16px 20px 12px',
+          borderBottom: '1px solid #1e3a5a',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexShrink: 0,
+        }}>
+          <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>📋 Phòng Đang Chờ</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}>✕</button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', color: '#64748b', padding: 40, fontSize: 14 }}>Đang tải...</div>
+          ) : rooms.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>🏜️</div>
+              <div style={{ color: '#64748b', fontSize: 14, marginBottom: 20 }}>Chưa có phòng nào đang chờ</div>
+              <button
+                onClick={() => { onClose(); navigate('/pvp-test'); }}
+                style={{
+                  padding: '10px 28px', borderRadius: 10, border: 'none',
+                  background: '#b45309', color: '#fff',
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                ➕ Tạo Phòng Mới
+              </button>
+            </div>
+          ) : (
+            rooms.map(room => (
+              <div
+                key={room.roomId}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 20px', borderBottom: '1px solid #0f1e30',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                    background: '#7c3aed',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16, fontWeight: 700, color: '#fff',
+                  }}>
+                    {(room.hostName || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: 14 }}>{room.hostName || 'Unknown'}</div>
+                    <div style={{ color: '#64748b', fontSize: 11 }}>
+                      #{room.roomCode} · {room.clients}/{room.maxClients} người
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => onJoin(room.roomId, room.roomCode)}
+                  style={{
+                    padding: '8px 18px', borderRadius: 8, border: 'none',
+                    background: '#22c55e', color: '#fff',
+                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  Vào ▶
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer refresh */}
+        <button
+          onClick={fetchRooms}
+          style={{
+            padding: '12px', background: 'none', border: 'none',
+            color: '#64748b', fontSize: 13, cursor: 'pointer',
+            borderTop: '1px solid #0f1e30', flexShrink: 0,
+          }}
+        >
+          🔄 Làm mới
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Invite Popup ────────────────────────────────────────────────────────────
 function InvitePopup({
   invite,
@@ -229,6 +377,7 @@ export default function PvpLobby() {
   const qc = useQueryClient();
 
   const [showFriendPicker, setShowFriendPicker] = useState(false);
+  const [showRoomList, setShowRoomList] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [waitSeconds, setWaitSeconds] = useState(0);
   const [pendingInvite, setPendingInvite] = useState<(PvpEvent & { type: 'pvp_invite' }) | null>(null);
@@ -369,6 +518,17 @@ export default function PvpLobby() {
         />
       )}
 
+      {/* Room list modal */}
+      {showRoomList && (
+        <RoomListModal
+          onClose={() => setShowRoomList(false)}
+          onJoin={(roomId) => {
+            setShowRoomList(false);
+            navigate(`/pvp-test?roomId=${roomId}`);
+          }}
+        />
+      )}
+
       {/* Friend picker modal */}
       {showFriendPicker && (
         <FriendPickerModal
@@ -440,13 +600,13 @@ export default function PvpLobby() {
           </div>
         </div>
 
-        {/* 3 action buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 24 }}>
+        {/* 4 action buttons (2x2) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
           {/* Mời bạn */}
           <button
             onClick={() => setShowFriendPicker(true)}
             style={{
-              padding: '16px 8px', borderRadius: 12, border: 'none',
+              padding: '16px 8px', borderRadius: 12,
               background: 'linear-gradient(135deg,#1e4d78,#0f3460)',
               color: '#fff', cursor: 'pointer', textAlign: 'center',
               border: '1px solid #1e4d78',
@@ -461,9 +621,9 @@ export default function PvpLobby() {
             onClick={() => joinQueueMut.mutate()}
             disabled={joinQueueMut.isPending || inQueue}
             style={{
-              padding: '16px 8px', borderRadius: 12, border: 'none',
+              padding: '16px 8px', borderRadius: 12,
               background: 'linear-gradient(135deg,#7c3aed,#4f46e5)',
-              color: '#fff', cursor: 'pointer', textAlign: 'center',
+              color: '#fff', cursor: joinQueueMut.isPending ? 'not-allowed' : 'pointer', textAlign: 'center',
               opacity: joinQueueMut.isPending ? 0.7 : 1,
               border: '1px solid #7c3aed',
             }}
@@ -472,17 +632,31 @@ export default function PvpLobby() {
             <div style={{ fontSize: 12, fontWeight: 700 }}>Tìm Trận</div>
           </button>
 
-          {/* Tạo phòng (game screen cũ) */}
+          {/* Danh sách phòng */}
+          <button
+            onClick={() => setShowRoomList(true)}
+            style={{
+              padding: '16px 8px', borderRadius: 12,
+              background: 'linear-gradient(135deg,#0f5132,#064e3b)',
+              color: '#fff', cursor: 'pointer', textAlign: 'center',
+              border: '1px solid #065f46',
+            }}
+          >
+            <div style={{ fontSize: 26, marginBottom: 6 }}>📋</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>Danh Sách Phòng</div>
+          </button>
+
+          {/* Tạo phòng */}
           <button
             onClick={() => navigate('/pvp-test')}
             style={{
-              padding: '16px 8px', borderRadius: 12, border: 'none',
+              padding: '16px 8px', borderRadius: 12,
               background: 'linear-gradient(135deg,#b45309,#92400e)',
               color: '#fff', cursor: 'pointer', textAlign: 'center',
               border: '1px solid #b45309',
             }}
           >
-            <div style={{ fontSize: 26, marginBottom: 6 }}>🏠</div>
+            <div style={{ fontSize: 26, marginBottom: 6 }}>➕</div>
             <div style={{ fontSize: 12, fontWeight: 700 }}>Tạo Phòng</div>
           </button>
         </div>
