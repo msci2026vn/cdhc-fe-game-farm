@@ -743,10 +743,10 @@ export default function PvpTestScreen() {
   return (
     <div style={{
       minHeight: '100dvh',
-      background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)',
+      background: '#0f1624',
       color: '#e0e0e0',
-      fontFamily: 'monospace',
-      padding: 16,
+      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+      padding: showBoard ? 0 : 16,
     }}>
       {/* Countdown overlay */}
       {showCountdown && <CountdownOverlay count={countdown} />}
@@ -907,139 +907,216 @@ export default function PvpTestScreen() {
           </div>
         )}
 
-        {/* ── BOARD VIEW (phase=playing, board loaded) ── */}
+        {/* ── BOARD VIEW — campaign-style full-screen layout ── */}
         {inRoom && showBoard && (
-          <div style={{ marginBottom: 16 }}>
-            {/* Timer */}
-            <div style={{ textAlign: 'center', marginBottom: 6 }}>
-              <span style={{
-                fontSize: timeLeft <= 10 ? 28 : 20,
-                fontWeight: 900,
-                color: timeLeft <= 10 ? '#ef4444' : isSuddenDeath ? '#a855f7' : '#f59e0b',
-                animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
-                opacity: activeDebuff?.type === 'hide_timer' ? 0 : 1,
-                transition: 'opacity 0.2s',
-              }}>
-                {timeLeft}s
-              </span>
-              {isSuddenDeath && (
-                <span style={{ fontSize: 10, color: '#a855f7', marginLeft: 6, fontWeight: 700 }}>
-                  SUDDEN DEATH
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 10,
+            background: 'linear-gradient(180deg,#0a1a0a 0%,#0d1a0d 40%,#0a1205 100%)',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'hidden',
+          }}>
+            {/* ── TOP: Opponent name + HP bar ── */}
+            <div style={{
+              padding: '10px 16px 6px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              background: 'rgba(0,0,0,0.35)',
+              flexShrink: 0,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: '#f0ece4', letterSpacing: '0.02em' }}>
+                  {opponentPlayer?.name ?? t('game.opponent')}
                 </span>
-              )}
-            </div>
-
-            {/* Player HUDs with HP/Mana — campaign-aligned */}
-            <div style={{
-              display: 'flex', gap: 12, marginBottom: 8,
-              background: '#0d1b2a', borderRadius: 8, padding: '8px 12px',
-              border: '1px solid #1e4d78',
-            }}>
-              {/* Me */}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: '#f59e0b', fontSize: 12, fontWeight: 'bold' }}>
-                    ⚔️ {myPlayer?.name ?? t('game.you')}
-                  </span>
-                  <span style={{ color: '#4caf50', fontSize: 11, fontWeight: 700 }}>
-                    {myScore.toLocaleString()}
-                  </span>
-                </div>
-                <HpBar current={myHp} max={myMaxHp} armor={myArmor} label="HP" />
-                <ManaBar current={myMana} max={200} />
+                <span style={{
+                  fontSize: 13, fontWeight: 700,
+                  color: opponentScore > myScore ? '#fbbf24' : '#94a3b8',
+                }}>
+                  {opponentScore.toLocaleString()}
+                </span>
               </div>
-
-              <div style={{ color: '#64748b', fontSize: 11, alignSelf: 'center' }}>VS</div>
-
-              {/* Opponent */}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: '#ef4444', fontSize: 12, fontWeight: 'bold' }}>
-                    🛡️ {opponentPlayer?.name ?? t('game.opponent')}
-                  </span>
-                  <span style={{ color: '#e94560', fontSize: 11, fontWeight: 700 }}>
-                    {opponentScore.toLocaleString()}
-                  </span>
-                </div>
-                <HpBar current={opponentHp} max={opponentMaxHp} armor={opponentArmor}
-                  color="#ef4444" label="HP" />
-              </div>
-            </div>
-
-            {/* My board (interactive) */}
-            <div style={{
-              marginBottom: 10,
-              border: damageFlash ? '3px solid #ef4444'
-                : isDangerZone ? '2px solid #f87171'
-                : '2px solid rgba(255,255,255,0.1)',
-              borderRadius: 8,
-              transition: 'border 0.1s, box-shadow 0.3s',
-              padding: 2,
-              position: 'relative',
-              animation: activeDebuff?.type === 'shake'
-                ? 'boardShake 0.4s ease-in-out 5'
-                : isDangerZone
-                ? 'dangerPulse 0.8s ease-in-out infinite'
-                : 'none',
-            }}>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4, paddingLeft: 4 }}>{t('game.yourBoard')} — {t('game.swapHint')}</div>
-              <GameBoard tiles={myBoard} onSwap={handleSwap} />
-              {/* Freeze overlay */}
-              {activeDebuff?.type === 'freeze' && (
+              {/* Opponent HP bar — thick */}
+              <div style={{
+                width: '78%', height: 20,
+                background: 'rgba(0,0,0,0.55)',
+                borderRadius: 10,
+                border: `2px solid ${opponentHp < opponentMaxHp * 0.3 ? 'rgba(239,68,68,0.5)' : 'rgba(74,222,128,0.35)'}`,
+                overflow: 'hidden', position: 'relative',
+              }}>
                 <div style={{
+                  width: `${Math.max(0, (opponentHp / opponentMaxHp) * 100)}%`,
+                  height: '100%',
+                  background: opponentHp < opponentMaxHp * 0.3
+                    ? 'linear-gradient(90deg,#dc2626,#f87171)'
+                    : 'linear-gradient(90deg,#16a34a,#4ade80,#86efac)',
+                  transition: 'width 0.3s ease',
+                  boxShadow: '0 0 8px rgba(74,222,128,0.4)',
+                }} />
+                <span style={{
                   position: 'absolute', inset: 0,
-                  background: 'rgba(147,210,255,0.18)',
-                  backdropFilter: 'blur(1px)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 48, borderRadius: 8,
-                  pointerEvents: 'none', zIndex: 5,
-                }}>❄️</div>
-              )}
+                  fontSize: 11, fontWeight: 700, color: '#fff',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+                }}>
+                  {opponentHp}/{opponentMaxHp}{opponentArmor > 0 ? ` 🛡️${opponentArmor}` : ''}
+                </span>
+              </div>
             </div>
 
-            {/* Opponent board (mini) */}
-            <div>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>{t('game.opponentBoard')}</div>
-              <GameBoard tiles={opponentBoard} mini />
-            </div>
-
-            {/* Emoji Bar */}
+            {/* ── AVATAR ROW: me (left) + opp (right) ── */}
             <div style={{
-              display: 'flex', justifyContent: 'space-around',
-              padding: '8px 4px', marginTop: 8,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 12,
+              padding: '4px 14px',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+              flexShrink: 0,
             }}>
-              {(['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
-                <button
-                  key={emoji}
-                  onClick={() => sendTaunt(emoji)}
-                  disabled={emojiCooldown}
-                  style={{
-                    fontSize: 24, background: 'none', border: 'none',
-                    padding: '4px 8px', borderRadius: 8,
-                    cursor: emojiCooldown ? 'not-allowed' : 'pointer',
-                    opacity: emojiCooldown ? 0.35 : 1,
-                    transition: 'transform 0.1s, opacity 0.3s',
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
-                  }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'scale(1.35)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                >
-                  {emoji}
-                </button>
-              ))}
+              {/* My avatar + HP/MP bars */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flex: 1 }}>
+                <div style={{
+                  width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+                  border: '3px solid #854d0e',
+                  boxShadow: '0 0 0 2px #a16207, 0 4px 10px rgba(0,0,0,0.6)',
+                  background: '#1a2e1a',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+                }}>
+                  👤
+                </div>
+                <div style={{ flex: 1, maxWidth: 140 }}>
+                  <div style={{ fontSize: 11, color: '#f59e0b', fontWeight: 700, marginBottom: 3 }}>
+                    {myPlayer?.name ?? t('game.you')} · <span style={{ color: myScore > opponentScore ? '#4ade80' : '#94a3b8' }}>{myScore.toLocaleString()}</span>
+                  </div>
+                  <HpBar current={myHp} max={myMaxHp} armor={myArmor} label="HP" />
+                  <ManaBar current={myMana} max={200} />
+                </div>
+              </div>
+              {/* Opponent avatar — bigger */}
+              <div style={{
+                width: 68, height: 68, borderRadius: '50%', flexShrink: 0,
+                border: '3px solid #7f1d1d',
+                boxShadow: '0 0 0 2px #991b1b, 0 4px 14px rgba(0,0,0,0.7)',
+                background: '#2e1a1a',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+              }}>
+                👹
+              </div>
             </div>
 
-            {/* Leave button */}
-            <button onClick={handleLeave} style={{
-              width: '100%', marginTop: 10, padding: '10px',
-              background: 'transparent', border: '1px solid #555',
-              color: '#999', borderRadius: 6, fontSize: 13, cursor: 'pointer',
-            }}>🚪 {t('game.leave')}</button>
+            {/* ── BOARD — wood-frame, fills remaining space ── */}
+            <div style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '2px 8px', overflow: 'hidden',
+            }}>
+              <div style={{
+                width: '100%', maxWidth: 380,
+                borderRadius: 14, padding: 6,
+                background: '#1a2e0a',
+                boxShadow: `
+                  0 0 0 3px #3d2b0a,
+                  0 0 0 6px #5c3d0a,
+                  0 0 0 8px #3d2b0a,
+                  0 8px 32px rgba(0,0,0,0.7)
+                `,
+                position: 'relative',
+                border: damageFlash ? '2px solid #ef4444'
+                  : isDangerZone ? '2px solid #f87171'
+                  : '2px solid transparent',
+                transition: 'border 0.1s',
+                animation: activeDebuff?.type === 'shake'
+                  ? 'boardShake 0.4s ease-in-out 5'
+                  : isDangerZone
+                  ? 'dangerPulse 0.8s ease-in-out infinite'
+                  : 'none',
+              }}>
+                <GameBoard tiles={myBoard} onSwap={handleSwap} />
+                {/* Freeze overlay */}
+                {activeDebuff?.type === 'freeze' && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'rgba(147,210,255,0.18)',
+                    backdropFilter: 'blur(1px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 48, borderRadius: 14,
+                    pointerEvents: 'none', zIndex: 5,
+                  }}>❄️</div>
+                )}
+              </div>
+            </div>
+
+            {/* ── TIMER + mini opponent board ── */}
+            <div style={{
+              padding: '2px 14px 4px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              flexShrink: 0,
+            }}>
+              {/* Mini opponent board */}
+              <div>
+                <div style={{ fontSize: 9, color: '#4a5568', marginBottom: 2 }}>{t('game.opponentBoard')}</div>
+                <GameBoard tiles={opponentBoard} mini />
+              </div>
+              {/* Timer */}
+              <div style={{ textAlign: 'right' }}>
+                <span style={{
+                  fontSize: timeLeft <= 10 ? 24 : 18, fontWeight: 900,
+                  color: timeLeft <= 10 ? '#f87171' : isSuddenDeath ? '#a855f7' : '#86efac',
+                  padding: '3px 12px',
+                  background: 'rgba(0,0,0,0.45)',
+                  borderRadius: 20,
+                  border: `1px solid ${timeLeft <= 10 ? 'rgba(248,113,113,0.45)' : 'rgba(74,222,128,0.25)'}`,
+                  animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
+                  opacity: activeDebuff?.type === 'hide_timer' ? 0 : 1,
+                  transition: 'opacity 0.2s',
+                  display: 'inline-block',
+                }}>
+                  {isSuddenDeath ? `☠️ ${timeLeft}s` : `⏱ ${timeLeft}s`}
+                </span>
+                {isSuddenDeath && (
+                  <div style={{ fontSize: 9, color: '#a855f7', fontWeight: 700, marginTop: 2 }}>SUDDEN DEATH</div>
+                )}
+              </div>
+            </div>
+
+            {/* ── BOTTOM: Emoji bar + leave ── */}
+            <div style={{
+              padding: '6px 10px 10px',
+              background: 'rgba(40,22,5,0.75)',
+              borderTop: '2px solid #4a2d08',
+              flexShrink: 0,
+            }}>
+              <div style={{
+                display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+              }}>
+                {(['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
+                  <button
+                    key={emoji}
+                    onClick={() => sendTaunt(emoji)}
+                    disabled={emojiCooldown}
+                    style={{
+                      fontSize: 22, background: 'none', border: 'none',
+                      padding: '6px 4px', borderRadius: 8,
+                      cursor: emojiCooldown ? 'not-allowed' : 'pointer',
+                      opacity: emojiCooldown ? 0.3 : 1,
+                      touchAction: 'manipulation',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                    onMouseDown={e => { e.currentTarget.style.transform = 'scale(1.35)'; }}
+                    onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+                <button
+                  onClick={handleLeave}
+                  style={{
+                    padding: '6px 12px', background: 'transparent',
+                    border: '1px solid rgba(239,68,68,0.5)',
+                    color: '#f87171', borderRadius: 20,
+                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  🚪
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1292,6 +1369,10 @@ export default function PvpTestScreen() {
           15%  { opacity: 1; transform: scale(1.15); }
           70%  { opacity: 1; transform: scale(1); }
           100% { opacity: 0; transform: scale(0.9); }
+        }
+        @keyframes ultPulse {
+          0%,100% { box-shadow: 0 0 0 2px #7c3aed, 0 0 16px rgba(124,58,237,0.6); }
+          50%      { box-shadow: 0 0 0 2px #a855f7, 0 0 28px rgba(168,85,247,0.8); }
         }
       `}</style>
     </div>
