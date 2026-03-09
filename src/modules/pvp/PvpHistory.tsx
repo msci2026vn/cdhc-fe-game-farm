@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { pvpApi } from '@/shared/api/api-pvp';
 import { useAuth } from '@/shared/hooks/useAuth';
 
 export default function PvpHistory() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation('pvp');
   const { data: auth } = useAuth();
   const [tab, setTab] = useState<'history' | 'leaderboard'>('history');
 
@@ -48,19 +50,19 @@ export default function PvpHistory() {
           borderRadius: 10, padding: 4, marginBottom: 20,
           border: '1px solid #1e3a5a',
         }}>
-          {(['history', 'leaderboard'] as const).map(t => (
+          {(['history', 'leaderboard'] as const).map(tabKey => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               style={{
                 flex: 1, padding: '10px', border: 'none', borderRadius: 8,
-                background: tab === t ? '#e94560' : 'transparent',
-                color: tab === t ? '#fff' : '#64748b',
+                background: tab === tabKey ? '#e94560' : 'transparent',
+                color: tab === tabKey ? '#fff' : '#64748b',
                 fontSize: 13, fontWeight: 700, cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
             >
-              {t === 'history' ? '📜 Lịch Sử' : '🏆 Bảng Xếp Hạng'}
+              {tabKey === 'history' ? `📜 ${t('history.title')}` : `🏆 ${t('history.leaderboard')}`}
             </button>
           ))}
         </div>
@@ -69,14 +71,14 @@ export default function PvpHistory() {
         {tab === 'history' && (
           <>
             {histLoading && (
-              <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Đang tải...</div>
+              <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>{t('common.loading')}</div>
             )}
             {!histLoading && !historyData?.matches?.length && (
               <div style={{
                 background: '#0d1b2a', border: '1px solid #1e3a5a',
                 borderRadius: 12, padding: 32, textAlign: 'center', color: '#64748b',
               }}>
-                Chưa có trận đấu nào
+                {t('history.noHistory')}
               </div>
             )}
             {historyData?.matches?.map(m => (
@@ -101,7 +103,7 @@ export default function PvpHistory() {
                         vs {m.opponent_name}
                       </div>
                       <div style={{ fontSize: 11, color: '#64748b' }}>
-                        {new Date(m.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(m.created_at).toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         {m.duration_seconds ? ` · ${m.duration_seconds}s` : ''}
                       </div>
                     </div>
@@ -114,7 +116,7 @@ export default function PvpHistory() {
                       background: m.result === 'win' ? '#14532d' : m.result === 'draw' ? '#1e293b' : '#450a0a',
                       color: m.result === 'win' ? '#22c55e' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
                     }}>
-                      {m.result === 'win' ? '🏆 Thắng' : m.result === 'draw' ? '🤝 Hoà' : '💀 Thua'}
+                      {m.result === 'win' ? `🏆 ${t('history.win')}` : m.result === 'draw' ? `🤝 ${t('history.draw')}` : `💀 ${t('history.lose')}`}
                     </div>
                     <div style={{ fontSize: 12, color: '#64748b' }}>
                       {m.my_score.toLocaleString()} – {m.opp_score.toLocaleString()}
@@ -130,7 +132,7 @@ export default function PvpHistory() {
         {tab === 'leaderboard' && (
           <>
             {lbLoading && (
-              <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Đang tải...</div>
+              <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>{t('common.loading')}</div>
             )}
             {lbData?.leaderboard?.map((entry, idx) => (
               <div key={entry.user_id} style={{

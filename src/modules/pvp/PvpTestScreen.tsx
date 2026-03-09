@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { Client, type Room } from '@colyseus/sdk';
 import { useAuth } from '@/shared/hooks/useAuth';
 
@@ -35,8 +36,8 @@ interface RoomStateBroadcast {
 async function fetchPvpToken(): Promise<string> {
   const res = await fetch(`${API_BASE}/api/auth/pvp-token`, { credentials: 'include' });
   if (!res.ok) {
-    if (res.status === 401) throw new Error('Chưa đăng nhập');
-    throw new Error(`Lấy token thất bại: HTTP ${res.status}`);
+    if (res.status === 401) throw new Error(i18n.t('pvp:error.notLoggedIn'));
+    throw new Error(i18n.t('pvp:error.tokenFailed', { status: res.status }));
   }
   const json = await res.json();
   if (!json.success) throw new Error(json.error?.message || 'pvp-token error');
@@ -400,7 +401,7 @@ export default function PvpTestScreen() {
       setJunkAlert('');
       if (code === 4001) {
         setOpponentLeft(false);
-        setError('Bạn đã bị đuổi khỏi phòng!');
+        setError(t('game.kicked'));
         addLog('⚠️ Bị kick khỏi phòng');
       } else if (code !== 1000) {
         setOpponentLeft(true);
@@ -449,11 +450,11 @@ export default function PvpTestScreen() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes('INVALID_TOKEN') || msg.includes('NO_TOKEN')) {
-        setError('Token không hợp lệ — thử đăng nhập lại');
+        setError(t('error.invalidToken'));
       } else if (msg.includes('not found') || msg.includes('404')) {
-        setError(`Không tìm thấy phòng: ${code}`);
+        setError(t('error.roomNotFound', { code }));
       } else if (msg.includes('full') || msg.includes('maxClients')) {
-        setError('Phòng đã đủ 2 người');
+        setError(t('error.roomFull'));
       } else {
         setError(msg);
       }
@@ -702,7 +703,7 @@ export default function PvpTestScreen() {
             background: '#3a1a1a', border: '1px solid #c62828', borderRadius: 8,
             padding: '10px 14px', marginBottom: 12, color: '#ef9a9a', fontSize: 13, textAlign: 'center',
           }}>
-            ⚠️ Đối thủ đã rời phòng
+            {t('room.opponentLeft')}
           </div>
         )}
 
@@ -736,7 +737,7 @@ export default function PvpTestScreen() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span style={{ color: '#f59e0b', fontSize: 12, fontWeight: 'bold' }}>
-                    ⚔️ {myPlayer?.name ?? 'Tôi'}
+                    ⚔️ {myPlayer?.name ?? t('game.you')}
                   </span>
                   <span style={{ color: '#4caf50', fontSize: 11, fontWeight: 700 }}>
                     {myScore.toLocaleString()}
@@ -752,7 +753,7 @@ export default function PvpTestScreen() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span style={{ color: '#ef4444', fontSize: 12, fontWeight: 'bold' }}>
-                    🛡️ {opponentPlayer?.name ?? 'Đối thủ'}
+                    🛡️ {opponentPlayer?.name ?? t('game.opponent')}
                   </span>
                   <span style={{ color: '#e94560', fontSize: 11, fontWeight: 700 }}>
                     {opponentScore.toLocaleString()}
@@ -771,13 +772,13 @@ export default function PvpTestScreen() {
               transition: 'border 0.1s',
               padding: 2,
             }}>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4, paddingLeft: 4 }}>BOARD CỦA BẠN — click 2 gem kề nhau để swap</div>
+              <div style={{ fontSize: 10, color: '#666', marginBottom: 4, paddingLeft: 4 }}>{t('game.yourBoard')} — {t('game.swapHint')}</div>
               <GameBoard tiles={myBoard} onSwap={handleSwap} />
             </div>
 
             {/* Opponent board (mini) */}
             <div>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>BOARD ĐỐI THỦ</div>
+              <div style={{ fontSize: 10, color: '#666', marginBottom: 4 }}>{t('game.opponentBoard')}</div>
               <GameBoard tiles={opponentBoard} mini />
             </div>
 
@@ -786,7 +787,7 @@ export default function PvpTestScreen() {
               width: '100%', marginTop: 12, padding: '10px',
               background: 'transparent', border: '1px solid #555',
               color: '#999', borderRadius: 6, fontSize: 13, cursor: 'pointer',
-            }}>🚪 Rời Phòng</button>
+            }}>🚪 {t('game.leave')}</button>
           </div>
         )}
 
@@ -834,13 +835,13 @@ export default function PvpTestScreen() {
                     }}>P{i + 1}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 600 }}>
-                        {p ? p.name : 'Đang chờ...'}
+                        {p ? p.name : t('game.waitingPlayer')}
                         {p && isThisHost && <span style={{ fontSize: 10, color: '#fdd835', marginLeft: 6 }}>👑HOST</span>}
-                        {p && isMe && <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>(bạn)</span>}
+                        {p && isMe && <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>{t('game.youLabel')}</span>}
                       </div>
                       {p && (
                         <div style={{ fontSize: 11, color: (isThisHost || p.ready) ? '#4caf50' : '#ff9800' }}>
-                          {isThisHost ? '✓ Host' : p.ready ? '✅ Sẵn sàng' : '○ Chưa sẵn sàng'}
+                          {isThisHost ? '✓ Host' : p.ready ? `✅ ${t('game.ready')}` : `○ ${t('game.notReady')}`}
                         </div>
                       )}
                     </div>
@@ -848,7 +849,7 @@ export default function PvpTestScreen() {
                       <button onClick={() => handleKick(sid)} style={{
                         padding: '4px 10px', background: '#5c1a1a', border: '1px solid #c62828',
                         color: '#ef9a9a', borderRadius: 4, fontSize: 11, cursor: 'pointer',
-                      }}>Đuổi</button>
+                      }}>{t('game.kick')}</button>
                     )}
                   </div>
                 );
@@ -863,7 +864,7 @@ export default function PvpTestScreen() {
                   background: myReady ? '#1a5c2a' : '#1e88e5',
                   color: '#fff', border: 'none', opacity: myReady ? 0.7 : 1,
                 }}>
-                  {myReady ? '✅ Đã sẵn sàng' : '🙌 Sẵn Sàng'}
+                  {myReady ? `✅ ${t('game.ready')}` : `🙌 ${t('game.setReady')}`}
                 </button>
               )}
 
@@ -874,14 +875,14 @@ export default function PvpTestScreen() {
                   background: canStart ? '#e94560' : '#333',
                   color: '#fff', border: 'none', opacity: canStart ? 1 : 0.5,
                 }}>
-                  {canStart ? '🚀 Bắt Đầu!' : '⏳ Chờ đối thủ sẵn sàng...'}
+                  {canStart ? `🚀 ${t('game.startGame')}` : `⏳ ${t('game.waitingOpponent')}`}
                 </button>
               )}
 
               <button onClick={handleLeave} style={{
                 padding: '10px', background: 'transparent', border: '1px solid #e94560',
                 color: '#e94560', borderRadius: 6, fontSize: 13, cursor: 'pointer',
-              }}>🚪 Rời Phòng</button>
+              }}>🚪 {t('game.leave')}</button>
             </div>
           </div>
         )}
@@ -958,7 +959,7 @@ export default function PvpTestScreen() {
           <div style={{ fontSize: 10, color: '#444', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Log</div>
           <div style={{ maxHeight: 160, overflowY: 'auto' }}>
             {log.length === 0
-              ? <div style={{ fontSize: 11, color: '#333' }}>Chưa có activity...</div>
+              ? <div style={{ fontSize: 11, color: '#333' }}>{t('common.noActivity')}</div>
               : log.map((l, i) => (
                 <div key={i} style={{
                   fontSize: 10, padding: '2px 0', borderBottom: '1px solid #0a0a1a',

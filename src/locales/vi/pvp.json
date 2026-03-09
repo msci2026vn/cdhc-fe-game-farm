@@ -16,10 +16,11 @@
     "inputPlaceholder": "Nhập Room ID để join...",
     "joining": "Đang vào phòng...",
     "opponentLeft": "⚠️ Đối thủ đã rời phòng",
-    "join": "Join",
+    "join": "Vào",
     "noRooms": "Chưa có phòng nào đang chờ",
     "refresh": "🔄 Làm mới",
-    "waiting": "Phòng Đang Chờ"
+    "waiting": "Phòng Đang Chờ",
+    "players": "{{current}}/{{max}} người"
   },
   "lobby": {
     "title": "⚔️ PVP Arena",
@@ -41,6 +42,7 @@
   "invite": {
     "title": "Lời mời PVP",
     "from": "mời bạn vào trận đấu",
+    "someone": "Ai đó",
     "accept": "✅ Đồng Ý",
     "reject": "❌ Từ Chối",
     "selectFriend": "👥 Chọn Bạn Để Mời",
@@ -53,9 +55,46 @@
     "waitTime": "Thời gian chờ:",
     "cancel": "Hủy"
   },
+  "game": {
+    "you": "Tôi",
+    "youLabel": "(bạn)",
+    "opponent": "Đối thủ",
+    "yourBoard": "BOARD CỦA BẠN",
+    "opponentBoard": "BOARD ĐỐI THỦ",
+    "swapHint": "click 2 gem kề nhau để swap",
+    "leave": "Rời Phòng",
+    "waitingPlayer": "Đang chờ...",
+    "ready": "Đã sẵn sàng",
+    "notReady": "Chưa sẵn sàng",
+    "setReady": "Sẵn Sàng",
+    "startGame": "Bắt Đầu!",
+    "waitingOpponent": "Chờ đối thủ sẵn sàng...",
+    "kick": "Đuổi",
+    "kicked": "Bạn đã bị đuổi khỏi phòng!"
+  },
+  "error": {
+    "notLoggedIn": "Chưa đăng nhập",
+    "tokenFailed": "Lấy token thất bại: HTTP {{status}}",
+    "invalidToken": "Token không hợp lệ — thử đăng nhập lại",
+    "roomNotFound": "Không tìm thấy phòng: {{code}}",
+    "roomFull": "Phòng đã đủ 2 người"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "noActivity": "Chưa có activity..."
+  },
   "history": {
     "win": "Thắng",
     "lose": "Thua",
-    "draw": "Hoà"
+    "draw": "Hoà",
+    "title": "Lịch Sử",
+    "leaderboard": "Bảng Xếp Hạng",
+    "noHistory": "Chưa có trận đấu nào"
+  },
+  "toast": {
+    "friendAccepted": "✅ Bạn bè đã chấp nhận! Đang vào phòng...",
+    "friendRejected": "❌ Bạn bè đã từ chối lời mời",
+    "matchFound": "✅ Tìm được đối thủ! Đang vào phòng...",
+    "inviteSent": "📨 Đã gửi lời mời!"
   }
 }

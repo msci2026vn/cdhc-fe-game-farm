@@ -30,6 +30,7 @@ function RoomListModal({
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t } = useTranslation('pvp');
 
   const fetchRooms = async () => {
     setLoading(true);
@@ -76,18 +77,18 @@ function RoomListModal({
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           flexShrink: 0,
         }}>
-          <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>📋 Phòng Đang Chờ</span>
+          <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>📋 {t('room.waiting')}</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
 
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', color: '#64748b', padding: 40, fontSize: 14 }}>Đang tải...</div>
+            <div style={{ textAlign: 'center', color: '#64748b', padding: 40, fontSize: 14 }}>{t('common.loading')}</div>
           ) : rooms.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 16px' }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>🏜️</div>
-              <div style={{ color: '#64748b', fontSize: 14, marginBottom: 20 }}>Chưa có phòng nào đang chờ</div>
+              <div style={{ color: '#64748b', fontSize: 14, marginBottom: 20 }}>{t('room.noRooms')}</div>
               <button
                 onClick={() => { onClose(); navigate('/pvp-test'); }}
                 style={{
@@ -96,7 +97,7 @@ function RoomListModal({
                   fontSize: 14, fontWeight: 700, cursor: 'pointer',
                 }}
               >
-                ➕ Tạo Phòng Mới
+                {t('room.createNew')}
               </button>
             </div>
           ) : (
@@ -120,7 +121,7 @@ function RoomListModal({
                   <div>
                     <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: 14 }}>{room.hostName || 'Unknown'}</div>
                     <div style={{ color: '#64748b', fontSize: 11 }}>
-                      #{room.roomCode} · {room.clients}/{room.maxClients} người
+                      #{room.roomCode} · {t('room.players', { current: room.clients, max: room.maxClients })}
                     </div>
                   </div>
                 </div>
@@ -133,7 +134,7 @@ function RoomListModal({
                     flexShrink: 0,
                   }}
                 >
-                  Vào ▶
+                  {t('room.join')} ▶
                 </button>
               </div>
             ))
@@ -149,7 +150,7 @@ function RoomListModal({
             borderTop: '1px solid #0f1e30', flexShrink: 0,
           }}
         >
-          🔄 Làm mới
+          {t('room.refresh')}
         </button>
       </div>
     </div>
@@ -166,6 +167,7 @@ function InvitePopup({
   onAccept: () => void;
   onReject: () => void;
 }) {
+  const { t } = useTranslation('pvp');
   const [secondsLeft, setSecondsLeft] = useState(() =>
     Math.max(0, Math.floor((new Date(invite.expiresAt).getTime() - Date.now()) / 1000)),
   );
@@ -196,13 +198,13 @@ function InvitePopup({
       }}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>⚔️</div>
         <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
-          Lời mời PVP
+          {t('invite.title')}
         </div>
         <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 16 }}>
           <span style={{ color: '#f59e0b', fontWeight: 700 }}>
-            {invite.fromName || 'Ai đó'}
+            {invite.fromName || t('invite.someone')}
           </span>{' '}
-          mời bạn vào trận đấu
+          {t('invite.from')}
         </div>
 
         {/* Countdown ring */}
@@ -223,7 +225,7 @@ function InvitePopup({
               cursor: 'pointer',
             }}
           >
-            ✅ Đồng Ý
+            {t('invite.accept')}
           </button>
           <button
             onClick={onReject}
@@ -233,7 +235,7 @@ function InvitePopup({
               color: '#ef4444', fontSize: 15, fontWeight: 700, cursor: 'pointer',
             }}
           >
-            ❌ Từ Chối
+            {t('invite.reject')}
           </button>
         </div>
       </div>
@@ -251,6 +253,7 @@ function FriendPickerModal({
   onSend: (friendId: string) => void;
   sending: boolean;
 }) {
+  const { t } = useTranslation('pvp');
   const { data: friends } = useQuery({
     queryKey: ['friends'],
     queryFn: socialApi.getFriends,
@@ -277,14 +280,14 @@ function FriendPickerModal({
           padding: '16px 20px', borderBottom: '1px solid #1e3a5a',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
-          <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>👥 Chọn Bạn Để Mời</span>
+          <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>{t('invite.selectFriend')}</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {!friends?.friends?.length ? (
             <div style={{ textAlign: 'center', padding: 32, color: '#64748b' }}>
-              Chưa có bạn bè. Thêm bạn từ màn hình Bạn Bè!
+              {t('invite.noFriends')}
             </div>
           ) : (
             friends.friends.map(f => (
@@ -318,7 +321,7 @@ function FriendPickerModal({
                     cursor: sending ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {sending ? '...' : 'Mời'}
+                  {sending ? t('invite.sending') : t('invite.send')}
                 </button>
               </div>
             ))
@@ -337,6 +340,7 @@ function QuickMatchModal({
   waitSeconds: number;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation('pvp');
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200,
@@ -351,9 +355,9 @@ function QuickMatchModal({
         boxShadow: '0 0 40px rgba(59,130,246,0.3)',
       }}>
         <div style={{ fontSize: 40, marginBottom: 12, animation: 'spin 2s linear infinite' }}>🔍</div>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Đang Tìm Đối Thủ...</div>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t('matchmaking.searching')}</div>
         <div style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>
-          Thời gian chờ: <span style={{ color: '#f59e0b', fontWeight: 700 }}>{waitSeconds}s</span>
+          {t('matchmaking.waitTime')} <span style={{ color: '#f59e0b', fontWeight: 700 }}>{waitSeconds}s</span>
         </div>
         <button
           onClick={onCancel}
@@ -363,7 +367,7 @@ function QuickMatchModal({
             color: '#ef4444', fontSize: 14, fontWeight: 700, cursor: 'pointer',
           }}
         >
-          Hủy
+          {t('matchmaking.cancel')}
         </button>
       </div>
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
@@ -430,14 +434,14 @@ export default function PvpLobby() {
       setPendingInvite(event);
     } else if (event.type === 'pvp_invite_response') {
       if (event.action === 'accept' && event.roomCode) {
-        showToast('✅ Bạn bè đã chấp nhận! Đang vào phòng...');
+        showToast(t('toast.friendAccepted'));
         setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}`), 1000);
       } else {
-        showToast('❌ Bạn bè đã từ chối lời mời');
+        showToast(t('toast.friendRejected'));
       }
     } else if (event.type === 'pvp_matched') {
       setInQueue(false);
-      showToast('✅ Tìm được đối thủ! Đang vào phòng...');
+      showToast(t('toast.matchFound'));
       setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}`), 800);
     }
   }, [navigate, showToast]);
@@ -449,7 +453,7 @@ export default function PvpLobby() {
     mutationFn: pvpApi.sendInvite,
     onSuccess: () => {
       setShowFriendPicker(false);
-      showToast('📨 Đã gửi lời mời!');
+      showToast(t('toast.inviteSent'));
     },
     onError: (e: Error) => showToast(`❌ ${e.message}`),
   });

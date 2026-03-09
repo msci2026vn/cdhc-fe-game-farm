@@ -19,7 +19,8 @@
     "join": "Join",
     "noRooms": "No rooms available",
     "refresh": "🔄 Refresh",
-    "waiting": "Waiting Rooms"
+    "waiting": "Waiting Rooms",
+    "players": "{{current}}/{{max}} players"
   },
   "lobby": {
     "title": "⚔️ PVP Arena",
@@ -41,6 +42,7 @@
   "invite": {
     "title": "PVP Invite",
     "from": "challenges you to a match",
+    "someone": "Someone",
     "accept": "✅ Accept",
     "reject": "❌ Decline",
     "selectFriend": "👥 Select Friend to Invite",
@@ -53,9 +55,46 @@
     "waitTime": "Wait time:",
     "cancel": "Cancel"
   },
+  "game": {
+    "you": "You",
+    "youLabel": "(you)",
+    "opponent": "Opponent",
+    "yourBoard": "YOUR BOARD",
+    "opponentBoard": "OPPONENT BOARD",
+    "swapHint": "click 2 adjacent gems to swap",
+    "leave": "Leave Room",
+    "waitingPlayer": "Waiting...",
+    "ready": "Ready",
+    "notReady": "Not Ready",
+    "setReady": "Ready",
+    "startGame": "Start!",
+    "waitingOpponent": "Waiting for opponent...",
+    "kick": "Kick",
+    "kicked": "You have been kicked from the room!"
+  },
+  "error": {
+    "notLoggedIn": "Not logged in",
+    "tokenFailed": "Failed to get token: HTTP {{status}}",
+    "invalidToken": "Invalid token — please log in again",
+    "roomNotFound": "Room not found: {{code}}",
+    "roomFull": "Room is full (max 2 players)"
+  },
+  "common": {
+    "loading": "Loading...",
+    "noActivity": "No activity yet..."
+  },
   "history": {
     "win": "Win",
     "lose": "Loss",
-    "draw": "Draw"
+    "draw": "Draw",
+    "title": "History",
+    "leaderboard": "Leaderboard",
+    "noHistory": "No matches yet"
+  },
+  "toast": {
+    "friendAccepted": "✅ Friend accepted! Joining room...",
+    "friendRejected": "❌ Friend declined your invite",
+    "matchFound": "✅ Opponent found! Joining room...",
+    "inviteSent": "📨 Invite sent!"
   }
 }
