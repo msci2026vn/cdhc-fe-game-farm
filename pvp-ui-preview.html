@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PVP — CDHC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08080d;
+  --s1: #0e0e16;
+  --s2: #13131c;
+  --s3: #1a1a26;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --accent: #f5c842;
+  --accent-glow: rgba(245,200,66,0.18);
+  --red: #e84b18;
+  --red-glow: rgba(232,75,24,0.28);
+  --purple: #8b5cf6;
+  --purple-glow: rgba(139,92,246,0.2);
+  --green: #10b981;
+  --green-glow: rgba(16,185,129,0.18);
+  --text: #f2ede8;
+  --text2: #a09caa;
+  --text3: #5c5868;
+  --win: #34d399;
+  --loss: #f87171;
+  --r: 18px;
+  --r2: 14px;
+  --r3: 10px;
+}
+
+html {
+  background: #030306;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Shell ─────────────────────────────────────────────────────── */
+.shell {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+}
+.shell::-webkit-scrollbar { display: none; }
+
+@media (min-width: 480px) {
+  body {
+    background: #020205;
+    align-items: center;
+    padding: 20px 0;
+  }
+  .shell {
+    min-height: 0;
+    height: 896px;
+    border-radius: 52px;
+    overflow-y: auto;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.07),
+      0 0 0 10px rgba(0,0,0,0.5),
+      0 60px 120px rgba(0,0,0,0.9);
+  }
+}
+
+/* ── Background glow ──────────────────────────────────────────── */
+.bg-glow {
+  position: fixed;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 400px;
+  height: 300px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Dynamic Island ───────────────────────────────────────────── */
+.dynamic-island-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: env(safe-area-inset-top, 14px);
+  padding-top: max(env(safe-area-inset-top), 14px);
+  padding-bottom: 4px;
+  position: relative;
+  z-index: 10;
+}
+.dynamic-island {
+  width: 120px;
+  height: 34px;
+  background: #000;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+.di-camera {
+  width: 10px; height: 10px;
+  background: #1a1a2a;
+  border-radius: 50%;
+  border: 1.5px solid #222;
+}
+.di-dot {
+  width: 5px; height: 5px;
+  background: #1f1f35;
+  border-radius: 50%;
+}
+
+/* Status bar */
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 28px 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  position: relative;
+  z-index: 10;
+}
+.statusbar-time { font-weight: 700; font-size: 15px; }
+.statusbar-icons { display: flex; gap: 6px; align-items: center; }
+
+/* ── Header ───────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px 8px;
+  position: relative;
+  z-index: 5;
+}
+.icon-btn {
+  width: 40px; height: 40px;
+  background: var(--s2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn:active { background: var(--s3); }
+.header-center {
+  display: flex; flex-direction: column; align-items: center;
+}
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 8px;
+}
+.live-chip {
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.3);
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 4px;
+}
+.live-chip::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.header-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.notif-btn {
+  width: 40px; height: 40px;
+  background: var(--s2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.notif-badge {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 1.5px solid var(--bg);
+}
+
+/* ── Rating card ──────────────────────────────────────────────── */
+.rating-card {
+  margin: 6px 16px 14px;
+  background: var(--s1);
+  border-radius: var(--r);
+  border: 1px solid var(--border2);
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.rating-card::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(245,200,66,0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+.rating-card::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 140px; height: 140px;
+  background: radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.rc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+.rc-left {}
+.rc-label {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.rc-rating {
+  font-family: 'Syne', sans-serif;
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.rc-delta {
+  font-size: 12px;
+  color: var(--win);
+  font-weight: 600;
+  margin-top: 3px;
+  display: flex; align-items: center; gap: 3px;
+}
+.rc-rank {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.rank-badge {
+  background: linear-gradient(135deg, rgba(245,200,66,0.18), rgba(245,200,66,0.06));
+  border: 1px solid rgba(245,200,66,0.25);
+  border-radius: 12px;
+  padding: 8px 14px;
+  text-align: center;
+}
+.rank-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+.rank-label { font-size: 10px; color: var(--text3); margin-top: 2px; letter-spacing: 0.08em; }
+.rank-tier {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Stats grid */
+.rc-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+.stat-box {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r3);
+  padding: 10px 6px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.stat-box.stat-win::before { content:''; position:absolute; inset:0; background: rgba(52,211,153,0.04); }
+.stat-box.stat-loss::before { content:''; position:absolute; inset:0; background: rgba(248,113,113,0.04); }
+.stat-n {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.c-win { color: var(--win); }
+.c-loss { color: var(--loss); }
+.c-draw { color: var(--text2); }
+.stat-lbl { font-size: 10px; color: var(--text3); font-weight: 500; }
+
+/* Winrate */
+.rc-winrate {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.wr-track {
+  flex: 1;
+  height: 5px;
+  background: var(--s3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.wr-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--win), #6ee7b7);
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+.wr-text { font-size: 12px; color: var(--win); font-weight: 600; white-space: nowrap; }
+
+/* ── Bot button ───────────────────────────────────────────────── */
+.bot-btn {
+  margin: 0 16px 12px;
+  width: calc(100% - 32px);
+  background: linear-gradient(135deg, #b83015 0%, #e84b18 50%, #f06030 100%);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 8px 32px rgba(232,75,24,0.4),
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 -1px 0 rgba(0,0,0,0.2) inset;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.bot-btn:active {
+  transform: scale(0.975);
+  box-shadow: 0 4px 16px rgba(232,75,24,0.3);
+}
+.bot-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: sweep 2.8s ease-in-out infinite;
+}
+@keyframes sweep { 0%{left:-120%} 100%{left:200%} }
+.bot-inner-left { display: flex; align-items: center; gap: 12px; }
+.bot-ico {
+  width: 46px; height: 46px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.bot-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.bot-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.02em;
+}
+.bot-arrow {
+  width: 34px; height: 34px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+/* ── Action grid ──────────────────────────────────────────────── */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 16px 20px;
+}
+.ac {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 15px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.12s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 96px;
+}
+.ac:active { transform: scale(0.97); }
+
+/* Color variants */
+.ac-purple {
+  background: linear-gradient(145deg, #110c25, #18103a);
+  border-color: rgba(139,92,246,0.2);
+}
+.ac-purple::after {
+  content:''; position:absolute; bottom:-24px; right:-24px;
+  width:90px; height:90px;
+  background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+}
+.ac-green {
+  background: linear-gradient(145deg, #0a1e14, #0d2a1a);
+  border-color: rgba(16,185,129,0.2);
+}
+.ac-green::after {
+  content:''; position:absolute; bottom:-24px; right:-24px;
+  width:90px; height:90px;
+  background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%);
+}
+.ac-blue {
+  background: linear-gradient(145deg, #0c1020, #121838);
+  border-color: rgba(96,130,255,0.18);
+}
+.ac-blue::after {
+  content:''; position:absolute; bottom:-24px; right:-24px;
+  width:90px; height:90px;
+  background: radial-gradient(circle, rgba(96,130,255,0.15) 0%, transparent 70%);
+}
+.ac-orange {
+  background: linear-gradient(145deg, #1a1008, #261810);
+  border-color: rgba(245,158,11,0.18);
+}
+.ac-orange::after {
+  content:''; position:absolute; bottom:-24px; right:-24px;
+  width:90px; height:90px;
+  background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);
+}
+
+.ac-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  position: relative;
+  z-index: 1;
+}
+.ico-purple { background: rgba(139,92,246,0.15); }
+.ico-green { background: rgba(16,185,129,0.15); }
+.ico-blue { background: rgba(96,130,255,0.12); }
+.ico-orange { background: rgba(245,158,11,0.12); }
+
+.ac-content { position: relative; z-index: 1; }
+.ac-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.ac-sub { font-size: 11px; color: var(--text3); }
+
+.online-dot {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--win); font-weight: 500;
+}
+.online-dot::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--win);
+  border-radius: 50%;
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+/* ── Section header ───────────────────────────────────────────── */
+.section-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px 10px;
+}
+.section-ttl {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-ttl::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+  display: block;
+}
+.section-link {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* ── Match list ───────────────────────────────────────────────── */
+.match-list {
+  padding: 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mi {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mi:active { background: var(--s2); }
+.mi-avatar {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: var(--s3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  position: relative;
+}
+.mi-win-ring { border-color: rgba(52,211,153,0.35); }
+.mi-loss-ring { border-color: rgba(248,113,113,0.25); }
+
+.mi-info { flex: 1; min-width: 0; }
+.mi-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+  letter-spacing: -0.01em;
+}
+.mi-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text3);
+}
+.mi-sep { color: var(--text3); opacity: 0.4; }
+.mi-score { color: var(--text2); font-weight: 500; }
+
+.mi-result {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.r-win {
+  background: rgba(52,211,153,0.1);
+  color: var(--win);
+  border: 1px solid rgba(52,211,153,0.2);
+}
+.r-loss {
+  background: rgba(248,113,113,0.08);
+  color: var(--loss);
+  border: 1px solid rgba(248,113,113,0.15);
+}
+
+/* ── Bottom spacer / home indicator ──────────────────────────── */
+.home-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 calc(8px + env(safe-area-inset-bottom));
+  margin-top: 8px;
+}
+.home-bar {
+  width: 134px; height: 5px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 3px;
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="shell">
+
+  <!-- Dynamic Island -->
+  <div class="dynamic-island-wrap">
+    <div class="dynamic-island">
+      <div class="di-dot"></div>
+      <div class="di-camera"></div>
+      <div class="di-dot"></div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <span class="statusbar-time">9:41</span>
+    <div class="statusbar-icons">
+      <!-- Signal -->
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor">
+        <rect x="0" y="4" width="3" height="8" rx="1" opacity="0.3"/>
+        <rect x="4.5" y="2.5" width="3" height="9.5" rx="1" opacity="0.5"/>
+        <rect x="9" y="1" width="3" height="11" rx="1" opacity="0.75"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="1"/>
+      </svg>
+      <!-- WiFi -->
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round">
+        <path d="M8 9.5C9 9.5 9.8 10.2 9.8 11" stroke-width="1.5"/>
+        <path d="M5.2 7C6.2 5.8 7.1 5.2 8 5.2s1.8.6 2.8 1.8" stroke-width="1.5"/>
+        <path d="M2.5 4.5C4.1 2.6 5.9 1.5 8 1.5s3.9 1.1 5.5 3" stroke-width="1.5"/>
+        <circle cx="8" cy="11" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+      <!-- Battery -->
+      <svg width="26" height="13" viewBox="0 0 26 13" fill="currentColor">
+        <rect x="0.5" y="0.5" width="22" height="12" rx="3.5" stroke="currentColor" stroke-width="1" fill="none"/>
+        <rect x="2" y="2" width="18" height="9" rx="2.5"/>
+        <path d="M23.5 4.5v4c1-.5 1.5-1 1.5-2s-.5-1.5-1.5-2z" opacity="0.4"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <button class="icon-btn" aria-label="Quay lại">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4L6 9l5 5"/>
+      </svg>
+    </button>
+
+    <div class="header-center">
+      <div class="header-title">
+        ⚔️ PVP Arena
+        <span class="live-chip">LIVE</span>
+      </div>
+      <div class="header-sub">Season 1 · Ranked</div>
+    </div>
+
+    <button class="notif-btn" aria-label="Thông báo">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 2C6.2 2 4 4.2 4 7v3.5L2.5 12h13L14 10.5V7C14 4.2 11.8 2 9 2z"/>
+        <path d="M7.2 12a1.8 1.8 0 003.6 0"/>
+      </svg>
+      <div class="notif-badge"></div>
+    </button>
+  </div>
+
+  <!-- Rating Card -->
+  <div class="rating-card">
+    <div class="rc-top">
+      <div class="rc-left">
+        <div class="rc-label">ELO Rating</div>
+        <div class="rc-rating">1063</div>
+        <div class="rc-delta">▲ +63 tuần này</div>
+      </div>
+      <div class="rc-rank">
+        <div class="rank-badge">
+          <div class="rank-num">👑 #1</div>
+          <div class="rank-label">LEADERBOARD</div>
+        </div>
+        <div class="rank-tier">✦ Gold IV</div>
+      </div>
+    </div>
+    <div class="rc-stats">
+      <div class="stat-box stat-win">
+        <div class="stat-n c-win">7</div>
+        <div class="stat-lbl">Thắng</div>
+      </div>
+      <div class="stat-box stat-loss">
+        <div class="stat-n c-loss">1</div>
+        <div class="stat-lbl">Thua</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n c-draw">0</div>
+        <div class="stat-lbl">Hòa</div>
+      </div>
+    </div>
+    <div class="rc-winrate">
+      <div class="wr-track">
+        <div class="wr-fill" style="width: 87.5%"></div>
+      </div>
+      <span class="wr-text">87.5% win rate</span>
+    </div>
+  </div>
+
+  <!-- Play vs Bot CTA -->
+  <button class="bot-btn">
+    <div class="bot-inner-left">
+      <div class="bot-ico">🤖</div>
+      <div>
+        <div class="bot-title">Chơi với Bot</div>
+        <div class="bot-sub">Easy · Medium · Hard · Expert</div>
+      </div>
+    </div>
+    <div class="bot-arrow">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3.5 8h9M8.5 4l4 4-4 4"/>
+      </svg>
+    </div>
+  </button>
+
+  <!-- Actions Grid -->
+  <div class="action-grid">
+
+    <div class="ac ac-purple">
+      <div class="ac-icon ico-purple">🎯</div>
+      <div class="ac-content">
+        <div class="ac-name">Find Match</div>
+        <div class="ac-sub"><span class="online-dot">12 online</span></div>
+      </div>
+    </div>
+
+    <div class="ac ac-green">
+      <div class="ac-icon ico-green">➕</div>
+      <div class="ac-content">
+        <div class="ac-name">Create Room</div>
+        <div class="ac-sub">Tạo phòng riêng</div>
+      </div>
+    </div>
+
+    <div class="ac ac-blue">
+      <div class="ac-icon ico-blue">👥</div>
+      <div class="ac-content">
+        <div class="ac-name">Invite Friend</div>
+        <div class="ac-sub">Mời bạn bè</div>
+      </div>
+    </div>
+
+    <div class="ac ac-orange">
+      <div class="ac-icon ico-orange">📋</div>
+      <div class="ac-content">
+        <div class="ac-name">Room List</div>
+        <div class="ac-sub">Xem phòng mở</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Recent Matches -->
+  <div class="section-hd">
+    <div class="section-ttl">Trận gần đây</div>
+    <span class="section-link">Xem tất cả →</span>
+  </div>
+
+  <div class="match-list">
+
+    <div class="mi">
+      <div class="mi-avatar mi-loss-ring">🎮</div>
+      <div class="mi-info">
+        <div class="mi-name">Tuấn Cường Trịnh</div>
+        <div class="mi-meta">
+          <span>1099 → 1063</span>
+          <span class="mi-sep">·</span>
+          <span class="mi-score">286–312</span>
+          <span class="mi-sep">·</span>
+          <span>3m</span>
+        </div>
+      </div>
+      <div class="mi-result r-loss">Thua</div>
+    </div>
+
+    <div class="mi">
+      <div class="mi-avatar mi-win-ring">🎮</div>
+      <div class="mi-info">
+        <div class="mi-name">Nguyễn Quang Huy</div>
+        <div class="mi-meta">
+          <span>1077 → 1099</span>
+          <span class="mi-sep">·</span>
+          <span class="mi-score">310–198</span>
+          <span class="mi-sep">·</span>
+          <span>4m</span>
+        </div>
+      </div>
+      <div class="mi-result r-win">Thắng</div>
+    </div>
+
+    <div class="mi">
+      <div class="mi-avatar mi-win-ring">🎮</div>
+      <div class="mi-info">
+        <div class="mi-name">Phạm Minh Khoa</div>
+        <div class="mi-meta">
+          <span>1055 → 1077</span>
+          <span class="mi-sep">·</span>
+          <span class="mi-score">290–241</span>
+          <span class="mi-sep">·</span>
+          <span>5m</span>
+        </div>
+      </div>
+      <div class="mi-result r-win">Thắng</div>
+    </div>
+
+  </div>
+
+  <!-- Home indicator -->
+  <div class="home-indicator">
+    <div class="home-bar"></div>
+  </div>
+
+</div>
+</body>
+</html>

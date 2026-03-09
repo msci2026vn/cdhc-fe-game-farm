@@ -16,6 +16,7 @@ import type { ZoneBoss } from '../types/campaign.types';
 import type { CampaignBossData } from '../hooks/useMatch3Campaign';
 import BossFightCampaign from '../components/BossFightCampaign';
 import { BOSS_SPRITE_PATHS } from '../data/bossSpritePaths';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Transform a campaign ZoneBoss + static detail → CampaignBossData
@@ -56,6 +57,7 @@ function transformCampaignBoss(boss: ZoneBoss, zoneNumber: number): CampaignBoss
 }
 
 export default function CampaignBattleScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { bossId } = useParams<{ bossId: string }>();
   const [searchParams] = useSearchParams();
@@ -74,7 +76,7 @@ export default function CampaignBattleScreen() {
       <div className="h-[100dvh] max-w-[430px] mx-auto boss-gradient flex items-center justify-center overflow-hidden">
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/80 font-heading font-bold text-sm">Đang tải boss...</p>
+          <p className="text-white/80 font-heading font-bold text-sm">{t('campaign.screens.loading_boss')}</p>
         </div>
       </div>
     );
@@ -87,7 +89,7 @@ export default function CampaignBattleScreen() {
         <div className="text-center">
           <span className="text-5xl mb-4 block">😵</span>
           <p className="text-red-300 font-heading font-bold mb-2">
-            {error ? 'Lỗi tải boss' : 'Boss không tìm thấy'}
+            {error ? t('campaign.screens.error_loading_boss') : t('campaign.screens.boss_not_found')}
           </p>
           <p className="text-white/40 text-xs mb-4">
             {error ? String(error) : `Boss ID: ${bossId}`}
@@ -96,7 +98,7 @@ export default function CampaignBattleScreen() {
             onClick={() => navigate(`/campaign/${zoneNumber}`)}
             className="btn-gold px-6 py-2 rounded-xl font-heading font-bold text-sm text-white"
           >
-            Về Map
+            {t('campaign.screens.back_to_map')}
           </button>
         </div>
       </div>

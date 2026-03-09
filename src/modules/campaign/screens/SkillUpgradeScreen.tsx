@@ -11,34 +11,36 @@ import SkillCard from '../components/SkillCard';
 import type { SkillId, PlayerSkill } from '../types/skill.types';
 import { playSound } from '@/shared/audio';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
+import { useTranslation } from 'react-i18next';
 
 // Default skill data when API hasn't loaded yet
-const DEFAULT_SKILLS: PlayerSkill[] = [
+const getDefaultSkills = (t: any): PlayerSkill[] => [
   {
-    skillId: 'sam_dong', name: 'Sấm Đồng', emoji: '⚡', level: 1,
-    description: 'Chiêu tuyệt kỹ: Gây sát thương khổng lồ lên boss.',
-    effects: [{ label: 'Sát thương', value: '×3.0 ATK' }],
-    nextLevelEffects: [{ label: 'Sát thương', value: '×3.5 ATK' }],
+    skillId: 'sam_dong', name: t('campaign.skills.sam_dong.name'), emoji: '⚡', level: 1,
+    description: t('campaign.skills.sam_dong.desc'),
+    effects: [{ label: t('campaign.skills.sam_dong.eff_dmg'), value: '×3.0 ATK' }],
+    nextLevelEffects: [{ label: t('campaign.skills.sam_dong.eff_dmg'), value: '×3.5 ATK' }],
     upgradeCost: { ogn: 2000, fragments: 5 },
     unlockCondition: null, isUnlocked: true,
   },
   {
-    skillId: 'ot_hiem', name: 'Ớt Hiểm', emoji: '🌶️', level: 0,
-    description: 'Tăng sát thương trong thời gian ngắn.',
+    skillId: 'ot_hiem', name: t('campaign.skills.ot_hiem.name'), emoji: '🌶️', level: 0,
+    description: t('campaign.skills.ot_hiem.desc'),
     effects: [],
     upgradeCost: null,
-    unlockCondition: 'Thắng Boss #4', isUnlocked: false,
+    unlockCondition: t('campaign.skills.ot_hiem.unlock'), isUnlocked: false,
   },
   {
-    skillId: 'rom_boc', name: 'Rơm Bọc', emoji: '🪹', level: 0,
-    description: 'Tạo khiên và giảm sát thương nhận vào.',
+    skillId: 'rom_boc', name: t('campaign.skills.rom_boc.name'), emoji: '🪹', level: 0,
+    description: t('campaign.skills.rom_boc.desc'),
     effects: [],
     upgradeCost: null,
-    unlockCondition: 'Thắng Boss #8', isUnlocked: false,
+    unlockCondition: t('campaign.skills.rom_boc.unlock'), isUnlocked: false,
   },
 ];
 
 export default function SkillUpgradeScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: skills, isLoading, error } = usePlayerSkills();
   const ogn = useOgn();
@@ -47,7 +49,7 @@ export default function SkillUpgradeScreen() {
   const [upgradeSuccess, setUpgradeSuccess] = useState<SkillId | null>(null);
 
   // Use API data or fallback to defaults
-  const displaySkills = skills && skills.length > 0 ? skills : DEFAULT_SKILLS;
+  const displaySkills = skills && skills.length > 0 ? skills : getDefaultSkills(t);
 
   // Player fragments — from profile or 0
   const playerFragments = 0; // TODO: read from profile when fragment system is live
@@ -79,7 +81,7 @@ export default function SkillUpgradeScreen() {
             ←
           </button>
           <h1 className="font-heading font-bold text-lg text-white">
-            ⚔️ Kỹ Năng Chiến Binh
+            ⚔️ {t('campaign.screens.warrior_skills')}
           </h1>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
@@ -98,7 +100,7 @@ export default function SkillUpgradeScreen() {
             style={{ background: 'rgba(108,92,231,0.15)', border: '1px solid rgba(108,92,231,0.2)' }}>
             <span className="text-sm">🧩</span>
             <span className="text-xs font-bold text-purple-300">{playerFragments}</span>
-            <span className="text-[9px] text-purple-300/60">Mảnh</span>
+            <span className="text-[9px] text-purple-300/60">{t('campaign.screens.fragments')}</span>
           </div>
         </div>
       </div>
@@ -112,7 +114,7 @@ export default function SkillUpgradeScreen() {
         ) : error ? (
           <div className="text-center py-20">
             <span className="text-4xl block mb-3">😵</span>
-            <p className="text-red-300 text-sm font-bold">Lỗi tải kỹ năng</p>
+            <p className="text-red-300 text-sm font-bold">{t('campaign.screens.error_loading_skills')}</p>
             <p className="text-white/40 text-xs mt-1">{String(error)}</p>
           </div>
         ) : (
@@ -137,9 +139,9 @@ export default function SkillUpgradeScreen() {
         {/* Info note */}
         <div className="text-center py-4">
           <p className="text-[10px] text-white/30">
-            Mở khóa kỹ năng mới bằng cách thắng boss trong chiến dịch.
+            {t('campaign.skills.unlock_desc1')}
             <br />
-            Thu thập mảnh kỹ năng 🧩 từ drop khi đánh boss.
+            {t('campaign.skills.unlock_desc2')}
           </p>
         </div>
       </div>

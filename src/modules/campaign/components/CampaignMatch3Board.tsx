@@ -5,16 +5,17 @@ import { ParticleOverlay } from './ParticleOverlay';
 import { FloatingCombatText, FloatingTextData } from './FloatingCombatText';
 import { ChainLightningContainer } from './ChainLightningContainer';
 import { ChainLightningData } from '@/shared/match3/combat.types';
+import { useTranslation } from 'react-i18next';
 
 // ═══ Candy glass gem colors — oval white highlight at top + deep color base ═══
 // 2 static bg layers: painted once, no GPU repaint. Must match .gem-* CSS classes.
 // ⚔️ atk = đỏ   💚 hp = xanh lá   🛡️ def = xanh biển   ⭐ star = vàng
 const HIGHLIGHT = 'radial-gradient(ellipse 68% 44% at 50% 13%, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0) 100%)';
 const GEM_STYLES: Record<string, React.CSSProperties> = {
-    atk:  { background: `${HIGHLIGHT}, linear-gradient(160deg, #ff5566 0%, #ee2233 45%, #aa0011 100%)` },
-    hp:   { background: `${HIGHLIGHT.replace('0.58','0.55')}, linear-gradient(160deg, #44ee77 0%, #22bb44 45%, #0d7722 100%)` },
-    def:  { background: `${HIGHLIGHT.replace('0.58','0.55')}, linear-gradient(160deg, #5588ff 0%, #2255ee 45%, #0d33aa 100%)` },
-    star: { background: `${HIGHLIGHT.replace('0.58','0.62')}, linear-gradient(160deg, #ffee33 0%, #ffbb00 45%, #aa7700 100%)` },
+    atk: { background: `${HIGHLIGHT}, linear-gradient(160deg, #ff5566 0%, #ee2233 45%, #aa0011 100%)` },
+    hp: { background: `${HIGHLIGHT.replace('0.58', '0.55')}, linear-gradient(160deg, #44ee77 0%, #22bb44 45%, #0d7722 100%)` },
+    def: { background: `${HIGHLIGHT.replace('0.58', '0.55')}, linear-gradient(160deg, #5588ff 0%, #2255ee 45%, #0d33aa 100%)` },
+    star: { background: `${HIGHLIGHT.replace('0.58', '0.62')}, linear-gradient(160deg, #ffee33 0%, #ffbb00 45%, #aa7700 100%)` },
 };
 
 // Pre-computed grid styles to avoid creating new objects every render
@@ -56,6 +57,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
 }: Props) {
     // Convert hintedGems array to Set for O(1) lookup instead of O(n) includes() on every gem
     const hintedSet = React.useMemo(() => new Set(hintedGems), [hintedGems]);
+    const { t } = useTranslation();
 
     return (
         <div className="relative flex-1 flex items-start justify-center">
@@ -122,7 +124,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                             <span className="text-5xl block">💫</span>
                             <span className="text-white font-heading font-bold text-xl block mt-2"
                                 style={{ textShadow: '0 0 20px rgba(253,203,110,0.8)' }}>
-                                CHOÁNG!
+                                {t('campaign.combat.stunned')}
                             </span>
                         </div>
                     </div>

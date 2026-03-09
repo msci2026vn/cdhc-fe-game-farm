@@ -9,6 +9,8 @@ interface LeaderboardRowProps {
   isMe?: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+
 const MEDALS = ['🥇', '🥈', '🥉'];
 
 function renderStars(stars?: number) {
@@ -17,23 +19,22 @@ function renderStars(stars?: number) {
 }
 
 export default function LeaderboardRow({ entry, isMe }: LeaderboardRowProps) {
+  const { t } = useTranslation();
   const isTop3 = entry.rank >= 1 && entry.rank <= 3;
   const medal = isTop3 ? MEDALS[entry.rank - 1] : null;
 
   return (
     <div
-      className={`rounded-xl p-3 flex items-center gap-3 transition-all ${
-        isMe ? 'ring-2 ring-amber-500/50' : ''
-      } ${isTop3 ? 'py-3.5' : ''}`}
+      className={`rounded-xl p-3 flex items-center gap-3 transition-all ${isMe ? 'ring-2 ring-amber-500/50' : ''
+        } ${isTop3 ? 'py-3.5' : ''}`}
       style={{
         background: isMe
           ? 'rgba(245,158,11,0.1)'
           : isTop3
             ? 'rgba(255,255,255,0.06)'
             : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${
-          isMe ? 'rgba(245,158,11,0.3)' : isTop3 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)'
-        }`,
+        border: `1px solid ${isMe ? 'rgba(245,158,11,0.3)' : isTop3 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)'
+          }`,
       }}
     >
       {/* Rank */}
@@ -52,13 +53,13 @@ export default function LeaderboardRow({ entry, isMe }: LeaderboardRowProps) {
             </div>
           )}
           <span className={`text-[13px] font-bold truncate ${isMe ? 'text-amber-400' : 'text-white'}`}>
-            {isMe ? 'Ban' : entry.userName}
+            {isMe ? t('campaign.ui.you', { defaultValue: 'You' }) : entry.userName}
           </span>
         </div>
         {entry.bossName && (
           <div className="text-[9px] text-white/30 mt-0.5 ml-9 truncate">
             {entry.bossName}
-            {entry.zoneNumber ? ` — Zone ${entry.zoneNumber}` : ''}
+            {entry.zoneNumber ? ` — ${t('campaign.ui.zone_prefix', { defaultValue: 'Zone' })} ${entry.zoneNumber}` : ''}
           </div>
         )}
       </div>

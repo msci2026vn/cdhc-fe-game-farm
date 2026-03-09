@@ -3,6 +3,7 @@ import type { ZoneBoss } from '../types/campaign.types';
 import type { StageState } from '../types/campaign.types';
 import { getBossImageSrc } from '../data/bossSpritePaths';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface StageNodeProps {
   boss: ZoneBoss;
@@ -16,6 +17,7 @@ interface StageNodeProps {
  * 3 states: completed (green circle), current (blue square + FIGHT!), locked (gray circle)
  */
 export default function StageNode({ boss, state, globalBossNumber, onClick }: StageNodeProps) {
+  const { t } = useTranslation();
   const isCompleted = state === 'completed';
   const isCurrent = state === 'current';
   const isLocked = state === 'locked';
@@ -62,7 +64,7 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
           </div>
           {/* FIGHT! badge */}
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border-2 border-white shadow-md animate-bounce">
-            FIGHT!
+            {t('campaign.ui.fight')}
           </div>
         </div>
       ) : (

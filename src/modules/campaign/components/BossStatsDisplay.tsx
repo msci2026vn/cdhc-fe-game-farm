@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import type { ActiveBossBuff } from '@/shared/match3/combat.types';
+import { useTranslation } from 'react-i18next';
 
 interface StatsProps {
   def: number;
@@ -11,6 +12,7 @@ interface StatsProps {
 }
 
 export function BossStatsBadges({ def, freq, enrageLevel }: StatsProps) {
+  const { t } = useTranslation();
   if (def <= 0 && freq <= 1 && enrageLevel <= 0) return null;
   return (
     <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
@@ -23,7 +25,7 @@ export function BossStatsBadges({ def, freq, enrageLevel }: StatsProps) {
       {freq > 1 && (
         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
           style={{ background: 'rgba(253,121,168,0.2)', color: '#fd79a8', border: '1px solid rgba(253,121,168,0.3)' }}>
-          ⚡ x{freq} đòn
+          ⚡ {t('campaign.ui.hits', { count: freq })}
         </span>
       )}
       {enrageLevel > 0 && (

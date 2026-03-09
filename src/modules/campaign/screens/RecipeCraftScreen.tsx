@@ -16,24 +16,26 @@ import { MAX_BUFF_SLOTS } from '../types/recipe.types';
 import { playSound } from '@/shared/audio';
 import { AnimatedNumber } from '@/shared/components/AnimatedNumber';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 type TabKey = 'craft' | 'inventory' | 'buffs';
 type TierFilter = 'all' | FragmentTier;
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'craft', label: 'Chế Tạo' },
-  { key: 'inventory', label: 'Kho CT' },
-  { key: 'buffs', label: 'Buff' },
+  { key: 'craft', label: 'campaign.recipes.tabs.craft' },
+  { key: 'inventory', label: 'campaign.recipes.tabs.inventory' },
+  { key: 'buffs', label: 'campaign.recipes.tabs.buffs' },
 ];
 
 const TIER_FILTERS: { key: TierFilter; label: string }[] = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'common', label: '\u2b1c' },
-  { key: 'rare', label: '\ud83d\udfe6' },
-  { key: 'legendary', label: '\ud83d\udfea' },
+  { key: 'all', label: 'campaign.recipes.filters.all' },
+  { key: 'common', label: '⬜' },
+  { key: 'rare', label: '🟦' },
+  { key: 'legendary', label: '🟧' },
 ];
 
 export default function RecipeCraftScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const ogn = useOgn();
 
@@ -86,14 +88,14 @@ export default function RecipeCraftScreen() {
         playSound('level_up');
       } else if (type === 'sell') {
         await sellMutation.mutateAsync(key);
-        playSound('coin_collect');
+        playSound('ogn_gain');
       } else if (type === 'use') {
         await useMutation.mutateAsync(key);
         playSound('level_up');
       }
     } catch {
       playSound('damage_dealt');
-      toast.error('Thao tác thất bại. Vui lòng thử lại.');
+      toast.error(t('campaign.recipes.toast_fail'));
     } finally {
       setCraftingKey(null);
     }
@@ -120,7 +122,7 @@ export default function RecipeCraftScreen() {
           >
             &larr;
           </button>
-          <h1 className="font-heading font-bold text-lg text-white">Công Thức</h1>
+          <h1 className="font-heading font-bold text-lg text-white">{t('campaign.recipes.title')}</h1>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
             style={{ background: 'rgba(253,203,110,0.15)', border: '1px solid rgba(253,203,110,0.2)' }}>
             <span className="text-sm">💰</span>
@@ -136,14 +138,13 @@ export default function RecipeCraftScreen() {
             <button
               key={tab.key}
               onClick={() => { setActiveTab(tab.key); playSound('ui_tab'); }}
-              className={`flex-1 py-2 rounded-full text-[12px] font-bold transition-all relative ${
-                tab.key === activeTab
-                  ? 'bg-amber-600 text-white'
-                  : 'text-white/50'
-              }`}
+              className={`flex-1 py-2 rounded-full text-[12px] font-bold transition-all relative ${tab.key === activeTab
+                ? 'bg-amber-600 text-white'
+                : 'text-white/50'
+                }`}
               style={tab.key !== activeTab ? { background: 'rgba(255,255,255,0.05)' } : { boxShadow: '0 4px 12px rgba(245,158,11,0.3)' }}
             >
-              {tab.label}
+              {t(tab.label)}
               {tab.key === 'buffs' && activeBuffCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center">
                   {activeBuffCount}
@@ -219,6 +220,7 @@ function CraftTab({
   onCraft: (key: string) => void;
   craftingKey: string | null;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       {/* Tier filter */}
@@ -227,11 +229,10 @@ function CraftTab({
           <button
             key={f.key}
             onClick={() => onTierFilter(f.key)}
-            className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
-              f.key === tierFilter ? 'bg-purple-600 text-white' : 'bg-white/5 text-white/40'
-            }`}
+            className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${f.key === tierFilter ? 'bg-purple-600 text-white' : 'bg-white/5 text-white/40'
+              }`}
           >
-            {f.label}
+            {f.key === 'all' ? t(f.label) : f.label}
           </button>
         ))}
       </div>
@@ -240,19 +241,17 @@ function CraftTab({
       <div className="flex gap-1 mb-3 overflow-x-auto scrollbar-hide pb-1">
         <button
           onClick={() => onZoneFilter(0)}
-          className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${
-            zoneFilter === 0 ? 'bg-amber-600 text-white' : 'bg-white/5 text-white/40'
-          }`}
+          className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${zoneFilter === 0 ? 'bg-amber-600 text-white' : 'bg-white/5 text-white/40'
+            }`}
         >
-          All
+          {t('campaign.recipes.filters.all')}
         </button>
         {Array.from({ length: 10 }, (_, i) => i + 1).map(z => (
           <button
             key={z}
             onClick={() => onZoneFilter(z)}
-            className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${
-              zoneFilter === z ? 'bg-amber-600 text-white' : 'bg-white/5 text-white/40'
-            }`}
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${zoneFilter === z ? 'bg-amber-600 text-white' : 'bg-white/5 text-white/40'
+              }`}
           >
             Z{z}
           </button>
@@ -262,7 +261,7 @@ function CraftTab({
       {isLoading ? (
         <LoadingSpinner />
       ) : definitions.length === 0 ? (
-        <EmptyState emoji="📜" text="Không có công thức" sub="Thử đổi tier hoặc zone" />
+        <EmptyState emoji="📜" text={t('campaign.recipes.empty_craft.title')} sub={t('campaign.recipes.empty_craft.sub')} />
       ) : (
         <div className="space-y-3">
           {definitions.map(d => (
@@ -294,8 +293,9 @@ function InventoryTab({
   onUse: (key: string, name: string) => void;
   activeBuffCount: number;
 }) {
+  const { t } = useTranslation();
   if (isLoading) return <LoadingSpinner />;
-  if (recipes.length === 0) return <EmptyState emoji="📦" text="Kho trống" sub="Chế tạo công thức để sử dụng!" />;
+  if (recipes.length === 0) return <EmptyState emoji="📦" text={t('campaign.recipes.empty_inventory.title')} sub={t('campaign.recipes.empty_inventory.sub')} />;
 
   return (
     <div className="space-y-2">
@@ -321,7 +321,7 @@ function InventoryTab({
                 </span>
               </div>
               <div className="text-[10px] text-white/40 mt-0.5">
-                Zone {r.zoneNumber} · {ZONE_NAMES[r.zoneNumber] ?? ''}
+                Zone {r.zoneNumber} · {ZONE_NAMES[r.zoneNumber] ? t(ZONE_NAMES[r.zoneNumber]) : ''}
                 {def && (
                   <span className="ml-2 text-yellow-400/60">{sellPrice} OGN</span>
                 )}
@@ -333,19 +333,18 @@ function InventoryTab({
               <button
                 onClick={() => onUse(r.recipeKey, r.name)}
                 disabled={buffFull}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-95 ${
-                  buffFull
-                    ? 'bg-white/5 text-white/20 cursor-not-allowed'
-                    : 'bg-green-600 text-white'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-95 ${buffFull
+                  ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                  : 'bg-green-600 text-white'
+                  }`}
               >
-                Dùng
+                {t('campaign.recipes.btn_use')}
               </button>
               <button
                 onClick={() => onSell(r.recipeKey, r.name)}
                 className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-yellow-600/80 text-white transition-all active:scale-95"
               >
-                Bán
+                {t('campaign.recipes.btn_sell')}
               </button>
             </div>
           </div>
@@ -360,6 +359,7 @@ function InventoryTab({
 // ═══════════════════════════════════════════════════════════════
 
 function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: boolean }) {
+  const { t } = useTranslation();
   const [, setTick] = useState(0);
 
   // Countdown ticker every second
@@ -379,9 +379,8 @@ function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: bo
         {Array.from({ length: MAX_BUFF_SLOTS }, (_, i) => (
           <div
             key={i}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${
-              i < buffs.length ? '' : 'opacity-20'
-            }`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${i < buffs.length ? '' : 'opacity-20'
+              }`}
             style={{
               background: i < buffs.length ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.05)',
               border: `2px solid ${i < buffs.length ? 'rgba(34,197,94,0.5)' : 'rgba(255,255,255,0.1)'}`,
@@ -394,7 +393,7 @@ function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: bo
       </div>
 
       {buffs.length === 0 ? (
-        <EmptyState emoji="✨" text="Chưa có buff" sub="Dùng công thức đã chế tạo để nhận buff!" />
+        <EmptyState emoji="✨" text={t('campaign.recipes.empty_buffs.title')} sub={t('campaign.recipes.empty_buffs.sub')} />
       ) : (
         <div className="space-y-2">
           {buffs.map(buff => {
@@ -424,7 +423,7 @@ function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: bo
                     className="text-[9px] font-bold px-2 py-0.5 rounded-full"
                     style={{ background: `${cfg.color}20`, color: cfg.color }}
                   >
-                    {cfg.label}
+                    {t(cfg.label)}
                   </span>
                 </div>
 
@@ -449,7 +448,7 @@ function BuffsTab({ buffs, isLoading }: { buffs: ActiveFarmBuff[]; isLoading: bo
                     />
                   </div>
                   <span className={`text-xs font-mono font-bold ${expired ? 'text-red-400' : 'text-white/70'}`}>
-                    {expired ? 'Hết hạn' : `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`}
+                    {expired ? t('campaign.recipes.expired') : `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`}
                   </span>
                 </div>
               </div>
@@ -474,10 +473,11 @@ function ConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const labels = {
-    craft: { title: 'Xác nhận Chế Tạo', desc: `Chế tạo "${action.name}"?`, btn: 'Chế Tạo', color: 'bg-amber-600' },
-    sell: { title: 'Xác nhận Bán', desc: `Bán "${action.name}"?`, btn: 'Bán', color: 'bg-yellow-600' },
-    use: { title: 'Xác nhận Sử Dụng', desc: `Dùng "${action.name}" làm buff nông trại?`, btn: 'Dùng', color: 'bg-green-600' },
+    craft: { title: t('campaign.recipes.confirm_craft.title'), desc: t('campaign.recipes.confirm_craft.desc', { name: action.name }), btn: t('campaign.recipes.confirm_craft.btn'), color: 'bg-amber-600' },
+    sell: { title: t('campaign.recipes.confirm_sell.title'), desc: t('campaign.recipes.confirm_sell.desc', { name: action.name }), btn: t('campaign.recipes.confirm_sell.btn'), color: 'bg-yellow-600' },
+    use: { title: t('campaign.recipes.confirm_use.title'), desc: t('campaign.recipes.confirm_use.desc', { name: action.name }), btn: t('campaign.recipes.confirm_use.btn'), color: 'bg-green-600' },
   };
 
   const cfg = labels[action.type];
@@ -496,7 +496,7 @@ function ConfirmModal({
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white/60 bg-white/5 active:scale-95 transition-transform"
           >
-            Huỷ
+            {t('campaign.recipes.btn_cancel')}
           </button>
           <button
             onClick={onConfirm}

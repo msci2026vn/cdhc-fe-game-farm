@@ -7,6 +7,7 @@ import { useCampaignZones } from '../hooks/useCampaignZones';
 import { ZONE_META, ZONE_POSITIONS } from '../data/zones';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
 import { playSound, audioManager } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 /**
  * CampaignMapScreen — Vertical scroll map of 10 zones.
@@ -14,6 +15,7 @@ import { playSound, audioManager } from '@/shared/audio';
  * Custom fullscreen layout (no ScreenShell).
  */
 export default function CampaignMapScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: zonesData, isLoading, error } = useCampaignZones();
   const { data: profile } = usePlayerProfile();
@@ -54,7 +56,7 @@ export default function CampaignMapScreen() {
       <div className="h-[100dvh] flex items-center justify-center campaign-map-gradient">
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/80 font-heading font-bold text-sm">Đang tải bản đồ...</p>
+          <p className="text-white/80 font-heading font-bold text-sm">{t('campaign.screens.loading_map')}</p>
         </div>
       </div>
     );
@@ -66,13 +68,13 @@ export default function CampaignMapScreen() {
       <div className="h-[100dvh] flex items-center justify-center campaign-map-gradient">
         <div className="text-center px-6">
           <span className="text-5xl mb-4 block">😵</span>
-          <p className="text-red-300 font-heading font-bold mb-2">Lỗi tải bản đồ</p>
+          <p className="text-red-300 font-heading font-bold mb-2">{t('campaign.screens.error_loading_map')}</p>
           <p className="text-white/40 text-xs mb-4">{String(error)}</p>
           <button
             onClick={() => navigate('/')}
             className="btn-gold px-6 py-2 rounded-xl font-heading font-bold text-sm text-white"
           >
-            Về menu chính
+            {t('campaign.screens.back_to_main_menu')}
           </button>
         </div>
       </div>
@@ -86,7 +88,7 @@ export default function CampaignMapScreen() {
     <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col">
       {/* Header */}
       <CampaignHeader
-        title="Campaign"
+        title={t('campaign.map.title')}
         stars={totalStars}
         maxStars={maxStars}
         backTo="/"
@@ -199,12 +201,13 @@ function getZoneX(zoneNumber: number): number {
 /** Simple bottom nav for campaign screens */
 function CampaignBottomNav() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const tabs = [
-    { icon: 'home', label: 'Menu', to: '/', active: false },
-    { icon: 'map', label: 'Bản Đồ', to: '/campaign', active: true },
-    { icon: 'bolt', label: 'Kỹ Năng', to: '/campaign/skills', active: false },
-    { icon: 'spa', label: 'Farm', to: '/farm', active: false },
+    { icon: 'home', label: t('campaign.map.tabs.menu'), to: '/', active: false },
+    { icon: 'map', label: t('campaign.map.tabs.map'), to: '/campaign', active: true },
+    { icon: 'bolt', label: t('campaign.map.tabs.skills'), to: '/campaign/skills', active: false },
+    { icon: 'spa', label: t('campaign.map.tabs.farm'), to: '/farm', active: false },
   ];
 
   return (

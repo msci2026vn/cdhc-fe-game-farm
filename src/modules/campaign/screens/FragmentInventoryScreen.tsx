@@ -9,17 +9,19 @@ import FragmentCard from '../components/FragmentCard';
 import { TIER_CONFIG, ZONE_NAMES } from '../types/fragment.types';
 import type { FragmentTier } from '../types/fragment.types';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 type FilterTab = 'all' | FragmentTier;
 
 const TABS: { key: FilterTab; label: string }[] = [
-  { key: 'all', label: 'Tat ca' },
-  { key: 'common', label: '\u2b1c Thuong' },
-  { key: 'rare', label: '\ud83d\udfe6 Hiem' },
-  { key: 'legendary', label: '\ud83d\udfea H.Thoai' },
+  { key: 'all', label: 'campaign.fragments.tabs.all' },
+  { key: 'common', label: 'campaign.fragments.tabs.common' },
+  { key: 'rare', label: 'campaign.fragments.tabs.rare' },
+  { key: 'legendary', label: 'campaign.fragments.tabs.legendary' },
 ];
 
 export default function FragmentInventoryScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: fragments, isLoading, isError } = usePlayerFragments();
   const [activeTier, setActiveTier] = useState<FilterTab>('all');
@@ -52,7 +54,7 @@ export default function FragmentInventoryScreen() {
         >
           <span className="text-white/70">&larr;</span>
         </button>
-        <h1 className="font-heading text-lg font-bold text-white">Kho Manh</h1>
+        <h1 className="font-heading text-lg font-bold text-white">{t('campaign.fragments.title')}</h1>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
           <span className="text-sm">{'\ud83e\udde9'}</span>
           <span className="font-heading text-sm font-bold text-purple-300">{totalCount}</span>
@@ -65,18 +67,17 @@ export default function FragmentInventoryScreen() {
           <button
             key={tab.key}
             onClick={() => { setActiveTier(tab.key); playSound('ui_tab'); }}
-            className={`flex-1 py-2 rounded-full text-[11px] font-bold transition-all ${
-              tab.key === activeTier
-                ? 'bg-purple-600 text-white'
-                : 'text-white/50'
-            }`}
+            className={`flex-1 py-2 rounded-full text-[11px] font-bold transition-all ${tab.key === activeTier
+              ? 'bg-purple-600 text-white'
+              : 'text-white/50'
+              }`}
             style={
               tab.key !== activeTier
                 ? { background: 'rgba(255,255,255,0.05)' }
                 : { boxShadow: '0 4px 12px rgba(168,85,247,0.3)' }
             }
           >
-            {tab.label}
+            {t(tab.label)}
           </button>
         ))}
       </div>
@@ -87,7 +88,7 @@ export default function FragmentInventoryScreen() {
         {isLoading && (
           <div className="flex flex-col items-center justify-center h-60">
             <div className="w-10 h-10 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-3" />
-            <p className="text-white/40 text-sm">Đang tải...</p>
+            <p className="text-white/40 text-sm">{t('campaign.fragments.loading')}</p>
           </div>
         )}
 
@@ -95,8 +96,8 @@ export default function FragmentInventoryScreen() {
         {isError && !isLoading && (
           <div className="flex flex-col items-center justify-center h-60 text-center">
             <span className="text-4xl mb-3">😿</span>
-            <p className="text-white/50 font-medium">Không tải được dữ liệu</p>
-            <p className="text-white/30 text-sm mt-1">Vui lòng thử lại sau</p>
+            <p className="text-white/50 font-medium">{t('campaign.fragments.error_load.title')}</p>
+            <p className="text-white/30 text-sm mt-1">{t('campaign.fragments.error_load.sub')}</p>
           </div>
         )}
 
@@ -104,13 +105,13 @@ export default function FragmentInventoryScreen() {
         {!isLoading && filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center h-60 text-center">
             <span className="text-5xl mb-3">{'\ud83e\udde9'}</span>
-            <p className="text-white/50 font-medium">Chưa có mảnh nào</p>
-            <p className="text-white/30 text-sm mt-1">Đánh boss để nhận mảnh!</p>
+            <p className="text-white/50 font-medium">{t('campaign.fragments.empty.title')}</p>
+            <p className="text-white/30 text-sm mt-1">{t('campaign.fragments.empty.sub')}</p>
             <button
               onClick={() => navigate('/campaign')}
               className="mt-4 px-5 py-2 bg-purple-600 text-white rounded-full text-sm font-bold active:scale-95 transition-transform"
             >
-              Đi đánh boss
+              {t('campaign.fragments.empty.go_fight')}
             </button>
           </div>
         )}
@@ -121,7 +122,7 @@ export default function FragmentInventoryScreen() {
             <div className="flex items-center gap-2 mb-2">
               <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
               <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
-                Zone {zoneNum}: {ZONE_NAMES[zoneNum] ?? `Zone ${zoneNum}`}
+                Zone {zoneNum}: {ZONE_NAMES[zoneNum] ? t(ZONE_NAMES[zoneNum]) : `Zone ${zoneNum}`}
               </span>
               <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
             </div>

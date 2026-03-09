@@ -3,6 +3,7 @@ import type { ZoneBoss } from '../types/campaign.types';
 import type { StageState } from '../types/campaign.types';
 import { getBossImageSrc } from '../data/bossSpritePaths';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface BossNodeProps {
   boss: ZoneBoss;
@@ -16,6 +17,7 @@ interface BossNodeProps {
  * Larger node with crown, stone platform, and BOSS badge.
  */
 export default function BossNode({ boss, state, globalBossNumber, onClick }: BossNodeProps) {
+  const { t } = useTranslation();
   const isCompleted = state === 'completed';
   const isCurrent = state === 'current';
   const isLocked = state === 'locked';
@@ -71,7 +73,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
             'absolute -bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-black px-3 py-0.5 rounded-full border-2 border-white shadow-md uppercase tracking-wider',
             isCompleted ? 'bg-green-600 text-white' : 'bg-red-600 text-white animate-bounce',
           )}>
-            BOSS
+            {t('campaign.boss.badge')}
           </div>
         )}
       </div>
@@ -106,7 +108,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
 
       {isCurrent && (
         <p className="text-[10px] text-yellow-300 font-bold mt-0.5">
-          Recommended Lv.{boss.unlockLevel}
+          {t('campaign.ui.recommended_level', { level: boss.unlockLevel })}
         </p>
       )}
     </button>

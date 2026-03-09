@@ -4,6 +4,7 @@
 
 import type { FragmentTier } from '../types/fragment.types';
 import { TIER_CONFIG, ZONE_NAMES } from '../types/fragment.types';
+import { useTranslation } from 'react-i18next';
 
 interface FragmentCardProps {
   name: string;
@@ -13,6 +14,7 @@ interface FragmentCardProps {
 }
 
 export default function FragmentCard({ name, tier, zoneNumber, quantity }: FragmentCardProps) {
+  const { t } = useTranslation();
   const cfg = TIER_CONFIG[tier];
   const isEmpty = quantity === 0;
 
@@ -51,7 +53,7 @@ export default function FragmentCard({ name, tier, zoneNumber, quantity }: Fragm
         className="text-[8px] font-bold px-2 py-0.5 rounded-full"
         style={{ background: `${cfg.color}20`, color: cfg.color }}
       >
-        {cfg.label}
+        {t(cfg.label)}
       </span>
     </div>
   );

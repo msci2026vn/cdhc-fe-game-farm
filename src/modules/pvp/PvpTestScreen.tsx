@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { Client, type Room } from '@colyseus/sdk';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { pvpApi } from '@/shared/api/api-pvp';
+import type { PvpRating } from '@/shared/api/api-pvp';
+import PostGameScreen from './PostGameScreen';
+import type { ClientMvpStats, H2HData } from './PostGameScreen';
 
 const WS_URL = import.meta.env.DEV
   ? 'ws://localhost:3001'
@@ -207,6 +211,7 @@ export default function PvpTestScreen() {
   const clientRef = useRef<Client | null>(null);
   const roomRef = useRef<Room | null>(null);
   const autoJoinedRef = useRef(false);
+  const myUserIdRef = useRef('');
 
   const [inRoom, setInRoom] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -239,6 +244,37 @@ export default function PvpTestScreen() {
   const [damageFlash, setDamageFlash] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState('');
+  // ── Emoji Taunt + Tilted System ──
+  const [floatingEmojis, setFloatingEmojis] = useState<Array<{ id: number; emoji: string }>>([]);
+  const [emojiCooldown, setEmojiCooldown] = useState(false);
+  const [activeDebuff, setActiveDebuff] = useState<{ type: string; until: number } | null>(null);
+  const [scoreAlert, setScoreAlert] = useState<{ text: string; color: string } | null>(null);
+  const [isDangerZone, setIsDangerZone] = useState(false);
+  const [comboBlast, setComboBlast] = useState<{ combo: number; id: number } | null>(null);
+
+  // ── Post-game data ──
+  const [myStats, setMyStats] = useState<ClientMvpStats>({
+    highestCombo: 0, fastestSwapMs: 9999,
+    debuffSent: 0, debuffReceived: 0,
+    tauntsTotal: 0, validSwaps: 0, totalSwaps: 0,
+  });
+  const statsRef = useRef<ClientMvpStats>({
+    highestCombo: 0, fastestSwapMs: 9999,
+    debuffSent: 0, debuffReceived: 0,
+    tauntsTotal: 0, validSwaps: 0, totalSwaps: 0,
+  });
+  const lastSwapAtRef = useRef(0);
+  const gameStartAtRef = useRef(0);
+  const [gameDurationMs, setGameDurationMs] = useState(0);
+  const [ratingBefore, setRatingBefore] = useState(1000);
+  const [ratingAfter, setRatingAfter] = useState<PvpRating | null>(null);
+  const [h2hData, setH2hData] = useState<H2HData>(null);
+  const [rematchState, setRematchState] = useState<'idle' | 'waiting' | 'ready'>('idle');
+
+  // Sync userId ref for post-game API calls
+  useEffect(() => {
+    if (auth?.user?.id) myUserIdRef.current = auth.user.id;
+  }, [auth?.user?.id]);
 
   const addLog = useCallback((msg: string) => {
     setLog(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 30));
@@ -253,8 +289,18 @@ export default function PvpTestScreen() {
   // ── Swap handler ──
   const handleSwap = useCallback((from: number, to: number) => {
     if (!roomRef.current) return;
+    statsRef.current.totalSwaps++;
     roomRef.current.send('swap', { from, to });
   }, []);
+
+  // ── Taunt handler ──
+  const sendTaunt = useCallback((emoji: string) => {
+    if (!roomRef.current || emojiCooldown) return;
+    statsRef.current.tauntsTotal++;
+    roomRef.current.send('taunt', { emoji });
+    setEmojiCooldown(true);
+    setTimeout(() => setEmojiCooldown(false), 5000);
+  }, [emojiCooldown]);
 
   const attachHandlers = useCallback((r: Room) => {
     roomRef.current = r;
@@ -266,6 +312,14 @@ export default function PvpTestScreen() {
       setIsHost(data.isHost);
       setMySessionId(data.mySessionId);
       addLog(`Vào phòng | id: ${data.roomId} | host: ${data.isHost}`);
+    });
+
+    r.onMessage('rematch_request', (_data: { fromId: string }) => {
+      setRematchState('ready');
+    });
+
+    r.onMessage('rematch_start', (data: { newRoomId: string; newRoomCode: string }) => {
+      navigate(`/pvp-test?roomId=${data.newRoomId}`);
     });
 
     r.onMessage('state_update', (data: RoomStateBroadcast) => {
@@ -294,6 +348,27 @@ export default function PvpTestScreen() {
       setMyMana(0);
       setOpponentHp(1000);
       setOpponentArmor(0);
+      // Reset taunt/debuff state
+      setFloatingEmojis([]);
+      setActiveDebuff(null);
+      setScoreAlert(null);
+      setIsDangerZone(false);
+      setComboBlast(null);
+      // Reset post-game tracking
+      const freshStats: ClientMvpStats = {
+        highestCombo: 0, fastestSwapMs: 9999,
+        debuffSent: 0, debuffReceived: 0,
+        tauntsTotal: 0, validSwaps: 0, totalSwaps: 0,
+      };
+      statsRef.current = freshStats;
+      setMyStats(freshStats);
+      lastSwapAtRef.current = 0;
+      gameStartAtRef.current = Date.now();
+      setRatingAfter(null);
+      setH2hData(null);
+      setRematchState('idle');
+      // Capture rating before game
+      pvpApi.getRating().then(r => setRatingBefore(r.rating)).catch(() => {});
       addLog('Board nhận thành công → Game bắt đầu!');
     });
 
@@ -309,6 +384,14 @@ export default function PvpTestScreen() {
       if (data.hp !== undefined) setMyHp(data.hp);
       if (data.armor !== undefined) setMyArmor(data.armor);
       if (data.mana !== undefined) setMyMana(data.mana);
+      // Track valid swap + fastest swap
+      statsRef.current.validSwaps++;
+      const now = Date.now();
+      if (lastSwapAtRef.current > 0) {
+        const ms = now - lastSwapAtRef.current;
+        if (ms < statsRef.current.fastestSwapMs) statsRef.current.fastestSwapMs = ms;
+      }
+      lastSwapAtRef.current = now;
 
       // Effect log
       const parts: string[] = [];
@@ -363,7 +446,30 @@ export default function PvpTestScreen() {
       setIsSuddenDeath(data.isSuddenDeath);
       const iWon = data.winnerSessionId === mySessionId;
       const isDr = data.winnerId === 'draw';
+      // Snapshot stats
+      const snap = { ...statsRef.current };
+      setMyStats(snap);
+      const duration = gameStartAtRef.current > 0 ? Date.now() - gameStartAtRef.current : 60000;
+      setGameDurationMs(duration);
       addLog(`Kết thúc! ${iWon ? '🏆 Thắng!' : isDr ? '🤝 Hoà' : '💀 Thua'}`);
+      // Fetch post-game data
+      const oppPlayer = data.players.find(p => p.userId !== myUserIdRef.current);
+      if (oppPlayer?.userId) {
+        pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => {});
+        pvpApi.getHeadToHead(oppPlayer.userId).then(res => {
+          const s = res.stats as Record<string, string> | null;
+          if (s) {
+            setH2hData({
+              total: Number(s.total ?? 0),
+              myWins: Number(s.my_wins ?? 0),
+              oppWins: Number(s.opp_wins ?? 0),
+              draws: Number(s.draws ?? 0),
+            });
+          }
+        }).catch(() => {});
+      } else {
+        pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => {});
+      }
     });
 
     r.onMessage('sudden_death', () => {
@@ -374,6 +480,60 @@ export default function PvpTestScreen() {
 
     r.onMessage('timer_tick', (data: { timeLeft: number }) => {
       setTimeLeft(data.timeLeft);
+    });
+
+    // ── Emoji Taunt messages ──
+    r.onMessage('taunt_received', (data: { emoji: string }) => {
+      const id = Date.now();
+      setFloatingEmojis(prev => [...prev, { id, emoji: data.emoji }]);
+      setTimeout(() => setFloatingEmojis(prev => prev.filter(e => e.id !== id)), 2000);
+    });
+
+    r.onMessage('taunt_blocked', () => { /* cooldown handled by emojiCooldown state */ });
+
+    r.onMessage('spam_warning', (data: { message: string }) => {
+      setJunkAlert(data.message);
+      setTimeout(() => setJunkAlert(''), 2500);
+    });
+
+    r.onMessage('debuff_applied', (data: { type: string; duration: number }) => {
+      setActiveDebuff({ type: data.type, until: Date.now() + data.duration });
+      setTimeout(() => setActiveDebuff(null), data.duration);
+      statsRef.current.debuffReceived++;
+      addLog(`🌀 Debuff: ${data.type} (${data.duration}ms)`);
+    });
+
+    r.onMessage('score_event', (data: { type: string; leaderId?: string; chaserId?: string }) => {
+      if (data.type === 'overtake') {
+        setScoreAlert({ text: 'OVERTAKE! 👑', color: '#f0c040' });
+        setTimeout(() => setScoreAlert(null), 2000);
+      } else if (data.type === 'comeback') {
+        setScoreAlert({ text: 'COMEBACK! 🔥', color: '#fb923c' });
+        setTimeout(() => setScoreAlert(null), 2000);
+      } else if (data.type === 'danger_zone') {
+        setIsDangerZone(true);
+      }
+    });
+
+    r.onMessage('combo_event', (data: { combo: number }) => {
+      const id = Date.now();
+      setComboBlast({ combo: data.combo, id });
+      setTimeout(() => setComboBlast(null), 1500);
+      if (data.combo > statsRef.current.highestCombo) statsRef.current.highestCombo = data.combo;
+    });
+
+    // Bot emoji taunt relay
+    r.onMessage('emoji_taunt', (data: { emoji: string }) => {
+      const id = Date.now();
+      setFloatingEmojis(prev => [...prev, { id, emoji: data.emoji }]);
+      setTimeout(() => setFloatingEmojis(prev => prev.filter(e => e.id !== id)), 2000);
+    });
+
+    r.onMessage('tilted_event', (data: { attackerId: string; debuffType: string }) => {
+      if (data.attackerId === mySessionId || data.attackerId === myUserIdRef.current) {
+        statsRef.current.debuffSent++;
+      }
+      addLog(`🌀 Tilted by ${data.attackerId.slice(0, 6)} → ${data.debuffType}`);
     });
 
     r.onError((code, msg) => {
@@ -399,6 +559,11 @@ export default function PvpTestScreen() {
       setWinnerSessionId('');
       setGameOverPlayers([]);
       setJunkAlert('');
+      setFloatingEmojis([]);
+      setActiveDebuff(null);
+      setScoreAlert(null);
+      setIsDangerZone(false);
+      setComboBlast(null);
       if (code === 4001) {
         setOpponentLeft(false);
         setError(t('game.kicked'));
@@ -484,11 +649,23 @@ export default function PvpTestScreen() {
     setGameOverPlayers([]);
     setJunkAlert('');
     setMyHp(1000);
+    setFloatingEmojis([]);
+    setActiveDebuff(null);
+    setScoreAlert(null);
+    setIsDangerZone(false);
+    setComboBlast(null);
     setMyArmor(0);
     setMyMana(0);
     setOpponentHp(1000);
     setOpponentArmor(0);
     addLog('Đã rời phòng');
+  };
+
+  const handleRematch = () => {
+    if (!roomRef.current) return;
+    roomRef.current.send('rematch_request');
+    setRematchState(prev => prev === 'ready' ? 'ready' : 'waiting');
+    addLog('Gửi: Rematch request');
   };
 
   const handleReady = () => {
@@ -586,6 +763,50 @@ export default function PvpTestScreen() {
         </div>
       )}
 
+      {/* Score alert — overtake / comeback */}
+      {scoreAlert && (
+        <div style={{
+          position: 'fixed', top: '30%', left: '50%',
+          fontSize: 26, fontWeight: 900, color: scoreAlert.color,
+          textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+          animation: 'alertPop 2s ease forwards',
+          zIndex: 102, pointerEvents: 'none',
+          transform: 'translateX(-50%)',
+          whiteSpace: 'nowrap',
+        }}>
+          {scoreAlert.text}
+        </div>
+      )}
+
+      {/* Combo blast fullscreen (x5+) */}
+      {comboBlast && (
+        <div style={{
+          position: 'fixed', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none', zIndex: 103,
+          animation: 'comboBlastAnim 1.5s ease forwards',
+        }}>
+          <div style={{
+            fontSize: 52, fontWeight: 900, color: '#c084fc',
+            textShadow: '0 0 40px rgba(192,132,252,0.9)',
+            letterSpacing: '-0.02em',
+          }}>
+            COMBO ×{comboBlast.combo}!
+          </div>
+        </div>
+      )}
+
+      {/* Floating emojis from opponent taunts */}
+      {floatingEmojis.map(({ id, emoji }) => (
+        <div key={id} style={{
+          position: 'fixed', top: '18%', right: '12%',
+          fontSize: 38, animation: 'floatUp 2s ease-out forwards',
+          pointerEvents: 'none', zIndex: 104,
+        }}>
+          {emoji}
+        </div>
+      ))}
+
       {/* Sudden Death overlay flash */}
       {isSuddenDeath && phase === 'sudden_death' && timeLeft >= 13 && (
         <div style={{
@@ -606,71 +827,29 @@ export default function PvpTestScreen() {
         }} />
       )}
 
-      {/* Game Over / Result screen — HP-based */}
+      {/* Post-Game Screen */}
       {showResult && (
-        <div style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.92)',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          zIndex: 200,
-        }}>
-          <div style={{
-            fontSize: 40, marginBottom: 8,
-            animation: 'cdPop 0.85s ease-out forwards',
-          }}>
-            {isWinner ? t('result.win') : isDraw ? t('result.draw') : t('result.lose')}
-          </div>
-
-          <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 4 }}>
-            {t('result.hpRemaining')}{' '}
-            <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{myHp}/{myMaxHp}</span>
-          </div>
-          <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 16 }}>
-            {t('result.totalDamage')}{' '}
-            <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>{myScore.toLocaleString()}</span>
-          </div>
-
-          {gameOverPlayers.map((p, i) => (
-            <div key={i} style={{
-              fontSize: i === 0 ? 20 : 18,
-              color: i === 0 ? '#f59e0b' : '#94a3b8',
-              marginBottom: 6,
-            }}>
-              {i === 0 ? '🥇' : '🥈'} {p.name}: HP {(p as { hp?: number }).hp ?? '?'} | DMG {p.score.toLocaleString()}
-            </div>
-          ))}
-
-          {isSuddenDeath && (
-            <div style={{ color: '#a855f7', fontSize: 14, marginTop: 8, marginBottom: 4 }}>
-              Sudden Death
-            </div>
-          )}
-
-          <div style={{
-            color: isWinner ? '#22c55e' : isDraw ? '#94a3b8' : '#ef4444',
-            fontSize: 16, marginTop: 12, marginBottom: 24,
-          }}>
-            {isWinner ? t('result.ratingWin') : isDraw ? t('result.ratingDraw') : t('result.ratingLoss')}
-          </div>
-
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => { handleLeave(); navigate('/pvp'); }} style={{
-              padding: '12px 24px', background: '#3b82f6',
-              color: 'white', borderRadius: 8, fontSize: 15,
-              border: 'none', cursor: 'pointer', fontWeight: 700,
-            }}>
-              {t('result.returnLobby')}
-            </button>
-            <button onClick={() => navigate('/')} style={{
-              padding: '12px 24px', background: 'transparent',
-              color: '#94a3b8', borderRadius: 8, fontSize: 15,
-              border: '1px solid #4b5563', cursor: 'pointer', fontWeight: 700,
-            }}>
-              {t('result.quit')}
-            </button>
-          </div>
-        </div>
+        <PostGameScreen
+          isWinner={isWinner}
+          isDraw={isDraw}
+          isSuddenDeath={isSuddenDeath}
+          myScore={myScore}
+          opponentScore={opponentScore}
+          myHp={myHp}
+          myMaxHp={myMaxHp}
+          opponentHp={opponentHp}
+          myName={myPlayer?.name ?? auth?.user?.name ?? t('game.you')}
+          opponentName={opponentPlayer?.name ?? t('game.opponent')}
+          gameDurationMs={gameDurationMs}
+          myStats={myStats}
+          ratingBefore={ratingBefore}
+          ratingAfter={ratingAfter}
+          h2hData={h2hData}
+          rematchState={rematchState}
+          onRematch={handleRematch}
+          onLeave={() => { handleLeave(); navigate('/pvp'); }}
+          onQuit={() => navigate('/')}
+        />
       )}
 
       <div style={{ maxWidth: 520, margin: '0 auto' }}>
@@ -717,6 +896,8 @@ export default function PvpTestScreen() {
                 fontWeight: 900,
                 color: timeLeft <= 10 ? '#ef4444' : isSuddenDeath ? '#a855f7' : '#f59e0b',
                 animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
+                opacity: activeDebuff?.type === 'hide_timer' ? 0 : 1,
+                transition: 'opacity 0.2s',
               }}>
                 {timeLeft}s
               </span>
@@ -767,13 +948,32 @@ export default function PvpTestScreen() {
             {/* My board (interactive) */}
             <div style={{
               marginBottom: 10,
-              border: damageFlash ? '3px solid #ef4444' : '2px solid rgba(255,255,255,0.1)',
+              border: damageFlash ? '3px solid #ef4444'
+                : isDangerZone ? '2px solid #f87171'
+                : '2px solid rgba(255,255,255,0.1)',
               borderRadius: 8,
-              transition: 'border 0.1s',
+              transition: 'border 0.1s, box-shadow 0.3s',
               padding: 2,
+              position: 'relative',
+              animation: activeDebuff?.type === 'shake'
+                ? 'boardShake 0.4s ease-in-out 5'
+                : isDangerZone
+                ? 'dangerPulse 0.8s ease-in-out infinite'
+                : 'none',
             }}>
               <div style={{ fontSize: 10, color: '#666', marginBottom: 4, paddingLeft: 4 }}>{t('game.yourBoard')} — {t('game.swapHint')}</div>
               <GameBoard tiles={myBoard} onSwap={handleSwap} />
+              {/* Freeze overlay */}
+              {activeDebuff?.type === 'freeze' && (
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'rgba(147,210,255,0.18)',
+                  backdropFilter: 'blur(1px)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 48, borderRadius: 8,
+                  pointerEvents: 'none', zIndex: 5,
+                }}>❄️</div>
+              )}
             </div>
 
             {/* Opponent board (mini) */}
@@ -782,9 +982,40 @@ export default function PvpTestScreen() {
               <GameBoard tiles={opponentBoard} mini />
             </div>
 
+            {/* Emoji Bar */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-around',
+              padding: '8px 4px', marginTop: 8,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 12,
+            }}>
+              {(['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => sendTaunt(emoji)}
+                  disabled={emojiCooldown}
+                  style={{
+                    fontSize: 24, background: 'none', border: 'none',
+                    padding: '4px 8px', borderRadius: 8,
+                    cursor: emojiCooldown ? 'not-allowed' : 'pointer',
+                    opacity: emojiCooldown ? 0.35 : 1,
+                    transition: 'transform 0.1s, opacity 0.3s',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
+                  }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'scale(1.35)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
             {/* Leave button */}
             <button onClick={handleLeave} style={{
-              width: '100%', marginTop: 12, padding: '10px',
+              width: '100%', marginTop: 10, padding: '10px',
               background: 'transparent', border: '1px solid #555',
               color: '#999', borderRadius: 6, fontSize: 13, cursor: 'pointer',
             }}>🚪 {t('game.leave')}</button>
@@ -990,6 +1221,35 @@ export default function PvpTestScreen() {
         @keyframes dmgFlash {
           0%   { opacity: 0.5; }
           100% { opacity: 0; }
+        }
+        @keyframes floatUp {
+          0%   { opacity: 1; transform: translateY(0) scale(1); }
+          60%  { opacity: 1; transform: translateY(-44px) scale(1.2); }
+          100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+        }
+        @keyframes boardShake {
+          0%, 100% { transform: translateX(0); }
+          15% { transform: translateX(-8px) rotate(-1deg); }
+          30% { transform: translateX(8px) rotate(1deg); }
+          45% { transform: translateX(-6px); }
+          60% { transform: translateX(6px); }
+          75% { transform: translateX(-3px); }
+        }
+        @keyframes dangerPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+          50% { box-shadow: 0 0 0 6px rgba(248,113,113,0.55), inset 0 0 16px rgba(248,113,113,0.08); }
+        }
+        @keyframes alertPop {
+          0%   { opacity: 0; transform: translateX(-50%) scale(0.5); }
+          20%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
+          80%  { opacity: 1; transform: translateX(-50%) scale(1); }
+          100% { opacity: 0; transform: translateX(-50%) scale(0.9); }
+        }
+        @keyframes comboBlastAnim {
+          0%   { opacity: 0; transform: scale(0.5); }
+          15%  { opacity: 1; transform: scale(1.15); }
+          70%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.9); }
         }
       `}</style>
     </div>

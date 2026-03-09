@@ -33,20 +33,20 @@ export const TIER_CONFIG: Record<FragmentTier, {
   emoji: string;
   glow: string;
 }> = {
-  common:    { label: 'Thường',      color: '#9ca3af', bg: '#1f2937', border: '#4b5563', emoji: '\u2b1c', glow: 'none' },
-  rare:      { label: 'Hiếm',        color: '#3b82f6', bg: '#1e3a5f', border: '#2563eb', emoji: '\ud83d\udfe6', glow: '0 0 12px rgba(59,130,246,0.5)' },
-  legendary: { label: 'Huyền Thoại', color: '#a855f7', bg: '#3b1f5e', border: '#7c3aed', emoji: '\ud83d\udfea', glow: '0 0 16px rgba(168,85,247,0.6)' },
+  common: { label: 'campaign.tier.common', color: '#9ca3af', bg: '#1f2937', border: '#4b5563', emoji: '⬜', glow: 'none' },
+  rare: { label: 'campaign.tier.rare', color: '#3b82f6', bg: '#1e3a5f', border: '#2563eb', emoji: '🟦', glow: '0 0 12px rgba(59,130,246,0.5)' },
+  legendary: { label: 'campaign.tier.legendary', color: '#a855f7', bg: '#3b1f5e', border: '#7c3aed', emoji: '🟪', glow: '0 0 16px rgba(168,85,247,0.6)' },
 };
 
 export const ZONE_NAMES: Record<number, string> = {
-  1: 'Phân Vi Sinh',
-  2: 'Trừ Sâu',
-  3: 'Ớt Tỏi',
-  4: 'Dầu Neem',
-  5: 'Trichoderma',
-  6: 'Lân Sinh Học',
-  7: 'Thảo Dược',
-  8: 'Mycorrhiza',
-  9: 'EM',
-  10: 'Vạn Năng',
+  1: 'campaign.zone.1',
+  2: 'campaign.zone.2',
+  3: 'campaign.zone.3',
+  4: 'campaign.zone.4',
+  5: 'campaign.zone.5',
+  6: 'campaign.zone.6',
+  7: 'campaign.zone.7',
+  8: 'campaign.zone.8',
+  9: 'campaign.zone.9',
+  10: 'campaign.zone.10',
 };

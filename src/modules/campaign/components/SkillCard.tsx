@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import type { PlayerSkill } from '../types/skill.types';
+import { useTranslation } from 'react-i18next';
 
 interface SkillCardProps {
   skill: PlayerSkill;
@@ -16,6 +17,7 @@ interface SkillCardProps {
 export default function SkillCard({
   skill, playerOgn, playerFragments, onUpgrade, isUpgrading,
 }: SkillCardProps) {
+  const { t } = useTranslation();
   const isLocked = !skill.isUnlocked;
   const isMaxLevel = skill.level >= 5;
   const cost = skill.upgradeCost;
@@ -30,11 +32,10 @@ export default function SkillCard({
 
   return (
     <div
-      className={`rounded-2xl p-4 transition-all ${
-        isLocked
+      className={`rounded-2xl p-4 transition-all ${isLocked
           ? 'opacity-60'
           : ''
-      }`}
+        }`}
       style={{
         background: isLocked
           ? 'rgba(255,255,255,0.03)'
@@ -51,7 +52,7 @@ export default function SkillCard({
               {skill.name}
             </h3>
             <span className="text-[10px] text-white/50">
-              {isLocked ? 'Chưa mở khóa' : starDisplay}
+              {isLocked ? t('campaign.ui.locked') : starDisplay}
             </span>
           </div>
         </div>
@@ -70,7 +71,7 @@ export default function SkillCard({
                 : '#a29bfe',
           }}
         >
-          {isLocked ? 'Locked' : isMaxLevel ? 'MAX' : `Lv.${skill.level}`}
+          {isLocked ? t('campaign.ui.locked') : isMaxLevel ? 'MAX' : `Lv.${skill.level}`}
         </span>
       </div>
 
@@ -80,7 +81,7 @@ export default function SkillCard({
       {/* Locked state */}
       {isLocked && skill.unlockCondition && (
         <div className="text-center py-3">
-          <p className="text-white/40 text-xs mb-1">Mở khóa:</p>
+          <p className="text-white/40 text-xs mb-1">{t('campaign.ui.unlock_condition')}</p>
           <p className="text-white/60 text-sm font-bold">{skill.unlockCondition}</p>
         </div>
       )}
@@ -139,11 +140,10 @@ export default function SkillCard({
               <button
                 onClick={onUpgrade}
                 disabled={!canAfford || isUpgrading}
-                className={`px-4 py-1.5 rounded-xl text-xs font-heading font-bold transition-all active:scale-95 ${
-                  canAfford && !isUpgrading
+                className={`px-4 py-1.5 rounded-xl text-xs font-heading font-bold transition-all active:scale-95 ${canAfford && !isUpgrading
                     ? 'text-white'
                     : 'text-white/30 opacity-50'
-                }`}
+                  }`}
                 style={{
                   background: canAfford && !isUpgrading
                     ? 'linear-gradient(135deg, #6c5ce7, #a29bfe)'
@@ -153,7 +153,7 @@ export default function SkillCard({
                     : 'none',
                 }}
               >
-                {isUpgrading ? '...' : 'Nâng Cấp'}
+                {isUpgrading ? t('campaign.ui.upgrading') : t('campaign.ui.upgrade')}
               </button>
             </div>
           )}
@@ -162,7 +162,7 @@ export default function SkillCard({
           {isMaxLevel && (
             <div className="text-center py-1">
               <span className="text-xs font-bold text-yellow-400">
-                ⭐ Kỹ năng tối đa!
+                {t('campaign.ui.max_level_skill')}
               </span>
             </div>
           )}

@@ -10,15 +10,17 @@ import MissionCard from '../components/MissionCard';
 import type { PlayerMission } from '../types/mission.types';
 import { playSound } from '@/shared/audio';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 type TabKey = 'daily' | 'weekly';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'daily', label: 'Hàng Ngày', icon: '\ud83d\udcc5' },
-  { key: 'weekly', label: 'Hàng Tuần', icon: '\ud83d\udcc6' },
+  { key: 'daily', label: 'campaign.missions.tabs.daily', icon: '📅' },
+  { key: 'weekly', label: 'campaign.missions.tabs.weekly', icon: '📆' },
 ];
 
 export default function MissionScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('daily');
 
@@ -56,10 +58,10 @@ export default function MissionScreen() {
     setClaimingId(missionId);
     try {
       await claimMutation.mutateAsync(missionId);
-      playSound('coin_collect');
+      playSound('ogn_gain');
     } catch {
       playSound('damage_dealt');
-      toast.error('Nhận thưởng thất bại. Vui lòng thử lại.');
+      toast.error(t('campaign.screens.claim_failed'));
     } finally {
       setClaimingId(null);
     }
@@ -72,7 +74,7 @@ export default function MissionScreen() {
       playSound('level_up');
     } catch {
       playSound('damage_dealt');
-      toast.error('Nhận thưởng thất bại. Vui lòng thử lại.');
+      toast.error(t('campaign.screens.claim_failed'));
     }
   };
 
@@ -91,7 +93,7 @@ export default function MissionScreen() {
           >
             &larr;
           </button>
-          <h1 className="font-heading font-bold text-lg text-white">Nhiệm Vụ</h1>
+          <h1 className="font-heading font-bold text-lg text-white">{t('campaign.screens.missions_title')}</h1>
           <div className="w-10" />
         </div>
 
@@ -104,14 +106,13 @@ export default function MissionScreen() {
               <button
                 key={tab.key}
                 onClick={() => { setActiveTab(tab.key); playSound('ui_tab'); }}
-                className={`flex-1 py-2 rounded-full text-[12px] font-bold transition-all relative ${
-                  tab.key === activeTab
-                    ? 'bg-blue-600 text-white'
-                    : 'text-white/50'
-                }`}
+                className={`flex-1 py-2 rounded-full text-[12px] font-bold transition-all relative ${tab.key === activeTab
+                  ? 'bg-blue-600 text-white'
+                  : 'text-white/50'
+                  }`}
                 style={tab.key !== activeTab ? { background: 'rgba(255,255,255,0.05)' } : { boxShadow: '0 4px 12px rgba(59,130,246,0.3)' }}
               >
-                {tab.icon} {tab.label}
+                {tab.icon} {t(tab.label)}
                 {tabClaimable > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
                     {tabClaimable}
@@ -137,8 +138,8 @@ export default function MissionScreen() {
         ) : sortedMissions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <span className="text-5xl mb-3">📋</span>
-            <p className="text-white/50 font-medium">Chưa có nhiệm vụ</p>
-            <p className="text-white/30 text-sm mt-1">Quay lại sau!</p>
+            <p className="text-white/50 font-medium">{t('campaign.screens.no_missions')}</p>
+            <p className="text-white/30 text-sm mt-1">{t('campaign.screens.check_back_later')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -162,10 +163,10 @@ export default function MissionScreen() {
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <div className="text-[11px]">
-              <span className="text-white/40">Tổng:</span>
+              <span className="text-white/40">{t('campaign.screens.total')}</span>
               <span className="font-bold text-yellow-400">{totalRewardOgn} OGN</span>
               <span className="text-white/20 mx-1.5">|</span>
-              <span className="text-white/40">Đã nhận:</span>
+              <span className="text-white/40">{t('campaign.screens.claimed')}</span>
               <span className="font-bold text-green-400">{claimedOgn} OGN</span>
             </div>
 
@@ -178,7 +179,7 @@ export default function MissionScreen() {
                 {claimAllMutation.isPending ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
                 ) : (
-                  `Nhận Tất Cả (${claimable.length})`
+                  `${t('campaign.screens.claim_all')} (${claimable.length})`
                 )}
               </button>
             )}
@@ -194,6 +195,7 @@ export default function MissionScreen() {
 // ═══════════════════════════════════════════════════════════════
 
 function ResetTimer({ type }: { type: 'daily' | 'weekly' }) {
+  const { t } = useTranslation();
   const [remaining, setRemaining] = useState('');
 
   useEffect(() => {
@@ -235,7 +237,7 @@ function ResetTimer({ type }: { type: 'daily' | 'weekly' }) {
   return (
     <div className="flex items-center justify-center gap-2 py-1">
       <span className="text-[10px] text-white/30">
-        {type === 'daily' ? 'Reset hàng ngày' : 'Reset hàng tuần'}:
+        {type === 'daily' ? t('campaign.screens.daily_reset') : t('campaign.screens.weekly_reset')}:
       </span>
       <span className="text-[12px] font-mono font-bold text-amber-400">{remaining}</span>
     </div>

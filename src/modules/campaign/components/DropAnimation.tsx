@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import type { DropResult } from '../types/fragment.types';
 import { TIER_CONFIG, ZONE_NAMES } from '../types/fragment.types';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface DropAnimationProps {
   drop: DropResult;
@@ -15,6 +16,7 @@ interface DropAnimationProps {
 }
 
 export default function DropAnimation({ drop, onClose, isVisible }: DropAnimationProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<'enter' | 'card' | 'pity' | 'ready'>('enter');
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
           <>
             {/* Title */}
             <div className="text-lg font-heading font-bold text-white mb-3">
-              CHIẾN LỢI PHẨM
+              {t('campaign.ui.loot_title')}
             </div>
 
             {/* Fragment card */}
@@ -81,17 +83,17 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
               <span className={`text-4xl block mb-2 ${tier === 'legendary' ? 'animate-pulse' : ''}`}>{cfg.emoji}</span>
               <div className="text-sm font-bold text-white">{drop.fragment!.name}</div>
               <div className="text-xs font-bold mt-1" style={{ color: cfg.color }}>
-                {cfg.label}
+                {t(cfg.label)}
               </div>
               <div className="text-[10px] text-white/50 mt-1">
-                Zone {drop.fragment!.zoneNumber}{ZONE_NAMES[drop.fragment!.zoneNumber] ? ` - ${ZONE_NAMES[drop.fragment!.zoneNumber]}` : ''}
+                Zone {drop.fragment!.zoneNumber}{ZONE_NAMES[drop.fragment!.zoneNumber] ? ` - ${t(ZONE_NAMES[drop.fragment!.zoneNumber])}` : ''}
               </div>
             </div>
           </>
         ) : (
           <div className="mb-3">
             <span className="text-3xl block mb-2">📦</span>
-            <div className="text-sm font-bold text-white/70">Không có mảnh rơi lần này</div>
+            <div className="text-sm font-bold text-white/70">{t('campaign.ui.no_drops')}</div>
           </div>
         )}
 
@@ -123,8 +125,8 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
           </div>
           <div className="text-[10px] mt-1" style={{ color: drop.guaranteedIn <= 5 ? '#f39c12' : 'rgba(255,255,255,0.4)' }}>
             {drop.guaranteedIn <= 0
-              ? 'Guaranteed rồi!'
-              : `Còn ${drop.guaranteedIn} trận guaranteed`}
+              ? t('campaign.ui.guaranteed_reached')
+              : t('campaign.ui.guaranteed_remaining', { count: drop.guaranteedIn })}
             {drop.guaranteedIn <= 5 && drop.guaranteedIn > 0 ? ' 🔥' : ''}
           </div>
         </div>
@@ -139,7 +141,7 @@ export default function DropAnimation({ drop, onClose, isVisible }: DropAnimatio
             pointerEvents: phase === 'ready' ? 'auto' : 'none',
           }}
         >
-          Tiếp tục
+          {t('campaign.ui.continue')}
         </button>
       </div>
     </div>

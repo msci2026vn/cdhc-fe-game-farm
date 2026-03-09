@@ -10,33 +10,36 @@ import AchievementCard from '../components/AchievementCard';
 import LoginStreakCalendar from '../components/LoginStreakCalendar';
 import LeaderboardRow from '../components/LeaderboardRow';
 import { CATEGORY_CONFIG } from '../types/achievement.types';
-import type { AchievementCategory, Achievement, LeaderboardPeriod } from '../types/achievement.types';
-import { playSound } from '@/shared/audio';
+import type { AchievementCategory, Achievement, LeaderboardPeriod, LoginStreak } from '../types/achievement.types';
+import { playSound, SoundName } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 type HubTab = 'achievements' | 'streak' | 'leaderboard';
 type CatFilter = 'all' | AchievementCategory;
 
 const HUB_TABS: { key: HubTab; label: string; icon: string }[] = [
-  { key: 'achievements', label: 'Thành Tựu', icon: '\ud83c\udfc6' },
-  { key: 'streak', label: 'Điểm Danh', icon: '\ud83d\udcc5' },
-  { key: 'leaderboard', label: 'BXH', icon: '\ud83e\udd47' },
+  { key: 'achievements', label: 'campaign.achievements.tabs.achievements', icon: '🏆' },
+  { key: 'streak', label: 'campaign.achievements.tabs.streak', icon: '📅' },
+  { key: 'leaderboard', label: 'campaign.achievements.tabs.leaderboard', icon: '🏅' },
 ];
 
-const CAT_FILTERS: { key: CatFilter; label: string }[] = [
-  { key: 'all', label: 'Tất cả' },
+const CAT_FILTERS: { key: CatFilter; label: string; emoji?: string }[] = [
+  { key: 'all', label: 'campaign.achievements.filters.all' },
   ...Object.entries(CATEGORY_CONFIG).map(([k, v]) => ({
     key: k as CatFilter,
-    label: `${v.emoji} ${v.label}`,
+    label: v.label,
+    emoji: v.emoji,
   })),
 ];
 
 const PERIOD_TABS: { key: LeaderboardPeriod; label: string; icon: string }[] = [
-  { key: 'weekly', label: 'Tuần', icon: '\ud83d\udcc5' },
-  { key: 'monthly', label: 'Tháng', icon: '\ud83d\udcc6' },
-  { key: 'alltime', label: 'Mọi lúc', icon: '\ud83c\udfc6' },
+  { key: 'weekly', label: 'campaign.achievements.periods.weekly', icon: '📅' },
+  { key: 'monthly', label: 'campaign.achievements.periods.monthly', icon: '📆' },
+  { key: 'alltime', label: 'campaign.achievements.periods.alltime', icon: '🏆' },
 ];
 
 export default function AchievementsHubScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<HubTab>('achievements');
 
@@ -69,7 +72,7 @@ export default function AchievementsHubScreen() {
           >
             &larr;
           </button>
-          <h1 className="font-heading font-bold text-lg text-white">Thành Tựu</h1>
+          <h1 className="font-heading font-bold text-lg text-white">{t('campaign.achievements.title')}</h1>
           <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl"
             style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.2)' }}>
             <span className="text-sm">🏆</span>
@@ -83,14 +86,13 @@ export default function AchievementsHubScreen() {
             <button
               key={tab.key}
               onClick={() => { setActiveTab(tab.key); playSound('ui_tab'); }}
-              className={`flex-1 py-2 rounded-full text-[11px] font-bold transition-all relative ${
-                tab.key === activeTab
-                  ? 'bg-purple-600 text-white'
-                  : 'text-white/50'
-              }`}
+              className={`flex-1 py-2 rounded-full text-[11px] font-bold transition-all relative ${tab.key === activeTab
+                ? 'bg-purple-600 text-white'
+                : 'text-white/50'
+                }`}
               style={tab.key !== activeTab ? { background: 'rgba(255,255,255,0.05)' } : { boxShadow: '0 4px 12px rgba(168,85,247,0.3)' }}
             >
-              {tab.icon} {tab.label}
+              {tab.icon} {t(tab.label)}
               {tab.key === 'achievements' && claimableCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
                   {claimableCount}
@@ -150,6 +152,7 @@ function AchievementsTab({
   claimingId: number | null;
   isClaimingAll: boolean;
 }) {
+  const { t } = useTranslation();
   const [catFilter, setCatFilter] = useState<CatFilter>('all');
 
   // Filter by category
@@ -190,11 +193,10 @@ function AchievementsTab({
           <button
             key={f.key}
             onClick={() => setCatFilter(f.key)}
-            className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${
-              f.key === catFilter ? 'bg-purple-600 text-white' : 'bg-white/5 text-white/40'
-            }`}
+            className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${f.key === catFilter ? 'bg-purple-600 text-white' : 'bg-white/5 text-white/40'
+              }`}
           >
-            {f.label}
+            {f.emoji ? `${f.emoji} ` : ''}{f.key === 'all' ? f.label : t(f.label)}
           </button>
         ))}
       </div>
@@ -219,7 +221,7 @@ function AchievementsTab({
 
       {/* Cards */}
       {sorted.length === 0 ? (
-        <EmptyState emoji="🏆" text="Chưa có thành tựu" sub="Chơi game để mở thành tựu!" />
+        <EmptyState emoji="🏆" text={t('campaign.achievements.empty_achievements.title')} sub={t('campaign.achievements.empty_achievements.sub')} />
       ) : (
         <div className="space-y-2">
           {sorted.map(a => (
@@ -236,7 +238,7 @@ function AchievementsTab({
       {/* Summary */}
       {achievements.length > 0 && (
         <div className="text-center mt-4 py-3 text-[10px] text-white/30">
-          Tổng thưởng: {totalRewardOgn.toLocaleString()} OGN + {titleCount} danh hiệu
+          {t('campaign.achievements.total_reward_prefix')} {totalRewardOgn.toLocaleString()} OGN + {titleCount} {t('campaign.achievements.total_reward_suffix')}
         </div>
       )}
     </>
@@ -248,8 +250,9 @@ function AchievementsTab({
 // ═══════════════════════════════════════════════════════════════
 
 function StreakTab({ streak, isLoading }: { streak: import('../types/achievement.types').LoginStreak | null; isLoading: boolean }) {
+  const { t } = useTranslation();
   if (isLoading) return <LoadingSpinner />;
-  if (!streak) return <EmptyState emoji="📅" text="Đăng nhập hàng ngày" sub="Hệ thống chưa sẵn sàng" />;
+  if (!streak) return <EmptyState emoji="📅" text={t('campaign.achievements.daily_login.title')} sub={t('campaign.achievements.daily_login.sub')} />;
 
   return <LoginStreakCalendar streak={streak} />;
 }
@@ -259,6 +262,7 @@ function StreakTab({ streak, isLoading }: { streak: import('../types/achievement
 // ═══════════════════════════════════════════════════════════════
 
 function LeaderboardTab() {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<LeaderboardPeriod>('weekly');
   const { data: leaderboard, isLoading } = useComboLeaderboard(period);
   const { data: myRank } = useMyComboRank(period);
@@ -271,12 +275,11 @@ function LeaderboardTab() {
           <button
             key={p.key}
             onClick={() => { setPeriod(p.key); playSound('ui_tab'); }}
-            className={`flex-1 py-2 rounded-full text-[11px] font-bold transition-all ${
-              p.key === period ? 'bg-amber-600 text-white' : 'bg-white/5 text-white/40'
-            }`}
+            className={`flex-1 py-2 rounded-full text-[11px] font-bold transition-all ${p.key === period ? 'bg-amber-600 text-white' : 'bg-white/5 text-white/40'
+              }`}
             style={p.key === period ? { boxShadow: '0 4px 12px rgba(245,158,11,0.3)' } : undefined}
           >
-            {p.icon} {p.label}
+            {p.icon} {t(p.label)}
           </button>
         ))}
       </div>
@@ -284,7 +287,7 @@ function LeaderboardTab() {
       {/* My rank (sticky) */}
       {myRank && (
         <div className="mb-3">
-          <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1 px-1">Hạng của bạn</div>
+          <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1 px-1">{t('campaign.achievements.your_rank')}</div>
           <LeaderboardRow entry={myRank} isMe />
         </div>
       )}
@@ -294,7 +297,7 @@ function LeaderboardTab() {
           className="rounded-xl p-3 mb-3 text-center text-[11px] text-white/40"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
         >
-          Chưa có dữ liệu — đánh boss để lên bảng!
+          {t('campaign.achievements.no_data_boss')}
         </div>
       )}
 
@@ -302,7 +305,7 @@ function LeaderboardTab() {
       {isLoading ? (
         <LoadingSpinner />
       ) : !leaderboard || leaderboard.length === 0 ? (
-        <EmptyState emoji="🥇" text="Chưa có dữ liệu" sub="Đánh boss để lên bảng xếp hạng!" />
+        <EmptyState emoji="🥇" text={t('campaign.achievements.empty_leaderboard.title')} sub={t('campaign.achievements.empty_leaderboard.sub')} />
       ) : (
         <div className="space-y-1.5">
           {leaderboard.map(entry => (

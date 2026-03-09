@@ -9,6 +9,7 @@ import { ARCHETYPE_INFO } from '../data/archetypes';
 import { ZONE_META } from '../data/zones';
 import { BOSS_SKILLS, getSkillDescVi } from '../data/bossSkills';
 import { getBossImageSrc } from '../data/bossSpritePaths';
+import { useTranslation } from 'react-i18next';
 import { playSound } from '@/shared/audio';
 
 interface BossDetailSheetProps {
@@ -32,8 +33,9 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
   const detail = BOSS_DETAILS[globalBossNumber];
   const archetype = ARCHETYPE_INFO[boss.archetype] || ARCHETYPE_INFO['none'];
   const meta = ZONE_META[zone.zoneNumber];
+  const { t } = useTranslation();
   const hasRecord = boss.isCleared && boss.bestStars > 0;
-  const hasSpecial = detail?.specialVi && detail.specialVi !== 'Không có';
+  const hasSpecial = detail?.specialVi && detail.specialVi !== 'campaign.boss.special.none';
   const skills = BOSS_SKILLS[globalBossNumber] ?? [];
   const hasSkills = skills.length > 0;
 
@@ -66,7 +68,7 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
 
             {/* Zone context */}
             <p className="text-sm text-gray-500">
-              {meta?.icon} Vùng {zone.zoneNumber}: {zone.name}
+              {meta?.icon} {t('campaign.ui.region')} {zone.zoneNumber}: {zone.name}
             </p>
           </div>
 
@@ -75,9 +77,9 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             <StatChip icon="❤️" label="HP" value={formatNumber(boss.hp)} />
             <StatChip icon="⚔️" label="ATK" value={formatNumber(detail?.atk ?? boss.attack ?? 0)} />
             <StatChip icon="🛡️" label="DEF" value={formatNumber(detail?.def ?? 0)} />
-            <StatChip icon="⏱️" label="Lượt" value={`${detail?.turnLimit ?? '?'}`} />
+            <StatChip icon="⏱️" label={t('campaign.ui.turns')} value={`${detail?.turnLimit ?? '?'}`} />
             <StatChip icon="🔄" label="Freq" value={`×${detail?.freq ?? 1}`} />
-            <StatChip icon="💚" label="Hồi" value={detail?.healPercent ? `${detail.healPercent}%` : '—'} />
+            <StatChip icon="💚" label={t('campaign.ui.heal')} value={detail?.healPercent ? `${detail.healPercent}%` : '—'} />
           </div>
 
           {/* ═══ ARCHETYPE TAG ═══ */}
@@ -96,7 +98,7 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             <div className="glass-card rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
-                <span className="font-heading font-bold text-sm text-gray-800">Kỹ năng đặc biệt</span>
+                <span className="font-heading font-bold text-sm text-gray-800">{t('campaign.ui.special_skill')}</span>
               </div>
               <div className="space-y-2">
                 {skills.map((s, i) => (
@@ -115,9 +117,9 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             <div className="glass-card rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
-                <span className="font-heading font-bold text-sm text-gray-800">Cơ chế đặc biệt</span>
+                <span className="font-heading font-bold text-sm text-gray-800">{t('campaign.ui.special_mechanic')}</span>
               </div>
-              <p className="text-sm text-gray-700 leading-relaxed">{detail?.specialVi}</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{detail?.specialVi ? t(detail.specialVi) : ''}</p>
             </div>
           )}
 
@@ -126,17 +128,17 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             <div className="glass-card rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-blue-500 text-lg">tips_and_updates</span>
-                <span className="font-heading font-bold text-sm text-gray-800">Gợi ý build</span>
+                <span className="font-heading font-bold text-sm text-gray-800">{t('campaign.ui.build_suggestion')}</span>
               </div>
               <div className="space-y-1.5">
                 <p className="text-sm text-green-700 flex items-start gap-1.5">
                   <span className="flex-shrink-0">✅</span>
-                  <span>Tốt: {archetype.counterIcon} {archetype.counterText}</span>
+                  <span>{t('campaign.ui.good')} {archetype.counterIcon} {archetype.counterText}</span>
                 </p>
                 {archetype.worstText && (
                   <p className="text-sm text-red-600 flex items-start gap-1.5">
                     <span className="flex-shrink-0">⚠️</span>
-                    <span>Khó: {archetype.worstIcon} {archetype.worstText}</span>
+                    <span>{t('campaign.ui.weak')} {archetype.worstIcon} {archetype.worstText}</span>
                   </p>
                 )}
               </div>
@@ -153,7 +155,7 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
                 >
                   emoji_events
                 </span>
-                <span className="font-heading font-bold text-sm text-gray-800">Kỷ lục của bạn</span>
+                <span className="font-heading font-bold text-sm text-gray-800">{t('campaign.boss.your_record')}</span>
               </div>
               <div className="flex items-center justify-between">
                 {/* Stars */}
@@ -174,14 +176,14 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
                 {/* Stats */}
                 <div className="flex items-center gap-3">
                   {boss.bestTurns != null && (
-                    <span className="text-xs text-gray-600">{boss.bestTurns} lượt</span>
+                    <span className="text-xs text-gray-600">{boss.bestTurns} {t('campaign.ui.turns').toLowerCase()}</span>
                   )}
                   {boss.bestHpPercent != null && (
                     <span className="text-xs text-gray-600">HP {boss.bestHpPercent}%</span>
                   )}
                 </div>
               </div>
-              <p className="text-xs text-gray-400 mt-1.5">Đã clear {boss.clearCount} lần</p>
+              <p className="text-xs text-gray-400 mt-1.5">{t('campaign.boss.cleared_times', { count: boss.clearCount })}</p>
             </div>
           )}
 
@@ -191,11 +193,11 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             className="btn-comic-red w-full py-4 rounded-2xl text-white font-heading text-xl font-black uppercase tracking-wider flex items-center justify-center gap-3 active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-2xl">swords</span>
-            ĐÁNH!
+            {t('campaign.boss.fight')}
           </button>
 
           <p className="text-center text-xs text-gray-400 mt-2">
-            Recommended Lv. {detail?.recommendedLevel ?? '?'}
+            {t('campaign.boss.recommended_lv')} {detail?.recommendedLevel ?? '?'}
           </p>
 
         </div>

@@ -4,6 +4,7 @@
 
 import { CATEGORY_CONFIG } from '../types/achievement.types';
 import type { Achievement } from '../types/achievement.types';
+import { useTranslation } from 'react-i18next';
 
 interface AchievementCardProps {
   achievement: Achievement;
@@ -12,6 +13,7 @@ interface AchievementCardProps {
 }
 
 export default function AchievementCard({ achievement: a, onClaim, isClaiming }: AchievementCardProps) {
+  const { t } = useTranslation();
   const catCfg = CATEGORY_CONFIG[a.category];
   const progress = Math.min(a.progress, a.conditionValue);
   const progressPct = (progress / a.conditionValue) * 100;
@@ -29,7 +31,7 @@ export default function AchievementCard({ achievement: a, onClaim, isClaiming }:
           <span className="text-xl">❓</span>
           <div className="flex-1">
             <span className="text-[13px] font-bold text-white/40">???</span>
-            <span className="block text-[10px] text-white/20">Thành tựu ẩn — tiếp tục chơi!</span>
+            <span className="block text-[10px] text-white/20">{t('campaign.achievements.card.hidden_achievement')}</span>
           </div>
           <span className="text-white/20">🔒</span>
         </div>
@@ -48,7 +50,7 @@ export default function AchievementCard({ achievement: a, onClaim, isClaiming }:
           <span className="text-xl">{catCfg.emoji}</span>
           <div className="flex-1 min-w-0">
             <span className="text-[13px] font-bold text-white/60 truncate block">{a.name}</span>
-            <span className="text-[10px] text-green-400/50">✓ Đã nhận</span>
+            <span className="text-[10px] text-green-400/50">✓ {t('campaign.achievements.card.claimed')}</span>
           </div>
           <span className="text-lg">🏆</span>
         </div>
@@ -121,7 +123,7 @@ export default function AchievementCard({ achievement: a, onClaim, isClaiming }:
             {isClaiming ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
             ) : (
-              'Nhận'
+              t('campaign.achievements.card.claim')
             )}
           </button>
         )}

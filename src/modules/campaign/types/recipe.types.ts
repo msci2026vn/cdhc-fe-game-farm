@@ -49,7 +49,7 @@ export interface ActiveFarmBuff {
 export const MAX_BUFF_SLOTS = 3;
 
 export const TIER_CRAFT_LABELS: Record<FragmentTier, string> = {
-  common: 'Thường',
-  rare: 'Hiếm',
-  legendary: 'Huyền Thoại',
+  common: 'campaign.tier.common',
+  rare: 'campaign.tier.rare',
+  legendary: 'campaign.tier.legendary',
 };

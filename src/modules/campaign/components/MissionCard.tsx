@@ -4,6 +4,7 @@
 
 import type { PlayerMission } from '../types/mission.types';
 import { getMissionIcon } from '../types/mission.types';
+import { useTranslation } from 'react-i18next';
 
 interface MissionCardProps {
   mission: PlayerMission;
@@ -12,6 +13,7 @@ interface MissionCardProps {
 }
 
 export default function MissionCard({ mission, onClaim, isClaiming }: MissionCardProps) {
+  const { t } = useTranslation();
   const icon = getMissionIcon(mission.missionKey);
   const progress = Math.min(mission.currentProgress, mission.targetValue);
   const progressPct = (progress / mission.targetValue) * 100;
@@ -42,7 +44,7 @@ export default function MissionCard({ mission, onClaim, isClaiming }: MissionCar
         {/* Status / Claim */}
         {isClaimed ? (
           <span className="text-[10px] font-bold text-green-400/60 shrink-0 flex items-center gap-1">
-            ✅ Đã nhận
+            ✅ {t('campaign.ui.claimed')}
           </span>
         ) : isClaimable ? (
           <button
@@ -53,7 +55,7 @@ export default function MissionCard({ mission, onClaim, isClaiming }: MissionCar
             {isClaiming ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
             ) : (
-              'Nhận 🎁'
+              `${t('campaign.ui.claim')} 🎁`
             )}
           </button>
         ) : (

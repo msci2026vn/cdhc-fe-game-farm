@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import type { CampaignZone } from '../types/campaign.types';
 import { ZONE_META } from '../data/zones';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface ZoneNodeProps {
   zone: CampaignZone;
@@ -13,6 +14,7 @@ interface ZoneNodeProps {
  * 3 states: cleared (green), open (blue + GO! badge), locked (gray)
  */
 export default function ZoneNode({ zone, onClick }: ZoneNodeProps) {
+  const { t } = useTranslation();
   const meta = ZONE_META[zone.zoneNumber];
   const isCleared = zone.isZoneCleared;
   const isOpen = zone.isUnlocked && !zone.isZoneCleared;
@@ -56,7 +58,7 @@ export default function ZoneNode({ zone, onClick }: ZoneNodeProps) {
           </div>
           {/* GO! badge */}
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border-2 border-white shadow-md animate-bounce">
-            GO!
+            {t('campaign.ui.go')}
           </div>
         </div>
       ) : (
@@ -75,7 +77,7 @@ export default function ZoneNode({ zone, onClick }: ZoneNodeProps) {
           'font-heading font-bold text-xs leading-tight',
           isCleared ? 'text-green-100' : isOpen ? 'text-white' : 'text-white/50',
         )}>
-          V{zone.zoneNumber} {meta?.name || zone.name}
+          {t('campaign.ui.zone_short')}{zone.zoneNumber} {meta?.name || zone.name}
         </p>
         {/* Stars or progress */}
         {(isCleared || isOpen) && (

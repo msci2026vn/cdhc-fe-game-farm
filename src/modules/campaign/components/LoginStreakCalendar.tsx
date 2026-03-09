@@ -4,6 +4,7 @@
 
 import type { LoginStreak } from '../types/achievement.types';
 import { STREAK_MILESTONES, DAILY_OGN } from '../types/achievement.types';
+import { useTranslation } from 'react-i18next';
 
 interface LoginStreakCalendarProps {
   streak: LoginStreak;
@@ -12,18 +13,19 @@ interface LoginStreakCalendarProps {
 const MILESTONE_DAYS = new Set(STREAK_MILESTONES.map(m => m.day));
 
 export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps) {
+  const { t } = useTranslation();
   const { currentStreak, longestStreak, monthlyDay, milestones, todayReward } = streak;
 
   // Build 28-day grid: 4 rows x 7 cols
   const days = Array.from({ length: 28 }, (_, i) => {
     const dayNum = i + 1;
-    const milestone = milestones.find(m => m.day === dayNum);
-    const isMilestoneDay = MILESTONE_DAYS.has(dayNum);
+    const milestone = milestones.find(m => m.day === (dayNum as any));
+    const isMilestoneDay = MILESTONE_DAYS.has(dayNum as any);
     const isPast = dayNum < monthlyDay;
     const isToday = dayNum === monthlyDay;
     const isFuture = dayNum > monthlyDay;
     const isClaimed = milestone?.isClaimed ?? isPast; // past days assumed claimed if not milestone
-    const streakMilestone = STREAK_MILESTONES.find(m => m.day === dayNum);
+    const streakMilestone = STREAK_MILESTONES.find(m => m.day === (dayNum as any));
     const ognReward = streakMilestone?.ogn ?? DAILY_OGN;
 
     return {
@@ -46,17 +48,17 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
         <div className="text-center">
           <div className="text-2xl mb-0.5">🔥</div>
           <div className="text-lg font-bold text-amber-400">{currentStreak}</div>
-          <div className="text-[9px] text-white/40">Liên tiếp</div>
+          <div className="text-[9px] text-white/40">{t('campaign.ui.streak_consecutive')}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl mb-0.5">📅</div>
-          <div className="text-lg font-bold text-white">Ngay {monthlyDay}</div>
-          <div className="text-[9px] text-white/40">Tháng này</div>
+          <div className="text-lg font-bold text-white">{t('campaign.ui.streak_day', { day: monthlyDay, defaultValue: `Day ${monthlyDay}` })}</div>
+          <div className="text-[9px] text-white/40">{t('campaign.ui.streak_this_month')}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl mb-0.5">🏆</div>
           <div className="text-lg font-bold text-purple-400">{longestStreak}</div>
-          <div className="text-[9px] text-white/40">Kỷ lục</div>
+          <div className="text-[9px] text-white/40">{t('campaign.ui.streak_record')}</div>
         </div>
       </div>
 
@@ -90,9 +92,8 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
           return (
             <div
               key={day.dayNum}
-              className={`relative rounded-lg p-1 flex flex-col items-center justify-center min-h-[52px] transition-all ${
-                day.isToday ? 'animate-pulse' : ''
-              }`}
+              className={`relative rounded-lg p-1 flex flex-col items-center justify-center min-h-[52px] transition-all ${day.isToday ? 'animate-pulse' : ''
+                }`}
               style={{ background: bgColor, border: `1.5px solid ${borderColor}` }}
             >
               {/* Day label */}
@@ -108,9 +109,8 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
               )}
 
               {/* OGN reward */}
-              <span className={`text-[7px] font-bold ${
-                day.isMilestoneDay ? 'text-yellow-400' : 'text-white/20'
-              }`}>
+              <span className={`text-[7px] font-bold ${day.isMilestoneDay ? 'text-yellow-400' : 'text-white/20'
+                }`}>
                 {day.ognReward}
               </span>
 
@@ -130,23 +130,23 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
       >
         {todayReward ? (
           <div className="text-[12px]">
-            <span className="text-white/50">Hôm nay:</span>
+            <span className="text-white/50">{t('campaign.ui.streak_today')}</span>
             <span className="font-bold text-yellow-400">+{todayReward.ogn} OGN</span>
             {todayReward.fragment && (
               <span className="text-purple-400 ml-1">+ 🧩</span>
             )}
-            <span className="ml-2 text-green-400 text-[10px]">✅ Đã nhận</span>
+            <span className="ml-2 text-green-400 text-[10px]">✅ {t('campaign.ui.claimed')}</span>
           </div>
         ) : (
           <div className="text-[12px] text-white/40">
-            Đăng nhập mỗi ngày để nhận thưởng!
+            {t('campaign.ui.streak_daily_desc')}
           </div>
         )}
       </div>
 
       {/* Milestone legend */}
       <div className="space-y-1 px-1">
-        <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1">Mốc thưởng</div>
+        <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1">{t('campaign.ui.streak_milestones')}</div>
         {STREAK_MILESTONES.map(m => (
           <div key={m.day} className="flex items-center gap-2 text-[10px]">
             <span className="text-white/20 w-6 text-right">D{m.day}</span>
@@ -155,7 +155,7 @@ export default function LoginStreakCalendar({ streak }: LoginStreakCalendarProps
               <span className="text-purple-400">+ 🧩 {m.fragment.tier} x{m.fragment.count}</span>
             )}
             {'title' in m && m.title && (
-              <span className="text-amber-400">+ "{m.title}"</span>
+              <span className="text-amber-400">+ "{t(m.title)}"</span>
             )}
           </div>
         ))}

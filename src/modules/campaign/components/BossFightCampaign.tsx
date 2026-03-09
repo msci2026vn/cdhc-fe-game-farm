@@ -19,6 +19,7 @@ import { onBattleEnd as learnerBattleEnd } from '@/shared/autoplay/auto-learner'
 import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
+import { useTranslation } from 'react-i18next';
 
 // Shared match-3 components & hooks
 import { useGemPointer, useComboParticles } from '@/shared/match3';
@@ -62,6 +63,7 @@ export default function BossFightCampaign({
   archetype, archetypeIcon, archetypeTip,
   onRetry,
 }: Props) {
+  const { t } = useTranslation();
   const { data: statInfo } = usePlayerStats();
 
   const combatStats: PlayerCombatStats = statInfo ? {
@@ -194,7 +196,7 @@ export default function BossFightCampaign({
       })
       .catch((err: any) => {
         console.error('[BATTLE] Failed to start battle session:', err);
-        setSessionError(err.message || 'Không thể bắt đầu trận đấu');
+        setSessionError(err.message || t('campaign.ui.cannot_start_battle_error'));
       });
   }, [campaignBossId]);
 

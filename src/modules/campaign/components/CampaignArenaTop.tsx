@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { BossHPBar, BattleTopBar, ComboDisplay, DamagePopupLayer } from '@/modules/boss/components/hud';
 import { BossStatsBadges, BossBuffsBadges } from './BossStatsDisplay';
 import { BossSprite } from './BossSprite';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     boss: any;
@@ -39,6 +40,7 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
     spriteSrc, spriteState, hasSprites, enrageMultiplier, skillWarning,
     egg, popups, combo, showCombo, comboInfo
 }: Props) {
+    const { t } = useTranslation();
     // Memoize .some() calls — avoid O(n) scan on every render
     const shieldBuff = useMemo(() => activeBossBuffs.some((b: any) => b.type === 'shield'), [activeBossBuffs]);
     const reflectBuff = useMemo(() => activeBossBuffs.some((b: any) => b.type === 'reflect'), [activeBossBuffs]);
@@ -123,7 +125,7 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                         </div>
                         <span className="text-[9px] font-bold text-white mt-0.5">{egg.hp}/{egg.maxHp}</span>
                         {egg.countdown <= 3 && (
-                            <span className="text-[8px] font-bold text-red-400 animate-pulse">SẮP NỞ!</span>
+                            <span className="text-[8px] font-bold text-red-400 animate-pulse">{t('campaign.ui.hatching_soon')}</span>
                         )}
                     </div>
                 )}

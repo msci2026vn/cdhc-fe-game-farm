@@ -3,6 +3,7 @@ import { PlayerHPBar, ManaBar } from '@/modules/boss/components/hud';
 import ExpiryBanner from '@/shared/components/ExpiryBanner';
 import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     activeDebuffs: any[];
@@ -210,6 +211,7 @@ export default function CampaignPlayerHUD({
     otHiemDuration, castOtHiem, romBocActive, romBocCooldown, ROM_BOC_CONFIG,
     romBocDuration, castRomBoc, handleDodge, fireUltimate
 }: Props) {
+    const { t } = useTranslation();
     const ultReady = (boss.ultCharge ?? 0) >= 100;
     const hasDodgeMana = boss.mana >= manaDodgeCost;
     const hasUltMana = boss.mana >= manaUltCost;
@@ -273,7 +275,7 @@ export default function CampaignPlayerHUD({
             {skillWarning && (
                 <div className="text-center py-1 pointer-events-none">
                     <span className="bg-red-900/80 text-red-300 px-4 py-1 rounded-full text-sm font-bold">
-                        ⚡ Đòn mạnh đang đến!
+                        {t('campaign.ui.strong_attack_warning')}
                     </span>
                 </div>
             )}
@@ -300,7 +302,7 @@ export default function CampaignPlayerHUD({
                 <CircleSkillBtn
                     className="campaign-skill-btn"
                     icon="🌶️"
-                    label={`Ớt${skillLevels.ot_hiem > 0 ? ` Lv${skillLevels.ot_hiem}` : ''}`}
+                    label={`${t('campaign.skills.ot_hiem.short_name')}${skillLevels.ot_hiem > 0 ? ` Lv${skillLevels.ot_hiem}` : ''}`}
                     sublabel={otHiemCooldown > 0 ? undefined : otHiemActive ? 'active' : undefined}
                     variant="red"
                     isActive={otHiemActive}
@@ -317,7 +319,7 @@ export default function CampaignPlayerHUD({
                 <CircleSkillBtn
                     className="campaign-skill-btn campaign-skill-btn-green"
                     icon="🪹"
-                    label={`Rơm${skillLevels.rom_boc > 0 ? ` Lv${skillLevels.rom_boc}` : ''}`}
+                    label={`${t('campaign.skills.rom_boc.short_name')}${skillLevels.rom_boc > 0 ? ` Lv${skillLevels.rom_boc}` : ''}`}
                     variant="green"
                     isActive={romBocActive}
                     onCooldown={romBocCooldown > 0}
@@ -333,7 +335,7 @@ export default function CampaignPlayerHUD({
                 <CircleSkillBtn
                     className={`campaign-skill-btn campaign-skill-btn-green${skillWarning && hasDodgeMana ? ' campaign-skill-btn-dodge-active' : ''}`}
                     icon="🏃"
-                    label={`NÉ (${manaDodgeCost})`}
+                    label={`${t('campaign.combat.dodge')} (${manaDodgeCost})`}
                     variant="run"
                     isReady={hasDodgeMana}
                     isDodgeWindow={skillWarning && hasDodgeMana}

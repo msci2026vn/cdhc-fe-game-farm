@@ -9,6 +9,7 @@ import { useZoneBosses } from '../hooks/useZoneBosses';
 import { ZONE_META } from '../data/zones';
 import type { StageState, ZoneBoss } from '../types/campaign.types';
 import { playSound, audioManager } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 
 /**
  * CampaignZoneScreen — Zone detail with 4 stages (3 minions/elites + 1 boss).
@@ -16,6 +17,7 @@ import { playSound, audioManager } from '@/shared/audio';
  * Click stage → BossDetailSheet popup → confirm → navigate to combat.
  */
 export default function CampaignZoneScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { zoneNumber: zoneParam } = useParams<{ zoneNumber: string }>();
   const zoneNumber = parseInt(zoneParam || '1', 10);
@@ -70,7 +72,7 @@ export default function CampaignZoneScreen() {
       <div className={`h-[100dvh] flex items-center justify-center ${meta?.bgClass || 'zone-bg-1'}`}>
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/80 font-heading font-bold text-sm">Đang tải vùng...</p>
+          <p className="text-white/80 font-heading font-bold text-sm">{t('campaign.screens.loading_zone')}</p>
         </div>
       </div>
     );
@@ -82,13 +84,13 @@ export default function CampaignZoneScreen() {
       <div className={`h-[100dvh] flex items-center justify-center ${meta?.bgClass || 'zone-bg-1'}`}>
         <div className="text-center px-6">
           <span className="text-5xl mb-4 block">😵</span>
-          <p className="text-red-300 font-heading font-bold mb-2">Lỗi tải vùng</p>
+          <p className="text-red-300 font-heading font-bold mb-2">{t('campaign.screens.error_loading_zone')}</p>
           <p className="text-white/40 text-xs mb-4">{String(error)}</p>
           <button
             onClick={() => navigate('/campaign')}
             className="btn-gold px-6 py-2 rounded-xl font-heading font-bold text-sm text-white"
           >
-            Về bản đồ
+            {t('campaign.screens.back_to_map')}
           </button>
         </div>
       </div>
@@ -102,7 +104,7 @@ export default function CampaignZoneScreen() {
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col ${meta?.bgClass || 'zone-bg-1'}`}>
       {/* Header */}
       <CampaignHeader
-        title={`Region ${zoneNumber}: ${zone?.name || meta?.name || ''}`}
+        title={`${t('campaign.zone.region')} ${zoneNumber}: ${zone?.name || meta?.name || ''}`}
         stars={totalStars}
         maxStars={maxStars}
         backTo="/campaign"
@@ -189,13 +191,14 @@ export default function CampaignZoneScreen() {
 /** Bottom nav for zone detail screen */
 function ZoneBottomNav() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const tabs = [
-    { icon: 'map', label: 'Bản Đồ', to: '/campaign' },
-    { icon: 'bolt', label: 'Kỹ Năng', to: '/campaign/skills' },
-    { icon: 'science', label: 'C.Thức', to: '/campaign/recipes' },
-    { icon: 'assignment', label: 'N.Vụ', to: '/campaign/missions' },
-    { icon: 'emoji_events', label: 'T.Tựu', to: '/campaign/achievements' },
+    { icon: 'map', label: t('campaign.zone.tabs.map'), to: '/campaign' },
+    { icon: 'bolt', label: t('campaign.zone.tabs.skills'), to: '/campaign/skills' },
+    { icon: 'science', label: t('campaign.zone.tabs.recipes'), to: '/campaign/recipes' },
+    { icon: 'assignment', label: t('campaign.zone.tabs.missions'), to: '/campaign/missions' },
+    { icon: 'emoji_events', label: t('campaign.zone.tabs.achievements'), to: '/campaign/achievements' },
   ];
 
   return (
