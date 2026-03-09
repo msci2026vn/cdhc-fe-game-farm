@@ -87,10 +87,10 @@ export const pvpApi = {
 
   getPendingInvites: () => pvpFetch<{ invites: PvpInvite[] }>('/invite/pending'),
 
-  sendInvite: (toUserId: string) =>
+  sendInvite: (toUserId: string, roomCode?: string) =>
     pvpFetch<{ ok: boolean; inviteId: string; roomCode: string }>('/invite', {
       method: 'POST',
-      body: JSON.stringify({ toUserId }),
+      body: JSON.stringify({ toUserId, ...(roomCode ? { roomCode } : {}) }),
     }),
 
   respondInvite: (inviteId: string, action: 'accept' | 'reject') =>

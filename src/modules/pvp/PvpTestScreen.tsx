@@ -6,6 +6,7 @@ import { Client, type Room } from '@colyseus/sdk';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { pvpApi } from '@/shared/api/api-pvp';
 import type { PvpRating } from '@/shared/api/api-pvp';
+import { socialApi } from '@/shared/api/api-social';
 import PostGameScreen from './PostGameScreen';
 import type { ClientMvpStats, H2HData } from './PostGameScreen';
 import './pvp-battle.css';
@@ -260,6 +261,10 @@ export default function PvpTestScreen() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteExpiry, setInviteExpiry] = useState<number | null>(null);
   const [inviteToast, setInviteToast] = useState('');
+  const [showFriendPicker, setShowFriendPicker] = useState(false);
+  const [friendList, setFriendList] = useState<Array<{ id: string; name: string; avatar: string | null; level: number }>>([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [sendingInviteTo, setSendingInviteTo] = useState<string | null>(null);
 
   // ── On-chain proof ──
   const [matchId, setMatchId] = useState<string | null>(null);
@@ -758,22 +763,29 @@ export default function PvpTestScreen() {
 
   const handleInviteFriend = async () => {
     if (!roomCode) return;
-    setInviteLoading(true);
+    setShowFriendPicker(true);
+    setFriendsLoading(true);
     try {
-      if (inviteUrl && inviteExpiry && Date.now() < inviteExpiry - 30_000) {
-        await navigator.clipboard.writeText(inviteUrl);
-        showInviteToast('✅ Đã copy link mời!');
-        return;
-      }
-      const data = await pvpApi.createInviteLink(roomCode);
-      setInviteUrl(data.inviteUrl);
-      setInviteExpiry(data.expiresAt);
-      await navigator.clipboard.writeText(data.inviteUrl);
-      showInviteToast('✅ Đã copy link mời! (hết hạn sau 5 phút)');
+      const result = await socialApi.getFriends();
+      setFriendList(result.friends);
     } catch {
-      showInviteToast('❌ Không thể tạo link mời');
+      setFriendList([]);
     } finally {
-      setInviteLoading(false);
+      setFriendsLoading(false);
+    }
+  };
+
+  const handleSendInviteToFriend = async (friendId: string) => {
+    if (!roomCode) return;
+    setSendingInviteTo(friendId);
+    try {
+      await pvpApi.sendInvite(friendId, roomCode);
+      showInviteToast('✅ Đã gửi lời mời!');
+      setShowFriendPicker(false);
+    } catch (e) {
+      showInviteToast(`❌ ${e instanceof Error ? e.message : 'Gửi lời mời thất bại'}`);
+    } finally {
+      setSendingInviteTo(null);
     }
   };
 
@@ -908,6 +920,83 @@ export default function PvpTestScreen() {
           pointerEvents: 'none',
         }}>
           {inviteToast}
+        </div>
+      )}
+
+      {/* Friend Picker Modal */}
+      {showFriendPicker && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 250,
+            background: 'rgba(0,0,0,0.65)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+          onClick={() => setShowFriendPicker(false)}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(180deg,#1a1a2e,#0f1624)',
+              border: '1px solid #1e4d78',
+              borderRadius: '16px 16px 0 0',
+              width: '100%', maxWidth: 480,
+              maxHeight: '70vh', overflow: 'hidden',
+              display: 'flex', flexDirection: 'column',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{
+              padding: '16px 20px', borderBottom: '1px solid #1e3a5a',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>👥 Mời Bạn Bè</span>
+              <button onClick={() => setShowFriendPicker(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+              {friendsLoading ? (
+                <div style={{ textAlign: 'center', color: '#64748b', padding: 40, fontSize: 14 }}>Đang tải...</div>
+              ) : friendList.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                  <div style={{ fontSize: 40, marginBottom: 8 }}>😔</div>
+                  <div style={{ color: '#64748b', fontSize: 14 }}>Chưa có bạn bè nào</div>
+                </div>
+              ) : (
+                friendList.map(f => (
+                  <div
+                    key={f.id}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 20px', borderBottom: '1px solid #0f1e30',
+                    }}
+                  >
+                    <div style={{
+                      width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                      background: '#1e4d78', overflow: 'hidden',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                    }}>
+                      {f.avatar ? <img src={f.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" /> : '👤'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: 14 }}>{f.name}</div>
+                      <div style={{ color: '#64748b', fontSize: 11 }}>Lv.{f.level}</div>
+                    </div>
+                    <button
+                      onClick={() => void handleSendInviteToFriend(f.id)}
+                      disabled={sendingInviteTo === f.id}
+                      style={{
+                        padding: '8px 16px', borderRadius: 8, border: 'none',
+                        background: sendingInviteTo === f.id ? '#333' : '#e94560',
+                        color: '#fff', fontSize: 12, fontWeight: 700,
+                        cursor: sendingInviteTo === f.id ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {sendingInviteTo === f.id ? '⏳' : '⚔️ Mời'}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       )}
 
