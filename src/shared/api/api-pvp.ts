@@ -160,4 +160,14 @@ export const pvpApi = {
 
   getRooms: () =>
     pvpFetch<{ rooms: { roomId: string; roomCode: string; hostName: string; clients: number; maxClients: number; createdAt: string | null }[] }>('/rooms'),
+
+  createInviteLink: (roomCode: string) =>
+    pvpFetch<{ inviteUrl: string; token: string; expiresAt: number }>('/create-invite-link', {
+      method: 'POST',
+      body: JSON.stringify({ roomCode }),
+    }),
+
+  validateInviteLink: (token: string): Promise<{ valid: boolean; roomCode?: string; hostName?: string; reason?: string }> =>
+    fetch(`${API_BASE_URL}/api/pvp/validate-invite/${token}`)
+      .then(res => res.json() as Promise<{ valid: boolean; roomCode?: string; hostName?: string; reason?: string }>),
 };

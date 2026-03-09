@@ -255,6 +255,12 @@ export default function PvpTestScreen() {
   const [h2hData, setH2hData] = useState<H2HData>(null);
   const [rematchState, setRematchState] = useState<'idle' | 'waiting' | 'ready'>('idle');
 
+  // ── Invite link state ──
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteExpiry, setInviteExpiry] = useState<number | null>(null);
+  const [inviteToast, setInviteToast] = useState('');
+
   // ── On-chain proof ──
   const [matchId, setMatchId] = useState<string | null>(null);
   const [proofData, setProofData] = useState<{
@@ -729,6 +735,63 @@ export default function PvpTestScreen() {
     addLog(`Gửi: Kick ${sessionId.slice(0, 6)}...`);
   };
 
+  const showInviteToast = (msg: string) => {
+    setInviteToast(msg);
+    setTimeout(() => setInviteToast(''), 3000);
+  };
+
+  const handleInviteFriend = async () => {
+    if (!roomCode) return;
+    setInviteLoading(true);
+    try {
+      if (inviteUrl && inviteExpiry && Date.now() < inviteExpiry - 30_000) {
+        await navigator.clipboard.writeText(inviteUrl);
+        showInviteToast('✅ Đã copy link mời!');
+        return;
+      }
+      const data = await pvpApi.createInviteLink(roomCode);
+      setInviteUrl(data.inviteUrl);
+      setInviteExpiry(data.expiresAt);
+      await navigator.clipboard.writeText(data.inviteUrl);
+      showInviteToast('✅ Đã copy link mời! (hết hạn sau 5 phút)');
+    } catch {
+      showInviteToast('❌ Không thể tạo link mời');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!roomCode) return;
+    setInviteLoading(true);
+    try {
+      let url = inviteUrl;
+      if (!url || !inviteExpiry || Date.now() >= inviteExpiry - 30_000) {
+        const data = await pvpApi.createInviteLink(roomCode);
+        url = data.inviteUrl;
+        setInviteUrl(url);
+        setInviteExpiry(data.expiresAt);
+      }
+      const shareData = {
+        title: '⚔️ Thách đấu PVP!',
+        text: `${roomState?.players[mySessionId ?? '']?.name ?? 'Host'} đang chờ bạn vào trận! Lời mời hết hạn sau 5 phút.`,
+        url: url!,
+      };
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        const zaloUrl = `https://zalo.me/share?url=${encodeURIComponent(url!)}&title=${encodeURIComponent(shareData.text)}`;
+        window.open(zaloUrl, '_blank', 'noopener');
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        showInviteToast('❌ Không thể chia sẻ');
+      }
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   // ── Auto-join khi có roomId trên URL ──
   useEffect(() => {
     if (urlRoomCode && !inRoom && !autoJoinedRef.current) {
@@ -740,6 +803,31 @@ export default function PvpTestScreen() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlRoomCode]);
+
+  // ── Auto-join khi có invite token trên URL ──
+  useEffect(() => {
+    const inviteToken = searchParams.get('invite');
+    if (!inviteToken || inRoom || autoJoinedRef.current) return;
+    autoJoinedRef.current = true;
+    const handleInviteToken = async (token: string) => {
+      try {
+        const result = await pvpApi.validateInviteLink(token);
+        window.history.replaceState({}, '', window.location.pathname);
+        if (result.valid && result.roomCode) {
+          showInviteToast(`Đang vào phòng của ${result.hostName ?? 'Host'}...`);
+          setTimeout(() => handleJoin(result.roomCode!), 600);
+        } else {
+          showInviteToast(
+            result.reason === 'expired' ? '❌ Lời mời đã hết hạn (5 phút)' : '❌ Link mời không hợp lệ',
+          );
+        }
+      } catch {
+        showInviteToast('❌ Không thể xác thực lời mời');
+      }
+    };
+    void handleInviteToken(inviteToken);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Derived state ──
   const phase = roomState?.phase ?? 'waiting';
@@ -788,6 +876,21 @@ export default function PvpTestScreen() {
           pointerEvents: 'none',
         }}>
           {comboText}
+        </div>
+      )}
+
+      {/* Invite toast */}
+      {inviteToast && (
+        <div style={{
+          position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
+          background: '#1e3a5a', border: '1px solid #3b82f6',
+          borderRadius: 10, padding: '10px 20px',
+          color: '#e2e8f0', fontSize: 14, fontWeight: 600,
+          zIndex: 400, whiteSpace: 'nowrap',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+          pointerEvents: 'none',
+        }}>
+          {inviteToast}
         </div>
       )}
 
@@ -1176,6 +1279,35 @@ export default function PvpTestScreen() {
                 >
                   {challengeSearching ? '🔍 Đang tìm...' : '⚔️ Thách Đấu'}
                 </button>
+              )}
+
+              {isHost && phase === 'waiting' && (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => void handleInviteFriend()}
+                    disabled={inviteLoading}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
+                      background: inviteLoading ? '#333' : '#1e88e5',
+                      color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
+                      opacity: inviteLoading ? 0.7 : 1,
+                    }}
+                  >
+                    {inviteLoading ? '⏳' : '👥'} Mời Bạn Bè
+                  </button>
+                  <button
+                    onClick={() => void handleShare()}
+                    disabled={inviteLoading}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
+                      background: inviteLoading ? '#333' : '#27ae60',
+                      color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
+                      opacity: inviteLoading ? 0.7 : 1,
+                    }}
+                  >
+                    📤 Chia Sẻ
+                  </button>
+                </div>
               )}
 
               <button onClick={handleLeave} style={{
