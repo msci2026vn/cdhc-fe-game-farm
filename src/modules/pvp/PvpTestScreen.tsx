@@ -188,7 +188,7 @@ export default function PvpTestScreen() {
   const navigate = useNavigate();
   const { t } = useTranslation('pvp');
   const [searchParams] = useSearchParams();
-  const urlRoomCode = searchParams.get('roomId') ?? '';
+  const urlRoomCode = searchParams.get('roomId') || searchParams.get('room') || '';
   const clientRef = useRef<Client | null>(null);
   const roomRef = useRef<Room | null>(null);
   const autoJoinedRef = useRef(false);
@@ -197,7 +197,9 @@ export default function PvpTestScreen() {
   const [inRoom, setInRoom] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [roomId, setRoomId] = useState('');
-  const [inputCode, setInputCode] = useState(() => searchParams.get('roomId') ?? '');
+  const [roomCode, setRoomCode] = useState('');
+  const [challengeSearching, setChallengeSearching] = useState(false);
+  const [inputCode, setInputCode] = useState(() => searchParams.get('roomId') || searchParams.get('room') || '');
   const [roomState, setRoomState] = useState<RoomStateBroadcast | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [mySessionId, setMySessionId] = useState('');
@@ -305,6 +307,7 @@ export default function PvpTestScreen() {
       roomId: string; roomCode: string; isHost: boolean; mySessionId: string; myOrder: 1 | 2;
     }) => {
       setRoomId(data.roomId);
+      setRoomCode(data.roomCode || data.roomId);
       setIsHost(data.isHost);
       setMySessionId(data.mySessionId);
       addLog(`Vào phòng | id: ${data.roomId} | host: ${data.isHost}`);
@@ -1145,6 +1148,33 @@ export default function PvpTestScreen() {
                   color: '#fff', border: 'none', opacity: canStart ? 1 : 0.5,
                 }}>
                   {canStart ? `🚀 ${t('game.startGame')}` : `⏳ ${t('game.waitingOpponent')}`}
+                </button>
+              )}
+
+              {isHost && phase === 'waiting' && (
+                <button
+                  onClick={async () => {
+                    if (challengeSearching || !roomCode) return;
+                    setChallengeSearching(true);
+                    try {
+                      await pvpApi.startChallenge(roomCode);
+                    } catch {
+                      // silent
+                    } finally {
+                      setTimeout(() => setChallengeSearching(false), 10000);
+                    }
+                  }}
+                  disabled={challengeSearching}
+                  style={{
+                    padding: '11px', borderRadius: 6, fontSize: 14, fontWeight: 700,
+                    cursor: challengeSearching ? 'not-allowed' : 'pointer',
+                    background: challengeSearching
+                      ? 'linear-gradient(135deg,#333,#222)'
+                      : 'linear-gradient(135deg,#7c3aed,#4f46e5)',
+                    color: '#fff', border: 'none', opacity: challengeSearching ? 0.6 : 1,
+                  }}
+                >
+                  {challengeSearching ? '🔍 Đang tìm...' : '⚔️ Thách Đấu'}
                 </button>
               )}
 
