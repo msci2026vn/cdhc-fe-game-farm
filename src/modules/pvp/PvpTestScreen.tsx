@@ -57,63 +57,137 @@ interface GameBoardProps {
 }
 
 function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
-  const [selected, setSelected] = useState<number | null>(null);
-  const size = mini ? 20 : 44;
+  const boardRef = useRef<HTMLDivElement>(null);
+  const swipeRef = useRef<{
+    startIdx: number;
+    startX: number;
+    startY: number;
+    fired: boolean;
+  } | null>(null);
+  const [highlightedIdx, setHighlightedIdx] = useState<number | null>(null);
 
-  const handleClick = (idx: number) => {
+  const getIdxAtPoint = useCallback((clientX: number, clientY: number) => {
+    if (!boardRef.current) return null;
+    const rect = boardRef.current.getBoundingClientRect();
+    const cellW = rect.width / 8;
+    const cellH = rect.height / 8;
+    const col = Math.floor((clientX - rect.left) / cellW);
+    const row = Math.floor((clientY - rect.top) / cellH);
+    if (row < 0 || row >= 8 || col < 0 || col >= 8) return null;
+    return row * 8 + col;
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!onSwap || mini) return;
-    if (selected === null) {
-      setSelected(idx);
+    e.preventDefault();
+    (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+    const idx = getIdxAtPoint(e.clientX, e.clientY);
+    if (idx === null) return;
+    swipeRef.current = { startIdx: idx, startX: e.clientX, startY: e.clientY, fired: false };
+    setHighlightedIdx(idx);
+  }, [onSwap, mini, getIdxAtPoint]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!swipeRef.current || swipeRef.current.fired) return;
+    const dx = e.clientX - swipeRef.current.startX;
+    const dy = e.clientY - swipeRef.current.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 14) return;
+    const startIdx = swipeRef.current.startIdx;
+    const startRow = Math.floor(startIdx / 8);
+    const startCol = startIdx % 8;
+    const horizontal = Math.abs(dx) >= Math.abs(dy);
+    let toRow = startRow;
+    let toCol = startCol;
+    if (horizontal) { toCol = dx > 0 ? startCol + 1 : startCol - 1; }
+    else             { toRow = dy > 0 ? startRow + 1 : startRow - 1; }
+    if (toRow < 0 || toRow >= 8 || toCol < 0 || toCol >= 8) {
+      swipeRef.current = null;
+      setHighlightedIdx(null);
       return;
     }
-    if (selected === idx) {
-      setSelected(null);
-      return;
-    }
-    onSwap(selected, idx);
-    setSelected(null);
-  };
+    swipeRef.current.fired = true;
+    setHighlightedIdx(null);
+    onSwap!(startIdx, toRow * 8 + toCol);
+    swipeRef.current = null;
+  }, [onSwap]);
+
+  const handlePointerUp = useCallback(() => {
+    swipeRef.current = null;
+    setHighlightedIdx(null);
+  }, []);
 
   if (!tiles.length) return null;
 
+  if (mini) {
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(8, 20px)',
+        gap: 1,
+        background: '#111',
+      }}>
+        {tiles.map((gem, idx) => (
+          <div key={idx} style={{
+            width: 20, height: 20,
+            borderRadius: 3,
+            background: gem === -1 ? '#1f2937' : (GEM_COLORS[gem] ?? '#333'),
+            opacity: gem === -1 ? 0.2 : 1,
+          }} />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(8, ${size}px)`,
-      gap: mini ? 1 : 2,
-      background: mini ? '#111' : '#0d1b2a',
-      padding: mini ? 0 : 4,
-      borderRadius: mini ? 0 : 8,
-      border: mini ? 'none' : '1px solid #1e4d78',
-    }}>
+    <div
+      ref={boardRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(8, 1fr)',
+        gridTemplateRows: 'repeat(8, 1fr)',
+        gap: 2,
+        background: '#0d1b2a',
+        padding: 4,
+        borderRadius: 8,
+        border: '1px solid #1e4d78',
+        touchAction: 'none',
+        userSelect: 'none',
+        cursor: 'grab',
+        boxSizing: 'border-box',
+      }}
+    >
       {tiles.map((gem, idx) => {
-        const isSelected = selected === idx;
+        const isHighlighted = highlightedIdx === idx;
         const isEmpty = gem === -1;
         return (
           <div
             key={idx}
-            onClick={() => handleClick(idx)}
             style={{
-              width: size,
-              height: size,
-              borderRadius: mini ? 3 : 6,
+              borderRadius: 6,
               background: isEmpty ? '#1f2937' : (GEM_COLORS[gem] ?? '#333'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: mini ? 8 : 18,
+              fontSize: 'clamp(12px, 2.5vw, 18px)',
               userSelect: 'none',
-              cursor: onSwap && !mini ? 'pointer' : 'default',
-              border: isSelected ? '2px solid #fff' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: isSelected
+              border: isHighlighted ? '2px solid #fff' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: isHighlighted
                 ? '0 0 8px rgba(255,255,255,0.5)'
                 : isEmpty ? 'none' : `0 2px 6px ${GEM_COLORS[gem] ?? '#000'}44`,
-              transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+              transform: isHighlighted ? 'scale(1.1)' : 'scale(1)',
               transition: 'transform 0.12s, border 0.12s, box-shadow 0.12s',
               opacity: isEmpty ? 0.2 : 1,
+              pointerEvents: 'none',
             }}
           >
-            {!mini && !isEmpty && GEM_LABELS[gem]}
+            {!isEmpty && GEM_LABELS[gem]}
           </div>
         );
       })}
@@ -914,6 +988,7 @@ export default function PvpTestScreen() {
             background: 'linear-gradient(180deg,#0a1a0a 0%,#0d1a0d 40%,#0a1205 100%)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
+            paddingTop: 'env(safe-area-inset-top)',
           }}>
             {/* ── TOP: Opponent name + HP bar ── */}
             <div style={{
@@ -1000,11 +1075,11 @@ export default function PvpTestScreen() {
 
             {/* ── BOARD — wood-frame, fills remaining space ── */}
             <div style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: '2px 8px', overflow: 'hidden',
             }}>
               <div style={{
-                width: '100%', maxWidth: 380,
+                width: '100%', aspectRatio: '1 / 1', maxHeight: '100%',
                 borderRadius: 14, padding: 6,
                 background: '#1a2e0a',
                 boxShadow: `
@@ -1074,7 +1149,8 @@ export default function PvpTestScreen() {
 
             {/* ── BOTTOM: Emoji bar + leave ── */}
             <div style={{
-              padding: '6px 10px 10px',
+              padding: '6px 10px',
+              paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
               background: 'rgba(40,22,5,0.75)',
               borderTop: '2px solid #4a2d08',
               flexShrink: 0,
