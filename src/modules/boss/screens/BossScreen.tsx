@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import BottomNav from '@/shared/components/BottomNav';
 import BossList from '../components/BossList';
 import BossFightM3 from '../components/BossFightM3';
 import { BossInfo } from '../data/bosses';
@@ -15,7 +14,6 @@ export default function BossScreen() {
   return (
     <>
       <BossList onSelect={setSelectedBoss} />
-      <BottomNav />
-    </>
+          </>
   );
 }

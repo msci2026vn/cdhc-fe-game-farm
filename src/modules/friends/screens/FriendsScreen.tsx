@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import BottomNav from '@/shared/components/BottomNav';
 import { useFriends, useFriendRequests, useUnfriend } from '@/shared/hooks/useSocial';
 import InviteFriends from '@/modules/friends/components/InviteFriends';
 import Leaderboard from '@/modules/friends/components/Leaderboard';
@@ -237,7 +236,6 @@ export default function FriendsScreen() {
 
       <InviteFriends open={showInvite} onClose={() => setShowInvite(false)} />
       <Leaderboard open={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
-      <BottomNav />
-    </div>
+          </div>
   );
 }

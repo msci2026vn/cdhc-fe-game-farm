@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMyBids, useMyListings } from '../hooks/useAuction';
 import { AuctionNftCard } from '../components/AuctionNftCard';
-import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
 type TabKey = 'bids' | 'listings';
@@ -106,7 +105,7 @@ export default function AuctionHistoryScreen() {
         )}
       </div>
 
-      <div className="z-50 shrink-0"><BottomNav /></div>
+      <div className="z-50 shrink-0"></div>
     </div>
   );
 }

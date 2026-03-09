@@ -1,7 +1,6 @@
 import { useInventory } from '@/shared/hooks/useInventory';
 import { useSellInventory, useSellAllInventory } from '@/shared/hooks/useSellInventory';
 import { useOgn } from '@/shared/hooks/usePlayerProfile';
-import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
 import { playSound } from '@/shared/audio';
 
@@ -164,8 +163,7 @@ export default function InventoryScreen() {
         </div>
       )}
 
-      <BottomNav />
-      <Toast />
+            <Toast />
     </div>
   );
 }

@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuctionList, useNextSession, useCancelQueueItem, useMyQueue } from '../hooks/useAuction';
 import { AuctionCountdown } from '../components/AuctionCountdown';
 import { AuctionNftCard } from '../components/AuctionNftCard';
-import BottomNav from '@/shared/components/BottomNav';
 import { ConfirmModal } from '@/shared/components/ConfirmModal';
 import type { AuctionQueueItem } from '../types/auction.types';
 type SubTab = 'spotlight' | 'side';
@@ -205,7 +204,7 @@ export default function AuctionLobbyScreen() {
         )}
       </div>
 
-      <div className="z-50 shrink-0"><BottomNav /></div>
+      <div className="z-50 shrink-0"></div>
 
       <ConfirmModal
         isOpen={!!cancelTarget}

@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import meThienNhienImg from '@/assets/pray/me-thien-nhien.png';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import { usePrayerStatus } from '../hooks/usePrayerStatus';

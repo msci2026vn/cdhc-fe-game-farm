@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '@/shared/components/BottomNav';
 import Toast from '@/shared/components/Toast';
 import PointsFlyUp from '@/shared/components/PointsFlyUp';
 import { useShopItems } from '@/shared/hooks/useShopItems';
@@ -276,8 +275,7 @@ export default function ShopScreen() {
         </div>
       )}
 
-      <BottomNav />
-      <Toast />
+            <Toast />
       <PointsFlyUp />
     </div>
   );

@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { marketplaceApi, type MarketplaceListing } from '@/shared/api/api-marketplace';
 import MyTransactionList from '@/modules/marketplace/components/MyTransactionList';
-import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 
 type Tab = 'browse' | 'my-listings' | 'history';
@@ -567,7 +566,7 @@ export default function MarketplaceScreen() {
         {activeTab === 'history' && <MyTransactionList />}
       </div>
 
-      <div className="z-50 shrink-0"><BottomNav /></div>
+      <div className="z-50 shrink-0"></div>
 
       {selected && (
         <ListingDetailModal listing={selected} currentUserId={currentUserId}

@@ -5,7 +5,6 @@ import { nftApi, type NftCard } from '@/shared/api/api-nft';
 import { marketplaceApi } from '@/shared/api/api-marketplace';
 import { CreateAuctionModal } from '@/modules/auction/components/CreateAuctionModal';
 import { useMyQueue } from '@/modules/auction/hooks/useAuction';
-import BottomNav from '@/shared/components/BottomNav';
 import { playSound } from '@/shared/audio';
 import type { AuctionQueueItem } from '@/modules/auction/types/auction.types';
 
@@ -631,7 +630,7 @@ export default function NftGalleryScreen() {
         )}
       </main>
 
-      <div className="z-50 shrink-0"><BottomNav /></div>
+      <div className="z-50 shrink-0"></div>
 
       {selected && (
         <CardDetail

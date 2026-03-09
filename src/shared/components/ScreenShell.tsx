@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import Header from './Header';
-import BottomNav from './BottomNav';
 import Toast from './Toast';
 import PointsFlyUp from './PointsFlyUp';
 
@@ -18,8 +17,7 @@ export default function ScreenShell({ children, hideHeader, hideNav, className =
       <main className="flex-1 min-h-0 overflow-y-auto pb-24">
         {children}
       </main>
-      {!hideNav && <BottomNav />}
-      <Toast />
+            <Toast />
       <PointsFlyUp />
     </div>
   );
