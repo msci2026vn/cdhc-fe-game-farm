@@ -650,7 +650,11 @@ export default function PvpTestScreen() {
     try {
       const token = await fetchPvpToken();
       addLog('Đang tạo phòng...');
-      const r = await clientRef.current.create('pvp_room', { token });
+      // Use REST API to create room (registers pvp:open_room in Redis for invite links)
+      const openRoom = await pvpApi.createOpenRoom();
+      if (!openRoom.ok) throw new Error('Failed to create room');
+      addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
+      const r = await clientRef.current.joinById(openRoom.roomId, { token });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -878,14 +882,15 @@ export default function PvpTestScreen() {
       {/* Combo flash */}
       {comboText && (
         <div style={{
-          position: 'fixed', top: '30%', left: '50%',
+          position: 'fixed', top: '15%', left: '50%',
           transform: 'translateX(-50%)',
           background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-          color: '#fff', padding: '12px 28px',
-          borderRadius: 14, fontSize: 24, fontWeight: 900, zIndex: 100,
+          color: '#fff', padding: '6px 16px',
+          borderRadius: 10, fontSize: 16, fontWeight: 900, zIndex: 100,
           animation: 'comboFlash 1.5s ease-out forwards',
-          textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.4)',
           pointerEvents: 'none',
+          whiteSpace: 'nowrap',
         }}>
           {comboText}
         </div>
@@ -909,15 +914,16 @@ export default function PvpTestScreen() {
       {/* Junk alert */}
       {junkAlert && (
         <div style={{
-          position: 'fixed', top: '40%', left: '50%',
+          position: 'fixed', top: '22%', left: '50%',
           transform: 'translateX(-50%)',
           background: 'linear-gradient(135deg, #6b7280, #374151)',
-          color: '#fbbf24', padding: '10px 24px',
-          borderRadius: 12, fontSize: 20, fontWeight: 900, zIndex: 101,
+          color: '#fbbf24', padding: '6px 16px',
+          borderRadius: 10, fontSize: 15, fontWeight: 900, zIndex: 101,
           animation: 'comboFlash 1.5s ease-out forwards',
-          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
           pointerEvents: 'none',
-          border: '2px solid #ef4444',
+          border: '1.5px solid #ef4444',
+          whiteSpace: 'nowrap',
         }}>
           {junkAlert}
         </div>
@@ -1089,29 +1095,30 @@ export default function PvpTestScreen() {
               </div>
             </div>
 
-            {/* ── MY SECTION ── */}
-            <div className="pvp-my">
-              <div className="pvp-my__avatar">🧝</div>
-              <div className="pvp-my__stats">
-                <div className="pvp-my__top-row">
-                  <span className="pvp-my__name">{myPlayer?.name ?? t('game.you')}</span>
-                  <span className="pvp-my__score">{myScore.toLocaleString()}</span>
-                </div>
-                <div className={`pvp-bar pvp-bar--hp${myHp < myMaxHp * 0.3 ? ' pvp-bar--low' : ''}`}>
-                  <div className="pvp-bar__fill" style={{ width: `${Math.max(0, (myHp / myMaxHp) * 100)}%` }} />
-                  <span className="pvp-bar__label">❤️ HP</span>
-                  <span className="pvp-bar__val">{myHp}/{myMaxHp}{myArmor > 0 ? ` 🛡️${myArmor}` : ''}</span>
-                </div>
-                <div className="pvp-bar pvp-bar--mp">
-                  <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / 200) * 100)}%` }} />
-                  <span className="pvp-bar__label">⭐ Mana</span>
-                  <span className="pvp-bar__val">{myMana}/200</span>
+            {/* ── BOARD SECTION ── */}
+            <div className="pvp-board-section">
+              {/* ── MY SECTION ── */}
+              <div className="pvp-my">
+                <div className="pvp-my__avatar">🧝</div>
+                <div className="pvp-my__stats">
+                  <div className="pvp-my__top-row">
+                    <span className="pvp-my__name">{myPlayer?.name ?? t('game.you')}</span>
+                    <span className="pvp-my__score">{myScore.toLocaleString()}</span>
+                  </div>
+                  <div className={`pvp-bar pvp-bar--hp${myHp < myMaxHp * 0.3 ? ' pvp-bar--low' : ''}`}>
+                    <div className="pvp-bar__fill" style={{ width: `${Math.max(0, (myHp / myMaxHp) * 100)}%` }} />
+                    <span className="pvp-bar__label">❤️ HP</span>
+                    <span className="pvp-bar__val">{myHp}/{myMaxHp}{myArmor > 0 ? ` 🛡️${myArmor}` : ''}</span>
+                  </div>
+                  <div className="pvp-bar pvp-bar--mp">
+                    <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / 200) * 100)}%` }} />
+                    <span className="pvp-bar__label">⭐ Mana</span>
+                    <span className="pvp-bar__val">{myMana}/200</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* ── BOARD — wood frame + vine corners ── */}
-            <div className="pvp-board-section">
+              {/* ── BOARD — wood frame + vine corners ── */}
               <div className={[
                 'pvp-board-wrap',
                 damageFlash && 'pvp-board-wrap--damage',
