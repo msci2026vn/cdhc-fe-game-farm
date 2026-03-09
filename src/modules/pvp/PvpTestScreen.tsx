@@ -8,6 +8,7 @@ import { pvpApi } from '@/shared/api/api-pvp';
 import type { PvpRating } from '@/shared/api/api-pvp';
 import PostGameScreen from './PostGameScreen';
 import type { ClientMvpStats, H2HData } from './PostGameScreen';
+import './pvp-battle.css';
 
 const WS_URL = import.meta.env.DEV
   ? 'ws://localhost:3001'
@@ -67,22 +68,15 @@ function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
 
   if (!tiles.length) return null;
 
-  // Mini board remains DOM — it's tiny, no perf concern
+  // Mini board — compact 80px grid matching mockup
   if (mini) {
     return (
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(8, 20px)',
-        gap: 1,
-        background: '#111',
-      }}>
+      <div className="pvp-mini-board">
         {tiles.map((gem, idx) => (
-          <div key={idx} style={{
-            width: 20, height: 20,
-            borderRadius: 3,
-            background: gem === -1 ? '#1f2937' : (GEM_COLORS[gem] ?? '#333'),
-            opacity: gem === -1 ? 0.2 : 1,
-          }} />
+          <div
+            key={idx}
+            className={`pvp-mini-gem ${gem === -1 ? 'pvp-mini-gem--empty' : `pvp-mini-gem--${gem}`}`}
+          />
         ))}
       </div>
     );
@@ -893,217 +887,109 @@ export default function PvpTestScreen() {
           </div>
         )}
 
-        {/* ── BOARD VIEW — campaign-style full-screen layout ── */}
+        {/* ── BOARD VIEW — wood & forest theme matching mockup ── */}
         {inRoom && showBoard && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 10,
-            background: 'linear-gradient(180deg,#0a1a0a 0%,#0d1a0d 40%,#0a1205 100%)',
-            display: 'flex', flexDirection: 'column',
-            overflow: 'hidden',
-            paddingTop: 'env(safe-area-inset-top)',
-          }}>
-            {/* ── TOP: Opponent name + HP bar ── */}
-            <div style={{
-              padding: '10px 16px 6px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-              background: 'rgba(0,0,0,0.35)',
-              flexShrink: 0,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 800, color: '#f0ece4', letterSpacing: '0.02em' }}>
-                  {opponentPlayer?.name ?? t('game.opponent')}
-                </span>
-                <span style={{
-                  fontSize: 13, fontWeight: 700,
-                  color: opponentScore > myScore ? '#fbbf24' : '#94a3b8',
-                }}>
-                  {opponentScore.toLocaleString()}
-                </span>
-              </div>
-              {/* Opponent HP bar — thick */}
-              <div style={{
-                width: '78%', height: 20,
-                background: 'rgba(0,0,0,0.55)',
-                borderRadius: 10,
-                border: `2px solid ${opponentHp < opponentMaxHp * 0.3 ? 'rgba(239,68,68,0.5)' : 'rgba(74,222,128,0.35)'}`,
-                overflow: 'hidden', position: 'relative',
-              }}>
-                <div style={{
-                  width: `${Math.max(0, (opponentHp / opponentMaxHp) * 100)}%`,
-                  height: '100%',
-                  background: opponentHp < opponentMaxHp * 0.3
-                    ? 'linear-gradient(90deg,#dc2626,#f87171)'
-                    : 'linear-gradient(90deg,#16a34a,#4ade80,#86efac)',
-                  transition: 'width 0.3s ease',
-                  boxShadow: '0 0 8px rgba(74,222,128,0.4)',
-                }} />
-                <span style={{
-                  position: 'absolute', inset: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 700, color: '#fff',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-                }}>
-                  {opponentHp}/{opponentMaxHp}{opponentArmor > 0 ? ` 🛡️${opponentArmor}` : ''}
-                </span>
-              </div>
-            </div>
+          <div className="pvp-battle">
+            <div className="pvp-battle__bg" />
+            {/* Fireflies */}
+            <div className="pvp-firefly" style={{ left: '12%', top: '20%', '--tx': '50px', '--ty': '-70px', animationDuration: '5s' } as React.CSSProperties} />
+            <div className="pvp-firefly" style={{ left: '72%', top: '12%', background: '#ffe', boxShadow: '0 0 5px 2px rgba(255,255,200,.8)', '--tx': '-35px', '--ty': '55px', animationDuration: '6s', animationDelay: '1.2s' } as React.CSSProperties} />
+            <div className="pvp-firefly" style={{ left: '88%', top: '38%', '--tx': '-55px', '--ty': '-40px', animationDuration: '7s', animationDelay: '2.5s' } as React.CSSProperties} />
+            <div className="pvp-firefly" style={{ left: '28%', top: '65%', background: '#faf', boxShadow: '0 0 5px 2px rgba(255,200,255,.7)', '--tx': '25px', '--ty': '-85px', animationDuration: '4.5s', animationDelay: '0.7s' } as React.CSSProperties} />
 
-            {/* ── AVATAR ROW: me (left) + opp (right) ── */}
-            <div style={{
-              padding: '4px 14px',
-              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-              flexShrink: 0,
-            }}>
-              {/* My avatar + HP/MP bars */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flex: 1 }}>
-                <div style={{
-                  width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
-                  border: '3px solid #854d0e',
-                  boxShadow: '0 0 0 2px #a16207, 0 4px 10px rgba(0,0,0,0.6)',
-                  background: '#1a2e1a',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
-                }}>
-                  👤
+            {/* Floating emojis from opponent taunts */}
+            {floatingEmojis.map(({ id, emoji }) => (
+              <div key={id} className="pvp-float-emoji">{emoji}</div>
+            ))}
+
+            {/* ── TOP: Opponent avatar + info + mini board ── */}
+            <div className="pvp-top">
+              <div className="pvp-top__avatar">👹</div>
+              <div className="pvp-top__info">
+                <div className="pvp-top__name-row">
+                  <span className="pvp-top__name">{opponentPlayer?.name ?? t('game.opponent')}</span>
+                  <span className="pvp-top__score">{opponentScore.toLocaleString()}</span>
                 </div>
-                <div style={{ flex: 1, maxWidth: 140 }}>
-                  <div style={{ fontSize: 11, color: '#f59e0b', fontWeight: 700, marginBottom: 3 }}>
-                    {myPlayer?.name ?? t('game.you')} · <span style={{ color: myScore > opponentScore ? '#4ade80' : '#94a3b8' }}>{myScore.toLocaleString()}</span>
-                  </div>
-                  <HpBar current={myHp} max={myMaxHp} armor={myArmor} label="HP" />
-                  <ManaBar current={myMana} max={200} />
+                <div className={`pvp-hp${opponentHp < opponentMaxHp * 0.3 ? ' pvp-hp--danger' : ''}`}>
+                  <div
+                    className={`pvp-hp__fill${opponentHp < opponentMaxHp * 0.3 ? ' pvp-hp__fill--danger' : ''}`}
+                    style={{ width: `${Math.max(0, (opponentHp / opponentMaxHp) * 100)}%` }}
+                  />
+                  <span className="pvp-hp__text">
+                    {opponentHp}/{opponentMaxHp}{opponentArmor > 0 ? ` 🛡️${opponentArmor}` : ''}
+                  </span>
                 </div>
               </div>
-              {/* Opponent avatar — bigger */}
-              <div style={{
-                width: 68, height: 68, borderRadius: '50%', flexShrink: 0,
-                border: '3px solid #7f1d1d',
-                boxShadow: '0 0 0 2px #991b1b, 0 4px 14px rgba(0,0,0,0.7)',
-                background: '#2e1a1a',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
-              }}>
-                👹
-              </div>
-            </div>
-
-            {/* ── BOARD — wood-frame, fills remaining space ── */}
-            <div style={{
-              flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '2px 8px', overflow: 'hidden',
-            }}>
-              <div style={{
-                width: '100%', aspectRatio: '1 / 1', maxHeight: '100%',
-                borderRadius: 14, padding: 6,
-                background: '#1a2e0a',
-                boxShadow: `
-                  0 0 0 3px #3d2b0a,
-                  0 0 0 6px #5c3d0a,
-                  0 0 0 8px #3d2b0a,
-                  0 8px 32px rgba(0,0,0,0.7)
-                `,
-                position: 'relative',
-                border: damageFlash ? '2px solid #ef4444'
-                  : isDangerZone ? '2px solid #f87171'
-                  : '2px solid transparent',
-                transition: 'border 0.1s',
-                animation: activeDebuff?.type === 'shake'
-                  ? 'boardShake 0.4s ease-in-out 5'
-                  : isDangerZone
-                  ? 'dangerPulse 0.8s ease-in-out infinite'
-                  : 'none',
-              }}>
-                <GameBoard tiles={myBoard} onSwap={handleSwap} />
-                {/* Freeze overlay */}
-                {activeDebuff?.type === 'freeze' && (
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'rgba(147,210,255,0.18)',
-                    backdropFilter: 'blur(1px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 48, borderRadius: 14,
-                    pointerEvents: 'none', zIndex: 5,
-                  }}>❄️</div>
-                )}
-              </div>
-            </div>
-
-            {/* ── TIMER + mini opponent board ── */}
-            <div style={{
-              padding: '2px 14px 4px',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              flexShrink: 0,
-            }}>
-              {/* Mini opponent board */}
-              <div>
-                <div style={{ fontSize: 9, color: '#4a5568', marginBottom: 2 }}>{t('game.opponentBoard')}</div>
+              <div className="pvp-mini-wrap">
+                <span className="pvp-mini-wrap__label">{t('game.opponentBoard')}</span>
                 <GameBoard tiles={opponentBoard} mini />
               </div>
-              {/* Timer */}
-              <div style={{ textAlign: 'right' }}>
-                <span style={{
-                  fontSize: timeLeft <= 10 ? 24 : 18, fontWeight: 900,
-                  color: timeLeft <= 10 ? '#f87171' : isSuddenDeath ? '#a855f7' : '#86efac',
-                  padding: '3px 12px',
-                  background: 'rgba(0,0,0,0.45)',
-                  borderRadius: 20,
-                  border: `1px solid ${timeLeft <= 10 ? 'rgba(248,113,113,0.45)' : 'rgba(74,222,128,0.25)'}`,
-                  animation: timeLeft <= 10 ? 'pulse 1s infinite' : 'none',
-                  opacity: activeDebuff?.type === 'hide_timer' ? 0 : 1,
-                  transition: 'opacity 0.2s',
-                  display: 'inline-block',
-                }}>
-                  {isSuddenDeath ? `☠️ ${timeLeft}s` : `⏱ ${timeLeft}s`}
-                </span>
-                {isSuddenDeath && (
-                  <div style={{ fontSize: 9, color: '#a855f7', fontWeight: 700, marginTop: 2 }}>SUDDEN DEATH</div>
+            </div>
+
+            {/* ── MY SECTION ── */}
+            <div className="pvp-my">
+              <div className="pvp-my__avatar">🧝</div>
+              <div className="pvp-my__stats">
+                <div className="pvp-my__top-row">
+                  <span className="pvp-my__name">{myPlayer?.name ?? t('game.you')}</span>
+                  <span className="pvp-my__score">{myScore.toLocaleString()}</span>
+                </div>
+                <div className={`pvp-bar pvp-bar--hp${myHp < myMaxHp * 0.3 ? ' pvp-bar--low' : ''}`}>
+                  <div className="pvp-bar__fill" style={{ width: `${Math.max(0, (myHp / myMaxHp) * 100)}%` }} />
+                  <span className="pvp-bar__label">❤️ HP</span>
+                  <span className="pvp-bar__val">{myHp}/{myMaxHp}{myArmor > 0 ? ` 🛡️${myArmor}` : ''}</span>
+                </div>
+                <div className="pvp-bar pvp-bar--mp">
+                  <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / 200) * 100)}%` }} />
+                  <span className="pvp-bar__label">⭐ Mana</span>
+                  <span className="pvp-bar__val">{myMana}/200</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ── BOARD — wood frame + vine corners ── */}
+            <div className="pvp-board-section">
+              <div className={[
+                'pvp-board-wrap',
+                damageFlash && 'pvp-board-wrap--damage',
+                activeDebuff?.type === 'shake' && 'pvp-board-wrap--shake',
+                isDangerZone && !damageFlash && 'pvp-board-wrap--danger',
+              ].filter(Boolean).join(' ')}>
+                <span className="pvp-vine pvp-vine--tl">🌿</span>
+                <span className="pvp-vine pvp-vine--tr">🍃</span>
+                <span className="pvp-vine pvp-vine--bl">🌿</span>
+                <span className="pvp-vine pvp-vine--br">🍃</span>
+                <GameBoard tiles={myBoard} onSwap={handleSwap} />
+                {activeDebuff?.type === 'freeze' && (
+                  <div className="pvp-freeze">❄️</div>
                 )}
+              </div>
+              <div className="pvp-timer-row">
+                <div className={[
+                  'pvp-timer',
+                  timeLeft <= 10 && 'pvp-timer--urgent',
+                  isSuddenDeath && timeLeft > 10 && 'pvp-timer--sudden',
+                  activeDebuff?.type === 'hide_timer' && 'pvp-timer--hidden',
+                ].filter(Boolean).join(' ')}>
+                  {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
+                </div>
               </div>
             </div>
 
             {/* ── BOTTOM: Emoji bar + leave ── */}
-            <div style={{
-              padding: '6px 10px',
-              paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
-              background: 'rgba(40,22,5,0.75)',
-              borderTop: '2px solid #4a2d08',
-              flexShrink: 0,
-            }}>
-              <div style={{
-                display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-              }}>
-                {(['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
-                  <button
-                    key={emoji}
-                    onClick={() => sendTaunt(emoji)}
-                    disabled={emojiCooldown}
-                    style={{
-                      fontSize: 22, background: 'none', border: 'none',
-                      padding: '6px 4px', borderRadius: 8,
-                      cursor: emojiCooldown ? 'not-allowed' : 'pointer',
-                      opacity: emojiCooldown ? 0.3 : 1,
-                      touchAction: 'manipulation',
-                      WebkitTapHighlightColor: 'transparent',
-                    }}
-                    onMouseDown={e => { e.currentTarget.style.transform = 'scale(1.35)'; }}
-                    onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                  >
-                    {emoji}
-                  </button>
-                ))}
+            <div className="pvp-bottom">
+              {(['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
                 <button
-                  onClick={handleLeave}
-                  style={{
-                    padding: '6px 12px', background: 'transparent',
-                    border: '1px solid rgba(239,68,68,0.5)',
-                    color: '#f87171', borderRadius: 20,
-                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                    touchAction: 'manipulation',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
+                  key={emoji}
+                  className={`pvp-emoji-btn${emojiCooldown ? ' pvp-emoji-btn--disabled' : ''}`}
+                  onClick={() => sendTaunt(emoji)}
+                  disabled={emojiCooldown}
                 >
-                  🚪
+                  {emoji}
                 </button>
-              </div>
+              ))}
+              <div className="pvp-separator" />
+              <button className="pvp-leave-btn" onClick={handleLeave}>🚪</button>
             </div>
           </div>
         )}

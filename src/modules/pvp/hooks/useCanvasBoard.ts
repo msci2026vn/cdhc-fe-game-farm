@@ -71,6 +71,7 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
   const rafRef = useRef(0);
   const dprRef = useRef(1);
   const cellRef = useRef(44);          // cell size in CSS px
+  const rectRef = useRef<DOMRect | null>(null); // cached canvas rect
   const gemsRef = useRef<GemAnim[]>([]); // mutable gem states
   const dragRef = useRef<DragState | null>(null);
   const prevBoardRef = useRef<number[]>([]);
@@ -90,6 +91,7 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     canvas.width = Math.round(cssSize * dpr);
     canvas.height = Math.round(cssSize * dpr);
     cellRef.current = cssSize / 8;
+    rectRef.current = canvas.getBoundingClientRect();
     needsDrawRef.current = true;
   }, []);
 
@@ -290,11 +292,10 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     rafRef.current = requestAnimationFrame(render);
   }, [drawGem]);
 
-  // ── Pointer hit-test ──
+  // ── Pointer hit-test (uses cached rect — no getBoundingClientRect in hot path) ──
   const getHit = useCallback((clientX: number, clientY: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
+    const rect = rectRef.current;
+    if (!rect) return null;
     const cell = cellRef.current;
     const col = Math.floor((clientX - rect.left) / cell);
     const row = Math.floor((clientY - rect.top) / cell);
@@ -307,6 +308,8 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     if (disabled || !onSwap) return;
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    // Refresh cached rect on each new gesture (scroll/resize may have moved canvas)
+    if (canvasRef.current) rectRef.current = canvasRef.current.getBoundingClientRect();
     const hit = getHit(e.clientX, e.clientY);
     if (!hit) return;
     hapticLight();
@@ -329,32 +332,33 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     drag.offsetX = Math.max(-maxOff, Math.min(maxOff, dx));
     drag.offsetY = Math.max(-maxOff, Math.min(maxOff, dy));
 
-    if (Math.sqrt(dx * dx + dy * dy) > 10 && drag.targetIdx === null) {
+    // Fire swap immediately when threshold exceeded (8px² = 64) — no waiting for pointerup
+    if (dx * dx + dy * dy >= 64) {
       const horiz = Math.abs(dx) >= Math.abs(dy);
       let toRow = drag.row, toCol = drag.col;
       if (horiz) toCol = dx > 0 ? drag.col + 1 : drag.col - 1;
       else toRow = dy > 0 ? drag.row + 1 : drag.row - 1;
       if (toRow >= 0 && toRow < 8 && toCol >= 0 && toCol < 8) {
+        drag.fired = true;
         drag.targetIdx = toRow * 8 + toCol;
+        hapticMedium();
+        onSwap?.(drag.idx, drag.targetIdx);
+      } else {
+        dragRef.current = null;
       }
     }
     needsDrawRef.current = true;
-  }, []);
+  }, [onSwap]);
 
   const onPointerUp = useCallback(() => {
     const drag = dragRef.current;
     if (!drag) return;
-    if (drag.targetIdx !== null && !drag.fired && onSwap) {
-      drag.fired = true;
-      hapticMedium();
-      onSwap(drag.idx, drag.targetIdx);
-    }
-    // Snap back
+    // Snap back visual — swap already fired in pointermove
     drag.offsetX = 0;
     drag.offsetY = 0;
     needsDrawRef.current = true;
     setTimeout(() => { dragRef.current = null; needsDrawRef.current = true; }, 120);
-  }, [onSwap]);
+  }, []);
 
   // ── Lifecycle: setup canvas, events, RAF, resize observer ──
   useEffect(() => {
