@@ -3,6 +3,7 @@ import { registerSW } from 'virtual:pwa-register';
 
 export const useServiceWorker = () => {
   const [needRefresh, setNeedRefresh] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<((reloadPage?: boolean) => Promise<void>) | null>(null);
 
   useEffect(() => {
@@ -22,8 +23,12 @@ export const useServiceWorker = () => {
   }, [updateSW]);
 
   const dismissUpdate = useCallback(() => {
-    setNeedRefresh(false);
+    setDismissed(true);
   }, []);
 
-  return { needRefresh, updateServiceWorker, dismissUpdate };
+  const showUpdatePrompt = useCallback(() => {
+    setDismissed(false);
+  }, []);
+
+  return { needRefresh, dismissed, updateServiceWorker, dismissUpdate, showUpdatePrompt };
 };

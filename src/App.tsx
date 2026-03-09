@@ -166,15 +166,17 @@ const AuthenticatedApp = () => {
  * /* → PROTECTED (AuthGuard → then game hooks + routes)
  */
 const App = () => {
-  const { needRefresh, updateServiceWorker, dismissUpdate } = useServiceWorker();
+  const { needRefresh, dismissed, updateServiceWorker, dismissUpdate, showUpdatePrompt } = useServiceWorker();
 
   return (
     <ErrorBoundary>
       <AppDisplayPrompt />
       <UpdatePopup
         visible={needRefresh}
+        dismissed={dismissed}
         onUpdate={updateServiceWorker}
         onDismiss={dismissUpdate}
+        onShow={showUpdatePrompt}
       />
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
