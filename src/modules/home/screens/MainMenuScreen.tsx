@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNav } from '@/shared/hooks/useNav';
 import { usePlayerProfile } from '@/shared/hooks/usePlayerProfile';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useBossStatus } from '@/shared/hooks/useBossStatus';
 import { playSound, audioManager } from '@/shared/audio';
 import { SoundToggle } from '@/shared/audio';
@@ -27,6 +28,8 @@ export default function MainMenuScreen() {
   const { t } = useTranslation();
   const navigate = useNav();
   const { data: profile } = usePlayerProfile();
+  const { data: auth } = useAuth();
+  const user = auth?.user;
   useBossStatus();
 
   useEffect(() => {
@@ -35,9 +38,9 @@ export default function MainMenuScreen() {
     return () => { audioManager.stopBgm(); };
   }, []);
 
-  const avatar = profile?.picture ?? '/assets/home/ava.png';
+  const avatar = user?.picture || (user as any)?.avatar || (user as any)?.avatarUrl || profile?.picture || (profile as any)?.avatar || (profile as any)?.avatarUrl || '/assets/home/ava.png';
   const level = profile?.level ?? 1;
-  const name = profile?.name ?? t('menu.farmer_title');
+  const name = user?.name || (user as any)?.fullName || profile?.name || (profile as any)?.fullName || t('menu.farmer_title');
   const ogn = profile?.ogn ?? 0;
 
   const miniCards = [
