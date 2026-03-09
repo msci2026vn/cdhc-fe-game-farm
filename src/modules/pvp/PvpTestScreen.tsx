@@ -265,9 +265,9 @@ export default function PvpTestScreen() {
   const [matchId, setMatchId] = useState<string | null>(null);
   const [proofData, setProofData] = useState<{
     merkleRoot: string | null;
-    ipfsHash:   string | null;
-    txHash:     string | null;
-    moveCount:  number | null;
+    ipfsHash: string | null;
+    txHash: string | null;
+    moveCount: number | null;
   }>({ merkleRoot: null, ipfsHash: null, txHash: null, moveCount: null });
   const proofPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -289,6 +289,18 @@ export default function PvpTestScreen() {
   useEffect(() => {
     return () => { if (proofPollRef.current) clearInterval(proofPollRef.current); };
   }, []);
+
+  // ── Local Timer Tick for Smooth Countdown ──
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (roomState?.phase === 'waiting' || roomState?.phase === 'ready') {
+        setLobbyTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      } else if (roomState?.phase === 'playing' || roomState?.phase === 'sudden_death') {
+        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [roomState?.phase]);
 
   // ── Swap handler ──
   const handleSwap = useCallback((from: number, to: number) => {
@@ -385,7 +397,7 @@ export default function PvpTestScreen() {
       setH2hData(null);
       setRematchState('idle');
       // Capture rating before game
-      pvpApi.getRating().then(r => setRatingBefore(r.rating)).catch(() => {});
+      pvpApi.getRating().then(r => setRatingBefore(r.rating)).catch(() => { });
       addLog('Board nhận thành công → Game bắt đầu!');
     });
 
@@ -472,7 +484,7 @@ export default function PvpTestScreen() {
       // Fetch post-game data
       const oppPlayer = data.players.find(p => p.userId !== myUserIdRef.current);
       if (oppPlayer?.userId) {
-        pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => {});
+        pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => { });
         pvpApi.getHeadToHead(oppPlayer.userId).then(res => {
           const s = res.stats as Record<string, string> | null;
           if (s) {
@@ -483,9 +495,9 @@ export default function PvpTestScreen() {
               draws: Number(s.draws ?? 0),
             });
           }
-        }).catch(() => {});
+        }).catch(() => { });
       } else {
-        pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => {});
+        pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => { });
       }
     });
 
@@ -501,9 +513,9 @@ export default function PvpTestScreen() {
           if (json.txHash) {
             setProofData({
               merkleRoot: json.merkleRoot ?? null,
-              ipfsHash:   json.ipfsHash ?? null,
-              txHash:     json.txHash,
-              moveCount:  json.moveCount ?? null,
+              ipfsHash: json.ipfsHash ?? null,
+              txHash: json.txHash,
+              moveCount: json.moveCount ?? null,
             });
             if (proofPollRef.current) clearInterval(proofPollRef.current);
           }
@@ -801,7 +813,7 @@ export default function PvpTestScreen() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlRoomCode]);
 
   // ── Auto-join khi có invite token trên URL ──
@@ -826,7 +838,7 @@ export default function PvpTestScreen() {
       }
     };
     void handleInviteToken(inviteToken);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Derived state ──
