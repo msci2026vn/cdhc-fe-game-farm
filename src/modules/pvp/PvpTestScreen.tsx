@@ -56,65 +56,107 @@ interface GameBoardProps {
   onSwap?: (from: number, to: number) => void;
 }
 
-function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
-  const boardRef = useRef<HTMLDivElement>(null);
-  const swipeRef = useRef<{
-    startIdx: number;
-    startX: number;
-    startY: number;
-    fired: boolean;
-  } | null>(null);
-  const [highlightedIdx, setHighlightedIdx] = useState<number | null>(null);
+interface DragState {
+  idx: number;
+  row: number;
+  col: number;
+  startX: number;
+  startY: number;
+  offsetX: number;
+  offsetY: number;
+  targetIdx: number | null;
+  fired: boolean;
+}
 
-  const getIdxAtPoint = useCallback((clientX: number, clientY: number) => {
+function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
+  const boardRef    = useRef<HTMLDivElement>(null);
+  const dragRef     = useRef<DragState | null>(null);
+  const cellSizeRef = useRef<number>(0);
+  const rafRef      = useRef<number>(0);
+  const [dragState, setDragState] = useState<DragState | null>(null);
+
+  const getCellSize = useCallback(() => {
+    if (!boardRef.current) return 44;
+    if (cellSizeRef.current) return cellSizeRef.current;
+    cellSizeRef.current = boardRef.current.getBoundingClientRect().width / 8;
+    return cellSizeRef.current;
+  }, []);
+
+  const getHitAtPoint = useCallback((clientX: number, clientY: number) => {
     if (!boardRef.current) return null;
     const rect = boardRef.current.getBoundingClientRect();
-    const cellW = rect.width / 8;
-    const cellH = rect.height / 8;
-    const col = Math.floor((clientX - rect.left) / cellW);
-    const row = Math.floor((clientY - rect.top) / cellH);
+    const size = getCellSize();
+    const col  = Math.floor((clientX - rect.left) / size);
+    const row  = Math.floor((clientY - rect.top)  / size);
     if (row < 0 || row >= 8 || col < 0 || col >= 8) return null;
-    return row * 8 + col;
-  }, []);
+    return { row, col, idx: row * 8 + col };
+  }, [getCellSize]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!onSwap || mini) return;
     e.preventDefault();
     (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
-    const idx = getIdxAtPoint(e.clientX, e.clientY);
-    if (idx === null) return;
-    swipeRef.current = { startIdx: idx, startX: e.clientX, startY: e.clientY, fired: false };
-    setHighlightedIdx(idx);
-  }, [onSwap, mini, getIdxAtPoint]);
+    cellSizeRef.current = 0; // invalidate cache on new gesture
+    const hit = getHitAtPoint(e.clientX, e.clientY);
+    if (!hit) return;
+    // Haptic: light selection feedback
+    navigator.vibrate?.(6);
+    (window as unknown as { Telegram?: { WebApp?: { HapticFeedback?: { selectionChanged?: () => void } } } })
+      .Telegram?.WebApp?.HapticFeedback?.selectionChanged?.();
+    const state: DragState = {
+      idx: hit.idx, row: hit.row, col: hit.col,
+      startX: e.clientX, startY: e.clientY,
+      offsetX: 0, offsetY: 0,
+      targetIdx: null, fired: false,
+    };
+    dragRef.current = state;
+    setDragState({ ...state });
+  }, [onSwap, mini, getHitAtPoint]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!swipeRef.current || swipeRef.current.fired) return;
-    const dx = e.clientX - swipeRef.current.startX;
-    const dy = e.clientY - swipeRef.current.startY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 14) return;
-    const startIdx = swipeRef.current.startIdx;
-    const startRow = Math.floor(startIdx / 8);
-    const startCol = startIdx % 8;
-    const horizontal = Math.abs(dx) >= Math.abs(dy);
-    let toRow = startRow;
-    let toCol = startCol;
-    if (horizontal) { toCol = dx > 0 ? startCol + 1 : startCol - 1; }
-    else             { toRow = dy > 0 ? startRow + 1 : startRow - 1; }
-    if (toRow < 0 || toRow >= 8 || toCol < 0 || toCol >= 8) {
-      swipeRef.current = null;
-      setHighlightedIdx(null);
-      return;
+    const drag = dragRef.current;
+    if (!drag || drag.fired) return;
+    const dx       = e.clientX - drag.startX;
+    const dy       = e.clientY - drag.startY;
+    const cellSize = getCellSize();
+    const maxOff   = cellSize * 0.85;
+    const offsetX  = Math.max(-maxOff, Math.min(maxOff, dx));
+    const offsetY  = Math.max(-maxOff, Math.min(maxOff, dy));
+    let { targetIdx } = drag;
+    if (Math.sqrt(dx * dx + dy * dy) > 10 && targetIdx === null) {
+      const horizontal = Math.abs(dx) >= Math.abs(dy);
+      let toRow = drag.row, toCol = drag.col;
+      if (horizontal) { toCol = dx > 0 ? drag.col + 1 : drag.col - 1; }
+      else             { toRow = dy > 0 ? drag.row + 1 : drag.row - 1; }
+      if (toRow >= 0 && toRow < 8 && toCol >= 0 && toCol < 8) {
+        targetIdx = toRow * 8 + toCol;
+      }
     }
-    swipeRef.current.fired = true;
-    setHighlightedIdx(null);
-    onSwap!(startIdx, toRow * 8 + toCol);
-    swipeRef.current = null;
-  }, [onSwap]);
+    const updated: DragState = { ...drag, offsetX, offsetY, targetIdx };
+    dragRef.current = updated;
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => setDragState({ ...updated }));
+  }, [getCellSize]);
 
   const handlePointerUp = useCallback(() => {
-    swipeRef.current = null;
-    setHighlightedIdx(null);
+    const drag = dragRef.current;
+    if (!drag) return;
+    if (drag.targetIdx !== null && !drag.fired) {
+      dragRef.current = { ...drag, fired: true };
+      // Haptic: medium impact on swap
+      navigator.vibrate?.([12, 0, 8]);
+      (window as unknown as { Telegram?: { WebApp?: { HapticFeedback?: { impactOccurred?: (s: string) => void } } } })
+        .Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium');
+      onSwap!(drag.idx, drag.targetIdx);
+    }
+    // Small delay so spring-back animation plays
+    setTimeout(() => { dragRef.current = null; setDragState(null); }, 150);
+  }, [onSwap]);
+
+  const handlePointerCancel = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    dragRef.current = null;
+    setDragState(null);
   }, []);
 
   if (!tiles.length) return null;
@@ -145,7 +187,7 @@ function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
       style={{
         width: '100%',
         height: '100%',
@@ -164,8 +206,29 @@ function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
       }}
     >
       {tiles.map((gem, idx) => {
-        const isHighlighted = highlightedIdx === idx;
-        const isEmpty = gem === -1;
+        const isDragging = dragState?.idx === idx;
+        const isTarget   = dragState?.targetIdx === idx;
+        const isEmpty    = gem === -1;
+
+        // Per-gem transform — GPU-composited, no layout thrash
+        const dynamicStyle: React.CSSProperties = isDragging ? {
+          transform:  `translate(${dragState!.offsetX}px, ${dragState!.offsetY}px) scale(1.18)`,
+          zIndex:     20,
+          filter:     'brightness(1.22) drop-shadow(0 6px 14px rgba(0,0,0,0.65))',
+          transition: 'filter 0.1s ease',   // no transform transition while dragging
+          willChange: 'transform',
+        } : isTarget ? {
+          transform:  'scale(0.88)',
+          opacity:    0.65,
+          transition: 'transform 0.12s ease, opacity 0.12s ease',
+          willChange: 'transform',
+        } : {
+          // spring snap-back when drag ends
+          transform:  'translate(0,0) scale(1)',
+          transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          willChange: 'auto',
+        };
+
         return (
           <div
             key={idx}
@@ -177,14 +240,15 @@ function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
               justifyContent: 'center',
               fontSize: 'clamp(12px, 2.5vw, 18px)',
               userSelect: 'none',
-              border: isHighlighted ? '2px solid #fff' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: isHighlighted
-                ? '0 0 8px rgba(255,255,255,0.5)'
-                : isEmpty ? 'none' : `0 2px 6px ${GEM_COLORS[gem] ?? '#000'}44`,
-              transform: isHighlighted ? 'scale(1.1)' : 'scale(1)',
-              transition: 'transform 0.12s, border 0.12s, box-shadow 0.12s',
+              border: isDragging
+                ? '2px solid rgba(255,255,255,0.85)'
+                : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: isEmpty ? 'none' : `0 2px 6px ${GEM_COLORS[gem] ?? '#000'}44`,
               opacity: isEmpty ? 0.2 : 1,
               pointerEvents: 'none',
+              position: 'relative',
+              backfaceVisibility: 'hidden',
+              ...dynamicStyle,
             }}
           >
             {!isEmpty && GEM_LABELS[gem]}
