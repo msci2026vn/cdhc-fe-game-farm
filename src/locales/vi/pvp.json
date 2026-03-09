@@ -100,7 +100,11 @@
     "startGame": "Bắt Đầu!",
     "waitingOpponent": "Chờ đối thủ sẵn sàng...",
     "kick": "Đuổi",
-    "kicked": "Bạn đã bị đuổi khỏi phòng!"
+    "kicked": "Bạn đã bị đuổi khỏi phòng!",
+    "lobbyCloseIn": "Phòng tự đóng sau",
+    "lobbyClosingSoon": "Phòng sắp đóng!",
+    "lobbyWarning5min": "⚠️ Phòng sẽ đóng sau 5 phút",
+    "lobbyWarning1min": "🚨 Phòng sẽ đóng sau 1 phút!"
   },
   "error": {
     "notLoggedIn": "Chưa đăng nhập",

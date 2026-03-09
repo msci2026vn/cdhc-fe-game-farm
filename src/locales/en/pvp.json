@@ -100,7 +100,11 @@
     "startGame": "Start!",
     "waitingOpponent": "Waiting for opponent...",
     "kick": "Kick",
-    "kicked": "You have been kicked from the room!"
+    "kicked": "You have been kicked from the room!",
+    "lobbyCloseIn": "Room closes in",
+    "lobbyClosingSoon": "Room closing soon!",
+    "lobbyWarning5min": "⚠️ Room closes in 5 minutes",
+    "lobbyWarning1min": "🚨 Room closes in 1 minute!"
   },
   "error": {
     "notLoggedIn": "Not logged in",

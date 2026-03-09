@@ -34,6 +34,7 @@ interface RoomStateBroadcast {
   countdown: number;
   players: Record<string, PlayerInfo>;
   timeLeft?: number;
+  lobbyTimeLeft?: number;
   winnerId?: string;
 }
 
@@ -228,6 +229,7 @@ export default function PvpTestScreen() {
   const [comboText, setComboText] = useState('');
   const [opponentLeft, setOpponentLeft] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
+  const [lobbyTimeLeft, setLobbyTimeLeft] = useState(900);
   const [isSuddenDeath, setIsSuddenDeath] = useState(false);
   const [winnerId, setWinnerId] = useState('');
   const [winnerSessionId, setWinnerSessionId] = useState('');
@@ -326,8 +328,20 @@ export default function PvpTestScreen() {
       setRoomState(data);
       setOpponentLeft(false);
       if (data.timeLeft !== undefined) setTimeLeft(data.timeLeft);
+      if (data.lobbyTimeLeft !== undefined) setLobbyTimeLeft(data.lobbyTimeLeft);
       const names = Object.values(data.players).map(p => p.name).join(', ');
       addLog(`State: [${data.phase}] cd:${data.countdown} t:${data.timeLeft ?? '-'}s | ${names || '(trống)'}`);
+    });
+
+    r.onMessage('lobby_warning', (data: { secondsLeft: number }) => {
+      const msg = data.secondsLeft === 60 ? t('game.lobbyWarning1min') : t('game.lobbyWarning5min');
+      setJunkAlert(msg);
+      setTimeout(() => setJunkAlert(''), 4000);
+    });
+
+    r.onMessage('lobby_timeout', () => {
+      addLog('⚠️ Phòng đã đóng do chờ quá lâu');
+      navigate('/pvp');
     });
 
     r.onMessage('game_start', (data: { myBoard: number[]; opponentBoard: number[] }) => {
@@ -706,6 +720,9 @@ export default function PvpTestScreen() {
   // ── Derived state ──
   const phase = roomState?.phase ?? 'waiting';
   const countdown = roomState?.countdown ?? -1;
+  const lobbyMins = Math.floor(lobbyTimeLeft / 60).toString().padStart(2, '0');
+  const lobbySecs = (lobbyTimeLeft % 60).toString().padStart(2, '0');
+  const lobbyTimerColor = lobbyTimeLeft <= 60 ? '#f87171' : lobbyTimeLeft <= 300 ? '#fb923c' : '#34d399';
   const playersArr = roomState ? Object.entries(roomState.players) : [];
   const hostSessionId = roomState?.hostId ?? '';
 
@@ -1049,6 +1066,27 @@ export default function PvpTestScreen() {
                 }}>{phase}</div>
               </div>
             </div>
+
+            {/* Lobby countdown timer — only visible in waiting phase */}
+            {(phase === 'waiting' || phase === 'ready') && (
+              <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: 2, padding: '8px 0', borderTop: '1px solid #1e3a5a',
+              }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 26, fontWeight: 800, color: lobbyTimerColor,
+                  transition: 'color 0.5s ease',
+                  animation: lobbyTimeLeft <= 60 ? 'pulse 1s infinite' : 'none',
+                }}>
+                  <span style={{ fontSize: 18 }}>⏱</span>
+                  <span>{lobbyMins}:{lobbySecs}</span>
+                </div>
+                <span style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {lobbyTimeLeft <= 60 ? t('game.lobbyClosingSoon') : t('game.lobbyCloseIn')}
+                </span>
+              </div>
+            )}
 
             {/* Player slots */}
             <div style={{ borderTop: '1px solid #1e3a5a', paddingTop: 10, marginBottom: 10 }}>
