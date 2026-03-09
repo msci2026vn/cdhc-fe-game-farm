@@ -375,6 +375,100 @@ function QuickMatchModal({
   );
 }
 
+// ─── Challenge Popup (with countdown) ─────────────────────────────────────────
+function ChallengePopup({
+  data,
+  pending,
+  onAccept,
+  onDecline,
+  onTimeout,
+}: {
+  data: { hostName: string; hostRating: number; timeoutMs: number };
+  pending: boolean;
+  onAccept: () => void;
+  onDecline: () => void;
+  onTimeout: () => void;
+}) {
+  const { t } = useTranslation('pvp');
+  const [secondsLeft, setSecondsLeft] = useState(() => Math.ceil(data.timeoutMs / 1000));
+
+  useEffect(() => {
+    if (secondsLeft <= 0) { onTimeout(); return; }
+    const timer = setInterval(() => {
+      setSecondsLeft(s => {
+        if (s <= 1) { clearInterval(timer); onTimeout(); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 300,
+      background: 'rgba(0,0,0,0.75)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+    }}>
+      <div style={{
+        background: 'linear-gradient(135deg,#1a1a2e,#16213e)',
+        border: '2px solid #3b82f6',
+        borderRadius: 16, padding: 28, maxWidth: 340, width: '100%',
+        textAlign: 'center', color: '#fff',
+        boxShadow: '0 0 60px rgba(59,130,246,0.3)',
+        animation: 'challengeSlideIn 0.3s ease-out',
+      }}>
+        <div style={{ fontSize: 48, marginBottom: 8 }}>⚔️</div>
+        <div style={{ fontSize: 13, color: '#3b82f6', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+          {t('challenge.title')}
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>{data.hostName}</div>
+        <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 12 }}>
+          Rating: <span style={{ color: '#f59e0b', fontWeight: 700 }}>{data.hostRating}</span> · {t('challenge.from')}
+        </div>
+
+        {/* Countdown */}
+        <div style={{
+          fontSize: 28, fontWeight: 900,
+          color: secondsLeft <= 10 ? '#ef4444' : '#3b82f6',
+          marginBottom: 20,
+          transition: 'color 0.3s',
+        }}>
+          {secondsLeft}s
+        </div>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={onDecline}
+            disabled={pending}
+            style={{
+              flex: 1, padding: '12px', borderRadius: 10,
+              border: '1px solid #64748b', background: 'transparent',
+              color: '#94a3b8', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            {t('challenge.decline')}
+          </button>
+          <button
+            onClick={onAccept}
+            disabled={pending}
+            style={{
+              flex: 1, padding: '12px', borderRadius: 10,
+              border: 'none', background: 'linear-gradient(135deg,#2563eb,#1d4ed8)',
+              color: '#fff', fontSize: 15, fontWeight: 700,
+              cursor: pending ? 'not-allowed' : 'pointer',
+              opacity: pending ? 0.7 : 1,
+            }}
+          >
+            {t('challenge.accept')}
+          </button>
+        </div>
+      </div>
+      <style>{`@keyframes challengeSlideIn { from { transform: translateY(20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }`}</style>
+    </div>
+  );
+}
+
 // ─── Main PvpLobby ────────────────────────────────────────────────────────────
 export default function PvpLobby() {
   const navigate = useNavigate();
@@ -393,6 +487,10 @@ export default function PvpLobby() {
   const [botLoading, setBotLoading] = useState(false);
   const [showBossPopup, setShowBossPopup] = useState(false);
   const [bossData, setBossData] = useState<{ name: string; avatar: string; greeting: string } | null>(null);
+  const [challengeData, setChallengeData] = useState<{ roomCode: string; hostId: string; hostName: string; hostRating: number; timeoutMs: number } | null>(null);
+  const [showChallengePopup, setShowChallengePopup] = useState(false);
+  const [openRoomLoading, setOpenRoomLoading] = useState(false);
+  const [challengeSearching, setChallengeSearching] = useState(false);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -467,6 +565,18 @@ export default function PvpLobby() {
       setInQueue(false);
       showToast(t('toast.matchFound'));
       setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}&fromQueue=1`), 800);
+    } else if (event.type === 'pvp_challenge') {
+      setChallengeData({ roomCode: event.roomCode, hostId: event.hostId, hostName: event.hostName, hostRating: event.hostRating, timeoutMs: event.timeoutMs || 30000 });
+      setShowChallengePopup(true);
+    } else if (event.type === 'challenge_accepted') {
+      setChallengeSearching(false);
+      showToast(t('challenge.accepted'));
+    } else if (event.type === 'quick_match_joined') {
+      showToast(t('toast.matchFound'));
+      setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}`), 800);
+    } else if (event.type === 'challenge_failed') {
+      setChallengeSearching(false);
+      showToast(t('challenge.noOpponent'));
     }
   }, [navigate, showToast]);
 
@@ -490,6 +600,16 @@ export default function PvpLobby() {
       if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
     },
     onError: () => setPendingInvite(null),
+  });
+
+  const challengeRespondMut = useMutation({
+    mutationFn: (accept: boolean) => pvpApi.challengeRespond(accept),
+    onSuccess: (data) => {
+      setShowChallengePopup(false);
+      setChallengeData(null);
+      if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
+    },
+    onError: () => { setShowChallengePopup(false); setChallengeData(null); },
   });
 
   const joinQueueMut = useMutation({
@@ -534,6 +654,25 @@ export default function PvpLobby() {
       showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);
     } finally {
       setBotLoading(false);
+    }
+  };
+
+  const handleCreateOpenRoom = async () => {
+    setOpenRoomLoading(true);
+    try {
+      const data = await pvpApi.createOpenRoom();
+      if (data.ok && data.roomCode) {
+        // Auto-challenge: tìm người online để thách đấu
+        setChallengeSearching(true);
+        pvpApi.startChallenge(data.roomCode).catch(() => {
+          // silent — host vẫn vào phòng bình thường
+        });
+        navigate(`/pvp-test?room=${data.roomCode}`);
+      }
+    } catch (e) {
+      showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);
+    } finally {
+      setOpenRoomLoading(false);
     }
   };
 
@@ -736,17 +875,20 @@ export default function PvpLobby() {
             <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.roomList')}</div>
           </button>
 
-          {/* Tạo phòng */}
+          {/* Tạo phòng — auto-challenge ngược chiều Quick Match */}
           <button
-            onClick={() => navigate('/pvp-test')}
+            onClick={() => void handleCreateOpenRoom()}
+            disabled={openRoomLoading}
             style={{
               padding: '16px 8px', borderRadius: 12,
-              background: 'linear-gradient(135deg,#b45309,#92400e)',
-              color: '#fff', cursor: 'pointer', textAlign: 'center',
-              border: '1px solid #b45309',
+              background: openRoomLoading
+                ? 'linear-gradient(135deg,#333,#222)'
+                : 'linear-gradient(135deg,#b45309,#92400e)',
+              color: '#fff', cursor: openRoomLoading ? 'not-allowed' : 'pointer', textAlign: 'center',
+              border: '1px solid #b45309', opacity: openRoomLoading ? 0.7 : 1,
             }}
           >
-            <div style={{ fontSize: 26, marginBottom: 6 }}>➕</div>
+            <div style={{ fontSize: 26, marginBottom: 6 }}>{openRoomLoading ? '⏳' : '➕'}</div>
             <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.createRoom')}</div>
           </button>
         </div>
@@ -909,6 +1051,21 @@ export default function PvpLobby() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Auto-Challenge Popup — nhận thách đấu từ host (30s countdown) */}
+      {showChallengePopup && challengeData && (
+        <ChallengePopup
+          data={challengeData}
+          pending={challengeRespondMut.isPending}
+          onAccept={() => challengeRespondMut.mutate(true)}
+          onDecline={() => challengeRespondMut.mutate(false)}
+          onTimeout={() => {
+            challengeRespondMut.mutate(false);
+            setShowChallengePopup(false);
+            setChallengeData(null);
+          }}
+        />
       )}
     </div>
   );

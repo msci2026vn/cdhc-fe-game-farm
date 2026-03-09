@@ -253,6 +253,16 @@ export default function PvpTestScreen() {
   const [h2hData, setH2hData] = useState<H2HData>(null);
   const [rematchState, setRematchState] = useState<'idle' | 'waiting' | 'ready'>('idle');
 
+  // ── On-chain proof ──
+  const [matchId, setMatchId] = useState<string | null>(null);
+  const [proofData, setProofData] = useState<{
+    merkleRoot: string | null;
+    ipfsHash:   string | null;
+    txHash:     string | null;
+    moveCount:  number | null;
+  }>({ merkleRoot: null, ipfsHash: null, txHash: null, moveCount: null });
+  const proofPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   // Sync userId ref for post-game API calls
   useEffect(() => {
     if (auth?.user?.id) myUserIdRef.current = auth.user.id;
@@ -267,6 +277,10 @@ export default function PvpTestScreen() {
     addLog(`Client → ${WS_URL}`);
     return () => { roomRef.current?.leave(); };
   }, [addLog]);
+
+  useEffect(() => {
+    return () => { if (proofPollRef.current) clearInterval(proofPollRef.current); };
+  }, []);
 
   // ── Swap handler ──
   const handleSwap = useCallback((from: number, to: number) => {
@@ -464,6 +478,33 @@ export default function PvpTestScreen() {
       } else {
         pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => {});
       }
+    });
+
+    r.onMessage('match_saved', (data: { matchId: string }) => {
+      setMatchId(data.matchId);
+      if (proofPollRef.current) clearInterval(proofPollRef.current);
+      let attempts = 0;
+      proofPollRef.current = setInterval(async () => {
+        attempts++;
+        try {
+          const res = await fetch(`${API_BASE}/api/pvp/proof/${data.matchId}`);
+          const json = await res.json();
+          if (json.txHash) {
+            setProofData({
+              merkleRoot: json.merkleRoot ?? null,
+              ipfsHash:   json.ipfsHash ?? null,
+              txHash:     json.txHash,
+              moveCount:  json.moveCount ?? null,
+            });
+            if (proofPollRef.current) clearInterval(proofPollRef.current);
+          }
+        } catch (e) {
+          console.warn('[Proof poll] error:', e);
+        }
+        if (attempts >= 10 && proofPollRef.current) {
+          clearInterval(proofPollRef.current);
+        }
+      }, 3000);
     });
 
     r.onMessage('sudden_death', () => {
@@ -850,6 +891,10 @@ export default function PvpTestScreen() {
           onRematch={handleRematch}
           onLeave={() => { handleLeave(); navigate('/pvp'); }}
           onQuit={() => navigate('/')}
+          proofMerkleRoot={proofData.merkleRoot}
+          proofTxHash={proofData.txHash}
+          proofIpfsHash={proofData.ipfsHash}
+          proofMoveCount={proofData.moveCount ?? undefined}
         />
       )}
 

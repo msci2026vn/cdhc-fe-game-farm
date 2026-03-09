@@ -65,7 +65,11 @@ export type PvpInvite = {
 export type PvpEvent =
   | { type: 'pvp_invite'; inviteId: string; fromUserId: string; fromName: string; fromAvatar: string | null; roomCode: string; expiresAt: string }
   | { type: 'pvp_invite_response'; inviteId: string; action: 'accept' | 'reject'; roomCode: string | null; fromUserId: string }
-  | { type: 'pvp_matched'; roomCode: string; opponentId: string };
+  | { type: 'pvp_matched'; roomCode: string; opponentId: string }
+  | { type: 'pvp_challenge'; roomCode: string; hostId: string; hostName: string; hostRating: number; timeoutMs: number }
+  | { type: 'challenge_accepted'; targetUserId: string; roomCode: string }
+  | { type: 'challenge_failed'; reason: string }
+  | { type: 'quick_match_joined'; userId: string; roomCode: string };
 
 export const pvpApi = {
   getRating: () => pvpFetch<PvpRating>('/rating'),
@@ -129,4 +133,31 @@ export const pvpApi = {
       '/boss-challenge',
       { method: 'POST' },
     ),
+
+  createOpenRoom: () =>
+    pvpFetch<{ ok: boolean; roomCode: string; roomId: string }>(
+      '/create-open-room',
+      { method: 'POST', body: '{}' },
+    ),
+
+  closeOpenRoom: (roomCode: string) =>
+    pvpFetch<{ ok: boolean }>('/close-open-room', {
+      method: 'POST',
+      body: JSON.stringify({ roomCode }),
+    }),
+
+  challengeRespond: (accept: boolean) =>
+    pvpFetch<{ ok: boolean; roomCode?: string; error?: string }>('/challenge-respond', {
+      method: 'POST',
+      body: JSON.stringify({ accept }),
+    }),
+
+  startChallenge: (roomCode: string) =>
+    pvpFetch<{ ok: boolean; error?: string }>('/start-challenge', {
+      method: 'POST',
+      body: JSON.stringify({ roomCode }),
+    }),
+
+  getRooms: () =>
+    pvpFetch<{ rooms: { roomId: string; roomCode: string; hostName: string; clients: number; maxClients: number; createdAt: string | null }[] }>('/rooms'),
 };

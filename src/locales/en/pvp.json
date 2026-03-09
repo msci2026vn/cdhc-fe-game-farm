@@ -143,5 +143,14 @@
     "challenge": "A Challenger Appears!",
     "fight": "Fight",
     "flee": "Run Away"
+  },
+  "challenge": {
+    "title": "PVP Challenge!",
+    "from": "wants to battle you!",
+    "accept": "Accept ⚔️",
+    "decline": "Decline",
+    "accepted": "✅ Opponent accepted the challenge!",
+    "noOpponent": "No opponent found. Try Quick Match instead.",
+    "searching": "Searching for opponent..."
   }
 }

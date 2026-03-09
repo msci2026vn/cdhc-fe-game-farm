@@ -143,5 +143,14 @@
     "challenge": "Có Kẻ Thách Đấu!",
     "fight": "Chiến Đấu",
     "flee": "Bỏ Chạy"
+  },
+  "challenge": {
+    "title": "Thách Đấu PVP!",
+    "from": "muốn đấu với bạn!",
+    "accept": "Chấp Nhận ⚔️",
+    "decline": "Từ Chối",
+    "accepted": "✅ Đối thủ đã chấp nhận thách đấu!",
+    "noOpponent": "Không tìm được đối thủ. Hãy thử Tìm Trận.",
+    "searching": "Đang tìm đối thủ..."
   }
 }
