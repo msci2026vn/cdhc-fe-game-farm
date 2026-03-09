@@ -105,7 +105,28 @@ export const pvpApi = {
     pvpFetch<{ ok: boolean }>('/find-match', { method: 'DELETE' }),
 
   getQueueStatus: () =>
-    pvpFetch<{ inQueue: boolean; matched?: boolean; roomCode?: string; waitSeconds?: number }>(
-      '/find-match/status',
+    pvpFetch<{
+      inQueue: boolean;
+      matched?: boolean;
+      roomCode?: string;
+      roomId?: string;
+      waitSeconds?: number;
+      triggerBoss?: boolean;
+      isBossGame?: boolean;
+      isBotGame?: boolean;
+      isStealth?: boolean;
+      boss?: { id: string; name: string; avatar: string; greeting: string; hp: number };
+    }>('/find-match/status'),
+
+  playBot: (tier = 'medium') =>
+    pvpFetch<{ ok: boolean; roomId?: string; roomCode?: string; error?: string }>(
+      '/play-bot',
+      { method: 'POST', body: JSON.stringify({ tier }) },
+    ),
+
+  bossChallenge: () =>
+    pvpFetch<{ ok: boolean; roomId?: string; roomCode?: string; boss?: Record<string, unknown>; error?: string }>(
+      '/boss-challenge',
+      { method: 'POST' },
     ),
 };

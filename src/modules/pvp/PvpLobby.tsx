@@ -388,6 +388,10 @@ export default function PvpLobby() {
   const [waitSeconds, setWaitSeconds] = useState(0);
   const [pendingInvite, setPendingInvite] = useState<(PvpEvent & { type: 'pvp_invite' }) | null>(null);
   const [toast, setToast] = useState('');
+  const [showBotPicker, setShowBotPicker] = useState(false);
+  const [botLoading, setBotLoading] = useState(false);
+  const [showBossPopup, setShowBossPopup] = useState(false);
+  const [bossData, setBossData] = useState<{ name: string; avatar: string; greeting: string } | null>(null);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -416,12 +420,28 @@ export default function PvpLobby() {
     refetchInterval: 3000,
   });
 
-  // When queue finds a match
+  // When queue finds a match (or triggers bot/boss)
   useEffect(() => {
     if (!queueStatus) return;
-    if (queueStatus.matched && queueStatus.roomCode) {
+    // Boss popup trigger
+    if (queueStatus.triggerBoss || queueStatus.isBossGame) {
       setInQueue(false);
-      navigate(`/pvp-test?room=${queueStatus.roomCode}`);
+      if (queueStatus.boss) {
+        setBossData(queueStatus.boss);
+        setShowBossPopup(true);
+      } else if (queueStatus.roomId) {
+        navigate(`/pvp-test?roomId=${queueStatus.roomId}`);
+      }
+      return;
+    }
+    // Matched (normal, bot stealth, or boss with roomId)
+    if (queueStatus.matched && (queueStatus.roomCode || queueStatus.roomId)) {
+      setInQueue(false);
+      const target = queueStatus.roomId
+        ? `/pvp-test?roomId=${queueStatus.roomId}`
+        : `/pvp-test?room=${queueStatus.roomCode}`;
+      navigate(target);
+      return;
     }
     if (queueStatus.inQueue && queueStatus.waitSeconds !== undefined) {
       setWaitSeconds(queueStatus.waitSeconds);
@@ -485,6 +505,36 @@ export default function PvpLobby() {
     mutationFn: pvpApi.leaveQueue,
     onSuccess: () => setInQueue(false),
   });
+
+  // ── Bot / Boss handlers ──
+  const handlePlayBot = async (tier: string) => {
+    setBotLoading(true);
+    setShowBotPicker(false);
+    try {
+      const data = await pvpApi.playBot(tier);
+      if (data.ok && data.roomId) {
+        navigate(`/pvp-test?roomId=${data.roomId}`);
+      } else {
+        showToast(`❌ ${data.error || 'Failed'}`);
+      }
+    } catch (e) {
+      showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);
+    } finally {
+      setBotLoading(false);
+    }
+  };
+
+  const handleBossAccept = async () => {
+    setShowBossPopup(false);
+    try {
+      const data = await pvpApi.bossChallenge();
+      if (data.ok && data.roomId) {
+        navigate(`/pvp-test?roomId=${data.roomId}`);
+      }
+    } catch (e) {
+      showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);
+    }
+  };
 
   const winRate = rating
     ? rating.wins + rating.losses + rating.draws > 0
@@ -606,7 +656,28 @@ export default function PvpLobby() {
           </div>
         </div>
 
-        {/* 4 action buttons (2x2) */}
+        {/* 5 action buttons (top: 3-col bot highlight, bottom: 2x2) */}
+        {/* Play vs Bot — full width highlight */}
+        <button
+          onClick={() => setShowBotPicker(true)}
+          disabled={botLoading}
+          style={{
+            width: '100%', padding: '14px', borderRadius: 12, marginBottom: 10,
+            background: botLoading
+              ? 'linear-gradient(135deg,#333,#222)'
+              : 'linear-gradient(135deg,#dc2626,#b91c1c)',
+            color: '#fff', cursor: botLoading ? 'not-allowed' : 'pointer',
+            textAlign: 'center', border: '1px solid #dc2626',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            opacity: botLoading ? 0.7 : 1,
+          }}
+        >
+          <span style={{ fontSize: 26 }}>🤖</span>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>
+            {botLoading ? t('common.loading') : t('bot.playWithBot')}
+          </span>
+        </button>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
           {/* Mời bạn */}
           <button
@@ -728,6 +799,104 @@ export default function PvpLobby() {
         </div>
 
       </div>
+
+      {/* Bot Difficulty Picker */}
+      {showBotPicker && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 250,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+          onClick={() => setShowBotPicker(false)}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(180deg,#1a1a2e,#0f1624)',
+              border: '1px solid #dc2626',
+              borderRadius: '16px 16px 0 0',
+              width: '100%', maxWidth: 420,
+              padding: '20px 20px 28px',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ color: '#fff', fontWeight: 700, fontSize: 16, marginBottom: 16, textAlign: 'center' }}>
+              🤖 {t('bot.selectDifficulty')}
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {([
+                { tier: 'easy', label: t('bot.easy'), emoji: '😊', bg: 'linear-gradient(135deg,#16a34a,#15803d)' },
+                { tier: 'medium', label: t('bot.medium'), emoji: '😐', bg: 'linear-gradient(135deg,#ca8a04,#a16207)' },
+                { tier: 'hard', label: t('bot.hard'), emoji: '😤', bg: 'linear-gradient(135deg,#ea580c,#c2410c)' },
+                { tier: 'expert', label: t('bot.expert'), emoji: '😈', bg: 'linear-gradient(135deg,#dc2626,#991b1b)' },
+              ] as const).map(({ tier, label, emoji, bg }) => (
+                <button
+                  key={tier}
+                  onClick={() => handlePlayBot(tier)}
+                  style={{
+                    background: bg, color: '#fff',
+                    borderRadius: 12, padding: '18px 8px',
+                    border: 'none', cursor: 'pointer',
+                    fontWeight: 700, fontSize: 15,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <span style={{ fontSize: 30 }}>{emoji}</span>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Boss Challenge Popup */}
+      {showBossPopup && bossData && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 300,
+          background: 'rgba(0,0,0,0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg,#1a1a2e,#16213e)',
+            border: '2px solid #ef4444',
+            borderRadius: 16, padding: 28, maxWidth: 340, width: '100%',
+            textAlign: 'center', color: '#fff',
+            boxShadow: '0 0 60px rgba(239,68,68,0.3)',
+          }}>
+            <div style={{ fontSize: 56, marginBottom: 8 }}>{bossData.avatar}</div>
+            <div style={{ fontSize: 14, color: '#ef4444', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+              {t('boss.challenge')}
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>{bossData.name}</div>
+            <div style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', marginBottom: 20 }}>
+              "{bossData.greeting}"
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setShowBossPopup(false)}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: 10,
+                  border: '1px solid #64748b', background: 'transparent',
+                  color: '#94a3b8', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                {t('boss.flee')}
+              </button>
+              <button
+                onClick={handleBossAccept}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: 10,
+                  border: 'none', background: 'linear-gradient(135deg,#dc2626,#991b1b)',
+                  color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                {t('boss.fight')} ⚔️
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

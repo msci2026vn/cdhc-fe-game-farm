@@ -96,5 +96,18 @@
     "friendRejected": "❌ Friend declined your invite",
     "matchFound": "✅ Opponent found! Joining room...",
     "inviteSent": "📨 Invite sent!"
+  },
+  "bot": {
+    "playWithBot": "Play vs Bot",
+    "selectDifficulty": "Select Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "expert": "Expert"
+  },
+  "boss": {
+    "challenge": "A Challenger Appears!",
+    "fight": "Fight",
+    "flee": "Run Away"
   }
 }

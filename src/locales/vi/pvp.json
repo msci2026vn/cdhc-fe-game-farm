@@ -96,5 +96,18 @@
     "friendRejected": "❌ Bạn bè đã từ chối lời mời",
     "matchFound": "✅ Tìm được đối thủ! Đang vào phòng...",
     "inviteSent": "📨 Đã gửi lời mời!"
+  },
+  "bot": {
+    "playWithBot": "Chơi với Bot",
+    "selectDifficulty": "Chọn độ khó",
+    "easy": "Dễ",
+    "medium": "Trung Bình",
+    "hard": "Khó",
+    "expert": "Chuyên Gia"
+  },
+  "boss": {
+    "challenge": "Có Kẻ Thách Đấu!",
+    "fight": "Chiến Đấu",
+    "flee": "Bỏ Chạy"
   }
 }
