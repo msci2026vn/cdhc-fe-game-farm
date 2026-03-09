@@ -1,8 +1,9 @@
 import type { DeliverySlot, DeliverySlotStatus } from '@/shared/types/game-api.types';
+import { useTranslation } from 'react-i18next';
 
 const STATUS_CONFIG: Record<DeliverySlotStatus, {
   icon: string;
-  label: string;
+  labelKey: string;
   bgColor: string;
   borderColor: string;
   textColor: string;
@@ -10,7 +11,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
 }> = {
   available: {
     icon: '🎁',
-    label: 'Sẵn sàng nhận rau',
+    labelKey: 'rwa.delivery_slot.status_available',
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
     textColor: 'text-green-700',
@@ -18,7 +19,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   claimed: {
     icon: '📦',
-    label: 'Chờ giao hàng',
+    labelKey: 'rwa.delivery_slot.status_claimed',
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-200',
     textColor: 'text-amber-700',
@@ -26,7 +27,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   shipped: {
     icon: '🚚',
-    label: 'Đang giao hàng',
+    labelKey: 'rwa.delivery_slot.status_shipped',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     textColor: 'text-blue-700',
@@ -34,7 +35,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   delivered: {
     icon: '✅',
-    label: 'Đã nhận',
+    labelKey: 'rwa.delivery_slot.status_delivered',
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-200',
     textColor: 'text-gray-600',
@@ -42,7 +43,7 @@ const STATUS_CONFIG: Record<DeliverySlotStatus, {
   },
   expired: {
     icon: '❌',
-    label: 'Hết hạn',
+    labelKey: 'rwa.delivery_slot.status_expired',
     bgColor: 'bg-red-50',
     borderColor: 'border-red-100',
     textColor: 'text-red-400',
@@ -71,6 +72,7 @@ interface DeliverySlotCardProps {
 export default function DeliverySlotCard({
   slot, index, onClaim, onScan, onManualVerify, onViewBlockchain, onViewDetail, isClaiming,
 }: DeliverySlotCardProps) {
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[slot.status] ?? STATUS_CONFIG.available;
   const hasBlockchain = !!slot.blockchainTx;
 
@@ -80,8 +82,8 @@ export default function DeliverySlotCard({
       <div className={`${config.iconBg} w-10 h-10 rounded-full flex items-center justify-center`}>
         <span className="text-xl">{config.icon}</span>
       </div>
-      <p className="text-sm font-bold text-stone-700">Hộp {index + 1}</p>
-      <p className={`text-xs font-medium ${config.textColor} text-center`}>{config.label}</p>
+      <p className="text-sm font-bold text-stone-700">{t('rwa.delivery_slot.box_index', { index: index + 1 })}</p>
+      <p className={`text-xs font-medium ${config.textColor} text-center`}>{t(config.labelKey)}</p>
 
       {/* === AVAILABLE: Claim button === */}
       {slot.status === 'available' && onClaim && (
@@ -93,7 +95,7 @@ export default function DeliverySlotCard({
           {isClaiming ? (
             <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
           ) : (
-            <>🎁 Nhận quà</>
+            <>🎁 {t('rwa.delivery_slot.claim_btn')}</>
           )}
         </button>
       )}
@@ -118,7 +120,7 @@ export default function DeliverySlotCard({
           {/* OTP code (compact) */}
           {slot.otpCode && (
             <p className="text-center text-xs font-mono font-bold text-amber-800 bg-white border border-amber-200 rounded-lg py-1">
-              Mã: {slot.otpCode}
+              {t('rwa.delivery_slot.code')}: {slot.otpCode}
             </p>
           )}
 
@@ -128,7 +130,7 @@ export default function DeliverySlotCard({
               onClick={() => onScan(slot.id)}
               className="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
             >
-              📷 Scan nhận hàng
+              📷 {t('rwa.delivery_slot.scan_btn')}
             </button>
           )}
 
@@ -138,7 +140,7 @@ export default function DeliverySlotCard({
               onClick={() => onManualVerify(slot.id)}
               className="w-full py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 text-[10px] font-semibold rounded-lg border border-amber-200 transition-colors flex items-center justify-center gap-1"
             >
-              ✏️ Nhập mã thủ công
+              ✏️ {t('rwa.delivery_slot.manual_btn')}
             </button>
           )}
         </div>
@@ -149,7 +151,7 @@ export default function DeliverySlotCard({
         <div className="w-full space-y-1.5">
           {/* Delivery time */}
           <p className="text-[10px] text-stone-500 text-center">
-            {formatDate(slot.deliveredAt) ?? 'Đã nhận'}
+            {formatDate(slot.deliveredAt) ?? t('rwa.delivery_detail.status_received')}
           </p>
 
           {/* Recipient name */}
@@ -168,9 +170,9 @@ export default function DeliverySlotCard({
 
           {/* Blockchain status */}
           {hasBlockchain ? (
-            <p className="text-[10px] text-green-600 font-semibold text-center">🔗 Đã ghi on-chain ✅</p>
+            <p className="text-[10px] text-green-600 font-semibold text-center">🔗 {t('rwa.delivery_slot.on_chain')} ✅</p>
           ) : (
-            <p className="text-[10px] text-amber-500 font-medium text-center">⏳ Đang chờ ghi blockchain</p>
+            <p className="text-[10px] text-amber-500 font-medium text-center">⏳ {t('rwa.delivery_slot.pending_chain')}</p>
           )}
 
           {/* View detail button */}
@@ -179,7 +181,7 @@ export default function DeliverySlotCard({
               onClick={() => onViewDetail(slot)}
               className="w-full py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 text-[10px] font-semibold rounded-lg border border-stone-200 transition-colors flex items-center justify-center gap-1"
             >
-              📋 Xem chi tiết
+              📋 {t('rwa.delivery_slot.view_detail')}
             </button>
           )}
         </div>

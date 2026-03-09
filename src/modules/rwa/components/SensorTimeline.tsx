@@ -1,20 +1,21 @@
 import { useState, useMemo } from 'react';
 import { useSensorHourly, useSensorDates, useSensorLatest } from '@/shared/hooks/useSensor';
+import { useTranslation } from 'react-i18next';
 
 const indicatorStyle = {
-  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: 'Tốt' },
-  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Cảnh báo' },
-  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', label: 'Nguy hiểm' },
+  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: t('rwa.sensor.status_good') },
+  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: t('rwa.sensor.status_warning') },
+  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', label: t('rwa.sensor.status_danger') },
 } as const;
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds} giây trước`;
+  if (seconds < 60) return t('rwa.sensor.seconds_ago', { count: seconds });
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} phút trước`;
+  if (minutes < 60) return t('rwa.sensor.minutes_ago', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  return `${hours} giờ trước`;
+  return t('rwa.sensor.hours_ago', { count: hours });
 }
 
 function MetricCard({ icon, label, value, unit, indicator, fullWidth }: {
@@ -25,6 +26,7 @@ function MetricCard({ icon, label, value, unit, indicator, fullWidth }: {
   indicator?: 'good' | 'warning' | 'danger' | null;
   fullWidth?: boolean;
 }) {
+  const { t } = useTranslation();
   const style = indicator ? indicatorStyle[indicator] : indicatorStyle.good;
 
   return (
@@ -51,6 +53,7 @@ function formatDateVN(dateStr: string): string {
 }
 
 export default function SensorTimeline() {
+  const { t } = useTranslation();
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedHour, setSelectedHour] = useState(new Date().getHours());
@@ -98,9 +101,9 @@ export default function SensorTimeline() {
         <div className="flex items-center gap-2">
           <span className="text-lg">📡</span>
           <div className="text-left">
-            <h3 className="font-bold text-farm-brown-dark text-sm">Cảm biến Vườn</h3>
+            <h3 className="font-bold text-farm-brown-dark text-sm">{t('rwa.sensor.title')}</h3>
             <p className="text-[10px] text-gray-400">
-              {latestReading ? `${latestReading.deviceId} · ${timeAgo(latestReading.recordedAt)}` : 'mock-sensor-001'}
+              {latestReading ? `${latestReading.deviceId} · ${timeAgo(latestReading.recordedAt, t)}` : 'mock-sensor-001'}
             </p>
           </div>
         </div>
@@ -195,7 +198,7 @@ export default function SensorTimeline() {
           {!isLoading && !currentHourData && (
             <div className="text-center py-6">
               <span className="material-symbols-outlined text-gray-300 text-4xl block mb-2">sensors_off</span>
-              <p className="text-sm text-gray-400">Không có dữ liệu cho giờ này</p>
+              <p className="text-sm text-gray-400">{t('rwa.sensor.no_data_hour')}</p>
               {hoursWithData.length > 0 && (
                 <button
                   onClick={() => setSelectedHour(hoursWithData[0])}
@@ -213,27 +216,27 @@ export default function SensorTimeline() {
               <div className="grid grid-cols-2 gap-2.5">
                 <MetricCard
                   icon="🌡️"
-                  label="Nhiệt độ"
+                  label={t("rwa.sensor.temp")}
                   value={currentHourData.avgTemperature !== null ? currentHourData.avgTemperature.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'}
                   unit="°C"
                   indicator={currentHourData.indicators?.temperature}
                 />
                 <MetricCard
                   icon="💧"
-                  label="Độ ẩm"
+                  label={t("rwa.sensor.humidity")}
                   value={currentHourData.avgHumidity !== null ? currentHourData.avgHumidity.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'}
                   unit="%"
                   indicator={currentHourData.indicators?.humidity}
                 />
                 <MetricCard
                   icon="☀️"
-                  label="Ánh sáng"
+                  label={t("rwa.sensor.light")}
                   value={currentHourData.avgLightLevel !== null ? currentHourData.avgLightLevel.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) : '--'}
                   unit="lux"
                 />
                 <MetricCard
                   icon="🌱"
-                  label="pH Đất"
+                  label={t("rwa.sensor.soil_ph")}
                   value={currentHourData.avgSoilPh !== null ? String(currentHourData.avgSoilPh) : '--'}
                   unit=""
                   indicator={currentHourData.indicators?.soilPh}
@@ -241,7 +244,7 @@ export default function SensorTimeline() {
               </div>
               <MetricCard
                 icon="💦"
-                label="Độ ẩm đất"
+                label={t("rwa.sensor.soil_moisture")}
                 value={currentHourData.avgSoilMoisture !== null ? currentHourData.avgSoilMoisture.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'}
                 unit="%"
                 fullWidth
@@ -249,7 +252,7 @@ export default function SensorTimeline() {
 
               {/* Reading count */}
               <p className="text-[10px] text-gray-400 text-center">
-                {currentHourData.readingCount} lần đo trong giờ này
+                {t('rwa.sensor.readings_count', { count: currentHourData.readingCount })}
                 {selectedDate === today && ' · ' + formatDateVN(selectedDate)}
               </p>
             </>

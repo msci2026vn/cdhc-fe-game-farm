@@ -1,8 +1,10 @@
 import { useGardenSummary, useMyGarden, useDeliveryHistory } from '@/shared/hooks/useMyGarden';
 import MyGardenView from '../components/MyGardenView';
 import LockedGardenView from '../components/LockedGardenView';
+import { useTranslation } from 'react-i18next';
 
 export default function MyGardenScreen() {
+  const { t } = useTranslation();
   const { data: summary, isLoading: loadingSummary } = useGardenSummary();
   const isVip = summary?.isVip ?? false;
 
@@ -24,7 +26,7 @@ export default function MyGardenScreen() {
     return (
       <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-gradient-to-b from-green-50 to-[#fefae0] gap-3">
         <span className="text-3xl">😿</span>
-        <p className="text-sm text-stone-500">Không tải được dữ liệu</p>
+        <p className="text-sm text-stone-500">{t('rwa.my_garden.error_load')}</p>
       </div>
     );
   }

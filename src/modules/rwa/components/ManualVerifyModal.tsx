@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useManualVerify } from '@/shared/hooks/useMyGarden';
+import { useTranslation } from 'react-i18next';
 
 interface ManualVerifyModalProps {
   open: boolean;
@@ -9,6 +10,7 @@ interface ManualVerifyModalProps {
 }
 
 export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerifyModalProps) {
+  const { t } = useTranslation();
   const verifyMutation = useManualVerify();
 
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
@@ -65,7 +67,7 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
   const handleVerify = () => {
     if (!slotId) return;
     if (otpValue.length !== 6) {
-      setError('Vui lòng nhập đủ 6 số');
+      setError(t('rwa.manual_verify.error_length'));
       return;
     }
 
@@ -78,7 +80,7 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
           // User clicks "Đóng" to close — no auto-close to avoid race condition
         },
         onError: (err: Error) => {
-          setError(err.message || 'Xác nhận thất bại');
+          setError(err.message || t('rwa.manual_verify.error_confirm'));
         },
       },
     );
@@ -90,7 +92,7 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-amber-800 flex items-center justify-center gap-2">
-            <span>✏️</span> Nhập mã nhận hàng
+            <span>✏️</span> {t('rwa.manual_verify.title')}
           </DialogTitle>
         </div>
 
@@ -99,7 +101,7 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
             /* Success state */
             <div className="text-center py-6 space-y-3">
               <span className="text-4xl">✅</span>
-              <p className="text-base font-bold text-green-700">Nhận hàng thành công!</p>
+              <p className="text-base font-bold text-green-700">{t('rwa.manual_verify.success')}</p>
               <p className="text-sm text-green-600">+50 XP</p>
               <button
                 onClick={handleClose}
@@ -149,7 +151,7 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
                 {verifyMutation.isPending ? (
                   <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
                 ) : (
-                  '✅ Xác nhận'
+                  `✅ ${t('rwa.manual_verify.confirm')}`
                 )}
               </button>
 

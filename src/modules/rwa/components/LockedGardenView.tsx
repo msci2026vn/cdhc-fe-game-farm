@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function LockedGardenView() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -16,7 +18,7 @@ export default function LockedGardenView() {
             <span className="material-symbols-outlined text-stone-600 text-lg">arrow_back</span>
           </button>
           <h1 className="text-xl font-bold text-stone-500 flex items-center gap-1.5">
-            <span>🔒</span> Vườn Của Tôi
+            <span>🔒</span> {t('rwa.locked_garden.title')}
           </h1>
         </div>
 
@@ -27,10 +29,10 @@ export default function LockedGardenView() {
           </div>
 
           <h2 className="text-lg font-bold text-stone-700 text-center">
-            Nâng cấp VIP để nhận rau hữu cơ
+            {t('rwa.locked_garden.upgrade_msg')}
           </h2>
           <p className="text-sm text-stone-500 text-center mt-1 max-w-[280px]">
-            Rau tươi từ nông trại CDHC giao tận nơi mỗi tuần!
+            {t('rwa.locked_garden.desc')}
           </p>
 
           {/* VIP tiers */}
@@ -39,14 +41,14 @@ export default function LockedGardenView() {
               <span className="text-lg">⭐</span>
               <div>
                 <p className="text-sm font-bold text-amber-700">Standard</p>
-                <p className="text-xs text-stone-500">4 lần/tháng &middot; 0.01 AVAX</p>
+                <p className="text-xs text-stone-500">{t('rwa.locked_garden.times_per_month', { count: 4 })} &middot; 0.01 AVAX</p>
               </div>
             </div>
             <div className="bg-white/80 border border-purple-200 rounded-xl p-3 flex items-start gap-2.5">
               <span className="text-lg">👑</span>
               <div>
                 <p className="text-sm font-bold text-purple-700">Premium</p>
-                <p className="text-xs text-stone-500">8 lần/tháng &middot; 0.02 AVAX</p>
+                <p className="text-xs text-stone-500">{t('rwa.locked_garden.times_per_month', { count: 8 })} &middot; 0.02 AVAX</p>
               </div>
             </div>
           </div>
@@ -57,7 +59,7 @@ export default function LockedGardenView() {
             className="mt-6 w-full max-w-[300px] py-3 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 active:bg-green-800 transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <span className="material-symbols-outlined text-base">shopping_cart</span>
-            Nâng cấp VIP
+            {t('rwa.locked_garden.upgrade_btn')}
           </button>
         </div>
       </div>

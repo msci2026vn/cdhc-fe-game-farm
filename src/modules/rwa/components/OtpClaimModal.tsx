@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import type { ClaimSlotResult, RecipientInfo } from '@/shared/types/game-api.types';
 import { useClaimSlot } from '@/shared/hooks/useMyGarden';
 import { useUIStore } from '@/shared/stores/uiStore';
+import { useTranslation } from 'react-i18next';
 
 interface OtpClaimModalProps {
   open: boolean;
@@ -23,6 +24,7 @@ function formatExpiry(iso: string) {
 }
 
 export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastRecipientInfo }: OtpClaimModalProps) {
+  const { t } = useTranslation();
   const claimMutation = useClaimSlot();
 
   const [step, setStep] = useState<'review' | 'form' | 'result'>(
@@ -63,10 +65,10 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!name.trim() || name.trim().length < 2) e.name = 'Vui lòng nhập họ tên (ít nhất 2 ký tự)';
-    if (name.trim().length > 100) e.name = 'Họ tên tối đa 100 ký tự';
-    if (!PHONE_REGEX.test(phone.trim())) e.phone = 'Số điện thoại không hợp lệ';
-    if (!address.trim() || address.trim().length < 10) e.address = 'Vui lòng nhập địa chỉ đầy đủ (ít nhất 10 ký tự)';
+    if (!name.trim() || name.trim().length < 2) e.name = t('rwa.otp_claim.name_error_empty');
+    if (name.trim().length > 100) e.name = t('rwa.otp_claim.name_error_max');
+    if (!PHONE_REGEX.test(phone.trim())) e.phone = t('rwa.otp_claim.phone_error');
+    if (!address.trim() || address.trim().length < 10) e.address = t('rwa.otp_claim.address_error');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -127,10 +129,10 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
     try {
       await navigator.clipboard.writeText(result.otpCode);
       setCopied(true);
-      useUIStore.getState().addToast('Đã copy mã OTP', 'success');
+      useUIStore.getState().addToast(t('rwa.otp_claim.toast_copy_success'), 'success');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      useUIStore.getState().addToast('Không thể copy', 'error');
+      useUIStore.getState().addToast(t('rwa.otp_claim.toast_copy_error'), 'error');
     }
   };
 
@@ -140,7 +142,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-green-800 flex items-center justify-center gap-2">
-            <span>📦</span> {step === 'result' ? 'Đã đăng ký nhận quà!' : `Nhận quà Tuần ${weekNumber}`}
+            <span>📦</span> {step === 'result' ? t('rwa.otp_claim.title_result') : t('rwa.otp_claim.title_form', { weekNumber })}
           </DialogTitle>
         </div>
 
@@ -150,7 +152,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
             <>
               {/* Read-only recipient info */}
               <div>
-                <label className="text-sm font-semibold text-stone-700 mb-1.5 block">Thông tin giao hàng:</label>
+                <label className="text-sm font-semibold text-stone-700 mb-1.5 block">{t('rwa.otp_claim.review_info')}</label>
                 <div className="bg-white/80 border border-stone-200 rounded-xl p-3 space-y-1.5">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-stone-400">👤</span>
@@ -173,21 +175,21 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 onClick={handleEdit}
                 className="text-xs font-medium text-green-600 hover:text-green-700 flex items-center gap-1 -mt-1"
               >
-                <span>✏️</span> Chỉnh sửa thông tin
+                <span>✏️</span> {t('rwa.otp_claim.edit_info')}
               </button>
 
               {/* Note — LUÔN EDITABLE */}
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-stone-600">Ghi chú cho lần giao này:</label>
+                <label className="text-sm font-semibold text-stone-600">{t('rwa.otp_claim.review_note')}</label>
                 <textarea
                   value={reviewNote}
                   onChange={(e) => setReviewNote(e.target.value)}
-                  placeholder="VD: Nhận sau 18h, gửi bảo vệ, cổng B..."
+                  placeholder={t("rwa.otp_claim.review_note_placeholder")}
                   maxLength={200}
                   rows={2}
                   className="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all resize-none"
                 />
-                <p className="text-[11px] text-stone-400">💡 VD: giờ nhận, cổng vào, gửi bảo vệ...</p>
+                <p className="text-[11px] text-stone-400">{t('rwa.otp_claim.review_note_hint')}</p>
               </div>
 
               {/* Quick submit */}
@@ -199,7 +201,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 {claimMutation.isPending ? (
                   <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
                 ) : (
-                  'Xác nhận nhận quà'
+                  t('rwa.otp_claim.quick_submit')
                 )}
               </button>
 
@@ -223,18 +225,18 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                   onClick={() => setStep('review')}
                   className="text-xs font-medium text-stone-500 hover:text-stone-700 flex items-center gap-1 -mt-1"
                 >
-                  ← Quay lại
+                  {t('rwa.otp_claim.back')}
                 </button>
               )}
 
               {/* Name */}
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-stone-700">Họ tên người nhận *</label>
+                <label className="text-sm font-semibold text-stone-700">{t('rwa.otp_claim.name_label')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Nguyễn Văn A"
+                  placeholder={t("rwa.otp_claim.name_placeholder")}
                   className="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all"
                 />
                 {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
@@ -242,7 +244,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
 
               {/* Phone */}
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-stone-700">Số điện thoại *</label>
+                <label className="text-sm font-semibold text-stone-700">{t('rwa.otp_claim.phone_label')}</label>
                 <input
                   type="tel"
                   inputMode="numeric"
@@ -256,11 +258,11 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
 
               {/* Address */}
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-stone-700">Địa chỉ giao hàng *</label>
+                <label className="text-sm font-semibold text-stone-700">{t('rwa.otp_claim.address_label')}</label>
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="456 Đường ABC, Quận 1, TP.HCM"
+                  placeholder={t("rwa.otp_claim.address_placeholder")}
                   rows={2}
                   className="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all resize-none"
                 />
@@ -269,12 +271,12 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
 
               {/* Note */}
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-stone-600">Ghi chú (tùy chọn)</label>
+                <label className="text-sm font-semibold text-stone-600">{t('rwa.otp_claim.note_label')}</label>
                 <input
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Tầng 3, cổng trái..."
+                  placeholder={t("rwa.otp_claim.note_placeholder")}
                   className="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all"
                 />
               </div>
@@ -288,7 +290,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 {claimMutation.isPending ? (
                   <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
                 ) : (
-                  'Xác nhận nhận quà'
+                  t('rwa.otp_claim.quick_submit')
                 )}
               </button>
 
@@ -307,7 +309,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
             <>
               {/* OTP display */}
               <div className="text-center space-y-2">
-                <p className="text-sm text-stone-600 font-medium">Mã nhận hàng của bạn:</p>
+                <p className="text-sm text-stone-600 font-medium">{t('rwa.otp_claim.otp_display')}</p>
                 <div className="bg-white border-2 border-green-300 rounded-xl py-4 px-3 shadow-inner">
                   <div className="flex items-center justify-center gap-2">
                     {result.otpCode.split('').map((digit, i) => (
@@ -321,7 +323,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                   </div>
                 </div>
                 <p className="text-xs text-stone-400">
-                  Hết hạn: {formatExpiry(result.expiresAt)}
+                  {t('rwa.otp_claim.expiry')}: {formatExpiry(result.expiresAt)}
                 </p>
               </div>
 
@@ -331,13 +333,13 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-100 hover:bg-green-200 text-green-700 font-semibold text-sm rounded-xl border border-green-200 transition-colors"
               >
                 <span>{copied ? '✓' : '📋'}</span>
-                {copied ? 'Đã copy!' : 'Copy mã'}
+                {copied ? t('rwa.otp_claim.copied') : t('rwa.otp_claim.copy_btn')}
               </button>
 
               {/* Recipient info */}
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-stone-200" />
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Giao đến</span>
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('rwa.otp_claim.deliver_to')}</span>
                 <div className="h-px flex-1 bg-stone-200" />
               </div>
 
@@ -355,7 +357,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
               {/* Batch info separator */}
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-stone-200" />
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Nguồn gốc</span>
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('rwa.otp_claim.source')}</span>
                 <div className="h-px flex-1 bg-stone-200" />
               </div>
 
@@ -371,7 +373,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <span>📅</span>
-                  <span className="text-stone-600">Thu hoạch: {result.batchInfo.harvestDate}</span>
+                  <span className="text-stone-600">{t('rwa.otp_claim.harvest')} {result.batchInfo.harvestDate}</span>
                 </div>
               </div>
 

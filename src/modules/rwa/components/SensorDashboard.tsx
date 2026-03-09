@@ -1,19 +1,20 @@
 import { useSensorLatest } from '@/shared/hooks/useSensor';
+import { useTranslation } from 'react-i18next';
 
 const indicatorColor = {
-  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', bar: 'bg-green-500', label: 'Tốt' },
-  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', bar: 'bg-yellow-500', label: 'Cảnh báo' },
-  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', bar: 'bg-red-500', label: 'Nguy hiểm' },
+  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', bar: 'bg-green-500', label: t('rwa.sensor.status_good') },
+  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', bar: 'bg-yellow-500', label: t('rwa.sensor.status_warning') },
+  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', bar: 'bg-red-500', label: t('rwa.sensor.status_danger') },
 } as const;
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds} giây trước`;
+  if (seconds < 60) return t('rwa.sensor.seconds_ago', { count: seconds });
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} phút trước`;
+  if (minutes < 60) return t('rwa.sensor.minutes_ago', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  return `${hours} giờ trước`;
+  return t('rwa.sensor.hours_ago', { count: hours });
 }
 
 function MetricCard({ icon, label, value, unit, indicator }: {
@@ -23,6 +24,7 @@ function MetricCard({ icon, label, value, unit, indicator }: {
   unit: string;
   indicator?: 'good' | 'warning' | 'danger';
 }) {
+  const { t } = useTranslation();
   const num = value ? parseFloat(value) : null;
   const style = indicator ? indicatorColor[indicator] : indicatorColor.good;
 
@@ -47,6 +49,7 @@ function MetricCard({ icon, label, value, unit, indicator }: {
 }
 
 export default function SensorDashboard() {
+  const { t } = useTranslation();
   const { data: reading, isLoading, isError } = useSensorLatest();
 
   if (isLoading) {
@@ -68,7 +71,7 @@ export default function SensorDashboard() {
     return (
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-sm">
         <p className="text-sm text-gray-500 text-center py-4">
-          Không thể tải dữ liệu cảm biến
+          {t('rwa.sensor.error_load')}
         </p>
       </div>
     );
@@ -82,14 +85,14 @@ export default function SensorDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-bold text-farm-brown-dark flex items-center gap-1.5">
-            <span className="text-lg">📡</span> Cảm biến Vườn
+            <span className="text-lg">📡</span> {t('rwa.sensor.title')}
           </h3>
           <p className="text-xs text-gray-400 mt-0.5">
-            {reading.deviceId} &middot; Đang hoạt động
+            {reading.deviceId} &middot; {t('rwa.sensor.active')}
           </p>
         </div>
         <span className="text-[10px] text-gray-400">
-          {timeAgo(reading.recordedAt)}
+          {timeAgo(reading.recordedAt, t)}
         </span>
       </div>
 
@@ -97,27 +100,27 @@ export default function SensorDashboard() {
       <div className="grid grid-cols-2 gap-2.5">
         <MetricCard
           icon="🌡️"
-          label="Nhiệt độ"
+          label={t("rwa.sensor.temp")}
           value={reading.temperature}
           unit="°C"
           indicator={ind?.temperature}
         />
         <MetricCard
           icon="💧"
-          label="Độ ẩm"
+          label={t("rwa.sensor.humidity")}
           value={reading.humidity}
           unit="%"
           indicator={ind?.humidity}
         />
         <MetricCard
           icon="☀️"
-          label="Ánh sáng"
+          label={t("rwa.sensor.light")}
           value={reading.lightLevel}
           unit="lux"
         />
         <MetricCard
           icon="🌱"
-          label="pH Đất"
+          label={t("rwa.sensor.soil_ph")}
           value={reading.soilPh}
           unit=""
           indicator={ind?.soilPh}
@@ -127,7 +130,7 @@ export default function SensorDashboard() {
       {/* Soil moisture - full width */}
       <MetricCard
         icon="💦"
-        label="Độ ẩm đất"
+        label={t("rwa.sensor.soil_moisture")}
         value={reading.soilMoisture}
         unit="%"
       />

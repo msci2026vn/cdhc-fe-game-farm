@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useDeliveryProof } from '@/shared/hooks/useMyGarden';
 import type { DeliverySlot } from '@/shared/types/game-api.types';
+import { useTranslation } from 'react-i18next';
 
 interface DeliveryDetailModalProps {
   open: boolean;
@@ -31,7 +32,7 @@ function CopyBtn({ text }: { text: string }) {
       onClick={handleCopy}
       className="text-xs text-stone-400 hover:text-stone-600 transition-colors ml-1"
     >
-      {copied ? '✓ Copied' : '📋'}
+      {copied ? `✓ ${t('common.success')}` : '📋'}
     </button>
   );
 }
@@ -47,6 +48,7 @@ function formatDateTime(dateStr: string | null | undefined) {
 }
 
 export default function DeliveryDetailModal({ open, onClose, slot, weekNumber }: DeliveryDetailModalProps) {
+  const { t } = useTranslation();
   const { data: proof, isLoading } = useDeliveryProof(open && slot ? slot.id : null);
 
   if (!slot) return null;
@@ -57,29 +59,29 @@ export default function DeliveryDetailModal({ open, onClose, slot, weekNumber }:
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-green-800 flex items-center justify-center gap-2">
-            <span>📦</span> Chi tiết nhận hàng
+            <span>📦</span> {t('rwa.delivery_detail.title')}
           </DialogTitle>
           <p className="text-sm text-stone-500 mt-1">
-            Tuần {weekNumber}
+            {t('rwa.delivery_detail.week')} {weekNumber}
           </p>
         </div>
 
         <div className="px-5 pb-5 space-y-4">
           {/* Delivery time + method */}
-          <Section icon="✅" title="Thông tin nhận hàng">
-            <Row label="Thời gian" value={formatDateTime(slot.deliveredAt) ?? 'Đã nhận'} />
+          <Section icon="✅" title={t("rwa.delivery_detail.delivery_info")}>
+            <Row label={t("rwa.delivery_detail.time")} value={formatDateTime(slot.deliveredAt) ?? t('rwa.delivery_detail.status_received')} />
             {proof?.deliveryData && (
-              <Row label="Phương thức" value={proof.isVerified ? 'Đã xác nhận' : 'Chờ xác nhận'} />
+              <Row label={t("rwa.delivery_detail.method")} value={proof.isVerified ? t('rwa.delivery_detail.verified') : t('rwa.delivery_detail.pending_verify')} />
             )}
           </Section>
 
           {/* Recipient info */}
           {(slot.recipientName || slot.recipientPhone || slot.recipientAddress) && (
-            <Section icon="👤" title="Người nhận">
-              {slot.recipientName && <Row label="Họ tên" value={slot.recipientName} />}
-              {slot.recipientPhone && <Row label="SĐT" value={slot.recipientPhone} />}
-              {slot.recipientAddress && <Row label="Địa chỉ" value={slot.recipientAddress} />}
-              {slot.recipientNote && <Row label="Ghi chú" value={slot.recipientNote} />}
+            <Section icon="👤" title={t("rwa.delivery_detail.recipient")}>
+              {slot.recipientName && <Row label={t("rwa.delivery_detail.name")} value={slot.recipientName} />}
+              {slot.recipientPhone && <Row label={t("rwa.delivery_detail.phone")} value={slot.recipientPhone} />}
+              {slot.recipientAddress && <Row label={t("rwa.delivery_detail.address")} value={slot.recipientAddress} />}
+              {slot.recipientNote && <Row label={t("rwa.delivery_detail.note")} value={slot.recipientNote} />}
             </Section>
           )}
 
@@ -89,18 +91,18 @@ export default function DeliveryDetailModal({ open, onClose, slot, weekNumber }:
               <div className="w-5 h-5 border-2 border-green-300 border-t-green-600 rounded-full animate-spin" />
             </div>
           ) : proof?.deliveryData && (
-            <Section icon="🌿" title="Sản phẩm">
-              <Row label="Sản phẩm" value={proof.deliveryData.product} />
-              <Row label="Nông trại" value={proof.deliveryData.farm} />
+            <Section icon="🌿" title={t("rwa.delivery_detail.product_info")}>
+              <Row label={t("rwa.delivery_detail.product_info")} value={proof.deliveryData.product} />
+              <Row label={t("rwa.delivery_detail.farm")} value={proof.deliveryData.farm} />
               {proof.deliveryData.harvestDate && (
-                <Row label="Thu hoạch" value={formatDateTime(proof.deliveryData.harvestDate) ?? proof.deliveryData.harvestDate} />
+                <Row label={t("rwa.delivery_detail.harvest_date")} value={formatDateTime(proof.deliveryData.harvestDate) ?? proof.deliveryData.harvestDate} />
               )}
             </Section>
           )}
 
           {/* Blockchain section */}
           {!isLoading && (
-            <Section icon="🔗" title="Blockchain">
+            <Section icon="🔗" title={t("rwa.delivery_detail.blockchain")}>
               {proof?.status === 'verified' && proof.blockchain ? (
                 <div className="space-y-2">
                   {/* TX Hash */}
@@ -151,19 +153,19 @@ export default function DeliveryDetailModal({ open, onClose, slot, weekNumber }:
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs rounded-xl border border-blue-200 transition-colors"
                     >
-                      🔍 Xem trên Snowtrace
+                      🔍 {t('rwa.delivery_detail.view_snowtrace')}
                       <span className="material-symbols-outlined text-sm">open_in_new</span>
                     </a>
                   )}
                 </div>
               ) : proof?.status === 'pending_blockchain' ? (
                 <div className="text-center py-2 space-y-1">
-                  <p className="text-xs text-amber-600 font-medium">⏳ Đang chờ ghi blockchain</p>
-                  <p className="text-[10px] text-stone-400">Dữ liệu sẽ được ghi lên chain hàng ngày lúc 00:00</p>
+                  <p className="text-xs text-amber-600 font-medium">{t('rwa.delivery_detail.pending_blockchain')}</p>
+                  <p className="text-[10px] text-stone-400">{t('rwa.delivery_detail.blockchain_note')}</p>
                 </div>
               ) : (
                 <div className="text-center py-2">
-                  <p className="text-xs text-stone-400">Chưa có dữ liệu blockchain</p>
+                  <p className="text-xs text-stone-400">{t('rwa.delivery_detail.no_blockchain_data')}</p>
                 </div>
               )}
             </Section>

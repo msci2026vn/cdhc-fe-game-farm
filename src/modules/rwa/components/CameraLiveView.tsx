@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCameraStream } from '@/shared/hooks/useCamera';
+import { useTranslation } from 'react-i18next';
 
 const CameraLiveView = () => {
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -56,7 +58,7 @@ const CameraLiveView = () => {
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">📹</span>
-          <span className="font-semibold text-gray-800">Camera Vườn</span>
+          <span className="font-semibold text-gray-800">{t('rwa.camera.title')}</span>
           <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
         </div>
         <span className="text-gray-400 text-sm">{isCollapsed ? '▼' : '▲'}</span>
@@ -87,8 +89,8 @@ const CameraLiveView = () => {
               <div className="w-full h-full flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <span className="text-4xl block mb-2">📹</span>
-                  <p className="text-sm font-medium">Camera đang offline</p>
-                  <p className="text-xs mt-1">Đang thử kết nối lại...</p>
+                  <p className="text-sm font-medium">{t('rwa.camera.camera_offline')}</p>
+                  <p className="text-xs mt-1">{t('rwa.camera.reconnecting')}</p>
                 </div>
               </div>
             )}
@@ -97,7 +99,7 @@ const CameraLiveView = () => {
           {/* Info */}
           <div className="mt-2 flex items-center gap-2 text-sm">
             <span className={isOnline ? 'text-green-600' : 'text-red-500'}>
-              {isOnline ? 'Đang phát trực tiếp' : 'Offline'}
+              {isOnline ? t('rwa.camera.live') : t('rwa.camera.offline')}
             </span>
             <span className="text-gray-300">|</span>
             <span className="text-gray-500">{streamInfo.location}</span>

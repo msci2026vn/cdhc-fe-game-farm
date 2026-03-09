@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useDeliveryProof } from '@/shared/hooks/useMyGarden';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface BlockchainProofModalProps {
   open: boolean;
@@ -15,6 +16,7 @@ function truncateHash(hash: string, chars = 6): string {
 }
 
 function CopyBtn({ text }: { text: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -34,6 +36,7 @@ function CopyBtn({ text }: { text: string }) {
 }
 
 export default function BlockchainProofModal({ open, onClose, slotId, weekNumber }: BlockchainProofModalProps) {
+  const { t } = useTranslation();
   const { data: proof, isLoading } = useDeliveryProof(open ? slotId : null);
 
   return (
@@ -42,7 +45,7 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-blue-800 flex items-center justify-center gap-2">
-            <span>🔗</span> Chứng nhận Blockchain
+            <span>🔗</span> {t('rwa.blockchain_proof.title')}
           </DialogTitle>
         </div>
 
@@ -58,8 +61,8 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
           {proof?.status === 'not_delivered' && (
             <div className="text-center py-6 space-y-2">
               <span className="text-3xl">📦</span>
-              <p className="text-sm text-stone-600">Chưa nhận hàng</p>
-              <p className="text-xs text-stone-400">Nhận hàng trước khi xem chứng nhận blockchain</p>
+              <p className="text-sm text-stone-600">{t('rwa.blockchain_proof.not_delivered')}</p>
+              <p className="text-xs text-stone-400">{t('rwa.blockchain_proof.not_delivered_desc')}</p>
             </div>
           )}
 
@@ -68,8 +71,8 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
             <div className="space-y-3">
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center space-y-1">
                 <span className="text-2xl">⏳</span>
-                <p className="text-sm font-medium text-amber-700">Đang chờ ghi blockchain</p>
-                <p className="text-xs text-amber-600">Dữ liệu sẽ được ghi lên chain trong vòng 12h</p>
+                <p className="text-sm font-medium text-amber-700">{t('rwa.blockchain_proof.pending_chain')}</p>
+                <p className="text-xs text-amber-600">{t('rwa.blockchain_proof.pending_desc')}</p>
               </div>
 
               {proof.deliveryData && (
@@ -136,7 +139,7 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-sm rounded-xl border border-blue-200 transition-colors mt-2"
                   >
-                    🔗 Xem trên Snowtrace
+                    🔗 {t('rwa.delivery_detail.view_snowtrace')}
                     <span className="material-symbols-outlined text-sm">open_in_new</span>
                   </a>
                 </div>
@@ -165,12 +168,12 @@ function DeliveryInfo({ data, weekNumber }: {
     <div className="bg-white/80 border border-stone-200 rounded-xl p-3 space-y-1.5">
       <div className="flex items-center gap-2 text-sm">
         <span>📦</span>
-        <span className="font-medium text-stone-700">Hộp Tuần {weekNumber}</span>
+        <span className="font-medium text-stone-700">{t('rwa.blockchain_proof.box_week', { weekNumber })}</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
         <span>✅</span>
         <span className="text-stone-600">
-          Đã nhận: {new Date(data.deliveredAt).toLocaleString('vi-VN', {
+          {t('rwa.blockchain_proof.received_at')}{new Date(data.deliveredAt).toLocaleString('vi-VN', {
             hour: '2-digit', minute: '2-digit',
             day: '2-digit', month: '2-digit', year: 'numeric',
           })}

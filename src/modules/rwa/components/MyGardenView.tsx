@@ -9,6 +9,7 @@ import BlockchainProofModal from './BlockchainProofModal';
 import DeliveryDetailModal from './DeliveryDetailModal';
 import SensorTimeline from './SensorTimeline';
 import CameraLiveView from './CameraLiveView';
+import { useTranslation } from 'react-i18next';
 
 function formatSlotDate(dateStr: string) {
   const today = new Date().toISOString().slice(0, 10);
@@ -29,6 +30,7 @@ interface MyGardenViewProps {
 }
 
 export default function MyGardenView({ garden, history, isLoadingHistory }: MyGardenViewProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -97,7 +99,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           </button>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-green-800 flex items-center gap-1.5">
-              <span>🌿</span> Vườn Của Tôi
+              <span>🌿</span> {t('rwa.my_garden.title')}
             </h1>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
             {tierLabel(garden.vipTier)}
           </span>
           <span className="px-2.5 py-1 bg-green-100 rounded-full text-xs font-bold text-green-700 border border-green-200">
-            {garden.claimedSlots}/{garden.totalSlots} đã nhận
+            {garden.claimedSlots}/{garden.totalSlots} {t('rwa.my_garden.claimed')}
           </span>
         </div>
 
@@ -147,7 +149,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
             <span className="text-lg leading-none mt-0.5">ℹ️</span>
             <p className="text-xs text-stone-600 leading-relaxed">
 
-              {garden.deliveriesPerDay} hộp rau/ngày. Bấm "Nhận quà" để điền thông tin giao hàng. Khi nhận hàng, bấm "Scan nhận hàng" hoặc nhập mã 6 số để xác nhận.
+              {garden.deliveriesPerDay} {t('rwa.my_garden.instruction')}
             </p>
           </div>
         </div>
@@ -184,12 +186,12 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
                       {formatSlotDate(d.date)}
                     </span>
                     <span className="text-xs font-bold text-stone-500">
-                      {d.deliveredSlots}/{d.totalSlots} đã nhận
+                      {d.deliveredSlots}/{d.totalSlots} {t('rwa.my_garden.claimed')}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-center text-xs text-stone-400 py-3">Chưa có lịch sử</p>
+                <p className="text-center text-xs text-stone-400 py-3">{t('rwa.my_garden.no_history')}</p>
               )}
             </div>
           )}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useScanClaim } from '@/shared/hooks/useMyGarden';
+import { useTranslation } from 'react-i18next';
 
 interface QrScannerModalProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface QrScannerModalProps {
 type Phase = 'scanning' | 'success' | 'error';
 
 export default function QrScannerModal({ open, onClose, slotId }: QrScannerModalProps) {
+  const { t } = useTranslation();
   const scanClaim = useScanClaim();
   const [phase, setPhase] = useState<Phase>('scanning');
   const [error, setError] = useState('');
@@ -45,7 +47,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
         () => { /* ignore scan errors */ },
       ).catch(() => {
         setPhase('error');
-        setError('Không thể mở camera. Vui lòng cấp quyền camera hoặc nhập mã thủ công.');
+        setError(t('rwa.qr_scanner.error_camera'));
       });
     }, 300);
 
@@ -68,25 +70,25 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
       qr = JSON.parse(decodedText);
     } catch {
       setPhase('error');
-      setError('QR không hợp lệ. Vui lòng scan lại QR trên phiếu giao hàng.');
+      setError(t('rwa.qr_scanner.error_invalid_qr'));
       return;
     }
 
     if (qr.t !== 'fv_d') {
       setPhase('error');
-      setError('QR không phải FARMVERSE. Vui lòng scan QR trên phiếu giao hàng.');
+      setError(t('rwa.qr_scanner.error_not_farmverse'));
       return;
     }
 
     if (qr.s !== slotId) {
       setPhase('error');
-      setError('QR không khớp hộp quà này. Vui lòng kiểm tra lại.');
+      setError(t('rwa.qr_scanner.error_mismatch'));
       return;
     }
 
     if (!qr.c || !qr.k) {
       setPhase('error');
-      setError('QR thiếu dữ liệu. Vui lòng nhập mã thủ công.');
+      setError(t('rwa.qr_scanner.error_missing_data'));
       return;
     }
 
@@ -99,7 +101,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
         },
         onError: (err: Error) => {
           setPhase('error');
-          setError(err.message || 'Xác nhận thất bại. Vui lòng thử lại.');
+          setError(err.message || t('rwa.qr_scanner.error_confirm'));
         },
       },
     );
@@ -122,7 +124,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <DialogTitle className="text-lg font-bold text-amber-800 flex items-center justify-center gap-2">
-            <span>📷</span> Scan QR nhận hàng
+            <span>📷</span> {t('rwa.qr_scanner.title')}
           </DialogTitle>
         </div>
 
@@ -140,7 +142,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
               {scanClaim.isPending && (
                 <div className="flex items-center justify-center gap-2 py-2">
                   <div className="w-5 h-5 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
-                  <span className="text-sm text-amber-700 font-medium">Đang xác nhận...</span>
+                  <span className="text-sm text-amber-700 font-medium">{t('rwa.qr_scanner.confirming')}</span>
                 </div>
               )}
             </div>
@@ -150,7 +152,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
           {phase === 'success' && (
             <div className="text-center py-6 space-y-3">
               <span className="text-4xl">✅</span>
-              <p className="text-base font-bold text-green-700">Nhận hàng thành công!</p>
+              <p className="text-base font-bold text-green-700">{t('rwa.qr_scanner.success')}</p>
               <p className="text-sm text-green-600">+50 XP</p>
               <button
                 onClick={handleClose}

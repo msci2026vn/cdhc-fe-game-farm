@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useBlockchainLogs, useBlockchainStats } from '@/shared/hooks/useBlockchain';
+import { useTranslation } from 'react-i18next';
 
 function truncateHash(hash: string | null, chars = 10): string {
   if (!hash) return '--';
@@ -15,13 +16,14 @@ function formatDate(dateStr: string | null): string {
 }
 
 const statusConfig = {
-  confirmed: { icon: '✅', label: 'Đã xác nhận', border: 'border-green-200', bg: 'bg-green-50' },
-  submitted: { icon: '⏳', label: 'Đang xử lý', border: 'border-yellow-200', bg: 'bg-yellow-50' },
-  pending: { icon: '🕐', label: 'Chờ xử lý', border: 'border-gray-200', bg: 'bg-gray-50' },
-  failed: { icon: '❌', label: 'Thất bại', border: 'border-red-200', bg: 'bg-red-50' },
+  confirmed: { icon: '✅', label: t('rwa.blockchain_log.status_confirmed'), border: 'border-green-200', bg: 'bg-green-50' },
+  submitted: { icon: '⏳', label: t('rwa.blockchain_log.status_processing'), border: 'border-yellow-200', bg: 'bg-yellow-50' },
+  pending: { icon: '🕐', label: t('rwa.blockchain_log.status_pending'), border: 'border-gray-200', bg: 'bg-gray-50' },
+  failed: { icon: '❌', label: t('rwa.blockchain_log.status_failed'), border: 'border-red-200', bg: 'bg-red-50' },
 } as const;
 
 function CopyButton({ text }: { text: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -34,7 +36,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       onClick={handleCopy}
       className="text-gray-400 hover:text-gray-600 transition-colors text-xs"
-      title="Sao chép"
+      title={t('rwa.blockchain_log.copy')}
     >
       {copied ? '✓' : '📋'}
     </button>
@@ -42,6 +44,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function BlockchainLog() {
+  const { t } = useTranslation();
   const { data: logs, isLoading: logsLoading } = useBlockchainLogs(10);
   const { data: stats, isLoading: statsLoading } = useBlockchainStats();
 
@@ -62,7 +65,7 @@ export default function BlockchainLog() {
       {/* Header */}
       <div>
         <h3 className="font-bold text-farm-brown-dark flex items-center gap-1.5">
-          <span className="text-lg">⛓️</span> Nhật ký Blockchain
+          <span className="text-lg">⛓️</span> {t('rwa.blockchain_log.title')}
         </h3>
         <p className="text-xs text-gray-400 mt-0.5">
           Avalanche C-Chain &middot; {logs?.length ?? 0} batch{(logs?.length ?? 0) !== 1 ? 'es' : ''}
@@ -104,7 +107,7 @@ export default function BlockchainLog() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs mt-1"
                     >
-                      🔗 Xem trên Snowtrace
+                      🔗 {t('rwa.blockchain_log.view_snowtrace')}
                     </a>
                   )}
                 </div>
@@ -113,14 +116,14 @@ export default function BlockchainLog() {
           })}
         </div>
       ) : (
-        <p className="text-sm text-gray-400 text-center py-3">Chưa có batch nào</p>
+        <p className="text-sm text-gray-400 text-center py-3">{t('rwa.blockchain_log.no_batch')}</p>
       )}
 
       {/* Contract stats */}
       {stats && (
         <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 space-y-1.5">
           <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-            📊 Thống kê Contract
+            📊 {t('rwa.blockchain_log.contract_stats')}
           </h4>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
             <span>Merkle roots:</span>
@@ -137,7 +140,7 @@ export default function BlockchainLog() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs mt-1"
             >
-              🔗 Xem Contract
+              🔗 {t('rwa.blockchain_log.view_contract')}
             </a>
           )}
         </div>
