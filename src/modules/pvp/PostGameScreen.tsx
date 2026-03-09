@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
 import type { PvpRating } from '@/shared/api/api-pvp';
+import { ProofBadge } from './components/ProofBadge';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,11 @@ interface PostGameProps {
   onRematch: () => void;
   onLeave: () => void;
   onQuit: () => void;
+  // Proof-of-Play (optional — populated async after match)
+  proofMerkleRoot?: string | null;
+  proofTxHash?:     string | null;
+  proofIpfsHash?:   string | null;
+  proofMoveCount?:  number;
 }
 
 // ─── ResultHero ───────────────────────────────────────────────────────────────
@@ -468,6 +474,10 @@ export default function PostGameScreen({
   onRematch,
   onLeave,
   onQuit,
+  proofMerkleRoot,
+  proofTxHash,
+  proofIpfsHash,
+  proofMoveCount,
 }: PostGameProps) {
   const { t } = useTranslation('pvp');
   const shareRef = useRef<HTMLDivElement>(null!);
@@ -509,6 +519,16 @@ export default function PostGameScreen({
         <MvpStatsGrid stats={myStats} />
 
         <HeadToHeadBanner h2h={h2hData} opponentName={opponentName} />
+
+        {/* On-chain proof badge */}
+        <div style={{ margin: '0 16px 14px' }}>
+          <ProofBadge
+            merkleRoot={proofMerkleRoot}
+            txHash={proofTxHash}
+            ipfsHash={proofIpfsHash}
+            moveCount={proofMoveCount}
+          />
+        </div>
 
         {/* Action buttons */}
         <div style={{ padding: '4px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>

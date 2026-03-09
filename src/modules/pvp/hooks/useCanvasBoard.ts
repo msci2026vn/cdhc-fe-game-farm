@@ -2,14 +2,14 @@ import { useRef, useEffect, useCallback } from 'react';
 
 // ── Gem visual config — aligned with campaign GEM_META ──
 // 0=atk(⚔️) 1=hp(💚) 2=def(🛡️) 3=star(⭐) 4=junk(🪨)
-const GEM_CONFIG: Array<{ bg: string; shine: string; emoji: string }> = [
-  { bg: '#dc2626', shine: 'rgba(255,180,180,0.35)', emoji: '⚔️' },  // 0: atk
-  { bg: '#16a34a', shine: 'rgba(150,255,180,0.35)', emoji: '💚' },  // 1: hp
-  { bg: '#2563eb', shine: 'rgba(180,200,255,0.35)', emoji: '🛡️' },  // 2: def
-  { bg: '#ca8a04', shine: 'rgba(255,230,100,0.35)', emoji: '⭐' },  // 3: star
-  { bg: '#57534e', shine: 'rgba(200,200,200,0.20)', emoji: '🪨' },  // 4: junk
+const GEM_CONFIG: Array<{ bg: string; bgLift: string; shine: string; emoji: string }> = [
+  { bg: '#dc2626', bgLift: '#ef4444', shine: 'rgba(255,180,180,0.35)', emoji: '⚔️' },
+  { bg: '#16a34a', bgLift: '#22c55e', shine: 'rgba(150,255,180,0.35)', emoji: '💚' },
+  { bg: '#2563eb', bgLift: '#3b82f6', shine: 'rgba(180,200,255,0.35)', emoji: '🛡️' },
+  { bg: '#ca8a04', bgLift: '#eab308', shine: 'rgba(255,230,100,0.35)', emoji: '⭐' },
+  { bg: '#57534e', bgLift: '#78716c', shine: 'rgba(200,200,200,0.20)', emoji: '🪨' },
 ];
-const EMPTY_GEM = { bg: '#1f2937', shine: 'transparent', emoji: '' };
+const EMPTY_GEM = { bg: '#1f2937', bgLift: '#374151', shine: 'transparent', emoji: '' };
 
 // ── Easing functions ──
 function easeOutBack(t: number) {
@@ -21,14 +21,14 @@ function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 // ── Gem animation state (mutable, no React re-render) ──
 interface GemAnim {
-  type: number;           // gem type index (-1 = empty)
-  renderX: number;        // current render position (CSS px)
+  type: number;
+  renderX: number;
   renderY: number;
-  targetX: number;        // where it should end up
+  targetX: number;
   targetY: number;
   scale: number;
   opacity: number;
-  animProgress: number;   // 0→1
+  animProgress: number;
   animType: 'idle' | 'swap' | 'fall' | 'match' | 'spawn';
 }
 
@@ -42,6 +42,14 @@ interface DragState {
   offsetY: number;
   targetIdx: number | null;
   fired: boolean;
+}
+
+// Spring snap-back animation state
+interface SnapState {
+  idx: number;
+  fromOffX: number;
+  fromOffY: number;
+  progress: number; // 0→1
 }
 
 // Haptic feedback helpers — safe no-op if unavailable
@@ -61,8 +69,8 @@ function hapticMedium() {
 }
 
 export interface UseCanvasBoardOptions {
-  board: number[];                                                // flat 64-element array
-  onSwap?: (from: number, to: number) => void;                   // callback: flat indices
+  board: number[];
+  onSwap?: (from: number, to: number) => void;
   disabled?: boolean;
 }
 
@@ -70,12 +78,13 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const dprRef = useRef(1);
-  const cellRef = useRef(44);          // cell size in CSS px
-  const rectRef = useRef<DOMRect | null>(null); // cached canvas rect
-  const gemsRef = useRef<GemAnim[]>([]); // mutable gem states
+  const cellRef = useRef(44);
+  const rectRef = useRef<DOMRect | null>(null);
+  const gemsRef = useRef<GemAnim[]>([]);
   const dragRef = useRef<DragState | null>(null);
+  const snapRef = useRef<SnapState | null>(null);
   const prevBoardRef = useRef<number[]>([]);
-  const needsDrawRef = useRef(true);   // dirty flag for RAF
+  const needsDrawRef = useRef(true);
 
   // ── Resize canvas to match parent, respecting devicePixelRatio ──
   const resizeCanvas = useCallback(() => {
@@ -115,6 +124,7 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
   }, []);
 
   // ── Draw a single gem onto the canvas ──
+  // hint: 'none' = normal, 'target' = dashed border only, 'lifted' = enhanced shadow+brightness
   const drawGem = useCallback((
     ctx: CanvasRenderingContext2D,
     type: number,
@@ -122,7 +132,7 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     size: number,
     scale: number,
     opacity: number,
-    isTarget: boolean,
+    hint: 'none' | 'target' | 'lifted',
   ) => {
     const gem = type >= 0 && type < GEM_CONFIG.length ? GEM_CONFIG[type] : EMPTY_GEM;
     const dpr = dprRef.current;
@@ -136,8 +146,8 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     ctx.globalAlpha = opacity;
     ctx.translate(cx, cy);
 
-    // Target hint: dashed border
-    if (isTarget) {
+    // Target hint: dashed border only
+    if (hint === 'target') {
       const gap = 2 * dpr;
       ctx.setLineDash([3 * dpr, 3 * dpr]);
       ctx.strokeStyle = 'rgba(255,255,255,0.5)';
@@ -150,29 +160,49 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
       return;
     }
 
-    // Shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 4 * dpr * scale;
-    ctx.shadowOffsetY = 2 * dpr * scale;
+    const isLifted = hint === 'lifted';
 
-    // Background rounded rect
-    ctx.fillStyle = gem.bg;
+    // Shadow — much larger when lifted for "floating" feel
+    if (isLifted) {
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 14 * dpr;
+      ctx.shadowOffsetY = 6 * dpr;
+    } else {
+      ctx.shadowColor = 'rgba(0,0,0,0.4)';
+      ctx.shadowBlur = 4 * dpr * scale;
+      ctx.shadowOffsetY = 2 * dpr * scale;
+    }
+
+    // Background rounded rect — brighter when lifted
+    ctx.fillStyle = isLifted ? gem.bgLift : gem.bg;
     ctx.beginPath();
     ctx.roundRect(-r, -r, r * 2, r * 2, 7 * dpr);
     ctx.fill();
 
-    // Shine gradient (top-left)
+    // Shine gradient (top-left) — stronger when lifted
     ctx.shadowColor = 'transparent';
     const shineGrad = ctx.createRadialGradient(
       -r * 0.3, -r * 0.3, 0,
       -r * 0.3, -r * 0.3, r * 0.8,
     );
-    shineGrad.addColorStop(0, gem.shine);
+    const shineColor = isLifted
+      ? 'rgba(255,255,255,0.45)'
+      : gem.shine;
+    shineGrad.addColorStop(0, shineColor);
     shineGrad.addColorStop(1, 'transparent');
     ctx.fillStyle = shineGrad;
     ctx.beginPath();
     ctx.roundRect(-r, -r, r * 2, r * 2, 7 * dpr);
     ctx.fill();
+
+    // Lifted glow rim
+    if (isLifted) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1.5 * dpr;
+      ctx.beginPath();
+      ctx.roundRect(-r, -r, r * 2, r * 2, 7 * dpr);
+      ctx.stroke();
+    }
 
     // Emoji icon
     if (gem.emoji) {
@@ -200,7 +230,7 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     const drag = dragRef.current;
     const gems = gemsRef.current;
 
-    // Advance animations
+    // Advance gem animations (spawn, fall, match, swap)
     let animating = false;
     for (let i = 0; i < gems.length; i++) {
       const g = gems[i];
@@ -239,12 +269,25 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
       }
     }
 
-    // Only redraw when animating, dragging, or dirty
-    if (!animating && !drag && !needsDrawRef.current) {
+    // Advance snap-back animation
+    let snapping = false;
+    const snap = snapRef.current;
+    if (snap) {
+      if (snap.progress < 1) {
+        snapping = true;
+        snap.progress = Math.min(1, snap.progress + 0.14);
+      }
+      if (snap.progress >= 1) {
+        snapRef.current = null;
+      }
+    }
+
+    // Only redraw when animating, dragging, snapping, or dirty
+    if (!animating && !drag && !snapping && !needsDrawRef.current) {
       rafRef.current = requestAnimationFrame(render);
       return;
     }
-    needsDrawRef.current = animating || !!drag;
+    needsDrawRef.current = animating || !!drag || snapping;
 
     // Clear + background
     ctx.fillStyle = '#141f0a';
@@ -265,27 +308,42 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
       ctx.stroke();
     }
 
-    // Draw all gems (except dragged)
+    // Identify gems to draw specially
+    const dragIdx = drag?.idx ?? -1;
+    const snapIdx = snap?.idx ?? -1;
+
+    // Draw all gems (except dragged and snapping)
     for (let i = 0; i < gems.length; i++) {
-      if (drag && i === drag.idx) continue;
+      if (i === dragIdx || (snapping && i === snapIdx)) continue;
       const g = gems[i];
       const isTarget = drag?.targetIdx === i;
       if (isTarget) {
-        drawGem(ctx, g.type, g.renderX, g.renderY, cell, 0.88, 0.65, false);
-        drawGem(ctx, g.type, g.renderX, g.renderY, cell, g.scale, g.opacity, true);
+        // Target gem: squished + dimmed, then dashed border overlay
+        drawGem(ctx, g.type, g.renderX, g.renderY, cell, 0.88, 0.65, 'none');
+        drawGem(ctx, g.type, g.renderX, g.renderY, cell, g.scale, g.opacity, 'target');
       } else {
-        drawGem(ctx, g.type, g.renderX, g.renderY, cell, g.scale, g.opacity, false);
+        drawGem(ctx, g.type, g.renderX, g.renderY, cell, g.scale, g.opacity, 'none');
       }
     }
 
-    // Draw dragged gem last (on top)
+    // Draw snap-back gem with spring interpolation (above normal gems)
+    if (snapping && snap && gems[snap.idx]) {
+      const g = gems[snap.idx];
+      const t = easeOutBack(snap.progress);
+      const ox = snap.fromOffX * (1 - t);
+      const oy = snap.fromOffY * (1 - t);
+      const sc = 1 + 0.18 * (1 - t); // scale 1.18 → 1.0 with spring
+      drawGem(ctx, g.type, g.renderX + ox, g.renderY + oy, cell, sc, 1, 'lifted');
+    }
+
+    // Draw dragged gem last (on top) — lifted appearance
     if (drag && gems[drag.idx]) {
       const g = gems[drag.idx];
       drawGem(
         ctx, g.type,
         g.renderX + drag.offsetX,
         g.renderY + drag.offsetY,
-        cell, 1.18, 1, false,
+        cell, 1.18, 1, 'lifted',
       );
     }
 
@@ -313,6 +371,8 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     const hit = getHit(e.clientX, e.clientY);
     if (!hit) return;
     hapticLight();
+    // Cancel any active snap on the same gem
+    if (snapRef.current?.idx === hit.idx) snapRef.current = null;
     dragRef.current = {
       ...hit,
       startX: e.clientX, startY: e.clientY,
@@ -332,8 +392,24 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     drag.offsetX = Math.max(-maxOff, Math.min(maxOff, dx));
     drag.offsetY = Math.max(-maxOff, Math.min(maxOff, dy));
 
+    // Early target detection at ~10px — show hint before swap fires
+    const dist2 = dx * dx + dy * dy;
+    if (dist2 > 100) { // 10² = 100
+      const hz = Math.abs(dx) >= Math.abs(dy);
+      let tr = drag.row, tc = drag.col;
+      if (hz) tc = dx > 0 ? drag.col + 1 : drag.col - 1;
+      else    tr = dy > 0 ? drag.row + 1 : drag.row - 1;
+      if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8) {
+        drag.targetIdx = tr * 8 + tc;
+      } else {
+        drag.targetIdx = null;
+      }
+    } else {
+      drag.targetIdx = null;
+    }
+
     // Fire swap immediately when threshold exceeded (7px² = 49) — no waiting for pointerup
-    if (dx * dx + dy * dy >= 49) {
+    if (dist2 >= 49) {
       const horiz = Math.abs(dx) >= Math.abs(dy);
       let toRow = drag.row, toCol = drag.col;
       if (horiz) toCol = dx > 0 ? drag.col + 1 : drag.col - 1;
@@ -343,7 +419,22 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
         drag.targetIdx = toRow * 8 + toCol;
         hapticMedium();
         onSwap?.(drag.idx, drag.targetIdx);
+        // Start spring snap-back animation (visual only — swap already sent)
+        snapRef.current = {
+          idx: drag.idx,
+          fromOffX: drag.offsetX,
+          fromOffY: drag.offsetY,
+          progress: 0,
+        };
+        dragRef.current = null; // drag done, snap takes over
       } else {
+        // Out of bounds — snap back
+        snapRef.current = {
+          idx: drag.idx,
+          fromOffX: drag.offsetX,
+          fromOffY: drag.offsetY,
+          progress: 0,
+        };
         dragRef.current = null;
       }
     }
@@ -353,11 +444,17 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
   const onPointerUp = useCallback(() => {
     const drag = dragRef.current;
     if (!drag) return;
-    // Snap back visual — swap already fired in pointermove
-    drag.offsetX = 0;
-    drag.offsetY = 0;
+    // Not fired — start spring snap-back (user released before threshold)
+    if (Math.abs(drag.offsetX) > 1 || Math.abs(drag.offsetY) > 1) {
+      snapRef.current = {
+        idx: drag.idx,
+        fromOffX: drag.offsetX,
+        fromOffY: drag.offsetY,
+        progress: 0,
+      };
+    }
+    dragRef.current = null;
     needsDrawRef.current = true;
-    setTimeout(() => { dragRef.current = null; needsDrawRef.current = true; }, 120);
   }, []);
 
   // ── Lifecycle: setup canvas, events, RAF, resize observer ──
