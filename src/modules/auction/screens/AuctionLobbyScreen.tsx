@@ -1,18 +1,17 @@
 import i18n from '@/i18n';
 import { useState } from 'react';
-import { useTranslation } from 'react';
+import { playSound } from '@/shared/audio';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuctionList, useNextSession, useCancelQueueItem, useMyQueue } from '../hooks/useAuction';
 import { AuctionCountdown } from '../components/AuctionCountdown';
 import { AuctionNftCard } from '../components/AuctionNftCard';
 import BottomNav from '@/shared/components/BottomNav';
 import { ConfirmModal } from '@/shared/components/ConfirmModal';
-import { playSound } from '@/shared/audio';
 import type { AuctionQueueItem } from '../types/auction.types';
-
-type MainTab = 'auction' | 'queue' | 'history';
 type SubTab = 'spotlight' | 'side';
 
+type MainTab = 'auction' | 'queue' | 'history';
 const mainTabs: { key: MainTab; label: string }[] = [
   { key: 'auction', label: i18n.t('tab_auction') },
   { key: 'queue', label: i18n.t('tab_queue') },
@@ -69,11 +68,10 @@ export default function AuctionLobbyScreen() {
                 }
                 setMainTab(t.key);
               }}
-              className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${
-                mainTab === t.key
-                  ? 'bg-amber-600 text-white'
-                  : 'text-gray-400 hover:text-gray-300'
-              }`}
+              className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${mainTab === t.key
+                ? 'bg-amber-600 text-white'
+                : 'text-gray-400 hover:text-gray-300'
+                } `}
             >
               {t.label}
             </button>
@@ -87,11 +85,10 @@ export default function AuctionLobbyScreen() {
               <button
                 key={t.key}
                 onClick={() => { playSound('ui_tab'); setSubTab(t.key); }}
-                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
-                  subTab === t.key
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                    : 'bg-gray-800 text-gray-500 hover:text-gray-400'
-                }`}
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${subTab === t.key
+                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                  : 'bg-gray-800 text-gray-500 hover:text-gray-400'
+                  } `}
               >
                 {t.label}
               </button>
@@ -105,7 +102,7 @@ export default function AuctionLobbyScreen() {
             {/* Next session banner */}
             {nextSession && nextSession.status === 'scheduled' && (
               <div className={`bg-gradient-to-r from-amber-900/40 to-orange-900/40 border rounded-2xl p-4 mb-4 ${showFomo ? 'border-amber-500 animate-pulse' : 'border-amber-700/50'
-                }`}>
+                } `}>
                 <div className="text-xs text-amber-400 uppercase tracking-wide">{t('next_session_title')}</div>
                 <div className="text-lg font-bold text-white mt-1">{nextSession.name}</div>
                 <AuctionCountdown endTime={nextSession.startTime} size="lg" />
@@ -140,7 +137,7 @@ export default function AuctionLobbyScreen() {
                     status={auction.status}
                     endTime={auction.endTime}
                     variant="grid"
-                    onClick={() => { playSound('ui_click'); navigate(`/auction/${auction.id}`); }}
+                    onClick={() => { playSound('ui_click'); navigate(`/ auction / ${auction.id} `); }}
                   />
                 ))}
               </div>
@@ -169,22 +166,21 @@ export default function AuctionLobbyScreen() {
                   </div>
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{item.nftName || `Token #${item.tokenId}`}</p>
+                    <p className="text-sm font-medium text-white truncate">{item.nftName || `Token #${item.tokenId} `}</p>
                     <p className="text-xs text-gray-400">{item.nftRarity} • {item.startPriceAvax} AVAX</p>
                     <p className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</p>
                   </div>
                   {/* Status + actions */}
                   <div className="flex flex-col items-end gap-1">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      item.status === 'queued' ? 'bg-yellow-500/20 text-yellow-400' :
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${item.status === 'queued' ? 'bg-yellow-500/20 text-yellow-400' :
                       item.status === 'assigned' ? 'bg-blue-500/20 text-blue-400' :
-                      item.status === 'active' ? 'bg-red-500/20 text-red-400' :
-                      'bg-gray-500/20 text-gray-400'
-                    }`}>
+                        item.status === 'active' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                      } `}>
                       {item.status === 'queued' ? t('queue_status_waiting') :
-                       item.status === 'assigned' ? t('queue_status_assigned') :
-                       item.status === 'active' ? t('queue_status_active') :
-                       item.status === 'ended' ? t('queue_status_ended') : t('queue_status_withdrawn')}
+                        item.status === 'assigned' ? t('queue_status_assigned') :
+                          item.status === 'active' ? t('queue_status_active') :
+                            item.status === 'ended' ? t('queue_status_ended') : t('queue_status_withdrawn')}
                     </span>
                     {item.status === 'queued' && (
                       <button

@@ -1,6 +1,6 @@
 import i18n from '@/i18n';
 import { useState } from 'react';
-import { useTranslation } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AuctionStatus } from '../types/auction.types';
 import { AuctionCountdown } from './AuctionCountdown';
 

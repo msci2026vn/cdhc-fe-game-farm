@@ -1,6 +1,6 @@
 import i18n from '@/i18n';
-import { useState } from 'react';
-import { useTranslation, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuctionDetail, useBidPack, useCancelAuction } from '../hooks/useAuction';
 import { useAuctionLivePolling } from '../hooks/useAuctionPolling';
@@ -11,8 +11,6 @@ import { PennyBidButton } from '../components/PennyBidButton';
 import { SealedBidPanel } from '../components/SealedBidPanel';
 import { RevealAnimation } from '../components/RevealAnimation';
 import { SuddenDeathModal } from '../components/SuddenDeathModal';
-import { EmojiReaction } from '../components/EmojiReaction';
-import { WhaleAlert } from '../components/WhaleAlert';
 import { playSound } from '@/shared/audio';
 import type { AuctionStatus } from '../types/auction.types';
 
@@ -92,7 +90,7 @@ export default function AuctionRoomScreen() {
         <h1 className="flex-1 text-center font-bold text-white uppercase tracking-wider text-sm">
           {status === 'sudden_death' ? 'Sudden Death' : t('room_title_normal')}
         </h1>
-        <span className={`text-xs px-2 py-1 rounded-full ${statusColors[status] || ''}`}>
+        <span className={`text - xs px - 2 py - 1 rounded - full ${statusColors[status] || ''} `}>
           {statusLabels[status] || status}
         </span>
       </div>
