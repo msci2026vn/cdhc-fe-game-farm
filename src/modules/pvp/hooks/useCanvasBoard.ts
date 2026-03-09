@@ -332,8 +332,8 @@ export function useCanvasBoard({ board, onSwap, disabled }: UseCanvasBoardOption
     drag.offsetX = Math.max(-maxOff, Math.min(maxOff, dx));
     drag.offsetY = Math.max(-maxOff, Math.min(maxOff, dy));
 
-    // Fire swap immediately when threshold exceeded (8px² = 64) — no waiting for pointerup
-    if (dx * dx + dy * dy >= 64) {
+    // Fire swap immediately when threshold exceeded (7px² = 49) — no waiting for pointerup
+    if (dx * dx + dy * dy >= 49) {
       const horiz = Math.abs(dx) >= Math.abs(dy);
       let toRow = drag.row, toCol = drag.col;
       if (horiz) toCol = dx > 0 ? drag.col + 1 : drag.col - 1;

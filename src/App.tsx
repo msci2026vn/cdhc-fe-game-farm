@@ -15,6 +15,8 @@ import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
 import { audioManager } from '@/shared/audio';
 import ErrorBoundary from '@/shared/components/ErrorBoundary';
 import { AppDisplayPrompt } from '@/components/AppDisplayPrompt';
+import { UpdatePopup } from '@/components/UpdatePopup';
+import { useServiceWorker } from '@/hooks/useServiceWorker';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
@@ -164,9 +166,16 @@ const AuthenticatedApp = () => {
  * /* → PROTECTED (AuthGuard → then game hooks + routes)
  */
 const App = () => {
+  const { needRefresh, updateServiceWorker, dismissUpdate } = useServiceWorker();
+
   return (
     <ErrorBoundary>
       <AppDisplayPrompt />
+      <UpdatePopup
+        visible={needRefresh}
+        onUpdate={updateServiceWorker}
+        onDismiss={dismissUpdate}
+      />
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
