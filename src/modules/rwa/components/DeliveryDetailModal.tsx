@@ -17,6 +17,7 @@ function truncateHash(hash: string, chars = 6): string {
 }
 
 function CopyBtn({ text }: { text: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -176,7 +177,7 @@ export default function DeliveryDetailModal({ open, onClose, slot, weekNumber }:
             onClick={onClose}
             className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
           >
-            Đóng
+            {t('close')}
           </button>
         </div>
       </DialogContent>

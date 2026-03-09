@@ -2,11 +2,6 @@ import { useState, useMemo } from 'react';
 import { useSensorHourly, useSensorDates, useSensorLatest } from '@/shared/hooks/useSensor';
 import { useTranslation } from 'react-i18next';
 
-const indicatorStyle = {
-  good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: t('rwa.sensor.status_good') },
-  warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: t('rwa.sensor.status_warning') },
-  danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', label: t('rwa.sensor.status_danger') },
-} as const;
 
 function timeAgo(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -27,6 +22,13 @@ function MetricCard({ icon, label, value, unit, indicator, fullWidth }: {
   fullWidth?: boolean;
 }) {
   const { t } = useTranslation();
+
+  const indicatorStyle = {
+    good: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: t('rwa.sensor.status_good') },
+    warning: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: t('rwa.sensor.status_warning') },
+    danger: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', label: t('rwa.sensor.status_danger') },
+  } as const;
+
   const style = indicator ? indicatorStyle[indicator] : indicatorStyle.good;
 
   return (
@@ -132,7 +134,7 @@ export default function SensorTimeline() {
                 onClick={() => selectDateAndReset(today)}
                 className="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-lg border border-green-200"
               >
-                Hôm nay
+                {t('rwa.sensor.today')}
               </button>
             )}
           </div>
@@ -169,13 +171,12 @@ export default function SensorTimeline() {
                 <button
                   key={i}
                   onClick={() => hasData && setSelectedHour(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    isSelected
-                      ? 'bg-green-500 scale-150'
-                      : hasData
-                        ? 'bg-green-300 hover:bg-green-400'
-                        : 'bg-gray-200'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all ${isSelected
+                    ? 'bg-green-500 scale-150'
+                    : hasData
+                      ? 'bg-green-300 hover:bg-green-400'
+                      : 'bg-gray-200'
+                    }`}
                   title={`${String(i).padStart(2, '0')}:00`}
                 />
               );
@@ -204,7 +205,7 @@ export default function SensorTimeline() {
                   onClick={() => setSelectedHour(hoursWithData[0])}
                   className="mt-2 text-xs text-green-600 font-medium underline"
                 >
-                  Chuyển đến giờ có dữ liệu
+                  {t('rwa.sensor.go_to_data')}
                 </button>
               )}
             </div>

@@ -54,11 +54,11 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
     return () => {
       clearTimeout(timeout);
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
+        scannerRef.current.stop().catch(() => { });
         scannerRef.current = null;
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, slotId]);
 
   const handleScanResult = async (decodedText: string, scanner: Html5Qrcode) => {
@@ -137,7 +137,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
                 className="w-full aspect-square rounded-xl overflow-hidden bg-black/5 border border-stone-200"
               />
               <p className="text-xs text-stone-500 text-center">
-                Chĩa camera vào QR trên phiếu giao hàng
+                {t('rwa.qr_scanner.instruction')}
               </p>
               {scanClaim.isPending && (
                 <div className="flex items-center justify-center gap-2 py-2">
@@ -158,7 +158,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
                 onClick={handleClose}
                 className="w-full py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-xl transition-colors mt-2"
               >
-                Đóng
+                {t('rwa.qr_scanner.close')}
               </button>
             </div>
           )}
@@ -178,7 +178,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
                 }}
                 className="w-full py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-700 font-semibold text-sm rounded-xl border border-amber-200 transition-colors"
               >
-                Thử lại
+                {t('rwa.qr_scanner.retry')}
               </button>
             </div>
           )}
@@ -188,7 +188,7 @@ export default function QrScannerModal({ open, onClose, slotId }: QrScannerModal
             onClick={handleClose}
             className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
           >
-            Đóng
+            {t('rwa.qr_scanner.close')}
           </button>
         </div>
       </DialogContent>

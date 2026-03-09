@@ -152,7 +152,7 @@ export default function BlockchainProofModal({ open, onClose, slotId, weekNumber
             onClick={onClose}
             className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
           >
-            Đóng
+            {t('close')}
           </button>
         </div>
       </DialogContent>
@@ -164,6 +164,7 @@ function DeliveryInfo({ data, weekNumber }: {
   data: NonNullable<import('@/shared/types/game-api.types').DeliveryProof['deliveryData']>;
   weekNumber: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white/80 border border-stone-200 rounded-xl p-3 space-y-1.5">
       <div className="flex items-center gap-2 text-sm">

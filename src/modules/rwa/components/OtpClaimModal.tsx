@@ -210,7 +210,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 onClick={handleClose}
                 className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
               >
-                Hủy
+                {t('rwa.otp_claim.cancel')}
               </button>
             </>
           )}
@@ -299,7 +299,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 onClick={handleClose}
                 className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
               >
-                Hủy
+                {t('rwa.otp_claim.cancel')}
               </button>
             </>
           )}
@@ -382,7 +382,7 @@ export default function OtpClaimModal({ open, onClose, slotId, weekNumber, lastR
                 onClick={handleClose}
                 className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
               >
-                Đóng
+                {t('close')}
               </button>
             </>
           )}

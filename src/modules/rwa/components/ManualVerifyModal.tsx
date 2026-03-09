@@ -107,14 +107,14 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
                 onClick={handleClose}
                 className="w-full py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-xl transition-colors mt-2"
               >
-                Đóng
+                {t('rwa.manual_verify.close')}
               </button>
             </div>
           ) : (
             <>
               {/* Instructions */}
               <p className="text-sm text-stone-600 text-center">
-                Nhập mã 6 số trên phiếu giao hàng:
+                {t('rwa.manual_verify.instruction')}
               </p>
 
               {/* OTP Input */}
@@ -160,7 +160,7 @@ export default function ManualVerifyModal({ open, onClose, slotId }: ManualVerif
                 onClick={handleClose}
                 className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium text-sm rounded-xl border border-stone-200 transition-colors"
               >
-                Hủy
+                {t('rwa.manual_verify.cancel')}
               </button>
             </>
           )}

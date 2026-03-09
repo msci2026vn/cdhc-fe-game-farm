@@ -11,9 +11,9 @@ import SensorTimeline from './SensorTimeline';
 import CameraLiveView from './CameraLiveView';
 import { useTranslation } from 'react-i18next';
 
-function formatSlotDate(dateStr: string) {
+function formatSlotDate(dateStr: string, t: any) {
   const today = new Date().toISOString().slice(0, 10);
-  if (dateStr === today) return 'Hôm nay';
+  if (dateStr === today) return t('rwa.sensor.today');
   const [year, month, day] = dateStr.split('-');
   return `${day}/${month}/${year}`;
 }
@@ -107,7 +107,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
         {/* Month + VIP info bar */}
         <div className="px-4 mt-3 flex items-center gap-2 flex-wrap">
           <span className="px-2.5 py-1 bg-white/80 rounded-full text-xs font-semibold text-stone-600 border border-stone-200">
-            {formatSlotDate(garden.date)}
+            {formatSlotDate(garden.date, t)}
           </span>
           <span className="px-2.5 py-1 bg-amber-100 rounded-full text-xs font-bold text-amber-700 border border-amber-200">
             {tierLabel(garden.vipTier)}
@@ -162,7 +162,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
           >
             <div className="h-px flex-1 bg-stone-300/50" />
             <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">
-              Lịch sử nhận rau
+              {t('rwa.my_garden.history')}
             </span>
             <span className="material-symbols-outlined text-stone-400 text-sm">
               {showHistory ? 'expand_less' : 'expand_more'}
@@ -183,7 +183,7 @@ export default function MyGardenView({ garden, history, isLoadingHistory }: MyGa
                     className="bg-white/60 border border-stone-200 rounded-lg px-3 py-2.5 flex items-center justify-between"
                   >
                     <span className="text-sm font-medium text-stone-700">
-                      {formatSlotDate(d.date)}
+                      {formatSlotDate(d.date, t)}
                     </span>
                     <span className="text-xs font-bold text-stone-500">
                       {d.deliveredSlots}/{d.totalSlots} {t('rwa.my_garden.claimed')}
