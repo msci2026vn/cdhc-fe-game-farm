@@ -68,7 +68,7 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
 
             {/* Zone context */}
             <p className="text-sm text-gray-500">
-              {meta?.icon} {t('campaign.ui.region')} {zone.zoneNumber}: {zone.name}
+              {meta?.icon} {t('campaign.ui.region')} {zone.zoneNumber}: {t(`campaign.zones.${zone.zoneNumber}.name`, { defaultValue: meta?.name || zone.name })}
             </p>
           </div>
 
@@ -82,14 +82,13 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
             <StatChip icon="💚" label={t('campaign.ui.heal')} value={detail?.healPercent ? `${detail.healPercent}%` : '—'} />
           </div>
 
-          {/* ═══ ARCHETYPE TAG ═══ */}
           {boss.archetype && boss.archetype !== 'none' && (
             <div className={cn('rounded-xl p-3 mb-4 text-white', archetype.color)}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{archetype.icon}</span>
-                <span className="font-heading font-bold text-sm">{archetype.label}</span>
+                <span className="font-heading font-bold text-sm">{t(`campaign.archetypes.${boss.archetype}.label`, { defaultValue: archetype.label })}</span>
               </div>
-              <p className="text-xs opacity-90">{archetype.tipVi}</p>
+              <p className="text-xs opacity-90">{t(`campaign.archetypes.${boss.archetype}.tip`, { defaultValue: archetype.tipVi })}</p>
             </div>
           )}
 
@@ -105,8 +104,8 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
                   <div key={i} className="flex items-start gap-2 text-sm">
                     <span className="text-lg leading-none flex-shrink-0">{s.icon}</span>
                     <div>
-                      <span className="font-bold text-gray-800">{s.label}</span>
-                      <span className="text-gray-500 ml-1.5">{getSkillDescVi(s)}</span>
+                      <span className="font-bold text-gray-800">{t(`campaign.boss_skills.${s.type}.label`, { defaultValue: s.label })}</span>
+                      <span className="text-gray-500 ml-1.5">{t(`campaign.boss_skills.${s.type}.desc`, { value: s.value, duration: s.duration, defaultValue: getSkillDescVi(s) })}</span>
                       <span className="text-gray-400 ml-1.5 text-xs">({s.cooldown}s CD)</span>
                     </div>
                   </div>
@@ -133,12 +132,12 @@ export default function BossDetailSheet({ boss, zone, open, onOpenChange, onFigh
               <div className="space-y-1.5">
                 <p className="text-sm text-green-700 flex items-start gap-1.5">
                   <span className="flex-shrink-0">✅</span>
-                  <span>{t('campaign.ui.good')} {archetype.counterIcon} {archetype.counterText}</span>
+                  <span>{t('campaign.ui.good')} {archetype.counterIcon} {t(`campaign.archetypes.${boss.archetype}.counterText`, { defaultValue: archetype.counterText })}</span>
                 </p>
                 {archetype.worstText && (
                   <p className="text-sm text-red-600 flex items-start gap-1.5">
                     <span className="flex-shrink-0">⚠️</span>
-                    <span>{t('campaign.ui.weak')} {archetype.worstIcon} {archetype.worstText}</span>
+                    <span>{t('campaign.ui.weak')} {archetype.worstIcon} {t(`campaign.archetypes.${boss.archetype}.worstText`, { defaultValue: archetype.worstText })}</span>
                   </p>
                 )}
               </div>

@@ -14,6 +14,7 @@ import {
 import { ROWS, COLS } from '@/shared/match3/board.utils';
 import { playSound } from '@/shared/audio';
 import type { BossSkill } from '../data/bossSkills';
+import i18n from '@/i18n';
 
 const BOSS_HEAL_INTERVAL = 5000;
 const MULTI_HIT_DELAY = 300;
@@ -51,7 +52,8 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
 
     if (isSkill) {
       // ══ SKILL ATTACK: 1 hit x2.5, NOT multiplied by freq ══
-      const skillName = getBossSkillName(archetype);
+      const skillNameKey = getBossSkillName(archetype);
+      const skillName = i18n.t(skillNameKey);
       const skillDmg = Math.round(baseAtk * SKILL_DMG_MULT);
 
       playSound('boss_skill');
@@ -65,7 +67,7 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
         setSkillWarning(null);
 
         if (dodgedRef.current) {
-          setBossAttackMsg({ text: 'NÉ THÀNH CÔNG! 🏃', emoji: '💨' });
+          setBossAttackMsg({ text: i18n.t('campaign.ui.dodge_success', { defaultValue: 'NÉ THÀNH CÔNG! 🏃' }), emoji: '💨' });
           setTimeout(() => setBossAttackMsg(null), 1000);
           return;
         }
@@ -81,7 +83,7 @@ export function setupCampaignBossAttackLoop(deps: BossAttackLoopDeps): () => voi
         const hitTimeout = setTimeout(() => {
           pendingHitsRef.current = pendingHitsRef.current.filter(t => t !== hitTimeout);
           const normalDmg = Math.round(baseAtk + Math.floor(Math.random() * Math.round(baseAtk * 0.2)));
-          const hitLabel = freq > 1 ? `Đòn ${i + 1}/${freq}!` : 'Boss tấn công!';
+          const hitLabel = freq > 1 ? i18n.t('campaign.ui.multi_hit', { current: i + 1, total: freq, defaultValue: `Đòn ${i + 1}/${freq}!` }) : i18n.t('campaign.ui.boss_attacks', { defaultValue: 'Boss tấn công!' });
           applyBossDamageRef.current(normalDmg, hitLabel, '💥');
         }, i * MULTI_HIT_DELAY);
         pendingHitsRef.current.push(hitTimeout);
@@ -182,7 +184,7 @@ export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
     skillCooldownsRef.current[skill.type] = Date.now();
 
     // Show alert
-    setSkillAlert({ icon: skill.icon, text: `${bossName} ${skill.label}` });
+    setSkillAlert({ icon: skill.icon, text: `${bossName} ${i18n.t(`campaign.boss_skills.${skill.type}.label`, { defaultValue: skill.label })}` });
     const alertTimeout = setTimeout(() => {
       skillTimersRef.current = skillTimersRef.current.filter(t => t !== alertTimeout);
       setSkillAlert(null);

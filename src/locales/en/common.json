@@ -1008,7 +1008,6 @@
       },
       "boss": {
         "special": {
-          "none": "None",
           "3": "HP < 50%, ATK +50%",
           "4": "Spawns eggs every 5 turns: if not destroyed → heals 15% HP",
           "6": "Cocoon: reduces damage by 50% for 1 turn every 5 turns",
@@ -1042,9 +1041,262 @@
           "37": "Spores on death: 4 mushroom tiles (match = 4% MaxHP)",
           "38": "Summons termites/4t (3,000 HP, 200 ATK)",
           "39": "Invisibile 1t/4t. Execute: player < 20% → damage ×5",
-          "40": "4 PHASES: P1 Tank → P2 Assassin → P3 Healer → P4 Glass Cannon"
+          "40": "4 PHASES: P1 Tank → P2 Assassin → P3 Healer → P4 Glass Cannon",
+          "none": "None"
         }
       }
     }
-  }
+  },
+  "campaign": {
+    "archetypes": {
+      "glass_cannon": {
+        "label": "Glass Cannon",
+        "counterText": "Attack (rush kill)",
+        "worstText": "",
+        "tip": "Kill fast, dodge when boss rages"
+      },
+      "tank": {
+        "label": "Tank",
+        "counterText": "Attack (armor break)",
+        "worstText": "Defense (damage blocked by DEF)",
+        "tip": "High ATK to break armor. Be patient in phase 1, burst in rage."
+      },
+      "healer": {
+        "label": "Healer",
+        "counterText": "Attack (out-damage heal)",
+        "worstText": "Defense (DPS < boss heal)",
+        "tip": "DPS must exceed heal. Burst when guard is down."
+      },
+      "assassin": {
+        "label": "Assassin",
+        "counterText": "Defense (tank burst)",
+        "worstText": "Attack (low DEF, die fast)",
+        "tip": "DEF reduction per hit ×Freq. Dodge rage phase."
+      },
+      "controller": {
+        "label": "Controller",
+        "counterText": "Balanced (Mana resists drain)",
+        "worstText": "Attack (disrupted)",
+        "tip": "High Mana resists drain well. Remember stun pattern."
+      },
+      "hybrid": {
+        "label": "Hybrid",
+        "counterText": "Attack (burst > heal)",
+        "worstText": "Balanced (low HP vs true damage)",
+        "tip": "DPS race. Dodge true damage. Boss self-destructs at low HP."
+      },
+      "all": {
+        "label": "Emperor",
+        "counterText": "Defense (safest)",
+        "worstText": "",
+        "tip": "4 phases: Tank→Assassin→Healer→Glass. Save Mana in P1, Dodge in P2, Burst in P3, Survive P4"
+      },
+      "none": {
+        "label": "Normal",
+        "counterText": "Any build is OK",
+        "worstText": "",
+        "tip": "Normal monster, no special mechanics"
+      }
+    },
+    "boss_skills": {
+      "stun": {
+        "label": "Stun!",
+        "desc": "Lock grid for {{duration}}s"
+      },
+      "burn": {
+        "label": "Burn!",
+        "desc": "{{value}}% maxHP/sec × {{duration}}s"
+      },
+      "heal_block": {
+        "label": "Heal block!",
+        "desc": "Block HP healing for {{duration}}s"
+      },
+      "armor_break": {
+        "label": "Armor break!",
+        "desc": "DEF = 0 for {{duration}}s"
+      },
+      "shield": {
+        "label": "Immortal!",
+        "desc": "Immune to damage for {{duration}}s"
+      },
+      "reflect": {
+        "label": "Reflect!",
+        "desc": "Reflect {{value}}% damage for {{duration}}s"
+      },
+      "egg": {
+        "label": "Lay egg!",
+        "desc": "Hatch in {{duration}}s → heals {{value}}% HP"
+      },
+      "gem_lock": {
+        "label": "Gem lock!",
+        "desc": "Lock {{value}} gems for {{duration}}s"
+      }
+    },
+    "boss_phases": {
+      "tank": {
+        "skillName": "Divine Armor!",
+        "description": "Extremely high DEF, slow attacks. Focus on armor break."
+      },
+      "assassin": {
+        "skillName": "Triple Strike!",
+        "description": "3 continuous strikes, very high ATK. DODGE or die!"
+      },
+      "healer": {
+        "skillName": "Resurrection!",
+        "description": "Heals 3% HP every 5 seconds. DPS race — burst quickly!"
+      },
+      "glass_cannon": {
+        "skillName": "Destruction!",
+        "description": "Max ATK, auto loses 2% HP/5s. Survive = win!"
+      }
+    },
+    "boss": {
+      "special": {
+        "3": "Drains 10% Mana per attack",
+        "4": "Poison Rain: -5% HP every 5 turns",
+        "6": "Shield: Reduces damage from Red gems by 50%",
+        "7": "Heals 10% HP on player miss",
+        "8": "Randomly locks 2 player skills for 3 turns",
+        "9": "Spider Queen: Summons spiderlings to block the board",
+        "11": "Each hit reduces player ATK by 10% (stacks)",
+        "12": "Toxic Worm: Spreads toxic spikes, player takes damage per move",
+        "13": "Mad Rabbit: x2 Speed when HP < 50%",
+        "14": "Escape: Will run away if not defeated in 15 turns",
+        "15": "Assassin: 30% Critical rate",
+        "16": "Shadow Clone: Creates 2 illusions that share HP",
+        "18": "Lifesteal: Heals HP equal to 50% of damage dealt",
+        "19": "Iron Skin: Immune to magic damage (Elemental gems)",
+        "20": "Symbiosis: Revives once with 30% HP",
+        "22": "Enrage: ATK increases by 20% every passing turn",
+        "23": "Charm: Reduces player combo rate",
+        "24": "Phantom Speed: Evades 30% of attacks",
+        "25": "Panda: Eats bamboo to fully heal if left unchecked",
+        "26": "Thorn Armor: Reflects 20% melee damage",
+        "27": "Seal: Locks player's healing abilities",
+        "28": "Dragon King: Summons meteor shower every 10 turns",
+        "29": "Mud: Player speed reduced by 50%",
+        "30": "Toxic Toad: Explodes on death causing massive damage",
+        "31": "Python: Constricts, draining 5% Max HP per turn",
+        "32": "Crocodile King: Death Roll ignores DEF",
+        "33": "Inferno: Battlefield constantly burns",
+        "34": "Magma: Turns red gems into time bombs",
+        "35": "Phoenix: Rebirths from the ashes",
+        "36": "Fire God: Summons fire pillars to destroy the grid",
+        "37": "Darkness: Obscures part of the battle grid",
+        "38": "Soul: Ignores 50% of player's defense",
+        "39": "Curse: Death bomb countdown",
+        "40": "Demon Lord: Changes mechanics every 25% HP",
+        "none": "No special mechanics."
+      }
+    },
+    "zones": {
+      "1": {
+        "name": "Rice Field"
+      },
+      "2": {
+        "name": "Tomato Garden"
+      },
+      "3": {
+        "name": "Pepper Garden"
+      },
+      "4": {
+        "name": "Carrot Patch"
+      },
+      "5": {
+        "name": "Barn"
+      },
+      "6": {
+        "name": "Wasteland"
+      },
+      "7": {
+        "name": "Bamboo Forest"
+      },
+      "8": {
+        "name": "Swamp"
+      },
+      "9": {
+        "name": "Volcano"
+      },
+      "10": {
+        "name": "Underworld"
+      }
+    },
+    "boss_random_skills": {
+      "glass_cannon": [
+        "Critical Strike!",
+        "Twin Blades!",
+        "Enrage!"
+      ],
+      "tank": [
+        "Headbutt!",
+        "Earth Smash!",
+        "Thorn Armor!"
+      ],
+      "healer": [
+        "Heal!",
+        "Healing Spores!",
+        "Lifesteal!"
+      ],
+      "assassin": [
+        "Multi-Strike!",
+        "Speed Attack!",
+        "Assassinate!"
+      ],
+      "controller": [
+        "Shuffle!",
+        "Mana Drain!",
+        "Stun!"
+      ],
+      "hybrid": [
+        "Hybrid Strike!",
+        "All-round Attack!",
+        "Full Force!"
+      ],
+      "all": [
+        "Emperor Descent!",
+        "Heaven Penalty!"
+      ],
+      "none": [
+        "Heavy Attack!",
+        "Hellfire!",
+        "Thunderbolt!",
+        "Tempest Strike!"
+      ]
+    }
+  },
+  "campaign_boss_special_3": "Drains 10% Mana per attack",
+  "campaign_boss_special_4": "Poison Rain: -5% HP every 5 turns",
+  "campaign_boss_special_6": "Shield: Reduces damage from Red gems by 50%",
+  "campaign_boss_special_7": "Heals 10% HP on player miss",
+  "campaign_boss_special_8": "Randomly locks 2 player skills for 3 turns",
+  "campaign_boss_special_9": "Spider Queen: Summons spiderlings to block the board",
+  "campaign_boss_special_11": "Each hit reduces player ATK by 10% (stacks)",
+  "campaign_boss_special_12": "Toxic Worm: Spreads toxic spikes, player takes damage per move",
+  "campaign_boss_special_13": "Mad Rabbit: x2 Speed when HP < 50%",
+  "campaign_boss_special_14": "Escape: Will run away if not defeated in 15 turns",
+  "campaign_boss_special_15": "Assassin: 30% Critical rate",
+  "campaign_boss_special_16": "Shadow Clone: Creates 2 illusions that share HP",
+  "campaign_boss_special_18": "Lifesteal: Heals HP equal to 50% of damage dealt",
+  "campaign_boss_special_19": "Iron Skin: Immune to magic damage (Elemental gems)",
+  "campaign_boss_special_20": "Symbiosis: Revives once with 30% HP",
+  "campaign_boss_special_22": "Enrage: ATK increases by 20% every passing turn",
+  "campaign_boss_special_23": "Charm: Reduces player combo rate",
+  "campaign_boss_special_24": "Phantom Speed: Evades 30% of attacks",
+  "campaign_boss_special_25": "Panda: Eats bamboo to fully heal if left unchecked",
+  "campaign_boss_special_26": "Thorn Armor: Reflects 20% melee damage",
+  "campaign_boss_special_27": "Seal: Locks player's healing abilities",
+  "campaign_boss_special_28": "Dragon King: Summons meteor shower every 10 turns",
+  "campaign_boss_special_29": "Mud: Player speed reduced by 50%",
+  "campaign_boss_special_30": "Toxic Toad: Explodes on death causing massive damage",
+  "campaign_boss_special_31": "Python: Constricts, draining 5% Max HP per turn",
+  "campaign_boss_special_32": "Crocodile King: Death Roll ignores DEF",
+  "campaign_boss_special_33": "Inferno: Battlefield constantly burns",
+  "campaign_boss_special_34": "Magma: Turns red gems into time bombs",
+  "campaign_boss_special_35": "Phoenix: Rebirths from the ashes",
+  "campaign_boss_special_36": "Fire God: Summons fire pillars to destroy the grid",
+  "campaign_boss_special_37": "Darkness: Obscures part of the battle grid",
+  "campaign_boss_special_38": "Soul: Ignores 50% of player's defense",
+  "campaign_boss_special_39": "Curse: Death bomb countdown",
+  "campaign_boss_special_40": "Demon Lord: Changes mechanics every 25% HP",
+  "campaign_boss_special_none": "No special mechanics."
 }

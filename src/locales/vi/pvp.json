@@ -82,7 +82,8 @@
   "matchmaking": {
     "searching": "Đang Tìm Đối Thủ...",
     "waitTime": "Thời gian chờ:",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "kickedRequeue": "Bị đuổi — đang tìm trận mới..."
   },
   "game": {
     "you": "Tôi",

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { pvpApi } from '@/shared/api/api-pvp';
@@ -378,6 +378,7 @@ function QuickMatchModal({
 // ─── Main PvpLobby ────────────────────────────────────────────────────────────
 export default function PvpLobby() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation('pvp');
   const { data: auth } = useAuth();
   const qc = useQueryClient();
@@ -418,6 +419,9 @@ export default function PvpLobby() {
     queryFn: pvpApi.getQueueStatus,
     enabled: inQueue,
     refetchInterval: 3000,
+    retry: 1,           // stop flood: only 1 retry on 502 (was 3 default)
+    retryDelay: 3000,   // fixed 3s delay, not exponential
+    refetchOnWindowFocus: false,
   });
 
   // When queue finds a match (or triggers bot/boss)
@@ -438,8 +442,8 @@ export default function PvpLobby() {
     if (queueStatus.matched && (queueStatus.roomCode || queueStatus.roomId)) {
       setInQueue(false);
       const target = queueStatus.roomId
-        ? `/pvp-test?roomId=${queueStatus.roomId}`
-        : `/pvp-test?room=${queueStatus.roomCode}`;
+        ? `/pvp-test?roomId=${queueStatus.roomId}&fromQueue=1`
+        : `/pvp-test?room=${queueStatus.roomCode}&fromQueue=1`;
       navigate(target);
       return;
     }
@@ -462,7 +466,7 @@ export default function PvpLobby() {
     } else if (event.type === 'pvp_matched') {
       setInQueue(false);
       showToast(t('toast.matchFound'));
-      setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}`), 800);
+      setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}&fromQueue=1`), 800);
     }
   }, [navigate, showToast]);
 
@@ -492,7 +496,7 @@ export default function PvpLobby() {
     mutationFn: pvpApi.joinQueue,
     onSuccess: (data) => {
       if (data.matched && data.roomCode) {
-        navigate(`/pvp-test?room=${data.roomCode}`);
+        navigate(`/pvp-test?room=${data.roomCode}&fromQueue=1`);
       } else {
         setInQueue(true);
         setWaitSeconds(0);
@@ -500,6 +504,15 @@ export default function PvpLobby() {
     },
     onError: (e: Error) => showToast(`❌ ${e.message}`),
   });
+
+  // Auto re-queue khi bị kick từ Quick Match (code 4001)
+  useEffect(() => {
+    if (searchParams.get('requeue') === '1') {
+      showToast(t('matchmaking.kickedRequeue'));
+      joinQueueMut.mutate();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const leaveQueueMut = useMutation({
     mutationFn: pvpApi.leaveQueue,

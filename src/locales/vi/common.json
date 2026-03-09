@@ -1008,7 +1008,6 @@
       },
       "boss": {
         "special": {
-          "none": "Không có",
           "3": "Khi HP<50% ATK tăng 50%",
           "4": "Đẻ trứng mỗi 5 lượt: không phá → hồi 15% HP",
           "6": "Kén: giảm 50% dame 1 turn mỗi 5 lượt",
@@ -1042,9 +1041,262 @@
           "37": "Bào tử khi chết: 4 tile nấm (match = 4% MaxHP)",
           "38": "Triệu hồi mối/4t (3,000 HP, ATK 200)",
           "39": "Tàng hình 1t/4t. Xử tử: player <20% → dame ×5",
-          "40": "4 PHASE: P1 Tank → P2 Assassin → P3 Healer → P4 Glass Cannon"
+          "40": "4 PHASE: P1 Tank → P2 Assassin → P3 Healer → P4 Glass Cannon",
+          "none": "Không có"
         }
       }
     }
-  }
+  },
+  "campaign": {
+    "archetypes": {
+      "glass_cannon": {
+        "label": "Glass Cannon",
+        "counterText": "Tấn Công (rush kill)",
+        "worstText": "",
+        "tip": "Giết nhanh, né khi boss rage"
+      },
+      "tank": {
+        "label": "Tank",
+        "counterText": "Tấn Công (phá giáp)",
+        "worstText": "Phòng Thủ (dame bị DEF chặn)",
+        "tip": "ATK cao phá giáp. Kiên nhẫn phase 1, burst phase rage"
+      },
+      "healer": {
+        "label": "Healer",
+        "counterText": "Tấn Công (vượt hồi)",
+        "worstText": "Phòng Thủ (DPS < hồi máu)",
+        "tip": "DPS phải vượt heal/turn. Dồn burst khi boss mở guard"
+      },
+      "assassin": {
+        "label": "Assassin",
+        "counterText": "Phòng Thủ (tank burst)",
+        "worstText": "Tấn Công (DEF thấp, chết nhanh)",
+        "tip": "DEF giảm MỖI đòn ×Freq. Né phase rage (Freq tăng)"
+      },
+      "controller": {
+        "label": "Controller",
+        "counterText": "Cân Bằng (Mana chống drain)",
+        "worstText": "Tấn Công (bị disrupt)",
+        "tip": "Mana cao chịu drain tốt. Nhớ pattern stun"
+      },
+      "hybrid": {
+        "label": "Hybrid",
+        "counterText": "Tấn Công (burst vượt hồi)",
+        "worstText": "Cân Bằng (HP thấp vs true damage)",
+        "tip": "Cuộc đua DPS. Né true damage. Boss tự hủy khi HP thấp"
+      },
+      "all": {
+        "label": "Đế Vương",
+        "counterText": "Phòng Thủ (an toàn nhất)",
+        "worstText": "",
+        "tip": "4 phase: Tank→Assassin→Healer→Glass. Tích Mana ở P1, Né ở P2, Burst ở P3, Sống sót P4"
+      },
+      "none": {
+        "label": "Thường",
+        "counterText": "Mọi build đều OK",
+        "worstText": "",
+        "tip": "Quái thường, không có cơ chế đặc biệt"
+      }
+    },
+    "boss_skills": {
+      "stun": {
+        "label": "Choáng!",
+        "desc": "Khóa grid {{duration}}s"
+      },
+      "burn": {
+        "label": "Đốt!",
+        "desc": "{{value}}% maxHP/giây × {{duration}}s"
+      },
+      "heal_block": {
+        "label": "Khóa hồi!",
+        "desc": "Khóa hồi HP {{duration}}s"
+      },
+      "armor_break": {
+        "label": "Phá giáp!",
+        "desc": "DEF = 0 trong {{duration}}s"
+      },
+      "shield": {
+        "label": "Bất tử!",
+        "desc": "Miễn nhiễm damage {{duration}}s"
+      },
+      "reflect": {
+        "label": "Phản dame!",
+        "desc": "Phản {{value}}% dame {{duration}}s"
+      },
+      "egg": {
+        "label": "Đẻ trứng!",
+        "desc": "Trứng nở {{duration}}s → hồi {{value}}% HP"
+      },
+      "gem_lock": {
+        "label": "Khóa gem!",
+        "desc": "Khóa {{value}} gem × {{duration}}s"
+      }
+    },
+    "boss_phases": {
+      "tank": {
+        "skillName": "Giáp thần!",
+        "description": "DEF cực cao, đánh chậm. Tập trung phá giáp."
+      },
+      "assassin": {
+        "skillName": "Tam liên kích!",
+        "description": "3 đòn liên hoàn, ATK cực cao. NÉ hoặc chết!"
+      },
+      "healer": {
+        "skillName": "Hồi sinh!",
+        "description": "Hồi 3% HP mỗi 5 giây. DPS race — burst nhanh!"
+      },
+      "glass_cannon": {
+        "skillName": "Hủy diệt!",
+        "description": "ATK tối đa, tự mất 2% HP/5s. Sống sót = thắng!"
+      }
+    },
+    "boss": {
+      "special": {
+        "3": "Hút 10% Mana mỗi đòn đánh",
+        "4": "Mưa độc: -5% HP mỗi 5 lượt",
+        "6": "Lá chắn: Giảm 50% sát thương từ gem Đỏ",
+        "7": "Hồi 10% HP khi người chơi hụt match",
+        "8": "Ngẫu nhiên khóa 2 skill người chơi trong 3 lượt",
+        "9": "Nhện chúa: Gọi đàn nhện con cản trở bàn đấu",
+        "11": "Mỗi đòn đánh giảm 10% ATK người chơi (tích dồn)",
+        "12": "Sâu độc: Rải gai độc, người chơi nhận sát thương mỗi lượt di chuyển",
+        "13": "Thỏ điên: Tốc độ x2 khi HP < 50%",
+        "14": "Đào tẩu: Sẽ bỏ chạy nếu không tiêu diệt trong 15 lượt",
+        "15": "Sát thủ: Tỷ lệ chí mạng 30%",
+        "16": "Phân bóng: Tạo 2 ảo ảnh chia sẻ HP",
+        "18": "Hút máu: Hồi HP bằng 50% sát thương gây ra",
+        "19": "Da sắt: Miễn nhiễm sát thương phép (Gem nguyên tố)",
+        "20": "Cộng sinh: Hồi sinh 1 lần với 30% HP",
+        "22": "Nóng giận: ATK tăng 20% mỗi lượt qua đi",
+        "23": "Mê hoặc: Giảm tỷ lệ combo của người chơi",
+        "24": "Ma tốc độ: Né tránh 30% đòn tấn công",
+        "25": "Gấu trúc: Ăn trúc hồi đầy HP nếu bị bỏ mặc",
+        "26": "Giáp gai: Phản 20% sát thương cận chiến",
+        "27": "Phong ấn: Khóa chức năng hồi máu của người chơi",
+        "28": "Long Vương: Gọi mưa sao băng mỗi 10 lượt",
+        "29": "Bùn lầy: Tốc độ người chơi giảm 50%",
+        "30": "Cóc độc: Nổ độc khi chết gây sát thương lớn",
+        "31": "Trăn tinh: Quấn siết, mỗi hiệp mất 5% HP tối đa",
+        "32": "Cá sấu chúa: Đòn cắn tử thần bỏ qua DEF",
+        "33": "Hỏa ngục: Sân thiêu đốt liên tục",
+        "34": "Dung nham: Khiển gem đỏ thành bom nổ chậm",
+        "35": "Phượng hoàng: Trùng sinh từ đống tro tàn",
+        "36": "Hỏa Thần: Triệu hồi cột lửa hủy grid",
+        "37": "Hắc ám: Che mờ 1 phần grid đấu",
+        "38": "Linh hồn: Bỏ qua 50% phòng thủ người chơi",
+        "39": "Lời nguyền: Trái bom tử thần đếm ngược",
+        "40": "Đại Ma Vương: Thay đổi cơ chế mỗi 25% HP",
+        "none": "Không có cơ chế đặc biệt."
+      }
+    },
+    "zones": {
+      "1": {
+        "name": "Ruộng Lúa"
+      },
+      "2": {
+        "name": "Vườn Cà Chua"
+      },
+      "3": {
+        "name": "Vườn Ớt"
+      },
+      "4": {
+        "name": "Rẫy Cà Rốt"
+      },
+      "5": {
+        "name": "Nhà Kho"
+      },
+      "6": {
+        "name": "Đồng Hoang"
+      },
+      "7": {
+        "name": "Rừng Tre"
+      },
+      "8": {
+        "name": "Đầm Lầy"
+      },
+      "9": {
+        "name": "Núi Lửa"
+      },
+      "10": {
+        "name": "Thế Giới Ngầm"
+      }
+    },
+    "boss_random_skills": {
+      "glass_cannon": [
+        "Đòn chí mạng!",
+        "Song kiếm!",
+        "Cuồng nộ!"
+      ],
+      "tank": [
+        "Lao đầu!",
+        "Đập đất!",
+        "Giáp gai!"
+      ],
+      "healer": [
+        "Hồi máu!",
+        "Bào tử hồi!",
+        "Hút máu!"
+      ],
+      "assassin": [
+        "Đa đòn!",
+        "Tấn công tốc!",
+        "Ám sát!"
+      ],
+      "controller": [
+        "Xáo trộn!",
+        "Hút mana!",
+        "Choáng!"
+      ],
+      "hybrid": [
+        "Hỗn hợp!",
+        "Toàn diện!",
+        "Tổng lực!"
+      ],
+      "all": [
+        "Đế Vương giáng!",
+        "Thiên phạt!"
+      ],
+      "none": [
+        "Tấn công mạnh!",
+        "Lửa Địa Ngục!",
+        "Sấm Sét!",
+        "Đòn Cuồng Phong!"
+      ]
+    }
+  },
+  "campaign_boss_special_3": "Hút 10% Mana mỗi đòn đánh",
+  "campaign_boss_special_4": "Mưa độc: -5% HP mỗi 5 lượt",
+  "campaign_boss_special_6": "Lá chắn: Giảm 50% sát thương từ gem Đỏ",
+  "campaign_boss_special_7": "Hồi 10% HP khi người chơi hụt match",
+  "campaign_boss_special_8": "Ngẫu nhiên khóa 2 skill người chơi trong 3 lượt",
+  "campaign_boss_special_9": "Nhện chúa: Gọi đàn nhện con cản trở bàn đấu",
+  "campaign_boss_special_11": "Mỗi đòn đánh giảm 10% ATK người chơi (tích dồn)",
+  "campaign_boss_special_12": "Sâu độc: Rải gai độc, người chơi nhận sát thương mỗi lượt di chuyển",
+  "campaign_boss_special_13": "Thỏ điên: Tốc độ x2 khi HP < 50%",
+  "campaign_boss_special_14": "Đào tẩu: Sẽ bỏ chạy nếu không tiêu diệt trong 15 lượt",
+  "campaign_boss_special_15": "Sát thủ: Tỷ lệ chí mạng 30%",
+  "campaign_boss_special_16": "Phân bóng: Tạo 2 ảo ảnh chia sẻ HP",
+  "campaign_boss_special_18": "Hút máu: Hồi HP bằng 50% sát thương gây ra",
+  "campaign_boss_special_19": "Da sắt: Miễn nhiễm sát thương phép (Gem nguyên tố)",
+  "campaign_boss_special_20": "Cộng sinh: Hồi sinh 1 lần với 30% HP",
+  "campaign_boss_special_22": "Nóng giận: ATK tăng 20% mỗi lượt qua đi",
+  "campaign_boss_special_23": "Mê hoặc: Giảm tỷ lệ combo của người chơi",
+  "campaign_boss_special_24": "Ma tốc độ: Né tránh 30% đòn tấn công",
+  "campaign_boss_special_25": "Gấu trúc: Ăn trúc hồi đầy HP nếu bị bỏ mặc",
+  "campaign_boss_special_26": "Giáp gai: Phản 20% sát thương cận chiến",
+  "campaign_boss_special_27": "Phong ấn: Khóa chức năng hồi máu của người chơi",
+  "campaign_boss_special_28": "Long Vương: Gọi mưa sao băng mỗi 10 lượt",
+  "campaign_boss_special_29": "Bùn lầy: Tốc độ người chơi giảm 50%",
+  "campaign_boss_special_30": "Cóc độc: Nổ độc khi chết gây sát thương lớn",
+  "campaign_boss_special_31": "Trăn tinh: Quấn siết, mỗi hiệp mất 5% HP tối đa",
+  "campaign_boss_special_32": "Cá sấu chúa: Đòn cắn tử thần bỏ qua DEF",
+  "campaign_boss_special_33": "Hỏa ngục: Sân thiêu đốt liên tục",
+  "campaign_boss_special_34": "Dung nham: Khiển gem đỏ thành bom nổ chậm",
+  "campaign_boss_special_35": "Phượng hoàng: Trùng sinh từ đống tro tàn",
+  "campaign_boss_special_36": "Hỏa Thần: Triệu hồi cột lửa hủy grid",
+  "campaign_boss_special_37": "Hắc ám: Che mờ 1 phần grid đấu",
+  "campaign_boss_special_38": "Linh hồn: Bỏ qua 50% phòng thủ người chơi",
+  "campaign_boss_special_39": "Lời nguyền: Trái bom tử thần đếm ngược",
+  "campaign_boss_special_40": "Đại Ma Vương: Thay đổi cơ chế mỗi 25% HP",
+  "campaign_boss_special_none": "Không có cơ chế đặc biệt."
 }

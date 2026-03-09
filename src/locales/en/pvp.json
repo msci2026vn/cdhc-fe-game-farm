@@ -82,7 +82,8 @@
   "matchmaking": {
     "searching": "Searching for Opponent...",
     "waitTime": "Wait time:",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "kickedRequeue": "Kicked — finding a new match..."
   },
   "game": {
     "you": "You",

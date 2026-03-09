@@ -9,6 +9,7 @@ import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
 import type { BossState, CombatStats, CombatNotifType, ActiveDebuff } from '@/shared/match3/combat.types';
 import { ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
 import type { PlayerSkillLevels } from '../types/skill.types';
+import i18n from '@/i18n';
 
 export interface CampaignDamageDeps {
   milestones: ActiveMilestones;
@@ -45,9 +46,9 @@ export function applyCampaignBossDamageImpl(
 
     // Fort milestone: immune every 10 turns
     if (milestones.hasFort && prev.turnCount > 0 && prev.turnCount % 10 === 0) {
-      addPopup('🏰 Miễn nhiễm!', '#74b9ff');
-      addCombatNotif('fort', '🏰 Thành Trì bất!', '#74b9ff');
-      setBossAttackMsg({ text: 'Thành Trì bất!', emoji: '🏰' });
+      addPopup(i18n.t('campaign.ui.immune', { defaultValue: '🏰 Miễn nhiễm!' }), '#74b9ff');
+      addCombatNotif('fort', i18n.t('campaign.ui.fortress', { defaultValue: '🏰 Thành Trì bất!' }), '#74b9ff');
+      setBossAttackMsg({ text: i18n.t('campaign.ui.fortress', { defaultValue: 'Thành Trì bất!' }), emoji: '🏰' });
       setTimeout(() => setBossAttackMsg(null), 1000);
       return prev;
     }
@@ -88,8 +89,8 @@ export function applyCampaignBossDamageImpl(
     // Immortal milestone: revive once
     if (newPlayerHp <= 0 && !prev.immortalUsed && milestones.hasImmortal) {
       newPlayerHp = Math.floor(prev.playerMaxHp * 0.2);
-      addPopup('👼 Bất Tử!', '#a29bfe');
-      addCombatNotif('immortal', '👼 Bất Tử kích hoạt!', '#a29bfe');
+      addPopup(i18n.t('campaign.ui.immortal_popup', { defaultValue: '👼 Bất Tử!' }), '#a29bfe');
+      addCombatNotif('immortal', i18n.t('campaign.ui.immortal_activated', { defaultValue: '👼 Bất Tử kích hoạt!' }), '#a29bfe');
       return { ...prev, playerHp: newPlayerHp, shield: shieldLeft, immortalUsed: true };
     }
 
@@ -116,8 +117,8 @@ export function applyCampaignBossDamageImpl(
       if (reflectDmg > 0) {
         setTotalDmgDealt(d => d + reflectDmg);
         setCombatStatsTracker(s => ({ ...s, reflectTotal: s.reflectTotal + reflectDmg }));
-        addPopup(`🛡️ Phản -${reflectDmg}`, '#74b9ff');
-        addCombatNotif('reflect', `🛡️ Phản xạ ${reflectDmg} DMG!`, '#74b9ff');
+        addPopup(`🛡️ ${i18n.t('campaign.ui.reflect_popup', { defaultValue: 'Phản' })} -${reflectDmg}`, '#74b9ff');
+        addCombatNotif('reflect', i18n.t('campaign.ui.reflect_notif', { dmg: reflectDmg, defaultValue: `🛡️ Phản xạ ${reflectDmg} DMG!` }), '#74b9ff');
       }
     }
 

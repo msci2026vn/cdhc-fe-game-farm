@@ -40,7 +40,8 @@ export function setupBossAttackLoop(deps: BossAttackLoopDeps): () => void {
 
     if (isSkill) {
       // ══ SKILL ATTACK: 1.5s warning, player can dodge ══
-      const skillName = getBossSkillName(archetype);
+      const skillNameKey = getBossSkillName(archetype);
+      const skillName = i18n.t(skillNameKey);
       const skillDmg = Math.round(baseAtk * SKILL_DMG_MULT);
 
       playSound('boss_skill');

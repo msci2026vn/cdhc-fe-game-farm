@@ -12,6 +12,7 @@ import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
 import { OT_HIEM_CONFIG } from '@/shared/match3/combat.config';
 import type { PlayerSkillLevels } from '../types/skill.types';
 import { playSound, AudioManager } from '@/shared/audio';
+import i18n from '@/i18n';
 
 export interface CampaignProcessorDeps {
   setBoss: Dispatch<SetStateAction<BossState>>;
@@ -163,7 +164,7 @@ export function processCampaignMatchesImpl(
   // Show special gem trigger popups
   const triggeredCount = allRemove.size - matchedPositions.size;
   if (triggeredCount > 0) {
-    addPopup(`+${triggeredCount} triggered!`, '#e056fd');
+    addPopup(`+${triggeredCount} ${i18n.t('campaign.ui.triggered', { defaultValue: 'triggered!' })}`, '#e056fd');
     playSound('gem_match');
   }
 
@@ -236,7 +237,7 @@ export function processCampaignMatchesImpl(
         if (newEggHp <= 0) {
           eggRef.current = null;
           setEgg(null);
-          addPopup('🥚💥 Trứng vỡ!', '#fd79a8');
+          addPopup(`🥚💥 ${i18n.t('campaign.ui.egg_broken', { defaultValue: 'Trứng vỡ!' })}`, '#fd79a8');
         } else {
           eggRef.current = { ...pipelineEgg, hp: newEggHp };
           setEgg({ ...pipelineEgg, hp: newEggHp });
@@ -255,7 +256,7 @@ export function processCampaignMatchesImpl(
       // 2. Boss shield: 80% damage reduction
       if (hasShield && actualDmg > 0) {
         actualDmg = Math.floor(actualDmg * 0.2);
-        addPopup('🛡️ Giảm 80%!', '#74b9ff');
+        addPopup(`🛡️ ${i18n.t('campaign.ui.reduced_dmg', { percent: 80, defaultValue: 'Giảm 80%!' })}`, '#74b9ff');
       }
 
       // 3. Apply damage to boss
@@ -266,7 +267,7 @@ export function processCampaignMatchesImpl(
         const reflectDmg = Math.round(dmgAfterDef * 0.3);
         if (reflectDmg > 0) {
           playerHp = Math.max(0, playerHp - reflectDmg);
-          addPopup(`🔄 Phản -${reflectDmg}`, '#e056fd');
+          addPopup(`🔄 ${i18n.t('campaign.ui.reflect_popup', { defaultValue: 'Phản' })} -${reflectDmg}`, '#e056fd');
         }
       }
 
@@ -293,8 +294,8 @@ export function processCampaignMatchesImpl(
       if (milestones.regenPercent > 0 && turnCount % milestones.regenInterval === 0) {
         const regenHp = Math.floor(prev.playerMaxHp * milestones.regenPercent);
         playerHp = Math.min(prev.playerMaxHp, playerHp + regenHp);
-        addPopup(`💚 Hoi +${regenHp} HP`, '#55efc4');
-        addCombatNotif('regen', `💚 Hoi phuc +${regenHp} HP`, '#55efc4');
+        addPopup(`💚 ${i18n.t('campaign.ui.regen', { hp: regenHp, defaultValue: `Hồi +${regenHp} HP` })}`, '#55efc4');
+        addCombatNotif('regen', `💚 ${i18n.t('campaign.ui.regen_notif', { hp: regenHp, defaultValue: `Hồi phục +${regenHp} HP` })}`, '#55efc4');
         setCombatStatsTracker(s => ({ ...s, totalHealed: s.totalHealed + regenHp }));
       }
 
@@ -311,11 +312,11 @@ export function processCampaignMatchesImpl(
         addPopup(label, isCrit ? '#ff6b6b' : comboInfo.color);
       }
       if (hpCount > 0) {
-        if (isHealBlocked) addPopup('🚫 Khóa hồi!', '#a29bfe');
+        if (isHealBlocked) addPopup(`🚫 ${i18n.t('campaign.boss_skills.heal_block.label', { defaultValue: 'Khóa hồi!' })}`, '#a29bfe');
         else { addPopup(`+${healAmt} HP`, '#55efc4'); if (healAmt > 0) playSound('heal'); }
       }
       if (defCount > 0) {
-        if (isArmorBrokenMatch) addPopup('💔 DEF 0!', '#fd79a8');
+        if (isArmorBrokenMatch) addPopup(`💔 ${i18n.t('campaign.ui.def_0', { defaultValue: 'DEF 0!' })}`, '#fd79a8');
         else { addPopup(`+${shieldAmt} 🛡️`, '#74b9ff'); if (shieldAmt > 0) playSound('shield_gain'); }
       }
 

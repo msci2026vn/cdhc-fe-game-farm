@@ -16,6 +16,7 @@ import type { BossPhase } from '../data/deVuongPhases';
 import type { PlayerSkillLevels } from '../types/skill.types';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG, SAM_DONG_CONFIG, BOARD_8X8_BOSS_HP_MULT } from '@/shared/match3/combat.config';
 import { playSound } from '@/shared/audio';
+import i18n from '@/i18n';
 
 // Shared match3
 import type { Gem } from '@/shared/match3/board.utils';
@@ -439,8 +440,8 @@ export function useMatch3Campaign(
     setOtHiemDuration(duration);
     setOtHiemCooldown(OT_HIEM_CONFIG.cooldown);
     playSound('ui_click');
-    addPopup(`🌶️ Ớt Hiểm +${Math.round(OT_HIEM_CONFIG.damageBonus[lv - 1] * 100)}%!`, '#e74c3c');
-    addCombatNotif('crit', `🌶️ Ớt Hiểm Lv.${lv} kích hoạt!`, '#e74c3c');
+    addPopup(`🌶️ ${i18n.t('campaign.ui.ot_hiem', { defaultValue: 'Ớt Hiểm' })} +${Math.round(OT_HIEM_CONFIG.damageBonus[lv - 1] * 100)}%!`, '#e74c3c');
+    addCombatNotif('crit', `🌶️ ${i18n.t('campaign.ui.ot_hiem_active', { level: lv, defaultValue: `Ớt Hiểm Lv.${lv} kích hoạt!` })}`, '#e74c3c');
 
     // Lv3+ cleanse: remove debuffs on cast
     if (OT_HIEM_CONFIG.cleanse[lv - 1]) {
@@ -450,7 +451,7 @@ export function useMatch3Campaign(
         isStunnedRef.current = false;
         setIsStunned(false);
       }
-      addPopup('✨ Tẩy debuff!', '#fdcb6e');
+      addPopup(`✨ ${i18n.t('campaign.ui.cleanse', { defaultValue: 'Tẩy debuff!' })}`, '#fdcb6e');
     }
   }, [skillLevels.ot_hiem, otHiemCooldown, otHiemActive, result, addPopup, addCombatNotif]);
 
@@ -475,7 +476,7 @@ export function useMatch3Campaign(
       return { ...prev, shield: newShield };
     });
 
-    addCombatNotif('dodge', `🪹 Rơm Bọc Lv.${lv} kích hoạt!`, '#27ae60');
+    addCombatNotif('dodge', `🪹 ${i18n.t('campaign.ui.rom_boc_active', { level: lv, defaultValue: `Rơm Bọc Lv.${lv} kích hoạt!` })}`, '#27ae60');
   }, [skillLevels.rom_boc, romBocCooldown, romBocActive, result, addPopup, addCombatNotif]);
 
   // ═══ Cleanup skill timers on battle end ═══
@@ -503,12 +504,12 @@ export function useMatch3Campaign(
   const handleDodge = useCallback(() => {
     if (!skillWarning && attackWarning?.phase !== 'dodge_window' && attackWarning?.phase !== 'warning') return;
     setBoss(prev => {
-      if (prev.mana < manaDodgeCost) { addPopup(`Thiếu mana! (${manaDodgeCost})`, '#e74c3c'); return prev; }
+      if (prev.mana < manaDodgeCost) { addPopup(`${i18n.t('campaign.ui.no_mana', { defaultValue: 'Thiếu mana!' })} (${manaDodgeCost})`, '#e74c3c'); return prev; }
       dodgedRef.current = true;
       setAttackWarning(null); setSkillWarning(null);
       playSound('dodge_success');
       setCombatStatsTracker(s => ({ ...s, dodgeCount: s.dodgeCount + 1 }));
-      addCombatNotif('dodge', '🏃 Né thành công!', '#55efc4');
+      addCombatNotif('dodge', `🏃 ${i18n.t('campaign.ui.dodge_success', { defaultValue: 'Né thành công!' })}`, '#55efc4');
       return { ...prev, mana: prev.mana - manaDodgeCost };
     });
   }, [skillWarning, attackWarning, manaDodgeCost, addPopup, addCombatNotif]);
@@ -541,17 +542,17 @@ export function useMatch3Campaign(
         ultDmg -= absorbed;
         const newEggHp = ultEgg.hp - absorbed;
         addPopup(`🥚 -${absorbed}`, '#fdcb6e');
-        if (newEggHp <= 0) { eggRef.current = null; setEgg(null); addPopup('🥚💥 Trứng vỡ!', '#fd79a8'); }
+        if (newEggHp <= 0) { eggRef.current = null; setEgg(null); addPopup(`🥚💥 ${i18n.t('campaign.ui.egg_broken', { defaultValue: 'Trứng vỡ!' })}`, '#fd79a8'); }
         else { eggRef.current = { ...ultEgg, hp: newEggHp }; setEgg({ ...ultEgg, hp: newEggHp }); }
       }
       // Lv5 pierce shield: bypass boss shield entirely
       if (sdPierce && activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) {
-        addPopup('⚡ Xuyên giáp!', '#fdcb6e');
-      } else if (activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) { addPopup('🛡️ Bất tử!', '#74b9ff'); ultDmg = 0; }
+        addPopup(`⚡ ${i18n.t('campaign.ui.pierce_armor', { defaultValue: 'Xuyên giáp!' })}`, '#fdcb6e');
+      } else if (activeBossBuffsRef.current.some(b => b.type === 'shield') && ultDmg > 0) { addPopup(`🛡️ ${i18n.t('campaign.ui.immortal_popup', { defaultValue: 'Bất tử!' })}`, '#74b9ff'); ultDmg = 0; }
       // Reflect
       let reflectDmg = 0;
       const ultReflectBuff = activeBossBuffsRef.current.find(b => b.type === 'reflect');
-      if (ultReflectBuff && dmgAfterDef > 0) { reflectDmg = Math.round(dmgAfterDef * 0.3); if (reflectDmg > 0) addPopup(`🔄 Phản -${reflectDmg}`, '#e056fd'); }
+      if (ultReflectBuff && dmgAfterDef > 0) { reflectDmg = Math.round(dmgAfterDef * 0.3); if (reflectDmg > 0) addPopup(`🔄 ${i18n.t('campaign.ui.reflect_popup', { defaultValue: 'Phản' })} -${reflectDmg}`, '#e056fd'); }
 
       setTotalDmgDealt(d => d + ultDmg);
       setCombatStatsTracker(s => ({ ...s, ultCount: s.ultCount + 1 }));
@@ -562,7 +563,7 @@ export function useMatch3Campaign(
       // Lv4+ ULT stun: freeze boss attacks temporarily
       const stunDuration = sdLv >= 1 ? SAM_DONG_CONFIG.stun[sdLv - 1] : 0;
       if (stunDuration > 0) {
-        addPopup(`💫 Choáng ${stunDuration}s!`, '#fdcb6e');
+        addPopup(`💫 ${i18n.t('campaign.boss_skills.stun.label', { defaultValue: 'Choáng' })} ${stunDuration}s!`, '#fdcb6e');
         // Note: this freezes boss attack loop by pausing for stunDuration
         // We repurpose isPausedRef briefly — but that would also pause player.
         // Instead, we just visually indicate stun and skip boss attacks via a ref.

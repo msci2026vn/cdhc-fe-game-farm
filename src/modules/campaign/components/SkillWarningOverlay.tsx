@@ -22,14 +22,19 @@ interface PhaseTransitionOverlayProps {
   phase: BossPhase | null;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function PhaseTransitionOverlay({ phase }: PhaseTransitionOverlayProps) {
+  const { t } = useTranslation();
   if (!phase) return null;
+
+  const phaseKey = phase.name.toLowerCase().replace(' ', '_');
   return (
     <PhaseTransition
       phase={phase.phaseNumber}
-      archetypeLabel={phase.name}
+      archetypeLabel={t(`campaign.archetypes.${phaseKey}.label`, { defaultValue: phase.name })}
       archetypeIcon={phase.icon}
-      description={phase.description}
+      description={t(`campaign.boss_phases.${phaseKey}.description`, { defaultValue: phase.description })}
     />
   );
 }
