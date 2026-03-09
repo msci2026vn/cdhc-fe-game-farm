@@ -555,16 +555,22 @@ export default function PvpLobby() {
     if (event.type === 'pvp_invite') {
       setPendingInvite(event);
     } else if (event.type === 'pvp_invite_response') {
-      if (event.action === 'accept' && event.roomCode) {
+      if (event.action === 'accept' && (event.roomId || event.roomCode)) {
         showToast(t('toast.friendAccepted'));
-        setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}`), 1000);
+        const target = event.roomId
+          ? `/pvp-test?roomId=${event.roomId}`
+          : `/pvp-test?room=${event.roomCode}`;
+        setTimeout(() => navigate(target), 1000);
       } else {
         showToast(t('toast.friendRejected'));
       }
     } else if (event.type === 'pvp_matched') {
       setInQueue(false);
       showToast(t('toast.matchFound'));
-      setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}&fromQueue=1`), 800);
+      const target = event.roomId
+        ? `/pvp-test?roomId=${event.roomId}&fromQueue=1`
+        : `/pvp-test?room=${event.roomCode}&fromQueue=1`;
+      setTimeout(() => navigate(target), 800);
     } else if (event.type === 'pvp_challenge') {
       setChallengeData({ roomCode: event.roomCode, hostId: event.hostId, hostName: event.hostName, hostRating: event.hostRating, timeoutMs: event.timeoutMs || 30000 });
       setShowChallengePopup(true);
@@ -573,7 +579,10 @@ export default function PvpLobby() {
       showToast(t('challenge.accepted'));
     } else if (event.type === 'quick_match_joined') {
       showToast(t('toast.matchFound'));
-      setTimeout(() => navigate(`/pvp-test?room=${event.roomCode}`), 800);
+      const qmTarget = event.roomId
+        ? `/pvp-test?roomId=${event.roomId}`
+        : `/pvp-test?room=${event.roomCode}`;
+      setTimeout(() => navigate(qmTarget), 800);
     } else if (event.type === 'challenge_failed') {
       setChallengeSearching(false);
       showToast(t('challenge.noOpponent'));
@@ -597,7 +606,8 @@ export default function PvpLobby() {
       pvpApi.respondInvite(inviteId, action),
     onSuccess: (data) => {
       setPendingInvite(null);
-      if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
+      if (data.roomId) navigate(`/pvp-test?roomId=${data.roomId}`);
+      else if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
     },
     onError: () => setPendingInvite(null),
   });
@@ -607,7 +617,8 @@ export default function PvpLobby() {
     onSuccess: (data) => {
       setShowChallengePopup(false);
       setChallengeData(null);
-      if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
+      if (data.roomId) navigate(`/pvp-test?roomId=${data.roomId}`);
+      else if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
     },
     onError: () => { setShowChallengePopup(false); setChallengeData(null); },
   });
@@ -615,8 +626,11 @@ export default function PvpLobby() {
   const joinQueueMut = useMutation({
     mutationFn: pvpApi.joinQueue,
     onSuccess: (data) => {
-      if (data.matched && data.roomCode) {
-        navigate(`/pvp-test?room=${data.roomCode}&fromQueue=1`);
+      if (data.matched && (data.roomId || data.roomCode)) {
+        const target = data.roomId
+          ? `/pvp-test?roomId=${data.roomId}&fromQueue=1`
+          : `/pvp-test?room=${data.roomCode}&fromQueue=1`;
+        navigate(target);
       } else {
         setInQueue(true);
         setWaitSeconds(0);
@@ -667,7 +681,8 @@ export default function PvpLobby() {
         pvpApi.startChallenge(data.roomCode).catch(() => {
           // silent — host vẫn vào phòng bình thường
         });
-        navigate(`/pvp-test?room=${data.roomCode}`);
+        // Use Colyseus roomId (internal ID) — not roomCode (short display code)
+        navigate(`/pvp-test?roomId=${data.roomId}`);
       }
     } catch (e) {
       showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);

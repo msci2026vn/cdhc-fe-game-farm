@@ -64,12 +64,12 @@ export type PvpInvite = {
 
 export type PvpEvent =
   | { type: 'pvp_invite'; inviteId: string; fromUserId: string; fromName: string; fromAvatar: string | null; roomCode: string; expiresAt: string }
-  | { type: 'pvp_invite_response'; inviteId: string; action: 'accept' | 'reject'; roomCode: string | null; fromUserId: string }
-  | { type: 'pvp_matched'; roomCode: string; opponentId: string }
+  | { type: 'pvp_invite_response'; inviteId: string; action: 'accept' | 'reject'; roomCode: string | null; roomId?: string; fromUserId: string }
+  | { type: 'pvp_matched'; roomCode: string; roomId?: string; opponentId: string }
   | { type: 'pvp_challenge'; roomCode: string; hostId: string; hostName: string; hostRating: number; timeoutMs: number }
-  | { type: 'challenge_accepted'; targetUserId: string; roomCode: string }
+  | { type: 'challenge_accepted'; targetUserId: string; roomCode: string; roomId?: string }
   | { type: 'challenge_failed'; reason: string }
-  | { type: 'quick_match_joined'; userId: string; roomCode: string };
+  | { type: 'quick_match_joined'; userId: string; roomCode: string; roomId?: string };
 
 export const pvpApi = {
   getRating: () => pvpFetch<PvpRating>('/rating'),
@@ -94,13 +94,13 @@ export const pvpApi = {
     }),
 
   respondInvite: (inviteId: string, action: 'accept' | 'reject') =>
-    pvpFetch<{ ok: boolean; action: string; roomCode: string | null }>('/invite/respond', {
+    pvpFetch<{ ok: boolean; action: string; roomCode: string | null; roomId?: string }>('/invite/respond', {
       method: 'POST',
       body: JSON.stringify({ inviteId, action }),
     }),
 
   joinQueue: () =>
-    pvpFetch<{ matched: boolean; roomCode?: string; opponent?: { id: string; name: string; rating: number }; message?: string }>(
+    pvpFetch<{ matched: boolean; roomCode?: string; roomId?: string; opponent?: { id: string; name: string; rating: number }; message?: string }>(
       '/find-match',
       { method: 'POST', body: '{}' },
     ),
@@ -147,7 +147,7 @@ export const pvpApi = {
     }),
 
   challengeRespond: (accept: boolean) =>
-    pvpFetch<{ ok: boolean; roomCode?: string; error?: string }>('/challenge-respond', {
+    pvpFetch<{ ok: boolean; roomCode?: string; roomId?: string; error?: string }>('/challenge-respond', {
       method: 'POST',
       body: JSON.stringify({ accept }),
     }),
