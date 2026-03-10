@@ -10,9 +10,11 @@ export interface PrayerCustomModalProps {
     cooldownRemaining: number;
     canPray: boolean;
     lastSubmitSuccess: boolean;
+    // [PRAYER-BLOCKCHAIN v2] Số giờ đến reset — nhận từ backend khi lỗi PRAYER_DAILY_LIMIT (đã tính UTC+7)
+    hoursUntilReset?: number | null;
 }
 
-export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitUsed, limitMax, cooldownRemaining, canPray, lastSubmitSuccess }: PrayerCustomModalProps) {
+export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitUsed, limitMax, cooldownRemaining, canPray, lastSubmitSuccess, hoursUntilReset }: PrayerCustomModalProps) {
     const [text, setText] = useState('');
     const [cooldown, setCooldown] = useState(0);
     const cooldownRef = useRef<ReturnType<typeof setInterval>>();
@@ -95,9 +97,18 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
                         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-b from-black/5 to-transparent"></div>
                         <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-t from-black/5 to-transparent"></div>
 
-                        <div className="text-farm-brown text-sm font-bold mb-4 flex items-center gap-2 bg-[#f4e4bc] px-3 py-1 rounded-full border border-farm-brown/30">
-                            <span className="material-symbols-outlined text-lg">edit_note</span>
-                            <span className="uppercase tracking-wider text-xs">Tự viết ({limitUsed}/{limitMax})</span>
+                        {/* [PRAYER-BLOCKCHAIN v2] 1 lượt/ngày — badge hiện "Còn 1 lượt" hoặc "Đã dùng hôm nay" + giờ reset từ backend */}
+                        <div className={`text-sm font-bold mb-4 flex flex-col items-center gap-1 px-3 py-1.5 rounded-full border ${limitUsed >= limitMax ? 'bg-red-100 border-red-300 text-red-700' : 'bg-[#f4e4bc] border-farm-brown/30 text-farm-brown'}`}>
+                            <div className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-lg">edit_note</span>
+                                <span className="uppercase tracking-wider text-xs">
+                                    {limitUsed >= limitMax ? 'Đã dùng lượt hôm nay' : `Còn ${limitMax - limitUsed} lượt hôm nay`}
+                                </span>
+                            </div>
+                            {/* [PRAYER-BLOCKCHAIN v2] Dùng hoursUntilReset từ backend — không tự tính giờ */}
+                            {limitUsed >= limitMax && hoursUntilReset != null && (
+                                <span className="text-[10px] text-red-500">Mở lại sau ~{hoursUntilReset} giờ</span>
+                            )}
                         </div>
 
                         <div className="w-full flex-1 relative mb-4">
@@ -114,9 +125,14 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
                         </div>
 
                         <div className="w-full border-t-2 border-dashed border-farm-brown/20 pt-4 flex justify-between items-center text-xs text-farm-brown/70">
-                            <span>{text.length}/500 ký tự</span>
+                            <span>{text.trim().length}/500 ký tự</span>
                             <div className="flex gap-1">
-                                {(text.length < 10) && <span className="text-red-400">Tối thiểu 10 ký tự</span>}
+                                {text.trim().length === 0
+                                    ? null
+                                    : text.trim().length < 10
+                                        ? <span className="text-red-400">Cần thêm {10 - text.trim().length} ký tự nữa</span>
+                                        : <span className="text-green-600">✓ Sẵn sàng ghi blockchain</span>
+                                }
                             </div>
                         </div>
                     </div>
@@ -138,7 +154,7 @@ export function PrayerCustomModal({ isOpen, onClose, onSubmit, isPending, limitU
                         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <span className="material-symbols-outlined text-[#fefae0] text-2xl group-active:scale-90 transition-transform">send</span>
                         <span className="text-[#fefae0] text-xl font-display font-bold uppercase tracking-wider text-shadow-sm">
-                            {isPending ? 'Đang gửi...' : inCooldown ? `Chờ ${cooldown}s` : 'Gửi Đi'}
+                            {isPending ? 'Đang ghi blockchain...' : inCooldown ? `Chờ ${cooldown}s` : 'Gửi & Ghi Blockchain'}
                         </span>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
                     </button>

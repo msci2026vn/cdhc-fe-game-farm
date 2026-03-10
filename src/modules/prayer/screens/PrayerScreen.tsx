@@ -46,6 +46,8 @@ export default function PrayerScreen() {
   const [showSparkles, setShowSparkles] = useState(false);
   const [flyText, setFlyText] = useState<string | null>(null);
   const [lastCustomSuccess, setLastCustomSuccess] = useState(false);
+  // [PRAYER-BLOCKCHAIN v2] Số giờ đến reset — nhận từ backend khi lỗi PRAYER_DAILY_LIMIT
+  const [hoursUntilReset, setHoursUntilReset] = useState<number | null>(null);
 
   // Preload prayer sounds + start BGM
   useEffect(() => {
@@ -100,8 +102,28 @@ export default function PrayerScreen() {
             setTimeout(() => playSound('prayer_reward'), 600);
           }
         },
-        onError: () => {
-          import('sonner').then(({ toast }) => toast.error('Gửi lời cầu nguyện thất bại. Vui lòng thử lại.'));
+        onError: (error: any) => {
+          // [PRAYER-BLOCKCHAIN v2] Backend mới trả flat errorCode: data.errorCode (không nested trong data.error.code)
+          const code = error?.response?.data?.errorCode || error?.code;
+          // [PRAYER-BLOCKCHAIN v2] Message tiếng Việt từ backend nằm ở data.error (string)
+          const msg = error?.response?.data?.error || error?.message;
+          // [PRAYER-BLOCKCHAIN v2] hoursUntilReset — backend tính sẵn theo UTC+7, chỉ có khi PRAYER_DAILY_LIMIT
+          const hrs = error?.response?.data?.hoursUntilReset ?? null;
+          if (hrs !== null) setHoursUntilReset(hrs);
+
+          import('sonner').then(({ toast }) => {
+            if (code === 'PRAYER_DAILY_LIMIT') {
+              toast.error('🌙 Hôm nay bạn đã cầu nguyện rồi', { description: msg || 'Quay lại vào ngày mai nhé!' });
+            } else if (code === 'PRAYER_TOO_SHORT') {
+              toast.error('✏️ Lời cầu nguyện quá ngắn', { description: msg });
+            } else if (code === 'PRAYER_BLOCKCHAIN_ERROR') {
+              // [PRAYER-BLOCKCHAIN v2] Blockchain lỗi tạm — prayer đã lưu, chỉ hiện warning
+              toast.warning('⚠️ Đã lưu, blockchain tạm thời lỗi', { description: msg });
+            } else {
+              // [PRAYER-BLOCKCHAIN v2] Đã xóa case PRAYER_BLOCKED — moderation bỏ ở backend
+              toast.error('Gửi lời cầu nguyện thất bại', { description: msg || 'Vui lòng thử lại.' });
+            }
+          });
         },
       },
     );
@@ -344,10 +366,11 @@ export default function PrayerScreen() {
         onSubmit={handleCustomSubmit}
         isPending={offerMutation.isPending}
         limitUsed={status?.customUsed ?? 0}
-        limitMax={status?.customMax ?? 3}
+        limitMax={status?.customMax ?? 1}
         cooldownRemaining={status?.cooldownRemaining ?? 0}
         canPray={status?.canPray ?? true}
         lastSubmitSuccess={lastCustomSuccess}
+        hoursUntilReset={hoursUntilReset}
       />
 
       <PrayerLeaderboardModal

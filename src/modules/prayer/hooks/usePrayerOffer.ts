@@ -22,6 +22,29 @@ export function usePrayerOffer() {
 
       useUIStore.getState().addToast(msg, 'success', '🙏');
 
+      // [PRAYER-BLOCKCHAIN v2] Blockchain confirmation toast for custom prayers
+      if (data.txHash && data.snowscanUrl) {
+        // Ghi blockchain thành công — hiện link Snowtrace
+        import('sonner').then(({ toast }) => {
+          toast.success('🌟 Đã ghi vĩnh viễn trên Avalanche blockchain', {
+            description: `TX: ${data.txHash!.slice(0, 10)}...${data.txHash!.slice(-6)}`,
+            action: {
+              label: '🔗 Xem Snowtrace',
+              onClick: () => window.open(data.snowscanUrl!, '_blank'),
+            },
+            duration: 8000,
+          });
+        });
+      } else if (data.blockchainWarning) {
+        // [PRAYER-BLOCKCHAIN v2] Prayer đã lưu DB nhưng blockchain lỗi tạm — hiện warning nhỏ
+        import('sonner').then(({ toast }) => {
+          toast.warning('⚠️ Lời cầu nguyện đã lưu', {
+            description: data.blockchainWarning!,
+            duration: 6000,
+          });
+        });
+      }
+
       // FlyUp
       if (data.ognReward > 0) {
         useUIStore.getState().showFlyUp(`+${data.ognReward} OGN 🪙`);

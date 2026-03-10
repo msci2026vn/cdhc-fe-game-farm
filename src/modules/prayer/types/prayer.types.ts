@@ -22,6 +22,10 @@ export interface PrayerOfferResponse {
   prayerHash: string;
   globalCount: number;
   milestone?: number;
+  txHash?: string | null;
+  snowscanUrl?: string | null;
+  // [PRAYER-BLOCKCHAIN v2] Khi blockchain lỗi tạm thời — prayer đã lưu DB nhưng chưa ghi chain
+  blockchainWarning?: string | null;
 }
 
 export interface PrayerPreset {
