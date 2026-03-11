@@ -459,6 +459,9 @@ JWT issued → player authenticated ✅
 
 ## 🔗 Smart Contracts
 
+> 📁 **[View full source code → /contracts](https://github.com/msci2026vn/cdhc-fe-game-farm/tree/main/contracts)**
+> Includes: `.sol` source files, `deployments.json`, contract documentation.
+
 > ✅ All contracts deployed on **Avalanche C-Chain Mainnet (Chain ID: 43114)**
 > Real transactions. Real ownership. No testnet. No simulation.
 
