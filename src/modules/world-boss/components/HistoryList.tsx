@@ -23,6 +23,46 @@ function timeAgo(dateStr: string, t: any): string {
   return new Date(dateStr).toLocaleDateString('vi-VN');
 }
 
+import { useSearchUsers } from '@/shared/hooks/useSocial';
+
+function HistoryLeaderboardEntryRow({ entry, index, medalLabel }: { entry: any, index: number, medalLabel?: React.ReactNode }) {
+  // If backend returns both, skip fetch. Otherwise use search API.
+  const hasProfileInfo = !!entry.username && !!entry.avatarUrl;
+  const { data } = useSearchUsers(hasProfileInfo ? '' : entry.userId);
+
+  const searchedUser = data?.results?.find((u: any) => u.id === entry.userId) || data?.results?.[0];
+
+  const displayName = entry.username || searchedUser?.name || entry.userId.slice(0, 10);
+  const displayAvatar = entry.avatarUrl || searchedUser?.picture;
+  const fallbackImg = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${entry.userId}`;
+
+  return (
+    <div className="flex items-center justify-between py-1.5 px-2 rounded text-sm">
+      <span className="flex items-center gap-2 text-gray-300 min-w-0">
+        <span className="w-6 text-center flex-shrink-0 text-sm">
+          {medalLabel}
+        </span>
+        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700 flex-shrink-0 border border-gray-600">
+          <img
+            src={displayAvatar || fallbackImg}
+            alt="avatar"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = fallbackImg;
+            }}
+          />
+        </div>
+        <span className="truncate text-xs font-mono">
+          {displayName}
+        </span>
+      </span>
+      <span className="text-yellow-400 font-mono text-xs flex-shrink-0 ml-2">
+        {entry.totalDamage.toLocaleString()} dmg
+      </span>
+    </div>
+  );
+}
+
 function HistoryLeaderboardContent({ eventId, t }: { eventId: string, t: any }) {
   const { data, isLoading } = useWorldBossHistoryLeaderboard(eventId);
   if (isLoading) {
@@ -39,32 +79,12 @@ function HistoryLeaderboardContent({ eventId, t }: { eventId: string, t: any }) 
   return (
     <div className="flex flex-col gap-0.5">
       {entries.slice(0, 20).map((entry, i) => (
-        <div
+        <HistoryLeaderboardEntryRow
           key={entry.userId}
-          className="flex items-center justify-between py-1.5 px-2 rounded text-sm"
-        >
-          <span className="flex items-center gap-2 text-gray-300 min-w-0">
-            <span className="w-6 text-center flex-shrink-0 text-sm">
-              {i < 3 ? MEDALS[i] : <span className="text-gray-500">{i + 1}</span>}
-            </span>
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700 flex-shrink-0 border border-gray-600">
-              <img
-                src={entry.avatarUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${entry.userId}`}
-                alt="avatar"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${entry.userId}`;
-                }}
-              />
-            </div>
-            <span className="truncate text-xs font-mono">
-              {entry.username ?? entry.userId.slice(0, 10)}
-            </span>
-          </span>
-          <span className="text-yellow-400 font-mono text-xs flex-shrink-0 ml-2">
-            {entry.totalDamage.toLocaleString()} dmg
-          </span>
-        </div>
+          entry={entry}
+          index={i}
+          medalLabel={i < 3 ? MEDALS[i] : <span className="text-gray-500">{i + 1}</span>}
+        />
       ))}
     </div>
   );
