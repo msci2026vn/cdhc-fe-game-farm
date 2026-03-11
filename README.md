@@ -1,4 +1,4 @@
-# 🌾 FARMVERSE — Con Duong Huu Co
+# 🌾 Organic Kingdom — Con Duong Huu Co
 
 ![Live](https://img.shields.io/badge/Live-game.cdhc.vn-brightgreen)
 ![Network](https://img.shields.io/badge/Network-Avalanche%20Mainnet-red)
@@ -18,7 +18,7 @@
 
 ## 🎯 What It Does
 
-**FARMVERSE** is a Web3 farming simulation game on Avalanche C-Chain that bridges virtual gameplay with real-world organic agriculture. Players farm crops, battle bosses through match-3 puzzle combat, collect NFT cards, participate in on-chain prayer ceremonies, and engage in real-time PvP — all while connecting to actual IoT sensor data from physical organic farms in Vietnam.
+**Organic Kingdom** is a Web3 farming simulation game on Avalanche C-Chain that bridges virtual gameplay with real-world organic agriculture. Players farm crops, battle bosses through match-3 puzzle combat, collect NFT cards, participate in on-chain prayer ceremonies, and engage in real-time PvP — all while connecting to actual IoT sensor data from physical organic farms in Vietnam.
 
 The blockchain runs silently underneath — players just play. No gas fees, no seed phrases, no wallet setup required. ERC-4337 Smart Wallets with Pimlico Paymaster handle everything behind the scenes.
 
@@ -33,7 +33,7 @@ The blockchain runs silently underneath — players just play. No gas fees, no s
 ## 🏗️ Architecture
 
 ```
-                         FARMVERSE ARCHITECTURE
+                         Organic Kingdom ARCHITECTURE
     ┌─────────────────────────────────────────────────────────────┐
     │                      FRONTEND (This Repo)                   │
     │          React 18 + Vite + TanStack Query + Zustand          │
@@ -230,7 +230,7 @@ The blockchain runs silently underneath — players just play. No gas fees, no s
 ### Design Philosophy — "Blockchain Invisible, Value Real"
 
 > Most Web3 games force users to sign transactions, pay gas, and understand wallets
-> before they can play. **FARMVERSE flips this entirely.**
+> before they can play. **Organic Kingdom flips this entirely.**
 >
 > Players just play. Blockchain runs silently underneath — recording value,
 > proving integrity, and enabling true ownership — without ever interrupting the experience.
@@ -242,7 +242,7 @@ PLAYER ACTION
      │
      ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   FARMVERSE BACKEND                     │
+│                   Organic Kingdom BACKEND                   │
 │  (Bun.js + Hono — business logic, game state, auth)     │
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐  │
@@ -323,7 +323,7 @@ Player can verify their prayer is included:
 ```
 
 **Why this matters:** Unlike typical game databases that can be altered,
-prayer records on FARMVERSE are cryptographically tamper-proof.
+prayer records on Organic Kingdom are cryptographically tamper-proof.
 Any player can independently verify their prayer was recorded — no trust required.
 
 ### Feature 3 — RWA: Real Organic Farm → Blockchain
@@ -354,7 +354,7 @@ Consumer scans QR → verifies product authenticity
     on-chain vs physical delivery record ✅
 ```
 
-**Why this matters:** This connects FARMVERSE's virtual farming game to a real-world
+**Why this matters:** This connects Organic Kingdom's virtual farming game to a real-world
 supply chain transparency problem. The IoT data hash on-chain makes organic certification
 verifiable by anyone, not just centralized auditors.
 
@@ -400,7 +400,7 @@ Backend generates nonce (one-time, expires in 5 min)
          │
          ▼
 Frontend prompts wallet to sign EIP-4361 message:
-    "Sign in to FARMVERSE at game.cdhc.vn
+    "Sign in to Organic Kingdom at game.cdhc.vn
      Nonce: abc123
      Issued: 2026-03-11T..."
          │
