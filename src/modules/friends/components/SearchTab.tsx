@@ -38,7 +38,7 @@ export default function SearchTab() {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Nhập tên để tìm bạn bè..."
-          className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all"
+          className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-gray-200 bg-white text-base font-semibold focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all"
           autoComplete="off"
         />
         {inputValue && (

@@ -211,7 +211,7 @@ function CampaignBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50 pb-[max(24px,env(safe-area-inset-bottom))]">
       <div className="absolute inset-0 bg-[#DEB887] rounded-full border-4 border-[#8B4513] shadow-[0_8px_0_#5D4037,0_15px_20px_rgba(0,0,0,0.3)] wood-pattern-v1" />
       {/* Nail dots */}
       <div className="absolute top-1/2 left-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner" />

@@ -17,7 +17,7 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
         onClick={onShow}
         style={{
           position: 'fixed',
-          top: '20px',
+          top: 'max(20px, env(safe-area-inset-top))',
           right: '20px',
           zIndex: 99999,
           width: '36px',

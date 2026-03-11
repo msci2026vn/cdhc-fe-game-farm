@@ -51,7 +51,7 @@ export function BottomDrawer({ isOpen, onClose, title, children }: BottomDrawerP
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto px-4 py-4 pb-8">
+        <div className="overflow-y-auto px-4 py-4 pb-[max(32px,calc(env(safe-area-inset-bottom)+8px))]">
           {children}
         </div>
       </div>

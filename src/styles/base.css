@@ -2,24 +2,28 @@
   * {
     @apply border-border;
     -webkit-tap-highlight-color: transparent;
+    /* Eliminate 300ms tap delay on mobile */
+    touch-action: manipulation;
   }
 
   html {
-    height: 100dvh;
     height: 100vh;
     /* fallback for older browsers */
+    height: 100dvh;
     overflow: hidden;
     /* Prevent iOS bounce/rubber-band scrolling */
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
+    /* Dark background for desktop gutters outside mobile frame */
+    background: #111;
   }
 
   body {
     @apply bg-background font-body antialiased;
     color: hsl(var(--text-dark));
-    height: 100dvh;
     height: 100vh;
     /* fallback */
+    height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
     /* Prevent pull-to-refresh on mobile */
@@ -27,12 +31,17 @@
     /* Prevent text size adjustment on orientation change */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Center the mobile frame on wide desktop screens */
+    display: flex;
+    justify-content: center;
   }
 
   #root {
-    height: 100dvh;
+    width: 100%;
+    max-width: 430px;
     height: 100vh;
     /* fallback */
+    height: 100dvh;
     overflow: hidden;
     /* Ensure content doesn't escape viewport */
     position: relative;
