@@ -41,32 +41,31 @@ export const coopApi = {
    * Gọi khi host bấm nút "Co-op" trên WorldBossScreen.
    */
   createRoom: (eventId: string) =>
-    coopFetch<{ roomCode: string; roomId: string }>('/create', {
+    coopFetch<{ roomId: string }>('/create', {
       method: 'POST',
       body: JSON.stringify({ eventId }),
     }),
 
   /**
-   * Lấy thông tin phòng theo roomCode.
-   * Dùng để FE kiểm tra phòng còn tồn tại không trước khi join lại sau disconnect.
+   * Lấy thông tin phòng theo Colyseus roomId.
+   * Dùng để FE kiểm tra phòng còn tồn tại không trước khi join.
    */
-  getRoom: (roomCode: string) =>
+  getRoom: (roomId: string) =>
     coopFetch<{
-      roomCode:  string;
       roomId:    string;
       phase:     'waiting' | 'active' | 'ended';
       teamSize:  number;
       eventId:   string;
-    } | null>(`/room/${roomCode}`),
+    } | null>(`/room/${roomId}`),
 
   /**
    * Mời bạn vào phòng Co-op.
    * Bạn sẽ nhận lời mời qua SSE channel coop:invite:{toUserId}.
    */
-  inviteToRoom: (toUserId: string, roomCode: string) =>
+  inviteToRoom: (toUserId: string, roomId: string) =>
     coopFetch<{ ok: boolean }>('/invite', {
       method: 'POST',
-      body: JSON.stringify({ toUserId, roomCode }),
+      body: JSON.stringify({ toUserId, roomId }),
     }),
 
   /**
@@ -76,7 +75,6 @@ export const coopApi = {
   getStatus: () =>
     coopFetch<{
       inSession: boolean;
-      roomCode?: string;
       roomId?:   string;
       phase?:    'waiting' | 'active' | 'ended';
     }>('/status'),

@@ -27,7 +27,7 @@ const RETRY_DELAYS = [3000, 6000, 10000];
 
 const DEFAULT_ROOM_STATE: CoopRoomState = {
   phase:         'waiting',
-  roomCode:      '',
+  roomId:        '',
   eventId:       '',
   teamSize:      1,
   multiplier:    1.0,
@@ -81,12 +81,12 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
   const attachHandlers = useCallback((r: Room) => {
     roomRef.current = r;
 
-    // room_info: nhận ngay sau join — lưu roomCode + hostId
-    r.onMessage('room_info', (data: { roomCode: string; hostId: string }) => {
+    // room_info: nhận ngay sau join — lưu roomId + hostId
+    r.onMessage('room_info', (data: { roomId: string; hostId: string }) => {
       setRoomState(prev => ({
         ...prev,
-        roomCode: data.roomCode,
-        hostId:   data.hostId ?? prev.hostId,
+        roomId: data.roomId,
+        hostId: data.hostId ?? prev.hostId,
       }));
     });
 

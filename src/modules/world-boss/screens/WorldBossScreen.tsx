@@ -50,7 +50,7 @@ export function WorldBossScreen() {
   const [popup, setPopup] = useState<'leaderboard' | 'feed' | null>(null);
 
   // === Join by room code ===
-  const [coopInitialCode, setCoopInitialCode] = useState<string | undefined>();
+  const [coopInitialRoomId, setCoopInitialRoomId] = useState<string | undefined>();
   const [showJoinInput,   setShowJoinInput]   = useState(false);
   const [joinCode,        setJoinCode]        = useState('');
   const [joiningByCode,   setJoiningByCode]   = useState(false);
@@ -101,15 +101,15 @@ export function WorldBossScreen() {
     return (
       <CoopScreen
         worldBoss={boss}
-        initialRoomCode={coopInitialCode}
-        onExit={() => { setShowCoop(false); setCoopInitialCode(undefined); }}
+        initialRoomId={coopInitialRoomId}
+        onExit={() => { setShowCoop(false); setCoopInitialRoomId(undefined); }}
       />
     );
   }
 
   const handleJoinByCode = async () => {
-    const code = joinCode.trim().toUpperCase();
-    if (code.length !== 4) {
+    const code = joinCode.trim();
+    if (!code) {
       setJoinError(t('pvp:coop.joinByCode.errorInvalid'));
       return;
     }
@@ -126,7 +126,7 @@ export function WorldBossScreen() {
         return;
       }
       setShowJoinInput(false);
-      setCoopInitialCode(code);
+      setCoopInitialRoomId(roomInfo.roomId);
       setShowCoop(true);
     } catch {
       setJoinError(t('pvp:coop.joinByCode.errorNotFound'));
@@ -213,7 +213,7 @@ export function WorldBossScreen() {
             </div>
             {/* Nút Co-op — optional path, không thay đổi solo flow */}
             <button
-              onClick={() => { setCoopInitialCode(undefined); setShowCoop(true); }}
+              onClick={() => { setCoopInitialRoomId(undefined); setShowCoop(true); }}
               style={{
                 padding:      '0 16px',
                 background:   'linear-gradient(135deg, #1d4ed8, #7c3aed)',

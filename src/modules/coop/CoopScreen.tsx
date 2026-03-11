@@ -27,11 +27,11 @@ interface Props {
   /** WorldBossInfo đã được WorldBossScreen fetch sẵn */
   worldBoss:        WorldBossInfo;
   onExit:           () => void;
-  /** Nếu set → join phòng có sẵn thay vì tạo mới */
-  initialRoomCode?: string;
+  /** Nếu set → join phòng có sẵn (Colyseus roomId) thay vì tạo mới */
+  initialRoomId?: string;
 }
 
-export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props) {
+export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) {
   const { data: authData } = useAuth();
   const addToast = useUIStore(s => s.addToast);
 
@@ -82,16 +82,10 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
         // 1. Lấy token xác thực Colyseus
         const authToken = await coopApi.getToken();
 
-        // 2a. Join phòng có sẵn qua mã phòng
-        if (initialRoomCode) {
-          const roomInfo = await coopApi.getRoom(initialRoomCode);
-          if (!roomInfo || roomInfo.phase === 'ended') {
-            addToast('Phòng không tồn tại hoặc đã kết thúc', 'error');
-            onExit();
-            return;
-          }
+        // 2a. Join phòng có sẵn qua roomId
+        if (initialRoomId) {
           setToken(authToken);
-          setRoomId(roomInfo.roomId);
+          setRoomId(initialRoomId);
           setLoading(false);
           return;
         }
@@ -102,7 +96,7 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
         if (status.inSession && status.roomId && status.phase !== 'ended') {
           // Session cũ còn active — hỏi user muốn rejoin không
           const wantRejoin = window.confirm(
-            `Bạn đang có phòng co-op đang chờ (${status.roomCode ?? ''}). Vào lại phòng cũ?`,
+            `Bạn đang có phòng co-op đang chờ (${status.roomId ?? ''}). Vào lại phòng cũ?`,
           );
 
           if (wantRejoin && status.roomId) {
@@ -134,15 +128,10 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
 
     try {
       const authToken = await coopApi.getToken();
-      const roomInfo = await coopApi.getRoom(invitePayload.roomCode);
-      if (!roomInfo || roomInfo.phase === 'ended') {
-        addToast('Phòng không còn tồn tại', 'error');
-        return;
-      }
       // Rời phòng cũ (nếu đang trong phòng) rồi join phòng mới
       if (isConnected) leaveRoom();
       setToken(authToken);
-      setRoomId(roomInfo.roomId);
+      setRoomId(invitePayload.roomId);
     } catch {
       addToast('Không thể vào phòng được mời', 'error');
     }
@@ -231,7 +220,7 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
       {/* Phase: waiting — chờ đủ người */}
       {(roomState.phase === 'waiting' || roomState.phase === 'active' && !isConnected) && (
         <CoopWaitingRoom
-          roomCode={roomState.roomCode}
+          roomCode={roomState.roomId}
           players={roomState.players}
           teamSize={roomState.teamSize}
           multiplier={roomState.multiplier}
@@ -248,7 +237,7 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
       {roomState.phase === 'active' && isConnected && (
         <CoopBattleView
           worldBoss={worldBoss}
-          coopRoomCode={roomState.roomCode}
+          coopRoomCode={roomState.roomId}
           teamSize={roomState.teamSize}
           multiplier={roomState.multiplier}
           teammates={teammates}
@@ -263,7 +252,7 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
       {roomState.phase === 'ended' && endResult && (
         <CoopResultScreen
           result={endResult}
-          roomCode={roomState.roomCode}
+          roomCode={roomState.roomId}
           multiplier={roomState.multiplier}
           onPlayAgain={handlePlayAgain}
           onExit={onExit}

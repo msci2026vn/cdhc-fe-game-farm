@@ -22,8 +22,8 @@ export interface CoopPlayer {
 export interface CoopRoomState {
   /** Giai đoạn hiện tại: waiting = chờ đủ người, active = đang đánh, ended = xong */
   phase:         'waiting' | 'active' | 'ended';
-  /** Mã phòng hiển thị cho người dùng (VD: "A3K7") */
-  roomCode:      string;
+  /** Colyseus roomId — dùng trực tiếp để join và hiển thị */
+  roomId:        string;
   /** ID sự kiện World Boss đang chiến */
   eventId:       string;
   /** Số người hiện đang trong phòng */
@@ -79,8 +79,8 @@ export interface CoopInvitePayload {
   fromUserId:    string;
   /** Tên hiển thị của người mời */
   fromUserName:  string;
-  /** Mã phòng để join vào */
-  roomCode:      string;
+  /** Colyseus roomId để join vào */
+  roomId:        string;
   /** Tên boss đang chiến trong phòng */
   bossName:      string;
   /** % HP boss còn lại tại thời điểm gửi lời mời */
@@ -92,4 +92,4 @@ export interface CoopInvitePayload {
 /** CoopSSEEvent — các loại event nhận từ SSE /api/coop/events */
 export type CoopSSEEvent =
   | { type: 'coop_invite';          payload: CoopInvitePayload }
-  | { type: 'coop_invite_response'; inviteId: string; action: 'accept' | 'reject'; roomCode?: string; roomId?: string };
+  | { type: 'coop_invite_response'; inviteId: string; action: 'accept' | 'reject'; roomId?: string };
