@@ -12,7 +12,7 @@
 > UI/UX polish is planned for upcoming sprints.
 > Core gameplay and blockchain integration are fully functional.
 
-**[🎮 Play Now](https://game.cdhc.vn)** | **[📹 Demo Video](https://www.youtube.com/watch?v=FXUyC021D3k)** | **[🔗 API](https://sta.cdhc.vn/health)**
+**[🎮 Play Now](https://game.cdhc.vn)** | **[📹 Project Demo](https://youtu.be/Wv9LXxfnH7g)** | **[🎯 Feature Walkthrough](https://www.youtube.com/watch?v=FXUyC021D3k)** | **[🔗 API Health](https://sta.cdhc.vn/health)**
 
 ---
 
@@ -24,11 +24,13 @@ The blockchain runs silently underneath — players just play. No gas fees, no s
 
 ## 🎮 Live Demo
 
-| Resource | URL |
-|----------|-----|
-| 🎮 Game | https://game.cdhc.vn |
-| 📹 Demo Video | https://www.youtube.com/watch?v=FXUyC021D3k |
-| 🔗 API Health | https://sta.cdhc.vn/health |
+| Link | Description |
+|------|-------------|
+| 🎮 [game.cdhc.vn](https://game.cdhc.vn) | Live game — playable on mobile right now |
+| 📹 [Project Demo Video](https://youtu.be/Wv9LXxfnH7g) | 5-min intro — onboarding, gameplay, blockchain, DePIN |
+| 🎯 [Feature Walkthrough](https://www.youtube.com/watch?v=FXUyC021D3k) | Detailed walkthrough of each in-game feature |
+| 🔗 [API Health](https://sta.cdhc.vn/health) | Backend status |
+| 🖥️ [Admin Dashboard](https://admintest.cdhc.vn/dashboard) | Internal ops panel (restricted access) |
 
 ## 🏗️ Architecture
 
@@ -222,6 +224,16 @@ The blockchain runs silently underneath — players just play. No gas fees, no s
 - **SIWE Wallet Auth** — Sign-In with Ethereum (Avalanche C-Chain + Fuji)
 - **Passkey/WebAuthn** — biometric login for Smart Wallet users
 - **JWT session** with refresh token rotation
+
+### 🔨 Currently Building
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| PixiJS WebGL Engine | 🔨 In Progress | Replace DOM rendering — stable 60 FPS on mid-range Android |
+| Cooperative Guild (Hop Tac Xa) | 🔨 In Progress | Farmer guilds, co-op raids, shared Knowledge Cards |
+| Advanced Co-op Multiplayer | 🔨 In Progress | Team farming modes beyond PvP 1v1 |
+| UI/UX Polish | ⏳ Post-feature freeze | Visual redesign after core features complete |
+| FarmChain (Avalanche L1) | 📋 Planned | Dedicated chain, gas ~$0, IoT precompile |
 
 ---
 
@@ -789,27 +801,51 @@ src/
 
 ## 🗺️ Roadmap
 
-- [x] Core farming mechanics (plant, water, harvest, weather)
-- [x] Boss battle system (weekly + 10-zone campaign)
-- [x] Match-3 puzzle combat engine
-- [x] World Boss cooperative raids
-- [x] PvP real-time arena (Colyseus WebSocket)
-- [x] On-chain prayer + Merkle proof batching
-- [x] NFT ERC-721 minting + Gallery
-- [x] P2P Marketplace + Auction House
-- [x] Smart Wallet ERC-4337 (gasless transactions)
-- [x] SIWE wallet authentication
-- [x] RWA IoT sensor integration + delivery verification
-- [x] Stock market prediction game
-- [x] VIP subscription with AVAX payment
-- [x] Multi-auth (Google + Telegram + Wallet + Passkey)
-- [x] PWA support (installable web app)
-- [x] i18n internationalization
-- [ ] UI/UX polish and responsive refinement
-- [ ] Mobile app (React Native)
-- [ ] Token launch (OGN)
-- [ ] DAO governance
-- [ ] Cross-chain bridge
+### ✅ Completed (MVP)
+- [x] PWA mobile-first (no app store required)
+- [x] Google OAuth + Telegram + SIWE + WebAuthn login
+- [x] Custodial wallet (AES-256-GCM, no seed phrase)
+- [x] Smart Wallet ERC-4337 (Coinbase + Pimlico gasless)
+- [x] Farming simulation (plant/water/harvest/weather)
+- [x] Campaign Boss Battle (Match-3, 8x8 grid, 4 gem types)
+- [x] World Boss multiplayer raid + leaderboard
+- [x] PvP 1v1 realtime (Colyseus WebSocket)
+- [x] AI Knowledge Card generation (GPT-4o-mini + Sharp)
+- [x] NFT ERC-721 mint on Avalanche C-Chain Mainnet
+- [x] Prayer System with Merkle proof on-chain
+- [x] DePIN IoT dashboard (Arduino sensors + webcam live feed)
+- [x] RWA delivery + QR scan + on-chain Merkle batch
+- [x] NFT P2P Marketplace + Auction (Colyseus realtime)
+- [x] VIP subscription (PayPal + VNPay)
+- [x] Multi-language: 12 languages
+- [x] Admin Dashboard (37 modules, full ops)
+- [x] Auto AI 5 levels (MCTS + RL, client-side, offline)
+- [x] Market prediction (Yahoo Finance + AI)
+
+### 🔨 In Progress
+- [ ] **PixiJS WebGL Rendering** — replace DOM/CSS with GPU-accelerated canvas
+  - 64 sprites → 1 draw call, stable 60 FPS on mid-range Android
+  - GSAP animations on DisplayObject, particle Object Pool
+  - React handles UI, PixiJS handles game canvas (clean separation)
+- [ ] **Cooperative Guild System (Hop Tac Xa)**
+  - Farmer guilds — joint farming, shared Knowledge Cards, co-op World Boss raids
+  - Group organic supply orders
+  - Mirrors real-world cooperative model in Vietnamese agriculture
+- [ ] **Advanced Multiplayer** — expanded co-op modes beyond PvP 1v1
+- [ ] **UI/UX Polish** — visual redesign after feature freeze
+
+### 📋 Planned
+- [ ] Avalanche L1 "FarmChain" — dedicated chain, gas ~$0, IoT precompile
+- [ ] OGN Token on C-Chain + ICTT bridge to FarmChain
+- [ ] DAO Governance — community voting on crop education content
+- [ ] Voice AI narration (ElevenLabs) for low-literacy farmers
+- [ ] Regional expansion: VietFarm → IndoFarm → IndiaFarm
+
+### Won't Have (Intentional)
+- Token listing / DEX integration — too early, no real value proven yet
+- Cross-chain bridge — focus depth on Avalanche, not breadth
+- NFT listing on OpenSea/Joepegs — keep Knowledge Cards in educational context
+- P2P fiat off-ramp — OGN is learning reward, not speculation instrument
 
 ## 📄 License
 
