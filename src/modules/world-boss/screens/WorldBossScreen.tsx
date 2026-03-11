@@ -13,6 +13,7 @@ import { AttackButton } from '../components/AttackButton';
 import { RewardsScreen } from '../components/RewardsScreen';
 import { HistoryList } from '../components/HistoryList';
 import { WorldBossBattleView } from '../components/WorldBossBattleView';
+import CoopScreen from '@/modules/coop/CoopScreen';
 
 interface EndedBossInfo {
   id: string;
@@ -44,6 +45,7 @@ export function WorldBossScreen() {
 
   // === Battle state ===
   const [showBattle, setShowBattle] = useState(false);
+  const [showCoop,   setShowCoop]   = useState(false);  // Co-op mode
   const [popup, setPopup] = useState<'leaderboard' | 'feed' | null>(null);
 
   // === Boss End Detection ===
@@ -76,12 +78,22 @@ export function WorldBossScreen() {
     prevActiveRef.current = isActive;
   }, [data?.active]);
 
-  // Fullscreen battle view
+  // Fullscreen solo battle view
   if (showBattle && boss) {
     return (
       <WorldBossBattleView
         worldBoss={boss}
         onExit={() => setShowBattle(false)}
+      />
+    );
+  }
+
+  // Fullscreen co-op mode — optional path, solo flow không bị ảnh hưởng
+  if (showCoop && boss) {
+    return (
+      <CoopScreen
+        worldBoss={boss}
+        onExit={() => setShowCoop(false)}
       />
     );
   }
@@ -154,12 +166,31 @@ export function WorldBossScreen() {
             durationMinutes={boss.durationMinutes}
           />
 
-          {/* Attack button — ngay dưới đếm ngược */}
-          <div style={{ padding: '10px 16px' }}>
-            <AttackButton
-              battleState="idle"
-              onAttack={() => setShowBattle(true)}
-            />
+          {/* Attack button + Co-op button — ngay dưới đếm ngược */}
+          <div style={{ padding: '10px 16px', display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <AttackButton
+                battleState="idle"
+                onAttack={() => setShowBattle(true)}
+              />
+            </div>
+            {/* Nút Co-op — optional path, không thay đổi solo flow */}
+            <button
+              onClick={() => setShowCoop(true)}
+              style={{
+                padding:      '0 16px',
+                background:   'linear-gradient(135deg, #1d4ed8, #7c3aed)',
+                color:        'white',
+                fontWeight:   700,
+                fontSize:     13,
+                border:       'none',
+                borderRadius: 10,
+                cursor:       'pointer',
+                whiteSpace:   'nowrap',
+              }}
+            >
+              👥 Co-op
+            </button>
           </div>
 
           <div className="flex items-center justify-between px-4 pb-1 text-xs text-gray-400">
