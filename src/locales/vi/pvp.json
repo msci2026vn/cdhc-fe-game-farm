@@ -152,5 +152,27 @@
     "accepted": "✅ Đối thủ đã chấp nhận thách đấu!",
     "noOpponent": "Không tìm được đối thủ. Hãy thử Tìm Trận.",
     "searching": "Đang tìm đối thủ..."
+  },
+  "coop": {
+    "inviteModal": {
+      "title": "Mời bạn vào phòng {{code}}",
+      "loading": "Đang tải...",
+      "empty": "Không có bạn bè nào đang online",
+      "noOnline": "Không có bạn bè nào đang online",
+      "invite": "Mời",
+      "inviting": "...",
+      "invited": "Đã mời ✓",
+      "sent": "Đã gửi lời mời!"
+    },
+    "joinByCode": {
+      "button": "Nhập mã",
+      "title": "Nhập Mã Phòng",
+      "placeholder": "VD: AB12",
+      "submit": "Vào Phòng",
+      "joining": "Đang vào...",
+      "errorNotFound": "Không tìm thấy phòng",
+      "errorEnded": "Phòng đã kết thúc",
+      "errorInvalid": "Mã phải đủ 4 ký tự"
+    }
   }
 }

@@ -14,6 +14,7 @@ import { RewardsScreen } from '../components/RewardsScreen';
 import { HistoryList } from '../components/HistoryList';
 import { WorldBossBattleView } from '../components/WorldBossBattleView';
 import CoopScreen from '@/modules/coop/CoopScreen';
+import { coopApi } from '@/modules/coop/api/api-coop';
 
 interface EndedBossInfo {
   id: string;
@@ -47,6 +48,13 @@ export function WorldBossScreen() {
   const [showBattle, setShowBattle] = useState(false);
   const [showCoop,   setShowCoop]   = useState(false);  // Co-op mode
   const [popup, setPopup] = useState<'leaderboard' | 'feed' | null>(null);
+
+  // === Join by room code ===
+  const [coopInitialCode, setCoopInitialCode] = useState<string | undefined>();
+  const [showJoinInput,   setShowJoinInput]   = useState(false);
+  const [joinCode,        setJoinCode]        = useState('');
+  const [joiningByCode,   setJoiningByCode]   = useState(false);
+  const [joinError,       setJoinError]       = useState('');
 
   // === Boss End Detection ===
   const [showEndScreen, setShowEndScreen] = useState(false);
@@ -93,10 +101,39 @@ export function WorldBossScreen() {
     return (
       <CoopScreen
         worldBoss={boss}
-        onExit={() => setShowCoop(false)}
+        initialRoomCode={coopInitialCode}
+        onExit={() => { setShowCoop(false); setCoopInitialCode(undefined); }}
       />
     );
   }
+
+  const handleJoinByCode = async () => {
+    const code = joinCode.trim().toUpperCase();
+    if (code.length !== 4) {
+      setJoinError(t('pvp:coop.joinByCode.errorInvalid'));
+      return;
+    }
+    setJoiningByCode(true);
+    setJoinError('');
+    try {
+      const roomInfo = await coopApi.getRoom(code);
+      if (!roomInfo) {
+        setJoinError(t('pvp:coop.joinByCode.errorNotFound'));
+        return;
+      }
+      if (roomInfo.phase === 'ended') {
+        setJoinError(t('pvp:coop.joinByCode.errorEnded'));
+        return;
+      }
+      setShowJoinInput(false);
+      setCoopInitialCode(code);
+      setShowCoop(true);
+    } catch {
+      setJoinError(t('pvp:coop.joinByCode.errorNotFound'));
+    } finally {
+      setJoiningByCode(false);
+    }
+  };
 
   return (
     <div
@@ -176,7 +213,7 @@ export function WorldBossScreen() {
             </div>
             {/* Nút Co-op — optional path, không thay đổi solo flow */}
             <button
-              onClick={() => setShowCoop(true)}
+              onClick={() => { setCoopInitialCode(undefined); setShowCoop(true); }}
               style={{
                 padding:      '0 16px',
                 background:   'linear-gradient(135deg, #1d4ed8, #7c3aed)',
@@ -190,6 +227,23 @@ export function WorldBossScreen() {
               }}
             >
               👥 Co-op
+            </button>
+            {/* Nút Nhập mã phòng */}
+            <button
+              onClick={() => { setJoinCode(''); setJoinError(''); setShowJoinInput(true); }}
+              style={{
+                padding:      '0 12px',
+                background:   'rgba(255,255,255,0.08)',
+                color:        '#d1d5db',
+                fontWeight:   600,
+                fontSize:     12,
+                border:       '1px solid #374151',
+                borderRadius: 10,
+                cursor:       'pointer',
+                whiteSpace:   'nowrap',
+              }}
+            >
+              {t('pvp:coop.joinByCode.button')}
             </button>
           </div>
 
@@ -279,6 +333,73 @@ export function WorldBossScreen() {
             <div style={{ flex: 1, overflowY: 'scroll', WebkitOverflowScrolling: 'touch' }}>
               <LiveFeed feed={boss.feed} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popup: Nhập mã phòng */}
+      {showJoinInput && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          onClick={() => setShowJoinInput(false)}
+        >
+          <div
+            style={{ background: '#1f2937', borderRadius: 16, padding: 24, width: '100%', maxWidth: 320 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+                🔑 {t('pvp:coop.joinByCode.title')}
+              </h3>
+              <button onClick={() => setShowJoinInput(false)} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 22, cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+            </div>
+            <input
+              type="text"
+              value={joinCode}
+              onChange={e => { setJoinCode(e.target.value.toUpperCase().slice(0, 4)); setJoinError(''); }}
+              onKeyDown={e => e.key === 'Enter' && handleJoinByCode()}
+              placeholder={t('pvp:coop.joinByCode.placeholder')}
+              maxLength={4}
+              autoFocus
+              style={{
+                width:        '100%',
+                padding:      '12px 14px',
+                background:   '#111827',
+                border:       `1px solid ${joinError ? '#ef4444' : '#374151'}`,
+                borderRadius: 10,
+                color:        'white',
+                fontSize:     22,
+                fontWeight:   700,
+                letterSpacing: 6,
+                textAlign:    'center',
+                fontFamily:   'monospace',
+                outline:      'none',
+                boxSizing:    'border-box',
+              }}
+            />
+            {joinError && (
+              <div style={{ color: '#ef4444', fontSize: 12, marginTop: 6, textAlign: 'center' }}>
+                {joinError}
+              </div>
+            )}
+            <button
+              onClick={handleJoinByCode}
+              disabled={joiningByCode}
+              style={{
+                marginTop:    14,
+                width:        '100%',
+                padding:      '12px 0',
+                background:   joiningByCode ? '#374151' : 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
+                color:        'white',
+                fontWeight:   700,
+                fontSize:     15,
+                border:       'none',
+                borderRadius: 10,
+                cursor:       joiningByCode ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {joiningByCode ? t('pvp:coop.joinByCode.joining') : t('pvp:coop.joinByCode.submit')}
+            </button>
           </div>
         </div>
       )}

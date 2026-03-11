@@ -152,5 +152,27 @@
     "accepted": "✅ Opponent accepted the challenge!",
     "noOpponent": "No opponent found. Try Quick Match instead.",
     "searching": "Searching for opponent..."
+  },
+  "coop": {
+    "inviteModal": {
+      "title": "Invite friends to room {{code}}",
+      "loading": "Loading...",
+      "empty": "No friends are online",
+      "noOnline": "No friends are online",
+      "invite": "Invite",
+      "inviting": "...",
+      "invited": "Invited ✓",
+      "sent": "Invite sent!"
+    },
+    "joinByCode": {
+      "button": "Join by code",
+      "title": "Enter Room Code",
+      "placeholder": "E.g. AB12",
+      "submit": "Join Room",
+      "joining": "Joining...",
+      "errorNotFound": "Room not found",
+      "errorEnded": "Room has ended",
+      "errorInvalid": "Code must be 4 characters"
+    }
   }
 }

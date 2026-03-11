@@ -4,8 +4,10 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CoopPlayer } from '@/modules/coop/types/coop.types';
 import { coopApi } from '@/modules/coop/api/api-coop';
+import { socialApi } from '@/shared/api/api-social';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 interface Props {
@@ -22,9 +24,16 @@ interface Props {
 export function CoopWaitingRoom({
   roomCode, players, teamSize, multiplier, isHost, lobbyTimeLeft, onStart, onLeave,
 }: Props) {
+  const { t } = useTranslation('pvp');
   const addToast = useUIStore(s => s.addToast);
-  const [inviting, setInviting] = useState(false);
-  const [copied,   setCopied]   = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // === Invite modal state ===
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [onlineFriends, setOnlineFriends] = useState<Array<{ id: string; name: string; avatar: string | null }>>([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
 
   // Số slot tối đa = 4 (hoặc teamSize tối đa của event)
   const MAX_SLOTS = 4;
@@ -43,20 +52,30 @@ export function CoopWaitingRoom({
     window.open(zaloUrl, '_blank');
   };
 
-  // Mời bạn qua friend picker — simplified: nhập userId
-  // (Trong sản phẩm thực: dùng FriendPickerModal tương tự PvpLobby)
-  const handleInviteFriend = async () => {
-    const toUserId = prompt('Nhập userId của bạn để mời:');
-    if (!toUserId) return;
-
-    setInviting(true);
+  const openInviteModal = async () => {
+    setShowInviteModal(true);
+    setLoadingFriends(true);
     try {
-      await coopApi.inviteToRoom(toUserId, roomCode);
-      addToast('Đã gửi lời mời!', 'success');
-    } catch (err) {
+      const { friends } = await socialApi.getFriends();
+      setOnlineFriends(friends.filter(f => f.online).map(f => ({ id: f.id, name: f.name, avatar: f.avatar })));
+    } catch {
+      addToast('Không thể tải danh sách bạn bè', 'error');
+      setShowInviteModal(false);
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
+
+  const handleInvite = async (friendId: string) => {
+    setInvitingId(friendId);
+    try {
+      await coopApi.inviteToRoom(friendId, roomCode);
+      setInvitedIds(prev => new Set(prev).add(friendId));
+      addToast(t('coop.inviteModal.sent'), 'success');
+    } catch {
       addToast('Không thể gửi lời mời', 'error');
     } finally {
-      setInviting(false);
+      setInvitingId(null);
     }
   };
 
@@ -65,6 +84,7 @@ export function CoopWaitingRoom({
   const lobbySeconds = lobbyTimeLeft % 60;
 
   return (
+    <>
     <div style={{
       position:       'fixed',
       inset:          0,
@@ -209,8 +229,7 @@ export function CoopWaitingRoom({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 320 }}>
         {/* Nút Mời Bạn */}
         <button
-          onClick={handleInviteFriend}
-          disabled={inviting}
+          onClick={openInviteModal}
           style={{
             padding:      '12px 0',
             background:   '#1d4ed8',
@@ -219,11 +238,10 @@ export function CoopWaitingRoom({
             fontSize:     15,
             border:       'none',
             borderRadius: 10,
-            cursor:       inviting ? 'not-allowed' : 'pointer',
-            opacity:      inviting ? 0.7 : 1,
+            cursor:       'pointer',
           }}
         >
-          {inviting ? 'Đang mời...' : '🤝 Mời Bạn'}
+          🤝 Mời Bạn
         </button>
 
         {/* Nút Bắt Đầu — chỉ host thấy, disabled khi chưa đủ 2 người */}
@@ -265,5 +283,120 @@ export function CoopWaitingRoom({
         </button>
       </div>
     </div>
+
+    {/* === Invite Friend Modal === */}
+    {showInviteModal && (
+      <div
+        style={{
+          position:       'fixed',
+          inset:          0,
+          background:     'rgba(0,0,0,0.8)',
+          zIndex:         30,
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          padding:        24,
+        }}
+        onClick={() => setShowInviteModal(false)}
+      >
+        <div
+          style={{
+            background:    '#1f2937',
+            borderRadius:  16,
+            padding:       20,
+            width:         '100%',
+            maxWidth:      360,
+            maxHeight:     '70vh',
+            display:       'flex',
+            flexDirection: 'column',
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+              🤝 {t('coop.inviteModal.title', { code: roomCode })}
+            </h3>
+            <button
+              onClick={() => setShowInviteModal(false)}
+              style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 22, cursor: 'pointer', lineHeight: 1, padding: 0 }}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* List */}
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {loadingFriends ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#9ca3af' }}>
+                {t('coop.inviteModal.loading')}
+              </div>
+            ) : onlineFriends.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#9ca3af', fontSize: 14 }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>👥</div>
+                {t('coop.inviteModal.empty')}
+              </div>
+            ) : (
+              onlineFriends.map(f => (
+                <div
+                  key={f.id}
+                  style={{
+                    display:      'flex',
+                    alignItems:   'center',
+                    gap:          10,
+                    padding:      '10px 0',
+                    borderBottom: '1px solid #374151',
+                  }}
+                >
+                  {/* Avatar */}
+                  <div style={{
+                    width: 36, height: 36, borderRadius: '50%',
+                    background: '#374151', overflow: 'hidden', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {f.avatar
+                      ? <img src={f.avatar} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <span style={{ fontSize: 16 }}>🧑</span>
+                    }
+                  </div>
+                  {/* Name */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {f.name}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#22c55e' }}>● Online</div>
+                  </div>
+                  {/* Invite button */}
+                  <button
+                    onClick={() => !invitedIds.has(f.id) && handleInvite(f.id)}
+                    disabled={invitingId === f.id || invitedIds.has(f.id)}
+                    style={{
+                      padding:      '6px 14px',
+                      background:   invitedIds.has(f.id) ? '#166534' : invitingId === f.id ? '#374151' : '#1d4ed8',
+                      color:        'white',
+                      fontWeight:   700,
+                      fontSize:     12,
+                      border:       'none',
+                      borderRadius: 8,
+                      cursor:       (invitingId === f.id || invitedIds.has(f.id)) ? 'default' : 'pointer',
+                      opacity:      invitingId === f.id ? 0.7 : 1,
+                      flexShrink:   0,
+                    }}
+                  >
+                    {invitedIds.has(f.id)
+                      ? t('coop.inviteModal.invited')
+                      : invitingId === f.id
+                        ? t('coop.inviteModal.inviting')
+                        : t('coop.inviteModal.invite')
+                    }
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

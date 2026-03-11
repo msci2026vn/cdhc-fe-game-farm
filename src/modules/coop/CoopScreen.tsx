@@ -25,11 +25,13 @@ import { CoopInvitePopup } from './components/CoopInvitePopup';
 
 interface Props {
   /** WorldBossInfo đã được WorldBossScreen fetch sẵn */
-  worldBoss: WorldBossInfo;
-  onExit:    () => void;
+  worldBoss:        WorldBossInfo;
+  onExit:           () => void;
+  /** Nếu set → join phòng có sẵn thay vì tạo mới */
+  initialRoomCode?: string;
 }
 
-export default function CoopScreen({ worldBoss, onExit }: Props) {
+export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props) {
   const { data: authData } = useAuth();
   const addToast = useUIStore(s => s.addToast);
 
@@ -72,14 +74,28 @@ export default function CoopScreen({ worldBoss, onExit }: Props) {
     }
   });
 
-  // ── Khởi tạo: kiểm tra session cũ hoặc tạo phòng mới ──
+  // ── Khởi tạo: join phòng có sẵn (initialRoomCode) hoặc tạo phòng mới ──
   useEffect(() => {
     (async () => {
       try {
         // 1. Lấy token xác thực Colyseus
         const authToken = await coopApi.getToken();
 
-        // 2. Kiểm tra đang trong session nào không
+        // 2a. Join phòng có sẵn qua mã phòng
+        if (initialRoomCode) {
+          const roomInfo = await coopApi.getRoom(initialRoomCode);
+          if (!roomInfo || roomInfo.phase === 'ended') {
+            addToast('Phòng không tồn tại hoặc đã kết thúc', 'error');
+            onExit();
+            return;
+          }
+          setToken(authToken);
+          setRoomId(roomInfo.roomId);
+          setLoading(false);
+          return;
+        }
+
+        // 2b. Kiểm tra đang trong session nào không
         const status = await coopApi.getStatus();
 
         if (status.inSession && status.roomId && status.phase !== 'ended') {
