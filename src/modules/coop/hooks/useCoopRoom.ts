@@ -46,11 +46,12 @@ export interface UseCoopRoomReturn {
   /** hiện sau 3 lần auto-retry thất bại — cho phép user bấm nút "Vào Lại" */
   showReconnectButton: boolean;
 
-  sendReady: () => void;
-  sendTaunt: (emoji: string) => void;
-  leaveRoom: () => void;
+  sendReady:  () => void;
+  sendTaunt:  (emoji: string) => void;
+  leaveRoom:  () => void;
+  kickPlayer: (targetUserId: string) => void;
   /** Manual reconnect — gọi khi showReconnectButton = true */
-  reconnect: () => Promise<void>;
+  reconnect:  () => Promise<void>;
 }
 
 interface UseCoopRoomOptions {
@@ -85,8 +86,39 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
       setRoomState(prev => ({
         ...prev,
         roomCode: data.roomCode,
-        hostId:   data.hostId,
+        hostId:   data.hostId ?? prev.hostId,
       }));
+    });
+
+    // player_list_update: danh sách đầy đủ sau mỗi join/leave — nguồn dữ liệu chính cho player slots
+    r.onMessage('player_list_update', (data: {
+      players:    Array<{ userId: string; name: string; hp: number; maxHp: number; isHost: boolean }>;
+      hostId:     string;
+      teamSize:   number;
+      multiplier: number;
+      phase:      string;
+    }) => {
+      setRoomState(prev => ({
+        ...prev,
+        players:    data.players.map(p => ({ ...p, isOnline: true })),
+        hostId:     data.hostId,
+        teamSize:   data.teamSize,
+        multiplier: data.multiplier,
+        phase:      data.phase as CoopRoomState['phase'],
+      }));
+    });
+
+    // kicked: bị host đuổi — rời phòng + toast
+    r.onMessage('kicked', () => {
+      addToast('Bạn đã bị đuổi khỏi phòng', 'warning');
+      intentionalLeaveRef.current = true;
+      r.leave();
+      setIsConnected(false);
+    });
+
+    // lobby_tick: cập nhật đếm ngược lobby
+    r.onMessage('lobby_tick', (data: { timeLeft: number }) => {
+      setRoomState(prev => ({ ...prev, lobbyTimeLeft: data.timeLeft }));
     });
 
     // state_update: sync toàn bộ CoopRoomState — gửi sau mỗi sự kiện quan trọng
@@ -203,6 +235,10 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     roomRef.current?.send('taunt', { emoji });
   }, []);
 
+  const kickPlayer = useCallback((targetUserId: string) => {
+    roomRef.current?.send('kick', { targetUserId });
+  }, []);
+
   const leaveRoom = useCallback(() => {
     intentionalLeaveRef.current = true;
     roomRef.current?.leave();
@@ -235,6 +271,7 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     sendReady,
     sendTaunt,
     leaveRoom,
+    kickPlayer,
     reconnect,
   };
 }

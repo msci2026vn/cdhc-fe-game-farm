@@ -11,18 +11,20 @@ import { socialApi } from '@/shared/api/api-social';
 import { useUIStore } from '@/shared/stores/uiStore';
 
 interface Props {
-  roomCode:   string;
-  players:    CoopPlayer[];
-  teamSize:   number;
-  multiplier: number;
-  isHost:     boolean;
+  roomCode:      string;
+  players:       CoopPlayer[];
+  teamSize:      number;
+  multiplier:    number;
+  isHost:        boolean;
   lobbyTimeLeft: number;
-  onStart:    () => void;
-  onLeave:    () => void;
+  currentUserId: string;
+  onStart:       () => void;
+  onLeave:       () => void;
+  onKick?:       (userId: string) => void;
 }
 
 export function CoopWaitingRoom({
-  roomCode, players, teamSize, multiplier, isHost, lobbyTimeLeft, onStart, onLeave,
+  roomCode, players, teamSize, multiplier, isHost, lobbyTimeLeft, currentUserId, onStart, onLeave, onKick,
 }: Props) {
   const { t } = useTranslation('pvp');
   const addToast = useUIStore(s => s.addToast);
@@ -180,10 +182,36 @@ export function CoopWaitingRoom({
               marginBottom: 8,
             }}
           >
-            <span style={{ fontSize: 18 }}>🧑</span>
-            <span style={{ flex: 1, fontWeight: 600, fontSize: 14 }}>{p.name}</span>
+            <span style={{ fontSize: 18, opacity: p.isOnline === false ? 0.4 : 1 }}>🧑</span>
+            <span style={{ flex: 1, fontWeight: 600, fontSize: 14, opacity: p.isOnline === false ? 0.5 : 1 }}>
+              {p.name}
+              {p.userId === currentUserId && <span style={{ fontSize: 10, color: '#6b7280', marginLeft: 4 }}>(bạn)</span>}
+            </span>
             {p.isHost && (
               <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 700 }}>HOST</span>
+            )}
+            {isHost && !p.isHost && p.userId !== currentUserId && onKick && (
+              <button
+                onClick={() => onKick(p.userId)}
+                title="Đuổi khỏi phòng"
+                style={{
+                  background:     'rgba(239,68,68,0.15)',
+                  border:         '1px solid rgba(239,68,68,0.3)',
+                  color:          '#f87171',
+                  borderRadius:   6,
+                  width:          24,
+                  height:         24,
+                  cursor:         'pointer',
+                  fontSize:       16,
+                  display:        'flex',
+                  alignItems:     'center',
+                  justifyContent: 'center',
+                  padding:        0,
+                  flexShrink:     0,
+                }}
+              >
+                ×
+              </button>
             )}
           </div>
         ))}

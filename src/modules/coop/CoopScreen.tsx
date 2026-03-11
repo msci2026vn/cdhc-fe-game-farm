@@ -52,6 +52,7 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
     showReconnectButton,
     sendReady,
     leaveRoom,
+    kickPlayer,
     reconnect,
   } = useCoopRoom({ roomId, token, eventId: worldBoss.id });
 
@@ -236,8 +237,10 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomCode }: Props
           multiplier={roomState.multiplier}
           isHost={isHost}
           lobbyTimeLeft={roomState.lobbyTimeLeft}
+          currentUserId={myUserId}
           onStart={handleStart}
           onLeave={handleLeave}
+          onKick={kickPlayer}
         />
       )}
 
