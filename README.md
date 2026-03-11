@@ -8,11 +8,16 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 > ⚠️ **MVP Notice — Features First, UI/UX Second**
-> Current focus: building and stabilizing all core features.
-> UI/UX redesign (PixiJS WebGL rendering + full visual polish) is scheduled
-> after feature freeze. **The game works — it just doesn't look pretty yet.**
-> Judges are encouraged to evaluate functionality and blockchain integration,
-> not visual design.
+>
+> 🇬🇧 This is an MVP focused on building and stabilizing core features.
+> UI/UX redesign (PixiJS WebGL + full visual polish) is scheduled after feature freeze.
+> The game works — it just doesn't look pretty yet.
+> We kindly ask judges to focus on core functionality and blockchain integration.
+> UI/UX polish is on the roadmap and will follow after feature freeze.
+>
+> 🇻🇳 Đây là bản MVP tập trung xây dựng và hoàn thiện tính năng cốt lõi.
+> Giao diện sẽ được thiết kế lại sau khi đóng băng tính năng.
+> Kính mong Ban Giám Khảo ưu tiên đánh giá tính năng và tích hợp blockchain.
 
 **[🎮 Play Now](https://game.cdhc.vn)** | **[📹 Project Demo](https://youtu.be/Wv9LXxfnH7g)** | **[🎯 Feature Walkthrough](https://www.youtube.com/watch?v=FXUyC021D3k)** | **[🔗 API Health](https://sta.cdhc.vn/health)**
 
