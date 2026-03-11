@@ -199,6 +199,11 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     setIsConnected(true);
     setIsReconnecting(false);
     setShowReconnectButton(false);
+
+    // Fix race condition: room_info + player_list_update được server gửi trong onJoin
+    // nhưng tới client TRƯỚC khi attachHandlers() đăng ký handlers → bị drop.
+    // Gửi get_state để server replay lại state hiện tại cho client này.
+    r.send('get_state', {});
   }, [roomId, token, eventId, addToast]);
 
   // Khởi tạo Colyseus client + join room khi roomId/token sẵn sàng
