@@ -356,10 +356,10 @@ export function WorldBossScreen() {
             <input
               type="text"
               value={joinCode}
-              onChange={e => { setJoinCode(e.target.value.toUpperCase().slice(0, 4)); setJoinError(''); }}
+              onChange={e => { setJoinCode(e.target.value.slice(0, 20)); setJoinError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleJoinByCode()}
               placeholder={t('pvp:coop.joinByCode.placeholder')}
-              maxLength={4}
+              maxLength={20}
               autoFocus
               style={{
                 width:        '100%',

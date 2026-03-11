@@ -167,12 +167,12 @@
     "joinByCode": {
       "button": "Nhập mã",
       "title": "Nhập Mã Phòng",
-      "placeholder": "VD: AB12",
+      "placeholder": "VD: abc123XYZ",
       "submit": "Vào Phòng",
       "joining": "Đang vào...",
       "errorNotFound": "Không tìm thấy phòng",
       "errorEnded": "Phòng đã kết thúc",
-      "errorInvalid": "Mã phải đủ 4 ký tự"
+      "errorInvalid": "Mã phòng không hợp lệ"
     }
   }
 }

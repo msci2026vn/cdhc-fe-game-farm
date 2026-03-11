@@ -18,6 +18,7 @@ export interface WorldBossFeedEntry {
 export interface WorldBossLeaderboardEntry {
   userId: string
   username?: string
+  avatarUrl?: string
   damage: number
 }
 
@@ -134,6 +135,7 @@ export interface WorldBossHistoryLeaderboard {
     bestSingleHit: number
     rank: number
     username?: string
+    avatarUrl?: string
   }>
 }
 

@@ -47,6 +47,16 @@ function HistoryLeaderboardContent({ eventId, t }: { eventId: string, t: any }) 
             <span className="w-6 text-center flex-shrink-0 text-sm">
               {i < 3 ? MEDALS[i] : <span className="text-gray-500">{i + 1}</span>}
             </span>
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700 flex-shrink-0 border border-gray-600">
+              <img
+                src={entry.avatarUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${entry.userId}`}
+                alt="avatar"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${entry.userId}`;
+                }}
+              />
+            </div>
             <span className="truncate text-xs font-mono">
               {entry.username ?? entry.userId.slice(0, 10)}
             </span>
