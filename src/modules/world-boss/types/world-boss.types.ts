@@ -17,6 +17,7 @@ export interface WorldBossFeedEntry {
 
 export interface WorldBossLeaderboardEntry {
   userId: string
+  username?: string
   damage: number
 }
 

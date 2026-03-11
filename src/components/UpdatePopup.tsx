@@ -1,3 +1,5 @@
+import React, { useState, useCallback } from 'react';
+
 interface UpdatePopupProps {
   visible: boolean;
   dismissed?: boolean;
@@ -7,6 +9,13 @@ interface UpdatePopupProps {
 }
 
 export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }: UpdatePopupProps) => {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleUpdate = useCallback(() => {
+    setIsUpdating(true);
+    onUpdate();
+  }, [onUpdate]);
+
   if (!visible) return null;
 
   if (dismissed) {
@@ -33,6 +42,7 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
           cursor: 'pointer',
           boxShadow: '0 4px 12px rgba(239, 68, 68, 0.5)',
           animation: 'pulseAlert 2s infinite',
+          touchAction: 'manipulation',
         }}
       >
         !
@@ -65,6 +75,7 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
         background: 'rgba(0,0,0,0.65)',
         animation: 'fadeInOverlay 0.2s ease-out',
         backdropFilter: 'blur(4px)',
+        touchAction: 'none',
       }}
     >
       <div
@@ -81,20 +92,22 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
           width: '100%',
           boxShadow: '0 8px 32px rgba(0,0,0,0.8), 0 0 0 1px rgba(34,197,94,0.15)',
           animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          pointerEvents: 'auto',
         }}
       >
-        <div style={{ fontSize: '48px', lineHeight: 1 }}>🔄</div>
+        <div style={{ fontSize: '48px', lineHeight: 1 }}>{isUpdating ? '⏳' : '🔄'}</div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ color: '#fff', fontWeight: 700, fontSize: '18px', marginBottom: '6px' }}>
             Phiên bản mới đã sẵn sàng!
           </div>
           <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', lineHeight: 1.4 }}>
-            Cập nhật để trải nghiệm tốt hơn
+            {isUpdating ? 'Đang áp dụng bản cập nhật...' : 'Cập nhật để trải nghiệm tốt hơn'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
           <button
             onClick={onDismiss}
+            disabled={isUpdating}
             style={{
               flex: 1,
               background: 'transparent',
@@ -103,14 +116,17 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
               color: '#fff',
               padding: '12px',
               fontSize: '14px',
-              cursor: 'pointer',
+              cursor: isUpdating ? 'not-allowed' : 'pointer',
               fontWeight: 600,
+              opacity: isUpdating ? 0.5 : 1,
+              touchAction: 'manipulation',
             }}
           >
             Bỏ qua
           </button>
           <button
-            onClick={onUpdate}
+            onClick={handleUpdate}
+            disabled={isUpdating}
             style={{
               flex: 1,
               background: 'linear-gradient(135deg, #16a34a, #15803d)',
@@ -119,12 +135,26 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
               color: '#fff',
               padding: '12px',
               fontSize: '14px',
-              cursor: 'pointer',
+              cursor: isUpdating ? 'wait' : 'pointer',
               fontWeight: 700,
-              boxShadow: '0 4px 12px rgba(22,163,74,0.4)',
+              boxShadow: isUpdating ? 'none' : '0 4px 12px rgba(22,163,74,0.4)',
+              opacity: isUpdating ? 0.8 : 1,
+              touchAction: 'manipulation',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            Cập nhật
+            {isUpdating && <div style={{
+              width: '14px',
+              height: '14px',
+              border: '2px solid rgba(255,255,255,0.3)',
+              borderTopColor: '#fff',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />}
+            {isUpdating ? 'Đang tải...' : 'Cập nhật'}
           </button>
         </div>
       </div>
@@ -138,7 +168,11 @@ export const UpdatePopup = ({ visible, dismissed, onUpdate, onDismiss, onShow }:
           from { opacity: 0; transform: scale(0.9) translateY(10px); }
           to { opacity: 1; transform: scale(1) translateY(0); }
         }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
       `}</style>
     </div>
   );
 };
+

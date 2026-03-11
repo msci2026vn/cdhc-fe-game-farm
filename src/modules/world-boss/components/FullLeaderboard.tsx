@@ -37,7 +37,7 @@ export function FullLeaderboard({ leaderboard, currentUserId }: FullLeaderboardP
                       {rank <= 3 ? MEDALS[rank - 1] : <span className="text-gray-500">{rank}</span>}
                     </span>
                     <span className="truncate text-xs font-mono">
-                      {entry.userId.slice(0, 10)}
+                      {entry.username || entry.userId.slice(0, 10)}
                       {isCurrentUser && <span className="text-blue-400 ml-1">({t('common.you', 'bạn')})</span>}
                     </span>
                   </span>

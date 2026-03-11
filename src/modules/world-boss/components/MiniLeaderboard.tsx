@@ -19,7 +19,7 @@ export function MiniLeaderboard({ leaderboard, participantCount }: MiniLeaderboa
         {top3.map((entry, i) => (
           <div key={entry.userId} className="flex items-center justify-between text-sm">
             <span className="text-gray-300">
-              {MEDALS[i]} {entry.userId.slice(0, 12)}...
+              {MEDALS[i]} {entry.username || `${entry.userId.slice(0, 12)}...`}
             </span>
             <span className="font-mono text-yellow-400">{entry.damage.toLocaleString()} dmg</span>
           </div>
