@@ -16,8 +16,10 @@ export interface WorldBossSessionResult {
 type BattleState = 'idle' | 'fighting' | 'ended';
 
 const DEFAULT_SKILL_LEVELS: PlayerSkillLevels = { sam_dong: 1, ot_hiem: 0, rom_boc: 0 };
-const BATCH_INTERVAL_MS = 2000;
-const BATCH_INTERVAL_URGENT_MS = 1500;
+// BATCH_INTERVAL_MS phải > BE rate limit 2500ms — thêm 200ms buffer tránh 429
+const BATCH_INTERVAL_MS = 2700;
+// BATCH_INTERVAL_URGENT_MS khi boss ≤ 10% HP — phải > BE endgame limit 800ms
+const BATCH_INTERVAL_URGENT_MS = 1000;
 const HP_URGENT_THRESHOLD = 0.1;
 
 /**

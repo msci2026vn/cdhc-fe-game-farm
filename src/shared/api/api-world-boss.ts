@@ -43,6 +43,12 @@ export const worldBossApi = {
       handleUnauthorized('worldBoss.attack');
       throw new Error('Session expired');
     }
+    // 429 on_cooldown — đọc retryAfter thay vì throw
+    // Cho phép sendBatch tích lũy damage và thử lại ở interval tiếp theo
+    if (response.status === 429) {
+      const errData = await response.json().catch(() => ({}));
+      return { ok: false, error: 'on_cooldown', retryAfter: errData.retryAfter ?? 2.5 } as WorldBossAttackResult;
+    }
     if (!response.ok) {
       const text = await response.text().catch(() => '');
       throw new Error(text || `HTTP ${response.status}`);

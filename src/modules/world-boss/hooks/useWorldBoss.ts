@@ -23,7 +23,7 @@ export function useWorldBossLite(enabled: boolean) {
     queryFn: worldBossApi.getLite,
     refetchInterval: (query) => {
       const hp = query.state.data?.hpPercent;
-      if (hp !== undefined && hp < 0.1) return 1_500;
+      if (hp !== undefined && hp < 0.1) return 1_000; // endgame: sync với BATCH_INTERVAL_URGENT_MS
       return 2_000;
     },
     refetchIntervalInBackground: false,

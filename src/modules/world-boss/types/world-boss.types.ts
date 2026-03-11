@@ -149,9 +149,6 @@ export interface WorldBossAttackResultLegacy {
   retryAfter?: number
 }
 
-export interface WorldBossAttackResult {
-  ok: boolean
-  hpPercent: number
-  rank: number | null
-  totalDamage?: number  // chỉ có khi final=true
-}
+export type WorldBossAttackResult =
+  | { ok: true; hpPercent: number; rank: number | null; totalDamage?: number }
+  | { ok: false; error: string; retryAfter?: number }
