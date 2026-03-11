@@ -1,0 +1,54 @@
+{
+  "network": {
+    "name": "Avalanche C-Chain Mainnet",
+    "chainId": 43114,
+    "rpc": "https://api.avax.network/ext/bc/C/rpc",
+    "explorer": "https://snowtrace.io"
+  },
+  "contracts": {
+    "FarmverseNFTCard": {
+      "address": "0x9b801a3e4144b100130506d5f1a2057355e601ec",
+      "standard": "ERC-721",
+      "name": "FarmverseNFTCard",
+      "symbol": "FVNFT",
+      "description": "Knowledge Card NFTs earned by defeating bosses in Organic Kingdom. AI-generated content + artwork, metadata on IPFS.",
+      "explorer": "https://snowtrace.io/address/0x9b801a3e4144b100130506d5f1a2057355e601ec",
+      "source": "contracts/FarmverseNFTCard.sol"
+    },
+    "FarmversePrayerRecord": {
+      "address": "0x853185f76a3daa50432c2802846c7a4f38a1a3f0",
+      "standard": "Custom",
+      "description": "On-chain prayer records for Vietnamese farmers. Each prayer is an immutable proof stored on Avalanche C-Chain.",
+      "explorer": "https://snowtrace.io/address/0x853185f76a3daa50432c2802846c7a4f38a1a3f0",
+      "source": "contracts/FarmversePrayerRecord.sol"
+    },
+    "MerkleRootStore": {
+      "address": "0x27CD564b8A98EFAa4Aff145Ee2E158bAE0051775",
+      "standard": "Custom",
+      "description": "Anchors IoT sensor data (soil moisture, temperature, humidity) and prayer Merkle roots on-chain for tamper-proof RWA verification.",
+      "explorer": "https://snowtrace.io/address/0x27CD564b8A98EFAa4Aff145Ee2E158bAE0051775",
+      "source": "contracts/MerkleRootStore.sol"
+    },
+    "CoinbaseSmartWalletFactory": {
+      "address": "0x0BA5ED0c6AA8c49038539082F85EaF0c14b2f0B2",
+      "standard": "ERC-4337",
+      "description": "Coinbase Smart Wallet Factory — creates ERC-4337 account abstraction wallets with passkey (WebAuthn) support.",
+      "explorer": "https://snowtrace.io/address/0x0BA5ED0c6AA8c49038539082F85EaF0c14b2f0B2",
+      "source": "external — Coinbase Wallet SDK"
+    },
+    "EntryPoint": {
+      "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "standard": "ERC-4337",
+      "description": "EIP-4361 EntryPoint v0.6 — canonical ERC-4337 entry point for user operation bundling via Pimlico.",
+      "explorer": "https://snowtrace.io/address/0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "source": "external — ERC-4337 canonical"
+    }
+  },
+  "testnet": {
+    "name": "Avalanche Fuji Testnet",
+    "chainId": 43113,
+    "rpc": "https://api.avax-test.network/ext/bc/C/rpc",
+    "explorer": "https://testnet.snowtrace.io",
+    "note": "Same contracts deployed on Fuji for development/testing"
+  }
+}
