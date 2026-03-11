@@ -233,7 +233,7 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
   }, [roomId, token, eventId, attachHandlers, addToast]);
 
   const sendReady = useCallback(() => {
-    roomRef.current?.send('ready', {});
+    roomRef.current?.send('start_battle', {});
   }, []);
 
   const sendTaunt = useCallback((emoji: string) => {
