@@ -7,10 +7,12 @@
 ![Bun](https://img.shields.io/badge/Bun-Runtime-f9f1e1)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-> ⚠️ **MVP Development Notice**
-> This is an MVP focused on **building features first**.
-> UI/UX polish is planned for upcoming sprints.
-> Core gameplay and blockchain integration are fully functional.
+> ⚠️ **MVP Notice — Features First, UI/UX Second**
+> Current focus: building and stabilizing all core features.
+> UI/UX redesign (PixiJS WebGL rendering + full visual polish) is scheduled
+> after feature freeze. **The game works — it just doesn't look pretty yet.**
+> Judges are encouraged to evaluate functionality and blockchain integration,
+> not visual design.
 
 **[🎮 Play Now](https://game.cdhc.vn)** | **[📹 Project Demo](https://youtu.be/Wv9LXxfnH7g)** | **[🎯 Feature Walkthrough](https://www.youtube.com/watch?v=FXUyC021D3k)** | **[🔗 API Health](https://sta.cdhc.vn/health)**
 
@@ -20,7 +22,7 @@
 
 **Organic Kingdom** is a Web3 farming simulation game on Avalanche C-Chain that bridges virtual gameplay with real-world organic agriculture. Players farm crops, battle bosses through match-3 puzzle combat, collect NFT cards, participate in on-chain prayer ceremonies, and engage in real-time PvP — all while connecting to actual IoT sensor data from physical organic farms in Vietnam.
 
-The blockchain runs silently underneath — players just play. No gas fees, no seed phrases, no wallet setup required. ERC-4337 Smart Wallets with Pimlico Paymaster handle everything behind the scenes.
+The blockchain runs silently underneath — players just play. No gas fees, no seed phrases, no wallet setup required. A custodial wallet is auto-created on sign-up — players see an address and balance immediately, with an Export button to take full self-custody when ready.
 
 ## 🎮 Live Demo
 
@@ -169,21 +171,23 @@ The blockchain runs silently underneath — players just play. No gas fees, no s
 - **Sensor timeline** with historical charts
 - **Snowtrace verification** for all on-chain proofs
 
-### 👛 Wallet System
+### 👛 Wallet System (Live)
 
-**ERC-4337 Smart Wallet (Account Abstraction):**
-- Auto-deployed Coinbase Smart Wallet for new players
-- WebAuthn/Passkey biometric signing
-- Pimlico Bundler for gasless transactions — players pay $0 AVAX
-- UserOperation building + signing handled by backend
-
-**Custodial Wallet:**
-- Backend-managed wallet for total beginners
-- No wallet setup needed — just play
+**Custodial Wallet (Active):**
+- Auto-created on Google / Telegram sign-up — no seed phrase ever
+- Private key encrypted AES-256-GCM on server
+- UI shows: address, real-time AVAX balance, network status
+- Actions: deposit AVAX, fiat onramp (PayPal), withdraw AVAX
+- **Export** button — player takes full self-custody anytime
+- NFT drops + OGN rewards go directly into this wallet
 
 **External Wallet (MetaMask / Core / WalletConnect):**
 - SIWE (Sign-In with Ethereum, EIP-4361) authentication
 - Direct on-chain transactions for power users
+
+**ERC-4337 Smart Wallet (In Progress — see Roadmap):**
+- Coinbase Smart Wallet + Pimlico Paymaster (gasless)
+- Currently fixing bundler integration on Avalanche Fuji
 
 ### 📚 Quiz & Education
 
@@ -370,35 +374,41 @@ Consumer scans QR → verifies product authenticity
 supply chain transparency problem. The IoT data hash on-chain makes organic certification
 verifiable by anyone, not just centralized auditors.
 
-### Feature 4 — ERC-4337 Smart Wallet (Account Abstraction)
+### Feature 4 — Custodial Wallet (Live)
 
-**Zero friction onboarding — new players never touch a seed phrase.**
+**Zero friction onboarding — farmers never see a seed phrase.**
 
 ```
-New player signs up (Google / Telegram / Email)
+Player signs up via Google / Telegram
          │
          ▼
-Backend deploys Coinbase Smart Wallet via Factory
-    └── 0x0BA5ED0c6AA8c49038F819E587E2633c4A9F428a
+Backend generates wallet keypair
+    └── Private key encrypted AES-256-GCM on server
          │
          ▼
-Wallet address assigned to player account
+Wallet UI shows immediately:
+    ├── Address: 0x711e...5404
+    ├── Balance: 0.000778 AVAX (real-time)
+    ├── Network: Avalanche C-Chain ✅
+    └── "Xem trên Snowtrace" — direct on-chain link
          │
          ▼
-Player earns OGN tokens / receives NFT
-    └── goes directly into smart wallet
+Player actions:
+    ├── Nạp tiền  — deposit AVAX
+    ├── Nạp Visa  — fiat onramp via PayPal
+    ├── Rút tiền  — withdraw AVAX
+    └── Export    — take full self-custody anytime
          │
          ▼
-When player wants to transact on-chain:
-    ├── UserOperation built by backend
-    ├── Sent to Pimlico Bundler
-    ├── Paymaster sponsors gas (player pays 0 AVAX)
-    └── Transaction executed on Avalanche ✅
+NFT rewards → go directly into this wallet
+OGN tokens  → go directly into this wallet
 ```
 
-**Why this matters:** Mainstream gaming audiences abandon Web3 when asked to
-buy gas tokens before playing. ERC-4337 eliminates this — players experience
-blockchain benefits (true ownership, interoperability) without blockchain complexity.
+**Why custodial first:**
+800 million smallholder farmers have never touched a seed phrase.
+Custodial wallet = familiar UX like a bank account.
+"Export" button gives full self-custody when player is ready —
+progressive decentralization, not forced complexity.
 
 ### Feature 5 — SIWE Auth (Sign-In with Ethereum)
 
@@ -431,8 +441,8 @@ JWT issued → player authenticated ✅
 | NFTs Minted | Verifiable on Snowtrace |
 | Prayer Batches | On-chain since 2026-03-10 |
 | RWA Hashes | Recorded per delivery batch |
-| Smart Wallets Deployed | 3+ (growing) |
-| Gas for Players | **$0** — Pimlico Paymaster |
+| Custodial Wallets Created | 3+ (growing) |
+| Gas for Players | **$0** — custodial backend pays (ERC-4337 gasless in progress) |
 
 ### Technical Decisions & Tradeoffs
 
@@ -457,8 +467,6 @@ JWT issued → player authenticated ✅
 | FarmverseNFTCard (ERC-721) | `0x9b801a3e4144b100130506d5f1a2057355e601ec` | [Snowtrace ↗](https://snowtrace.io/address/0x9b801a3e4144b100130506d5f1a2057355e601ec) | NFT cards from World Boss |
 | FarmversePrayerRecord | `0x853185f76a3daa50432c2802846c7a4f38a1a3f0` | [Snowtrace ↗](https://snowtrace.io/address/0x853185f76a3daa50432c2802846c7a4f38a1a3f0) | On-chain Merkle prayer proof |
 | MerkleRootStore | `0x27CD564b8A98EFAa4Aff145Ee2E158bAE0051775` | [Snowtrace ↗](https://snowtrace.io/address/0x27CD564b8A98EFAa4Aff145Ee2E158bAE0051775) | RWA IoT data integrity |
-| SmartWalletFactory (ERC-4337) | `0x0BA5ED0c6AA8c49038F819E587E2633c4A9F428a` | [Snowtrace ↗](https://snowtrace.io/address/0x0BA5ED0c6AA8c49038F819E587E2633c4A9F428a) | Coinbase Smart Wallet v1.1 |
-| EntryPoint (ERC-4337) | `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789` | [Snowtrace ↗](https://snowtrace.io/address/0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789) | ERC-4337 standard EntryPoint |
 
 ### Verify On-Chain
 
@@ -744,7 +752,7 @@ See [`.env.example`](.env.example) for a complete template with comments.
 | Smart Wallets Deployed | 3 |
 | Game Modules | 23 |
 | Screens/Pages | 37+ |
-| Smart Contracts | 5 |
+| Smart Contracts | 3 |
 
 ## 📂 Project Structure
 
@@ -804,8 +812,7 @@ src/
 ### ✅ Completed (MVP)
 - [x] PWA mobile-first (no app store required)
 - [x] Google OAuth + Telegram + SIWE + WebAuthn login
-- [x] Custodial wallet (AES-256-GCM, no seed phrase)
-- [x] Smart Wallet ERC-4337 (Coinbase + Pimlico gasless)
+- [x] Custodial wallet (AES-256-GCM, auto-created, Export to self-custody)
 - [x] Farming simulation (plant/water/harvest/weather)
 - [x] Campaign Boss Battle (Match-3, 8x8 grid, 4 gem types)
 - [x] World Boss multiplayer raid + leaderboard
@@ -823,6 +830,9 @@ src/
 - [x] Market prediction (Yahoo Finance + AI)
 
 ### 🔨 In Progress
+- [ ] **ERC-4337 Smart Wallet (Account Abstraction)** — 🐛 fixing
+  - Coinbase Smart Wallet via Factory + Pimlico Bundler + Paymaster (gasless — player pays $0)
+  - Currently: custodial wallet active, ERC-4337 migration in progress
 - [ ] **PixiJS WebGL Rendering** — replace DOM/CSS with GPU-accelerated canvas
   - 64 sprites → 1 draw call, stable 60 FPS on mid-range Android
   - GSAP animations on DisplayObject, particle Object Pool
@@ -832,7 +842,11 @@ src/
   - Group organic supply orders
   - Mirrors real-world cooperative model in Vietnamese agriculture
 - [ ] **Advanced Multiplayer** — expanded co-op modes beyond PvP 1v1
-- [ ] **UI/UX Polish** — visual redesign after feature freeze
+- [ ] **UI/UX Polish** ⏳ — *scheduled after feature freeze*
+  - Full visual redesign: farm screen, combat, wallet, marketplace
+  - PixiJS WebGL replaces DOM/CSS → 60 FPS stable on mid-range Android
+  - Mobile-first responsive overhaul + GSAP animations
+  - **Current state is intentional** — shipping features > shipping pixels
 
 ### 📋 Planned
 - [ ] Avalanche L1 "FarmChain" — dedicated chain, gas ~$0, IoT precompile
@@ -846,6 +860,21 @@ src/
 - Cross-chain bridge — focus depth on Avalanche, not breadth
 - NFT listing on OpenSea/Joepegs — keep Knowledge Cards in educational context
 - P2P fiat off-ramp — OGN is learning reward, not speculation instrument
+
+## 🤖 Built With AI Assistance
+
+This project was developed with the help of **[Claude Code](https://claude.ai/code)** (Anthropic) as an AI pair programmer.
+
+Claude Code was used to:
+- Accelerate feature development across frontend, backend, and smart contracts
+- Debug complex blockchain integration (ERC-721, Merkle proof, SIWE auth)
+- Generate boilerplate and refactor code across 100+ TypeScript files
+- Write and review game logic (Match-3 engine, boss AI, PvP state machine)
+- Optimize database queries and Redis cache patterns
+
+> All architecture decisions, product vision, and core logic were designed
+> and directed by the human developer.
+> Claude Code accelerated execution — not replaced thinking.
 
 ## 📄 License
 
