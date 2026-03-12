@@ -13,6 +13,8 @@ import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
 import type { WorldBossInfo } from '../types/world-boss.types';
 import { useWorldBossLite } from '../hooks/useWorldBoss';
+import { useWorldBossSSE } from '../hooks/useWorldBossSSE';
+import { FloatingDamage } from './FloatingDamage';
 import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
 
 // Campaign components (reuse, NOT modify)
@@ -65,7 +67,13 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     authData?.user?.name ?? undefined,
   );
 
-  // Lite polling — detect boss death/expiry while fighting
+  // SSE realtime HP — <100ms latency, thay thế phần lớn lite polling
+  const { sseHpPercent, damageFeed } = useWorldBossSSE(
+    worldBoss.id,
+    authData?.user?.id,
+  );
+
+  // Lite polling — detect boss death/expiry while fighting (fallback khi SSE mất)
   const { data: liteData } = useWorldBossLite(battleState === 'fighting');
 
   useEffect(() => {
@@ -161,8 +169,8 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
   const comboParticles = useComboParticles(combo, showCombo);
 
-  // HP từ server — override engine local để hiển thị đúng máu boss toàn server
-  const serverHpPct = sessionStats.hpPercent; // 0..1
+  // HP từ server — ưu tiên SSE realtime > liteData poll 2s > sessionStats local
+  const serverHpPct = sseHpPercent ?? liteData?.hpPercent ?? sessionStats.hpPercent; // 0..1
   const serverHp = Math.round(serverHpPct * worldBoss.stats.max_hp);
   const serverMaxHp = worldBoss.stats.max_hp;
   const bossHpPct = Math.round(serverHpPct * 100); // rage overlay
@@ -189,6 +197,9 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
 
   return (
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative boss-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
+      {/* Floating damage từ người khác đánh — SSE realtime */}
+      <FloatingDamage entries={damageFeed} />
+
       {/* Ultimate flash */}
       {ultActive && <UltimateFlash />}
 
