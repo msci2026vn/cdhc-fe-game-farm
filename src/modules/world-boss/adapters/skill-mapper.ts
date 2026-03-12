@@ -4,27 +4,27 @@
 
 import type { WorldBossSkill } from '../types/world-boss.types';
 
-// Campaign BossSkill shape (inline — bossSkills.ts doesn't exist yet)
+// Campaign BossSkill shape — matches BossSkill contract (values in SECONDS)
 export interface CampaignBossSkill {
   type: 'burn' | 'stun' | 'armor_break' | 'shield' | 'heal' | 'enrage' | 'egg' | 'gem_lock';
-  cooldown: number;     // ms
-  duration?: number;    // ms
+  cooldown: number;     // s (giây) — setupBossSkillsInterval nhân * 1000 nội bộ
+  duration?: number;    // s (giây) — setupBossSkillsInterval nhân * 1000 nội bộ
   healPercent?: number; // fraction: 0.05 = 5%
 }
 
 /**
- * Map trigger string → cooldown ms
+ * Map trigger string → cooldown in SECONDS
  */
 function triggerToCooldown(trigger: string): number {
   switch (trigger) {
-    case 'first_turn':    return 5_000;
-    case 'every_2_turns': return 15_000;
-    case 'every_3_turns': return 25_000;
-    case 'hp_below_75':   return 30_000;
-    case 'hp_below_50':   return 25_000;
-    case 'hp_below_30':   return 20_000;
-    case 'hp_below_10':   return 15_000;
-    default:              return 20_000;
+    case 'first_turn':    return 5;
+    case 'every_2_turns': return 15;
+    case 'every_3_turns': return 25;
+    case 'hp_below_75':   return 30;
+    case 'hp_below_50':   return 25;
+    case 'hp_below_30':   return 20;
+    case 'hp_below_10':   return 15;
+    default:              return 20;
   }
 }
 
@@ -43,31 +43,31 @@ function mapSkill(skill: WorldBossSkill): CampaignBossSkill | null {
       return null;
 
     case 'dot_poison':
-      return { type: 'burn', cooldown, duration: 5_000 };
+      return { type: 'burn', cooldown, duration: 5 };
 
     case 'stun':
-      return { type: 'stun', cooldown, duration: 1_500 };
+      return { type: 'stun', cooldown, duration: 1.5 };
 
     case 'def_break':
-      return { type: 'armor_break', cooldown, duration: 8_000 };
+      return { type: 'armor_break', cooldown, duration: 8 };
 
     case 'shield':
-      return { type: 'shield', cooldown, duration: 3_000 };
+      return { type: 'shield', cooldown, duration: 3 };
 
     case 'heal':
       return { type: 'heal', cooldown, healPercent: skill.damage_multi || 0.05 };
 
     case 'drain':
-      return { type: 'burn', cooldown, duration: 5_000 };
+      return { type: 'burn', cooldown, duration: 5 };
 
     case 'enrage':
-      return { type: 'enrage', cooldown, duration: 4_000 };
+      return { type: 'enrage', cooldown, duration: 4 };
 
     case 'summon_minion':
-      return { type: 'egg', cooldown, duration: 8_000 };
+      return { type: 'egg', cooldown, duration: 8 };
 
     case 'atk_down':
-      return { type: 'gem_lock', cooldown, duration: 5_000 };
+      return { type: 'gem_lock', cooldown, duration: 5 };
 
     default:
       console.warn(`[SkillMapper] Unknown skill type: ${skill.type}`);

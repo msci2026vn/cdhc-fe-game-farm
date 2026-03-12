@@ -151,6 +151,17 @@ export interface BossSkillsDeps {
   setSkillAlert: (alert: { icon: string; text: string } | null) => void;
 }
 
+/**
+ * Setup skill interval cho boss (campaign + world boss).
+ *
+ * ⚠️  CONTRACT ĐƠN VỊ — ĐỌC KỸ TRƯỚC KHI SỬA:
+ *   - skill.cooldown : số GIÂY  (ví dụ: 25 → 25 giây)
+ *   - skill.duration : số GIÂY  (ví dụ: 1.5 → 1.5 giây)
+ *   - Hàm này nhân * 1000 bên trong để convert sang ms cho setTimeout/setInterval.
+ *
+ * Nếu thêm nguồn skill mới (API, config...) → đảm bảo output là GIÂY trước khi truyền vào.
+ * Xem: bossSkills.ts (campaign) và skill-mapper.ts (world boss) làm ví dụ.
+ */
 export function setupBossSkillsInterval(deps: BossSkillsDeps): () => void {
   const {
     bossName, bossMaxHp, skills,
