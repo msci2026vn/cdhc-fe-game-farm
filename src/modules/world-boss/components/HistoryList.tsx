@@ -26,8 +26,8 @@ function timeAgo(dateStr: string, t: any): string {
 import { useSearchUsers } from '@/shared/hooks/useSocial';
 
 function HistoryLeaderboardEntryRow({ entry, index, medalLabel }: { entry: any, index: number, medalLabel?: React.ReactNode }) {
-  // If backend returns both, skip fetch. Otherwise use search API.
-  const hasProfileInfo = !!entry.username && !!entry.avatarUrl;
+  // Skip search if backend already provides username; avatar falls back to dicebear.
+  const hasProfileInfo = !!entry.username;
   const { data } = useSearchUsers(hasProfileInfo ? '' : entry.userId);
 
   const searchedUser = data?.results?.find((u: any) => u.id === entry.userId) || data?.results?.[0];
