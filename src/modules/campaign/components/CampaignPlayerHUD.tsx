@@ -33,7 +33,7 @@ interface Props {
 }
 
 // ── Circular skill button matching the mockup wood style ──
-interface CircleSkillBtnProps {
+export interface CircleSkillBtnProps {
     icon: string;
     label: string;
     sublabel?: string;
@@ -51,7 +51,7 @@ interface CircleSkillBtnProps {
     size?: 'sm' | 'md' | 'lg';
 }
 
-const CircleSkillBtn = memo(function CircleSkillBtn({
+export const CircleSkillBtn = memo(function CircleSkillBtn({
     icon, label, sublabel,
     className,
     variant = 'green',

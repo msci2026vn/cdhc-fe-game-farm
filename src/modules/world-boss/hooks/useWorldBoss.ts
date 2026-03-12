@@ -10,9 +10,9 @@ export function useWorldBoss() {
   return useQuery<WorldBossData>({
     queryKey: WORLD_BOSS_KEY,
     queryFn: worldBossApi.getCurrent,
-    refetchInterval: 15_000,
+    refetchInterval: 3_000,
     refetchIntervalInBackground: false,
-    staleTime: 10_000,
+    staleTime: 2_000,
   });
 }
 
