@@ -4,7 +4,7 @@
 
 export default function UltimateFlash() {
   return (
-    <div className="absolute inset-0 z-50 pointer-events-none">
+    <div className="absolute inset-0 z-[60] pointer-events-none">
       <div className="absolute inset-0 animate-ult-flash" />
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
         <div className="text-7xl mb-2 text-center animate-boss-idle">⚡</div>

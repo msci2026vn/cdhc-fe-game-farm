@@ -77,27 +77,8 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                 </div>
             )}
 
-            {/* Boss HP bar */}
-            <BossHPBar
-                name={bossData.name}
-                emoji={bossData.emoji}
-                hp={boss.bossHp}
-                maxHp={boss.bossMaxHp}
-                archetype={archetype}
-                archetypeIcon={archetypeIcon}
-                phase={currentPhase}
-                totalPhases={totalPhases}
-                healPerTurn={activeBossStats.healPercent}
-            />
-
-            {/* Boss stats badges */}
-            <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={enrageLevel} />
-
-            {/* Boss buffs */}
-            <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
-
-            {/* Boss sprite + damage popups + combo */}
-            <div className="flex-1 flex items-center justify-center relative z-10">
+            {/* Boss sprite — absolute top-right */}
+            <div className="absolute right-0 top-0 w-[19.5%] aspect-square z-10">
                 <BossSprite
                     src={spriteSrc}
                     state={spriteState}
@@ -111,35 +92,56 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                     skillWarning={!!skillWarning}
                     bossDead={boss.bossHp <= 0}
                 />
-
-                {/* Egg */}
-                {egg && (
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center animate-scale-in">
-                        <span className={`text-4xl ${egg.countdown <= 3 ? 'opacity-100' : 'opacity-90'}`}>🥚</span>
-                        <div className="w-12 h-1.5 rounded-full bg-gray-700 mt-1 overflow-hidden">
-                            <div className="h-full rounded-full transition-all duration-300"
-                                style={{
-                                    width: `${Math.round((egg.hp / egg.maxHp) * 100)}%`,
-                                    background: egg.hp / egg.maxHp > 0.5 ? '#27ae60' : egg.hp / egg.maxHp > 0.25 ? '#f39c12' : '#e74c3c',
-                                }} />
-                        </div>
-                        <span className="text-[9px] font-bold text-white mt-0.5">{egg.hp}/{egg.maxHp}</span>
-                        {egg.countdown <= 3 && (
-                            <span className="text-[8px] font-bold text-red-400 animate-pulse">{t('campaign.ui.hatching_soon')}</span>
-                        )}
-                    </div>
-                )}
-
-                <DamagePopupLayer popups={popups} />
-
-                <ComboDisplay
-                    combo={combo}
-                    show={showCombo}
-                    label={comboInfo.label}
-                    mult={comboInfo.mult}
-                    color={comboInfo.color}
-                />
             </div>
+
+            {/* Boss HP bar — 80% width to leave room for sprite */}
+            <div className="w-[80%]">
+                <BossHPBar
+                    name={bossData.name}
+                    emoji={bossData.emoji}
+                    hp={boss.bossHp}
+                    maxHp={boss.bossMaxHp}
+                    archetype={archetype}
+                    archetypeIcon={archetypeIcon}
+                    phase={currentPhase}
+                    totalPhases={totalPhases}
+                    healPerTurn={activeBossStats.healPercent}
+                />
+
+                {/* Boss stats badges */}
+                <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={enrageLevel} />
+
+                {/* Boss buffs */}
+                <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
+            </div>
+
+            {/* Egg indicator */}
+            {egg && (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center animate-scale-in">
+                    <span className={`text-4xl ${egg.countdown <= 3 ? 'opacity-100' : 'opacity-90'}`}>🥚</span>
+                    <div className="w-12 h-1.5 rounded-full bg-gray-700 mt-1 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-300"
+                            style={{
+                                width: `${Math.round((egg.hp / egg.maxHp) * 100)}%`,
+                                background: egg.hp / egg.maxHp > 0.5 ? '#27ae60' : egg.hp / egg.maxHp > 0.25 ? '#f39c12' : '#e74c3c',
+                            }} />
+                    </div>
+                    <span className="text-[9px] font-bold text-white mt-0.5">{egg.hp}/{egg.maxHp}</span>
+                    {egg.countdown <= 3 && (
+                        <span className="text-[8px] font-bold text-red-400 animate-pulse">{t('campaign.ui.hatching_soon')}</span>
+                    )}
+                </div>
+            )}
+
+            <DamagePopupLayer popups={popups} />
+
+            <ComboDisplay
+                combo={combo}
+                show={showCombo}
+                label={comboInfo.label}
+                mult={comboInfo.mult}
+                color={comboInfo.color}
+            />
         </div>
     );
 });

@@ -233,7 +233,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   }
 
   return (
-    <div className={`relative h-[100dvh] max-w-[430px] mx-auto boss-gradient overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
+    <div className={`relative h-[100dvh] max-w-[390px] mx-auto boss-gradient overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
 
       {/* === OVERLAYS: full-screen z-index layers === */}
       <FloatingDamage entries={damageFeed} />

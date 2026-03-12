@@ -64,7 +64,7 @@ export function BossSprite({
           key={src}
           src={src}
           alt={name}
-          className="w-40 h-40 object-contain select-none pointer-events-none"
+          className="w-full h-full object-contain select-none pointer-events-none"
           /* Removed filter:drop-shadow — too expensive on mobile GPU */
           draggable={false}
         />
