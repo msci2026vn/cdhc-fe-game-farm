@@ -1,10 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // WorldBossBattleView — Fullscreen campaign combat for World Boss
 // Layout: absolute % positioning, canvas 390×693 (9:16)
-//   0-22%  → Boss area (HP bar + avatar)
-//  22-34%  → Player area (avatar + HP bar)
-//  34-80%  → Gem board
-//  80-100% → Mana bar + skill buttons
+//   All positions from ui-match.json, relative to root 390×693
 // ═══════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useRef } from 'react';
@@ -233,14 +230,23 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   }
 
   return (
-    <div className={`relative h-[100dvh] max-w-[390px] mx-auto boss-gradient overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
+    <div className={`relative w-full max-w-[390px] h-[693px] mx-auto boss-gradient overflow-hidden ${screenShake ? 'animate-screen-shake' : ''}`}>
 
-      {/* === OVERLAYS: full-screen z-index layers === */}
-      <FloatingDamage entries={damageFeed} />
+      {/* ── BossRageOverlay: inset-0 z-20 ── */}
+      <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={'👾'} />
+
+      {/* ── UltimateFlash: inset-0 z-[60] ── */}
       {ultActive && <UltimateFlash />}
+
+      {/* ── BossAttackFlash: inset-0 z-[50] ── */}
       {bossAttackMsg && !ultActive && <BossAttackFlash text={bossAttackMsg.text} emoji={bossAttackMsg.emoji} />}
+
+      {/* ── ComboParticles + SkillWarningGlow + DamageVignette (fullscreen overlays) ── */}
       <ComboParticles particles={comboParticles} />
       <SkillWarningGlow skillWarning={skillWarning} />
+      <DamageVignette screenShake={screenShake} ultActive={ultActive} />
+
+      {/* ── CombatNotifList: absolute top-24 right-3 z-40 ── */}
       {combatNotifs.length > 0 && (
         <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
           {combatNotifs.slice(-3).map((n: any) => (
@@ -251,21 +257,17 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
           ))}
         </div>
       )}
-      <DamageVignette screenShake={screenShake} ultActive={ultActive} />
-      <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={'👾'} />
 
-      {/* ═══════════════════════════════════════
-          BOSS AREA — top 0~22%
-          Left: timer bar + HP bar + stat badges
-          Right: boss sprite avatar
-      ═══════════════════════════════════════ */}
-      <div className="absolute flex flex-col pt-safe px-3 pb-1 z-[5]"
-        style={{ top: 0, left: 0, right: 0, height: '22%' }}>
-        {/* Background gradient */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(circle at 50% 60%, rgba(30,100,15,0.2) 0%, transparent 55%), radial-gradient(circle at 20% 20%, rgba(20,80,10,0.12) 0%, transparent 40%)' }} />
+      {/* ── DamagePopupLayer: left:0% top:8% width:100% height:14% z-30 ── */}
+      <div style={{ position: 'absolute', left: '0%', top: '8%', width: '100%', height: '14%', zIndex: 30 }}>
+        <DamagePopupLayer popups={popups} />
+      </div>
 
-        {/* Top bar: timer + controls */}
+      {/* ── FloatingDamage (other players SSE): absolute, positioned internally ── */}
+      <FloatingDamage entries={damageFeed} />
+
+      {/* ── BattleTopBar: left:0% top:0.5% width:100% height:8% ── */}
+      <div style={{ position: 'absolute', left: '0%', top: '0.5%', width: '100%', height: '8%' }}>
         <BattleTopBar
           turn={boss.turnCount}
           maxTurns={0}
@@ -279,117 +281,142 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
           onPause={pauseBattle}
           onResume={resumeBattle}
         />
-
-        {/* Boss HP info (left) + sprite avatar (right) */}
-        <div className="flex items-center gap-2 flex-1 min-h-0">
-          <div className="flex-1 min-w-0">
-            <BossHPBar
-              name={worldBoss.bossName}
-              emoji="👾"
-              hp={serverHp}
-              maxHp={serverMaxHp}
-              phase={currentPhase}
-              totalPhases={totalPhases}
-              healPerTurn={activeBossStats.healPercent}
-            />
-            <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={0} />
-            <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
-          </div>
-
-          {/* Boss sprite — SVG if available, emoji fallback */}
-          <div className="relative flex-shrink-0 flex items-center justify-center">
-            {bossSpriteSrc ? (
-              <img
-                src={bossSpriteSrc}
-                alt={worldBoss.bossName}
-                className={`object-contain select-none pointer-events-none ${skillWarning ? 'animate-boss-attack' : 'animate-boss-idle'}`}
-                style={{ width: 76, height: 76, opacity: serverHp <= 0 ? 0.3 : 1 }}
-                draggable={false}
-              />
-            ) : (
-              <span
-                className={`text-[44px] ${skillWarning ? 'animate-boss-attack' : 'animate-boss-idle'}`}
-                style={{ opacity: serverHp <= 0 ? 0.3 : 1 }}>
-                👾
-              </span>
-            )}
-            {/* Damage popups float over boss sprite */}
-            <DamagePopupLayer popups={popups} />
-          </div>
-        </div>
-
-        {/* Combo badge — positioned relative to boss area */}
-        <div className="relative h-0">
-          <ComboDisplay combo={combo} show={showCombo} label={comboInfo.label} mult={comboInfo.mult} color={comboInfo.color} />
-        </div>
       </div>
 
-      {/* ═══════════════════════════════════════
-          PLAYER AREA — top 22~34%
-          Left: player avatar
-          Center-right: HP + shield bars
-          Right: compact debuffs
-      ═══════════════════════════════════════ */}
-      <div className="absolute flex items-center gap-2 px-3"
-        style={{ top: '22%', left: 0, right: 0, height: '12%', background: 'rgba(0,0,0,0.28)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      {/* ── BossStatsBadges: left:24.87% top:2.95% width:50.56% height:5.33% ── */}
+      <div style={{ position: 'absolute', left: '24.87%', top: '2.95%', width: '50.56%', height: '5.33%' }}>
+        <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={0} />
+      </div>
 
-        {/* Player avatar */}
+      {/* ── BossHPBar: left:35.38% top:9.58% width:33.64% height:4.33% ── */}
+      <div style={{ position: 'absolute', left: '35.38%', top: '9.58%', width: '33.64%', height: '4.33%' }}>
+        <BossHPBar
+          name={worldBoss.bossName}
+          emoji="👾"
+          hp={serverHp}
+          maxHp={serverMaxHp}
+          phase={currentPhase}
+          totalPhases={totalPhases}
+          healPerTurn={activeBossStats.healPercent}
+        />
+      </div>
+
+      {/* ── BossBuffsBadges: left:71.03% top:9.99% width:28% height:3.49% ── */}
+      <div style={{ position: 'absolute', left: '71.03%', top: '9.99%', width: '28%', height: '3.49%' }}>
+        <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
+      </div>
+
+      {/* ── BossSprite: left:73.62% top:10.96% width:19.5% height:19% ── */}
+      <div style={{ position: 'absolute', left: '73.62%', top: '10.96%', width: '19.5%', height: '19%' }}
+        className="flex items-center justify-center">
+        {bossSpriteSrc ? (
+          <img
+            src={bossSpriteSrc}
+            alt={worldBoss.bossName}
+            className={`object-contain select-none pointer-events-none w-full h-full ${skillWarning ? 'animate-boss-attack' : 'animate-boss-idle'}`}
+            style={{ opacity: serverHp <= 0 ? 0.3 : 1 }}
+            draggable={false}
+          />
+        ) : (
+          <span
+            className={`text-[44px] ${skillWarning ? 'animate-boss-attack' : 'animate-boss-idle'}`}
+            style={{ opacity: serverHp <= 0 ? 0.3 : 1 }}>
+            👾
+          </span>
+        )}
+      </div>
+
+      {/* ── PlayerAvatar: left:4.03% top:11.3% width:17.82% height:9.25% ── */}
+      <div style={{ position: 'absolute', left: '4.03%', top: '11.3%', width: '17.82%', height: '9.25%' }}
+        className="flex items-center justify-center">
         {playerAvatarUrl ? (
           <img
             src={playerAvatarUrl}
             alt="you"
-            className={`aspect-square rounded-full object-cover border-2 flex-shrink-0 ${isBurning ? 'border-orange-500' : 'border-green-400/60'}`}
-            style={{ height: '72%' }}
+            className={`aspect-square rounded-full object-cover border-2 w-full h-full ${isBurning ? 'border-orange-500' : 'border-green-400/60'}`}
           />
         ) : (
           <div
-            className={`aspect-square rounded-full flex items-center justify-center text-sm border-2 flex-shrink-0 bg-gray-700 ${isBurning ? 'border-orange-500' : 'border-green-400/40'}`}
-            style={{ height: '72%' }}>
+            className={`aspect-square rounded-full flex items-center justify-center text-sm border-2 bg-gray-700 w-full h-full ${isBurning ? 'border-orange-500' : 'border-green-400/40'}`}>
             👤
-          </div>
-        )}
-
-        {/* HP + shield bars */}
-        <div className={`flex-1 min-w-0 relative ${isBurning ? 'ring-1 ring-orange-500/50 rounded' : ''}`}>
-          <PlayerHPBar
-            hp={boss.playerHp}
-            maxHp={boss.playerMaxHp}
-            shield={boss.shield}
-            maxShield={shieldMax}
-            def={combatStats.def}
-            isHit={!!lastPlayerDamage}
-          />
-          {lastPlayerDamage > 0 && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-damage-float">
-              <span className="font-heading text-xl font-bold text-red-500"
-                style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
-                -{lastPlayerDamage}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Debuffs — compact, max 2 */}
-        {activeDebuffs.length > 0 && (
-          <div className="flex flex-col gap-0.5 flex-shrink-0">
-            {activeDebuffs.slice(0, 2).map((d: any, i: number) => (
-              <span key={`${d.type}-${i}`} className="text-[8px] font-bold px-1.5 py-0.5 rounded-full"
-                style={{
-                  background: d.type === 'burn' ? 'rgba(231,76,60,0.3)' : d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' : 'rgba(253,121,168,0.3)',
-                  color: d.type === 'burn' ? '#ff6b6b' : d.type === 'heal_block' ? '#a29bfe' : '#fd79a8',
-                }}>
-                {d.icon} {d.remainingSec}s
-              </span>
-            ))}
           </div>
         )}
       </div>
 
-      {/* ═══════════════════════════════════════
-          GEM BOARD — top 34%~80%
-      ═══════════════════════════════════════ */}
-      <div className="absolute flex flex-col"
-        style={{ top: '34%', left: '2%', right: '2%', height: '46%' }}>
+      {/* ── PlayerHPBar: left:6.54% top:21.19% width:30.95% height:3.54% ── */}
+      <div style={{ position: 'absolute', left: '6.54%', top: '21.19%', width: '30.95%', height: '3.54%' }}
+        className={`relative ${isBurning ? 'ring-1 ring-orange-500/50 rounded' : ''}`}>
+        <PlayerHPBar
+          hp={boss.playerHp}
+          maxHp={boss.playerMaxHp}
+          shield={boss.shield}
+          maxShield={shieldMax}
+          def={combatStats.def}
+          isHit={!!lastPlayerDamage}
+        />
+        {lastPlayerDamage > 0 && (
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-damage-float">
+            <span className="font-heading text-xl font-bold text-red-500"
+              style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
+              -{lastPlayerDamage}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ── ManaBar: left:6% top:26.39% width:29.95% height:3.54% ── */}
+      <div style={{ position: 'absolute', left: '6%', top: '26.39%', width: '29.95%', height: '3.54%' }}>
+        <ManaBar
+          mana={boss.mana}
+          maxMana={boss.maxMana}
+          dodgeCost={manaDodgeCost}
+          ultCost={manaUltCost}
+          ultCharge={boss.ultCharge ?? 0}
+        />
+      </div>
+
+      {/* ── PlayerDebuffs: compact, max 2 ── */}
+      {activeDebuffs.length > 0 && (
+        <div className="absolute flex flex-col gap-0.5" style={{ left: '69%', top: '24%', width: '28%', height: '10%' }}>
+          {activeDebuffs.slice(0, 2).map((d: any, i: number) => (
+            <span key={`${d.type}-${i}`} className="text-[8px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{
+                background: d.type === 'burn' ? 'rgba(231,76,60,0.3)' : d.type === 'heal_block' ? 'rgba(108,92,231,0.3)' : 'rgba(253,121,168,0.3)',
+                color: d.type === 'burn' ? '#ff6b6b' : d.type === 'heal_block' ? '#a29bfe' : '#fd79a8',
+              }}>
+              {d.icon} {d.remainingSec}s
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* ── SkillWarning: left:7.18% top:30.28% width:30.56% height:2.24% ── */}
+      {skillWarning && (
+        <div style={{ position: 'absolute', left: '7.18%', top: '30.28%', width: '30.56%', height: '2.24%' }}
+          className="flex items-center justify-center pointer-events-none">
+          <span className="bg-red-900/80 text-red-300 px-4 py-0.5 rounded-full text-xs font-bold">
+            {t('campaign.ui.strong_attack_warning')}
+          </span>
+        </div>
+      )}
+
+      {/* ── ComboDisplay: left:37.82% top:24.22% width:30% height:5% ── */}
+      <div style={{ position: 'absolute', left: '37.82%', top: '24.22%', width: '30%', height: '5%' }}>
+        <ComboDisplay combo={combo} show={showCombo} label={comboInfo.label} mult={comboInfo.mult} color={comboInfo.color} />
+      </div>
+
+      {/* ── Boss skill alert ── */}
+      {skillAlert && (
+        <div className="absolute left-0 right-0 flex justify-center animate-fade-in" style={{ top: '30.28%' }}>
+          <span className="px-4 py-1 rounded-full text-xs font-bold text-purple-200"
+            style={{ background: 'rgba(108,92,231,0.85)', boxShadow: '0 0 15px rgba(108,92,231,0.3)' }}>
+            {skillAlert.icon} {skillAlert.text}
+          </span>
+        </div>
+      )}
+
+      {/* ── CampaignMatch3Board: left:2% top:34% width:96% height:46% ── */}
+      <div style={{ position: 'absolute', left: '2%', top: '34%', width: '96%', height: '46%' }}>
         <CampaignMatch3Board
           grid={grid} selected={selected} matchedCells={matchedCells}
           spawningGems={spawningGems} lockedGems={lockedGems} highlightedGem={highlightedGem}
@@ -401,104 +428,92 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
         />
       </div>
 
-      {/* ═══════════════════════════════════════
-          BOTTOM HUD — top 80%~100%
-          Mana bar + skill warning + skill buttons
-      ═══════════════════════════════════════ */}
-      <div className="absolute flex flex-col justify-end px-3"
-        style={{ top: '80%', left: 0, right: 0, bottom: 0, paddingBottom: 'max(env(safe-area-inset-bottom, 4px), 4px)' }}>
+      {/* ── ManaBarText: left:3% top:80% width:94% height:2% ── */}
+      <div style={{ position: 'absolute', left: '3%', top: '80%', width: '94%', height: '2%' }}
+        className="flex justify-between text-[8px] text-gray-400 pointer-events-none">
+        <span>Mana</span>
+        <span>NE: {manaDodgeCost} | ULT: {manaUltCost}</span>
+      </div>
 
-        <ManaBar
-          mana={boss.mana}
-          maxMana={boss.maxMana}
-          dodgeCost={manaDodgeCost}
-          ultCost={manaUltCost}
-          ultCharge={boss.ultCharge ?? 0}
+      {/* ── CircleSkillBtn_Dodge: left:10.26% top:85.13% width:17.49% height:11.75% ── */}
+      <div style={{ position: 'absolute', left: '10.26%', top: '85.13%', width: '17.49%', height: '11.75%' }}
+        className="flex items-center justify-center">
+        <CircleSkillBtn
+          className={skillWarning && hasDodgeMana ? 'campaign-skill-btn-dodge-active' : ''}
+          icon="🏃"
+          label={`${t('campaign.combat.dodge')} (${manaDodgeCost})`}
+          variant="run"
+          isReady={hasDodgeMana}
+          isDodgeWindow={skillWarning && hasDodgeMana}
+          onClick={handleDodge}
+          size="md"
         />
+      </div>
 
-        {/* Skill warning */}
-        {skillWarning && (
-          <div className="text-center py-0.5 pointer-events-none">
-            <span className="bg-red-900/80 text-red-300 px-4 py-0.5 rounded-full text-xs font-bold">
-              {t('campaign.ui.strong_attack_warning')}
-            </span>
-          </div>
-        )}
+      {/* ── CircleSkillBtn_1 (Ớt Hiểm): left:31.08% top:86% width:18.46% height:10.16% ── */}
+      <div style={{ position: 'absolute', left: '31.08%', top: '86%', width: '18.46%', height: '10.16%' }}
+        className="flex items-center justify-center">
+        <CircleSkillBtn
+          icon="🌶️"
+          label={`${t('campaign.skills.ot_hiem.short_name')}${skillLevels.ot_hiem > 0 ? ` Lv${skillLevels.ot_hiem}` : ''}`}
+          sublabel={otHiemCooldown > 0 ? undefined : otHiemActive ? 'active' : undefined}
+          variant="red"
+          isActive={otHiemActive}
+          onCooldown={otHiemCooldown > 0}
+          cooldownSec={otHiemCooldown}
+          cooldownPct={OT_HIEM_CONFIG.cooldown > 0 ? (otHiemCooldown / OT_HIEM_CONFIG.cooldown) * 100 : 0}
+          isReady={skillLevels.ot_hiem > 0 && otHiemCooldown === 0 && !otHiemActive}
+          isLocked={skillLevels.ot_hiem === 0}
+          onClick={castOtHiem}
+          size="md"
+        />
+      </div>
 
-        {/* Boss skill alert */}
-        {skillAlert && (
-          <div className="text-center py-0.5 animate-fade-in">
-            <span className="px-4 py-1 rounded-full text-xs font-bold text-purple-200"
-              style={{ background: 'rgba(108,92,231,0.85)', boxShadow: '0 0 15px rgba(108,92,231,0.3)' }}>
-              {skillAlert.icon} {skillAlert.text}
-            </span>
-          </div>
-        )}
+      {/* ── CircleSkillBtn_2 (Rơm Bọc): left:51.69% top:85.57% width:18.62% height:11.32% ── */}
+      <div style={{ position: 'absolute', left: '51.69%', top: '85.57%', width: '18.62%', height: '11.32%' }}
+        className="flex items-center justify-center">
+        <CircleSkillBtn
+          icon="🪹"
+          label={`${t('campaign.skills.rom_boc.short_name')}${skillLevels.rom_boc > 0 ? ` Lv${skillLevels.rom_boc}` : ''}`}
+          variant="green"
+          isActive={romBocActive}
+          onCooldown={romBocCooldown > 0}
+          cooldownSec={romBocCooldown}
+          cooldownPct={ROM_BOC_CONFIG.cooldown > 0 ? (romBocCooldown / ROM_BOC_CONFIG.cooldown) * 100 : 0}
+          isReady={skillLevels.rom_boc > 0 && romBocCooldown === 0 && !romBocActive}
+          isLocked={skillLevels.rom_boc === 0}
+          onClick={castRomBoc}
+          size="md"
+        />
+      </div>
 
-        {/* Skill buttons row */}
-        <div className="flex items-end justify-around pt-1 pb-1">
-          {/* Ớt Hiểm */}
-          <CircleSkillBtn
-            icon="🌶️"
-            label={`${t('campaign.skills.ot_hiem.short_name')}${skillLevels.ot_hiem > 0 ? ` Lv${skillLevels.ot_hiem}` : ''}`}
-            sublabel={otHiemCooldown > 0 ? undefined : otHiemActive ? 'active' : undefined}
-            variant="red"
-            isActive={otHiemActive}
-            onCooldown={otHiemCooldown > 0}
-            cooldownSec={otHiemCooldown}
-            cooldownPct={OT_HIEM_CONFIG.cooldown > 0 ? (otHiemCooldown / OT_HIEM_CONFIG.cooldown) * 100 : 0}
-            isReady={skillLevels.ot_hiem > 0 && otHiemCooldown === 0 && !otHiemActive}
-            isLocked={skillLevels.ot_hiem === 0}
-            onClick={castOtHiem}
-            size="md"
-          />
-          {/* Rơm Bọc */}
-          <CircleSkillBtn
-            icon="🪹"
-            label={`${t('campaign.skills.rom_boc.short_name')}${skillLevels.rom_boc > 0 ? ` Lv${skillLevels.rom_boc}` : ''}`}
-            variant="green"
-            isActive={romBocActive}
-            onCooldown={romBocCooldown > 0}
-            cooldownSec={romBocCooldown}
-            cooldownPct={ROM_BOC_CONFIG.cooldown > 0 ? (romBocCooldown / ROM_BOC_CONFIG.cooldown) * 100 : 0}
-            isReady={skillLevels.rom_boc > 0 && romBocCooldown === 0 && !romBocActive}
-            isLocked={skillLevels.rom_boc === 0}
-            onClick={castRomBoc}
-            size="md"
-          />
-          {/* NÉ */}
-          <CircleSkillBtn
-            className={skillWarning && hasDodgeMana ? 'campaign-skill-btn-dodge-active' : ''}
-            icon="🏃"
-            label={`${t('campaign.combat.dodge')} (${manaDodgeCost})`}
-            variant="run"
-            isReady={hasDodgeMana}
-            isDodgeWindow={skillWarning && hasDodgeMana}
-            onClick={handleDodge}
-            size="md"
-          />
-          {/* ULT */}
-          <CircleSkillBtn
-            icon="⚡"
-            label={ultReady ? 'ULT ⚡' : `ULT, ${boss.ultCharge ?? 0}%`}
-            variant="ult"
-            isReady={ultReady && hasUltMana && !ultOnCooldown}
-            onCooldown={ultOnCooldown}
-            cooldownSec={boss.ultCooldown ?? 0}
-            ultChargePct={boss.ultCharge ?? 0}
-            onClick={fireUltimate}
-            size="lg"
-          />
-          {/* Auto AI */}
-          <AutoPlayToggle
-            isActive={autoPlay.isActive}
-            onToggle={autoPlay.toggle}
-            vipLevel={autoPlay.vipLevel}
-            dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-            currentSituation={autoPlay.currentSituation}
-            compact
-          />
-        </div>
+      {/* ── CircleSkillBtn_Ult: left:74.15% top:85.15% width:17.69% height:12.45% ── */}
+      <div style={{ position: 'absolute', left: '74.15%', top: '85.15%', width: '17.69%', height: '12.45%' }}
+        className="flex items-center justify-center">
+        <CircleSkillBtn
+          icon="⚡"
+          label={ultReady ? 'ULT ⚡' : `ULT, ${boss.ultCharge ?? 0}%`}
+          variant="ult"
+          isReady={ultReady && hasUltMana && !ultOnCooldown}
+          onCooldown={ultOnCooldown}
+          cooldownSec={boss.ultCooldown ?? 0}
+          ultChargePct={boss.ultCharge ?? 0}
+          onClick={fireUltimate}
+          size="lg"
+        />
+      </div>
+
+      {/* ── AutoPlayToggle: left:5.38% top:3.75% width:12.87% height:5.4% ── */}
+      <div style={{ position: 'absolute', left: '5.38%', top: '3.75%', width: '12.87%', height: '5.4%' }}
+        className="flex items-center justify-center">
+        <AutoPlayToggle
+          isActive={autoPlay.isActive}
+          onToggle={autoPlay.toggle}
+          vipLevel={autoPlay.vipLevel}
+          dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+          currentSituation={autoPlay.currentSituation}
+          compact
+        />
       </div>
     </div>
   );
