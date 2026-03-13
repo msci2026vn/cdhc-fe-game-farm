@@ -18,6 +18,7 @@ import { useWorldBossLite } from '../hooks/useWorldBoss';
 import { useWorldBossSSE } from '../hooks/useWorldBossSSE';
 import { FloatingDamage } from './FloatingDamage';
 import { useAutoPlayController } from '@/shared/autoplay/auto-controller';
+import { useUIPositions } from '@/shared/hooks/useUIPositions';
 
 // Shared sub-components (source files not modified)
 import CampaignMatch3Board from '@/modules/campaign/components/CampaignMatch3Board';
@@ -194,6 +195,35 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   // VIP Lv1: free for all (later will gate to VIP only via useAutoPlayLevel)
   useEffect(() => { autoPlay.setVipLevel(1); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const { getPos } = useUIPositions('world-boss');
+
+  // Seed UI positions lên DB nếu chưa có
+  useEffect(() => {
+    if (!authData?.isAdmin) return;
+    fetch('/api/ui-config?screen=world-boss')
+      .then(r => r.json())
+      .then(json => {
+        if (json.data) return; // đã có rồi, skip
+        // Chưa có → seed từ ui-match.json
+        fetch('/json/ui-match.json')
+          .then(r => r.json())
+          .then((m: any) => {
+            const data: Record<string, any> = {};
+            m.elements.forEach((el: any) => {
+              if (el.position && !el.position.left?.includes('–')) {
+                data[el.name] = el.position;
+              }
+            });
+            fetch('/api/ui-config/admin', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ screen: 'world-boss', data }),
+            });
+          });
+      });
+  }, [authData?.isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { handlePointerDown, handlePointerMove, handlePointerUp } = useGemPointer(handleTap, handleSwipe);
   const comboParticles = useComboParticles(combo, showCombo);
 
@@ -248,7 +278,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
 
       {/* ── CombatNotifList: absolute top-24 right-3 z-40 ── */}
       {combatNotifs.length > 0 && (
-        <div style={{position:'absolute', left:'85%', top:'3%', width:'13%'}} className="z-40 flex flex-col gap-1 pointer-events-none">
+        <div style={getPos('CombatNotifList')} className="z-40 flex flex-col gap-1 pointer-events-none">
           {combatNotifs.slice(-3).map((n: any) => (
             <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
               style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
@@ -259,7 +289,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       )}
 
       {/* ── DamagePopupLayer: left:0% top:8% width:100% height:14% z-30 ── */}
-      <div style={{ position: 'absolute', left: '0%', top: '8%', width: '100%', height: '14%', zIndex: 30 }}>
+      <div style={getPos('DamagePopupLayer')}>
         <DamagePopupLayer popups={popups} />
       </div>
 
@@ -267,7 +297,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       <FloatingDamage entries={damageFeed} />
 
       {/* ── BattleTopBar: left:0% top:0.5% width:100% height:8% ── */}
-      <div style={{ position: 'absolute', left: '0%', top: '0.5%', width: '100%', height: '8%' }}>
+      <div style={getPos('BattleTopBar')}>
         <BattleTopBar
           turn={boss.turnCount}
           maxTurns={0}
@@ -284,12 +314,12 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── BossStatsBadges: left:24.87% top:2.95% width:50.56% height:5.33% ── */}
-      <div style={{ position: 'absolute', left: '24.87%', top: '2.95%', width: '50.56%', height: '5.33%' }}>
+      <div style={getPos('BossStatsBadges')}>
         <BossStatsBadges def={activeBossStats.def} freq={activeBossStats.freq} enrageLevel={0} />
       </div>
 
       {/* ── BossHPBar: left:35.38% top:9.58% width:33.64% height:4.33% ── */}
-      <div style={{ position: 'absolute', left: '35.38%', top: '9.58%', width: '33.64%', height: '4.33%' }}>
+      <div style={getPos('BossHPBar')}>
         <BossHPBar
           name={worldBoss.bossName}
           emoji="👾"
@@ -302,12 +332,12 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── BossBuffsBadges: left:71.03% top:9.99% width:28% height:3.49% ── */}
-      <div style={{ position: 'absolute', left: '71.03%', top: '9.99%', width: '28%', height: '3.49%' }}>
+      <div style={getPos('BossBuffsBadges')}>
         <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
       </div>
 
       {/* ── BossSprite: left:73.62% top:10.96% width:19.5% height:19% ── */}
-      <div style={{ position: 'absolute', left: '73.62%', top: '10.96%', width: '19.5%', height: '19%' }}
+      <div style={getPos('BossSprite')}
         className="flex items-center justify-center">
         {bossSpriteSrc ? (
           <img
@@ -327,7 +357,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── PlayerAvatar: left:4.03% top:11.3% width:17.82% height:9.25% ── */}
-      <div style={{ position: 'absolute', left: '4.03%', top: '11.3%', width: '17.82%', height: '9.25%' }}
+      <div style={getPos('PlayerAvatar')}
         className="flex items-center justify-center">
         {playerAvatarUrl ? (
           <img
@@ -344,7 +374,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── PlayerHPBar: left:6.54% top:21.19% width:30.95% height:3.54% ── */}
-      <div style={{ position: 'absolute', left: '6.54%', top: '21.19%', width: '30.95%', height: '3.54%' }}
+      <div style={getPos('PlayerHPBar')}
         className={`relative ${isBurning ? 'ring-1 ring-orange-500/50 rounded' : ''}`}>
         <PlayerHPBar
           hp={boss.playerHp}
@@ -365,7 +395,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── ManaBar: left:6% top:26.39% width:29.95% height:3.54% ── */}
-      <div style={{ position: 'absolute', left: '6%', top: '26.39%', width: '29.95%', height: '3.54%' }}>
+      <div style={getPos('ManaBar')}>
         <ManaBar
           mana={boss.mana}
           maxMana={boss.maxMana}
@@ -377,7 +407,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
 
       {/* ── PlayerDebuffs: compact, max 2 ── */}
       {activeDebuffs.length > 0 && (
-        <div className="absolute flex flex-col gap-0.5" style={{ left: '69%', top: '24%', width: '28%', height: '10%' }}>
+        <div className="flex flex-col gap-0.5" style={getPos('PlayerDebuffs')}>
           {activeDebuffs.slice(0, 2).map((d: any, i: number) => (
             <span key={`${d.type}-${i}`} className="text-[8px] font-bold px-1.5 py-0.5 rounded-full"
               style={{
@@ -392,7 +422,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
 
       {/* ── SkillWarning: left:7.18% top:30.28% width:30.56% height:2.24% ── */}
       {skillWarning && (
-        <div style={{ position: 'absolute', left: '7.18%', top: '30.28%', width: '30.56%', height: '2.24%' }}
+        <div style={getPos('SkillWarningBanner')}
           className="flex items-center justify-center pointer-events-none">
           <span className="bg-red-900/80 text-red-300 px-4 py-0.5 rounded-full text-xs font-bold">
             {t('campaign.ui.strong_attack_warning')}
@@ -401,7 +431,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       )}
 
       {/* ── ComboDisplay: left:37.82% top:24.22% width:30% height:5% ── */}
-      <div style={{ position: 'absolute', left: '37.82%', top: '24.22%', width: '30%', height: '5%' }}>
+      <div style={getPos('ComboDisplay')}>
         <ComboDisplay combo={combo} show={showCombo} label={comboInfo.label} mult={comboInfo.mult} color={comboInfo.color} />
       </div>
 
@@ -416,7 +446,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       )}
 
       {/* ── CampaignMatch3Board: left:2% top:34% width:96% height:46% ── */}
-      <div style={{ position: 'absolute', left: '2%', top: '34%', width: '96%', height: '46%' }}>
+      <div style={getPos('CampaignMatch3Board')}>
         <CampaignMatch3Board
           grid={grid} selected={selected} matchedCells={matchedCells}
           spawningGems={spawningGems} lockedGems={lockedGems} highlightedGem={highlightedGem}
@@ -429,14 +459,14 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── ManaBarText: left:3% top:80% width:94% height:2% ── */}
-      <div style={{ position: 'absolute', left: '3%', top: '80%', width: '94%', height: '2%' }}
+      <div style={getPos('ManaBarText')}
         className="flex justify-between text-[8px] text-gray-400 pointer-events-none">
         <span>Mana</span>
         <span>NE: {manaDodgeCost} | ULT: {manaUltCost}</span>
       </div>
 
       {/* ── CircleSkillBtn_Dodge: left:10.26% top:85.13% width:17.49% height:11.75% ── */}
-      <div style={{ position: 'absolute', left: '10.26%', top: '85.13%', width: '17.49%', height: '11.75%' }}
+      <div style={getPos('CircleSkillBtn_Dodge')}
         className="flex items-center justify-center">
         <CircleSkillBtn
           className={skillWarning && hasDodgeMana ? 'campaign-skill-btn-dodge-active' : ''}
@@ -451,7 +481,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── CircleSkillBtn_1 (Ớt Hiểm): left:31.08% top:86% width:18.46% height:10.16% ── */}
-      <div style={{ position: 'absolute', left: '31.08%', top: '86%', width: '18.46%', height: '10.16%' }}
+      <div style={getPos('CircleSkillBtn_1')}
         className="flex items-center justify-center">
         <CircleSkillBtn
           icon="🌶️"
@@ -470,7 +500,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── CircleSkillBtn_2 (Rơm Bọc): left:51.69% top:85.57% width:18.62% height:11.32% ── */}
-      <div style={{ position: 'absolute', left: '51.69%', top: '85.57%', width: '18.62%', height: '11.32%' }}
+      <div style={getPos('CircleSkillBtn_2')}
         className="flex items-center justify-center">
         <CircleSkillBtn
           icon="🪹"
@@ -488,7 +518,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── CircleSkillBtn_Ult: left:74.15% top:85.15% width:17.69% height:12.45% ── */}
-      <div style={{ position: 'absolute', left: '74.15%', top: '85.15%', width: '17.69%', height: '12.45%' }}
+      <div style={getPos('CircleSkillBtn_Ult')}
         className="flex items-center justify-center">
         <CircleSkillBtn
           icon="⚡"
@@ -504,7 +534,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
       </div>
 
       {/* ── AutoPlayToggle: left:5.38% top:3.75% width:12.87% height:5.4% ── */}
-      <div style={{ position: 'absolute', left: '5.38%', top: '3.75%', width: '12.87%', height: '5.4%' }}
+      <div style={getPos('AutoPlayToggle')}
         className="flex items-center justify-center">
         <AutoPlayToggle
           isActive={autoPlay.isActive}

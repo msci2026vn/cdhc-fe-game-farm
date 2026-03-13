@@ -106,9 +106,11 @@ export const authApi = {
       }
 
       // Return user data
+      const userData = json.data || json.user || null;
       return {
         isLoggedIn: true,
-        user: json.data || json.user || null,
+        isAdmin: ['super_admin', 'admin'].includes(userData?.role ?? ''),
+        user: userData,
       };
     } catch (error) {
       console.error('[GameAPI] getAuthStatus error:', error);

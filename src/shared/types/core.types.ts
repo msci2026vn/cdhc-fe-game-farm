@@ -38,11 +38,13 @@ export interface PingResult {
 
 export interface AuthStatus {
   isLoggedIn: boolean;
+  isAdmin?: boolean;
   user: {
     id: string;
     name: string;
     email: string;
     picture: string | null;
+    role?: string;
     fullName?: string;    // Fallback for Google Auth
     avatarUrl?: string;   // Fallback for some APIs
     avatar?: string;      // Fallback for consistency with FriendData
