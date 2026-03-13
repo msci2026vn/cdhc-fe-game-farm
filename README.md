@@ -29,6 +29,130 @@
 
 The blockchain runs silently underneath — players just play. No gas fees, no seed phrases, no wallet setup required. A custodial wallet is auto-created on sign-up — players see an address and balance immediately, with an Export button to take full self-custody when ready.
 
+---
+
+## 📖 The Story — "Hạt Thóc" (The Grain)
+
+> *"Một hạt giống giữ — ngàn đời còn ăn.*
+> *Một hạt giống mất — vạn năm khó tìm."*
+> — Mẫu Kinh (The Mother Scripture)
+
+### 🇬🇧 English
+
+**Organic Kingdom** isn't just a farming game — it's a story about a boy, the earth, and the mother who never speaks but always gives.
+
+**Thóc** (literally "grain") is a 17-year-old orphan raised by **Grandma Tư** in a small Vietnamese village called **Cổ Mộc**. One day, the land begins to die — wells dry up, crops wilt, soil cracks. Only Thóc can hear the earth crying.
+
+Grandma Tư reveals the **Mẫu Kinh** — an ancient scripture that teaches **Nông Đạo** (The Way of Farming): not combat magic, but the art of *listening to the earth, nurturing soil, and serving Mother Nature*.
+
+Thóc's journey spans **10 cultivation realms**, from learning to test soil by hand (Level 1) to preserving heirloom seeds for future generations (Level 100). Each realm unlocks real organic farming techniques — composting, companion planting, biological pest control, crop rotation, hydroponics — disguised as mystical abilities in the game.
+
+**The twist:** Every time Thóc levels up, he isn't just growing stronger — he's slowly dissolving back into the earth. The final realm doesn't make him a saint. It makes him *soil*.
+
+The villain isn't a monster — it's the **Hoang Triều** (Desolation Dynasty), a faction that sees land as a resource to extract, not a living being to respect. They bring "miracle fertilizer" (chemical farming) that boosts yields for 2-3 seasons, then kills the soil forever. Sound familiar?
+
+**Three endings. No right answer.**
+- 🌾 **Return to Mother** — Sacrifice yourself. The world lives. You become the wind in the rice field.
+- 🌱 **New Path** — Refuse. Teach everyone to farm. Slower, harder, but no one dies alone.
+- 🔥 **Burn the Field** — Destroy the old system. No more magic. Just human hands and honest dirt.
+
+### 🇻🇳 Tiếng Việt
+
+**Organic Kingdom** không chỉ là game nông trại — đây là câu chuyện về thằng Thóc, về đất, và về Mẹ Thiên Nhiên.
+
+**Thóc** — 17 tuổi, mồ côi, lớn lên với Bà Tư ở làng Cổ Mộc. Một ngày, đất bắt đầu chết. Chỉ mình Thóc nghe được tiếng Mẹ Đất đang đau.
+
+Bà Tư trao cho Thóc cuốn **Mẫu Kinh** — sách cổ dạy **Nông Đạo**: không phải phép thuật chiến đấu, mà là nghệ thuật *lắng nghe đất, nuôi cây, phụng sự Mẹ Thiên Nhiên*.
+
+Hành trình **10 cảnh giới tu luyện**, từ học nắm đất đoán bệnh đến bảo tồn giống bản địa. Mỗi cảnh giới = kiến thức nông nghiệp hữu cơ thật — ủ phân, trồng xen canh, trừ sâu sinh học, luân canh, thủy canh — dưới dạng **108 bài ca dao** (Mẫu Kinh Vè).
+
+**Bước ngoặt:** Mỗi lần Thóc level up, Thóc đang dần hòa tan vào đất. Cảnh giới cuối cùng không phải thành thánh — mà là *thành đất*.
+
+**Kẻ thù — Hoang Triều** — không phải quái vật, mà là thế lực coi đất là tài nguyên khai thác. Họ mang "linh dược" (phân hóa học) hứa hẹn bội thu nhưng đầu độc đất cho đời sau.
+
+---
+
+### 🌾 The 10 Cultivation Realms
+
+Each realm teaches real organic farming knowledge through gameplay:
+
+| Realm | Level | What Thóc Learns | Real-World Knowledge |
+|-------|-------|-------------------|---------------------|
+| 🌱 **Thức Điền Kỳ** | 1-9 | Hear the earth breathe | Soil testing, pH, earthworm counting |
+| 🌾 **Linh Thổ Kỳ** | 10-19 | Feed the soil with Mother's milk | Composting, vermicompost, rice water fermentation |
+| 🌿 **Ngự Mộc Kỳ** | 20-29 | Befriend the trees | Companion planting, Three Sisters, trap cropping |
+| 💧 **Thông Mạch Kỳ** | 30-39 | Open Mother's veins | Drip irrigation, mulching, rainwater harvesting |
+| 🪨 **Hóa Linh Kỳ** | 40-49 | Turn stone into fruit | Minerals, eggshell calcium, wood ash potassium |
+| 🏆 **Nông Vương Kỳ** | 50-59 | Command pests to retreat | Bio pest control, neem oil, ladybug allies |
+| 🌍 **Địa Tôn Kỳ** | 60-69 | Understand the cycle | Crop rotation, VAC model, rice-fish-duck systems |
+| ⚡ **Thiên Nông Kỳ** | 70-79 | Defy the seasons | Greenhouse, grafting, seed saving, microclimate |
+| 🔥 **Phá Thiên Kỳ** | 80-89 | Grow in the void | Hydroponics, aeroponics, aquaponics, vertical farming |
+| 🌌 **Nông Thánh Kỳ** | 90-100 | Each grain holds a galaxy | Seed preservation, regenerative agriculture, food forests |
+
+---
+
+### 📜 Mẫu Kinh Vè — 108 Verses of Farming Wisdom
+
+All "magic spells" in the game are actually **real organic farming recipes** written as Vietnamese folk poetry:
+
+> *"Trồng hành bên cạnh cà chua,*
+> *Quả thì ngọt tốt, lá thì xanh thêm."*
+>
+> 📌 Plant onions next to tomatoes — sulfur repels pests, shade retains moisture. Real companion planting.
+
+> *"Tỏi ba tép, ớt một trái,*
+> *Ngâm trong nước ấm, đợi vài canh thâu."*
+>
+> 📌 3 garlic cloves + 1 chili soaked overnight = organic pest spray. Actually works.
+
+> *"Ba chị em Mẹ gả chung vườn:*
+> *Chị Ngô đứng thẳng làm giường cho em."*
+>
+> 📌 The Three Sisters technique: corn as trellis, beans fix nitrogen, squash covers soil.
+
+**Players memorize the verses in-game. Walk away knowing real farming.**
+
+The full 108 verses are collectible in-game and will be released as a free educational PDF.
+
+---
+
+### 🎭 Key Characters
+
+| Character | Role | Represents |
+|-----------|------|------------|
+| **Thóc** | Orphan protagonist, Mother Nature's last seed | The farmer who must choose: serve or be free |
+| **Bà Tư** | Grandma who raised Thóc, knows the truth | Human motherhood vs. Nature's motherhood |
+| **Mục** | Cold loner, secret spy for Hoang Triều | Loyalty — family vs. friendship vs. the earth |
+| **Nếp** | Village healer, devout believer in Mother | Faith vs. fear — she hears Mother but is afraid |
+| **Đại Mạch** | Drunk old man, claims to be a farming sage | The one who ran from his destiny — Thóc's dark mirror |
+| **Hoang Triều** | The antagonist faction | Industrial chemical agriculture — profit over soil |
+
+---
+
+### 🎯 Core Themes
+
+- **Mother & Child** — Does Mother Nature love us, or just need us?
+- **Filial Duty vs. Freedom** — Vietnamese culture demands obedience. But what if obedience means self-destruction?
+- **Extraction vs. Stewardship** — Hoang Triều mines the earth. Nông Đạo serves it. Where's the line?
+- **The Seed & Hope** — Even after everything burns, a sprout still pushes through the ash.
+
+---
+
+### 💡 Why This Story Matters for Web3
+
+Most Web3 games have lore as an afterthought. **Organic Kingdom** uses story as the core engagement loop:
+
+- **108 Mẫu Kinh Vè** = collectible NFT verses with real-world farming knowledge
+- **3 endings** = community governance potential (DAO votes on canon ending?)
+- **Hoang Triều vs. Nông Đạo** = narrative framework for faction-based gameplay & tokenomics
+- **Real education embedded in gameplay** = social impact beyond speculation
+- **Vietnamese cultural identity** = differentiation in a sea of generic fantasy games
+
+> *"Thóc ơi, ăn cơm chưa?"*
+> — Bà Tư (the most ordinary line, and the most heartbreaking one after you know the truth)
+
+---
+
 ## 🎮 Live Demo
 
 | Link | Description |
