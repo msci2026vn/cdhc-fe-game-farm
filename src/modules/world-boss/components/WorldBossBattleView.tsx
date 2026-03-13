@@ -248,7 +248,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
 
       {/* ── CombatNotifList: absolute top-24 right-3 z-40 ── */}
       {combatNotifs.length > 0 && (
-        <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
+        <div style={{position:'absolute', left:'85%', top:'3%', width:'13%'}} className="z-40 flex flex-col gap-1 pointer-events-none">
           {combatNotifs.slice(-3).map((n: any) => (
             <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
               style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
