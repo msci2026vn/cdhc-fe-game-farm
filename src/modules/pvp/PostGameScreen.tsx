@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
 import type { PvpRating } from '@/shared/api/api-pvp';
-import { SKILL_GROUPS, STAT_DEFS } from '@/shared/api/api-pvp';
+import { SKILL_GROUPS, STAT_DEFS, getRankFromPoints } from '@/shared/api/api-pvp';
 import { ProofBadge } from './components/ProofBadge';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -167,9 +167,14 @@ function RatingChange({ ratingBefore, ratingAfter }: { ratingBefore: number; rat
   const { t } = useTranslation('pvp');
   if (!ratingAfter) return null;
 
-  const delta = ratingAfter.rating - ratingBefore;
+  const prevPoints = ratingBefore;
+  const newPoints = ratingAfter.rankPoints ?? ratingAfter.rating;
+  const delta = newPoints - prevPoints;
   const sign = delta >= 0 ? '+' : '';
   const color = delta > 0 ? '#22c55e' : delta < 0 ? '#ef4444' : '#94a3b8';
+
+  const prevRank = getRankFromPoints(prevPoints);
+  const newRank = getRankFromPoints(newPoints);
 
   return (
     <div style={{
@@ -177,22 +182,31 @@ function RatingChange({ ratingBefore, ratingAfter }: { ratingBefore: number; rat
       background: 'rgba(255,255,255,0.03)',
       border: '1px solid rgba(255,255,255,0.07)',
       borderRadius: 12,
-      padding: '10px 16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      padding: '12px 16px',
     }}>
-      <span style={{ fontSize: 12, color: '#64748b' }}>
-        {t('postGame.ratingChange')}
-      </span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 14, color: '#64748b' }}>{ratingBefore}</span>
+      {/* Tier icons */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
+        <span style={{ fontSize: 24 }}>{prevRank.tier.icon}</span>
+        {prevRank.tier.id !== newRank.tier.id && (
+          <>
+            <span style={{ color: '#475569', fontSize: 14 }}>→</span>
+            <span style={{ fontSize: 24, animation: 'pgIconIn 0.6s ease both' }}>{newRank.tier.icon}</span>
+          </>
+        )}
+      </div>
+      <div style={{ textAlign: 'center', fontWeight: 700, color: newRank.tier.color, fontSize: 14, marginBottom: 6 }}>
+        {newRank.tier.name} {newRank.subTierName}
+      </div>
+
+      {/* Points change */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <span style={{ fontSize: 13, color: '#64748b' }}>{prevPoints}</span>
         <span style={{ fontSize: 11, color: '#475569' }}>→</span>
         <span style={{ fontSize: 16, fontWeight: 800, color: '#f59e0b', fontFamily: "'Syne', sans-serif" }}>
-          {ratingAfter.rating}
+          {newPoints}
         </span>
         <span style={{
-          fontSize: 14, fontWeight: 700, color,
+          fontSize: 13, fontWeight: 700, color,
           background: `${color}18`, borderRadius: 8, padding: '2px 8px',
         }}>
           {sign}{delta}
@@ -634,48 +648,62 @@ export default function PostGameScreen({
   );
 }
 
-// ─── Rank Tier Helpers ──────────────────────────────────────────────────────
-
-const RANK_TIERS = [
-  { id: 'dong',      name: 'Dong',      icon: '\u{1F949}', minElo: 0,    maxElo: 1199 },
-  { id: 'bac',       name: 'Bac',       icon: '\u{1F948}', minElo: 1200, maxElo: 1599 },
-  { id: 'vang',      name: 'Vang',      icon: '\u{1F947}', minElo: 1600, maxElo: 1999 },
-  { id: 'kim_cuong', name: 'Kim Cuong',  icon: '\u{1F48E}', minElo: 2000, maxElo: 2399 },
-  { id: 'cao_thu',   name: 'Cao Thu',    icon: '\u{1F451}', minElo: 2400, maxElo: 99999 },
-] as const;
-
-function getTierFromElo(elo: number) {
-  return RANK_TIERS.find(t => elo >= t.minElo && elo <= t.maxElo) || RANK_TIERS[0];
-}
-
-// ─── TierChangeDisplay ──────────────────────────────────────────────────────
+// ─── TierChangeDisplay (using Cảnh Giới) ────────────────────────────────────
 
 function TierChangeDisplay({ ratingBefore, ratingAfter }: { ratingBefore: number; ratingAfter: PvpRating | null }) {
   if (!ratingAfter) return null;
-  const prevTier = getTierFromElo(ratingBefore);
-  const newTier = getTierFromElo(ratingAfter.rating);
-  const tierChanged = prevTier.id !== newTier.id;
-  const promoted = newTier.minElo > prevTier.minElo;
+
+  const prevPoints = ratingBefore;
+  const newPoints = ratingAfter.rankPoints ?? ratingAfter.rating;
+  const prevRank = getRankFromPoints(prevPoints);
+  const newRank = getRankFromPoints(newPoints);
+  const tierChanged = prevRank.tier.id !== newRank.tier.id;
+  const tierUp = newRank.tier.minPoints > prevRank.tier.minPoints;
+
+  if (!tierChanged) return null;
 
   return (
     <div style={{
       margin: '0 16px 14px',
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: 12, padding: '10px 16px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+      background: tierUp ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
+      border: `1px solid ${tierUp ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.2)'}`,
+      borderRadius: 12, padding: '14px 16px',
+      textAlign: 'center',
     }}>
-      <span style={{ fontSize: 22 }}>{prevTier.icon}</span>
-      <span style={{ color: '#475569', fontSize: 14 }}>&rarr;</span>
-      <span style={{ fontSize: 22, animation: tierChanged ? 'pgIconIn 0.6s ease both' : 'none' }}>{newTier.icon}</span>
-      <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 14 }}>{newTier.name}</span>
-      {tierChanged && promoted && (
-        <span style={{
-          fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#4ade80',
-          padding: '2px 8px', borderRadius: 12, fontWeight: 700,
-        }}>
-          THANG HANG!
-        </span>
+      {tierUp ? (
+        <>
+          <div style={{
+            fontSize: 14, fontWeight: 700,
+            color: '#f59e0b', marginBottom: 6,
+            animation: 'pgIconIn 0.6s ease both',
+          }}>
+            🎉 THĂNG CẢNH GIỚI!
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 20 }}>{prevRank.tier.icon}</span>
+            <span style={{ color: '#475569' }}>→</span>
+            <span style={{ fontSize: 28, animation: 'pgIconIn 0.6s 0.2s ease both' }}>{newRank.tier.icon}</span>
+          </div>
+          <div style={{ fontWeight: 700, color: newRank.tier.color, fontSize: 16 }}>{newRank.tier.name}</div>
+          <div style={{
+            fontSize: 12, color: 'rgba(245,158,11,0.7)', fontStyle: 'italic',
+            marginTop: 6, padding: '0 8px',
+          }}>
+            "{newRank.tier.mauKinh}"
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#ef4444', marginBottom: 4 }}>
+            Rớt Cảnh Giới
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <span style={{ fontSize: 20 }}>{prevRank.tier.icon}</span>
+            <span style={{ color: '#475569' }}>→</span>
+            <span style={{ fontSize: 20 }}>{newRank.tier.icon}</span>
+          </div>
+          <div style={{ fontWeight: 600, color: newRank.tier.color, fontSize: 13, marginTop: 4 }}>{newRank.tier.name}</div>
+        </>
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { pvpApi, getTierFromElo } from '@/shared/api/api-pvp';
+import { pvpApi, getRankFromPoints } from '@/shared/api/api-pvp';
 import { useAuth } from '@/shared/hooks/useAuth';
 
 export default function PvpHistory() {
@@ -175,8 +175,8 @@ export default function PvpHistory() {
 
                 {/* Rating + tier */}
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, marginBottom: 1 }}>{getTierFromElo(entry.rating).icon}</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: idx < 3 ? '#f59e0b' : '#94a3b8' }}>
+                  <div style={{ fontSize: 16, marginBottom: 1 }}>{getRankFromPoints(entry.rating).tier.icon}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: idx < 3 ? '#f59e0b' : getRankFromPoints(entry.rating).tier.color }}>
                     {entry.rating}
                   </div>
                 </div>

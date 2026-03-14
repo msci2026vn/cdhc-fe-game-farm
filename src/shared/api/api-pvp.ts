@@ -27,6 +27,7 @@ export type PvpRating = {
   losses: number;
   draws: number;
   rank: number | null;
+  rankPoints?: number;
 };
 
 export type PvpMatch = {
@@ -124,29 +125,165 @@ export const STAT_DEFS = [
 
 export const STAT_TOTAL = 30;
 
-// ── Rank Tier System (FE mirror of BE RANK_TIERS) ──
+// ── Rank Tier System — 10 Cảnh Giới ──
 
-export const RANK_TIERS_FE = [
-  { id: 'dong',      name: '\u0110\u1ED3ng',     icon: '\u{1F949}', minElo: 0,    maxElo: 1199 },
-  { id: 'bac',       name: 'B\u1EA1c',           icon: '\u{1F948}', minElo: 1200, maxElo: 1599 },
-  { id: 'vang',      name: 'V\u00E0ng',          icon: '\u{1F947}', minElo: 1600, maxElo: 1999 },
-  { id: 'kim_cuong', name: 'Kim C\u01B0\u01A1ng', icon: '\u{1F48E}', minElo: 2000, maxElo: 2399 },
-  { id: 'cao_thu',   name: 'Cao Th\u1EE7',       icon: '\u{1F451}', minElo: 2400, maxElo: 99999 },
+export const RANK_TIERS = [
+  {
+    id: 'thuc_dien_ky',
+    name: 'Thức Điền Kỳ',
+    icon: '🌱',
+    color: '#8B6914',
+    minPoints: 0,
+    maxPoints: 599,
+    winPoints: 18,
+    losePoints: 15,
+    mauKinh: 'Đất sống hay chết — nghe giun mà biết',
+  },
+  {
+    id: 'linh_tho_ky',
+    name: 'Linh Thổ Kỳ',
+    icon: '🌿',
+    color: '#4A7C59',
+    minPoints: 600,
+    maxPoints: 1499,
+    winPoints: 20,
+    losePoints: 17,
+    mauKinh: 'Phân trâu một lớp làm nền...',
+  },
+  {
+    id: 'ngu_moc_ky',
+    name: 'Ngự Mộc Kỳ',
+    icon: '🌳',
+    color: '#2E8B57',
+    minPoints: 1500,
+    maxPoints: 2699,
+    winPoints: 22,
+    losePoints: 19,
+    mauKinh: 'Trồng hành bên cạnh cà chua...',
+  },
+  {
+    id: 'thong_mach_ky',
+    name: 'Thông Mạch Kỳ',
+    icon: '💧',
+    color: '#4682B4',
+    minPoints: 2700,
+    maxPoints: 4199,
+    winPoints: 24,
+    losePoints: 21,
+    mauKinh: 'Tưới nhỏ giọt, rơm phủ đầu...',
+  },
+  {
+    id: 'hoa_linh_ky',
+    name: 'Hóa Linh Kỳ',
+    icon: '✨',
+    color: '#9B59B6',
+    minPoints: 4200,
+    maxPoints: 5999,
+    winPoints: 26,
+    losePoints: 23,
+    mauKinh: 'Vỏ trứng nghiền, tro bếp rắc lên...',
+  },
+  {
+    id: 'nong_vuong_ky',
+    name: 'Nông Vương Kỳ',
+    icon: '👑',
+    color: '#DAA520',
+    minPoints: 6000,
+    maxPoints: 8099,
+    winPoints: 28,
+    losePoints: 25,
+    mauKinh: 'Tỏi già, ớt một trái, ngâm nước ấm...',
+  },
+  {
+    id: 'dia_ton_ky',
+    name: 'Địa Tôn Kỳ',
+    icon: '🔥',
+    color: '#E74C3C',
+    minPoints: 8100,
+    maxPoints: 10499,
+    winPoints: 30,
+    losePoints: 27,
+    mauKinh: 'Luân canh bốn mùa, đất không mệt...',
+  },
+  {
+    id: 'thien_nong_ky',
+    name: 'Thiên Nông Kỳ',
+    icon: '⚡',
+    color: '#F39C12',
+    minPoints: 10500,
+    maxPoints: 13199,
+    winPoints: 32,
+    losePoints: 29,
+    mauKinh: 'Nhà kính giữ hơi, hạt mầm vượt lạnh...',
+  },
+  {
+    id: 'pha_thien_ky',
+    name: 'Phá Thiên Kỳ',
+    icon: '💫',
+    color: '#E91E63',
+    minPoints: 13200,
+    maxPoints: 16199,
+    winPoints: 35,
+    losePoints: 32,
+    mauKinh: 'Không cần đất vẫn xanh, nước nuôi rễ...',
+  },
+  {
+    id: 'nong_thanh_ky',
+    name: 'Nông Thánh Kỳ',
+    icon: '🌟',
+    color: '#FFD700',
+    minPoints: 16200,
+    maxPoints: 999999,
+    winPoints: 35,
+    losePoints: 35,
+    mauKinh: 'Một hạt giống giữ — ngàn đời còn ăn',
+    isLegendary: true,
+  },
 ] as const;
 
-export function getTierFromElo(elo: number) {
-  return RANK_TIERS_FE.find(t => elo >= t.minElo && elo <= t.maxElo) || RANK_TIERS_FE[0];
+export type RankTier = typeof RANK_TIERS[number];
+
+export const SUB_TIER_NAMES = ['Sơ Kỳ', 'Trung Kỳ', 'Hậu Kỳ'] as const;
+
+export function getRankFromPoints(points: number) {
+  const tier = RANK_TIERS.find(t => points >= t.minPoints && points <= t.maxPoints)
+    || RANK_TIERS[0];
+
+  // Nông Thánh Kỳ: no sub-tiers
+  if (tier.id === 'nong_thanh_ky') {
+    return {
+      tier,
+      subTierIdx: -1,
+      subTierName: 'Đỉnh Cao',
+      progress: 100,
+      points,
+    };
+  }
+
+  const tierRange = tier.maxPoints - tier.minPoints + 1;
+  const tierProgress = points - tier.minPoints;
+  const subTierSize = tierRange / 3;
+  const subTierIdx = Math.min(2, Math.floor(tierProgress / subTierSize));
+  const subTierStart = tier.minPoints + subTierIdx * subTierSize;
+  const progress = Math.min(100, Math.floor(((points - subTierStart) / subTierSize) * 100));
+
+  return {
+    tier,
+    subTierIdx,
+    subTierName: SUB_TIER_NAMES[subTierIdx],
+    progress,
+    points,
+  };
 }
 
+// Legacy aliases for backward compatibility
+export const RANK_TIERS_FE = RANK_TIERS;
+export function getTierFromElo(elo: number) {
+  return getRankFromPoints(elo).tier;
+}
 export function getSubTier(elo: number) {
-  const tier = getTierFromElo(elo);
-  const range = tier.maxElo - tier.minElo + 1;
-  const progress = elo - tier.minElo;
-  const subSize = range / 3;
-  const idx = Math.min(2, Math.floor(progress / subSize));
-  const names = ['S\u01A1 K\u1EF3', 'Trung K\u1EF3', 'H\u1EADu K\u1EF3'];
-  const subProgress = Math.min(100, Math.floor(((progress - idx * subSize) / subSize) * 100));
-  return { name: names[idx], progress: subProgress };
+  const info = getRankFromPoints(elo);
+  return { name: info.subTierName, progress: info.progress };
 }
 
 export const pvpApi = {
