@@ -370,6 +370,16 @@
         "height": "auto"
       },
       "note": "Create guild modal inner panel — CreateGuildModal.tsx"
+    },
+    {
+      "name": "GuildNavBtn",
+      "position": {
+        "left": "78%",
+        "top": "68.5%",
+        "width": "16%",
+        "height": "13%"
+      },
+      "note": "Guild nav button — 5th mini card in MainMenuScreen"
     }
   ]
 }

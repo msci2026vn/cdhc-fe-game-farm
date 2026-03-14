@@ -9,6 +9,7 @@ import { SoundToggle } from '@/shared/audio';
 import { WorldBossMarquee } from '@/modules/world-boss/components/WorldBossMarquee';
 import { AuctionBanner } from '@/modules/auction/components/AuctionBanner';
 import { HomeParticles } from '../components/HomeParticles';
+import { useUIPositions } from '@/shared/hooks/useUIPositions';
 
 // Shared text label style — bold white with dark shadow, readable on any background
 // Shared text label style — bold white with dark shadow, readable on any background
@@ -27,6 +28,7 @@ function GearIcon() {
 export default function MainMenuScreen() {
   const { t } = useTranslation();
   const navigate = useNav();
+  const { getPos } = useUIPositions('home');
   const { data: profile } = usePlayerProfile();
   const { data: auth } = useAuth();
   const user = auth?.user;
@@ -43,12 +45,20 @@ export default function MainMenuScreen() {
   const name = user?.name || (user as any)?.fullName || profile?.name || (profile as any)?.fullName || t('menu.farmer_title');
   const ogn = profile?.ogn ?? 0;
 
+  // ============================================================
+  // Mini cards — 5 items, formula: left=${6 + i * 18}%, width 16%
+  // Guild (i=4) uses getPos('GuildNavBtn') — LỚP 1 Admin-Editable
+  // ============================================================
   const miniCards = [
     { emoji: '🛒', label: t('menu.shop'), route: '/shop' },
     { emoji: '🎒', label: t('menu.inventory'), route: '/inventory' },
     { emoji: '⚡', label: t('menu.auction'), route: '/auction' },
     { emoji: '⚔️', label: t('menu.pvp'), route: '/pvp' },
+    { emoji: '🏰', label: t('menu.guild'), route: '/guild' },
   ];
+
+  // LỚP 1: admin-editable position cho nút Guild
+  const guildPosStyle = getPos('GuildNavBtn');
 
   return (
     <div className="bg-[#111] min-h-[100dvh] flex items-center justify-center select-none font-body text-farm-brown-dark">
@@ -146,32 +156,43 @@ export default function MainMenuScreen() {
           <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>📚 {t('menu.quiz')}</span>
         </div>
 
-        {/* ── MINI CARDS: Chợ / Túi đồ / Bạn bè ── */}
-        {miniCards.map(({ emoji, label, route }, i) => (
-          <div
-            key={route}
-            className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
-            style={{ left: `${9 + i * 21}%`, top: '68.5%', width: '19%', height: '13%' }}
-            onClick={() => { playSound('ui_click'); navigate(route); }}
-          >
+        {/* ── MINI CARDS: Chợ / Túi đồ / Đấu Giá / PVP / Guild ── */}
+        {/* 5 cards: left=${6 + i * 18}%, width 16% — Guild (i=4) uses getPos() */}
+        {miniCards.map(({ emoji, label, route }, i) => {
+          const isGuild = route === '/guild';
+          // LỚP 1: Guild dùng getPos('GuildNavBtn') nếu admin đã set coordinates
+          const hasPosData = guildPosStyle.left !== undefined || guildPosStyle.top !== undefined;
+          const defaultStyle = { left: `${6 + i * 18}%`, top: '68.5%', width: '16%', height: '13%' };
+          const cardStyle = isGuild && hasPosData ? guildPosStyle : defaultStyle;
+
+          return (
             <div
-              className="absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-1"
-              style={{
-                background: 'linear-gradient(160deg, #d4a84b 0%, #9c6325 55%, #6b3e12 100%)',
-                border: '2.5px solid #4a2a08',
-                boxShadow: 'inset 0 1px 0 rgba(255,230,130,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.55)',
-              }}
+              key={route}
+              className="absolute cursor-pointer hover:-translate-y-1 transition-transform"
+              style={cardStyle}
+              onClick={() => { playSound('ui_click'); navigate(route); }}
             >
-              <span className="text-[22px] leading-none drop-shadow-md">{emoji}</span>
-              <span
-                className="text-[11px] font-black text-white leading-none"
-                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)', letterSpacing: '0.02em' }}
+              <div
+                className="absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-1"
+                style={{
+                  background: isGuild
+                    ? 'linear-gradient(160deg, #4b7a3e 0%, #2d5a22 55%, #1a3a12 100%)'
+                    : 'linear-gradient(160deg, #d4a84b 0%, #9c6325 55%, #6b3e12 100%)',
+                  border: `2.5px solid ${isGuild ? '#1a3a08' : '#4a2a08'}`,
+                  boxShadow: 'inset 0 1px 0 rgba(255,230,130,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.55)',
+                }}
               >
-                {label}
-              </span>
+                <span className="text-[20px] leading-none drop-shadow-md">{emoji}</span>
+                <span
+                  className="text-[10px] font-black text-white leading-none"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)', letterSpacing: '0.02em' }}
+                >
+                  {label}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* ── BAR: IoT / Vườn thông minh ── */}
         <div
