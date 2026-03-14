@@ -71,6 +71,84 @@ export type PvpEvent =
   | { type: 'challenge_failed'; reason: string }
   | { type: 'quick_match_joined'; userId: string; roomCode: string; roomId?: string };
 
+// ── Build Config types ──
+
+export interface PvpBuildConfig {
+  str: number;
+  vit: number;
+  wis: number;
+  arm: number;
+  mana: number;
+  skillA: string | null;
+  skillB: string | null;
+  skillC: string | null;
+}
+
+export const SKILL_GROUPS = {
+  A: [
+    { id: 'sam_dong',    name: 'Sấm Đồng',   icon: '⚡', desc: 'Gây 300 sát thương xuyên giáp', manaCost: 200 },
+    { id: 'mua_da',     name: 'Mưa Đá',     icon: '🧊', desc: 'Chèn 6 junk vào board đối thủ', manaCost: 120 },
+    { id: 'man_dem',    name: 'Màn Đêm',     icon: '🌑', desc: 'Ẩn board đối thủ 5 giây', manaCost: 200 },
+    { id: 'phong_an',   name: 'Phong Ấn',    icon: '🔒', desc: 'Khoá vùng 3×3 board đối thủ 8s', manaCost: 180 },
+    { id: 'thien_thach', name: 'Thiên Thạch', icon: '☄️', desc: 'Xoá 1 hàng board đối thủ', manaCost: 160 },
+  ],
+  B: [
+    { id: 'ot_hiem',    name: 'Ớt Hiểm',    icon: '🌶️', desc: 'Giảm 50% giáp đối thủ 10s', manaCost: 80 },
+    { id: 'troi_buoc',  name: 'Trói Buộc',   icon: '⛓️', desc: 'Chậm swap đối thủ 8s', manaCost: 120 },
+    { id: 'hon_loan',   name: 'Hỗn Loạn',    icon: '🌀', desc: 'Xáo trộn board đối thủ', manaCost: 100 },
+    { id: 'hoan_doi',   name: 'Hoán Đổi',    icon: '🔄', desc: 'Đổi gem ATK↔DEF trên board mình', manaCost: 80 },
+    { id: 'ho_den',     name: 'Hố Đen',      icon: '🕳️', desc: 'Xoá STAR gem đối thủ + hút mana', manaCost: 140 },
+  ],
+  C: [
+    { id: 'rom_boc',    name: 'Rơm Bọc',     icon: '🛡️', desc: 'Tăng 200 giáp', manaCost: 100 },
+    { id: 'tang_toc',   name: 'Tăng Tốc',    icon: '⚡', desc: 'Swap nhanh gấp đôi 8s', manaCost: 150 },
+    { id: 'trieu_hoi',  name: 'Triệu Hồi',   icon: '✨', desc: 'Kéo STAR gem về hàng cuối', manaCost: 80 },
+    { id: 'thien_nhan', name: 'Thiên Nhãn',   icon: '👁️', desc: 'Xem board đối thủ 5s', manaCost: 60 },
+    { id: 'tai_sinh',   name: 'Tái Sinh',     icon: '💚', desc: 'Hồi 600 HP', manaCost: 120 },
+  ],
+} as const;
+
+export const SKILL_COOLDOWNS: Record<string, number> = {
+  sam_dong: 40000, mua_da: 25000, man_dem: 45000, phong_an: 40000, thien_thach: 35000,
+  ot_hiem: 20000, troi_buoc: 25000, hon_loan: 30000, hoan_doi: 20000, ho_den: 35000,
+  rom_boc: 20000, tang_toc: 30000, trieu_hoi: 15000, thien_nhan: 10000, tai_sinh: 25000,
+};
+
+export const STAT_DEFS = [
+  { key: 'str' as const, name: 'SỨC MẠNH',  icon: '⚔️', color: '#ef4444', desc: 'Tăng sát thương ATK gem',     formula: (v: number) => `${40 + v * 8} dmg/gem` },
+  { key: 'vit' as const, name: 'SINH LỰC',   icon: '❤️', color: '#22c55e', desc: 'Tăng HP tối đa',              formula: (v: number) => `${2500 + v * 120} HP` },
+  { key: 'wis' as const, name: 'TRÍ TUỆ',    icon: '💜', color: '#a855f7', desc: 'Tăng hồi HP & mana/star',     formula: (v: number) => `${25 + v * 3} heal/gem, +${8 + v * 2} mana/star` },
+  { key: 'arm' as const, name: 'PHÒNG THỦ',   icon: '🛡️', color: '#3b82f6', desc: 'Tăng giáp từ DEF gem',        formula: (v: number) => `${20 + v * 5} armor/gem` },
+  { key: 'mana' as const, name: 'NĂNG LƯỢNG', icon: '⭐', color: '#eab308', desc: 'Tăng mana tối đa',            formula: (v: number) => `${100 + v * 20} max mana` },
+] as const;
+
+export const STAT_TOTAL = 30;
+
+// ── Rank Tier System (FE mirror of BE RANK_TIERS) ──
+
+export const RANK_TIERS_FE = [
+  { id: 'dong',      name: '\u0110\u1ED3ng',     icon: '\u{1F949}', minElo: 0,    maxElo: 1199 },
+  { id: 'bac',       name: 'B\u1EA1c',           icon: '\u{1F948}', minElo: 1200, maxElo: 1599 },
+  { id: 'vang',      name: 'V\u00E0ng',          icon: '\u{1F947}', minElo: 1600, maxElo: 1999 },
+  { id: 'kim_cuong', name: 'Kim C\u01B0\u01A1ng', icon: '\u{1F48E}', minElo: 2000, maxElo: 2399 },
+  { id: 'cao_thu',   name: 'Cao Th\u1EE7',       icon: '\u{1F451}', minElo: 2400, maxElo: 99999 },
+] as const;
+
+export function getTierFromElo(elo: number) {
+  return RANK_TIERS_FE.find(t => elo >= t.minElo && elo <= t.maxElo) || RANK_TIERS_FE[0];
+}
+
+export function getSubTier(elo: number) {
+  const tier = getTierFromElo(elo);
+  const range = tier.maxElo - tier.minElo + 1;
+  const progress = elo - tier.minElo;
+  const subSize = range / 3;
+  const idx = Math.min(2, Math.floor(progress / subSize));
+  const names = ['S\u01A1 K\u1EF3', 'Trung K\u1EF3', 'H\u1EADu K\u1EF3'];
+  const subProgress = Math.min(100, Math.floor(((progress - idx * subSize) / subSize) * 100));
+  return { name: names[idx], progress: subProgress };
+}
+
 export const pvpApi = {
   getRating: () => pvpFetch<PvpRating>('/rating'),
 
@@ -170,4 +248,13 @@ export const pvpApi = {
   validateInviteLink: (token: string): Promise<{ valid: boolean; roomCode?: string; hostName?: string; reason?: string }> =>
     fetch(`${API_BASE_URL}/api/pvp/validate-invite/${token}`)
       .then(res => res.json() as Promise<{ valid: boolean; roomCode?: string; hostName?: string; reason?: string }>),
+
+  saveBuild: (build: PvpBuildConfig) =>
+    pvpFetch<{ ok: boolean }>('/build', {
+      method: 'POST',
+      body: JSON.stringify(build),
+    }),
+
+  getBuild: () =>
+    pvpFetch<{ build: PvpBuildConfig | null }>('/build'),
 };

@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { Client, type Room } from '@colyseus/sdk';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { pvpApi } from '@/shared/api/api-pvp';
+import { pvpApi, SKILL_GROUPS, SKILL_COOLDOWNS } from '@/shared/api/api-pvp';
 import type { PvpRating } from '@/shared/api/api-pvp';
+import { PvpSkillButton } from './components/PvpSkillButton';
+import { PvpSkillOverlay, type ActiveEffect } from './components/PvpSkillOverlay';
 import { socialApi } from '@/shared/api/api-social';
 import PostGameScreen from './PostGameScreen';
 import type { ClientMvpStats, H2HData } from './PostGameScreen';
@@ -51,53 +53,21 @@ async function fetchPvpToken(): Promise<string> {
   return json.data.token;
 }
 
-// ─── Interactive Board (Canvas-based for 60fps) ────────────────────────────────
-import { useCanvasBoard } from './hooks/useCanvasBoard';
+// ─── Interactive Board — CampaignMatch3Board ───────────────────────────────────
+// import { useCanvasBoard } from './hooks/useCanvasBoard';  // kept for rollback
+import CampaignMatch3Board from '@/modules/campaign/components/CampaignMatch3Board';
+import { tilesToGems, PVP_GEM_META } from './hooks/pvp-board.adapter';
+import { usePvpBoardInput } from './hooks/usePvpBoardInput';
 
-interface GameBoardProps {
-  tiles: number[];
-  mini?: boolean;
-  onSwap?: (from: number, to: number) => void;
-}
-
-function GameBoard({ tiles, mini = false, onSwap }: GameBoardProps) {
-  const { canvasRef } = useCanvasBoard({
-    board: tiles,
-    onSwap,
-    disabled: mini || !onSwap,
-  });
-
+// Mini board — opponent compact view (kept as-is, CSS-based)
+interface MiniBoardProps { tiles: number[]; }
+function MiniBoard({ tiles }: MiniBoardProps) {
   if (!tiles.length) return null;
-
-  // Mini board — compact 80px grid matching mockup
-  if (mini) {
-    return (
-      <div className="pvp-mini-board">
-        {tiles.map((gem, idx) => (
-          <div
-            key={idx}
-            className={`pvp-mini-gem ${gem === -1 ? 'pvp-mini-gem--empty' : `pvp-mini-gem--${gem}`}`}
-          />
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <canvas
-        ref={canvasRef}
-        style={{
-          display: 'block',
-          width: '100%',
-          height: '100%',
-          touchAction: 'none',
-          transform: 'translateZ(0)',
-          willChange: 'transform',
-          borderRadius: 10,
-          cursor: 'grab',
-        }}
-      />
+    <div className="pvp-mini-board">
+      {tiles.map((gem, idx) => (
+        <div key={idx} className={`pvp-mini-gem ${gem === -1 ? 'pvp-mini-gem--empty' : `pvp-mini-gem--${gem}`}`} />
+      ))}
     </div>
   );
 }
@@ -166,18 +136,36 @@ function HpBar({ current, max, armor, color = '#22c55e', label }: {
   );
 }
 
-// ─── Mana Bar ──────────────────────────────────────────────────────────────────
-function ManaBar({ current, max }: { current: number; max: number }) {
+// ─── Mana Bar with skill cost markers ────────────────────────────────────────
+function ManaBar({ current, max, markers }: {
+  current: number; max: number;
+  markers?: Array<{ icon: string; cost: number }>;
+}) {
   return (
     <div style={{ marginBottom: 6 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
         <span>⭐ Mana</span><span>{current}/{max}</span>
       </div>
-      <div style={{ height: 6, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 6, background: '#1f2937', borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
         <div style={{
-          width: `${(current / max) * 100}%`, height: '100%',
+          width: `${Math.min(100, (current / max) * 100)}%`, height: '100%',
           background: '#eab308', transition: 'width 0.3s',
         }} />
+        {/* Skill cost threshold markers */}
+        {markers?.map((m, i) => {
+          const pct = (m.cost / max) * 100;
+          if (pct > 100) return null;
+          return (
+            <div key={i} style={{
+              position: 'absolute', top: -10, left: `${pct}%`,
+              transform: 'translateX(-50%)',
+              fontSize: 8, lineHeight: 1, pointerEvents: 'none',
+              opacity: current >= m.cost ? 1 : 0.4,
+            }}>
+              {m.icon}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -211,7 +199,7 @@ export default function PvpTestScreen() {
   const [opponentScore, setOpponentScore] = useState(0);
   const [comboText, setComboText] = useState('');
   const [opponentLeft, setOpponentLeft] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(90);
   const [lobbyTimeLeft, setLobbyTimeLeft] = useState(900);
   const [isSuddenDeath, setIsSuddenDeath] = useState(false);
   const [winnerId, setWinnerId] = useState('');
@@ -220,12 +208,19 @@ export default function PvpTestScreen() {
   const [junkAlert, setJunkAlert] = useState('');
   // Combat stats — aligned with campaign BossState
   const [myHp, setMyHp] = useState(1000);
-  const [myMaxHp] = useState(1000);
+  const [myMaxHp, setMyMaxHp] = useState(2500);
   const [myArmor, setMyArmor] = useState(0);
   const [myMana, setMyMana] = useState(0);
   const [opponentHp, setOpponentHp] = useState(1000);
-  const [opponentMaxHp] = useState(1000);
+  const [opponentMaxHp, setOpponentMaxHp] = useState(2500);
   const [opponentArmor, setOpponentArmor] = useState(0);
+  const [opponentMana, setOpponentMana] = useState(0);
+  const [opponentMaxMana, setOpponentMaxMana] = useState(100);
+  const [myMaxMana, setMyMaxMana] = useState(100);
+  const [myBuild, setMyBuild] = useState<{
+    str: number; vit: number; wis: number; arm: number; mana: number;
+    skillA: string; skillB: string; skillC: string;
+  } | null>(null);
   const [damageFlash, setDamageFlash] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState('');
@@ -236,6 +231,30 @@ export default function PvpTestScreen() {
   const [scoreAlert, setScoreAlert] = useState<{ text: string; color: string } | null>(null);
   const [isDangerZone, setIsDangerZone] = useState(false);
   const [comboBlast, setComboBlast] = useState<{ combo: number; id: number } | null>(null);
+
+  // ── Skill state ──
+  const [skillCooldowns, setSkillCooldowns] = useState<Record<string, { remaining: number; total: number }>>({});
+  const [opponentSkillFlash, setOpponentSkillFlash] = useState<string | null>(null);
+
+  // ── Skill effect overlays ──
+  const [activeEffects, setActiveEffects] = useState<ActiveEffect[]>([]);
+  const [boardShake, setBoardShake] = useState(false);
+
+  // ── Build reveal (PostGame) ──
+  const [gameBuilds, setGameBuilds] = useState<Record<string, {
+    str: number; vit: number; wis: number; arm: number; mana: number;
+    skillA: string; skillB: string; skillC: string;
+  }> | null>(null);
+
+  // ── Board flash effects ──
+  const [matchedCells, setMatchedCells] = useState<Set<number>>(new Set());
+  const [spawningGems, setSpawningGems] = useState<Set<number>>(new Set());
+  const myBoardRef = useRef<number[]>([]);
+  const matchedTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const spawningTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const comboTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [pvpCombo, setPvpCombo] = useState(0);
+  const [showCombo, setShowCombo] = useState(false);
 
   // ── Post-game data ──
   const [myStats, setMyStats] = useState<ClientMvpStats>({
@@ -314,6 +333,81 @@ export default function PvpTestScreen() {
     roomRef.current.send('swap', { from, to });
   }, []);
 
+  // ── PVP Board input (CampaignMatch3Board gesture wrapper) ──
+  // disabled prop is passed as ref-based value; actual phase check happens at render
+  const {
+    selected: boardSelected,
+    animating: boardAnimating,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+  } = usePvpBoardInput({
+    onSwap: handleSwap,   // hook internally triggers animating after each swap
+    disabled: (roomState?.phase !== 'playing' && roomState?.phase !== 'sudden_death') || (roomState?.timeLeft ?? 60) <= 0,
+  });
+
+  // Stable gem array — recomputed only when board tiles change
+  const myGems = useMemo(() => tilesToGems(myBoard), [myBoard]);
+
+  // ── Skill info from build ──
+  const mySkills = useMemo(() => {
+    if (!myBuild) return [];
+    const skills: Array<{ id: string; icon: string; name: string; manaCost: number; cooldownMs: number }> = [];
+    const groups = ['A', 'B', 'C'] as const;
+    const buildKeys = ['skillA', 'skillB', 'skillC'] as const;
+    for (let i = 0; i < 3; i++) {
+      const skillId = myBuild[buildKeys[i]];
+      if (!skillId) continue;
+      const group = SKILL_GROUPS[groups[i]];
+      const def = group.find((s) => s.id === skillId);
+      if (def) {
+        skills.push({
+          id: skillId,
+          icon: def.icon,
+          name: def.name,
+          manaCost: def.manaCost,
+          cooldownMs: SKILL_COOLDOWNS[skillId] || 20000,
+        });
+      }
+    }
+    return skills;
+  }, [myBuild]);
+
+  // ── Skill cooldown timer (100ms tick) ──
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSkillCooldowns(prev => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [skillId, cd] of Object.entries(next)) {
+          if (cd.remaining > 0) {
+            next[skillId] = { ...cd, remaining: Math.max(0, cd.remaining - 100) };
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ── Cast skill ──
+  const handleCastSkill = useCallback((skillId: string) => {
+    if (!roomRef.current) return;
+    roomRef.current.send('use_skill', { skillId });
+  }, []);
+
+  // ── Add skill effect with auto-remove ──
+  const addEffect = useCallback((effect: Omit<ActiveEffect, 'id' | 'startedAt'>) => {
+    const id = `${effect.type}_${Date.now()}`;
+    const full: ActiveEffect = { ...effect, id, startedAt: Date.now() };
+    setActiveEffects(prev => [...prev, full]);
+    const removeAfter = effect.durationMs || 2000;
+    setTimeout(() => {
+      setActiveEffects(prev => prev.filter(e => e.id !== id));
+    }, removeAfter);
+  }, []);
+
   // ── Taunt handler ──
   const sendTaunt = useCallback((emoji: string) => {
     if (!roomRef.current || emojiCooldown) return;
@@ -340,8 +434,8 @@ export default function PvpTestScreen() {
       setRematchState('ready');
     });
 
-    r.onMessage('rematch_start', (data: { newRoomId: string; newRoomCode: string }) => {
-      navigate(`/pvp-test?roomId=${data.newRoomId}`);
+    r.onMessage('rematch_start', (data: { roomId: string }) => {
+      if (data.roomId) navigate(`/pvp-test?roomId=${data.roomId}`);
     });
 
     r.onMessage('state_update', (data: RoomStateBroadcast) => {
@@ -364,30 +458,57 @@ export default function PvpTestScreen() {
       navigate('/pvp');
     });
 
-    r.onMessage('game_start', (data: { myBoard: number[]; opponentBoard: number[] }) => {
+    r.onMessage('game_start', (data: {
+      myBoard: number[]; opponentBoard: number[];
+      myMaxHp?: number; opponentMaxHp?: number;
+      myMaxMana?: number; opponentMaxMana?: number;
+      myBuild?: { str: number; vit: number; wis: number; arm: number; mana: number; skillA: string; skillB: string; skillC: string };
+    }) => {
+      myBoardRef.current = data.myBoard;
       setMyBoard(data.myBoard);
       setOpponentBoard(data.opponentBoard);
       setMyScore(0);
       setOpponentScore(0);
       setComboText('');
-      setTimeLeft(60);
+      setTimeLeft(90);
       setIsSuddenDeath(false);
       setWinnerId('');
       setWinnerSessionId('');
       setGameOverPlayers([]);
       setJunkAlert('');
-      // Reset combat stats
-      setMyHp(1000);
+      // Reset combat stats — use server-sent maxHp/maxMana from build
+      const serverMaxHp = data.myMaxHp ?? 2500;
+      const serverOpMaxHp = data.opponentMaxHp ?? 2500;
+      const serverMaxMana = data.myMaxMana ?? 100;
+      const serverOpMaxMana = data.opponentMaxMana ?? 100;
+      setMyMaxHp(serverMaxHp);
+      setOpponentMaxHp(serverOpMaxHp);
+      setMyMaxMana(serverMaxMana);
+      setOpponentMaxMana(serverOpMaxMana);
+      setMyHp(serverMaxHp);
       setMyArmor(0);
       setMyMana(0);
-      setOpponentHp(1000);
+      setOpponentHp(serverOpMaxHp);
       setOpponentArmor(0);
+      setOpponentMana(0);
+      if (data.myBuild) setMyBuild(data.myBuild);
       // Reset taunt/debuff state
       setFloatingEmojis([]);
       setActiveDebuff(null);
       setScoreAlert(null);
       setIsDangerZone(false);
       setComboBlast(null);
+      // Reset skill state
+      setSkillCooldowns({});
+      setOpponentSkillFlash(null);
+      setActiveEffects([]);
+      setBoardShake(false);
+      setGameBuilds(null);
+      // Reset board flash effects
+      setMatchedCells(new Set());
+      setSpawningGems(new Set());
+      setPvpCombo(0);
+      setShowCombo(false);
       // Reset post-game tracking
       const freshStats: ClientMvpStats = {
         highestCombo: 0, fastestSwapMs: 9999,
@@ -408,11 +529,15 @@ export default function PvpTestScreen() {
 
     r.onMessage('board_update', (data: {
       tiles: number[]; score: number; combo: number; gained: number;
+      matched_cells?: number[];
       junkReceived?: number; hp?: number; armor?: number; mana?: number;
       damageDealt?: number;
       effects?: { atk: number; hp: number; def: number; star: number };
       junkSent?: number;
     }) => {
+      // Save prev board BEFORE updating ref (for spawn diff)
+      const prevTiles = myBoardRef.current;
+      myBoardRef.current = data.tiles;
       setMyBoard(data.tiles);
       setMyScore(data.score);
       if (data.hp !== undefined) setMyHp(data.hp);
@@ -426,6 +551,34 @@ export default function PvpTestScreen() {
         if (ms < statsRef.current.fastestSwapMs) statsRef.current.fastestSwapMs = ms;
       }
       lastSwapAtRef.current = now;
+
+      // Flash matched cells (clear old timeout to prevent early clear on rapid updates)
+      if (data.matched_cells?.length) {
+        setMatchedCells(new Set(data.matched_cells));
+        clearTimeout(matchedTimerRef.current);
+        matchedTimerRef.current = setTimeout(() => setMatchedCells(new Set()), 350);
+      }
+
+      // Spawn animation — diff old vs new board to find cells that changed
+      if (prevTiles.length === 64) {
+        const spawning = new Set<number>();
+        data.tiles.forEach((tile: number, i: number) => {
+          if (prevTiles[i] !== tile) spawning.add(i);
+        });
+        if (spawning.size > 0) {
+          setSpawningGems(spawning);
+          clearTimeout(spawningTimerRef.current);
+          spawningTimerRef.current = setTimeout(() => setSpawningGems(new Set()), 400);
+        }
+      }
+
+      // Combo state for CampaignMatch3Board overlay
+      if (data.combo > 0) {
+        setPvpCombo(data.combo);
+        setShowCombo(true);
+        clearTimeout(comboTimerRef.current);
+        comboTimerRef.current = setTimeout(() => setShowCombo(false), 1500);
+      }
 
       // Effect log
       const parts: string[] = [];
@@ -455,9 +608,12 @@ export default function PvpTestScreen() {
       if (data.score !== undefined) setOpponentScore(data.score);
       if (data.opponentScore !== undefined) setOpponentScore(data.opponentScore);
       if (data.opponentHp !== undefined) setOpponentHp(data.opponentHp);
+      if (data.opponentMaxHp !== undefined) setOpponentMaxHp(data.opponentMaxHp);
       if (data.opponentArmor !== undefined) setOpponentArmor(data.opponentArmor);
+      if (data.opponentMana !== undefined) setOpponentMana(data.opponentMana);
       // Update own stats (may have taken damage from opponent)
       if (data.myHp !== undefined) setMyHp(data.myHp);
+      if (data.myMaxHp !== undefined) setMyMaxHp(data.myMaxHp);
       if (data.myArmor !== undefined) setMyArmor(data.myArmor);
       if (data.myMana !== undefined) setMyMana(data.myMana);
     });
@@ -473,9 +629,15 @@ export default function PvpTestScreen() {
       addLog(`💥 Nhận ${data.damage} damage${data.absorbed > 0 ? ` (🛡️${data.absorbed} absorbed)` : ''}! HP: ${data.remainingHp}`);
     });
 
-    r.onMessage('game_over', (data: { winnerId: string; winnerSessionId: string; players: Array<{ userId: string; name: string; score: number; hp?: number }>; isSuddenDeath: boolean }) => {
+    r.onMessage('game_over', (data: {
+      winnerId: string; winnerSessionId: string;
+      players: Array<{ userId: string; name: string; score: number; hp?: number }>;
+      isSuddenDeath: boolean;
+      builds?: Record<string, { str: number; vit: number; wis: number; arm: number; mana: number; skillA: string; skillB: string; skillC: string }>;
+    }) => {
       setWinnerId(data.winnerId);
       setWinnerSessionId(data.winnerSessionId);
+      if (data.builds) setGameBuilds(data.builds);
       setGameOverPlayers(data.players);
       setIsSuddenDeath(data.isSuddenDeath);
       const iWon = data.winnerSessionId === mySessionId;
@@ -581,6 +743,73 @@ export default function PvpTestScreen() {
       setComboBlast({ combo: data.combo, id });
       setTimeout(() => setComboBlast(null), 1500);
       if (data.combo > statsRef.current.highestCombo) statsRef.current.highestCombo = data.combo;
+    });
+
+    // ── Skill messages ──
+    r.onMessage('skill_used', (data: { skillId: string; isSelf: boolean; manaCost: number; cooldownMs: number }) => {
+      if (data.isSelf) {
+        setSkillCooldowns(prev => ({
+          ...prev,
+          [data.skillId]: { remaining: data.cooldownMs, total: data.cooldownMs },
+        }));
+      } else {
+        const allSkills = [...SKILL_GROUPS.A, ...SKILL_GROUPS.B, ...SKILL_GROUPS.C];
+        const skillDef = allSkills.find(s => s.id === data.skillId);
+        setOpponentSkillFlash(skillDef ? `${skillDef.icon} ${skillDef.name}!` : data.skillId);
+        setTimeout(() => setOpponentSkillFlash(null), 2000);
+      }
+    });
+
+    r.onMessage('skill_effect', (data: {
+      type: string; target: string; durationMs?: number; value?: number;
+      zone?: number[]; junkPositions?: number[]; junkCount?: number;
+    }) => {
+      addEffect({
+        type: data.type,
+        target: data.target as 'self' | 'opponent',
+        durationMs: data.durationMs,
+        data: { zone: data.zone, junkPositions: data.junkPositions, value: data.value },
+      });
+      // Board shake for Hỗn Loạn
+      if (data.type === 'hon_loan' && data.target === 'self') {
+        setBoardShake(true);
+        setTimeout(() => setBoardShake(false), 1000);
+      }
+      addLog(`Skill effect: ${data.type} target=${data.target}${data.value ? ` val=${data.value}` : ''}`);
+    });
+
+    r.onMessage('skill_ready', (data: { skillId: string }) => {
+      console.log('[Skill Ready]', data.skillId);
+    });
+
+    r.onMessage('skill_error', (data: { error: string }) => {
+      console.warn('[Skill Error]', data.error);
+    });
+
+    r.onMessage('reveal_board', (data: { tiles: number[]; durationMs: number }) => {
+      console.log('[Reveal Board] Duration:', data.durationMs);
+    });
+
+    r.onMessage('reveal_board_end', () => {
+      console.log('[Reveal Board End]');
+    });
+
+    r.onMessage('debuff_expired', (data: { type: string }) => {
+      setActiveEffects(prev => prev.filter(e => e.type !== data.type));
+      addLog(`Debuff expired: ${data.type}`);
+    });
+
+    r.onMessage('debuff_expired_opponent', (data: { type: string }) => {
+      setActiveEffects(prev => prev.filter(e => e.type !== data.type));
+    });
+
+    r.onMessage('swap_blocked', (data: { reason: string }) => {
+      console.log('[Swap Blocked]', data.reason);
+    });
+
+    r.onMessage('mana_update', (data: { mana: number; maxMana: number }) => {
+      setMyMana(data.mana);
+      if (data.maxMana) setMyMaxMana(data.maxMana);
     });
 
     // Bot emoji taunt relay
@@ -1108,6 +1337,8 @@ export default function PvpTestScreen() {
           proofTxHash={proofData.txHash}
           proofIpfsHash={proofData.ipfsHash}
           proofMoveCount={proofData.moveCount ?? undefined}
+          myBuild={gameBuilds && mySessionId ? gameBuilds[mySessionId] : null}
+          opponentBuild={gameBuilds ? Object.entries(gameBuilds).find(([sid]) => sid !== mySessionId)?.[1] ?? null : null}
         />
       )}
 
@@ -1177,10 +1408,21 @@ export default function PvpTestScreen() {
                     {opponentHp}/{opponentMaxHp}{opponentArmor > 0 ? ` 🛡️${opponentArmor}` : ''}
                   </span>
                 </div>
+                <div className="pvp-hp" style={{ height: 5, marginTop: 2 }}>
+                  <div
+                    className="pvp-hp__fill"
+                    style={{ width: `${Math.min(100, (opponentMana / opponentMaxMana) * 100)}%`, background: '#eab308' }}
+                  />
+                  <span className="pvp-hp__text" style={{ fontSize: 9 }}>
+                    ⭐{opponentMana}/{opponentMaxMana}
+                  </span>
+                </div>
               </div>
-              <div className="pvp-mini-wrap">
+              <div className="pvp-mini-wrap" style={{ position: 'relative' }}>
                 <span className="pvp-mini-wrap__label">{t('game.opponentBoard')}</span>
-                <GameBoard tiles={opponentBoard} mini />
+                <MiniBoard tiles={opponentBoard} />
+                {/* Skill effect overlays on opponent mini board */}
+                <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'opponent')} />
               </div>
             </div>
 
@@ -1199,10 +1441,26 @@ export default function PvpTestScreen() {
                     <span className="pvp-bar__label">❤️ HP</span>
                     <span className="pvp-bar__val">{myHp}/{myMaxHp}{myArmor > 0 ? ` 🛡️${myArmor}` : ''}</span>
                   </div>
-                  <div className="pvp-bar pvp-bar--mp">
-                    <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / 200) * 100)}%` }} />
+                  <div className="pvp-bar pvp-bar--mp" style={{ position: 'relative' }}>
+                    <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / myMaxMana) * 100)}%` }} />
                     <span className="pvp-bar__label">⭐ Mana</span>
-                    <span className="pvp-bar__val">{myMana}/200</span>
+                    <span className="pvp-bar__val">{myMana}/{myMaxMana}</span>
+                    {/* Skill cost markers */}
+                    {mySkills.map(skill => {
+                      const pct = (skill.manaCost / myMaxMana) * 100;
+                      if (pct > 100) return null;
+                      return (
+                        <div key={skill.id} style={{
+                          position: 'absolute', top: -9, left: `${pct}%`,
+                          transform: 'translateX(-50%)',
+                          fontSize: 7, lineHeight: 1, pointerEvents: 'none',
+                          opacity: myMana >= skill.manaCost ? 1 : 0.35,
+                          transition: 'opacity 0.3s',
+                        }}>
+                          {skill.icon}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1212,16 +1470,38 @@ export default function PvpTestScreen() {
                 'pvp-board-wrap',
                 damageFlash && 'pvp-board-wrap--damage',
                 activeDebuff?.type === 'shake' && 'pvp-board-wrap--shake',
+                boardShake && 'pvp-board-wrap--skill-shake',
                 isDangerZone && !damageFlash && 'pvp-board-wrap--danger',
               ].filter(Boolean).join(' ')}>
                 <span className="pvp-vine pvp-vine--tl">🌿</span>
                 <span className="pvp-vine pvp-vine--tr">🍃</span>
                 <span className="pvp-vine pvp-vine--bl">🌿</span>
                 <span className="pvp-vine pvp-vine--br">🍃</span>
-                <GameBoard tiles={myBoard} onSwap={handleSwap} />
-                {activeDebuff?.type === 'freeze' && (
-                  <div className="pvp-freeze">❄️</div>
+                {myGems.length > 0 && (
+                  <CampaignMatch3Board
+                    grid={myGems}
+                    selected={boardSelected}
+                    matchedCells={matchedCells}
+                    spawningGems={spawningGems}
+                    lockedGems={new Set()}
+                    highlightedGem={null}
+                    isStunned={activeDebuff?.type === 'freeze'}
+                    animating={boardAnimating}
+                    handlePointerDown={handlePointerDown}
+                    handlePointerMove={handlePointerMove}
+                    handlePointerUp={handlePointerUp}
+                    combo={pvpCombo}
+                    showCombo={showCombo}
+                    otHiemActive={false}
+                    romBocActive={false}
+                    GEM_META={PVP_GEM_META}
+                  />
                 )}
+                {activeDebuff?.type === 'freeze' && (
+                  <div className="pvp-freeze">&#10052;&#65039;</div>
+                )}
+                {/* Skill effect overlays on my board */}
+                <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'self')} />
               </div>
               <div className="pvp-timer-row">
                 <div className={[
@@ -1233,7 +1513,49 @@ export default function PvpTestScreen() {
                   {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
                 </div>
               </div>
+
+              {/* ── SKILL BUTTONS ── */}
+              {mySkills.length > 0 && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  gap: 10, padding: '6px 0 2px',
+                }}>
+                  {mySkills.map(skill => {
+                    const cd = skillCooldowns[skill.id];
+                    return (
+                      <PvpSkillButton
+                        key={skill.id}
+                        skillId={skill.id}
+                        icon={skill.icon}
+                        name={skill.name}
+                        manaCost={skill.manaCost}
+                        currentMana={myMana}
+                        cooldownTotal={cd?.total ?? skill.cooldownMs}
+                        cooldownRemaining={cd?.remaining ?? 0}
+                        disabled={phase !== 'playing' && phase !== 'sudden_death'}
+                        onCast={() => handleCastSkill(skill.id)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
+
+            {/* Opponent skill flash */}
+            {opponentSkillFlash && (
+              <div style={{
+                position: 'absolute', top: '15%', left: '50%',
+                transform: 'translateX(-50%)', zIndex: 50,
+                background: 'rgba(239,68,68,0.9)', color: '#fff',
+                padding: '6px 16px', borderRadius: 12,
+                fontSize: 14, fontWeight: 700,
+                animation: 'comboFlash 2s ease-out forwards',
+                boxShadow: '0 4px 20px rgba(239,68,68,0.5)',
+                whiteSpace: 'nowrap', pointerEvents: 'none',
+              }}>
+                {opponentSkillFlash}
+              </div>
+            )}
 
             {/* ── BOTTOM: Emoji bar + leave ── */}
             <div className="pvp-bottom">

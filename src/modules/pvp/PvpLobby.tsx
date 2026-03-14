@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { pvpApi } from '@/shared/api/api-pvp';
+import { pvpApi, RANK_TIERS_FE } from '@/shared/api/api-pvp';
 import type { PvpEvent, PvpInvite } from '@/shared/api/api-pvp';
 import { usePvpSSE } from './hooks/usePvpSSE';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -709,6 +709,8 @@ export default function PvpLobby() {
       : 0
     : 0;
 
+  const tierInfo = RANK_TIERS_FE.find(t => (rating?.rating ?? 1000) >= t.minElo && (rating?.rating ?? 1000) <= t.maxElo) || RANK_TIERS_FE[0];
+
   return (
     <div style={{
       minHeight: '100dvh',
@@ -796,7 +798,10 @@ export default function PvpLobby() {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <div>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>{t('lobby.rating')}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 22 }}>{tierInfo.icon}</span>
+              <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 14 }}>{tierInfo.name}</span>
+            </div>
             <div style={{ fontSize: 36, fontWeight: 900, color: '#f59e0b' }}>
               {rating?.rating ?? 1000}
             </div>
@@ -822,6 +827,21 @@ export default function PvpLobby() {
             <div style={{ fontSize: 12, color: '#64748b' }}>{t('lobby.winRate', { rate: winRate })}</div>
           </div>
         </div>
+
+        {/* Build button */}
+        <button
+          onClick={() => navigate('/pvp/build')}
+          style={{
+            width: '100%', padding: '12px', borderRadius: 12, marginBottom: 10,
+            background: 'linear-gradient(135deg,#b45309,#92400e)',
+            color: '#fff', cursor: 'pointer', textAlign: 'center',
+            border: '1px solid #b45309',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+          }}
+        >
+          <span style={{ fontSize: 22 }}>⚙️</span>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>Thiết Lập Build</span>
+        </button>
 
         {/* 5 action buttons (top: 3-col bot highlight, bottom: 2x2) */}
         {/* Play vs Bot — full width highlight */}

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
 import type { PvpRating } from '@/shared/api/api-pvp';
+import { SKILL_GROUPS, STAT_DEFS } from '@/shared/api/api-pvp';
 import { ProofBadge } from './components/ProofBadge';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -48,7 +49,15 @@ interface PostGameProps {
   proofTxHash?:     string | null;
   proofIpfsHash?:   string | null;
   proofMoveCount?:  number;
+  // Build reveal (Prompt 8)
+  myBuild?: BuildData | null;
+  opponentBuild?: BuildData | null;
 }
+
+type BuildData = {
+  str: number; vit: number; wis: number; arm: number; mana: number;
+  skillA: string; skillB: string; skillC: string;
+};
 
 // ─── ResultHero ───────────────────────────────────────────────────────────────
 
@@ -478,6 +487,8 @@ export default function PostGameScreen({
   proofTxHash,
   proofIpfsHash,
   proofMoveCount,
+  myBuild,
+  opponentBuild,
 }: PostGameProps) {
   const { t } = useTranslation('pvp');
   const shareRef = useRef<HTMLDivElement>(null!);
@@ -519,6 +530,22 @@ export default function PostGameScreen({
         <MvpStatsGrid stats={myStats} />
 
         <HeadToHeadBanner h2h={h2hData} opponentName={opponentName} />
+
+        {/* Build reveal */}
+        {(myBuild || opponentBuild) && (
+          <div style={{ margin: '0 16px 14px' }}>
+            <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+              Build Chien Dau
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {myBuild && <BuildRevealCard label={myName} build={myBuild} isWinner={isWinner && !isDraw} />}
+              {opponentBuild && <BuildRevealCard label={opponentName} build={opponentBuild} isWinner={!isWinner && !isDraw} />}
+            </div>
+          </div>
+        )}
+
+        {/* Tier change display */}
+        <TierChangeDisplay ratingBefore={ratingBefore} ratingAfter={ratingAfter} />
 
         {/* On-chain proof badge */}
         <div style={{ margin: '0 16px 14px' }}>
@@ -603,6 +630,114 @@ export default function PostGameScreen({
           50%       { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
         }
       `}</style>
+    </div>
+  );
+}
+
+// ─── Rank Tier Helpers ──────────────────────────────────────────────────────
+
+const RANK_TIERS = [
+  { id: 'dong',      name: 'Dong',      icon: '\u{1F949}', minElo: 0,    maxElo: 1199 },
+  { id: 'bac',       name: 'Bac',       icon: '\u{1F948}', minElo: 1200, maxElo: 1599 },
+  { id: 'vang',      name: 'Vang',      icon: '\u{1F947}', minElo: 1600, maxElo: 1999 },
+  { id: 'kim_cuong', name: 'Kim Cuong',  icon: '\u{1F48E}', minElo: 2000, maxElo: 2399 },
+  { id: 'cao_thu',   name: 'Cao Thu',    icon: '\u{1F451}', minElo: 2400, maxElo: 99999 },
+] as const;
+
+function getTierFromElo(elo: number) {
+  return RANK_TIERS.find(t => elo >= t.minElo && elo <= t.maxElo) || RANK_TIERS[0];
+}
+
+// ─── TierChangeDisplay ──────────────────────────────────────────────────────
+
+function TierChangeDisplay({ ratingBefore, ratingAfter }: { ratingBefore: number; ratingAfter: PvpRating | null }) {
+  if (!ratingAfter) return null;
+  const prevTier = getTierFromElo(ratingBefore);
+  const newTier = getTierFromElo(ratingAfter.rating);
+  const tierChanged = prevTier.id !== newTier.id;
+  const promoted = newTier.minElo > prevTier.minElo;
+
+  return (
+    <div style={{
+      margin: '0 16px 14px',
+      background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 12, padding: '10px 16px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+    }}>
+      <span style={{ fontSize: 22 }}>{prevTier.icon}</span>
+      <span style={{ color: '#475569', fontSize: 14 }}>&rarr;</span>
+      <span style={{ fontSize: 22, animation: tierChanged ? 'pgIconIn 0.6s ease both' : 'none' }}>{newTier.icon}</span>
+      <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 14 }}>{newTier.name}</span>
+      {tierChanged && promoted && (
+        <span style={{
+          fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#4ade80',
+          padding: '2px 8px', borderRadius: 12, fontWeight: 700,
+        }}>
+          THANG HANG!
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ─── BuildRevealCard ────────────────────────────────────────────────────────
+
+function BuildRevealCard({
+  label, build, isWinner,
+}: {
+  label: string;
+  build: BuildData;
+  isWinner: boolean;
+}) {
+  const allSkills = [...SKILL_GROUPS.A, ...SKILL_GROUPS.B, ...SKILL_GROUPS.C];
+  const skills = [build.skillA, build.skillB, build.skillC]
+    .filter(Boolean)
+    .map(id => allSkills.find(s => s.id === id))
+    .filter(Boolean);
+
+  return (
+    <div style={{
+      background: 'rgba(30,40,60,0.6)', borderRadius: 12, padding: 10,
+      border: isWinner ? '1px solid rgba(245,158,11,0.35)' : '1px solid rgba(255,255,255,0.07)',
+    }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
+        {label} {isWinner && '\u{1F451}'}
+      </div>
+      {/* Stats mini bars */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}>
+        {STAT_DEFS.map(stat => {
+          const val = build[stat.key as keyof BuildData] as number;
+          return (
+            <div key={stat.key} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ fontSize: 9, width: 14 }}>{stat.icon}</span>
+              <div style={{ flex: 1, height: 3, background: '#374151', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 2,
+                  width: `${(val / 30) * 100}%`,
+                  background: stat.color,
+                }} />
+              </div>
+              <span style={{ fontSize: 9, color: '#94a3b8', width: 14, textAlign: 'right' }}>{val}</span>
+            </div>
+          );
+        })}
+      </div>
+      {/* Skills */}
+      <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+        {skills.map(skill => (
+          <span key={skill!.id} style={{
+            background: 'rgba(255,255,255,0.06)', borderRadius: 6,
+            padding: '1px 5px', fontSize: 9, display: 'flex', alignItems: 'center', gap: 2,
+          }}>
+            <span>{skill!.icon}</span>
+            <span style={{ color: '#d1d5db' }}>{skill!.name}</span>
+          </span>
+        ))}
+        {skills.length === 0 && (
+          <span style={{ fontSize: 9, color: '#6b7280' }}>No skills</span>
+        )}
+      </div>
     </div>
   );
 }

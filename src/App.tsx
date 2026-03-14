@@ -70,6 +70,7 @@ const AuctionRoomScreen = lazyWithRetry(() => import('@/modules/auction/screens/
 const PvpTestScreen = lazyWithRetry(() => import('@/modules/pvp/PvpTestScreen'));
 const PvpLobby = lazyWithRetry(() => import('@/modules/pvp/PvpLobby'));
 const PvpHistory = lazyWithRetry(() => import('@/modules/pvp/PvpHistory'));
+const BuildScreen = lazyWithRetry(() => import('@/modules/pvp/BuildScreen'));
 const GuildScreen = lazyWithRetry(() => import('@/modules/guild/screens/GuildScreen').then(m => ({ default: m.GuildScreen })));
 
 const Fallback = () => (
@@ -191,6 +192,7 @@ const App = () => {
                 <Route path="/login" element={<LoginScreen />} />
                 <Route path="/pvp-test" element={<PvpTestScreen />} />
                 <Route path="/pvp" element={<PvpLobby />} />
+                <Route path="/pvp/build" element={<BuildScreen />} />
                 <Route path="/pvp/history" element={<PvpHistory />} />
 
                 {/* Protected — AuthGuard first, then game hooks */}

@@ -16,6 +16,7 @@ const GEM_STYLES: Record<string, React.CSSProperties> = {
     hp: { background: `${HIGHLIGHT.replace('0.58', '0.55')}, linear-gradient(160deg, #44ee77 0%, #22bb44 45%, #0d7722 100%)` },
     def: { background: `${HIGHLIGHT.replace('0.58', '0.55')}, linear-gradient(160deg, #5588ff 0%, #2255ee 45%, #0d33aa 100%)` },
     star: { background: `${HIGHLIGHT.replace('0.58', '0.62')}, linear-gradient(160deg, #ffee33 0%, #ffbb00 45%, #aa7700 100%)` },
+    junk: { background: `${HIGHLIGHT.replace('0.58', '0.40')}, linear-gradient(160deg, #6b7280 0%, #4b5563 45%, #374151 100%)` },
 };
 
 // Pre-computed grid styles to avoid creating new objects every render
