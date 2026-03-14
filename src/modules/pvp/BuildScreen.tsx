@@ -131,7 +131,8 @@ export default function BuildScreen() {
 
   return (
     <div style={{
-      minHeight: '100dvh',
+      height: '100dvh',
+      overflowY: 'auto',
       background: 'linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f3460 100%)',
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
