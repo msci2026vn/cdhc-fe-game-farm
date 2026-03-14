@@ -70,6 +70,7 @@ const AuctionRoomScreen = lazyWithRetry(() => import('@/modules/auction/screens/
 const PvpTestScreen = lazyWithRetry(() => import('@/modules/pvp/PvpTestScreen'));
 const PvpLobby = lazyWithRetry(() => import('@/modules/pvp/PvpLobby'));
 const PvpHistory = lazyWithRetry(() => import('@/modules/pvp/PvpHistory'));
+const GuildScreen = lazyWithRetry(() => import('@/modules/guild/screens/GuildScreen').then(m => ({ default: m.GuildScreen })));
 
 const Fallback = () => (
   <div className="h-[100dvh] flex items-center justify-center splash-gradient">
@@ -149,6 +150,7 @@ const AuthenticatedApp = () => {
         <Route path="/auction" element={<AuctionLobbyScreen />} />
         <Route path="/auction/history" element={<AuctionHistoryScreen />} />
         <Route path="/auction/:id" element={<AuctionRoomScreen />} />
+        <Route path="/guild" element={<GuildScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/farmverse/topup" element={<TopupPage />} />
         <Route path="/farmverse/topup/success" element={<TopupSuccessPage />} />

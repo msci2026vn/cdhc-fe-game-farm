@@ -1,0 +1,56 @@
+{
+  "screen": {
+    "title": "Guilds",
+    "subtitle": "Create or join a guild — stake AVAX to unlock features"
+  },
+  "balance": {
+    "label": "Subnet balance",
+    "unit": "AVAX"
+  },
+  "warning": {
+    "need_avax": "You need at least {{amount}} AVAX on the Subnet to join a guild.",
+    "contact_admin": "Contact admin to top up test AVAX."
+  },
+  "my_guild": {
+    "label": "Your Guild",
+    "members": "Members",
+    "total_stake": "Total Staked",
+    "leave": "Leave Guild",
+    "confirm_leave": "Confirm leave?",
+    "refund_note": "Get back 90% AVAX",
+    "cancel": "Cancel",
+    "confirm": "Leave"
+  },
+  "list": {
+    "title": "All Guilds",
+    "empty_title": "No guilds yet",
+    "empty_desc": "Be the first to create a guild!",
+    "join_btn": "Join",
+    "badge_mine": "Yours",
+    "badge_dissolved": "Dissolved",
+    "members_count": "{{count}} members",
+    "staked": "{{amount}} AVAX staked",
+    "owner_label": "owner"
+  },
+  "create": {
+    "btn_enough": "Create New Guild (stake {{fee}} AVAX)",
+    "btn_not_enough": "Need at least {{fee}} AVAX to create a guild (have {{current}})",
+    "modal_title": "Create New Guild",
+    "fee_label": "Creation fee (stake)",
+    "refund_label": "Refund on dissolve",
+    "refund_value": "100%",
+    "name_label": "Guild Name",
+    "name_placeholder": "e.g. CoffeeDAO, FarmersUnion...",
+    "cancel": "Cancel",
+    "submit": "Create Guild",
+    "submitting": "Creating...",
+    "success_title": "Guild \"{{name}}\" created!",
+    "done": "Done"
+  },
+  "errors": {
+    "join_failed": "Failed to join guild",
+    "leave_failed": "Failed to leave guild",
+    "create_failed": "Failed to create guild",
+    "name_too_short": "Guild name must be at least 3 characters"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "screen": {
+    "title": "Guilds",
+    "subtitle": "Tạo hoặc tham gia guild — stake AVAX để mở khóa tính năng"
+  },
+  "balance": {
+    "label": "Subnet balance",
+    "unit": "AVAX"
+  },
+  "warning": {
+    "need_avax": "Bạn cần ít nhất {{amount}} AVAX trên Subnet để tham gia guild.",
+    "contact_admin": "Liên hệ admin để nạp AVAX test."
+  },
+  "my_guild": {
+    "label": "Guild của bạn",
+    "members": "Thành viên",
+    "total_stake": "Tổng stake",
+    "leave": "Rời guild",
+    "confirm_leave": "Xác nhận rời?",
+    "refund_note": "Nhận lại 90% AVAX",
+    "cancel": "Huỷ",
+    "confirm": "Rời"
+  },
+  "list": {
+    "title": "Tất cả Guilds",
+    "empty_title": "Chưa có guild nào",
+    "empty_desc": "Hãy tạo guild đầu tiên!",
+    "join_btn": "Tham gia",
+    "badge_mine": "Của bạn",
+    "badge_dissolved": "Đã giải tán",
+    "members_count": "{{count}} thành viên",
+    "staked": "{{amount}} AVAX staked",
+    "owner_label": "owner"
+  },
+  "create": {
+    "btn_enough": "Tạo Guild mới (stake {{fee}} AVAX)",
+    "btn_not_enough": "Cần ít nhất {{fee}} AVAX để tạo guild (hiện có {{current}})",
+    "modal_title": "Tạo Guild mới",
+    "fee_label": "Phí tạo guild (stake)",
+    "refund_label": "Hoàn lại khi giải tán",
+    "refund_value": "100%",
+    "name_label": "Tên Guild",
+    "name_placeholder": "VD: CoffeeDAO, FarmersUnion...",
+    "cancel": "Huỷ",
+    "submit": "Tạo Guild",
+    "submitting": "Đang tạo...",
+    "success_title": "Guild \"{{name}}\" đã tạo!",
+    "done": "Xong"
+  },
+  "errors": {
+    "join_failed": "Lỗi khi join guild",
+    "leave_failed": "Lỗi khi rời guild",
+    "create_failed": "Lỗi khi tạo guild",
+    "name_too_short": "Tên guild phải ít nhất 3 ký tự"
+  }
+}
