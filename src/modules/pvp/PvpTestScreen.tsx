@@ -207,11 +207,11 @@ export default function PvpTestScreen() {
   const [gameOverPlayers, setGameOverPlayers] = useState<Array<{ userId: string; name: string; score: number }>>([]);
   const [junkAlert, setJunkAlert] = useState('');
   // Combat stats — aligned with campaign BossState
-  const [myHp, setMyHp] = useState(1000);
+  const [myHp, setMyHp] = useState(2500);
   const [myMaxHp, setMyMaxHp] = useState(2500);
   const [myArmor, setMyArmor] = useState(0);
   const [myMana, setMyMana] = useState(0);
-  const [opponentHp, setOpponentHp] = useState(1000);
+  const [opponentHp, setOpponentHp] = useState(2500);
   const [opponentMaxHp, setOpponentMaxHp] = useState(2500);
   const [opponentArmor, setOpponentArmor] = useState(0);
   const [opponentMana, setOpponentMana] = useState(0);
@@ -343,7 +343,7 @@ export default function PvpTestScreen() {
     handlePointerUp,
   } = usePvpBoardInput({
     onSwap: handleSwap,   // hook internally triggers animating after each swap
-    disabled: (roomState?.phase !== 'playing' && roomState?.phase !== 'sudden_death') || (roomState?.timeLeft ?? 60) <= 0,
+    disabled: (roomState?.phase !== 'playing' && roomState?.phase !== 'sudden_death') || (roomState?.timeLeft ?? 90) <= 0,
   });
 
   // Stable gem array — recomputed only when board tiles change
@@ -843,7 +843,7 @@ export default function PvpTestScreen() {
       setMyScore(0);
       setOpponentScore(0);
       setComboText('');
-      setTimeLeft(60);
+      setTimeLeft(90);
       setIsSuddenDeath(false);
       setWinnerId('');
       setWinnerSessionId('');
