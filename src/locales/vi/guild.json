@@ -30,7 +30,8 @@
     "badge_dissolved": "Đã giải tán",
     "members_count": "{{count}} thành viên",
     "staked": "{{amount}} AVAX staked",
-    "owner_label": "owner"
+    "owner_label": "owner",
+    "members_unit": "thành viên"
   },
   "create": {
     "btn_enough": "Tạo Guild mới (stake {{fee}} AVAX)",

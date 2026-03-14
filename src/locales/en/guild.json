@@ -30,7 +30,8 @@
     "badge_dissolved": "Dissolved",
     "members_count": "{{count}} members",
     "staked": "{{amount}} AVAX staked",
-    "owner_label": "owner"
+    "owner_label": "owner",
+    "members_unit": "members"
   },
   "create": {
     "btn_enough": "Create New Guild (stake {{fee}} AVAX)",
