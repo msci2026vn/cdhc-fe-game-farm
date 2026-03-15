@@ -51,6 +51,8 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
     kickPlayer,
     sendDied,
     sendRespawned,
+    sendTaunt,
+    tauntEvents,
     reconnect,
   } = useCoopRoom({ roomId, token, eventId: worldBoss.id });
 
@@ -251,6 +253,8 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
           onReconnect={reconnect}
           onExit={handleLeave}
           onRespawn={handleRespawn}
+          onSendTaunt={sendTaunt}
+          tauntEvents={tauntEvents}
         />
       )}
 

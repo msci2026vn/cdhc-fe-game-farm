@@ -36,6 +36,8 @@ import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
 import { TeamMultiplierBadge } from './components/TeamMultiplierBadge';
 import { TeammateStatus } from './components/TeammateStatus';
 import { CoopDeathOverlay, type DeathStats } from './components/CoopDeathOverlay';
+import { CoopTauntFloat, type TauntFloat } from './components/CoopTauntFloat';
+import type { CoopTauntEvent } from './hooks/useCoopRoom';
 
 interface Props {
   worldBoss:           WorldBossInfo;
@@ -51,11 +53,14 @@ interface Props {
   onExit:              () => void;
   /** Called when player wants to respawn after death */
   onRespawn?:          () => void;
+  onSendTaunt?:        (emoji: string) => void;
+  tauntEvents?:        CoopTauntEvent[];
 }
 
 export default function CoopBattleView({
   worldBoss, coopRoomCode, teamSize, multiplier, teammates,
   bossHpPercent, showReconnectButton, onReconnect, onExit, onRespawn,
+  onSendTaunt, tauntEvents = [],
 }: Props) {
   const { data: statInfo } = usePlayerStats();
   const { data: authData } = useAuth();
@@ -148,6 +153,18 @@ export default function CoopBattleView({
   const enrageRef         = useRef(enrageMultiplier);enrageRef.current        = enrageMultiplier;
 
   const [highlightedGem, setHighlightedGem] = useState<number | null>(null);
+  const [showEmojiBar, setShowEmojiBar] = useState(false);
+
+  const COOP_EMOJIS = ['😂', '😭', '🔥', '💀', '👑', '👊', '❤️', '⚡', '🌟', '💪'];
+
+  // Convert taunt events to float positions
+  const tauntFloats: TauntFloat[] = tauntEvents.map((e, i) => ({
+    id:         e.id,
+    fromName:   e.fromName,
+    fromAvatar: e.fromAvatar,
+    emoji:      e.emoji,
+    xOffset:    10 + ((i * 17 + Number(e.id.split('-')[0]) % 50) % 70),
+  }));
 
   const autoPlay = useAutoPlayController({
     gridRef, bossRef, lockedGemsRef,
@@ -258,13 +275,54 @@ export default function CoopBattleView({
           handleDodge={handleDodge} fireUltimate={fireUltimate}
         />
 
-        {/* TeammateStatus — compact HP đồng đội ở cuối bottom section */}
-        {teammates.length > 0 && (
-          <div style={{ marginTop: 4 }}>
-            <TeammateStatus players={teammates} myUserId={myUserId} />
+        {/* TeammateStatus + Emoji bar */}
+        <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {teammates.length > 0 && (
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <TeammateStatus players={teammates} myUserId={myUserId} />
+            </div>
+          )}
+          {/* Emoji toggle button */}
+          {!isDead && onSendTaunt && (
+            <button
+              onClick={() => setShowEmojiBar(p => !p)}
+              style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: showEmojiBar ? '#f59e0b' : 'rgba(255,255,255,0.1)',
+                border: 'none', fontSize: 18, cursor: 'pointer',
+                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              😊
+            </button>
+          )}
+        </div>
+
+        {/* Emoji picker grid */}
+        {showEmojiBar && !isDead && onSendTaunt && (
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center',
+            padding: '6px 0', marginTop: 2,
+          }}>
+            {COOP_EMOJIS.map(emoji => (
+              <button
+                key={emoji}
+                onClick={() => { onSendTaunt(emoji); setShowEmojiBar(false); }}
+                style={{
+                  width: 36, height: 36, fontSize: 20, borderRadius: 8,
+                  background: 'rgba(255,255,255,0.08)', border: 'none',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
           </div>
         )}
       </div>
+
+      {/* Taunt float animations — absolute over the battle view */}
+      <CoopTauntFloat floats={tauntFloats} />
 
       {/* Death overlay — player HP=0, offer Leave or Respawn */}
       {isDead && deathStats && (

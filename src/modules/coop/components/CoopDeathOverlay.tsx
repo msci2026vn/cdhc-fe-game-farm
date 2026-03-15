@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// CoopDeathOverlay — "Bạn Đã Chết" overlay with session stats
+// CoopDeathOverlay — "Bạn Đã Thua" overlay with session stats
 // Shows after player HP=0, offers Leave or Respawn
 // ═══════════════════════════════════════════════════════════════
 
@@ -44,7 +44,7 @@ export function CoopDeathOverlay({ stats, teammates, onLeave, onRespawn }: Props
       {/* Header */}
       <div style={{ fontSize: 44, marginBottom: 4 }}>💀</div>
       <div style={{ fontSize: 22, fontWeight: 900, color: '#ef4444', marginBottom: 16 }}>
-        Bạn Đã Chết
+        Bạn Đã Thua
       </div>
 
       {/* Stats card */}

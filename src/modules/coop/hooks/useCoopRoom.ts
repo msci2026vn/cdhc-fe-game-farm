@@ -37,14 +37,20 @@ const DEFAULT_ROOM_STATE: CoopRoomState = {
   lobbyTimeLeft: 900,  // 15 phút tối đa
 };
 
+export interface CoopTauntEvent {
+  id:         string;
+  fromName:   string;
+  fromAvatar: string;
+  emoji:      string;
+}
+
 export interface UseCoopRoomReturn {
   roomState:           CoopRoomState;
   endResult:           CoopEndResult | null;
   isConnected:         boolean;
-  /** true khi đang trong quá trình auto-retry sau disconnect */
   isReconnecting:      boolean;
-  /** hiện sau 3 lần auto-retry thất bại — cho phép user bấm nút "Vào Lại" */
   showReconnectButton: boolean;
+  tauntEvents:         CoopTauntEvent[];
 
   sendReady:     () => void;
   sendTaunt:     (emoji: string) => void;
@@ -52,7 +58,6 @@ export interface UseCoopRoomReturn {
   kickPlayer:    (targetUserId: string) => void;
   sendDied:      () => void;
   sendRespawned: () => void;
-  /** Manual reconnect — gọi khi showReconnectButton = true */
   reconnect:     () => Promise<void>;
 }
 
@@ -73,6 +78,7 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
   const [isConnected,         setIsConnected]         = useState(false);
   const [isReconnecting,      setIsReconnecting]      = useState(false);
   const [showReconnectButton, setShowReconnectButton] = useState(false);
+  const [tauntEvents,         setTauntEvents]         = useState<CoopTauntEvent[]>([]);
 
   const clientRef           = useRef<Client | null>(null);
   const roomRef             = useRef<Room | null>(null);
@@ -160,6 +166,19 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     // need_more_players: server cảnh báo chưa đủ người để start
     r.onMessage('need_more_players', () => {
       addToast('Cần ít nhất 2 người để bắt đầu!', 'warning');
+    });
+
+    // taunt_received: emoji cheer from teammate — show floating animation
+    r.onMessage('taunt_received', (data: { fromSessionId: string; fromName: string; emoji: string }) => {
+      const id = `${Date.now()}-${data.fromSessionId}`;
+      const evt: CoopTauntEvent = {
+        id,
+        fromName:   data.fromName,
+        fromAvatar: '', // server doesn't send avatar, FE uses name only
+        emoji:      data.emoji,
+      };
+      setTauntEvents(prev => [...prev, evt]);
+      setTimeout(() => setTauntEvents(prev => prev.filter(e => e.id !== id)), 2800);
     });
 
     // onLeave: xử lý disconnect — auto-retry 3 lần với progressive backoff
@@ -290,5 +309,6 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     sendDied,
     sendRespawned,
     reconnect,
+    tauntEvents,
   };
 }
