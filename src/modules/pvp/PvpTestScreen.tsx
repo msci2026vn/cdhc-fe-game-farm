@@ -273,16 +273,17 @@ export default function PvpTestScreen() {
   const [showCombo, setShowCombo] = useState(false);
 
   // ── Post-game data ──
-  const [myStats, setMyStats] = useState<ClientMvpStats>({
+  const EMPTY_STATS: ClientMvpStats = {
     highestCombo: 0, fastestSwapMs: 9999,
     debuffSent: 0, debuffReceived: 0,
     tauntsTotal: 0, validSwaps: 0, totalSwaps: 0,
-  });
-  const statsRef = useRef<ClientMvpStats>({
-    highestCombo: 0, fastestSwapMs: 9999,
-    debuffSent: 0, debuffReceived: 0,
-    tauntsTotal: 0, validSwaps: 0, totalSwaps: 0,
-  });
+    dmgDealt: 0, dmgReceived: 0, armorAbsorbed: 0,
+    hpHealed: 0, junkSent: 0, junkReceived: 0,
+    skillsUsed: 0, opponentSkillsUsed: 0,
+  };
+  const [myStats, setMyStats] = useState<ClientMvpStats>({ ...EMPTY_STATS });
+  const statsRef = useRef<ClientMvpStats>({ ...EMPTY_STATS });
+  const myHpStatsRef = useRef(0);
   const lastSwapAtRef = useRef(0);
   const gameStartAtRef = useRef(0);
   const [gameDurationMs, setGameDurationMs] = useState(0);
@@ -580,9 +581,13 @@ export default function PvpTestScreen() {
         highestCombo: 0, fastestSwapMs: 9999,
         debuffSent: 0, debuffReceived: 0,
         tauntsTotal: 0, validSwaps: 0, totalSwaps: 0,
+        dmgDealt: 0, dmgReceived: 0, armorAbsorbed: 0,
+        hpHealed: 0, junkSent: 0, junkReceived: 0,
+        skillsUsed: 0, opponentSkillsUsed: 0,
       };
       statsRef.current = freshStats;
       setMyStats(freshStats);
+      myHpStatsRef.current = serverMaxHp;
       lastSwapAtRef.current = 0;
       gameStartAtRef.current = Date.now();
       setRatingAfter(null);
@@ -606,9 +611,19 @@ export default function PvpTestScreen() {
       myBoardRef.current = data.tiles;
       setMyBoard(data.tiles);
       setMyScore(data.score);
-      if (data.hp !== undefined) setMyHp(data.hp);
+      if (data.hp !== undefined) {
+        if (data.hp > myHpStatsRef.current) {
+          statsRef.current.hpHealed += data.hp - myHpStatsRef.current;
+        }
+        myHpStatsRef.current = data.hp;
+        setMyHp(data.hp);
+      }
       if (data.armor !== undefined) setMyArmor(data.armor);
       if (data.mana !== undefined) setMyMana(data.mana);
+      // Track combat stats
+      if (data.damageDealt && data.damageDealt > 0) statsRef.current.dmgDealt += data.damageDealt;
+      if (data.junkSent && data.junkSent > 0) statsRef.current.junkSent += data.junkSent;
+      if (data.junkReceived && data.junkReceived > 0) statsRef.current.junkReceived += data.junkReceived;
       // Track valid swap + fastest swap
       statsRef.current.validSwaps++;
       const now = Date.now();
@@ -678,7 +693,7 @@ export default function PvpTestScreen() {
       if (data.opponentArmor !== undefined) setOpponentArmor(data.opponentArmor);
       if (data.opponentMana !== undefined) setOpponentMana(data.opponentMana);
       // Update own stats (may have taken damage from opponent)
-      if (data.myHp !== undefined) setMyHp(data.myHp);
+      if (data.myHp !== undefined) { myHpStatsRef.current = data.myHp; setMyHp(data.myHp); }
       if (data.myMaxHp !== undefined) setMyMaxHp(data.myMaxHp);
       if (data.myArmor !== undefined) setMyArmor(data.myArmor);
       if (data.myMana !== undefined) setMyMana(data.myMana);
@@ -690,8 +705,11 @@ export default function PvpTestScreen() {
     }) => {
       setDamageFlash(true);
       setTimeout(() => setDamageFlash(false), 300);
+      myHpStatsRef.current = data.remainingHp;
       setMyHp(data.remainingHp);
       setMyArmor(data.remainingArmor);
+      statsRef.current.dmgReceived += data.damage;
+      statsRef.current.armorAbsorbed += data.absorbed;
       addLog(`💥 Nhận ${data.damage} damage${data.absorbed > 0 ? ` (🛡️${data.absorbed} absorbed)` : ''}! HP: ${data.remainingHp}`);
     });
 
@@ -814,11 +832,13 @@ export default function PvpTestScreen() {
     // ── Skill messages ──
     r.onMessage('skill_used', (data: { skillId: string; isSelf: boolean; manaCost: number; cooldownMs: number }) => {
       if (data.isSelf) {
+        statsRef.current.skillsUsed++;
         setSkillCooldowns(prev => ({
           ...prev,
           [data.skillId]: { remaining: data.cooldownMs, total: data.cooldownMs },
         }));
       } else {
+        statsRef.current.opponentSkillsUsed++;
         // Opponent used skill → show BIG notification
         const groupA = SKILL_GROUPS.A.find(s => s.id === data.skillId);
         const groupB = SKILL_GROUPS.B.find(s => s.id === data.skillId);

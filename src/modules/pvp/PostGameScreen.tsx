@@ -15,6 +15,15 @@ export type ClientMvpStats = {
   tauntsTotal: number;
   validSwaps: number;
   totalSwaps: number;
+  // Combat stats
+  dmgDealt: number;
+  dmgReceived: number;
+  armorAbsorbed: number;
+  hpHealed: number;
+  junkSent: number;
+  junkReceived: number;
+  skillsUsed: number;
+  opponentSkillsUsed: number;
 };
 
 export type H2HData = {
@@ -215,104 +224,157 @@ function RatingChange({ ratingBefore, ratingAfter }: { ratingBefore: number; rat
   );
 }
 
-// ─── MVP Stats Grid ───────────────────────────────────────────────────────────
+// ─── Battle Stats Table (2-col comparison) ────────────────────────────────────
 
-const STAT_CONFIG = [
+interface StatRowDef {
+  icon: string;
+  label: string;
+  myVal: (s: ClientMvpStats) => number;
+  oppVal: ((s: ClientMvpStats) => number) | null;
+  format: (v: number) => string;
+  higherIsBetter: boolean;
+}
+
+const BATTLE_STATS: StatRowDef[] = [
   {
-    key: 'highestCombo',
-    labelKey: 'postGame.highestCombo',
-    icon: '🔥',
-    format: (v: number) => `×${v}`,
-    higherIsBetter: true,
+    icon: '⚔️', label: 'DMG gây ra',
+    myVal: s => s.dmgDealt, oppVal: s => s.dmgReceived,
+    format: v => v.toLocaleString(), higherIsBetter: true,
   },
   {
-    key: 'fastestSwap',
-    labelKey: 'postGame.fastestSwap',
-    icon: '⚡',
-    format: (v: number) => v >= 9999 ? '—' : `${(v / 1000).toFixed(2)}s`,
+    icon: '🛡️', label: 'DMG nhận',
+    myVal: s => s.dmgReceived, oppVal: s => s.dmgDealt,
+    format: v => v.toLocaleString(), higherIsBetter: false,
+  },
+  {
+    icon: '🛡️', label: 'Giáp hấp thụ',
+    myVal: s => s.armorAbsorbed, oppVal: null,
+    format: v => v.toLocaleString(), higherIsBetter: true,
+  },
+  {
+    icon: '💚', label: 'HP đã hồi',
+    myVal: s => s.hpHealed, oppVal: null,
+    format: v => v.toLocaleString(), higherIsBetter: true,
+  },
+  {
+    icon: '🧊', label: 'Junk đã gửi',
+    myVal: s => s.junkSent, oppVal: s => s.junkReceived,
+    format: v => `${v}`, higherIsBetter: true,
+  },
+  {
+    icon: '⚡', label: 'Skill đã dùng',
+    myVal: s => s.skillsUsed, oppVal: s => s.opponentSkillsUsed,
+    format: v => `${v}`, higherIsBetter: true,
+  },
+  {
+    icon: '🔗', label: 'Combo cao nhất',
+    myVal: s => s.highestCombo, oppVal: null,
+    format: v => `×${v}`, higherIsBetter: true,
+  },
+  {
+    icon: '⏱️', label: 'Swap nhanh nhất',
+    myVal: s => s.fastestSwapMs, oppVal: null,
+    format: v => v >= 9999 ? '—' : `${(v / 1000).toFixed(2)}s`,
     higherIsBetter: false,
   },
   {
-    key: 'debuffSent',
-    labelKey: 'postGame.debuffSent',
-    icon: '😤',
-    format: (v: number) => `${v}`,
-    higherIsBetter: true,
+    icon: '🔢', label: 'Tổng số swap',
+    myVal: s => s.totalSwaps, oppVal: null,
+    format: v => `${v}`, higherIsBetter: true,
   },
-  {
-    key: 'debuffReceived',
-    labelKey: 'postGame.debuffReceived',
-    icon: '🛡️',
-    format: (v: number) => `${v}`,
-    higherIsBetter: false,
-  },
-  {
-    key: 'accuracyRate',
-    labelKey: 'postGame.accuracyRate',
-    icon: '🎯',
-    format: (v: number) => `${v}%`,
-    higherIsBetter: true,
-  },
-  {
-    key: 'tauntsTotal',
-    labelKey: 'postGame.tauntsTotal',
-    icon: '💬',
-    format: (v: number) => `${v}`,
-    higherIsBetter: true,
-  },
-] as const;
+];
 
-function MvpStatsGrid({ stats }: { stats: ClientMvpStats }) {
-  const { t } = useTranslation('pvp');
-  const accuracyRate = Math.round((stats.validSwaps / Math.max(stats.totalSwaps, 1)) * 100);
-
-  const values: Record<string, number> = {
-    highestCombo: stats.highestCombo,
-    fastestSwap: stats.fastestSwapMs,
-    debuffSent: stats.debuffSent,
-    debuffReceived: stats.debuffReceived,
-    accuracyRate,
-    tauntsTotal: stats.tauntsTotal,
-  };
+function BattleStatsTable({
+  myStats, myName, opponentName, isWinner, isDraw,
+}: {
+  myStats: ClientMvpStats;
+  myName: string;
+  opponentName: string;
+  isWinner: boolean;
+  isDraw: boolean;
+}) {
+  const myWon = isWinner && !isDraw;
+  const oppWon = !isWinner && !isDraw;
 
   return (
     <div style={{ margin: '0 16px 14px' }}>
-      <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-        {t('postGame.mvpStats')}
+      <div style={{
+        fontSize: 11, color: '#64748b', textTransform: 'uppercase',
+        letterSpacing: '0.08em', marginBottom: 8, textAlign: 'center',
+      }}>
+        THỐNG KÊ TRẬN ĐẤU
       </div>
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 8,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 14, overflow: 'hidden',
       }}>
-        {STAT_CONFIG.map(({ key, labelKey, icon, format }, i) => {
-          const val = values[key] ?? 0;
+        {/* Player name header */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 76px 76px',
+          padding: '8px 12px',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          background: 'rgba(255,255,255,0.03)',
+        }}>
+          <div />
+          <div style={{
+            textAlign: 'center', fontSize: 10, fontWeight: 700,
+            color: myWon ? '#f59e0b' : '#94a3b8',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {myName}{myWon ? ' 👑' : ''}
+          </div>
+          <div style={{
+            textAlign: 'center', fontSize: 10, fontWeight: 700,
+            color: oppWon ? '#f59e0b' : '#94a3b8',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {opponentName}{oppWon ? ' 👑' : ''}
+          </div>
+        </div>
+
+        {/* Stat rows */}
+        {BATTLE_STATS.map(({ icon, label, myVal, oppVal, format, higherIsBetter }, i) => {
+          const mv = myVal(myStats);
+          const ov = oppVal ? oppVal(myStats) : null;
+
+          let myColor = '#94a3b8';
+          let ovColor = '#94a3b8';
+          if (ov !== null) {
+            const iWin = higherIsBetter ? mv > ov : mv < ov;
+            const oWin = higherIsBetter ? ov > mv : ov < mv;
+            if (iWin) { myColor = '#e2e8f0'; ovColor = '#475569'; }
+            else if (oWin) { myColor = '#475569'; ovColor = '#e2e8f0'; }
+          }
+
           return (
             <div
-              key={key}
+              key={label}
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 12,
-                padding: '12px 8px',
-                textAlign: 'center',
-                position: 'relative',
-                animation: `pgCardReveal 0.4s ${i * 0.08}s ease both`,
+                display: 'grid',
+                gridTemplateColumns: '1fr 76px 76px',
+                padding: '7px 12px',
+                borderBottom: i < BATTLE_STATS.length - 1
+                  ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                alignItems: 'center',
               }}
             >
-              <span style={{ fontSize: 20, display: 'block', marginBottom: 4 }}>{icon}</span>
-              <span style={{
-                fontFamily: "'Syne', -apple-system, sans-serif",
-                fontSize: 17,
-                fontWeight: 700,
-                display: 'block',
-                color: '#e2e8f0',
+              <div style={{ fontSize: 11, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span>{icon}</span>
+                <span>{label}</span>
+              </div>
+              <div style={{
+                textAlign: 'center', fontSize: 14, fontWeight: 700,
+                fontFamily: "'Syne', sans-serif", color: myColor,
               }}>
-                {format(val as never)}
-              </span>
-              <span style={{ fontSize: 10, color: '#475569', display: 'block', marginTop: 2 }}>
-                {t(labelKey)}
-              </span>
+                {format(mv)}
+              </div>
+              <div style={{
+                textAlign: 'center', fontSize: 14, fontWeight: 700,
+                fontFamily: "'Syne', sans-serif", color: ovColor,
+              }}>
+                {ov !== null ? format(ov) : '—'}
+              </div>
             </div>
           );
         })}
@@ -539,7 +601,13 @@ export default function PostGameScreen({
 
         <RatingChange ratingBefore={ratingBefore} ratingAfter={ratingAfter} />
 
-        <MvpStatsGrid stats={myStats} />
+        <BattleStatsTable
+          myStats={myStats}
+          myName={myName}
+          opponentName={opponentName}
+          isWinner={isWinner}
+          isDraw={isDraw}
+        />
 
         <HeadToHeadBanner h2h={h2hData} opponentName={opponentName} />
 
