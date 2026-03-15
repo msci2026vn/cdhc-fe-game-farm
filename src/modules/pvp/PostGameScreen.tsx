@@ -40,10 +40,9 @@ interface PostGameProps {
   ratingBefore: number;
   ratingAfter: PvpRating | null;
   h2hData: H2HData;
-  rematchState: 'idle' | 'waiting' | 'ready';
-  onRematch: () => void;
+  countdown: number;
+  onSkip: () => void;
   onLeave: () => void;
-  onQuit: () => void;
   // Proof-of-Play (optional — populated async after match)
   proofMerkleRoot?: string | null;
   proofTxHash?:     string | null;
@@ -493,10 +492,9 @@ export default function PostGameScreen({
   ratingBefore,
   ratingAfter,
   h2hData,
-  rematchState,
-  onRematch,
+  countdown,
+  onSkip,
   onLeave,
-  onQuit,
   proofMerkleRoot,
   proofTxHash,
   proofIpfsHash,
@@ -571,46 +569,49 @@ export default function PostGameScreen({
           />
         </div>
 
+        {/* Countdown bar */}
+        <div style={{ margin: '0 16px 12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', marginBottom: 4 }}>
+            <span>Quay về phòng trong...</span>
+            <span style={{ fontWeight: 700, color: '#f59e0b', fontFamily: "'Syne', sans-serif" }}>{countdown}s</span>
+          </div>
+          <div style={{ width: '100%', height: 3, background: '#1e293b', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', background: '#f59e0b', borderRadius: 2,
+              width: `${(countdown / 10) * 100}%`,
+              transition: 'width 1s linear',
+            }} />
+          </div>
+        </div>
+
         {/* Action buttons */}
         <div style={{ padding: '4px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <RematchArea rematchState={rematchState} onRematch={onRematch} />
+          {/* Tiếp Tục — skip countdown */}
+          <button
+            onClick={onSkip}
+            style={{
+              width: '100%', padding: '14px',
+              borderRadius: 12, border: 'none',
+              background: 'linear-gradient(135deg,#d97706,#b45309)',
+              color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            ▸ Tiếp Tục
+          </button>
 
           <ShareButton targetRef={shareRef} />
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              onClick={onLeave}
-              style={{
-                flex: 2,
-                padding: '13px',
-                borderRadius: 12,
-                border: 'none',
-                background: 'linear-gradient(135deg,#1e4d78,#0f3460)',
-                color: '#fff',
-                fontSize: 14,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              {t('postGame.returnLobby')}
-            </button>
-            <button
-              onClick={onQuit}
-              style={{
-                flex: 1,
-                padding: '13px',
-                borderRadius: 12,
-                border: '1px solid #374151',
-                background: 'transparent',
-                color: '#4b5563',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {t('postGame.quit')}
-            </button>
-          </div>
+          <button
+            onClick={onLeave}
+            style={{
+              width: '100%', padding: '13px',
+              borderRadius: 12, border: '1px solid #374151',
+              background: 'rgba(255,255,255,0.04)',
+              color: '#6b7280', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            }}
+          >
+            🚪 Thoát Phòng
+          </button>
         </div>
       </div>
 

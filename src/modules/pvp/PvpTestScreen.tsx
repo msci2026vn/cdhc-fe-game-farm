@@ -290,6 +290,7 @@ export default function PvpTestScreen() {
   const [ratingAfter, setRatingAfter] = useState<PvpRating | null>(null);
   const [h2hData, setH2hData] = useState<H2HData>(null);
   const [rematchState, setRematchState] = useState<'idle' | 'waiting' | 'ready'>('idle');
+  const [postGameCountdown, setPostGameCountdown] = useState(10);
 
   // ── Invite link state ──
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -452,6 +453,45 @@ export default function PvpTestScreen() {
 
     r.onMessage('rematch_start', (data: { roomId: string }) => {
       if (data.roomId) navigate(`/pvp-test?roomId=${data.roomId}`);
+    });
+
+    // ── Room reset — quay về phòng chờ trong cùng room ──
+    r.onMessage('room_reset', () => {
+      setMyReady(false);
+      setRematchState('idle');
+      setWinnerId('');
+      setWinnerSessionId('');
+      setGameOverPlayers([]);
+      setGameBuilds(null);
+      setMatchId(null);
+      setProofData({ merkleRoot: null, ipfsHash: null, txHash: null, moveCount: null });
+      if (proofPollRef.current) { clearInterval(proofPollRef.current); proofPollRef.current = null; }
+      setPostGameCountdown(10);
+      setMyMana(0);
+      setMyArmor(0);
+      setOpponentMana(0);
+      setOpponentArmor(0);
+      setSkillCooldowns({});
+      setActiveEffects([]);
+      setBoardShake(false);
+      setOpponentBoardRevealed(false);
+      setOpponentSkillFlash(null);
+      setOpponentSkillNotif(null);
+      addLog('↩️ Quay về phòng chờ — Bấm Sẵn Sàng để chơi lại!');
+    });
+
+    r.onMessage('host_changed', (data: { newHostId: string; newHostName: string }) => {
+      setIsHost(data.newHostId === r.sessionId);
+      addLog(`👑 Host mới: ${data.newHostName}`);
+    });
+
+    r.onMessage('you_are_host', () => {
+      setIsHost(true);
+      addLog('👑 Bạn là Host mới');
+    });
+
+    r.onMessage('player_left', (data: { sessionId: string; name: string }) => {
+      addLog(`🚪 ${data.name} đã rời phòng`);
     });
 
     r.onMessage('state_update', (data: RoomStateBroadcast) => {
@@ -1010,6 +1050,12 @@ export default function PvpTestScreen() {
     addLog('Gửi: Rematch request');
   };
 
+  const handleSkipPostGame = () => {
+    if (!roomRef.current) return;
+    roomRef.current.send('skip_post_game');
+    addLog('Gửi: Skip post game');
+  };
+
   const handleReady = () => {
     if (!roomRef.current) return;
     roomRef.current.send('ready');
@@ -1132,6 +1178,20 @@ export default function PvpTestScreen() {
 
   // ── Derived state ──
   const phase = roomState?.phase ?? 'waiting';
+
+  // ── Post-game countdown (10s → 0, resets when leaving 'finished' phase) ──
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (phase !== 'finished') {
+      setPostGameCountdown(10);
+      return;
+    }
+    const interval = setInterval(() => {
+      setPostGameCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase]);
+
   const countdown = roomState?.countdown ?? -1;
   const lobbyMins = Math.floor(lobbyTimeLeft / 60).toString().padStart(2, '0');
   const lobbySecs = (lobbyTimeLeft % 60).toString().padStart(2, '0');
@@ -1373,10 +1433,9 @@ export default function PvpTestScreen() {
           ratingBefore={ratingBefore}
           ratingAfter={ratingAfter}
           h2hData={h2hData}
-          rematchState={rematchState}
-          onRematch={handleRematch}
+          countdown={postGameCountdown}
+          onSkip={handleSkipPostGame}
           onLeave={() => { handleLeave(); navigate('/pvp'); }}
-          onQuit={() => navigate('/')}
           proofMerkleRoot={proofData.merkleRoot}
           proofTxHash={proofData.txHash}
           proofIpfsHash={proofData.ipfsHash}
