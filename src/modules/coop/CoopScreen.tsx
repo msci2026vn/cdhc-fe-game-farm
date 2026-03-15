@@ -14,14 +14,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import type { WorldBossInfo } from '@/modules/world-boss/types/world-boss.types';
-import type { CoopInvitePayload } from './types/coop.types';
 import { coopApi } from './api/api-coop';
 import { useCoopRoom } from './hooks/useCoopRoom';
 import { useCoopSSE } from './hooks/useCoopSSE';
 import { CoopWaitingRoom } from './CoopWaitingRoom';
 import CoopBattleView from './CoopBattleView';
 import CoopResultScreen from './CoopResultScreen';
-import { CoopInvitePopup } from './components/CoopInvitePopup';
+
 
 interface Props {
   /** WorldBossInfo đã được WorldBossScreen fetch sẵn */
@@ -40,9 +39,6 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
   const [token,   setToken]   = useState('');
   const [loading, setLoading] = useState(true);
 
-  // SSE invite popup — nhận lời mời từ người khác trong khi ở màn này
-  const [invitePayload, setInvitePayload] = useState<CoopInvitePayload | null>(null);
-
   // Colyseus hook — chỉ kết nối khi roomId + token sẵn sàng (guard bên trong hook)
   const {
     roomState,
@@ -59,18 +55,11 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
   const myUserId = authData?.user?.id ?? '';
   const isHost = roomState.hostId === myUserId;
 
-  // SSE: nhận coop_invite và coop_invite_response
+  // SSE: coop_invite_response only — invite popups handled by global listener in App.tsx
   useCoopSSE(!!authData?.user, (event) => {
-    if (event.type === 'coop_invite') {
-      // Chỉ hiện popup khi user không đang trong session active
-      if (roomState.phase !== 'active') {
-        setInvitePayload(event.payload);
-      }
-    }
-    // coop_invite_response: thông báo cho host biết bạn đã accept/reject
     if (event.type === 'coop_invite_response') {
       if (event.action === 'accept') {
-        addToast('Bạn đã chấp nhận lời mời!', 'success');
+        addToast('Bạn bè đã chấp nhận lời mời!', 'success');
       }
     }
   });
@@ -120,22 +109,6 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
       }
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Handler: chấp nhận lời mời từ người khác ──
-  const handleAcceptInvite = useCallback(async () => {
-    if (!invitePayload) return;
-    setInvitePayload(null);
-
-    try {
-      const authToken = await coopApi.getToken();
-      // Rời phòng cũ (nếu đang trong phòng) rồi join phòng mới
-      if (isConnected) leaveRoom();
-      setToken(authToken);
-      setRoomId(invitePayload.roomId);
-    } catch {
-      addToast('Không thể vào phòng được mời', 'error');
-    }
-  }, [invitePayload, isConnected, leaveRoom, addToast]);
 
   // ── Handler: host bấm "Bắt Đầu" ──
   // sendReady() → server chuyển phase sang 'active' khi đủ điều kiện
@@ -259,14 +232,6 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
         />
       )}
 
-      {/* SSE Invite Popup — hiện khi nhận lời mời co-op từ bạn */}
-      {invitePayload && (
-        <CoopInvitePopup
-          payload={invitePayload}
-          onAccept={handleAcceptInvite}
-          onDecline={() => setInvitePayload(null)}
-        />
-      )}
     </>
   );
 }

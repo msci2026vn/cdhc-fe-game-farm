@@ -38,7 +38,7 @@ export function CoopWaitingRoom({
   const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
 
   // Số slot tối đa = 4 (hoặc teamSize tối đa của event)
-  const MAX_SLOTS = 4;
+  const MAX_SLOTS = 5;
   const emptySlots = Math.max(0, MAX_SLOTS - players.length);
 
   const handleCopyCode = () => {

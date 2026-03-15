@@ -10,6 +10,9 @@ import { setNavigateToLogin } from '@/shared/utils/error-handler';
 import { useGameSync } from '@/shared/hooks/useGameSync';
 import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
 import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
+import { useGlobalCoopInvite } from '@/modules/coop/hooks/useGlobalCoopInvite';
+import { CoopInvitePopup } from '@/modules/coop/components/CoopInvitePopup';
+import { useAuth } from '@/shared/hooks/useAuth';
 import Toast from '@/shared/components/Toast';
 import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
 import { audioManager } from '@/shared/audio';
@@ -103,6 +106,8 @@ const AuthenticatedApp = () => {
   // Safe here because AuthGuard already confirmed auth
   useGameSync();
   useLevelUpDetector();
+  const { data: authData } = useAuth();
+  const { invitePayload, acceptInvite, declineInvite } = useGlobalCoopInvite(!!authData?.user);
 
   // Initialize audio on first user interaction + preload UI sounds
   useEffect(() => {
@@ -122,6 +127,13 @@ const AuthenticatedApp = () => {
   return (
     <>
       <LevelUpOverlay />
+      {invitePayload && (
+        <CoopInvitePopup
+          payload={invitePayload}
+          onAccept={acceptInvite}
+          onDecline={declineInvite}
+        />
+      )}
       <Routes>
         <Route path="/" element={<MainMenuScreen />} />
         <Route path="/farm" element={<FarmingScreen />} />

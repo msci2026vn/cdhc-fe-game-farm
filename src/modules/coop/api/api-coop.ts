@@ -7,6 +7,18 @@ import { API_BASE_URL, handleUnauthorized } from '@/shared/api/api-utils';
 import type { WorldBossAttackPayload, WorldBossAttackResult } from '@/modules/world-boss/types/world-boss.types';
 
 /** Lịch sử một session co-op đã tham gia */
+/** Phòng co-op đang chờ trong room list */
+export interface CoopRoomSummary {
+  roomId:     string;
+  eventId:    string;
+  hostId:     string;
+  hostName:   string;
+  teamSize:   number;
+  maxSize:    number;
+  multiplier: number;
+  createdAt:  number;
+}
+
 export interface CoopHistoryItem {
   sessionId:   string;
   eventId:     string;
@@ -36,6 +48,10 @@ async function coopFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const coopApi = {
+  /** Danh sách phòng co-op đang waiting */
+  getRooms: () =>
+    coopFetch<{ rooms: CoopRoomSummary[] }>('/rooms'),
+
   /**
    * Tạo phòng Co-op mới cho World Boss event.
    * Gọi khi host bấm nút "Co-op" trên WorldBossScreen.

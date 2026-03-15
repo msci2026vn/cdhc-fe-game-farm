@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorldBoss } from '../hooks/useWorldBoss';
 import { useAuth } from '../../../shared/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import { HistoryList } from '../components/HistoryList';
 import { WorldBossBattleView } from '../components/WorldBossBattleView';
 import CoopScreen from '@/modules/coop/CoopScreen';
 import { coopApi } from '@/modules/coop/api/api-coop';
+import { CoopRoomList } from '@/modules/coop/components/CoopRoomList';
 
 interface EndedBossInfo {
   id: string;
@@ -37,6 +38,7 @@ function LoadingSkeleton() {
 
 export function WorldBossScreen() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useWorldBoss();
   const { data: authData } = useAuth();
@@ -48,9 +50,20 @@ export function WorldBossScreen() {
   const [showBattle, setShowBattle] = useState(false);
   const [showCoop,   setShowCoop]   = useState(false);  // Co-op mode
   const [popup, setPopup] = useState<'leaderboard' | 'feed' | null>(null);
+  const [showRoomList, setShowRoomList] = useState(false);
 
   // === Join by room code ===
   const [coopInitialRoomId, setCoopInitialRoomId] = useState<string | undefined>();
+
+  // === Auto-open coop from URL param (global invite accept) ===
+  useEffect(() => {
+    const coopRoom = searchParams.get('coopRoom');
+    if (coopRoom) {
+      setCoopInitialRoomId(coopRoom);
+      setShowCoop(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [showJoinInput,   setShowJoinInput]   = useState(false);
   const [joinCode,        setJoinCode]        = useState('');
   const [joiningByCode,   setJoiningByCode]   = useState(false);
@@ -228,6 +241,23 @@ export function WorldBossScreen() {
             >
               👥 Co-op
             </button>
+            {/* Nút Danh Sách Phòng */}
+            <button
+              onClick={() => setShowRoomList(true)}
+              style={{
+                padding:      '0 12px',
+                background:   'rgba(255,255,255,0.08)',
+                color:        '#d1d5db',
+                fontWeight:   600,
+                fontSize:     12,
+                border:       '1px solid #374151',
+                borderRadius: 10,
+                cursor:       'pointer',
+                whiteSpace:   'nowrap',
+              }}
+            >
+              📋 Phòng
+            </button>
             {/* Nút Nhập mã phòng */}
             <button
               onClick={() => { setJoinCode(''); setJoinError(''); setShowJoinInput(true); }}
@@ -402,6 +432,18 @@ export function WorldBossScreen() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Room list modal */}
+      {showRoomList && (
+        <CoopRoomList
+          onJoin={(roomId) => {
+            setShowRoomList(false);
+            setCoopInitialRoomId(roomId);
+            setShowCoop(true);
+          }}
+          onClose={() => setShowRoomList(false)}
+        />
       )}
 
       {/* End Screen */}
