@@ -236,6 +236,22 @@ export default function PvpTestScreen() {
   const [skillCooldowns, setSkillCooldowns] = useState<Record<string, { remaining: number; total: number }>>({});
   const [opponentSkillFlash, setOpponentSkillFlash] = useState<string | null>(null);
 
+  // ── Avatar state ──
+  const [myAvatar, setMyAvatar] = useState<string | null>(null);
+  const [opponentAvatar, setOpponentAvatar] = useState<string | null>(null);
+  const [myName, setMyName] = useState<string>('');
+  const [opponentName, setOpponentName] = useState<string>('');
+
+  // ── Opponent board reveal (Thiên Nhãn) ──
+  const [opponentBoardRevealed, setOpponentBoardRevealed] = useState(false);
+
+  // ── Opponent skill notification (big banner) ──
+  const [opponentSkillNotif, setOpponentSkillNotif] = useState<{
+    icon: string;
+    name: string;
+    target: string;
+  } | null>(null);
+
   // ── Skill effect overlays ──
   const [activeEffects, setActiveEffects] = useState<ActiveEffect[]>([]);
   const [boardShake, setBoardShake] = useState(false);
@@ -463,6 +479,8 @@ export default function PvpTestScreen() {
       myMaxHp?: number; opponentMaxHp?: number;
       myMaxMana?: number; opponentMaxMana?: number;
       myBuild?: { str: number; vit: number; wis: number; arm: number; mana: number; skillA: string; skillB: string; skillC: string };
+      myName?: string; opponentName?: string;
+      myAvatar?: string | null; opponentAvatar?: string | null;
     }) => {
       myBoardRef.current = data.myBoard;
       setMyBoard(data.myBoard);
@@ -504,6 +522,14 @@ export default function PvpTestScreen() {
       setActiveEffects([]);
       setBoardShake(false);
       setGameBuilds(null);
+      // Avatar + name from server
+      setMyAvatar(data.myAvatar || null);
+      setOpponentAvatar(data.opponentAvatar || null);
+      if (data.myName) setMyName(data.myName);
+      if (data.opponentName) setOpponentName(data.opponentName);
+      // Reset opponent board reveal
+      setOpponentBoardRevealed(false);
+      setOpponentSkillNotif(null);
       // Reset board flash effects
       setMatchedCells(new Set());
       setSpawningGems(new Set());
@@ -753,8 +779,21 @@ export default function PvpTestScreen() {
           [data.skillId]: { remaining: data.cooldownMs, total: data.cooldownMs },
         }));
       } else {
-        const allSkills = [...SKILL_GROUPS.A, ...SKILL_GROUPS.B, ...SKILL_GROUPS.C];
-        const skillDef = allSkills.find(s => s.id === data.skillId);
+        // Opponent used skill → show BIG notification
+        const groupA = SKILL_GROUPS.A.find(s => s.id === data.skillId);
+        const groupB = SKILL_GROUPS.B.find(s => s.id === data.skillId);
+        const groupC = SKILL_GROUPS.C.find(s => s.id === data.skillId);
+        const skillDef = groupA || groupB || groupC;
+
+        if (skillDef) {
+          let targetText = '';
+          if (groupA) targetText = '⚔️ Tấn công bạn!';
+          else if (groupB) targetText = '⛓️ Kiểm soát bạn!';
+          else if (groupC) targetText = '💚 Tự hỗ trợ';
+          setOpponentSkillNotif({ icon: skillDef.icon, name: skillDef.name, target: targetText });
+          setTimeout(() => setOpponentSkillNotif(null), 3000);
+        }
+        // Keep the small flash too
         setOpponentSkillFlash(skillDef ? `${skillDef.icon} ${skillDef.name}!` : data.skillId);
         setTimeout(() => setOpponentSkillFlash(null), 2000);
       }
@@ -787,11 +826,14 @@ export default function PvpTestScreen() {
     });
 
     r.onMessage('reveal_board', (data: { tiles: number[]; durationMs: number }) => {
-      console.log('[Reveal Board] Duration:', data.durationMs);
+      setOpponentBoard(data.tiles);
+      setOpponentBoardRevealed(true);
+      setTimeout(() => setOpponentBoardRevealed(false), data.durationMs);
+      addLog(`👁️ Thiên Nhãn — board đối thủ hiện ${data.durationMs / 1000}s`);
     });
 
     r.onMessage('reveal_board_end', () => {
-      console.log('[Reveal Board End]');
+      setOpponentBoardRevealed(false);
     });
 
     r.onMessage('debuff_expired', (data: { type: string }) => {
@@ -888,7 +930,7 @@ export default function PvpTestScreen() {
       const openRoom = await pvpApi.createOpenRoom();
       if (!openRoom.ok) throw new Error('Failed to create room');
       addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
-      const r = await clientRef.current.joinById(openRoom.roomId, { token });
+      const r = await clientRef.current.joinById(openRoom.roomId, { token, picture: auth?.user?.picture || '' });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -908,7 +950,7 @@ export default function PvpTestScreen() {
     try {
       const token = await fetchPvpToken();
       addLog(`Join: ${code}...`);
-      const r = await clientRef.current.joinById(code, { token });
+      const r = await clientRef.current.joinById(code, { token, picture: auth?.user?.picture || '' });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -1386,14 +1428,52 @@ export default function PvpTestScreen() {
             <div className="pvp-firefly" style={{ left: '88%', top: '38%', '--tx': '-55px', '--ty': '-40px', animationDuration: '7s', animationDelay: '2.5s' } as React.CSSProperties} />
             <div className="pvp-firefly" style={{ left: '28%', top: '65%', background: '#faf', boxShadow: '0 0 5px 2px rgba(255,200,255,.7)', '--tx': '25px', '--ty': '-85px', animationDuration: '4.5s', animationDelay: '0.7s' } as React.CSSProperties} />
 
+            {/* ── PC layout container — centered max-width ── */}
+            <div className="pvp-battle__container">
+
             {/* Floating emojis from opponent taunts */}
             {floatingEmojis.map(({ id, emoji }) => (
               <div key={id} className="pvp-float-emoji">{emoji}</div>
             ))}
 
+            {/* ══════ TIMER — TOP CENTER ══════ */}
+            <div className="pvp-timer-top">
+              <div className={[
+                'pvp-timer',
+                timeLeft <= 10 && 'pvp-timer--urgent',
+                isSuddenDeath && timeLeft > 10 && 'pvp-timer--sudden',
+                activeDebuff?.type === 'hide_timer' && 'pvp-timer--hidden',
+              ].filter(Boolean).join(' ')}>
+                {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
+              </div>
+            </div>
+
+            {/* ── Opponent skill notification (BIG banner) ── */}
+            {opponentSkillNotif && (
+              <div className="pvp-opp-skill-notif">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 28 }}>{opponentSkillNotif.icon}</span>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>
+                      {opponentSkillNotif.name}
+                    </div>
+                    <div style={{ color: '#fca5a5', fontSize: 11 }}>
+                      {opponentName || opponentPlayer?.name || t('game.opponent')} dùng {opponentSkillNotif.target}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ── TOP: Opponent avatar + info + mini board ── */}
             <div className="pvp-top">
-              <div className="pvp-top__avatar">👹</div>
+              <div className="pvp-top__avatar">
+                {opponentAvatar ? (
+                  <img src={opponentAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                ) : (
+                  <span>{(opponentName || opponentPlayer?.name || '?').charAt(0).toUpperCase()}</span>
+                )}
+              </div>
               <div className="pvp-top__info">
                 <div className="pvp-top__name-row">
                   <span className="pvp-top__name">{opponentPlayer?.name ?? t('game.opponent')}</span>
@@ -1420,9 +1500,21 @@ export default function PvpTestScreen() {
               </div>
               <div className="pvp-mini-wrap" style={{ position: 'relative' }}>
                 <span className="pvp-mini-wrap__label">{t('game.opponentBoard')}</span>
-                <MiniBoard tiles={opponentBoard} />
-                {/* Skill effect overlays on opponent mini board */}
-                <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'opponent')} />
+                <div style={{ position: 'relative' }}>
+                  <MiniBoard tiles={opponentBoard} />
+                  {/* Blur overlay — default hidden, revealed by Thiên Nhãn */}
+                  {!opponentBoardRevealed && (
+                    <div className="pvp-mini-blur">
+                      <span style={{ fontSize: 16 }}>👁️</span>
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginTop: 1 }}>Thiên Nhãn</span>
+                    </div>
+                  )}
+                  {opponentBoardRevealed && (
+                    <div className="pvp-mini-revealed">👁️ Thiên Nhãn</div>
+                  )}
+                  {/* Skill effect overlays on opponent mini board */}
+                  <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'opponent')} />
+                </div>
               </div>
             </div>
 
@@ -1430,7 +1522,13 @@ export default function PvpTestScreen() {
             <div className="pvp-board-section">
               {/* ── MY SECTION ── */}
               <div className="pvp-my">
-                <div className="pvp-my__avatar">🧝</div>
+                <div className="pvp-my__avatar">
+                  {myAvatar ? (
+                    <img src={myAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ) : (
+                    <span>{(myName || myPlayer?.name || '?').charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
                 <div className="pvp-my__stats">
                   <div className="pvp-my__top-row">
                     <span className="pvp-my__name">{myPlayer?.name ?? t('game.you')}</span>
@@ -1503,16 +1601,7 @@ export default function PvpTestScreen() {
                 {/* Skill effect overlays on my board */}
                 <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'self')} />
               </div>
-              <div className="pvp-timer-row">
-                <div className={[
-                  'pvp-timer',
-                  timeLeft <= 10 && 'pvp-timer--urgent',
-                  isSuddenDeath && timeLeft > 10 && 'pvp-timer--sudden',
-                  activeDebuff?.type === 'hide_timer' && 'pvp-timer--hidden',
-                ].filter(Boolean).join(' ')}>
-                  {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
-                </div>
-              </div>
+              {/* Timer moved to top center */}
 
               {/* ── SKILL BUTTONS ── */}
               {mySkills.length > 0 && (
@@ -1572,6 +1661,8 @@ export default function PvpTestScreen() {
               <div className="pvp-separator" />
               <button className="pvp-leave-btn" onClick={handleLeave}>🚪</button>
             </div>
+
+            </div>{/* close pvp-battle__container */}
           </div>
         )}
 

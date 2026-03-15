@@ -18,9 +18,30 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
+  align-items: center;
   overflow: hidden;
   font-family: 'Nunito', -apple-system, sans-serif;
   color: var(--text);
+}
+
+/* ── PC layout: centered max-width container ── */
+.pvp-battle__container {
+  width: 100%;
+  max-width: 430px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 431px) {
+  .pvp-battle__container {
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
 }
 
 /* ── Background ── */
@@ -514,7 +535,19 @@
   transform: rotate(-15deg) scale(-1, -1);
 }
 
-/* Timer */
+/* Timer — top center */
+.pvp-timer-top {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 2px;
+  padding-top: max(6px, env(safe-area-inset-top));
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+/* Timer — old bottom (deprecated) */
 .pvp-timer-row {
   width: 100%;
   display: flex;
@@ -704,4 +737,61 @@
 
 .pvp-board-wrap--skill-shake {
   animation: pvpShake 0.6s ease-in-out;
+}
+
+/* ── Mini board blur overlay (opponent board hidden by default) ── */
+.pvp-mini-blur {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 19, 10, 0.80);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.pvp-mini-revealed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(234, 179, 8, 0.85);
+  color: #1a0a00;
+  font-size: 7px;
+  font-weight: 800;
+  text-align: center;
+  padding: 1px 0;
+  border-radius: 7px 7px 0 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── Opponent skill notification (big banner) ── */
+.pvp-opp-skill-notif {
+  position: relative;
+  z-index: 50;
+  margin: 0 14px;
+  background: rgba(127, 29, 29, 0.95);
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  border-radius: 14px;
+  padding: 8px 14px;
+  box-shadow: 0 4px 24px rgba(239, 68, 68, 0.3);
+  animation: pvpOppSkillSlide 0.3s ease-out;
+  flex-shrink: 0;
+}
+
+@keyframes pvpOppSkillSlide {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ── Avatar with image support ── */
+.pvp-top__avatar img,
+.pvp-my__avatar img {
+  display: block;
 }
