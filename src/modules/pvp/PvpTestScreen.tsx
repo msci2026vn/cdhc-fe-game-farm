@@ -207,12 +207,12 @@ export default function PvpTestScreen() {
   const [gameOverPlayers, setGameOverPlayers] = useState<Array<{ userId: string; name: string; score: number }>>([]);
   const [junkAlert, setJunkAlert] = useState('');
   // Combat stats — aligned with campaign BossState
-  const [myHp, setMyHp] = useState(2500);
-  const [myMaxHp, setMyMaxHp] = useState(2500);
+  const [myHp, setMyHp] = useState(5000);
+  const [myMaxHp, setMyMaxHp] = useState(5000);
   const [myArmor, setMyArmor] = useState(0);
   const [myMana, setMyMana] = useState(0);
-  const [opponentHp, setOpponentHp] = useState(2500);
-  const [opponentMaxHp, setOpponentMaxHp] = useState(2500);
+  const [opponentHp, setOpponentHp] = useState(5000);
+  const [opponentMaxHp, setOpponentMaxHp] = useState(5000);
   const [opponentArmor, setOpponentArmor] = useState(0);
   const [opponentMana, setOpponentMana] = useState(0);
   const [opponentMaxMana, setOpponentMaxMana] = useState(100);
@@ -535,8 +535,8 @@ export default function PvpTestScreen() {
       setGameOverPlayers([]);
       setJunkAlert('');
       // Reset combat stats — use server-sent maxHp/maxMana from build
-      const serverMaxHp = data.myMaxHp ?? 2500;
-      const serverOpMaxHp = data.opponentMaxHp ?? 2500;
+      const serverMaxHp = data.myMaxHp ?? 5000;
+      const serverOpMaxHp = data.opponentMaxHp ?? 5000;
       const serverMaxMana = data.myMaxMana ?? 100;
       const serverOpMaxMana = data.opponentMaxMana ?? 100;
       setMyMaxHp(serverMaxHp);

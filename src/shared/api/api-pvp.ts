@@ -117,13 +117,13 @@ export const SKILL_COOLDOWNS: Record<string, number> = {
 
 export const STAT_DEFS = [
   { key: 'str' as const, name: 'SỨC MẠNH',  icon: '⚔️', color: '#ef4444', desc: 'Tăng sát thương ATK gem',     formula: (v: number) => `${40 + v * 8} dmg/gem` },
-  { key: 'vit' as const, name: 'SINH LỰC',   icon: '❤️', color: '#22c55e', desc: 'Tăng HP tối đa',              formula: (v: number) => `${2500 + v * 120} HP` },
-  { key: 'wis' as const, name: 'TRÍ TUỆ',    icon: '💜', color: '#a855f7', desc: 'Tăng hồi HP & mana/star',     formula: (v: number) => `${25 + v * 3} heal/gem, +${8 + v * 2} mana/star` },
-  { key: 'arm' as const, name: 'PHÒNG THỦ',   icon: '🛡️', color: '#3b82f6', desc: 'Tăng giáp từ DEF gem',        formula: (v: number) => `${20 + v * 5} armor/gem` },
+  { key: 'vit' as const, name: 'SINH LỰC',   icon: '❤️', color: '#22c55e', desc: 'Tăng HP tối đa',              formula: (v: number) => `${5000 + v * 200} HP` },
+  { key: 'wis' as const, name: 'TRÍ TUỆ',    icon: '💜', color: '#a855f7', desc: 'Tăng hồi HP & mana/star',     formula: (v: number) => `${25 + v * 4} heal, +${8 + v * 2} mana/star` },
+  { key: 'arm' as const, name: 'PHÒNG THỦ',   icon: '🛡️', color: '#3b82f6', desc: 'Tăng giáp từ DEF gem',        formula: (v: number) => `${20 + v * 6} armor/gem` },
   { key: 'mana' as const, name: 'NĂNG LƯỢNG', icon: '⭐', color: '#eab308', desc: 'Tăng mana tối đa',            formula: (v: number) => `${100 + v * 20} max mana` },
 ] as const;
 
-export const STAT_TOTAL = 30;
+export const STAT_TOTAL = 50;
 
 // ── Rank Tier System — 10 Cảnh Giới ──
 

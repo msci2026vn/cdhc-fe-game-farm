@@ -743,7 +743,7 @@ function BuildRevealCard({
               <div style={{ flex: 1, height: 3, background: '#374151', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', borderRadius: 2,
-                  width: `${(val / 30) * 100}%`,
+                  width: `${(val / 50) * 100}%`,
                   background: stat.color,
                 }} />
               </div>

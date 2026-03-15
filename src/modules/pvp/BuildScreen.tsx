@@ -19,7 +19,7 @@ interface SkillDef {
 }
 
 // ── Default build ──
-const DEFAULT_STATS: Record<StatKey, number> = { str: 6, vit: 6, wis: 6, arm: 6, mana: 6 };
+const DEFAULT_STATS: Record<StatKey, number> = { str: 10, vit: 10, wis: 10, arm: 10, mana: 10 };
 
 export default function BuildScreen() {
   const navigate = useNavigate();
@@ -45,11 +45,11 @@ export default function BuildScreen() {
         const res = await pvpApi.getBuild();
         if (res.build) {
           setStats({
-            str:  res.build.str  ?? 6,
-            vit:  res.build.vit  ?? 6,
-            wis:  res.build.wis  ?? 6,
-            arm:  res.build.arm  ?? 6,
-            mana: res.build.mana ?? 6,
+            str:  res.build.str  ?? 10,
+            vit:  res.build.vit  ?? 10,
+            wis:  res.build.wis  ?? 10,
+            arm:  res.build.arm  ?? 10,
+            mana: res.build.mana ?? 10,
           });
           setSkills({
             A: res.build.skillA || null,
@@ -69,7 +69,7 @@ export default function BuildScreen() {
   const changeStat = useCallback((key: StatKey, delta: number) => {
     setStats(prev => {
       const newVal = prev[key] + delta;
-      if (newVal < 0 || newVal > 30) return prev;
+      if (newVal < 0 || newVal > 50) return prev;
       const curTotal = Object.values(prev).reduce((a, b) => a + b, 0);
       if (curTotal + delta > STAT_TOTAL) return prev;
       return { ...prev, [key]: newVal };
@@ -198,10 +198,10 @@ export default function BuildScreen() {
         }}>
           <h2 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>Xem Trước Chỉ Số</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <PreviewItem label="❤️ HP" value={`${2500 + stats.vit * 120}`} />
+            <PreviewItem label="❤️ HP" value={`${5000 + stats.vit * 200}`} />
             <PreviewItem label="⚔️ ATK/gem" value={`${40 + stats.str * 8}`} />
-            <PreviewItem label="💚 Heal/gem" value={`${25 + stats.wis * 3}`} />
-            <PreviewItem label="🛡️ Armor/gem" value={`${20 + stats.arm * 5}`} />
+            <PreviewItem label="💚 Heal/gem" value={`${25 + stats.wis * 4}`} />
+            <PreviewItem label="🛡️ Armor/gem" value={`${20 + stats.arm * 6}`} />
             <PreviewItem label="⭐ Max Mana" value={`${100 + stats.mana * 20}`} />
             <PreviewItem label="⭐ Mana/star" value={`${8 + stats.wis * 2}`} />
           </div>
@@ -309,7 +309,7 @@ function StatRow({
         {/* Value bar */}
         <div style={{ marginTop: 4, height: 4, background: '#1f2937', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{
-            width: `${(value / 30) * 100}%`, height: '100%', borderRadius: 2,
+            width: `${(value / 50) * 100}%`, height: '100%', borderRadius: 2,
             background: stat.color, transition: 'width 0.2s',
           }} />
         </div>
@@ -334,12 +334,12 @@ function StatRow({
         </span>
         <button
           onClick={() => onChange(+1)}
-          disabled={value >= 30 || remaining <= 0}
+          disabled={value >= 50 || remaining <= 0}
           style={{
             width: 30, height: 30, borderRadius: 8, border: 'none',
             background: '#1e293b', color: '#94a3b8', fontWeight: 700, fontSize: 16,
-            cursor: (value >= 30 || remaining <= 0) ? 'not-allowed' : 'pointer',
-            opacity: (value >= 30 || remaining <= 0) ? 0.3 : 1,
+            cursor: (value >= 50 || remaining <= 0) ? 'not-allowed' : 'pointer',
+            opacity: (value >= 50 || remaining <= 0) ? 0.3 : 1,
           }}
         >
           +
