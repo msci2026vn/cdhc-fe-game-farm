@@ -964,6 +964,8 @@ export default function PvpTestScreen() {
         setError(msg);
       }
       addLog(`❌ Join thất bại: ${msg}`);
+      // Clear URL param so spinner disappears and user can retry
+      if (urlRoomCode) navigate('/pvp-test', { replace: true });
     } finally {
       setConnecting(false);
     }
