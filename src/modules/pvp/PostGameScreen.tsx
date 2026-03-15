@@ -46,6 +46,7 @@ interface PostGameProps {
   opponentName: string;
   gameDurationMs: number;
   myStats: ClientMvpStats;
+  opponentStats?: ClientMvpStats | null;
   ratingBefore: number;
   ratingAfter: PvpRating | null;
   h2hData: H2HData;
@@ -61,6 +62,7 @@ interface PostGameProps {
   myBuild?: BuildData | null;
   opponentBuild?: BuildData | null;
 }
+
 
 type BuildData = {
   str: number; vit: number; wis: number; arm: number; mana: number;
@@ -230,7 +232,7 @@ interface StatRowDef {
   icon: string;
   label: string;
   myVal: (s: ClientMvpStats) => number;
-  oppVal: ((s: ClientMvpStats) => number) | null;
+  oppKey: keyof ClientMvpStats | null;
   format: (v: number) => string;
   higherIsBetter: boolean;
 }
@@ -238,56 +240,57 @@ interface StatRowDef {
 const BATTLE_STATS: StatRowDef[] = [
   {
     icon: '⚔️', label: 'DMG gây ra',
-    myVal: s => s.dmgDealt, oppVal: s => s.dmgReceived,
+    myVal: s => s.dmgDealt, oppKey: 'dmgDealt',
     format: v => v.toLocaleString(), higherIsBetter: true,
   },
   {
     icon: '🛡️', label: 'DMG nhận',
-    myVal: s => s.dmgReceived, oppVal: s => s.dmgDealt,
+    myVal: s => s.dmgReceived, oppKey: 'dmgReceived',
     format: v => v.toLocaleString(), higherIsBetter: false,
   },
   {
     icon: '🛡️', label: 'Giáp hấp thụ',
-    myVal: s => s.armorAbsorbed, oppVal: null,
+    myVal: s => s.armorAbsorbed, oppKey: 'armorAbsorbed',
     format: v => v.toLocaleString(), higherIsBetter: true,
   },
   {
     icon: '💚', label: 'HP đã hồi',
-    myVal: s => s.hpHealed, oppVal: null,
+    myVal: s => s.hpHealed, oppKey: 'hpHealed',
     format: v => v.toLocaleString(), higherIsBetter: true,
   },
   {
     icon: '🧊', label: 'Junk đã gửi',
-    myVal: s => s.junkSent, oppVal: s => s.junkReceived,
+    myVal: s => s.junkSent, oppKey: 'junkSent',
     format: v => `${v}`, higherIsBetter: true,
   },
   {
     icon: '⚡', label: 'Skill đã dùng',
-    myVal: s => s.skillsUsed, oppVal: s => s.opponentSkillsUsed,
+    myVal: s => s.skillsUsed, oppKey: 'skillsUsed',
     format: v => `${v}`, higherIsBetter: true,
   },
   {
     icon: '🔗', label: 'Combo cao nhất',
-    myVal: s => s.highestCombo, oppVal: null,
+    myVal: s => s.highestCombo, oppKey: 'highestCombo',
     format: v => `×${v}`, higherIsBetter: true,
   },
   {
     icon: '⏱️', label: 'Swap nhanh nhất',
-    myVal: s => s.fastestSwapMs, oppVal: null,
+    myVal: s => s.fastestSwapMs, oppKey: 'fastestSwapMs',
     format: v => v >= 9999 ? '—' : `${(v / 1000).toFixed(2)}s`,
     higherIsBetter: false,
   },
   {
     icon: '🔢', label: 'Tổng số swap',
-    myVal: s => s.totalSwaps, oppVal: null,
+    myVal: s => s.totalSwaps, oppKey: 'totalSwaps',
     format: v => `${v}`, higherIsBetter: true,
   },
 ];
 
 function BattleStatsTable({
-  myStats, myName, opponentName, isWinner, isDraw,
+  myStats, opponentStats, myName, opponentName, isWinner, isDraw,
 }: {
   myStats: ClientMvpStats;
+  opponentStats?: ClientMvpStats | null;
   myName: string;
   opponentName: string;
   isWinner: boolean;
@@ -334,9 +337,9 @@ function BattleStatsTable({
         </div>
 
         {/* Stat rows */}
-        {BATTLE_STATS.map(({ icon, label, myVal, oppVal, format, higherIsBetter }, i) => {
+        {BATTLE_STATS.map(({ icon, label, myVal, oppKey, format, higherIsBetter }, i) => {
           const mv = myVal(myStats);
-          const ov = oppVal ? oppVal(myStats) : null;
+          const ov = (opponentStats && oppKey) ? (opponentStats[oppKey] as number) : null;
 
           let myColor = '#94a3b8';
           let ovColor = '#94a3b8';
@@ -551,6 +554,7 @@ export default function PostGameScreen({
   opponentName,
   gameDurationMs,
   myStats,
+  opponentStats,
   ratingBefore,
   ratingAfter,
   h2hData,
@@ -603,6 +607,7 @@ export default function PostGameScreen({
 
         <BattleStatsTable
           myStats={myStats}
+          opponentStats={opponentStats}
           myName={myName}
           opponentName={opponentName}
           isWinner={isWinner}

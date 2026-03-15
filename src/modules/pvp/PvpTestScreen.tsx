@@ -282,6 +282,7 @@ export default function PvpTestScreen() {
     skillsUsed: 0, opponentSkillsUsed: 0,
   };
   const [myStats, setMyStats] = useState<ClientMvpStats>({ ...EMPTY_STATS });
+  const [opponentStats, setOpponentStats] = useState<ClientMvpStats | null>(null);
   const statsRef = useRef<ClientMvpStats>({ ...EMPTY_STATS });
   const myHpStatsRef = useRef(0);
   const lastSwapAtRef = useRef(0);
@@ -468,6 +469,7 @@ export default function PvpTestScreen() {
       setProofData({ merkleRoot: null, ipfsHash: null, txHash: null, moveCount: null });
       if (proofPollRef.current) { clearInterval(proofPollRef.current); proofPollRef.current = null; }
       setPostGameCountdown(10);
+      setOpponentStats(null);
       setMyMana(0);
       setMyArmor(0);
       setOpponentMana(0);
@@ -587,6 +589,7 @@ export default function PvpTestScreen() {
       };
       statsRef.current = freshStats;
       setMyStats(freshStats);
+      setOpponentStats(null);
       myHpStatsRef.current = serverMaxHp;
       lastSwapAtRef.current = 0;
       gameStartAtRef.current = Date.now();
@@ -718,6 +721,13 @@ export default function PvpTestScreen() {
       players: Array<{ userId: string; name: string; score: number; hp?: number }>;
       isSuddenDeath: boolean;
       builds?: Record<string, { str: number; vit: number; wis: number; arm: number; mana: number; skillA: string; skillB: string; skillC: string }>;
+      battleStats?: Record<string, {
+        dmgDealt: number; dmgReceived: number; armorAbsorbed: number;
+        hpHealed: number; junkSent: number; skillsUsed: number;
+        highestCombo: number; fastestSwapMs: number;
+        totalSwaps: number; validSwaps: number;
+        debuffSent: number; debuffReceived: number; tauntsTotal: number;
+      }>;
     }) => {
       setWinnerId(data.winnerId);
       setWinnerSessionId(data.winnerSessionId);
@@ -726,9 +736,49 @@ export default function PvpTestScreen() {
       setIsSuddenDeath(data.isSuddenDeath);
       const iWon = data.winnerSessionId === mySessionId;
       const isDr = data.winnerId === 'draw';
-      // Snapshot stats
+      // Snapshot local stats as base
       const snap = { ...statsRef.current };
       setMyStats(snap);
+      // Merge server battleStats (authoritative) over local snapshot
+      if (data.battleStats) {
+        const myId = r.sessionId;
+        const serverMy = data.battleStats[myId];
+        const serverOppEntry = Object.entries(data.battleStats).find(([sid]) => sid !== myId);
+        const serverOpp = serverOppEntry?.[1];
+        if (serverMy) {
+          setMyStats({
+            ...snap,
+            dmgDealt: serverMy.dmgDealt ?? snap.dmgDealt,
+            dmgReceived: serverMy.dmgReceived ?? snap.dmgReceived,
+            armorAbsorbed: serverMy.armorAbsorbed ?? snap.armorAbsorbed,
+            hpHealed: serverMy.hpHealed ?? snap.hpHealed,
+            junkSent: serverMy.junkSent ?? snap.junkSent,
+            skillsUsed: serverMy.skillsUsed ?? snap.skillsUsed,
+            highestCombo: serverMy.highestCombo ?? snap.highestCombo,
+            fastestSwapMs: serverMy.fastestSwapMs > 0 ? serverMy.fastestSwapMs : snap.fastestSwapMs,
+            totalSwaps: serverMy.totalSwaps ?? snap.totalSwaps,
+          });
+        }
+        if (serverOpp) {
+          setOpponentStats({
+            highestCombo: serverOpp.highestCombo ?? 0,
+            fastestSwapMs: serverOpp.fastestSwapMs > 0 ? serverOpp.fastestSwapMs : 9999,
+            debuffSent: serverOpp.debuffSent ?? 0,
+            debuffReceived: serverOpp.debuffReceived ?? 0,
+            tauntsTotal: serverOpp.tauntsTotal ?? 0,
+            validSwaps: serverOpp.validSwaps ?? 0,
+            totalSwaps: serverOpp.totalSwaps ?? 0,
+            dmgDealt: serverOpp.dmgDealt ?? 0,
+            dmgReceived: serverOpp.dmgReceived ?? 0,
+            armorAbsorbed: serverOpp.armorAbsorbed ?? 0,
+            hpHealed: serverOpp.hpHealed ?? 0,
+            junkSent: serverOpp.junkSent ?? 0,
+            junkReceived: serverMy?.junkSent ?? 0,
+            skillsUsed: serverOpp.skillsUsed ?? 0,
+            opponentSkillsUsed: serverMy?.skillsUsed ?? 0,
+          });
+        }
+      }
       const duration = gameStartAtRef.current > 0 ? Date.now() - gameStartAtRef.current : 60000;
       setGameDurationMs(duration);
       addLog(`Kết thúc! ${iWon ? '🏆 Thắng!' : isDr ? '🤝 Hoà' : '💀 Thua'}`);
@@ -1450,6 +1500,7 @@ export default function PvpTestScreen() {
           opponentName={opponentPlayer?.name ?? t('game.opponent')}
           gameDurationMs={gameDurationMs}
           myStats={myStats}
+          opponentStats={opponentStats}
           ratingBefore={ratingBefore}
           ratingAfter={ratingAfter}
           h2hData={h2hData}
