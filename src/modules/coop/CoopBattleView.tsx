@@ -35,6 +35,7 @@ import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
 // Co-op components
 import { TeamMultiplierBadge } from './components/TeamMultiplierBadge';
 import { TeammateStatus } from './components/TeammateStatus';
+import { CoopDeathOverlay, type DeathStats } from './components/CoopDeathOverlay';
 
 interface Props {
   worldBoss:           WorldBossInfo;
@@ -48,11 +49,13 @@ interface Props {
   showReconnectButton: boolean;
   onReconnect:         () => Promise<void>;
   onExit:              () => void;
+  /** Called when player wants to respawn after death */
+  onRespawn?:          () => void;
 }
 
 export default function CoopBattleView({
   worldBoss, coopRoomCode, teamSize, multiplier, teammates,
-  bossHpPercent, showReconnectButton, onReconnect, onExit,
+  bossHpPercent, showReconnectButton, onReconnect, onExit, onRespawn,
 }: Props) {
   const { data: statInfo } = usePlayerStats();
   const { data: authData } = useAuth();
@@ -71,7 +74,7 @@ export default function CoopBattleView({
 
   const skillLevels = useSkillLevels();
 
-  const { engine, battleState, startBattle, notifyBossDeadFromServer } = useCoopBossBattle(
+  const { engine, battleState, deathInfo, startBattle, notifyBossDeadFromServer } = useCoopBossBattle(
     worldBoss,
     combatStats,
     worldBoss.id,
@@ -88,10 +91,21 @@ export default function CoopBattleView({
     }
   }, [bossHpPercent, battleState, notifyBossDeadFromServer]);
 
-  // Session ended → CoopScreen xử lý transition sang CoopResultScreen
+  // Session ended (boss died or session finished) → CoopScreen xử lý transition
+  // 'dead' state is handled separately with death overlay (NOT exit)
   useEffect(() => {
     if (battleState === 'ended') onExit();
   }, [battleState, onExit]);
+
+  const isDead = battleState === 'dead';
+  const deathStats: DeathStats | null = isDead && deathInfo ? {
+    totalDamage:   deathInfo.totalDamage,
+    hits:          deathInfo.hits,
+    maxCombo:      deathInfo.maxCombo,
+    aliveTime:     deathInfo.aliveTime,
+    multiplier,
+    bossHpPercent,
+  } : null;
 
   // Auto-start khi mount
   useEffect(() => {
@@ -251,6 +265,16 @@ export default function CoopBattleView({
           </div>
         )}
       </div>
+
+      {/* Death overlay — player HP=0, offer Leave or Respawn */}
+      {isDead && deathStats && (
+        <CoopDeathOverlay
+          stats={deathStats}
+          teammates={teammates}
+          onLeave={onExit}
+          onRespawn={() => onRespawn?.()}
+        />
+      )}
 
       {/* Reconnect overlay — xuất hiện sau 3 lần auto-retry thất bại */}
       {/* Không block board — player biết mình đang offline nhưng game vẫn chạy local */}

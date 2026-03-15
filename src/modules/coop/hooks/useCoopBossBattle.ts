@@ -24,7 +24,14 @@ export interface CoopBossSessionResult {
   duration:    number;
 }
 
-type BattleState = 'idle' | 'fighting' | 'ended';
+export interface CoopDeathInfo {
+  totalDamage:   number;
+  hits:          number;
+  maxCombo:      number;
+  aliveTime:     number;
+}
+
+type BattleState = 'idle' | 'fighting' | 'dead' | 'ended';
 
 const DEFAULT_SKILL_LEVELS: PlayerSkillLevels = { sam_dong: 1, ot_hiem: 0, rom_boc: 0 };
 // BATCH_INTERVAL_MS > BE rate limit 2500ms + 200ms buffer
@@ -146,26 +153,23 @@ export function useCoopBossBattle(
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [battleState, sendBatch, sessionStats.hpPercent]);
 
-  // Player chết → flush batch cuối
+  // Player chết → set dead state (DON'T end session — allow respawn)
+  const [deathInfo, setDeathInfo] = useState<CoopDeathInfo | null>(null);
+
   useEffect(() => {
     if (engine.result !== 'defeat' || battleStateRef.current !== 'fighting') return;
 
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    const duration = Math.floor((Date.now() - battleStartRef.current) / 1000);
+    // Flush current batch (not final — may respawn)
+    sendBatch(false).catch(() => {});
 
-    const flush = async () => {
-      const res = await sendBatch(true);
-      const sessionResult: CoopBossSessionResult = {
-        totalDamage: res?.totalDamage ?? (engine.totalDmgDealt ?? 0),
-        maxCombo:    engine.maxCombo ?? 0,
-        rank:        res?.rank ?? null,
-        duration,
-      };
-      setBattleState('ended');
-      onSessionEnd?.(sessionResult);
-    };
-
-    flush();
+    const aliveTime = Math.floor((Date.now() - battleStartRef.current) / 1000);
+    setDeathInfo({
+      totalDamage: engine.totalDmgDealt ?? 0,
+      hits:        hitCountRef.current + Math.max(0, (engine.totalDmgDealt ?? 0) - lastSentDamageRef.current > 0 ? 1 : 0),
+      maxCombo:    engine.maxCombo ?? 0,
+      aliveTime,
+    });
+    setBattleState('dead');
   }, [engine.result]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup: fire-and-forget flush pending damage khi unmount
@@ -215,6 +219,7 @@ export function useCoopBossBattle(
     engine,
     battleState,
     sessionStats,
+    deathInfo,
     startBattle,
     notifyBossDeadFromServer,
   };

@@ -46,12 +46,14 @@ export interface UseCoopRoomReturn {
   /** hiện sau 3 lần auto-retry thất bại — cho phép user bấm nút "Vào Lại" */
   showReconnectButton: boolean;
 
-  sendReady:  () => void;
-  sendTaunt:  (emoji: string) => void;
-  leaveRoom:  () => void;
-  kickPlayer: (targetUserId: string) => void;
+  sendReady:     () => void;
+  sendTaunt:     (emoji: string) => void;
+  leaveRoom:     () => void;
+  kickPlayer:    (targetUserId: string) => void;
+  sendDied:      () => void;
+  sendRespawned: () => void;
   /** Manual reconnect — gọi khi showReconnectButton = true */
-  reconnect:  () => Promise<void>;
+  reconnect:     () => Promise<void>;
 }
 
 interface UseCoopRoomOptions {
@@ -244,6 +246,14 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     roomRef.current?.send('kick', { targetUserId });
   }, []);
 
+  const sendDied = useCallback(() => {
+    roomRef.current?.send('player_died', {});
+  }, []);
+
+  const sendRespawned = useCallback(() => {
+    roomRef.current?.send('player_respawned', {});
+  }, []);
+
   const leaveRoom = useCallback(() => {
     intentionalLeaveRef.current = true;
     roomRef.current?.leave();
@@ -277,6 +287,8 @@ export function useCoopRoom({ roomId, token, eventId }: UseCoopRoomOptions): Use
     sendTaunt,
     leaveRoom,
     kickPlayer,
+    sendDied,
+    sendRespawned,
     reconnect,
   };
 }

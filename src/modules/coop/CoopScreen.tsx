@@ -10,7 +10,7 @@
 // QUAN TRỌNG: Colyseus chỉ mount sau khi có roomId — tránh connect sớm
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useUIStore } from '@/shared/stores/uiStore';
 import type { WorldBossInfo } from '@/modules/world-boss/types/world-boss.types';
@@ -49,11 +49,18 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
     sendReady,
     leaveRoom,
     kickPlayer,
+    sendDied,
+    sendRespawned,
     reconnect,
   } = useCoopRoom({ roomId, token, eventId: worldBoss.id });
 
   const myUserId = authData?.user?.id ?? '';
   const isHost = roomState.hostId === myUserId;
+
+  // Respawn: key remount + countdown
+  const [battleKey, setBattleKey] = useState(0);
+  const [respawnCountdown, setRespawnCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // SSE: coop_invite_response only — invite popups handled by global listener in App.tsx
   useCoopSSE(!!authData?.user, (event) => {
@@ -121,6 +128,30 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
     leaveRoom();
     onExit();
   }, [leaveRoom, onExit]);
+
+  // ── Handler: respawn after death — 3-2-1 countdown then remount engine ──
+  const handleRespawn = useCallback(() => {
+    sendDied(); // notify server
+    setRespawnCountdown(3);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setRespawnCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          if (countdownRef.current) clearInterval(countdownRef.current);
+          countdownRef.current = null;
+          sendRespawned(); // notify server: HP reset
+          setBattleKey(k => k + 1); // remount CoopBattleView with fresh engine
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [sendDied, sendRespawned]);
+
+  // Cleanup countdown on unmount
+  useEffect(() => () => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+  }, []);
 
   // ── Handler: chơi lại (tạo phòng mới) ──
   const handlePlayAgain = useCallback(async () => {
@@ -207,8 +238,9 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
       )}
 
       {/* Phase: active — đang chiến đấu */}
-      {roomState.phase === 'active' && isConnected && (
+      {roomState.phase === 'active' && isConnected && !respawnCountdown && (
         <CoopBattleView
+          key={battleKey}
           worldBoss={worldBoss}
           coopRoomCode={roomState.roomId}
           teamSize={roomState.teamSize}
@@ -218,7 +250,26 @@ export default function CoopScreen({ worldBoss, onExit, initialRoomId }: Props) 
           showReconnectButton={showReconnectButton}
           onReconnect={reconnect}
           onExit={handleLeave}
+          onRespawn={handleRespawn}
         />
+      )}
+
+      {/* Respawn countdown overlay */}
+      {respawnCountdown !== null && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 300,
+          background: 'rgba(0,0,0,0.9)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          color: 'white',
+        }}>
+          <div style={{ fontSize: 80, fontWeight: 900, color: '#22c55e', marginBottom: 16 }}>
+            {respawnCountdown}
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>
+            Chuẩn bị chiến đấu!
+          </div>
+        </div>
       )}
 
       {/* Phase: ended — kết quả */}
