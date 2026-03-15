@@ -78,7 +78,7 @@ export default function BuildScreen() {
   }, []);
 
   const resetStats = useCallback(() => {
-    setStats({ ...DEFAULT_STATS });
+    setStats({ str: 0, vit: 0, wis: 0, arm: 0, mana: 0 });
     setSaveSuccess(false);
   }, []);
 
