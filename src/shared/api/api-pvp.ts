@@ -47,6 +47,7 @@ export type PvpLeaderboardEntry = {
   name: string;
   picture: string | null;
   rating: number;
+  rank_points: number;
   wins: number;
   losses: number;
   draws: number;

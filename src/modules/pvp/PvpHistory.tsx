@@ -173,12 +173,22 @@ export default function PvpHistory() {
                   </div>
                 </div>
 
-                {/* Rating + tier */}
+                {/* Rank tier + points */}
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, marginBottom: 1 }}>{getRankFromPoints(entry.rating).tier.icon}</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: idx < 3 ? '#f59e0b' : getRankFromPoints(entry.rating).tier.color }}>
-                    {entry.rating}
-                  </div>
+                  {(() => {
+                    const rk = getRankFromPoints(entry.rank_points ?? 0);
+                    return (
+                      <>
+                        <div style={{ fontSize: 16, marginBottom: 1 }}>{rk.tier.icon}</div>
+                        <div style={{ fontSize: 9, color: rk.tier.color, marginBottom: 2, whiteSpace: 'nowrap' }}>
+                          {rk.tier.name} {rk.subTierName}
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 800, color: idx < 3 ? '#f59e0b' : rk.tier.color }}>
+                          {entry.rank_points ?? 0}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
