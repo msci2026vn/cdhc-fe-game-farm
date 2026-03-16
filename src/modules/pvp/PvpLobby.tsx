@@ -790,6 +790,25 @@ export default function PvpLobby() {
             ←
           </button>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#e94560' }}>⚔️ PVP Arena</h1>
+          <button
+            onClick={() => navigate('/pvp/history?tab=leaderboard')}
+            style={{
+              marginLeft: 'auto',
+              background: 'rgba(255,255,255,0.08)',
+              border: '0.5px solid rgba(255,255,255,0.15)',
+              borderRadius: '8px',
+              padding: '6px 12px',
+              color: '#FAC775',
+              fontSize: '13px',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            🏆 BXH
+          </button>
         </div>
 
         {/* Rating card — Cảnh Giới */}

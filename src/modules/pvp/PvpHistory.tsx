@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { pvpApi, getRankFromPoints } from '@/shared/api/api-pvp';
@@ -7,9 +7,12 @@ import { useAuth } from '@/shared/hooks/useAuth';
 
 export default function PvpHistory() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t, i18n } = useTranslation('pvp');
   const { data: auth } = useAuth();
-  const [tab, setTab] = useState<'history' | 'leaderboard'>('history');
+  const [tab, setTab] = useState<'history' | 'leaderboard'>(
+    searchParams.get('tab') === 'leaderboard' ? 'leaderboard' : 'history'
+  );
 
   const { data: historyData, isLoading: histLoading } = useQuery({
     queryKey: ['pvp', 'history', 20],
@@ -25,7 +28,9 @@ export default function PvpHistory() {
 
   return (
     <div style={{
-      minHeight: '100dvh',
+      height: '100dvh',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
       background: 'linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f3460 100%)',
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
