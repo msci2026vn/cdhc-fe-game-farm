@@ -40,6 +40,7 @@ interface RoomStateBroadcast {
   timeLeft?: number;
   lobbyTimeLeft?: number;
   winnerId?: string;
+  spectatorCount?: number;
 }
 
 async function fetchPvpToken(): Promise<string> {
@@ -255,6 +256,10 @@ export default function PvpTestScreen() {
   // ── Skill effect overlays ──
   const [activeEffects, setActiveEffects] = useState<ActiveEffect[]>([]);
   const [boardShake, setBoardShake] = useState(false);
+
+  // ── Spectator mode ──
+  const isSpectator = searchParams.get('mode') === 'spectator';
+  const [spectatorCount, setSpectatorCount] = useState<number>(0);
 
   // ── Build reveal (PostGame) ──
   const [gameBuilds, setGameBuilds] = useState<Record<string, {
@@ -502,8 +507,17 @@ export default function PvpTestScreen() {
       setOpponentLeft(false);
       if (data.timeLeft !== undefined) setTimeLeft(data.timeLeft);
       if (data.lobbyTimeLeft !== undefined) setLobbyTimeLeft(data.lobbyTimeLeft);
+      if (data.spectatorCount !== undefined) setSpectatorCount(data.spectatorCount);
       const names = Object.values(data.players).map(p => p.name).join(', ');
       addLog(`State: [${data.phase}] cd:${data.countdown} t:${data.timeLeft ?? '-'}s | ${names || '(trống)'}`);
+    });
+
+    r.onMessage('role_assigned', (data: { role: string }) => {
+      console.log('[PvpTestScreen] role assigned:', data.role);
+    });
+
+    r.onMessage('spectator_update', (data: { spectatorCount: number }) => {
+      setSpectatorCount(data.spectatorCount);
     });
 
     r.onMessage('lobby_warning', (data: { secondsLeft: number }) => {
@@ -1040,7 +1054,7 @@ export default function PvpTestScreen() {
       const openRoom = await pvpApi.createOpenRoom();
       if (!openRoom.ok) throw new Error('Failed to create room');
       addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
-      const r = await clientRef.current.joinById(openRoom.roomId, { token, picture: auth?.user?.picture || '' });
+      const r = await clientRef.current.joinById(openRoom.roomId, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -1060,7 +1074,7 @@ export default function PvpTestScreen() {
     try {
       const token = await fetchPvpToken();
       addLog(`Join: ${code}...`);
-      const r = await clientRef.current.joinById(code, { token, picture: auth?.user?.picture || '' });
+      const r = await clientRef.current.joinById(code, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -1578,7 +1592,33 @@ export default function PvpTestScreen() {
               ].filter(Boolean).join(' ')}>
                 {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
               </div>
+              {spectatorCount > 0 && (
+                <div style={{
+                  fontSize: '11px', color: 'rgba(255,255,255,0.5)',
+                  display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: 4,
+                }}>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#E24B4A', display: 'inline-block' }} />
+                  {spectatorCount} đang xem
+                </div>
+              )}
             </div>
+
+            {/* ── Spectator banner ── */}
+            {isSpectator && (
+              <div style={{
+                background: 'rgba(226,75,74,0.15)', border: '0.5px solid rgba(226,75,74,0.3)',
+                borderRadius: '8px', padding: '6px 14px', textAlign: 'center',
+                fontSize: '12px', color: '#E24B4A', fontWeight: 500,
+                marginBottom: '8px', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', gap: '6px',
+              }}>
+                <span style={{
+                  width: '6px', height: '6px', borderRadius: '50%', background: '#E24B4A',
+                  display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+                Đang xem trực tiếp
+              </div>
+            )}
 
             {/* ── Opponent skill notification (BIG banner) ── */}
             {opponentSkillNotif && (
@@ -1717,9 +1757,9 @@ export default function PvpTestScreen() {
                     highlightedGem={null}
                     isStunned={activeDebuff?.type === 'freeze'}
                     animating={boardAnimating}
-                    handlePointerDown={handlePointerDown}
-                    handlePointerMove={handlePointerMove}
-                    handlePointerUp={handlePointerUp}
+                    handlePointerDown={isSpectator ? () => {} : handlePointerDown}
+                    handlePointerMove={isSpectator ? () => {} : handlePointerMove}
+                    handlePointerUp={isSpectator ? () => {} : handlePointerUp}
                     combo={pvpCombo}
                     showCombo={showCombo}
                     otHiemActive={false}
@@ -1736,7 +1776,7 @@ export default function PvpTestScreen() {
               {/* Timer moved to top center */}
 
               {/* ── SKILL BUTTONS ── */}
-              {mySkills.length > 0 && (
+              {!isSpectator && mySkills.length > 0 && (
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   gap: 10, padding: '6px 0 2px',
@@ -1780,7 +1820,7 @@ export default function PvpTestScreen() {
 
             {/* ── BOTTOM: Emoji bar + leave ── */}
             <div className="pvp-bottom">
-              {(['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
+              {!isSpectator && (['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
                 <button
                   key={emoji}
                   className={`pvp-emoji-btn${emojiCooldown ? ' pvp-emoji-btn--disabled' : ''}`}
@@ -1790,7 +1830,7 @@ export default function PvpTestScreen() {
                   {emoji}
                 </button>
               ))}
-              <div className="pvp-separator" />
+              {!isSpectator && <div className="pvp-separator" />}
               <button className="pvp-leave-btn" onClick={handleLeave}>🚪</button>
             </div>
 
