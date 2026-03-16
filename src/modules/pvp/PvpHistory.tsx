@@ -115,17 +115,41 @@ export default function PvpHistory() {
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{
-                      fontSize: 12, fontWeight: 700, padding: '3px 10px',
-                      borderRadius: 6, marginBottom: 4,
-                      background: m.result === 'win' ? '#14532d' : m.result === 'draw' ? '#1e293b' : '#450a0a',
-                      color: m.result === 'win' ? '#22c55e' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
-                    }}>
-                      {m.result === 'win' ? `🏆 ${t('history.win')}` : m.result === 'draw' ? `🤝 ${t('history.draw')}` : `💀 ${t('history.lose')}`}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 4 }}>
+                      <div style={{
+                        fontSize: 12, fontWeight: 700, padding: '3px 10px',
+                        borderRadius: 6,
+                        background: m.result === 'win' ? '#14532d' : m.result === 'draw' ? '#1e293b' : '#450a0a',
+                        color: m.result === 'win' ? '#22c55e' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
+                      }}>
+                        {m.result === 'win' ? `🏆 ${t('history.win')}` : m.result === 'draw' ? `🤝 ${t('history.draw')}` : `💀 ${t('history.lose')}`}
+                      </div>
+                      {m.points_change != null && m.points_change !== 0 && (
+                        <span style={{
+                          fontSize: 12, fontWeight: 600,
+                          color: m.points_change > 0 ? '#22c55e' : '#ef4444',
+                        }}>
+                          {m.points_change > 0 ? '+' : ''}{m.points_change}
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: 12, color: '#64748b' }}>
                       {m.my_score.toLocaleString()} – {m.opp_score.toLocaleString()}
                     </div>
+                    {m.tx_hash && (
+                      <a
+                        href={`https://snowtrace.io/tx/${m.tx_hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: 10, color: 'rgba(255,255,255,0.25)',
+                          display: 'block', marginTop: 3,
+                          fontFamily: 'monospace', textDecoration: 'none',
+                        }}
+                      >
+                        {m.tx_hash.slice(0, 8)}...{m.tx_hash.slice(-6)} ↗
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

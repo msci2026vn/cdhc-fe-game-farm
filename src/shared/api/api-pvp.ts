@@ -40,6 +40,8 @@ export type PvpMatch = {
   result: 'win' | 'loss' | 'draw';
   opponent_name: string;
   opponent_avatar: string | null;
+  points_change: number | null;
+  tx_hash: string | null;
 };
 
 export type PvpLeaderboardEntry = {
