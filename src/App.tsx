@@ -72,6 +72,7 @@ const AuctionLobbyScreen = lazyWithRetry(() => import('@/modules/auction/screens
 const AuctionHistoryScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionHistoryScreen'));
 const AuctionRoomScreen = lazyWithRetry(() => import('@/modules/auction/screens/AuctionRoomScreen'));
 const PvpTestScreen = lazyWithRetry(() => import('@/modules/pvp/PvpTestScreen'));
+const PvpHub = lazyWithRetry(() => import('@/modules/pvp/PvpHub'));
 const PvpLobby = lazyWithRetry(() => import('@/modules/pvp/PvpLobby'));
 const PvpHistory = lazyWithRetry(() => import('@/modules/pvp/PvpHistory'));
 const BuildScreen = lazyWithRetry(() => import('@/modules/pvp/BuildScreen'));
@@ -207,7 +208,8 @@ const App = () => {
                 <Route path="/login" element={<LoginScreen />} />
                 <Route path="/dev-login" element={<DevLoginScreen />} />
                 <Route path="/pvp-test" element={<PvpTestScreen />} />
-                <Route path="/pvp" element={<PvpLobby />} />
+                <Route path="/pvp" element={<PvpHub />} />
+                <Route path="/pvp/arena" element={<PvpLobby />} />
                 <Route path="/pvp/build" element={<BuildScreen />} />
                 <Route path="/pvp/history" element={<PvpHistory />} />
                 <Route path="/pvp/rank" element={<RankInfoScreen />} />
