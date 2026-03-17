@@ -155,3 +155,40 @@ export interface WorldBossAttackResultLegacy {
 export type WorldBossAttackResult =
   | { ok: true; hpPercent: number; rank: number | null; totalDamage?: number }
   | { ok: false; error: string; retryAfter?: number }
+
+// ─── Boss Skill Engine types (SSE: boss_skill / boss_skill_end) ───────────────
+
+export type BossSkillId =
+  | 'burn'
+  | 'gem_swap'
+  | 'slow_swap'
+  | 'chaos_shuffle'
+  | 'darkness'
+  | 'stun'
+  | 'gem_lock'
+  | 'direct_strike'
+  | 'junk_rain'
+  | 'meteor'
+  | 'zone_lock'
+  | 'void_drain'
+  | 'armor_break'
+  | 'shield'
+  | 'heal_self';
+
+export interface BossSkillEvent {
+  type: 'boss_skill';
+  skillId: BossSkillId;
+  duration?: number;    // giây
+  timestamp: number;
+}
+
+export interface BossSkillEndEvent {
+  type: 'boss_skill_end';
+  skillId: BossSkillId;
+}
+
+/** Skill đang active trên player (có countdown) */
+export interface ActiveBossSkill {
+  skillId: BossSkillId;
+  endTime: number;  // Date.now() + duration * 1000
+}

@@ -13,7 +13,7 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { useGemPointer, useComboParticles } from '@/shared/match3';
 import { STAT_CONFIG } from '@/shared/utils/stat-constants';
 import type { PlayerCombatStats } from '@/shared/utils/combat-formulas';
-import type { WorldBossInfo } from '../types/world-boss.types';
+import type { WorldBossInfo, ActiveBossSkill, BossSkillId } from '../types/world-boss.types';
 import { useWorldBossLite } from '../hooks/useWorldBoss';
 import { useWorldBossSSE } from '../hooks/useWorldBossSSE';
 import { FloatingDamage } from './FloatingDamage';
@@ -35,6 +35,47 @@ import {
 import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
 import { WorldBossCampaignResult } from './WorldBossCampaignResult';
+
+// ─── ActiveSkillBadge — badge với countdown cho mỗi boss skill đang active ───
+
+const SKILL_LABEL: Record<BossSkillId, string> = {
+  burn:          '🔥 Burn',
+  gem_swap:      '🔄 Gem Swap',
+  slow_swap:     '⛓️ Slow',
+  chaos_shuffle: '🌀 Chaos',
+  darkness:      '🌑 Darkness',
+  stun:          '⚡ Stun',
+  gem_lock:      '🔒 Lock',
+  direct_strike: '💥 Strike',
+  junk_rain:     '🧊 Junk',
+  meteor:        '☄️ Meteor',
+  zone_lock:     '🔒 Zone',
+  void_drain:    '🕳️ Void',
+  armor_break:   '🛡️ Armor',
+  shield:        '🔰 Shield',
+  heal_self:     '💚 Heal',
+};
+
+function ActiveSkillBadge({ skill }: { skill: ActiveBossSkill }) {
+  const [remaining, setRemaining] = useState(
+    Math.ceil((skill.endTime - Date.now()) / 1000),
+  );
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setRemaining(Math.ceil((skill.endTime - Date.now()) / 1000));
+    }, 500);
+    return () => clearInterval(t);
+  }, [skill.endTime]);
+
+  if (remaining <= 0) return null;
+
+  return (
+    <span className="bg-red-900/90 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">
+      {SKILL_LABEL[skill.skillId] ?? skill.skillId} {remaining}s
+    </span>
+  );
+}
 
 // Boss sprite assets — mirrors BossDisplay.tsx SPRITE_MAP
 const SPRITE_MAP: Record<string, string> = {
@@ -96,8 +137,8 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     authData?.user?.name ?? undefined,
   );
 
-  // SSE realtime HP — <100ms latency
-  const { sseHpPercent, damageFeed } = useWorldBossSSE(
+  // SSE realtime HP + boss skill events
+  const { sseHpPercent, damageFeed, activeSkills, boardVisible, isBossStunned } = useWorldBossSSE(
     worldBoss.id,
     authData?.user?.id,
   );
@@ -445,17 +486,33 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
         </div>
       )}
 
+      {/* ── Active Boss Skills badges ── */}
+      {activeSkills.length > 0 && (
+        <div className="absolute flex flex-wrap gap-1 z-30 pointer-events-none"
+          style={{ left: '2%', top: '31%' }}>
+          {activeSkills.map((skill) => (
+            <ActiveSkillBadge key={skill.skillId} skill={skill} />
+          ))}
+        </div>
+      )}
+
       {/* ── CampaignMatch3Board: left:2% top:34% width:96% height:46% ── */}
-      <div style={getPos('CampaignMatch3Board')}>
+      <div style={getPos('CampaignMatch3Board')} className="relative">
         <CampaignMatch3Board
           grid={grid} selected={selected} matchedCells={matchedCells}
           spawningGems={spawningGems} lockedGems={lockedGems} highlightedGem={highlightedGem}
-          isStunned={isStunned} animating={animating}
+          isStunned={isStunned || isBossStunned} animating={animating}
           handlePointerDown={handlePointerDown} handlePointerMove={handlePointerMove} handlePointerUp={handlePointerUp}
           combo={combo} showCombo={showCombo} otHiemActive={otHiemActive} romBocActive={romBocActive}
           GEM_META={GEM_META}
           blastVfxs={blastVfxs} hintedGems={hintedGems} particleBursts={particleBursts} floatingTexts={floatingTexts} chainLightnings={chainLightnings}
         />
+        {/* Darkness overlay */}
+        {!boardVisible && (
+          <div className="absolute inset-0 bg-black/95 z-20 flex items-center justify-center rounded-lg">
+            <span className="text-white text-base font-bold animate-pulse">🌑 Màn Đêm...</span>
+          </div>
+        )}
       </div>
 
       {/* ── ManaBarText: left:3% top:80% width:94% height:2% ── */}
