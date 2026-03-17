@@ -10,9 +10,7 @@ import type { TeamRoomState } from './pvp-team.types.client';
 
 // ─── Colyseus WS URL (reuse từ PvpTestScreen pattern) ─────────
 
-const WS_URL = import.meta.env.DEV
-  ? 'ws://localhost:3001'
-  : 'wss://sta.cdhc.vn/pvp-ws';
+const WS_URL = import.meta.env.VITE_WS_URL as string;
 
 // ─── PvP Token (reuse từ PvpTestScreen pattern) ────────────────
 
