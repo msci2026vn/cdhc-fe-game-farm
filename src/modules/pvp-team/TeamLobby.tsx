@@ -6,6 +6,7 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { pvpApi } from '@/shared/api/api-pvp';
 import { createTeamRoom, joinTeamRoom, findTeamRoom } from './api-pvp-team';
 import { TeamDraftPhase } from './TeamDraftPhase';
+import { InvitePanel } from './InvitePanel';
 import type { TeamRoomState, TeamId, ClientPlayerState } from './pvp-team.types.client';
 
 type LobbyStep = 'menu' | 'waiting' | 'draft';
@@ -41,8 +42,17 @@ function PlayerSlot({ player }: PlayerSlotProps) {
       fontSize: 13,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontWeight: 600 }}>{player.name}</span>
-        {player.isReady && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {(player as any).avatar && (
+            <img
+              src={(player as any).avatar}
+              alt=""
+              style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }}
+            />
+          )}
+          <span style={{ fontWeight: 600 }}>{player.name || 'Player'}</span>
+        </div>
+        {player.ready && (
           <span style={{ color: '#22c55e', fontSize: 12 }}>✅ Sẵn sàng</span>
         )}
       </div>
@@ -77,6 +87,7 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
 
   const username = auth?.user?.name ?? 'Player';
   const picture = auth?.user?.picture ?? '';
@@ -97,9 +108,36 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
     setTimeout(() => setToast(''), 3000);
   }, []);
 
+  // Auto-join từ invite link (?join=ROOMCODE)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    if (joinCode && !room) {
+      void handleJoinByCode(joinCode);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleJoinByCode = async (code: string) => {
+    if (!currentBuild) return;
+    setLoading(true);
+    setError('');
+    try {
+      const r = await joinTeamRoom(code, { username, picture, build: currentBuild });
+      setRoom(r);
+      setRoomCode(code);
+      setStep('waiting');
+      window.history.replaceState({}, '', '/pvp-team');
+    } catch {
+      setError('Không thể vào phòng. Phòng có thể đã đầy hoặc không tồn tại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Cleanup khi unmount
   useEffect(() => {
-    return () => { room?.leave(); };
+    return () => { try { room?.leave(); } catch {} };
   }, [room]);
 
   // Lắng nghe state updates từ Colyseus
@@ -129,6 +167,12 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
         const currentTeam = state.players.get(room.sessionId)?.team ?? myTeam;
         onBattleStart(room, currentTeam);
       }
+    });
+
+    // Get short roomCode from server
+    room.onMessage('room_info', (data: { roomCode: string; myTeam: TeamId }) => {
+      if (data.roomCode) setRoomCode(data.roomCode);
+      if (data.myTeam) setMyTeam(data.myTeam);
     });
 
     room.onMessage('player_joined', (data: { username: string; team: TeamId }) => {
@@ -203,9 +247,14 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
   };
 
   const handleReady = () => {
-    if (!room || isReady) return;
-    room.send('ready', {});
-    setIsReady(true);
+    if (!room) return;
+    if (isReady) {
+      room.send('unready', {});
+      setIsReady(false);
+    } else {
+      room.send('ready', {});
+      setIsReady(true);
+    }
   };
 
   const handleSwitchTeam = (team: TeamId) => {
@@ -215,7 +264,7 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
   };
 
   const handleLeave = () => {
-    room?.leave();
+    try { room?.leave(); } catch (e) { console.warn('leave error', e); }
     setRoom(null);
     setRoomCode('');
     setPlayers([]);
@@ -359,11 +408,36 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
             </div>
           </div>
 
+          {/* Invite button */}
+          <button
+            onClick={() => setShowInvite(true)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              borderRadius: 10,
+              background: 'rgba(124,58,237,0.15)',
+              border: '1px solid rgba(124,58,237,0.35)',
+              color: '#c4b5fd',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              marginBottom: 12,
+            }}
+          >
+            👥 Mời Bạn Bè
+          </button>
+
+          {showInvite && roomCode && (
+            <InvitePanel
+              roomCode={roomCode}
+              onClose={() => setShowInvite(false)}
+            />
+          )}
+
           {/* Actions */}
           <div style={{ display: 'flex', gap: 10 }}>
             <button
               onClick={handleReady}
-              disabled={isReady}
               style={{
                 flex: 1,
                 padding: '14px',
@@ -375,10 +449,10 @@ export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
                 color: '#fff',
                 fontSize: 15,
                 fontWeight: 700,
-                cursor: isReady ? 'default' : 'pointer',
+                cursor: 'pointer',
               }}
             >
-              {isReady ? '✅ Đã Sẵn Sàng' : 'Sẵn Sàng'}
+              {isReady ? '✅ Hủy Sẵn Sàng' : 'Sẵn Sàng'}
             </button>
             <button
               onClick={handleLeave}

@@ -49,12 +49,18 @@ export async function createTeamRoom(
 }
 
 export async function joinTeamRoom(
-  roomId: string,
+  roomCode: string,
   options: TeamJoinOptions,
 ): Promise<Room<TeamRoomState>> {
   const token = await fetchPvpToken();
   const client = new Client(WS_URL);
-  return client.joinById(roomId, { token, ...options });
+
+  // Find room by short roomCode via available rooms metadata
+  const rooms = await client.getAvailableRooms('team_room');
+  const target = rooms.find(r => r.metadata?.roomCode === roomCode);
+  if (!target) throw new Error('Không tìm thấy phòng');
+
+  return client.joinById(target.roomId, { token, ...options });
 }
 
 export async function findTeamRoom(
@@ -90,3 +96,33 @@ export const pvpTeamApi = {
   getHistory: (limit = 20) =>
     pvpTeamFetch<{ matches: unknown[] }>(`/history?limit=${limit}`),
 };
+
+// ─── Invite System ──────────────────────────────────────────
+
+export async function getOnlineUsers(): Promise<{ id: string; username: string; avatar: string }[]> {
+  const data = await pvpTeamFetch<{ users: { id: string; username: string; avatar: string }[] }>('/online-users');
+  return data.users ?? [];
+}
+
+export async function sendInvite(targetUserId: string, roomCode: string): Promise<void> {
+  await pvpTeamFetch<{ ok: boolean }>('/invite', {
+    method: 'POST',
+    body: JSON.stringify({ targetUserId, roomCode }),
+  });
+}
+
+export async function checkInvite(): Promise<{
+  from: { id: string; username: string; avatar: string };
+  roomCode: string;
+  expiresAt: number;
+} | null> {
+  const data = await pvpTeamFetch<{ invite: any }>('/check-invite');
+  return data.invite ?? null;
+}
+
+export async function pvpPresence(action: 'join' | 'leave'): Promise<void> {
+  await pvpTeamFetch<{ ok: boolean }>('/presence', {
+    method: 'POST',
+    body: JSON.stringify({ action }),
+  });
+}

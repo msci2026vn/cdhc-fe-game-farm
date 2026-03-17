@@ -1,8 +1,17 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PvpRatingCard } from './PvpRatingCard';
+import { InviteNotification } from '@/modules/pvp-team/InviteNotification';
+import { pvpPresence } from '@/modules/pvp-team/api-pvp-team';
 
 export default function PvpHub() {
   const navigate = useNavigate();
+
+  // Track PvP presence for invite system
+  useEffect(() => {
+    pvpPresence('join').catch(() => {});
+    return () => { pvpPresence('leave').catch(() => {}); };
+  }, []);
 
   return (
     <div style={{
@@ -141,6 +150,9 @@ export default function PvpHub() {
         </div>
 
       </div>
+
+      {/* Invite notification popup */}
+      <InviteNotification />
     </div>
   );
 }

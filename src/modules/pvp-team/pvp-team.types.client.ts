@@ -18,7 +18,7 @@ export interface ClientPlayerState {
   wis: number;
   arm: number;
   mana: number;
-  isReady: boolean;
+  ready: boolean;
   team: TeamId;
   skillA: string | null;
   skillB: string | null;
