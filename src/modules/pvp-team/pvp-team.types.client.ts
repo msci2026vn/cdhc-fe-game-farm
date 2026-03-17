@@ -1,0 +1,48 @@
+// Types cho frontend — mirror TeamRoomState từ Colyseus server
+
+export type TeamId = 'team_a' | 'team_b';
+
+export type RoomPhase =
+  | 'waiting'
+  | 'draft'
+  | 'countdown'
+  | 'playing'
+  | 'sudden_death'
+  | 'finished';
+
+export interface ClientPlayerState {
+  id: string;
+  name: string;
+  str: number;
+  vit: number;
+  wis: number;
+  arm: number;
+  mana: number;
+  isReady: boolean;
+  team: TeamId;
+  skillA: string | null;
+  skillB: string | null;
+  skillC: string | null;
+}
+
+export interface ClientTeamState {
+  teamId: TeamId;
+  teamHp: number;
+  teamMaxHp: number;
+  teamArmor: number;
+  totalDamageDealt: number;
+  totalHealDone: number;
+}
+
+export interface TeamRoomState {
+  phase: RoomPhase;
+  roomCode: string;
+  timeLeft: number;
+  draftTimeLeft: number;
+  countdownLeft: number;
+  isSuddenDeath: boolean;
+  winnerId: string;
+  players: Map<string, ClientPlayerState>;
+  teamA: ClientTeamState;
+  teamB: ClientTeamState;
+}

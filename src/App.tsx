@@ -76,6 +76,7 @@ const PvpLobby = lazyWithRetry(() => import('@/modules/pvp/PvpLobby'));
 const PvpHistory = lazyWithRetry(() => import('@/modules/pvp/PvpHistory'));
 const BuildScreen = lazyWithRetry(() => import('@/modules/pvp/BuildScreen'));
 const RankInfoScreen = lazyWithRetry(() => import('@/modules/pvp/RankInfoScreen'));
+const TeamLobby = lazyWithRetry(() => import('@/modules/pvp-team/TeamLobby'));
 const GuildScreen = lazyWithRetry(() => import('@/modules/guild/screens/GuildScreen').then(m => ({ default: m.GuildScreen })));
 
 const Fallback = () => (
@@ -210,6 +211,7 @@ const App = () => {
                 <Route path="/pvp/build" element={<BuildScreen />} />
                 <Route path="/pvp/history" element={<PvpHistory />} />
                 <Route path="/pvp/rank" element={<RankInfoScreen />} />
+                <Route path="/pvp-team" element={<TeamLobby />} />
 
                 {/* Protected — AuthGuard first, then game hooks */}
                 <Route path="/*" element={
