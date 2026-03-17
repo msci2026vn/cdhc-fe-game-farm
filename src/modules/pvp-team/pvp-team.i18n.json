@@ -1,0 +1,48 @@
+{
+  "pvpTeam": {
+    "title": "PvP 3v3 Team Battle",
+    "subtitle": "Kết hợp sức mạnh 3 người — Hạ gục team địch!",
+    "lobby": {
+      "createRoom": "Tạo Phòng",
+      "joinRoom": "Vào Phòng",
+      "findMatch": "Tìm Trận",
+      "roomCode": "Mã phòng",
+      "waiting": "Đang chờ...",
+      "ready": "Sẵn Sàng",
+      "teamA": "Đội A",
+      "teamB": "Đội B"
+    },
+    "draft": {
+      "title": "Xem build địch và điều chỉnh!",
+      "enemyBuilds": "Build Team Địch",
+      "myBuilds": "Build Đội Mình",
+      "hpPreview": "HP Pool dự kiến"
+    },
+    "battle": {
+      "myTeam": "Đội Mình",
+      "enemyTeam": "Đội Địch",
+      "suddenDeath": "SUDDEN DEATH — Dame ×1.5"
+    },
+    "result": {
+      "win": "CHIẾN THẮNG",
+      "lose": "THẤT BẠI",
+      "draw": "HÒA",
+      "mvp": "MVP",
+      "playAgain": "Trận Mới",
+      "rematch": "Đánh Lại",
+      "exit": "Thoát",
+      "rankPoints": "điểm rank",
+      "mvpBonus": "bao gồm +10 MVP",
+      "player": "Người chơi",
+      "damage": "Damage",
+      "heal": "Heal",
+      "skill": "Skill",
+      "contribution": "Đóng góp",
+      "endedBy": {
+        "hp_zero": "Hạ gục hoàn toàn",
+        "timeout": "Hết giờ",
+        "surrender": "Đối thủ bỏ cuộc"
+      }
+    }
+  }
+}

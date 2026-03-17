@@ -46,3 +46,26 @@ export interface TeamRoomState {
   teamA: ClientTeamState;
   teamB: ClientTeamState;
 }
+
+// ─── Match Result (from server "game_over" message) ─────────
+
+export interface TeamPlayerStat {
+  userId: string;
+  username: string;
+  teamId: TeamId;
+  damage: number;
+  heal: number;
+  skillCount: number;
+}
+
+export interface TeamMatchResult {
+  winner: TeamId | 'draw';
+  endedBy: 'hp_zero' | 'timeout' | 'surrender';
+  teamAHpLeft: number;
+  teamBHpLeft: number;
+  teamAMaxHp: number;
+  teamBMaxHp: number;
+  durationSecs: number;
+  mvpUserId: string | null;
+  stats: TeamPlayerStat[];
+}

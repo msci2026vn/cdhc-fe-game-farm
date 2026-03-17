@@ -59,7 +59,11 @@ function PlayerSlot({ player }: PlayerSlotProps) {
 
 // ─── Main TeamLobby ────────────────────────────────────────────
 
-export default function TeamLobby() {
+interface TeamLobbyProps {
+  onBattleStart?: (room: Room<TeamRoomState>, myTeam: TeamId) => void;
+}
+
+export default function TeamLobby({ onBattleStart }: TeamLobbyProps = {}) {
   const navigate = useNavigate();
   const { data: auth } = useAuth();
 
@@ -116,6 +120,15 @@ export default function TeamLobby() {
 
       // Chuyển sang draft khi đủ 6 người
       if (state.phase === 'draft') setStep('draft');
+
+      // Chuyển sang battle khi countdown hoặc playing bắt đầu
+      if (
+        (state.phase === 'countdown' || state.phase === 'playing') &&
+        room && onBattleStart
+      ) {
+        const currentTeam = state.players.get(room.sessionId)?.team ?? myTeam;
+        onBattleStart(room, currentTeam);
+      }
     });
 
     room.onMessage('player_joined', (data: { username: string; team: TeamId }) => {
