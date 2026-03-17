@@ -120,6 +120,8 @@ function LoginScreenContent() {
   const [loading, setLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Default to muted to avoid browser autoplay blocks
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [devEmail, setDevEmail] = useState('loutrinh2312000@gmail.com');
+  const [devPassword, setDevPassword] = useState('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Telegram auth
@@ -255,6 +257,37 @@ function LoginScreenContent() {
     }
   };
 
+  const handleDevLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(API_BASE_URL + '/api/auth/dev-login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: devEmail, password: devPassword }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        resetRedirectLock();
+        try {
+          await queryClient.prefetchQuery({
+            queryKey: PLAYER_PROFILE_KEY,
+            queryFn: () => gameApi.getProfile(),
+          });
+        } catch { /* non-blocking */ }
+        navigate('/farm', { replace: true });
+      } else {
+        setError(data.error?.message || 'Dev login failed');
+      }
+    } catch {
+      setError('Lỗi kết nối');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Mini App — đang auto-login
   if (isMiniApp && isTgLoading) {
     return (
@@ -331,31 +364,33 @@ function LoginScreenContent() {
                 </button>
               </div>
 
-              {/* Google Login Button */}
-              <div className="relative group w-full flex justify-center cursor-pointer">
+              {/* Google Login Button — ẩn trong Telegram Mini App (GSI không chạy được trong WebView) */}
+              {!isMiniApp && (
+                <div className="relative group w-full flex justify-center cursor-pointer">
 
-                {/* Robust invisible overlay for GoogleLogin */}
-                <div className="absolute inset-0 z-30 opacity-[0.01] flex items-center justify-center overflow-hidden rounded-2xl">
-                  <div className="w-full h-full flex items-center justify-center transform scale-y-[2] scale-x-[1.3]">
-                    <GoogleLogin
-                      onSuccess={(res) => {
-                        if (res.credential) handleAuthSuccess(res.credential);
-                      }}
-                      onError={() => {
-                        // FedCM/silent sign-in failure is expected — don't show error
-                        console.warn('[LoginScreen] GoogleLogin onError — user needs to click manually');
-                      }}
-                      width="350"
-                      size="large"
-                      shape="pill"
-                    />
+                  {/* Robust invisible overlay for GoogleLogin */}
+                  <div className="absolute inset-0 z-30 opacity-[0.01] flex items-center justify-center overflow-hidden rounded-2xl">
+                    <div className="w-full h-full flex items-center justify-center transform scale-y-[2] scale-x-[1.3]">
+                      <GoogleLogin
+                        onSuccess={(res) => {
+                          if (res.credential) handleAuthSuccess(res.credential);
+                        }}
+                        onError={() => {
+                          // FedCM/silent sign-in failure is expected — don't show error
+                          console.warn('[LoginScreen] GoogleLogin onError — user needs to click manually');
+                        }}
+                        width="350"
+                        size="large"
+                        shape="pill"
+                      />
+                    </div>
+                  </div>
+
+                  <div className={`w-full transition-all relative z-10 pointer-events-none ${loading ? 'opacity-70 cursor-wait' : 'group-hover:animate-button-vibrate group-hover:brightness-110 group-active:animate-button-pop group-active:scale-95'}`}>
+                    <img src="/assets/login/btn-g.png" alt="Login with Google" className="w-full h-auto object-contain drop-shadow-sm" />
                   </div>
                 </div>
-
-                <div className={`w-full transition-all relative z-10 pointer-events-none ${loading ? 'opacity-70 cursor-wait' : 'group-hover:animate-button-vibrate group-hover:brightness-110 group-active:animate-button-pop group-active:scale-95'}`}>
-                  <img src="/assets/login/btn-g.png" alt="Login with Google" className="w-full h-auto object-contain drop-shadow-sm" />
-                </div>
-              </div>
+              )}
 
               {/* Telegram Login Button — chỉ hiện khi không phải Mini App */}
               {!isMiniApp && (
@@ -375,6 +410,38 @@ function LoginScreenContent() {
                 </div>
               )}
             </div>
+
+            {/* Dev Login — chỉ hiện trong môi trường dev (import.meta.env.DEV) */}
+            {import.meta.env.DEV && (
+              <form onSubmit={handleDevLogin} className="w-full mt-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2 opacity-60">
+                  <div className="flex-1 h-px bg-white/20" />
+                  <span className="text-[10px] text-white/40 font-mono">DEV</span>
+                  <div className="flex-1 h-px bg-white/20" />
+                </div>
+                <input
+                  type="email"
+                  value={devEmail}
+                  onChange={(e) => setDevEmail(e.target.value)}
+                  placeholder="Dev email"
+                  className="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-white/30 focus:outline-none focus:border-green-500/50"
+                />
+                <input
+                  type="password"
+                  value={devPassword}
+                  onChange={(e) => setDevPassword(e.target.value)}
+                  placeholder="Dev password"
+                  className="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-white/30 focus:outline-none focus:border-green-500/50"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2 rounded-lg bg-green-800/60 border border-green-600/40 text-green-300 text-xs font-mono hover:bg-green-700/60 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {loading ? '...' : 'Dev Login'}
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Wallet Selection Modal */}

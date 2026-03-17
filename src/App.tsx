@@ -37,6 +37,7 @@ const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
 
 // Lazy load screens
 const LoginScreen = lazyWithRetry(() => import('@/modules/auth/screens/LoginScreen'));
+const DevLoginScreen = lazyWithRetry(() => import('@/modules/auth/screens/DevLoginScreen'));
 const FarmingScreen = lazyWithRetry(() => import('@/modules/farming/screens/FarmingScreen'));
 const BossScreen = lazyWithRetry(() => import('@/modules/boss/screens/BossScreen'));
 const QuizScreen = lazyWithRetry(() => import('@/modules/quiz/screens/QuizScreen'));
@@ -203,6 +204,7 @@ const App = () => {
               <Routes>
                 {/* Public — NO AuthGuard, NO game hooks */}
                 <Route path="/login" element={<LoginScreen />} />
+                <Route path="/dev-login" element={<DevLoginScreen />} />
                 <Route path="/pvp-test" element={<PvpTestScreen />} />
                 <Route path="/pvp" element={<PvpLobby />} />
                 <Route path="/pvp/build" element={<BuildScreen />} />
