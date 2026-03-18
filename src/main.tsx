@@ -1,13 +1,9 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { restoreTranslation, watchTranslation } from "./shared/utils/translation-cache";
 import "./i18n";
 
 import { Suspense } from 'react';
-
-// Khôi phục ngôn ngữ Google Translate đã lưu từ lần trước
-restoreTranslation();
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
@@ -15,7 +11,4 @@ root.render(
         <App />
     </Suspense>
 );
-
-// Lắng nghe ngôn ngữ mới → lưu cache
-watchTranslation();
 

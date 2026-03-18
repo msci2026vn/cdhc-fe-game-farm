@@ -10,6 +10,7 @@ import { WorldBossMarquee } from '@/modules/world-boss/components/WorldBossMarqu
 import { AuctionBanner } from '@/modules/auction/components/AuctionBanner';
 import { HomeParticles } from '../components/HomeParticles';
 import { useUIPositions } from '@/shared/hooks/useUIPositions';
+import { usePrayerStatus } from '@/modules/prayer/hooks/usePrayerStatus';
 
 // Shared text label style — bold white with dark shadow, readable on any background
 // Shared text label style — bold white with dark shadow, readable on any background
@@ -33,6 +34,10 @@ export default function MainMenuScreen() {
   const { data: auth } = useAuth();
   const user = auth?.user;
   useBossStatus();
+  const { data: prayerStatus } = usePrayerStatus();
+  const prayerRemaining = prayerStatus
+    ? (prayerStatus.freeMax - prayerStatus.freeUsed) + (prayerStatus.customMax - prayerStatus.customUsed)
+    : 0;
 
   useEffect(() => {
     audioManager.preloadScene('ui');
@@ -47,18 +52,18 @@ export default function MainMenuScreen() {
 
   // ============================================================
   // Mini cards — 5 items, formula: left=${6 + i * 18}%, width 16%
-  // Guild (i=4) uses getPos('GuildNavBtn') — LỚP 1 Admin-Editable
+  // Prayer (i=4) uses getPos('PrayerNavBtn') — LỚP 1 Admin-Editable
   // ============================================================
   const miniCards = [
     { emoji: '🛒', label: t('menu.shop'), route: '/shop' },
     { emoji: '🎒', label: t('menu.inventory'), route: '/inventory' },
     { emoji: '⚡', label: t('menu.auction'), route: '/auction' },
     { emoji: '⚔️', label: t('menu.pvp'), route: '/pvp' },
-    { emoji: '🏰', label: t('menu.guild'), route: '/guild' },
+    { emoji: '🙏', label: t('menu.prayer'), route: '/prayer' },
   ];
 
-  // LỚP 1: admin-editable position cho nút Guild
-  const guildPosStyle = getPos('GuildNavBtn');
+  // LỚP 1: admin-editable position cho nút Cầu Nguyện
+  const prayerPosStyle = getPos('PrayerNavBtn');
 
   return (
     <div className="bg-[#111] min-h-[100dvh] flex items-center justify-center select-none font-body text-farm-brown-dark">
@@ -156,14 +161,14 @@ export default function MainMenuScreen() {
           <span className={`${labelClass} text-[13px]`} style={{ bottom: '20%' }}>📚 {t('menu.quiz')}</span>
         </div>
 
-        {/* ── MINI CARDS: Chợ / Túi đồ / Đấu Giá / PVP / Guild ── */}
-        {/* 5 cards: left=${6 + i * 18}%, width 16% — Guild (i=4) uses getPos() */}
+        {/* ── MINI CARDS: Chợ / Túi đồ / Đấu Giá / PVP / Cầu Nguyện ── */}
+        {/* 5 cards: left=${6 + i * 18}%, width 16% — Prayer (i=4) uses getPos() */}
         {miniCards.map(({ emoji, label, route }, i) => {
-          const isGuild = route === '/guild';
-          // LỚP 1: Guild dùng getPos('GuildNavBtn') nếu admin đã set coordinates
-          const hasPosData = guildPosStyle.left !== undefined || guildPosStyle.top !== undefined;
+          const isPrayer = route === '/prayer';
+          // LỚP 1: Prayer dùng getPos('PrayerNavBtn') nếu admin đã set coordinates
+          const hasPosData = prayerPosStyle.left !== undefined || prayerPosStyle.top !== undefined;
           const defaultStyle = { left: `${6 + i * 18}%`, top: '68.5%', width: '16%', height: '13%' };
-          const cardStyle = isGuild && hasPosData ? guildPosStyle : defaultStyle;
+          const cardStyle = isPrayer && hasPosData ? prayerPosStyle : defaultStyle;
 
           return (
             <div
@@ -175,10 +180,10 @@ export default function MainMenuScreen() {
               <div
                 className="absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-1"
                 style={{
-                  background: isGuild
-                    ? 'linear-gradient(160deg, #4b7a3e 0%, #2d5a22 55%, #1a3a12 100%)'
+                  background: isPrayer
+                    ? 'linear-gradient(160deg, #7c3aed 0%, #5b21b6 55%, #3b0764 100%)'
                     : 'linear-gradient(160deg, #d4a84b 0%, #9c6325 55%, #6b3e12 100%)',
-                  border: `2.5px solid ${isGuild ? '#1a3a08' : '#4a2a08'}`,
+                  border: `2.5px solid ${isPrayer ? '#3b0764' : '#4a2a08'}`,
                   boxShadow: 'inset 0 1px 0 rgba(255,230,130,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.55)',
                 }}
               >
@@ -190,6 +195,21 @@ export default function MainMenuScreen() {
                   {label}
                 </span>
               </div>
+              {/* Badge lượt cầu nguyện còn lại — chỉ hiện khi > 0 */}
+              {isPrayer && prayerRemaining > 0 && (
+                <div
+                  className="absolute -top-1 -right-1 rounded-full flex items-center justify-center z-10"
+                  style={{
+                    width: '16px', height: '16px',
+                    fontSize: '8px', fontWeight: 900,
+                    color: '#fff', lineHeight: 1,
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.6)',
+                  }}
+                >
+                  {prayerRemaining > 9 ? '9+' : prayerRemaining}
+                </div>
+              )}
             </div>
           );
         })}

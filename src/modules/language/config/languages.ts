@@ -20,5 +20,3 @@ export const DEFAULT_LANGUAGE = LANGUAGES[0];
 export const STORAGE_KEY = 'cdhc-language';
 
 export const FLAG_CDN_BASE = 'https://flagcdn.com';
-
-export const INCLUDED_LANGUAGES = LANGUAGES.map(l => l.code).join(',');
