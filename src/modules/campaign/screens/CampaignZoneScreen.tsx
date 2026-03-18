@@ -4,7 +4,6 @@ import CampaignHeader from '../components/CampaignHeader';
 import StageNode from '../components/StageNode';
 import BossNode from '../components/BossNode';
 import BossDetailSheet from '../components/BossDetailSheet';
-import MapPath from '../components/MapPath';
 import { useZoneBosses } from '../hooks/useZoneBosses';
 import { ZONE_META } from '../data/zones';
 import type { StageState, ZoneBoss } from '../types/campaign.types';
@@ -104,7 +103,7 @@ export default function CampaignZoneScreen() {
     <div className={`h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col ${meta?.bgClass || 'zone-bg-1'}`}>
       {/* Header */}
       <CampaignHeader
-        title={`${t('campaign.zone.region')} ${zoneNumber}: ${zone?.name || meta?.name || ''}`}
+        title={`Vùng ${zoneNumber} : ${zone?.name || meta?.name || ''}`}
         stars={totalStars}
         maxStars={maxStars}
         backTo="/campaign"
@@ -118,15 +117,11 @@ export default function CampaignZoneScreen() {
         <div className="absolute bottom-[20%] left-[8%] text-2xl opacity-20 pointer-events-none">🌲</div>
         <div className="absolute top-[70%] right-[10%] text-2xl opacity-20 pointer-events-none">🌲</div>
 
-        {/* SVG path */}
-        <MapPath
-          height={800}
-          pathD="M 195 700 C 195 650, 100 600, 100 550 S 290 450, 290 400 S 150 300, 150 250 S 195 150, 195 100"
-        />
+        <div className="absolute top-[70%] right-[10%] text-2xl opacity-20 pointer-events-none">🌲</div>
 
         {/* Stage 1 (Minion #1): center bottom */}
         {regularBosses[0] && (
-          <div className="absolute z-10" style={{ left: '50%', bottom: '100px', transform: 'translateX(-50%)' }}>
+          <div className="absolute z-10" style={{ left: '70%', bottom: '85px', transform: 'translateX(-50%)' }}>
             <StageNode
               boss={regularBosses[0]}
               state={getStageState(regularBosses[0])}
@@ -138,7 +133,7 @@ export default function CampaignZoneScreen() {
 
         {/* Stage 2 (Minion #2): left */}
         {regularBosses[1] && (
-          <div className="absolute z-10" style={{ left: '25%', bottom: '270px', transform: 'translateX(-50%)' }}>
+          <div className="absolute z-10" style={{ left: '25%', bottom: '180px', transform: 'translateX(-50%)' }}>
             <StageNode
               boss={regularBosses[1]}
               state={getStageState(regularBosses[1])}
@@ -150,7 +145,7 @@ export default function CampaignZoneScreen() {
 
         {/* Stage 3 (Elite): right */}
         {regularBosses[2] && (
-          <div className="absolute z-10" style={{ right: '25%', bottom: '440px', transform: 'translateX(50%)' }}>
+          <div className="absolute z-10" style={{ right: '25%', bottom: '250px', transform: 'translateX(50%)' }}>
             <StageNode
               boss={regularBosses[2]}
               state={getStageState(regularBosses[2])}
@@ -162,7 +157,7 @@ export default function CampaignZoneScreen() {
 
         {/* Boss: center top */}
         {zoneBoss && (
-          <div className="absolute z-10" style={{ left: '50%', top: '100px', transform: 'translateX(-50%)' }}>
+          <div className="absolute z-10" style={{ left: '50%', top: '70px', transform: 'translateX(-50%)' }}>
             <BossNode
               boss={zoneBoss}
               state={getStageState(zoneBoss)}
@@ -194,40 +189,43 @@ function ZoneBottomNav() {
   const { t } = useTranslation();
 
   const tabs = [
-    { icon: 'map', label: t('campaign.zone.tabs.map'), to: '/campaign' },
-    { icon: 'bolt', label: t('campaign.zone.tabs.skills'), to: '/campaign/skills' },
-    { icon: 'science', label: t('campaign.zone.tabs.recipes'), to: '/campaign/recipes' },
-    { icon: 'assignment', label: t('campaign.zone.tabs.missions'), to: '/campaign/missions' },
-    { icon: 'emoji_events', label: t('campaign.zone.tabs.achievements'), to: '/campaign/achievements' },
+    { icon: 'map', label: 'Bản Đồ', to: '/campaign' },
+    { icon: 'bolt', label: 'Kỹ Năng', to: '/campaign/skills' },
+    { icon: 'science', label: 'C.Thức', to: '/campaign/recipes' },
+    { icon: 'assignment', label: 'N.Vụ', to: '/campaign/missions' },
+    { icon: 'emoji_events', label: 'T.Tụ', to: '/campaign/achievements' },
   ];
 
-  return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[94%] max-w-md z-50 pb-[max(24px,env(safe-area-inset-bottom))]">
-      <div className="absolute inset-0 bg-[#DEB887] rounded-full border-4 border-[#8B4513] shadow-[0_8px_0_#5D4037,0_15px_20px_rgba(0,0,0,0.3)] wood-pattern-v1" />
-      <div className="absolute top-1/2 left-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner" />
-      <div className="absolute top-1/2 right-2 w-2 h-2 bg-[#5D4037] rounded-full transform -translate-y-1/2 shadow-inner" />
+  const iconSrc: Record<string, string> = {
+    map: '/assets/map/campaign_region_1/button_map.png',
+    bolt: '/assets/map/campaign_region_1/button_skill.png',
+    science: '/assets/map/campaign_region_1/button_recipe.png',
+    assignment: '/assets/map/campaign_region_1/button_mission.png',
+    emoji_events: '/assets/map/campaign_region_1/button_achievements.png',
+  };
 
-      <div className="relative flex justify-between items-center px-4 py-3">
+  return (
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[80%] max-w-md z-50 pb-[max(4px,env(safe-area-inset-bottom))]">
+      <div className="relative flex justify-evenly items-center px-4 py-2">
         {tabs.map((tab) => {
           const isActive = tab.to === '/campaign';
+          const src = iconSrc[tab.icon] || '';
           return (
             <button
               key={tab.to}
               onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
-              className={`flex flex-col items-center gap-1 w-12 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}
+              className={`relative flex items-center justify-center w-16 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}
             >
-              {isActive ? (
-                <div className="w-10 h-10 rounded-full bg-[#8B4513] border-2 border-[#DEB887] flex items-center justify-center shadow-inner transform -translate-y-2 transition-all duration-200">
-                  <span className="material-symbols-outlined text-[#90EE90] text-xl">{tab.icon}</span>
-                </div>
-              ) : (
-                <div className="w-8 h-8 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#8B4513] text-2xl group-hover:scale-110 transition-transform">{tab.icon}</span>
-                </div>
-              )}
-              <span className={`text-[8px] font-bold ${isActive ? 'font-black text-[#5D4037] uppercase tracking-tighter' : 'text-[#8B4513]'}`}>
-                {tab.label}
-              </span>
+              <div className={`relative w-20 h-20 flex items-center justify-center transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
+                {src ? (
+                  <img src={src} alt={tab.label} className="w-full h-full object-contain" />
+                ) : (
+                  <span className="material-symbols-outlined text-[#8B4513] text-4xl">{tab.icon}</span>
+                )}
+                <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] font-bold text-white uppercase tracking-tighter whitespace-nowrap">
+                  {tab.label}
+                </span>
+              </div>
             </button>
           );
         })}

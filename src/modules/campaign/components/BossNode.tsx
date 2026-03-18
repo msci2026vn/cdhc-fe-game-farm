@@ -22,6 +22,15 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
   const isCurrent = state === 'current';
   const isLocked = state === 'locked';
 
+  const stageIndex = globalBossNumber ? (((globalBossNumber - 1) % 4) + 1) : undefined;
+  const COMPLETED_ICON_BY_STAGE: Record<number, string> = {
+    1: '/assets/map/campaign_region_1/baby_bedbugs.png',
+    2: '/assets/map/campaign_region_1/soldier_aphids.png',
+    3: '/assets/map/campaign_region_1/winged_aphids.png',
+    4: '/assets/map/campaign_region_1/Queen_aphid.png',
+  };
+  const completedIcon = stageIndex ? COMPLETED_ICON_BY_STAGE[stageIndex] : undefined;
+
   return (
     <button
       onClick={() => { if (!isLocked) playSound('boss_select'); onClick(); }}
@@ -40,50 +49,51 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       <div className="relative">
         {/* Ping for current */}
         {isCurrent && (
-          <div className="absolute inset-0 w-24 h-24 rounded-3xl bg-red-400/40 campaign-ping" />
+          <div className="absolute inset-0 w-36 h-36 rounded-3xl bg-red-400/40 campaign-ping" />
         )}
 
         <div className={cn(
-          'w-24 h-24 rounded-3xl border-4 flex items-center justify-center',
+          'w-36 h-36 flex items-center justify-center',
           isCompleted
-            ? 'bg-gradient-to-b from-green-500 to-green-700 border-yellow-400 shadow-[0_8px_0_#1B5E20]'
+            ? ''
             : isCurrent
-              ? 'bg-gradient-to-b from-red-500 to-red-700 border-yellow-400 shadow-[0_8px_0_#B71C1C]'
-              : 'bg-gradient-to-b from-gray-500 to-gray-700 border-gray-400 shadow-[0_8px_0_#424242] grayscale',
+              ? 'rounded-3xl border-4 bg-gradient-to-b from-red-500 to-red-700 border-yellow-400 shadow-[0_8px_0_#B71C1C]'
+              : 'rounded-3xl border-4 bg-gradient-to-b from-gray-500 to-gray-700 border-gray-400 shadow-[0_8px_0_#424242] grayscale',
         )}>
           {isCompleted ? (
-            <span className="material-symbols-outlined text-white text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              check
-            </span>
+            <div className="relative">
+              {completedIcon ? (
+                <img src={completedIcon} alt={boss.name} className="w-32 h-32 object-contain drop-shadow-lg" />
+              ) : (
+                <span className="material-symbols-outlined text-white text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  check
+                </span>
+              )}
+              {completedIcon && (
+                <span className="absolute inset-0 flex items-center justify-center translate-y-1">
+                  <span className="material-symbols-outlined text-white text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    check
+                  </span>
+                </span>
+              )}
+            </div>
           ) : isLocked ? (
             <div className="relative flex items-center justify-center">
               <span className="text-4xl opacity-30">{boss.emoji || '🔒'}</span>
               <span className="material-symbols-outlined text-white/80 text-lg absolute -bottom-1 -right-1 drop-shadow">lock</span>
             </div>
           ) : globalBossNumber ? (
-            <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+            <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-32 h-32 object-contain drop-shadow-lg" />
           ) : (
             <span className="text-5xl drop-shadow-lg">{boss.emoji}</span>
           )}
         </div>
 
-        {/* BOSS badge */}
-        {!isLocked && (
-          <div className={cn(
-            'absolute -bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-black px-3 py-0.5 rounded-full border-2 border-white shadow-md uppercase tracking-wider',
-            isCompleted ? 'bg-green-600 text-white' : 'bg-red-600 text-white animate-bounce',
-          )}>
-            {t('campaign.boss.badge')}
-          </div>
-        )}
       </div>
-
-      {/* Stone platform */}
-      <div className="w-32 h-6 bg-stone-600 rounded-[50%] mt-2 shadow-inner border border-stone-500" />
 
       {/* Boss name + stars */}
       <p className={cn(
-        'font-heading font-bold text-xs text-center mt-1.5',
+        'font-heading font-bold text-xs text-center mt-1 max-w-[90px]',
         isCompleted ? 'text-green-200' : isCurrent ? 'text-white' : 'text-white/40',
       )}>
         {boss.name}
@@ -97,7 +107,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       )}
 
       {isCompleted && boss.bestStars > 0 && (
-        <div className="flex justify-center gap-0.5 mt-0.5">
+        <div className="flex justify-center gap-0.5 mt-0.25">
           {Array.from({ length: 3 }).map((_, i) => (
             <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400' : 'text-white/20')}>
               ⭐

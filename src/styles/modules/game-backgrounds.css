@@ -63,7 +63,7 @@
 
     /* ═══════ Campaign Zone Gradients ═══════ */
     .zone-bg-1 {
-        background: linear-gradient(180deg, #A5D6A7 0%, #66BB6A 50%, #2E7D32 100%);
+        background: url('/assets/map/campaign_region_1/background_region_1.png') center/cover no-repeat;
     }
 
     .zone-bg-2 {
