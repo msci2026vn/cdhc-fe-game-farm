@@ -41,7 +41,7 @@ export default function MainMenuScreen() {
 
   useEffect(() => {
     audioManager.preloadScene('ui');
-    audioManager.startBgm('farm_day');
+    audioManager.startBgm('farm');
     return () => { audioManager.stopBgm(); };
   }, []);
 
