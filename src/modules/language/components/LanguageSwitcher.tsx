@@ -85,8 +85,6 @@ export function LanguageSwitcher({ className = '' }: LanguageSwitcherProps) {
         </>
       )}
 
-      {/* Hidden Google Translate element - REQUIRED */}
-      <div id="google_translate_element" style={{ display: 'none' }} />
     </div>
   );
 }

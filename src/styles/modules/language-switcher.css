@@ -189,33 +189,6 @@
   }
 }
 
-/* ── Hide Google Translate default UI ── */
-#google_translate_element {
-  display: none !important;
-}
-
-.goog-te-banner-frame,
-.goog-te-gadget,
-.goog-te-gadget-simple,
-.goog-te-menu-frame,
-.skiptranslate,
-#goog-gt-tt,
-.goog-te-balloon-frame,
-.goog-tooltip,
-.goog-tooltip:hover,
-.goog-te-spinner-pos {
-  display: none !important;
-}
-
-body {
-  top: 0 !important;
-}
-
-.goog-text-highlight {
-  background: none !important;
-  box-shadow: none !important;
-}
-
 /* ── Responsive ── */
 @media (max-width: 360px) {
   .lang-grid {
