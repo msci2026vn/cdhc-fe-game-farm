@@ -31,45 +31,85 @@ export default function PvpHistory() {
       height: '100dvh',
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
-      background: 'linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f3460 100%)',
+      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / cover",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '16px 16px 80px',
+      padding: '40px 16px 80px',
     }}>
-      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ maxWidth: 320, margin: '0 auto' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          marginBottom: 40,
+          minHeight: 32,
+        }}>
           <button
             onClick={() => navigate('/pvp')}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer', padding: 4 }}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              color: '#94a3b8',
+              fontSize: 20,
+              cursor: 'pointer',
+              padding: 4,
+            }}
           >
             ←
           </button>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#fff' }}>⚔️ PVP Stats</h1>
+          <h1 style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 900,
+            color: '#FFFEA3',
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+            textShadow: '2px 2px 0 #1a0a00, -2px 2px 0 #1a0a00, 2px -2px 0 #1a0a00, -2px -2px 0 #1a0a00, 3px 0 0 #1a0a00, -3px 0 0 #1a0a00, 0 3px 0 #1a0a00, 0 -3px 0 #1a0a00',
+          }}>
+            ⚔️ Stats
+          </h1>
         </div>
 
         {/* Tabs */}
-        <div style={{
-          display: 'flex', background: '#0d1b2a',
-          borderRadius: 10, padding: 4, marginBottom: 20,
-          border: '1px solid #1e3a5a',
-        }}>
-          {(['history', 'leaderboard'] as const).map(tabKey => (
-            <button
-              key={tabKey}
-              onClick={() => setTab(tabKey)}
-              style={{
-                flex: 1, padding: '10px', border: 'none', borderRadius: 8,
-                background: tab === tabKey ? '#e94560' : 'transparent',
-                color: tab === tabKey ? '#fff' : '#64748b',
-                fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              {tabKey === 'history' ? `📜 ${t('history.title')}` : `🏆 ${t('history.leaderboard')}`}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', justifyContent: 'center' }}>
+          <button
+            onClick={() => setTab('history')}
+            style={{
+              width: 130, height: 40, flexShrink: 0,
+              background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+              opacity: tab === 'history' ? 1 : 0.6,
+              transition: 'opacity 0.2s, transform 0.1s',
+            }}
+            onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
+            onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <img src="/assets/stats/btn_history.png" alt="History" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+          </button>
+          
+          <button
+            onClick={() => setTab('leaderboard')}
+            style={{
+              width: 130, height: 40, flexShrink: 0,
+              background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+              opacity: tab === 'leaderboard' ? 1 : 0.6,
+              transition: 'opacity 0.2s, transform 0.1s',
+            }}
+            onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
+            onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <img src="/assets/stats/btn_rankings.png" alt="Leaderboard" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+          </button>
         </div>
 
         {/* History tab */}
@@ -166,7 +206,7 @@ export default function PvpHistory() {
             {lbData?.leaderboard?.map((entry, idx) => (
               <div key={entry.user_id} style={{
                 background: idx < 3
-                  ? `linear-gradient(135deg,${['#78350f','#334155','#1c1c0a'][idx]},#0d1b2a)`
+                  ? `linear-gradient(135deg,${['#78350f', '#334155', '#1c1c0a'][idx]},#0d1b2a)`
                   : '#0d1b2a',
                 border: `1px solid ${idx === 0 ? '#f59e0b' : idx === 1 ? '#94a3b8' : idx === 2 ? '#b45309' : '#1e3a5a'}`,
                 borderRadius: 12, padding: '12px 16px', marginBottom: 8,

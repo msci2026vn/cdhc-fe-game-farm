@@ -2,9 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export function PvpActionGrid({
-  onPlayBot,
-  botLoading,
-  onInviteFriend,
   onFindMatch,
   findMatchDisabled,
   onRoomList,
@@ -13,9 +10,6 @@ export function PvpActionGrid({
   isPublic,
   onTogglePublic,
 }: {
-  onPlayBot: () => void;
-  botLoading: boolean;
-  onInviteFriend: () => void;
   onFindMatch: () => void;
   findMatchDisabled: boolean;
   onRoomList: () => void;
@@ -29,85 +23,46 @@ export function PvpActionGrid({
 
   return (
     <>
-      {/* Build button */}
-      <button
-        onClick={() => navigate('/pvp/build')}
-        style={{
-          width: '100%', padding: '12px', borderRadius: 12, marginBottom: 10,
-          background: 'linear-gradient(135deg,#b45309,#92400e)',
-          color: '#fff', cursor: 'pointer', textAlign: 'center',
-          border: '1px solid #b45309',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-        }}
-      >
-        <span style={{ fontSize: 22 }}>⚙️</span>
-        <span style={{ fontSize: 14, fontWeight: 700 }}>Thiết Lập Build</span>
-      </button>
 
-      {/* Play vs Bot — full width highlight */}
-      <button
-        onClick={onPlayBot}
-        disabled={botLoading}
-        style={{
-          width: '100%', padding: '14px', borderRadius: 12, marginBottom: 10,
-          background: botLoading
-            ? 'linear-gradient(135deg,#333,#222)'
-            : 'linear-gradient(135deg,#dc2626,#b91c1c)',
-          color: '#fff', cursor: botLoading ? 'not-allowed' : 'pointer',
-          textAlign: 'center', border: '1px solid #dc2626',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-          opacity: botLoading ? 0.7 : 1,
-        }}
-      >
-        <span style={{ fontSize: 26 }}>🤖</span>
-        <span style={{ fontSize: 15, fontWeight: 700 }}>
-          {botLoading ? t('common.loading') : t('bot.playWithBot')}
-        </span>
-      </button>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
-        {/* Mời bạn */}
-        <button
-          onClick={onInviteFriend}
-          style={{
-            padding: '16px 8px', borderRadius: 12,
-            background: 'linear-gradient(135deg,#1e4d78,#0f3460)',
-            color: '#fff', cursor: 'pointer', textAlign: 'center',
-            border: '1px solid #1e4d78',
-          }}
-        >
-          <div style={{ fontSize: 26, marginBottom: 6 }}>👥</div>
-          <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.inviteFriend')}</div>
-        </button>
-
+      <div style={{ display: 'flex', flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 25, justifyContent: 'center' }}>
         {/* Tìm trận */}
         <button
           onClick={onFindMatch}
           disabled={findMatchDisabled}
           style={{
-            padding: '16px 8px', borderRadius: 12,
-            background: 'linear-gradient(135deg,#7c3aed,#4f46e5)',
-            color: '#fff', cursor: findMatchDisabled ? 'not-allowed' : 'pointer', textAlign: 'center',
-            opacity: findMatchDisabled ? 0.7 : 1,
-            border: '1px solid #7c3aed',
+            background: 'none', border: 'none', padding: 0,
+            cursor: findMatchDisabled ? 'not-allowed' : 'pointer',
+            opacity: findMatchDisabled ? 0.6 : 1,
+            transition: 'transform 0.1s, opacity 0.1s',
+            display: 'block', width: 90, flexShrink: 0,
           }}
+          onPointerDown={e => { if (!findMatchDisabled) e.currentTarget.style.transform = 'scale(0.96)'; }}
+          onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
         >
-          <div style={{ fontSize: 26, marginBottom: 6 }}>🔍</div>
-          <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.findMatch')}</div>
+          <img
+            src="/assets/pvp_1vs1_arena/btn_find_matches.png"
+            alt={t('lobby.findMatch')}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
+          />
         </button>
 
         {/* Danh sách phòng */}
         <button
           onClick={onRoomList}
           style={{
-            padding: '16px 8px', borderRadius: 12,
-            background: 'linear-gradient(135deg,#0f5132,#064e3b)',
-            color: '#fff', cursor: 'pointer', textAlign: 'center',
-            border: '1px solid #065f46',
+            background: 'none', border: 'none', padding: 0,
+            cursor: 'pointer',
+            transition: 'transform 0.1s',
+            display: 'block', width: 90, flexShrink: 0,
           }}
+          onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.96)')}
+          onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
         >
-          <div style={{ fontSize: 26, marginBottom: 6 }}>📋</div>
-          <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.roomList')}</div>
+          <img
+            src="/assets/pvp_1vs1_arena/btn_room_list.png"
+            alt={t('lobby.roomList')}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
+          />
         </button>
 
         {/* Tạo phòng */}
@@ -115,16 +70,20 @@ export function PvpActionGrid({
           onClick={onCreateRoom}
           disabled={createRoomLoading}
           style={{
-            padding: '16px 8px', borderRadius: 12,
-            background: createRoomLoading
-              ? 'linear-gradient(135deg,#333,#222)'
-              : 'linear-gradient(135deg,#b45309,#92400e)',
-            color: '#fff', cursor: createRoomLoading ? 'not-allowed' : 'pointer', textAlign: 'center',
-            border: '1px solid #b45309', opacity: createRoomLoading ? 0.7 : 1,
+            background: 'none', border: 'none', padding: 0,
+            cursor: createRoomLoading ? 'not-allowed' : 'pointer',
+            opacity: createRoomLoading ? 0.6 : 1,
+            transition: 'transform 0.1s, opacity 0.1s',
+            display: 'block', width: 90, flexShrink: 0,
           }}
+          onPointerDown={e => { if (!createRoomLoading) e.currentTarget.style.transform = 'scale(0.96)'; }}
+          onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
         >
-          <div style={{ fontSize: 26, marginBottom: 6 }}>{createRoomLoading ? '⏳' : '➕'}</div>
-          <div style={{ fontSize: 12, fontWeight: 700 }}>{t('lobby.createRoom')}</div>
+          <img
+            src="/assets/pvp_1vs1_arena/btn_create_room.png"
+            alt={t('lobby.createRoom')}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
+          />
         </button>
       </div>
 
@@ -133,25 +92,32 @@ export function PvpActionGrid({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'rgba(255,255,255,0.04)',
-        border: '0.5px solid rgba(255,255,255,0.08)',
+        background: "url('/assets/pvp_1vs1_arena/frame_wood_7.png') no-repeat center center / 100% 100%",
         borderRadius: '12px',
-        padding: '10px 14px',
-        marginBottom: '10px',
+        padding: '8px 14px',
+        marginBottom: '6px',
       }}>
         <div>
-          <div style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>
+          <div style={{
+            fontSize: '13px', color: '#FFFEA3', fontWeight: 900,
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif", letterSpacing: 0.5,
+            textShadow: '1px 1px 0 #1a0a00, -1px 1px 0 #1a0a00, 1px -1px 0 #1a0a00, -1px -1px 0 #1a0a00'
+          }}>
             Phòng công khai
           </div>
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+          <div style={{
+            fontSize: '11px', color: '#fff', fontWeight: 500, marginTop: '2px',
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif", letterSpacing: 0.5,
+            textShadow: '1px 1px 0 #1a0a00, -1px 1px 0 #1a0a00, 1px -1px 0 #1a0a00, -1px -1px 0 #1a0a00'
+          }}>
             {isPublic ? 'Mọi người có thể xem trận đấu' : 'Chỉ người được mời mới vào được'}
           </div>
         </div>
         <div
           onClick={onTogglePublic}
           style={{
-            width: '44px', height: '24px',
-            borderRadius: '12px',
+            width: '36px', height: '20px',
+            borderRadius: '10px',
             background: isPublic ? 'rgba(29,158,117,0.7)' : 'rgba(255,255,255,0.15)',
             position: 'relative',
             cursor: 'pointer',
@@ -162,8 +128,8 @@ export function PvpActionGrid({
           <div style={{
             position: 'absolute',
             top: '3px',
-            left: isPublic ? '23px' : '3px',
-            width: '18px', height: '18px',
+            left: isPublic ? '19px' : '3px',
+            width: '14px', height: '14px',
             borderRadius: '50%',
             background: '#fff',
             transition: 'left 0.2s',

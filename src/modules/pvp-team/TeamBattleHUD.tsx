@@ -106,7 +106,7 @@ export function TeamBattleHUD({
     <div style={{
       position: 'relative',
       zIndex: 2,
-      padding: '6px 10px 4px',
+      padding: '120px 10px 4px',
       flexShrink: 0,
     }}>
       {/* HP bars + timer */}

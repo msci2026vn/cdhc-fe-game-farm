@@ -33,8 +33,6 @@ export default function PvpLobby() {
   const [waitSeconds, setWaitSeconds] = useState(0);
   const [pendingInvite, setPendingInvite] = useState<(PvpEvent & { type: 'pvp_invite' }) | null>(null);
   const [toast, setToast] = useState('');
-  const [showBotPicker, setShowBotPicker] = useState(false);
-  const [botLoading, setBotLoading] = useState(false);
   const [showBossPopup, setShowBossPopup] = useState(false);
   const [bossData, setBossData] = useState<{ name: string; avatar: string; greeting: string } | null>(null);
   const [challengeData, setChallengeData] = useState<{ roomCode: string; hostId: string; hostName: string; hostRating: number; timeoutMs: number } | null>(null);
@@ -42,11 +40,30 @@ export default function PvpLobby() {
   const [openRoomLoading, setOpenRoomLoading] = useState(false);
   const [challengeSearching, setChallengeSearching] = useState(false);
   const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [showBotPicker, setShowBotPicker] = useState(false);
+  const [botLoading, setBotLoading] = useState(false);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
   }, []);
+
+  const handlePlayBot = async (tier: string) => {
+    setBotLoading(true);
+    setShowBotPicker(false);
+    try {
+      const data = await pvpApi.playBot(tier);
+      if (data.ok && data.roomId) {
+        navigate(`/pvp-test?roomId=${data.roomId}`);
+      } else {
+        showToast(`❌ ${data.error || 'Failed'}`);
+      }
+    } catch (e) {
+      showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);
+    } finally {
+      setBotLoading(false);
+    }
+  };
 
   // Queue status poll (only when in queue)
   const { data: queueStatus } = useQuery({
@@ -128,7 +145,7 @@ export default function PvpLobby() {
 
   // Mutations
   const sendInviteMut = useMutation({
-    mutationFn: pvpApi.sendInvite,
+    mutationFn: (toUserId: string) => pvpApi.sendInvite(toUserId),
     onSuccess: () => {
       setShowFriendPicker(false);
       showToast(t('toast.inviteSent'));
@@ -159,7 +176,7 @@ export default function PvpLobby() {
   });
 
   const joinQueueMut = useMutation({
-    mutationFn: pvpApi.joinQueue,
+    mutationFn: () => pvpApi.joinQueue(),
     onSuccess: (data) => {
       if (data.matched && (data.roomId || data.roomCode)) {
         const target = data.roomId
@@ -175,7 +192,7 @@ export default function PvpLobby() {
   });
 
   const leaveQueueMut = useMutation({
-    mutationFn: pvpApi.leaveQueue,
+    mutationFn: () => pvpApi.leaveQueue(),
     onSuccess: () => setInQueue(false),
   });
 
@@ -185,26 +202,10 @@ export default function PvpLobby() {
       showToast(t('matchmaking.kickedRequeue'));
       joinQueueMut.mutate();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Bot / Boss handlers ──
-  const handlePlayBot = async (tier: string) => {
-    setBotLoading(true);
-    setShowBotPicker(false);
-    try {
-      const data = await pvpApi.playBot(tier);
-      if (data.ok && data.roomId) {
-        navigate(`/pvp-test?roomId=${data.roomId}`);
-      } else {
-        showToast(`❌ ${data.error || 'Failed'}`);
-      }
-    } catch (e) {
-      showToast(`❌ ${e instanceof Error ? e.message : 'Error'}`);
-    } finally {
-      setBotLoading(false);
-    }
-  };
+
 
   const handleCreateOpenRoom = async () => {
     setOpenRoomLoading(true);
@@ -218,7 +219,7 @@ export default function PvpLobby() {
       const data = (await res.json()) as { ok: boolean; roomCode: string; roomId: string };
       if (data.ok && data.roomCode) {
         setChallengeSearching(true);
-        pvpApi.startChallenge(data.roomCode).catch(() => {});
+        pvpApi.startChallenge(data.roomCode).catch(() => { });
         navigate(`/pvp-test?roomId=${data.roomId}`);
       }
     } catch (e) {
@@ -244,10 +245,10 @@ export default function PvpLobby() {
     <div style={{
       minHeight: '100dvh',
       overflowY: 'auto',
-      background: 'linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f3460 100%)',
+      background: "url('/assets/pvp/bg_pvp.png') no-repeat center top / 100% 100%",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '16px 16px 80px',
+      padding: '20px 16px 80px',
     }}>
       {/* Pending invite popup */}
       {pendingInvite && (
@@ -305,44 +306,76 @@ export default function PvpLobby() {
         </div>
       )}
 
-      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ maxWidth: 320, margin: '0 auto' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          marginBottom: 40,
+          marginTop: 20,
+          minHeight: 32,
+        }}>
           <button
-            onClick={() => navigate(-1)}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer', padding: 4 }}
+            onClick={() => navigate('/pvp')}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 58,
+              background: "url('/assets/pvp_1vs1_arena/btn_back.png') no-repeat center center / contain",
+              border: 'none',
+              width: 86,
+              height: 38,
+              cursor: 'pointer',
+              color: 'transparent',
+              padding: 0,
+              transition: 'transform 0.1s',
+            }}
+            onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.95)')}
+            onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            ←
+            Back
           </button>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#e94560' }}>⚔️ PVP Arena</h1>
+          <h1 style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 900,
+            color: '#FFFEA3',
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+            textShadow: '2px 2px 0 #1a0a00, -2px 2px 0 #1a0a00, 2px -2px 0 #1a0a00, -2px -2px 0 #1a0a00, 3px 0 0 #1a0a00, -3px 0 0 #1a0a00, 0 3px 0 #1a0a00, 0 -3px 0 #1a0a00',
+          }}>
+            1 vs 1 Arena
+          </h1>
           <button
             onClick={() => navigate('/pvp/history?tab=leaderboard')}
             style={{
-              marginLeft: 'auto',
-              background: 'rgba(255,255,255,0.08)',
-              border: '0.5px solid rgba(255,255,255,0.15)',
-              borderRadius: '8px',
-              padding: '6px 12px',
-              color: '#FAC775',
-              fontSize: '13px',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
+              position: 'absolute',
+              right: 0,
+              top: 58,
+              background: "url('/assets/pvp/btn_bxh.png') no-repeat center center / contain",
+              border: 'none',
+              width: 86,
+              height: 38,
               cursor: 'pointer',
+              color: 'transparent',
+              padding: 0,
             }}
           >
-            🏆 BXH
+            BXH
           </button>
         </div>
 
-        <PvpRatingCard />
+        <div style={{ transform: 'translateY(22px)' }}>
+          <PvpRatingCard />
+        </div>
 
         <PvpActionGrid
-          onPlayBot={() => setShowBotPicker(true)}
-          botLoading={botLoading}
-          onInviteFriend={() => setShowFriendPicker(true)}
           onFindMatch={() => joinQueueMut.mutate()}
           findMatchDisabled={joinQueueMut.isPending || inQueue}
           onRoomList={() => setShowRoomList(true)}
@@ -358,13 +391,6 @@ export default function PvpLobby() {
 
       </div>
 
-      {/* Bot Difficulty Picker */}
-      {showBotPicker && (
-        <PvpBotDifficultyPicker
-          onClose={() => setShowBotPicker(false)}
-          onSelect={handlePlayBot}
-        />
-      )}
 
       {/* Boss Challenge Popup */}
       {showBossPopup && bossData && (
@@ -389,6 +415,77 @@ export default function PvpLobby() {
           }}
         />
       )}
+      {/* Bot Difficulty Picker */}
+      {showBotPicker && (
+        <PvpBotDifficultyPicker
+          onClose={() => setShowBotPicker(false)}
+          onSelect={handlePlayBot}
+        />
+      )}
+
+      {/* Bottom Navigation — same as PvpHub */}
+      <div style={{
+        position: 'fixed',
+        bottom: 25,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 420,
+        height: 90,
+        background: 'linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.6))',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        padding: '0 20px 10px',
+        zIndex: 100,
+      }}>
+        {[
+          { icon: 'btn_home.png', label: 'Home', path: '/' },
+          { icon: 'btn_pvp.png', label: 'Bot' },
+          { icon: 'btn_friend.png', label: 'Invite' },
+          { icon: 'btn_build.png', label: 'Build', path: '/pvp/build' }
+        ].map((btn, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              if (btn.label === 'Bot') {
+                setShowBotPicker(true);
+              } else if (btn.label === 'Invite') {
+                setShowFriendPicker(true);
+              } else {
+                navigate(btn.path || '/');
+              }
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              cursor: 'pointer',
+              gap: 2,
+              transition: 'transform 0.15s',
+            }}
+            onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.9)')}
+            onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <img
+              src={`/assets/pvp/${btn.icon}`}
+              alt={btn.label}
+              style={{ width: 36, height: 36, objectFit: 'contain' }}
+            />
+            <span style={{
+              fontSize: 11,
+              fontFamily: "'Nunito', sans-serif",
+              fontWeight: 900,
+              color: '#FFFEA3',
+              textShadow: '1px 1.5px 0 #3b1e0a, -1px -1.5px 0 #3b1e0a, 1px -1.5px 0 #3b1e0a, -1px 1.5px 0 #3b1e0a',
+            }}>
+              {btn.label}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

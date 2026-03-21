@@ -71,9 +71,10 @@ export function RoomListModal({
           {loading ? (
             <div style={{ textAlign: 'center', color: '#64748b', padding: 40, fontSize: 14 }}>{t('common.loading')}</div>
           ) : rooms.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>🏜️</div>
-              <div style={{ color: '#64748b', fontSize: 14, marginBottom: 20 }}>{t('room.noRooms')}</div>
+            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>🛸</div>
+              <div style={{ color: '#94a3b8', fontSize: 15, fontWeight: 500 }}>Chưa có phòng nào...</div>
+              <div style={{ color: '#64748b', fontSize: 13, marginTop: 4, marginBottom: 24 }}>Hãy thử tạo phòng mới nhé!</div>
               <button
                 onClick={() => { onClose(); navigate('/pvp-test'); }}
                 style={{

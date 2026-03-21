@@ -16,12 +16,23 @@ export function PvpRecentMatches() {
   });
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8' }}>{t('lobby.recentMatches')}</span>
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <span style={{
+          fontSize: 14, fontWeight: 900, color: '#FFFEA3',
+          fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+          textShadow: '1px 1px 0 #1a0a00, -1px 1px 0 #1a0a00, 1px -1px 0 #1a0a00, -1px -1px 0 #1a0a00',
+        }}>{t('lobby.recentMatches')}</span>
         <button
           onClick={() => navigate('/pvp/history')}
-          style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: '#FFFEA3',
+            fontSize: 12, fontWeight: 900,
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+            textShadow: '1px 1px 0 #1a0a00, -1px 1px 0 #1a0a00, 1px -1px 0 #1a0a00, -1px -1px 0 #1a0a00',
+            padding: 0,
+          }}
         >
           {t('lobby.viewAll')}
         </button>
@@ -29,9 +40,11 @@ export function PvpRecentMatches() {
 
       {!historyData?.matches?.length ? (
         <div style={{
-          background: '#0d1b2a', border: '1px solid #1e3a5a',
-          borderRadius: 10, padding: '20px', textAlign: 'center',
-          color: '#64748b', fontSize: 13,
+          background: "url('/assets/pvp_1vs1_arena/frame_recent_match.png') no-repeat center center / 100% 100%",
+          borderRadius: 10, padding: '18px 12px', textAlign: 'center',
+          color: '#5c3a21', fontSize: 13, minHeight: 60,
+          fontFamily: "'Fredoka One', 'Nunito', sans-serif", letterSpacing: 0.5,
+          textShadow: '0 1px 1px rgba(255,255,255,0.4)',
         }}>
           {t('lobby.noMatches')}
         </div>
@@ -39,7 +52,7 @@ export function PvpRecentMatches() {
         historyData.matches.map(m => (
           <div key={m.id} style={{
             background: '#0d1b2a', border: '1px solid #1e3a5a',
-            borderRadius: 10, padding: '12px 16px', marginBottom: 8,
+            borderRadius: 10, padding: '8px 12px', marginBottom: 6,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

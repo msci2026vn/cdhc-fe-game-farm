@@ -113,7 +113,7 @@ export default function TeamBattleScreen({
       inset: 0,
       display: 'flex',
       flexDirection: 'column',
-      background: '#0a130a',
+      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / cover",
       color: '#f0e8d0',
       fontFamily: "'Nunito', -apple-system, sans-serif",
       overflowY: 'hidden',

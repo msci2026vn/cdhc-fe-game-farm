@@ -1300,10 +1300,10 @@ export default function PvpTestScreen() {
   return (
     <div style={{
       minHeight: '100dvh',
-      background: '#0f1624',
+      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / cover",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      padding: showBoard ? 0 : 16,
+      padding: showBoard ? 0 : '120px 16px 20px',
     }}>
       {/* Countdown overlay */}
       {showCountdown && <CountdownOverlay count={countdown} />}
