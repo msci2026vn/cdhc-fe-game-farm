@@ -1577,262 +1577,262 @@ export default function PvpTestScreen() {
             {/* ── PC layout container — centered max-width ── */}
             <div className="pvp-battle__container">
 
-            {/* Floating emojis from opponent taunts */}
-            {floatingEmojis.map(({ id, emoji }) => (
-              <div key={id} className="pvp-float-emoji">{emoji}</div>
-            ))}
+              {/* Floating emojis from opponent taunts */}
+              {floatingEmojis.map(({ id, emoji }) => (
+                <div key={id} className="pvp-float-emoji">{emoji}</div>
+              ))}
 
-            {/* ══════ TIMER — TOP CENTER ══════ */}
-            <div className="pvp-timer-top">
-              <div className={[
-                'pvp-timer',
-                timeLeft <= 10 && 'pvp-timer--urgent',
-                isSuddenDeath && timeLeft > 10 && 'pvp-timer--sudden',
-                activeDebuff?.type === 'hide_timer' && 'pvp-timer--hidden',
-              ].filter(Boolean).join(' ')}>
-                {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
-              </div>
-              {spectatorCount > 0 && (
-                <div style={{
-                  fontSize: '11px', color: 'rgba(255,255,255,0.5)',
-                  display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: 4,
-                }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#E24B4A', display: 'inline-block' }} />
-                  {spectatorCount} đang xem
+              {/* ══════ TIMER — TOP CENTER ══════ */}
+              <div className="pvp-timer-top">
+                <div className={[
+                  'pvp-timer',
+                  timeLeft <= 10 && 'pvp-timer--urgent',
+                  isSuddenDeath && timeLeft > 10 && 'pvp-timer--sudden',
+                  activeDebuff?.type === 'hide_timer' && 'pvp-timer--hidden',
+                ].filter(Boolean).join(' ')}>
+                  {isSuddenDeath ? '☠️' : '⏱'} <span>{timeLeft}</span>s
                 </div>
-              )}
-            </div>
-
-            {/* ── Spectator banner ── */}
-            {isSpectator && (
-              <div style={{
-                background: 'rgba(226,75,74,0.15)', border: '0.5px solid rgba(226,75,74,0.3)',
-                borderRadius: '8px', padding: '6px 14px', textAlign: 'center',
-                fontSize: '12px', color: '#E24B4A', fontWeight: 500,
-                marginBottom: '8px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', gap: '6px',
-              }}>
-                <span style={{
-                  width: '6px', height: '6px', borderRadius: '50%', background: '#E24B4A',
-                  display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite',
-                }} />
-                Đang xem trực tiếp
-              </div>
-            )}
-
-            {/* ── Opponent skill notification (BIG banner) ── */}
-            {opponentSkillNotif && (
-              <div className="pvp-opp-skill-notif">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 28 }}>{opponentSkillNotif.icon}</span>
-                  <div>
-                    <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>
-                      {opponentSkillNotif.name}
-                    </div>
-                    <div style={{ color: '#fca5a5', fontSize: 11 }}>
-                      {opponentName || opponentPlayer?.name || t('game.opponent')} dùng {opponentSkillNotif.target}
-                    </div>
+                {spectatorCount > 0 && (
+                  <div style={{
+                    fontSize: '11px', color: 'rgba(255,255,255,0.5)',
+                    display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: 4,
+                  }}>
+                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#E24B4A', display: 'inline-block' }} />
+                    {spectatorCount} đang xem
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── TOP: Opponent avatar + info + mini board ── */}
-            <div className="pvp-top">
-              <div className="pvp-top__avatar">
-                {opponentAvatar ? (
-                  <img src={opponentAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                ) : (
-                  <span>{(opponentName || opponentPlayer?.name || '?').charAt(0).toUpperCase()}</span>
                 )}
               </div>
-              <div className="pvp-top__info">
-                <div className="pvp-top__name-row">
-                  <span className="pvp-top__name">{opponentPlayer?.name ?? t('game.opponent')}</span>
-                  <span className="pvp-top__score">{opponentScore.toLocaleString()}</span>
-                </div>
-                <div className={`pvp-hp${opponentHp < opponentMaxHp * 0.3 ? ' pvp-hp--danger' : ''}`}>
-                  <div
-                    className={`pvp-hp__fill${opponentHp < opponentMaxHp * 0.3 ? ' pvp-hp__fill--danger' : ''}`}
-                    style={{ width: `${Math.max(0, (opponentHp / opponentMaxHp) * 100)}%` }}
-                  />
-                  <span className="pvp-hp__text">
-                    {opponentHp}/{opponentMaxHp}{opponentArmor > 0 ? ` 🛡️${opponentArmor}` : ''}
-                  </span>
-                </div>
-                <div className="pvp-hp" style={{ height: 5, marginTop: 2 }}>
-                  <div
-                    className="pvp-hp__fill"
-                    style={{ width: `${Math.min(100, (opponentMana / opponentMaxMana) * 100)}%`, background: '#eab308' }}
-                  />
-                  <span className="pvp-hp__text" style={{ fontSize: 9 }}>
-                    ⭐{opponentMana}/{opponentMaxMana}
-                  </span>
-                </div>
-              </div>
-              <div className="pvp-mini-wrap" style={{ position: 'relative' }}>
-                <span className="pvp-mini-wrap__label">{t('game.opponentBoard')}</span>
-                <div style={{ position: 'relative' }}>
-                  <MiniBoard tiles={opponentBoard} />
-                  {/* Blur overlay — default hidden, revealed by Thiên Nhãn */}
-                  {!opponentBoardRevealed && (
-                    <div className="pvp-mini-blur">
-                      <span style={{ fontSize: 16 }}>👁️</span>
-                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginTop: 1 }}>Thiên Nhãn</span>
-                    </div>
-                  )}
-                  {opponentBoardRevealed && (
-                    <div className="pvp-mini-revealed">👁️ Thiên Nhãn</div>
-                  )}
-                  {/* Skill effect overlays on opponent mini board */}
-                  <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'opponent')} />
-                </div>
-              </div>
-            </div>
 
-            {/* ── BOARD SECTION ── */}
-            <div className="pvp-board-section">
-              {/* ── MY SECTION ── */}
-              <div className="pvp-my">
-                <div className="pvp-my__avatar">
-                  {myAvatar ? (
-                    <img src={myAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              {/* ── Spectator banner ── */}
+              {isSpectator && (
+                <div style={{
+                  background: 'rgba(226,75,74,0.15)', border: '0.5px solid rgba(226,75,74,0.3)',
+                  borderRadius: '8px', padding: '6px 14px', textAlign: 'center',
+                  fontSize: '12px', color: '#E24B4A', fontWeight: 500,
+                  marginBottom: '8px', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', gap: '6px',
+                }}>
+                  <span style={{
+                    width: '6px', height: '6px', borderRadius: '50%', background: '#E24B4A',
+                    display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite',
+                  }} />
+                  Đang xem trực tiếp
+                </div>
+              )}
+
+              {/* ── Opponent skill notification (BIG banner) ── */}
+              {opponentSkillNotif && (
+                <div className="pvp-opp-skill-notif">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 28 }}>{opponentSkillNotif.icon}</span>
+                    <div>
+                      <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>
+                        {opponentSkillNotif.name}
+                      </div>
+                      <div style={{ color: '#fca5a5', fontSize: 11 }}>
+                        {opponentName || opponentPlayer?.name || t('game.opponent')} dùng {opponentSkillNotif.target}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── TOP: Opponent avatar + info + mini board ── */}
+              <div className="pvp-top">
+                <div className="pvp-top__avatar">
+                  {opponentAvatar ? (
+                    <img src={opponentAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                   ) : (
-                    <span>{(myName || myPlayer?.name || '?').charAt(0).toUpperCase()}</span>
+                    <span>{(opponentName || opponentPlayer?.name || '?').charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <div className="pvp-my__stats">
-                  <div className="pvp-my__top-row">
-                    <span className="pvp-my__name">{myPlayer?.name ?? t('game.you')}</span>
-                    <span className="pvp-my__score">{myScore.toLocaleString()}</span>
+                <div className="pvp-top__info">
+                  <div className="pvp-top__name-row">
+                    <span className="pvp-top__name">{opponentPlayer?.name ?? t('game.opponent')}</span>
+                    <span className="pvp-top__score">{opponentScore.toLocaleString()}</span>
                   </div>
-                  <div className={`pvp-bar pvp-bar--hp${myHp < myMaxHp * 0.3 ? ' pvp-bar--low' : ''}`}>
-                    <div className="pvp-bar__fill" style={{ width: `${Math.max(0, (myHp / myMaxHp) * 100)}%` }} />
-                    <span className="pvp-bar__label">❤️ HP</span>
-                    <span className="pvp-bar__val">{myHp}/{myMaxHp}{myArmor > 0 ? ` 🛡️${myArmor}` : ''}</span>
+                  <div className={`pvp-hp${opponentHp < opponentMaxHp * 0.3 ? ' pvp-hp--danger' : ''}`}>
+                    <div
+                      className={`pvp-hp__fill${opponentHp < opponentMaxHp * 0.3 ? ' pvp-hp__fill--danger' : ''}`}
+                      style={{ width: `${Math.max(0, (opponentHp / opponentMaxHp) * 100)}%` }}
+                    />
+                    <span className="pvp-hp__text">
+                      {opponentHp}/{opponentMaxHp}{opponentArmor > 0 ? ` 🛡️${opponentArmor}` : ''}
+                    </span>
                   </div>
-                  <div className="pvp-bar pvp-bar--mp" style={{ position: 'relative' }}>
-                    <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / myMaxMana) * 100)}%` }} />
-                    <span className="pvp-bar__label">⭐ Mana</span>
-                    <span className="pvp-bar__val">{myMana}/{myMaxMana}</span>
-                    {/* Skill cost markers */}
+                  <div className="pvp-hp" style={{ height: 5, marginTop: 2 }}>
+                    <div
+                      className="pvp-hp__fill"
+                      style={{ width: `${Math.min(100, (opponentMana / opponentMaxMana) * 100)}%`, background: '#eab308' }}
+                    />
+                    <span className="pvp-hp__text" style={{ fontSize: 9 }}>
+                      ⭐{opponentMana}/{opponentMaxMana}
+                    </span>
+                  </div>
+                </div>
+                <div className="pvp-mini-wrap" style={{ position: 'relative' }}>
+                  <span className="pvp-mini-wrap__label">{t('game.opponentBoard')}</span>
+                  <div style={{ position: 'relative' }}>
+                    <MiniBoard tiles={opponentBoard} />
+                    {/* Blur overlay — default hidden, revealed by Thiên Nhãn */}
+                    {!opponentBoardRevealed && (
+                      <div className="pvp-mini-blur">
+                        <span style={{ fontSize: 16 }}>👁️</span>
+                        <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginTop: 1 }}>Thiên Nhãn</span>
+                      </div>
+                    )}
+                    {opponentBoardRevealed && (
+                      <div className="pvp-mini-revealed">👁️ Thiên Nhãn</div>
+                    )}
+                    {/* Skill effect overlays on opponent mini board */}
+                    <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'opponent')} />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── BOARD SECTION ── */}
+              <div className="pvp-board-section">
+                {/* ── MY SECTION ── */}
+                <div className="pvp-my">
+                  <div className="pvp-my__avatar">
+                    {myAvatar ? (
+                      <img src={myAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    ) : (
+                      <span>{(myName || myPlayer?.name || '?').charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div className="pvp-my__stats">
+                    <div className="pvp-my__top-row">
+                      <span className="pvp-my__name">{myPlayer?.name ?? t('game.you')}</span>
+                      <span className="pvp-my__score">{myScore.toLocaleString()}</span>
+                    </div>
+                    <div className={`pvp-bar pvp-bar--hp${myHp < myMaxHp * 0.3 ? ' pvp-bar--low' : ''}`}>
+                      <div className="pvp-bar__fill" style={{ width: `${Math.max(0, (myHp / myMaxHp) * 100)}%` }} />
+                      <span className="pvp-bar__label">❤️ HP</span>
+                      <span className="pvp-bar__val">{myHp}/{myMaxHp}{myArmor > 0 ? ` 🛡️${myArmor}` : ''}</span>
+                    </div>
+                    <div className="pvp-bar pvp-bar--mp" style={{ position: 'relative' }}>
+                      <div className="pvp-bar__fill" style={{ width: `${Math.min(100, (myMana / myMaxMana) * 100)}%` }} />
+                      <span className="pvp-bar__label">⭐ Mana</span>
+                      <span className="pvp-bar__val">{myMana}/{myMaxMana}</span>
+                      {/* Skill cost markers */}
+                      {mySkills.map(skill => {
+                        const pct = (skill.manaCost / myMaxMana) * 100;
+                        if (pct > 100) return null;
+                        return (
+                          <div key={skill.id} style={{
+                            position: 'absolute', top: -9, left: `${pct}%`,
+                            transform: 'translateX(-50%)',
+                            fontSize: 7, lineHeight: 1, pointerEvents: 'none',
+                            opacity: myMana >= skill.manaCost ? 1 : 0.35,
+                            transition: 'opacity 0.3s',
+                          }}>
+                            {skill.icon}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── BOARD — wood frame + vine corners ── */}
+                <div className={[
+                  'pvp-board-wrap',
+                  damageFlash && 'pvp-board-wrap--damage',
+                  activeDebuff?.type === 'shake' && 'pvp-board-wrap--shake',
+                  boardShake && 'pvp-board-wrap--skill-shake',
+                  isDangerZone && !damageFlash && 'pvp-board-wrap--danger',
+                ].filter(Boolean).join(' ')}>
+                  <span className="pvp-vine pvp-vine--tl">🌿</span>
+                  <span className="pvp-vine pvp-vine--tr">🍃</span>
+                  <span className="pvp-vine pvp-vine--bl">🌿</span>
+                  <span className="pvp-vine pvp-vine--br">🍃</span>
+                  {myGems.length > 0 && (
+                    <CampaignMatch3Board
+                      grid={myGems}
+                      selected={boardSelected}
+                      matchedCells={matchedCells}
+                      spawningGems={spawningGems}
+                      lockedGems={new Set()}
+                      highlightedGem={null}
+                      isStunned={activeDebuff?.type === 'freeze'}
+                      animating={boardAnimating}
+                      handlePointerDown={isSpectator ? () => { } : handlePointerDown}
+                      handlePointerMove={isSpectator ? () => { } : handlePointerMove}
+                      handlePointerUp={isSpectator ? () => { } : handlePointerUp}
+                      combo={pvpCombo}
+                      showCombo={showCombo}
+                      otHiemActive={false}
+                      romBocActive={false}
+                      GEM_META={PVP_GEM_META}
+                    />
+                  )}
+                  {activeDebuff?.type === 'freeze' && (
+                    <div className="pvp-freeze">&#10052;&#65039;</div>
+                  )}
+                  {/* Skill effect overlays on my board */}
+                  <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'self')} />
+                </div>
+                {/* Timer moved to top center */}
+
+                {/* ── SKILL BUTTONS ── */}
+                {!isSpectator && mySkills.length > 0 && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    gap: 10, padding: '6px 0 2px',
+                  }}>
                     {mySkills.map(skill => {
-                      const pct = (skill.manaCost / myMaxMana) * 100;
-                      if (pct > 100) return null;
+                      const cd = skillCooldowns[skill.id];
                       return (
-                        <div key={skill.id} style={{
-                          position: 'absolute', top: -9, left: `${pct}%`,
-                          transform: 'translateX(-50%)',
-                          fontSize: 7, lineHeight: 1, pointerEvents: 'none',
-                          opacity: myMana >= skill.manaCost ? 1 : 0.35,
-                          transition: 'opacity 0.3s',
-                        }}>
-                          {skill.icon}
-                        </div>
+                        <PvpSkillButton
+                          key={skill.id}
+                          skillId={skill.id}
+                          icon={skill.icon}
+                          name={skill.name}
+                          manaCost={skill.manaCost}
+                          currentMana={myMana}
+                          cooldownTotal={cd?.total ?? skill.cooldownMs}
+                          cooldownRemaining={cd?.remaining ?? 0}
+                          disabled={phase !== 'playing' && phase !== 'sudden_death'}
+                          onCast={() => handleCastSkill(skill.id)}
+                        />
                       );
                     })}
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* ── BOARD — wood frame + vine corners ── */}
-              <div className={[
-                'pvp-board-wrap',
-                damageFlash && 'pvp-board-wrap--damage',
-                activeDebuff?.type === 'shake' && 'pvp-board-wrap--shake',
-                boardShake && 'pvp-board-wrap--skill-shake',
-                isDangerZone && !damageFlash && 'pvp-board-wrap--danger',
-              ].filter(Boolean).join(' ')}>
-                <span className="pvp-vine pvp-vine--tl">🌿</span>
-                <span className="pvp-vine pvp-vine--tr">🍃</span>
-                <span className="pvp-vine pvp-vine--bl">🌿</span>
-                <span className="pvp-vine pvp-vine--br">🍃</span>
-                {myGems.length > 0 && (
-                  <CampaignMatch3Board
-                    grid={myGems}
-                    selected={boardSelected}
-                    matchedCells={matchedCells}
-                    spawningGems={spawningGems}
-                    lockedGems={new Set()}
-                    highlightedGem={null}
-                    isStunned={activeDebuff?.type === 'freeze'}
-                    animating={boardAnimating}
-                    handlePointerDown={isSpectator ? () => {} : handlePointerDown}
-                    handlePointerMove={isSpectator ? () => {} : handlePointerMove}
-                    handlePointerUp={isSpectator ? () => {} : handlePointerUp}
-                    combo={pvpCombo}
-                    showCombo={showCombo}
-                    otHiemActive={false}
-                    romBocActive={false}
-                    GEM_META={PVP_GEM_META}
-                  />
-                )}
-                {activeDebuff?.type === 'freeze' && (
-                  <div className="pvp-freeze">&#10052;&#65039;</div>
-                )}
-                {/* Skill effect overlays on my board */}
-                <PvpSkillOverlay effects={activeEffects.filter(e => e.target === 'self')} />
-              </div>
-              {/* Timer moved to top center */}
-
-              {/* ── SKILL BUTTONS ── */}
-              {!isSpectator && mySkills.length > 0 && (
+              {/* Opponent skill flash */}
+              {opponentSkillFlash && (
                 <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  gap: 10, padding: '6px 0 2px',
+                  position: 'absolute', top: '15%', left: '50%',
+                  transform: 'translateX(-50%)', zIndex: 50,
+                  background: 'rgba(239,68,68,0.9)', color: '#fff',
+                  padding: '6px 16px', borderRadius: 12,
+                  fontSize: 14, fontWeight: 700,
+                  animation: 'comboFlash 2s ease-out forwards',
+                  boxShadow: '0 4px 20px rgba(239,68,68,0.5)',
+                  whiteSpace: 'nowrap', pointerEvents: 'none',
                 }}>
-                  {mySkills.map(skill => {
-                    const cd = skillCooldowns[skill.id];
-                    return (
-                      <PvpSkillButton
-                        key={skill.id}
-                        skillId={skill.id}
-                        icon={skill.icon}
-                        name={skill.name}
-                        manaCost={skill.manaCost}
-                        currentMana={myMana}
-                        cooldownTotal={cd?.total ?? skill.cooldownMs}
-                        cooldownRemaining={cd?.remaining ?? 0}
-                        disabled={phase !== 'playing' && phase !== 'sudden_death'}
-                        onCast={() => handleCastSkill(skill.id)}
-                      />
-                    );
-                  })}
+                  {opponentSkillFlash}
                 </div>
               )}
-            </div>
 
-            {/* Opponent skill flash */}
-            {opponentSkillFlash && (
-              <div style={{
-                position: 'absolute', top: '15%', left: '50%',
-                transform: 'translateX(-50%)', zIndex: 50,
-                background: 'rgba(239,68,68,0.9)', color: '#fff',
-                padding: '6px 16px', borderRadius: 12,
-                fontSize: 14, fontWeight: 700,
-                animation: 'comboFlash 2s ease-out forwards',
-                boxShadow: '0 4px 20px rgba(239,68,68,0.5)',
-                whiteSpace: 'nowrap', pointerEvents: 'none',
-              }}>
-                {opponentSkillFlash}
+              {/* ── BOTTOM: Emoji bar + leave ── */}
+              <div className="pvp-bottom">
+                {!isSpectator && (['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
+                  <button
+                    key={emoji}
+                    className={`pvp-emoji-btn${emojiCooldown ? ' pvp-emoji-btn--disabled' : ''}`}
+                    onClick={() => sendTaunt(emoji)}
+                    disabled={emojiCooldown}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+                {!isSpectator && <div className="pvp-separator" />}
+                <button className="pvp-leave-btn" onClick={handleLeave}>🚪</button>
               </div>
-            )}
-
-            {/* ── BOTTOM: Emoji bar + leave ── */}
-            <div className="pvp-bottom">
-              {!isSpectator && (['😂', '😤', '🔥', '💀', '👑', '🫵'] as const).map(emoji => (
-                <button
-                  key={emoji}
-                  className={`pvp-emoji-btn${emojiCooldown ? ' pvp-emoji-btn--disabled' : ''}`}
-                  onClick={() => sendTaunt(emoji)}
-                  disabled={emojiCooldown}
-                >
-                  {emoji}
-                </button>
-              ))}
-              {!isSpectator && <div className="pvp-separator" />}
-              <button className="pvp-leave-btn" onClick={handleLeave}>🚪</button>
-            </div>
 
             </div>{/* close pvp-battle__container */}
           </div>
@@ -2092,6 +2092,42 @@ export default function PvpTestScreen() {
               ))
             }
           </div>
+        </div>
+        
+        {/* Bottom Navigation */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+          padding: '12px 0 24px', borderTop: '1px solid #1a1a2e', marginTop: 16
+        }}>
+          {[
+            { icon: 'btn_home.png', label: 'Home', path: '/' },
+            { icon: 'btn_pvp.png', label: 'Bot' },
+            { icon: 'btn_friend.png', label: 'Invite' },
+            { icon: 'btn_build.png', label: 'Build', path: '/pvp/build' }
+          ].map((btn, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (btn.label === 'Bot') {
+                  addLog('Tính năng chơi với Bot sắp ra mắt');
+                } else if (btn.label === 'Invite') {
+                  if (inRoom) handleInviteFriend();
+                  else addLog('Hãy tạo phòng trước khi mời bạn');
+                } else {
+                  navigate(btn.path || '/');
+                }
+              }}
+              style={{
+                background: 'none', border: 'none', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', cursor: 'pointer', gap: 4, transition: 'transform 0.1s',
+              }}
+              onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.9)')}
+              onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              <img src={`/assets/pvp/${btn.icon}`} alt={btn.label} style={{ width: 32, height: 32, objectFit: 'contain' }} />
+              <span style={{ fontSize: 10, color: '#FFFEA3', fontWeight: 600 }}>{btn.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 

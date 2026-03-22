@@ -133,52 +133,82 @@ export default function BuildScreen() {
     <div style={{
       height: '100dvh',
       overflowY: 'auto',
-      background: 'linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f3460 100%)',
+      background: "url('/assets/build/bg_build.png') no-repeat center center / cover",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
       paddingBottom: 100,
     }}>
       {/* ── Header ── */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'rgba(15,15,26,0.95)', backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid #1e3a5a',
-        padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12,
+        position: 'relative', width: '100%', height: 90,
+        display: 'flex', alignItems: 'center', gap: 4, padding: '10px 10px 0'
       }}>
+        {/* Back Button */}
         <button
           onClick={() => navigate('/pvp')}
-          style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}
-        >
-          ←
-        </button>
-        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff' }}>⚙️ Thiết Lập Chiến Đấu</h1>
-        <div style={{ marginLeft: 'auto', fontSize: 13 }}>
-          <span style={{ color: remaining === 0 ? '#22c55e' : '#eab308' }}>
-            {remaining === 0 ? '✓ Đã phân bổ đủ' : `Còn ${remaining} điểm`}
-          </span>
+          style={{
+            width: 40, height: 40, border: 'none', cursor: 'pointer', flexShrink: 0,
+            background: "url('/assets/stats/btn_back_arrow.png') no-repeat center center / contain",
+          }}
+        />
+
+        {/* Title Frame */}
+        <div style={{
+          flex: 1, height: 64, maxWidth: 260,
+          background: "url('/assets/build/frame_title_build.png') no-repeat center center / contain",
+          display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: 6
+        }}>
+          <h1 style={{
+            margin: 0, fontSize: 17, fontWeight: 900,
+            color: '#FFFEA3', textShadow: '1px 1px 0 #3b1e0a',
+            textAlign: 'center'
+          }}>
+            Thiết lập chiến đấu
+          </h1>
+        </div>
+
+        {/* Allocation Status Frame */}
+        <div style={{
+          width: 110, height: 50, flexShrink: 0,
+          background: "url('/assets/build/frame_allocation.png') no-repeat center center / contain",
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: remaining === 0 ? '#bef264' : '#fb923c', paddingBottom: 2
+        }}>
+          <div style={{ textAlign: 'center', lineHeight: 1, fontSize: 8, fontWeight: 800 }}>
+            <div>{remaining === 0 ? 'Đã phân bổ đủ' : 'Chưa phân bổ đủ'}</div>
+            <div style={{ fontSize: 11, marginTop: 1 }}>{totalUsed}/{STAT_TOTAL}</div>
+          </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '16px 16px 0' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 0' }}>
 
         {/* ══════ STAT ALLOCATION ══════ */}
-        <section style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#94a3b8' }}>
-              Phân Bổ Chỉ Số ({totalUsed}/{STAT_TOTAL})
+        <div style={{
+          width: '100%', maxWidth: 480, margin: '0 auto 20px',
+          background: "url('/assets/build/frame_index_allocation.png') no-repeat center center / 100% 100%",
+          padding: '40px 44px 30px',
+          display: 'flex', flexDirection: 'column'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '0 4px' }}>
+            <h2 style={{
+              margin: 0, fontSize: 13, fontWeight: 900, color: '#FFFEA3',
+              textShadow: '1px 1px 0 #3b1e0a'
+            }}>
+              CHỈ SỐ ({totalUsed}/{STAT_TOTAL})
             </h2>
             <button
               onClick={resetStats}
               style={{
-                fontSize: 11, color: '#64748b', background: 'none',
-                border: '1px solid #334155', borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
+                fontSize: 10, color: '#FFFEA3', background: 'rgba(0,0,0,0.4)',
+                border: '1px solid rgba(255,254,163,0.3)', borderRadius: 4, padding: '2px 8px', cursor: 'pointer',
               }}
             >
-              Đặt lại
+              Reset
             </button>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {STAT_DEFS.map(stat => (
               <StatRow
                 key={stat.key}
@@ -189,7 +219,7 @@ export default function BuildScreen() {
               />
             ))}
           </div>
-        </section>
+        </div>
 
         {/* ══════ PREVIEW PANEL ══════ */}
         <section style={{
@@ -296,20 +326,26 @@ function StatRow({
 }) {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 8,
-      background: 'rgba(30,58,90,0.2)', borderRadius: 10, padding: '8px 12px',
+      display: 'flex', alignItems: 'center', gap: 6,
+      background: "url('/assets/build/frame_wood_5.png') no-repeat center center / 100% 100%",
+      padding: '4px 14px',
     }}>
       {/* Icon + Name */}
-      <div style={{ width: 28, textAlign: 'center', fontSize: 18 }}>{stat.icon}</div>
+      <div style={{ width: 24, textAlign: 'center', fontSize: 16 }}>{stat.icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: stat.color }}>{stat.name}</span>
-          <span style={{ fontSize: 10, color: '#64748b' }}>{stat.desc}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 10, fontWeight: 900, color: stat.color, letterSpacing: 0.3 }}>
+            {stat.name.toUpperCase()}
+          </span>
+          <span style={{ 
+            fontSize: 8, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+          }}>{stat.desc}</span>
         </div>
         {/* Value bar */}
-        <div style={{ marginTop: 4, height: 4, background: '#1f2937', borderRadius: 2, overflow: 'hidden' }}>
+        <div style={{ marginTop: 2, height: 3, background: 'rgba(0,0,0,0.4)', borderRadius: 1.5, overflow: 'hidden' }}>
           <div style={{
-            width: `${(value / 50) * 100}%`, height: '100%', borderRadius: 2,
+            width: `${(value / 50) * 100}%`, height: '100%', borderRadius: 1.5,
             background: stat.color, transition: 'width 0.2s',
           }} />
         </div>
@@ -321,26 +357,30 @@ function StatRow({
           onClick={() => onChange(-1)}
           disabled={value <= 0}
           style={{
-            width: 30, height: 30, borderRadius: 8, border: 'none',
-            background: '#1e293b', color: '#94a3b8', fontWeight: 700, fontSize: 16,
+            width: 24, height: 24, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.05)', color: '#FFFEA3', fontWeight: 900, fontSize: 14,
             cursor: value <= 0 ? 'not-allowed' : 'pointer',
-            opacity: value <= 0 ? 0.3 : 1,
+            opacity: value <= 0 ? 0.2 : 1, transition: 'all 0.1s'
           }}
+          onMouseDown={e => value > 0 && (e.currentTarget.style.transform = 'scale(0.9)')}
+          onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
         >
           −
         </button>
-        <span style={{ width: 28, textAlign: 'center', fontFamily: 'monospace', fontWeight: 700, fontSize: 16 }}>
+        <span style={{ width: 22, textAlign: 'center', fontFamily: 'monospace', fontWeight: 900, fontSize: 13, color: '#FFFEA3' }}>
           {value}
         </span>
         <button
           onClick={() => onChange(+1)}
           disabled={value >= 50 || remaining <= 0}
           style={{
-            width: 30, height: 30, borderRadius: 8, border: 'none',
-            background: '#1e293b', color: '#94a3b8', fontWeight: 700, fontSize: 16,
+            width: 24, height: 24, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.05)', color: '#FFFEA3', fontWeight: 900, fontSize: 14,
             cursor: (value >= 50 || remaining <= 0) ? 'not-allowed' : 'pointer',
-            opacity: (value >= 50 || remaining <= 0) ? 0.3 : 1,
+            opacity: (value >= 50 || remaining <= 0) ? 0.2 : 1, transition: 'all 0.1s'
           }}
+          onMouseDown={e => (value < 50 && remaining > 0) && (e.currentTarget.style.transform = 'scale(0.9)')}
+          onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
         >
           +
         </button>
