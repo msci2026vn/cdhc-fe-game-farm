@@ -29,18 +29,20 @@ export default function PvpHistory() {
   return (
     <div style={{
       height: '100dvh',
-      overflowY: 'auto',
-      WebkitOverflowScrolling: 'touch',
+      display: 'flex',
+      flexDirection: 'column',
+      boxSizing: 'border-box',
       background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / cover",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
       padding: '40px 16px 80px',
     }}>
-      <div style={{ maxWidth: 320, margin: '0 auto' }}>
+      <div style={{ maxWidth: 320, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
 
         {/* Header */}
         <div style={{
           display: 'flex',
+          flexShrink: 0,
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
@@ -80,7 +82,7 @@ export default function PvpHistory() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', justifyContent: 'center', flexShrink: 0 }}>
           <button
             onClick={() => setTab('history')}
             style={{
@@ -112,7 +114,17 @@ export default function PvpHistory() {
           </button>
         </div>
 
-        {/* History tab */}
+        <style>{`
+          .pvp-history-scroll::-webkit-scrollbar { display: none; }
+          .pvp-history-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        `}</style>
+        <div className="pvp-history-scroll" style={{
+          flex: 1,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: 20,
+        }}>
+          {/* History tab */}
         {tab === 'history' && (
           <>
             {histLoading && (
@@ -263,6 +275,7 @@ export default function PvpHistory() {
             ))}
           </>
         )}
+        </div>
 
       </div>
     </div>
