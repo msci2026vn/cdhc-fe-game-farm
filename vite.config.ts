@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'prompt',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
       },
       manifest: {
         name: 'FARMVERSE - Organic Kingdom',
