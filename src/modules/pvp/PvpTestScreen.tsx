@@ -13,9 +13,9 @@ import PostGameScreen from './PostGameScreen';
 import type { ClientMvpStats, H2HData } from './PostGameScreen';
 import './pvp-battle.css';
 
-const WS_URL = import.meta.env.DEV
+const WS_URL = import.meta.env.VITE_PVP_WS_URL || (import.meta.env.DEV
   ? 'ws://localhost:3001'
-  : 'wss://sta.cdhc.vn/pvp-ws';
+  : 'wss://sta.cdhc.vn/pvp-ws');
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn';
 

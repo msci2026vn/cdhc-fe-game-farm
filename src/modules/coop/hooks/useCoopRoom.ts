@@ -12,9 +12,9 @@ import { useUIStore } from '@/shared/stores/uiStore';
 // WS URL cho Colyseus co-op server
 // DEV: coop server chạy port 3002 (riêng với pvp port 3001)
 // PROD: wss://sta.cdhc.vn/coop-ws
-const COOP_WS_URL = import.meta.env.DEV
+const COOP_WS_URL = import.meta.env.VITE_COOP_WS_URL || (import.meta.env.DEV
   ? 'ws://localhost:3001'
-  : 'wss://sta.cdhc.vn/coop-ws';
+  : 'wss://sta.cdhc.vn/coop-ws');
 
 // Số lần retry tối đa khi mất kết nối không chủ ý
 const MAX_RETRY = 3;
