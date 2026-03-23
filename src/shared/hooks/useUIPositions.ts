@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import defaultData from '../../../public/json/ui-match.json';
+import defaultData from '@/json/ui-match.json'
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 

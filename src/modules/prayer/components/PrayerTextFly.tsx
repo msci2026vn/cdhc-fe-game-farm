@@ -23,7 +23,7 @@ export function PrayerTextFly({ text, onDone }: PrayerTextFlyProps) {
   return (
     <div
       className={`fixed inset-0 z-40 flex items-center justify-center pointer-events-none
-        transition-all duration-[1500ms]
+        transition-all [transition-duration:1500ms]
         ${visible ? 'opacity-100' : 'opacity-0 -translate-y-20'}`}
     >
       <p className="text-white/80 text-lg font-body text-center px-8 max-w-xs animate-prayer-ascend">
