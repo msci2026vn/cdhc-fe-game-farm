@@ -45,10 +45,10 @@ export default function BuildScreen() {
         const res = await pvpApi.getBuild();
         if (res.build) {
           setStats({
-            str:  res.build.str  ?? 10,
-            vit:  res.build.vit  ?? 10,
-            wis:  res.build.wis  ?? 10,
-            arm:  res.build.arm  ?? 10,
+            str: res.build.str ?? 10,
+            vit: res.build.vit ?? 10,
+            wis: res.build.wis ?? 10,
+            arm: res.build.arm ?? 10,
             mana: res.build.mana ?? 10,
           });
           setSkills({
@@ -101,11 +101,11 @@ export default function BuildScreen() {
     setError(null);
     try {
       await pvpApi.saveBuild({
-        str:    stats.str,
-        vit:    stats.vit,
-        wis:    stats.wis,
-        arm:    stats.arm,
-        mana:   stats.mana,
+        str: stats.str,
+        vit: stats.vit,
+        wis: stats.wis,
+        arm: stats.arm,
+        mana: stats.mana,
         skillA: skills.A,
         skillB: skills.B,
         skillC: skills.C,
@@ -136,7 +136,7 @@ export default function BuildScreen() {
       background: "url('/assets/build/bg_build.png') no-repeat center center / cover",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      paddingBottom: 100,
+      paddingBottom: 40,
     }}>
       {/* ── Header ── */}
       <div style={{
@@ -167,17 +167,26 @@ export default function BuildScreen() {
           </h1>
         </div>
 
-        {/* Allocation Status Frame */}
-        <div style={{
-          width: 110, height: 50, flexShrink: 0,
-          background: "url('/assets/build/frame_allocation.png') no-repeat center center / contain",
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: remaining === 0 ? '#bef264' : '#fb923c', paddingBottom: 2
-        }}>
-          <div style={{ textAlign: 'center', lineHeight: 1, fontSize: 8, fontWeight: 800 }}>
-            <div>{remaining === 0 ? 'Đã phân bổ đủ' : 'Chưa phân bổ đủ'}</div>
-            <div style={{ fontSize: 11, marginTop: 1 }}>{totalUsed}/{STAT_TOTAL}</div>
+        {/* Allocation Status Frame & Reset */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', marginTop: 10 }}>
+          <div style={{
+            width: 110, height: 52, flexShrink: 0,
+            background: "url('/assets/build/frame_allocation.png') no-repeat center center / contain",
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: remaining === 0 ? '#bef264' : '#fb923c', paddingBottom: 2
+          }}>
+            <div style={{ textAlign: 'center', lineHeight: 1, fontSize: 8, fontWeight: 800 }}>
+              <div>{remaining === 0 ? 'Đã phân bổ đủ' : 'Chưa phân bổ đủ'}</div>
+              <div style={{ fontSize: 11, marginTop: 1 }}>{totalUsed}/{STAT_TOTAL}</div>
+            </div>
           </div>
+          <button
+            onClick={resetStats}
+            style={{
+              width: 60, height: 22, border: 'none', cursor: 'pointer',
+              background: "url('/assets/build/btn_reset.png') no-repeat center center / contain",
+            }}
+          />
         </div>
       </div>
 
@@ -187,28 +196,19 @@ export default function BuildScreen() {
         <div style={{
           width: '100%', maxWidth: 480, margin: '0 auto 20px',
           background: "url('/assets/build/frame_index_allocation.png') no-repeat center center / 100% 100%",
-          padding: '40px 44px 30px',
+          padding: '36px 44px 24px',
           display: 'flex', flexDirection: 'column'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '0 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginBottom: 12, marginTop: -20, paddingLeft: 4 }}>
             <h2 style={{
-              margin: 0, fontSize: 13, fontWeight: 900, color: '#FFFEA3',
+              margin: 0, fontSize: 14, fontWeight: 900, color: '#FFFEA3',
               textShadow: '1px 1px 0 #3b1e0a'
             }}>
               CHỈ SỐ ({totalUsed}/{STAT_TOTAL})
             </h2>
-            <button
-              onClick={resetStats}
-              style={{
-                fontSize: 10, color: '#FFFEA3', background: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(255,254,163,0.3)', borderRadius: 4, padding: '2px 8px', cursor: 'pointer',
-              }}
-            >
-              Reset
-            </button>
           </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {STAT_DEFS.map(stat => (
               <StatRow
                 key={stat.key}
@@ -223,26 +223,39 @@ export default function BuildScreen() {
 
         {/* ══════ PREVIEW PANEL ══════ */}
         <section style={{
-          background: 'rgba(30,58,90,0.3)', borderRadius: 12, padding: 16,
-          border: '1px solid #1e3a5a', marginBottom: 20,
+          background: "url('/assets/build/frame_wood_3.png') no-repeat center center / 100% 100%",
+          padding: '24px 28px', marginBottom: 20, position: 'relative'
         }}>
-          <h2 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>Xem Trước Chỉ Số</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <PreviewItem label="❤️ HP" value={`${5000 + stats.vit * 200}`} />
-            <PreviewItem label="⚔️ ATK/gem" value={`${40 + stats.str * 8}`} />
-            <PreviewItem label="💚 Heal/gem" value={`${25 + stats.wis * 4}`} />
-            <PreviewItem label="🛡️ Armor/gem" value={`${20 + stats.arm * 6}`} />
-            <PreviewItem label="⭐ Max Mana" value={`${100 + stats.mana * 20}`} />
-            <PreviewItem label="⭐ Mana/star" value={`${8 + stats.wis * 2}`} />
+          <h2 style={{
+            margin: '0 4px 12px', fontSize: 14, fontWeight: 900, color: '#FFFEA3',
+            textShadow: '1px 1px 0 #3b1e0a', textAlign: 'left'
+          }}>
+            Xem Trước Chỉ Số
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            <PreviewItem label="HP" value={`${5000 + stats.vit * 200}`} icon="heart_icon.png" />
+            <PreviewItem label="ATK/GEM" value={`${40 + stats.str * 8}`} icon="atk_icon.png" />
+            <PreviewItem label="HEAL/GEM" value={`${25 + stats.wis * 4}`} icon="heal_icon.png" />
+            <PreviewItem label="ARMOR/GEM" value={`${20 + stats.arm * 6}`} icon="armor_icon.png" />
+            <PreviewItem label="MAX MANA" value={`${100 + stats.mana * 20}`} icon="mana_icon.png" />
+            <PreviewItem label="MANA/STAR" value={`${8 + stats.wis * 2}`} icon="mana_star_icon.png" />
           </div>
         </section>
 
         {/* ══════ SKILL PICKER ══════ */}
-        <section>
-          <h2 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 700, color: '#94a3b8' }}>Kỹ Năng Chiến Đấu</h2>
+        <section style={{
+          background: "url('/assets/build/frame_wood_4.png') no-repeat center center / 100% 100%",
+          padding: '24px 32px', margin: '0 -12px 20px', position: 'relative'
+        }}>
+          <h2 style={{
+            margin: '-18px 0 12px', fontSize: 14, fontWeight: 900, color: '#FFFEA3',
+            textShadow: '1px 1px 0 #3b1e0a', textAlign: 'center'
+          }}>
+            Kỹ Năng Chiến Đấu
+          </h2>
 
           <SkillSlotPicker
-            label="⚔️ Tấn Công (Nhóm A)"
+            label="TẤN CÔNG"
             skills={SKILL_GROUPS.A as unknown as SkillDef[]}
             selected={skills.A}
             onSelect={(id) => selectSkill('A', id)}
@@ -250,7 +263,7 @@ export default function BuildScreen() {
           />
 
           <SkillSlotPicker
-            label="⛓️ Kiểm Soát (Nhóm B)"
+            label="KIỂM SOÁT"
             skills={SKILL_GROUPS.B as unknown as SkillDef[]}
             selected={skills.B}
             onSelect={(id) => selectSkill('B', id)}
@@ -258,53 +271,42 @@ export default function BuildScreen() {
           />
 
           <SkillSlotPicker
-            label="💚 Hỗ Trợ (Nhóm C)"
+            label="HỖ TRỢ"
             skills={SKILL_GROUPS.C as unknown as SkillDef[]}
             selected={skills.C}
             onSelect={(id) => selectSkill('C', id)}
             maxMana={100 + stats.mana * 20}
           />
         </section>
-      </div>
 
-      {/* ══════ STICKY BOTTOM BAR ══════ */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: 'rgba(15,15,26,0.95)', backdropFilter: 'blur(8px)',
-        borderTop: '1px solid #1e3a5a', padding: 16,
-      }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 12 }}>
           <button
             onClick={() => navigate('/pvp')}
             style={{
-              flex: 1, padding: '14px', borderRadius: 12,
-              background: '#1e293b', color: '#94a3b8', border: 'none',
-              fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              width: 120, height: 40, border: 'none',
+              background: "url('/assets/build/btn_cancel.png') no-repeat center center / contain",
+              cursor: 'pointer', transition: 'all 0.2s',
             }}
-          >
-            Huỷ
-          </button>
+            aria-label="Huỷ"
+          />
           <button
             onClick={handleSave}
             disabled={saving || remaining !== 0}
             style={{
-              flex: 1, padding: '14px', borderRadius: 12, border: 'none',
-              fontSize: 15, fontWeight: 700, cursor: saving || remaining !== 0 ? 'not-allowed' : 'pointer',
+              width: 140, height: 40, border: 'none',
+              background: "url('/assets/build/btn_confirm_build.png') no-repeat center center / contain",
+              cursor: saving || remaining !== 0 ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s',
-              ...(saveSuccess
-                ? { background: '#16a34a', color: '#fff' }
-                : remaining !== 0
-                  ? { background: '#334155', color: '#64748b' }
-                  : { background: 'linear-gradient(135deg,#f59e0b,#d97706)', color: '#0f0f1a' }),
+              opacity: saving || remaining !== 0 ? 0.6 : 1,
             }}
-          >
-            {saving ? 'Đang lưu...' : saveSuccess ? '✓ Đã Lưu' : 'Xác Nhận Build'}
-          </button>
+            aria-label="Xác Nhận Build"
+          />
         </div>
         {error && (
           <p style={{ color: '#ef4444', fontSize: 13, textAlign: 'center', marginTop: 8 }}>{error}</p>
         )}
       </div>
+
     </div>
   );
 }
@@ -325,70 +327,99 @@ function StatRow({
   onChange: (delta: number) => void;
 }) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 6,
-      background: "url('/assets/build/frame_wood_5.png') no-repeat center center / 100% 100%",
-      padding: '4px 14px',
-    }}>
-      {/* Icon + Name */}
-      <div style={{ width: 24, textAlign: 'center', fontSize: 16 }}>{stat.icon}</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 10, fontWeight: 900, color: stat.color, letterSpacing: 0.3 }}>
-            {stat.name.toUpperCase()}
-          </span>
-          <span style={{ 
-            fontSize: 8, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
-          }}>{stat.desc}</span>
+    <div style={{ display: 'flex', alignItems: 'stretch', gap: 4 }}>
+      {/* Main Wood Plank */}
+      <div style={{
+        flex: 1,
+        width: 0, // Force equal flex distribution
+        display: 'flex', alignItems: 'center', gap: 6,
+        background: "url('/assets/build/frame_wood_5.png') no-repeat center center / 100% 100%",
+        padding: '4px 12px',
+        minWidth: 0,
+      }}>
+        {/* Icon + Name */}
+        <div style={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={`/assets/build/${stat.icon}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
-        {/* Value bar */}
-        <div style={{ marginTop: 2, height: 3, background: 'rgba(0,0,0,0.4)', borderRadius: 1.5, overflow: 'hidden' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 9, fontWeight: 900, color: stat.color, letterSpacing: 0.3, fontFamily: 'monospace' }}>
+              {stat.name.toUpperCase()}
+            </span>
+          </div>
+          {/* Value bar */}
+          <div style={{ marginTop: 2, height: 3, background: 'rgba(0,0,0,0.4)', borderRadius: 1.5, overflow: 'hidden' }}>
+            <div style={{
+              width: `${(value / 50) * 100}%`, height: '100%', borderRadius: 1.5,
+              background: stat.color, transition: 'width 0.2s',
+            }} />
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div style={{
+          display: 'flex', alignItems: 'center', position: 'relative',
+          width: 80, height: 30, justifyContent: 'center', marginLeft: 8
+        }}>
+          {/* Middle dark frame */}
           <div style={{
-            width: `${(value / 50) * 100}%`, height: '100%', borderRadius: 1.5,
-            background: stat.color, transition: 'width 0.2s',
+            position: 'absolute', left: 8, right: 8, top: 4, bottom: 4,
+            background: "url('/assets/build/frame_index_2.png') no-repeat center center / 100% 100%",
+            zIndex: 0
           }} />
+
+          <button
+            onClick={() => onChange(-1)}
+            disabled={value <= 0}
+            style={{
+              position: 'absolute', left: -4, width: 28, height: 28, border: 'none',
+              cursor: value <= 0 ? 'not-allowed' : 'pointer',
+              background: "url('/assets/build/minus_icon.png') no-repeat center center / contain",
+              opacity: 1, transition: 'all 0.1s', zIndex: 2
+            }}
+            onMouseDown={e => value > 0 && (e.currentTarget.style.transform = 'scale(0.9)')}
+            onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+          />
+
+          <span style={{
+            position: 'relative', zIndex: 1, textAlign: 'center',
+            fontFamily: 'monospace', fontWeight: 900, fontSize: 13,
+            color: '#FFFFFF',
+            textShadow: '0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000'
+          }}>
+            {value}
+          </span>
+
+          <button
+            onClick={() => onChange(+1)}
+            disabled={value >= 50 || remaining <= 0}
+            style={{
+              position: 'absolute', right: -4, width: 28, height: 28, border: 'none',
+              cursor: (value >= 50 || remaining <= 0) ? 'not-allowed' : 'pointer',
+              background: "url('/assets/build/plus_icon.png') no-repeat center center / contain",
+              opacity: 1, transition: 'all 0.1s', zIndex: 2
+            }}
+            onMouseDown={e => (value < 50 && remaining > 0) && (e.currentTarget.style.transform = 'scale(0.9)')}
+            onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+          />
         </div>
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8 }}>
-        <button
-          onClick={() => onChange(-1)}
-          disabled={value <= 0}
-          style={{
-            width: 24, height: 24, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.05)', color: '#FFFEA3', fontWeight: 900, fontSize: 14,
-            cursor: value <= 0 ? 'not-allowed' : 'pointer',
-            opacity: value <= 0 ? 0.2 : 1, transition: 'all 0.1s'
-          }}
-          onMouseDown={e => value > 0 && (e.currentTarget.style.transform = 'scale(0.9)')}
-          onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          −
-        </button>
-        <span style={{ width: 22, textAlign: 'center', fontFamily: 'monospace', fontWeight: 900, fontSize: 13, color: '#FFFEA3' }}>
-          {value}
-        </span>
-        <button
-          onClick={() => onChange(+1)}
-          disabled={value >= 50 || remaining <= 0}
-          style={{
-            width: 24, height: 24, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.05)', color: '#FFFEA3', fontWeight: 900, fontSize: 14,
-            cursor: (value >= 50 || remaining <= 0) ? 'not-allowed' : 'pointer',
-            opacity: (value >= 50 || remaining <= 0) ? 0.2 : 1, transition: 'all 0.1s'
-          }}
-          onMouseDown={e => (value < 50 && remaining > 0) && (e.currentTarget.style.transform = 'scale(0.9)')}
-          onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          +
-        </button>
-      </div>
-
-      {/* Formula preview */}
-      <div style={{ fontSize: 11, color: '#64748b', width: 90, textAlign: 'right', fontFamily: 'monospace' }}>
-        {stat.formula(value)}
+      {/* Formula preview Frame */}
+      <div style={{
+        width: 75, height: 38, flexShrink: 0,
+        background: "url('/assets/build/frame_index_1.png') no-repeat center center / 100% 100%",
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '0 8px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          fontSize: 8, color: '#FFFEA3', fontWeight: 800,
+          textAlign: 'center', fontFamily: 'monospace', lineHeight: 1,
+          textShadow: '0.5px 0.5px 0 rgba(0,0,0,0.5)'
+        }}>
+          {stat.formula(value)}
+        </div>
       </div>
     </div>
   );
@@ -409,8 +440,15 @@ function SkillSlotPicker({
 }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <h3 style={{ margin: '0 0 8px', fontSize: 13, color: '#64748b' }}>{label}</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+        <h3 style={{
+          margin: 0, fontSize: 11, fontWeight: 900, color: '#FFFEA3',
+          textShadow: '0.5px 0.5px 0 #000',
+          background: "url('/assets/build/frame_group.png') no-repeat center center / 100% 100%",
+          padding: '5px 20px', minWidth: 110, textAlign: 'center'
+        }}>{label}</h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4 }}>
         {skills.map(skill => {
           const isSelected = selected === skill.id;
           const canAfford = maxMana >= skill.manaCost;
@@ -420,38 +458,48 @@ function SkillSlotPicker({
               onClick={() => onSelect(skill.id)}
               style={{
                 position: 'relative', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', padding: '8px 4px', borderRadius: 12,
-                border: isSelected ? '2px solid #f59e0b' : '2px solid #1e3a5a',
-                background: isSelected ? 'rgba(245,158,11,0.1)' : 'rgba(30,58,90,0.2)',
+                alignItems: 'center', justifyContent: 'center', width: 62, height: 62, border: 'none',
+                background: "url('/assets/build/btn_skill.png') no-repeat center center / contain",
                 cursor: 'pointer', transition: 'all 0.15s',
                 opacity: canAfford ? 1 : 0.5,
-                boxShadow: isSelected ? '0 0 16px rgba(245,158,11,0.2)' : 'none',
+                filter: isSelected ? 'drop-shadow(0 0 4px #f59e0b) brightness(1.1)' : 'none',
               }}
             >
-              <span style={{ fontSize: 22 }}>{skill.icon}</span>
-              <span style={{ fontSize: 9, marginTop: 4, textAlign: 'center', lineHeight: 1.2, fontWeight: 600, color: '#e2e8f0' }}>
+              <img
+                src={`/assets/build/icon_skills/${skill.icon}`}
+                alt=""
+                style={{ width: 26, height: 26, objectFit: 'contain' }}
+              />
+              <span style={{
+                fontSize: 7, marginTop: 1, textAlign: 'center', lineHeight: 1,
+                fontWeight: 900, color: '#FFFFFF', textShadow: '0.5px 0.5px 0 #000',
+                maxWidth: '85%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+              }}>
                 {skill.name}
               </span>
-              <span style={{ fontSize: 8, color: '#64748b', marginTop: 2 }}>
+              <span style={{
+                fontSize: 6.5, color: '#bef264', fontWeight: 900,
+                textShadow: '0.5px 0.5px 0 #000', marginTop: 1
+              }}>
                 ⭐{skill.manaCost}
               </span>
               {!canAfford && (
                 <div style={{
-                  position: 'absolute', inset: 0, display: 'flex',
+                  position: 'absolute', inset: 4, display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(0,0,0,0.4)', borderRadius: 12,
+                  background: 'rgba(0,0,0,0.4)', borderRadius: '50%',
                 }}>
-                  <span style={{ fontSize: 8, color: '#ef4444' }}>Thiếu mana</span>
+                  <span style={{ fontSize: 7, color: '#ef4444', fontWeight: 900 }}>THIẾU</span>
                 </div>
               )}
               {isSelected && (
                 <div style={{
-                  position: 'absolute', top: -4, right: -4,
-                  width: 16, height: 16, borderRadius: '50%',
+                  position: 'absolute', top: 2, right: 2,
+                  width: 14, height: 14, borderRadius: '50%',
                   background: '#f59e0b', display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <span style={{ fontSize: 9, color: '#0f0f1a', fontWeight: 700 }}>✓</span>
+                  <span style={{ fontSize: 8, color: '#0f0f1a', fontWeight: 900 }}>✓</span>
                 </div>
               )}
             </button>
@@ -461,8 +509,10 @@ function SkillSlotPicker({
       {/* Selected skill description */}
       {selected && (
         <div style={{
-          marginTop: 8, fontSize: 12, color: '#94a3b8',
-          background: 'rgba(30,58,90,0.2)', borderRadius: 8, padding: '8px 12px',
+          marginTop: 8, fontSize: 11, fontWeight: 900, color: '#3b1e0a',
+          textShadow: '0.5px 0.5px 0 rgba(255,254,163,0.3)',
+          background: "url('/assets/build/frame_recent_match.png') no-repeat center center / 100% 100%",
+          padding: '10px 20px', minHeight: 40, display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
           {skills.find(s => s.id === selected)?.desc}
         </div>
@@ -471,14 +521,29 @@ function SkillSlotPicker({
   );
 }
 
-function PreviewItem({ label, value }: { label: string; value: string }) {
+function PreviewItem({ label, value, icon }: { label: string; value: string; icon?: string }) {
+  const st: React.CSSProperties = {
+    fontSize: 11, fontWeight: 900, color: '#FFFEA3',
+    textShadow: '0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
+    letterSpacing: 0.3
+  };
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      background: 'rgba(30,58,90,0.3)', borderRadius: 8, padding: '6px 12px',
+      background: "url('/assets/build/frame_index_3.png') no-repeat center center / 100% 100%",
+      padding: '8px 12px', height: 32, boxSizing: 'border-box'
     }}>
-      <span style={{ fontSize: 12, color: '#94a3b8' }}>{label}</span>
-      <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#f59e0b' }}>{value}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {icon && (
+          <img
+            src={`/assets/build/${icon}`}
+            alt=""
+            style={{ width: 18, height: 18, objectFit: 'contain' }}
+          />
+        )}
+        <span style={st}>{label}</span>
+      </div>
+      <span style={st}>{value}</span>
     </div>
   );
 }

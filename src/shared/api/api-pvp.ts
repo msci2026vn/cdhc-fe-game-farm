@@ -90,25 +90,25 @@ export interface PvpBuildConfig {
 
 export const SKILL_GROUPS = {
   A: [
-    { id: 'sam_dong',    name: 'Sấm Đồng',   icon: '⚡', desc: 'Gây 300 sát thương xuyên giáp', manaCost: 200 },
-    { id: 'mua_da',     name: 'Mưa Đá',     icon: '🧊', desc: 'Chèn 6 junk vào board đối thủ', manaCost: 120 },
-    { id: 'man_dem',    name: 'Màn Đêm',     icon: '🌑', desc: 'Ẩn board đối thủ 5 giây', manaCost: 200 },
-    { id: 'phong_an',   name: 'Phong Ấn',    icon: '🔒', desc: 'Khoá vùng 3×3 board đối thủ 8s', manaCost: 180 },
-    { id: 'thien_thach', name: 'Thiên Thạch', icon: '☄️', desc: 'Xoá 1 hàng board đối thủ', manaCost: 160 },
+    { id: 'sam_dong',    name: 'Sấm Đồng',   icon: 'thunder_icon.png', desc: 'Gây 300 sát thương xuyên giáp', manaCost: 200 },
+    { id: 'mua_da',     name: 'Mưa Đá',     icon: 'hail_icon.png', desc: 'Chèn 6 junk vào board đối thủ', manaCost: 120 },
+    { id: 'man_dem',    name: 'Màn Đêm',     icon: 'night_icon.png', desc: 'Ẩn board đối thủ 5 giây', manaCost: 200 },
+    { id: 'phong_an',   name: 'Phong Ấn',    icon: 'seal_icon.png', desc: 'Khoá vùng 3×3 board đối thủ 8s', manaCost: 180 },
+    { id: 'thien_thach', name: 'Thiên Thạch', icon: 'meteorite_icon.png', desc: 'Xoá 1 hàng board đối thủ', manaCost: 160 },
   ],
   B: [
-    { id: 'ot_hiem',    name: 'Ớt Hiểm',    icon: '🌶️', desc: 'Giảm 50% giáp đối thủ 10s', manaCost: 80 },
-    { id: 'troi_buoc',  name: 'Trói Buộc',   icon: '⛓️', desc: 'Chậm swap đối thủ 8s', manaCost: 120 },
-    { id: 'hon_loan',   name: 'Hỗn Loạn',    icon: '🌀', desc: 'Xáo trộn board đối thủ', manaCost: 100 },
-    { id: 'hoan_doi',   name: 'Hoán Đổi',    icon: '🔄', desc: 'Đổi gem ATK↔DEF trên board mình', manaCost: 80 },
-    { id: 'ho_den',     name: 'Hố Đen',      icon: '🕳️', desc: 'Xoá STAR gem đối thủ + hút mana', manaCost: 140 },
+    { id: 'ot_hiem',    name: 'Ớt Hiểm',    icon: 'chili_peppers_icon.png', desc: 'Giảm 50% giáp đối thủ 10s', manaCost: 80 },
+    { id: 'troi_buoc',  name: 'Trói Buộc',   icon: 'bind_icon.png', desc: 'Chậm swap đối thủ 8s', manaCost: 120 },
+    { id: 'hon_loan',   name: 'Hỗn Loạn',    icon: 'chaotic_icon.png', desc: 'Xáo trộn board đối thủ', manaCost: 100 },
+    { id: 'hoan_doi',   name: 'Hoán Đổi',    icon: 'swap_icon.png', desc: 'Đổi gem ATK↔DEF trên board mình', manaCost: 80 },
+    { id: 'ho_den',     name: 'Hố Đen',      icon: 'black_hole_icon.png', desc: 'Xoá STAR gem đối thủ + hút mana', manaCost: 140 },
   ],
   C: [
-    { id: 'rom_boc',    name: 'Rơm Bọc',     icon: '🛡️', desc: 'Tăng 200 giáp', manaCost: 100 },
-    { id: 'tang_toc',   name: 'Tăng Tốc',    icon: '⚡', desc: 'Swap nhanh gấp đôi 8s', manaCost: 150 },
-    { id: 'trieu_hoi',  name: 'Triệu Hồi',   icon: '✨', desc: 'Kéo STAR gem về hàng cuối', manaCost: 80 },
-    { id: 'thien_nhan', name: 'Thiên Nhãn',   icon: '👁️', desc: 'Xem board đối thủ 5s', manaCost: 60 },
-    { id: 'tai_sinh',   name: 'Tái Sinh',     icon: '💚', desc: 'Hồi 600 HP', manaCost: 120 },
+    { id: 'rom_boc',    name: 'Rơm Bọc',     icon: 'straw_wrapped_icon.png', desc: 'Tăng 200 giáp', manaCost: 100 },
+    { id: 'tang_toc',   name: 'Tăng Tốc',    icon: 'accelerate_icon.png', desc: 'Swap nhanh gấp đôi 8s', manaCost: 150 },
+    { id: 'trieu_hoi',  name: 'Triệu Hồi',   icon: 'recall_icon.png', desc: 'Kéo STAR gem về hàng cuối', manaCost: 80 },
+    { id: 'thien_nhan', name: 'Thiên Nhãn',   icon: 'all_seeing_eye_icon.png', desc: 'Xem board đối thủ 5s', manaCost: 60 },
+    { id: 'tai_sinh',   name: 'Tái Sinh',     icon: 'regeneration_icon.png', desc: 'Hồi 600 HP', manaCost: 120 },
   ],
 } as const;
 
@@ -119,11 +119,11 @@ export const SKILL_COOLDOWNS: Record<string, number> = {
 };
 
 export const STAT_DEFS = [
-  { key: 'str' as const, name: 'SỨC MẠNH',  icon: '⚔️', color: '#ef4444', desc: 'Tăng sát thương ATK gem',     formula: (v: number) => `${40 + v * 8} dmg/gem` },
-  { key: 'vit' as const, name: 'SINH LỰC',   icon: '❤️', color: '#22c55e', desc: 'Tăng HP tối đa',              formula: (v: number) => `${5000 + v * 200} HP` },
-  { key: 'wis' as const, name: 'TRÍ TUỆ',    icon: '💜', color: '#a855f7', desc: 'Tăng hồi HP & mana/star',     formula: (v: number) => `${25 + v * 4} heal, +${8 + v * 2} mana/star` },
-  { key: 'arm' as const, name: 'PHÒNG THỦ',   icon: '🛡️', color: '#3b82f6', desc: 'Tăng giáp từ DEF gem',        formula: (v: number) => `${20 + v * 6} armor/gem` },
-  { key: 'mana' as const, name: 'NĂNG LƯỢNG', icon: '⭐', color: '#eab308', desc: 'Tăng mana tối đa',            formula: (v: number) => `${100 + v * 20} max mana` },
+  { key: 'str' as const, name: 'SỨC MẠNH',  icon: 'power_icon.png', color: '#ef4444', desc: 'Tăng sát thương ATK gem',     formula: (v: number) => `${40 + v * 8} dmg/gem` },
+  { key: 'vit' as const, name: 'SINH LỰC',   icon: 'hp_icon.png', color: '#22c55e', desc: 'Tăng HP tối đa',              formula: (v: number) => `${5000 + v * 200} HP` },
+  { key: 'wis' as const, name: 'TRÍ TUỆ',    icon: 'intelligence_icon.png', color: '#a855f7', desc: 'Tăng hồi HP & mana/star',     formula: (v: number) => `${25 + v * 4} heal, +${8 + v * 2} mana/star` },
+  { key: 'arm' as const, name: 'PHÒNG THỦ',   icon: 'defense_icon.png', color: '#3b82f6', desc: 'Tăng giáp từ DEF gem',        formula: (v: number) => `${20 + v * 6} armor/gem` },
+  { key: 'mana' as const, name: 'NĂNG LƯỢNG', icon: 'energy_icon.png', color: '#eab308', desc: 'Tăng mana tối đa',            formula: (v: number) => `${100 + v * 20} max mana` },
 ] as const;
 
 export const STAT_TOTAL = 50;
