@@ -1300,10 +1300,10 @@ export default function PvpTestScreen() {
   return (
     <div style={{
       minHeight: '100dvh',
-      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / cover",
+      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / 100% 100%",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      padding: showBoard ? 0 : '120px 16px 20px',
+      padding: showBoard ? 0 : '40px 16px 20px',
     }}>
       {/* Countdown overlay */}
       {showCountdown && <CountdownOverlay count={countdown} />}
@@ -1530,27 +1530,27 @@ export default function PvpTestScreen() {
         />
       )}
 
-      <div style={{ maxWidth: 520, margin: '0 auto' }}>
+      <div style={{ maxWidth: 335, margin: '0 auto' }}>
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#e94560', margin: 0 }}>🎮 PVP Arena</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 10, color: '#555' }}>{WS_URL}</p>
+        <div style={{ textAlign: 'center', marginBottom: 80 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#FFFEA3', margin: 0, fontFamily: "'Fredoka One', 'Nunito', sans-serif", textShadow: '2px 2px 0 #000' }}>1 vs 1 ARENA</h1>
         </div>
 
         {/* Status bar */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: '#0d0d1a', borderRadius: 8, padding: '8px 14px', marginBottom: 12,
-          border: '1px solid #222',
+          background: "url('/assets/pvp_test/frame_wood_7.png') no-repeat center center / 100% 100%",
+          borderRadius: 8, padding: '12px 20px', marginBottom: 12,
+          minHeight: 64,
         }}>
-          <span style={{ fontSize: 12, color: '#aaa' }}>👤 {auth?.user?.name || '(guest)'}</span>
+          <span style={{ fontSize: 13, color: '#FFFEA3', fontWeight: 900, fontFamily: "'Fredoka One', 'Nunito', sans-serif", textShadow: '1px 1px 1px #000' }}>👤 {auth?.user?.name || '(guest)'}</span>
           <span style={{
-            fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 12,
+            fontSize: 11, fontWeight: 900, padding: '3px 12px', borderRadius: 12,
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif",
             background: inRoom ? '#1a5c2a' : connecting ? '#5c4a1a' : '#3a1a1a',
             color: inRoom ? '#4caf50' : connecting ? '#ff9800' : '#f44336',
           }}>
-            {inRoom ? '● Connected' : connecting ? '◌ ...' : '○ Off'}
+            {inRoom ? '● Connected' : connecting ? '◌ ...' : ''}
           </span>
         </div>
 
@@ -2017,14 +2017,15 @@ export default function PvpTestScreen() {
             {/* Khi có urlRoomCode → hiện loading, ẩn Create + manual Join */}
             {urlRoomCode ? (
               <div style={{
-                textAlign: 'center', padding: '24px 16px',
-                background: '#0d1b2a', borderRadius: 8, border: '1px solid #1e4d78',
+                textAlign: 'center', padding: '40px 20px',
+                background: "url('/assets/pvp_test/frame_wood_3.png') no-repeat center center / 100% 100%",
+                minHeight: 180, display: 'flex', flexDirection: 'column', justifyContent: 'center',
               }}>
                 <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
-                <div style={{ fontSize: 15, color: '#4fc3f7', fontWeight: 700 }}>
-                  {t('room.joining')}
+                <div style={{ fontSize: 18, color: '#FFFEA3', fontWeight: 900, fontFamily: "'Fredoka One', 'Nunito', sans-serif", textShadow: '1px 1px 2px #000' }}>
+                  Đang vào phòng...
                 </div>
-                <div style={{ fontSize: 11, color: '#555', marginTop: 4 }}>
+                <div style={{ fontSize: 13, color: '#FFFEA3', fontWeight: 900, marginTop: 4, fontFamily: "'Fredoka One', 'Nunito', sans-serif", textShadow: '1px 1px 1px #000', opacity: 0.8 }}>
                   {urlRoomCode}
                 </div>
               </div>
@@ -2078,8 +2079,8 @@ export default function PvpTestScreen() {
           </div>
         )}
 
-        {/* Log */}
-        <div style={{ background: '#050510', border: '1px solid #1a1a2e', borderRadius: 8, padding: '8px 12px' }}>
+        {/* Log hidden as requested */}
+        <div style={{ display: 'none' }}>
           <div style={{ fontSize: 10, color: '#444', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Log</div>
           <div style={{ maxHeight: 160, overflowY: 'auto' }}>
             {log.length === 0
@@ -2093,42 +2094,8 @@ export default function PvpTestScreen() {
             }
           </div>
         </div>
-        
-        {/* Bottom Navigation */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          padding: '12px 0 24px', borderTop: '1px solid #1a1a2e', marginTop: 16
-        }}>
-          {[
-            { icon: 'btn_home.png', label: 'Home', path: '/' },
-            { icon: 'btn_pvp.png', label: 'Bot' },
-            { icon: 'btn_friend.png', label: 'Invite' },
-            { icon: 'btn_build.png', label: 'Build', path: '/pvp/build' }
-          ].map((btn, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                if (btn.label === 'Bot') {
-                  addLog('Tính năng chơi với Bot sắp ra mắt');
-                } else if (btn.label === 'Invite') {
-                  if (inRoom) handleInviteFriend();
-                  else addLog('Hãy tạo phòng trước khi mời bạn');
-                } else {
-                  navigate(btn.path || '/');
-                }
-              }}
-              style={{
-                background: 'none', border: 'none', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', cursor: 'pointer', gap: 4, transition: 'transform 0.1s',
-              }}
-              onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.9)')}
-              onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-            >
-              <img src={`/assets/pvp/${btn.icon}`} alt={btn.label} style={{ width: 32, height: 32, objectFit: 'contain' }} />
-              <span style={{ fontSize: 10, color: '#FFFEA3', fontWeight: 600 }}>{btn.label}</span>
-            </button>
-          ))}
-        </div>
+
+        {/* Bottom Navigation removed as requested */}
       </div>
 
       {/* Global keyframes */}

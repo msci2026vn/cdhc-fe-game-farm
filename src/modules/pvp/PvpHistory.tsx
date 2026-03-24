@@ -32,12 +32,12 @@ export default function PvpHistory() {
       display: 'flex',
       flexDirection: 'column',
       boxSizing: 'border-box',
-      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / cover",
+      background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / 100% 100%",
       color: '#e0e0e0',
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '40px 16px 80px',
+      padding: '40px 16px 100px',
     }}>
-      <div style={{ maxWidth: 320, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div style={{ maxWidth: 335, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
 
         {/* Header */}
         <div style={{
@@ -55,7 +55,7 @@ export default function PvpHistory() {
               position: 'absolute',
               left: -10,
               top: '50%',
-              marginTop: 25, // Centers it vertically (height 44 -> -22) but pushes it down by 6px
+              marginTop: 45,
               background: "url('/assets/stats/btn_back_arrow.png') no-repeat center center / contain",
               border: 'none',
               width: 36,
@@ -127,7 +127,7 @@ export default function PvpHistory() {
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          paddingBottom: 20,
+          paddingBottom: 120,
         }}>
           {/* History tab */}
           {tab === 'history' && (
@@ -151,10 +151,11 @@ export default function PvpHistory() {
               )}
               {historyData?.matches?.map(m => (
                 <div key={m.id} style={{
-                  background: '#0d1b2a', border: '1px solid #1e3a5a',
-                  borderRadius: 12, padding: '14px 16px', marginBottom: 8,
+                  background: `url('/assets/stats/rankings/frame_wood_7.png') no-repeat center center / 100% 100%`,
+                  borderRadius: 12, padding: '12px 20px', marginBottom: 8,
+                  minHeight: 72, display: 'flex', alignItems: 'center'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                       <div style={{
                         width: 38, height: 38, borderRadius: '50%',
@@ -182,8 +183,11 @@ export default function PvpHistory() {
                         <div style={{
                           fontSize: 12, fontWeight: 700, padding: '3px 10px',
                           borderRadius: 6,
-                          background: m.result === 'win' ? '#14532d' : m.result === 'draw' ? '#1e293b' : '#450a0a',
-                          color: m.result === 'win' ? '#22c55e' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
+                          background: "url('/assets/pvp_1vs1_arena/frame_result.png') no-repeat center center / 100% 100%",
+                          color: m.result === 'win' ? '#fff' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
+                          textAlign: 'center', minWidth: 70,
+                          fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+                          textShadow: m.result === 'win' ? '1px 1px 0 #14532d' : 'none',
                         }}>
                           {m.result === 'win' ? `🏆 ${t('history.win')}` : m.result === 'draw' ? `🤝 ${t('history.draw')}` : `💀 ${t('history.lose')}`}
                         </div>
@@ -233,9 +237,9 @@ export default function PvpHistory() {
                       : idx === 2 ? 'frame_bronze.png'
                         : 'frame_wood_7.png'
                     }') no-repeat center center / 100% 100%`,
-                  borderRadius: 12, padding: '16px 20px', marginBottom: 8,
+                  borderRadius: 12, padding: '12px 20px', marginBottom: 8,
                   display: 'flex', alignItems: 'center', gap: 12,
-                  minHeight: 80, // Optional: Ensure the frame is large enough
+                  minHeight: 72, // Optional: Ensure the frame is large enough
                 }}>
                   {/* Rank */}
                   <div style={{

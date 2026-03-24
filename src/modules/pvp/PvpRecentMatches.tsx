@@ -51,9 +51,10 @@ export function PvpRecentMatches() {
       ) : (
         historyData.matches.map(m => (
           <div key={m.id} style={{
-            background: '#0d1b2a', border: '1px solid #1e3a5a',
-            borderRadius: 10, padding: '8px 12px', marginBottom: 6,
+            background: "url('/assets/pvp_1vs1_arena/frame_recent_match.png') no-repeat center center / 100% 100%",
+            borderRadius: 10, padding: '12px 32px', marginBottom: 6,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            minHeight: 64,
           }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <div style={{
@@ -67,19 +68,22 @@ export function PvpRecentMatches() {
                   : '👤'}
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#4a2c16' }}>
                   vs {m.opponent_name}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>
+                <div style={{ fontSize: 11, color: 'rgba(74, 44, 22, 0.7)' }}>
                   {m.my_score.toLocaleString()} – {m.opp_score.toLocaleString()}
                 </div>
               </div>
             </div>
             <div style={{
-              fontSize: 13, fontWeight: 700, padding: '4px 12px',
-              borderRadius: 8,
-              background: m.result === 'win' ? '#14532d' : m.result === 'draw' ? '#1e293b' : '#450a0a',
-              color: m.result === 'win' ? '#22c55e' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
+              fontSize: 12, fontWeight: 900, padding: '4px 14px',
+              borderRadius: 6,
+              background: "url('/assets/pvp_1vs1_arena/frame_result.png') no-repeat center center / 100% 100%",
+              color: m.result === 'win' ? '#fff' : m.result === 'draw' ? '#94a3b8' : '#ef4444',
+              minWidth: 70, textAlign: 'center',
+              fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+              textShadow: m.result === 'win' ? '1px 1px 0 #14532d' : 'none',
             }}>
               {m.result === 'win' ? t('history.win') : m.result === 'draw' ? t('history.draw') : t('history.lose')}
             </div>
