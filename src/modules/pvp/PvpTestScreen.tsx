@@ -1840,174 +1840,229 @@ export default function PvpTestScreen() {
 
         {/* ── LOBBY VIEW ── */}
         {inRoom && !showBoard && roomState && (
-          <div style={{ background: '#0d1b2a', border: '1px solid #1e4d78', borderRadius: 8, padding: 14, marginBottom: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
 
-            {/* Room header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div>
-                <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>MÃ PHÒNG (join)</div>
-                <div style={{
-                  fontSize: 13, fontWeight: 800, letterSpacing: 1, color: '#e94560',
-                  cursor: 'pointer', wordBreak: 'break-all',
-                }} title="Click copy" onClick={() => { navigator.clipboard?.writeText(roomId); addLog('Copied room ID'); }}>
-                  {roomId}
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>PHASE</div>
-                <div style={{
-                  fontSize: 15, fontWeight: 700, textTransform: 'uppercase',
-                  color: phase === 'ready' ? '#4caf50' : phase === 'waiting' ? '#ff9800' : '#4fc3f7',
-                }}>{phase}</div>
-              </div>
+            {/* ── SECTION 1: Room code frame ── */}
+            <div
+              title="Click to copy"
+              onClick={() => { navigator.clipboard?.writeText(roomCode || roomId); addLog('Copied room ID'); }}
+              style={{
+                backgroundImage: "url('/assets/guest_room/frame_index_2.png')",
+                backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+                padding: '6px 20px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{
+                fontSize: 14, fontWeight: 900, letterSpacing: 2,
+                color: '#fff', textShadow: '1px 1px 3px rgba(0,0,0,0.8)',
+                fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+              }}>
+                {roomCode || roomId}
+              </span>
             </div>
 
-            {/* Lobby countdown timer — only visible in waiting phase */}
-            {(phase === 'waiting' || phase === 'ready') && (
-              <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: 2, padding: '8px 0', borderTop: '1px solid #1e3a5a',
-              }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  fontSize: 26, fontWeight: 800, color: lobbyTimerColor,
-                  transition: 'color 0.5s ease',
-                  animation: lobbyTimeLeft <= 60 ? 'pulse 1s infinite' : 'none',
-                }}>
-                  <span style={{ fontSize: 18 }}>⏱</span>
-                  <span>{lobbyMins}:{lobbySecs}</span>
-                </div>
-                <span style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  {lobbyTimeLeft <= 60 ? t('game.lobbyClosingSoon') : t('game.lobbyCloseIn')}
-                </span>
-              </div>
-            )}
+            {/* ── SECTION 2: Players + Timer frame ── */}
+            <div style={{
+              background: "url('/assets/guest_room/frame_pvp_1vs1.png') no-repeat center center / 100% 100%",
+              padding: '28px 16px 32px',
+            }}>
 
-            {/* Player slots */}
-            <div style={{ borderTop: '1px solid #1e3a5a', paddingTop: 10, marginBottom: 10 }}>
-              {[0, 1].map(i => {
-                const [sid, p] = playersArr[i] ?? ['', undefined];
-                const isThisHost = sid === hostSessionId;
-                const isMe = sid === mySessionId;
-                return (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '7px 0', opacity: p ? 1 : 0.35,
-                    borderBottom: i === 0 ? '1px solid #1e3a5a' : 'none',
-                  }}>
-                    <div style={{
-                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                      background: i === 0 ? '#e94560' : '#4fc3f7',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 13, fontWeight: 700, color: '#fff',
-                    }}>P{i + 1}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>
-                        {p ? p.name : t('game.waitingPlayer')}
-                        {p && isThisHost && <span style={{ fontSize: 10, color: '#fdd835', marginLeft: 6 }}>👑HOST</span>}
-                        {p && isMe && <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>{t('game.youLabel')}</span>}
+              {/* Host left — Guest right */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Host (left) */}
+                {(() => {
+                  const hostEntry = playersArr.find(([sid]) => sid === hostSessionId);
+                  const hostP = hostEntry?.[1];
+                  return (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                      {/* Avatar */}
+                      <div style={{
+                        width: 72, height: 72,
+                        backgroundImage: "url('/assets/guest_room/frame_ava.png')",
+                        backgroundSize: '100% 100%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {(hostP as (PlayerInfo & { avatar?: string }) | undefined)?.avatar ? (
+                          <img src={(hostP as PlayerInfo & { avatar?: string }).avatar} alt="" style={{ width: '72%', height: '72%', objectFit: 'cover', borderRadius: '50%' }} />
+                        ) : (
+                          <div style={{
+                            width: '72%', height: '72%', borderRadius: '50%',
+                            background: 'linear-gradient(135deg,#e94560,#a01030)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 26, fontWeight: 900, color: '#fff', textShadow: '1px 1px 2px #000',
+                          }}>
+                            {(hostP?.name ?? '?').charAt(0).toUpperCase()}
+                          </div>
+                        )}
                       </div>
-                      {p && (
-                        <div style={{ fontSize: 11, color: (isThisHost || p.ready) ? '#4caf50' : '#ff9800' }}>
-                          {isThisHost ? '✓ Host' : p.ready ? `✅ ${t('game.ready')}` : `○ ${t('game.notReady')}`}
+                      {/* Info */}
+                      <div style={{ textAlign: 'center', fontFamily: "'Fredoka One','Nunito',sans-serif", display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 72 }}>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', textShadow: '1px 1px 2px #000', wordBreak: 'break-word', maxWidth: 100 }}>
+                          {hostP?.name ?? t('game.waitingPlayer')}
                         </div>
+                        <div style={{ fontSize: 11, color: '#fdd835', fontWeight: 700 }}>👑HOST</div>
+                        <div style={{ flex: 1 }} />
+                        <img src="/assets/guest_room/frame_ready.png" alt="Ready" style={{ width: 64, height: 'auto' }} />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Center: timer + subtitle */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, paddingTop: 8 }}>
+                  <img src="/assets/guest_room/icon_knife.png" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+                  <div style={{
+                    fontSize: 22, fontWeight: 900, color: lobbyTimerColor,
+                    fontFamily: "'Fredoka One','Nunito',sans-serif",
+                    textShadow: '1px 1px 4px rgba(0,0,0,0.8)',
+                    transition: 'color 0.5s ease',
+                    lineHeight: 1.1,
+                  }}>
+                    {lobbyMins}:{lobbySecs}
+                  </div>
+                  <span style={{ fontSize: 8, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', maxWidth: 60, lineHeight: 1.2 }}>
+                    {lobbyTimeLeft <= 60 ? t('game.lobbyClosingSoon') : t('game.lobbyCloseIn')}
+                  </span>
+                </div>
+
+                {/* Guest (right) */}
+                {(() => {
+                  const guestEntry = playersArr.find(([sid]) => sid !== hostSessionId);
+                  const guestP = guestEntry?.[1];
+                  const guestSid = guestEntry?.[0];
+                  const guestReady = guestP?.ready ?? false;
+                  return (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                      {/* Avatar */}
+                      <div style={{
+                        width: 72, height: 72,
+                        backgroundImage: "url('/assets/guest_room/frame_ava.png')",
+                        backgroundSize: '100% 100%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        opacity: guestP ? 1 : 0.5,
+                      }}>
+                        {guestP ? (
+                          (guestP as PlayerInfo & { avatar?: string }).avatar ? (
+                            <img src={(guestP as PlayerInfo & { avatar?: string }).avatar} alt="" style={{ width: '72%', height: '72%', objectFit: 'cover', borderRadius: '50%' }} />
+                          ) : (
+                            <div style={{
+                              width: '72%', height: '72%', borderRadius: '50%',
+                              background: 'linear-gradient(135deg,#1e88e5,#0d4080)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 26, fontWeight: 900, color: '#fff', textShadow: '1px 1px 2px #000',
+                            }}>
+                              {(guestP.name ?? '?').charAt(0).toUpperCase()}
+                            </div>
+                          )
+                        ) : (
+                          <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.3)' }}>?</div>
+                        )}
+                      </div>
+                      {/* Info */}
+                      <div style={{ textAlign: 'center', fontFamily: "'Fredoka One','Nunito',sans-serif", display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 72 }}>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', textShadow: '1px 1px 2px #000', wordBreak: 'break-word', maxWidth: 100 }}>
+                          {guestP ? `${guestP.name}(bạn)` : t('game.waitingPlayer')}
+                        </div>
+                        <div style={{ flex: 1 }} />
+                        {guestP && (
+                          <img
+                            src={guestReady ? '/assets/guest_room/frame_ready.png' : '/assets/guest_room/frame_not_ready.png'}
+                            alt={guestReady ? 'Sẵn sàng' : 'Chưa sẵn sàng'}
+                            style={{ width: 64, height: 'auto' }}
+                          />
+                        )}
+                      </div>
+                      {/* Kick button */}
+                      {isHost && guestP && guestSid && (
+                        <button onClick={() => handleKick(guestSid)} style={{
+                          padding: '3px 10px', background: '#5c1a1a', border: '1px solid #c62828',
+                          color: '#ef9a9a', borderRadius: 4, fontSize: 10, cursor: 'pointer',
+                        }}>{t('game.kick')}</button>
                       )}
                     </div>
-                    {p && isHost && sid !== mySessionId && (
-                      <button onClick={() => handleKick(sid)} style={{
-                        padding: '4px 10px', background: '#5c1a1a', border: '1px solid #c62828',
-                        color: '#ef9a9a', borderRadius: 4, fontSize: 11, cursor: 'pointer',
-                      }}>{t('game.kick')}</button>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })()}
+              </div>
             </div>
 
-            {/* Action buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {!isHost && (
-                <button onClick={handleReady} disabled={myReady} style={{
-                  padding: '11px', borderRadius: 6, fontSize: 14, fontWeight: 700, cursor: myReady ? 'default' : 'pointer',
-                  background: myReady ? '#1a5c2a' : '#1e88e5',
-                  color: '#fff', border: 'none', opacity: myReady ? 0.7 : 1,
-                }}>
-                  {myReady ? `✅ ${t('game.ready')}` : `🙌 ${t('game.setReady')}`}
-                </button>
-              )}
-
-              {isHost && (
+            {/* ── SECTION 3: Action buttons side-by-side ── */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              {/* Ready / Start */}
+              {isHost ? (
                 <button onClick={handleStart} disabled={!canStart} style={{
-                  padding: '11px', borderRadius: 6, fontSize: 14, fontWeight: 700,
-                  cursor: canStart ? 'pointer' : 'not-allowed',
-                  background: canStart ? '#e94560' : '#333',
-                  color: '#fff', border: 'none', opacity: canStart ? 1 : 0.5,
+                  flex: 1, border: 'none', background: 'none', padding: 0,
+                  cursor: canStart ? 'pointer' : 'not-allowed', opacity: canStart ? 1 : 0.5,
                 }}>
-                  {canStart ? `🚀 ${t('game.startGame')}` : `⏳ ${t('game.waitingOpponent')}`}
+                  <img src="/assets/guest_room/btn_ready.png" alt="Bắt đầu" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                </button>
+              ) : (
+                <button onClick={handleReady} disabled={myReady} style={{
+                  flex: 1, border: 'none', background: 'none', padding: 0,
+                  cursor: myReady ? 'default' : 'pointer', opacity: myReady ? 0.6 : 1,
+                }}>
+                  <img src="/assets/guest_room/btn_ready.png" alt="Sẵn Sàng" style={{ width: '100%', height: 'auto', display: 'block' }} />
                 </button>
               )}
 
-              {isHost && phase === 'waiting' && (
+              {/* Leave */}
+              <button onClick={handleLeave} style={{
+                flex: 1, border: 'none', background: 'none', padding: 0, cursor: 'pointer',
+              }}>
+                <img src="/assets/guest_room/btn_leave_the_room.png" alt="Rời Phòng" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              </button>
+            </div>
+
+            {/* Host-only: Challenge + Invite row */}
+            {isHost && phase === 'waiting' && (
+              <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   onClick={async () => {
                     if (challengeSearching || !roomCode) return;
                     setChallengeSearching(true);
-                    try {
-                      await pvpApi.startChallenge(roomCode);
-                    } catch {
-                      // silent
-                    } finally {
-                      setTimeout(() => setChallengeSearching(false), 10000);
-                    }
+                    try { await pvpApi.startChallenge(roomCode); } catch { /* silent */ }
+                    finally { setTimeout(() => setChallengeSearching(false), 10000); }
                   }}
                   disabled={challengeSearching}
                   style={{
-                    padding: '11px', borderRadius: 6, fontSize: 14, fontWeight: 700,
-                    cursor: challengeSearching ? 'not-allowed' : 'pointer',
-                    background: challengeSearching
-                      ? 'linear-gradient(135deg,#333,#222)'
-                      : 'linear-gradient(135deg,#7c3aed,#4f46e5)',
-                    color: '#fff', border: 'none', opacity: challengeSearching ? 0.6 : 1,
+                    flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
+                    background: challengeSearching ? '#333' : 'linear-gradient(135deg,#7c3aed,#4f46e5)',
+                    color: '#fff', border: 'none', cursor: challengeSearching ? 'not-allowed' : 'pointer',
+                    opacity: challengeSearching ? 0.6 : 1,
                   }}
                 >
                   {challengeSearching ? '🔍 Đang tìm...' : '⚔️ Thách Đấu'}
                 </button>
-              )}
-
-              {isHost && phase === 'waiting' && (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => void handleInviteFriend()}
-                    disabled={inviteLoading}
-                    style={{
-                      flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
-                      background: inviteLoading ? '#333' : '#1e88e5',
-                      color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
-                      opacity: inviteLoading ? 0.7 : 1,
-                    }}
-                  >
-                    {inviteLoading ? '⏳' : '👥'} Mời Bạn Bè
-                  </button>
-                  <button
-                    onClick={() => void handleShare()}
-                    disabled={inviteLoading}
-                    style={{
-                      flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
-                      background: inviteLoading ? '#333' : '#27ae60',
-                      color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
-                      opacity: inviteLoading ? 0.7 : 1,
-                    }}
-                  >
-                    📤 Chia Sẻ
-                  </button>
-                </div>
-              )}
-
-              <button onClick={handleLeave} style={{
-                padding: '10px', background: 'transparent', border: '1px solid #e94560',
-                color: '#e94560', borderRadius: 6, fontSize: 13, cursor: 'pointer',
-              }}>🚪 {t('game.leave')}</button>
-            </div>
+                <button
+                  onClick={() => void handleInviteFriend()}
+                  disabled={inviteLoading}
+                  style={{
+                    flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
+                    background: inviteLoading ? '#333' : '#1e88e5',
+                    color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
+                    opacity: inviteLoading ? 0.7 : 1,
+                  }}
+                >
+                  {inviteLoading ? '⏳' : '👥'} Mời Bạn Bè
+                </button>
+                <button
+                  onClick={() => void handleShare()}
+                  disabled={inviteLoading}
+                  style={{
+                    flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
+                    background: inviteLoading ? '#333' : '#27ae60',
+                    color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
+                    opacity: inviteLoading ? 0.7 : 1,
+                  }}
+                >
+                  📤 Chia Sẻ
+                </button>
+              </div>
+            )}
           </div>
         )}
 
