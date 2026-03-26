@@ -95,23 +95,7 @@ export default function PvpHub() {
           }}>
             PVP Arena
           </h1>
-          <button
-            onClick={() => navigate('/pvp/history?tab=leaderboard')}
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 58,
-              background: "url('/assets/pvp/btn_bxh.png') no-repeat center center / contain",
-              border: 'none',
-              width: 86,
-              height: 38,
-              cursor: 'pointer',
-              color: 'transparent',
-              padding: 0,
-            }}
-          >
-            BXH
-          </button>
+
         </div>
 
         {/* Rank card — reuse from 1v1 */}

@@ -50,7 +50,7 @@ export default function PvpHistory() {
           minHeight: 32,
         }}>
           <button
-            onClick={() => navigate('/pvp')}
+            onClick={() => navigate('/pvp/arena')}
             style={{
               position: 'absolute',
               left: -10,

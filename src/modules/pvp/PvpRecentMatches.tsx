@@ -10,8 +10,8 @@ export function PvpRecentMatches() {
   const { data: auth } = useAuth();
 
   const { data: historyData } = useQuery({
-    queryKey: ['pvp', 'history', 3],
-    queryFn: () => pvpApi.getHistory(3),
+    queryKey: ['pvp', 'history', 1],
+    queryFn: () => pvpApi.getHistory(1),
     enabled: !!auth?.user,
   });
 

@@ -1147,6 +1147,11 @@ export default function PvpTestScreen() {
     addLog('Gửi: Sẵn sàng');
   };
 
+  const handleUnready = () => {
+    setMyReady(false);
+    addLog('Hủy sẵn sàng (local)');
+  };
+
   const handleStart = () => {
     if (!roomRef.current) return;
     roomRef.current.send('start');
@@ -1870,10 +1875,11 @@ export default function PvpTestScreen() {
             <div style={{
               background: "url('/assets/guest_room/frame_pvp_1vs1.png') no-repeat center center / 100% 100%",
               padding: '28px 16px 32px',
+              position: 'relative',
             }}>
 
               {/* Host left — Guest right */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                 {/* Host (left) */}
                 {(() => {
                   const hostEntry = playersArr.find(([sid]) => sid === hostSessionId);
@@ -1903,7 +1909,7 @@ export default function PvpTestScreen() {
                       {/* Info */}
                       <div style={{ textAlign: 'center', fontFamily: "'Fredoka One','Nunito',sans-serif", display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 72 }}>
                         <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', textShadow: '1px 1px 2px #000', wordBreak: 'break-word', maxWidth: 100 }}>
-                          {hostP?.name ?? t('game.waitingPlayer')}
+                          {hostP ? `${hostP.name}${mySessionId === hostSessionId ? '(bạn)' : ''}` : t('game.waitingPlayer')}
                         </div>
                         <div style={{ fontSize: 11, color: '#fdd835', fontWeight: 700 }}>👑HOST</div>
                         <div style={{ flex: 1 }} />
@@ -1937,7 +1943,7 @@ export default function PvpTestScreen() {
                   const guestSid = guestEntry?.[0];
                   const guestReady = guestP?.ready ?? false;
                   return (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}>
                       {/* Avatar */}
                       <div style={{
                         width: 72, height: 72,
@@ -1966,7 +1972,7 @@ export default function PvpTestScreen() {
                       {/* Info */}
                       <div style={{ textAlign: 'center', fontFamily: "'Fredoka One','Nunito',sans-serif", display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 72 }}>
                         <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', textShadow: '1px 1px 2px #000', wordBreak: 'break-word', maxWidth: 100 }}>
-                          {guestP ? `${guestP.name}(bạn)` : t('game.waitingPlayer')}
+                          {guestP ? `${guestP.name}${mySessionId === guestSid ? '(bạn)' : ''}` : t('game.waitingPlayer')}
                         </div>
                         <div style={{ flex: 1 }} />
                         {guestP && (
@@ -1979,10 +1985,23 @@ export default function PvpTestScreen() {
                       </div>
                       {/* Kick button */}
                       {isHost && guestP && guestSid && (
-                        <button onClick={() => handleKick(guestSid)} style={{
-                          padding: '3px 10px', background: '#5c1a1a', border: '1px solid #c62828',
-                          color: '#ef9a9a', borderRadius: 4, fontSize: 10, cursor: 'pointer',
-                        }}>{t('game.kick')}</button>
+                        <button
+                          onClick={() => handleKick(guestSid)}
+                          style={{
+                            position: 'absolute',
+                            bottom: -40,
+                            left: '50%',
+                            marginLeft: '-32px', // Half of width (64)
+                            background: 'none', border: 'none', padding: 0,
+                            cursor: 'pointer', transition: 'transform 0.1s',
+                            zIndex: 2,
+                          }}
+                          onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.95)')}
+                          onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                          onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                        >
+                          <img src="/assets/guest_room/btn_drive_away.png" alt="Đuổi" style={{ width: 64, height: 'auto', display: 'block' }} />
+                        </button>
                       )}
                     </div>
                   );
@@ -1990,23 +2009,37 @@ export default function PvpTestScreen() {
               </div>
             </div>
 
+
+
+
             {/* ── SECTION 3: Action buttons side-by-side ── */}
             <div style={{ display: 'flex', gap: 10 }}>
-              {/* Ready / Start */}
+              {/* Ready / Start / Cancel */}
               {isHost ? (
                 <button onClick={handleStart} disabled={!canStart} style={{
                   flex: 1, border: 'none', background: 'none', padding: 0,
                   cursor: canStart ? 'pointer' : 'not-allowed', opacity: canStart ? 1 : 0.5,
                 }}>
-                  <img src="/assets/guest_room/btn_ready.png" alt="Bắt đầu" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  <img
+                    src={canStart ? '/assets/guest_room/btn_enter.png' : '/assets/guest_room/btn_ready.png'}
+                    alt={canStart ? 'Vào' : 'Bắt đầu'}
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                  />
                 </button>
               ) : (
-                <button onClick={handleReady} disabled={myReady} style={{
-                  flex: 1, border: 'none', background: 'none', padding: 0,
-                  cursor: myReady ? 'default' : 'pointer', opacity: myReady ? 0.6 : 1,
-                }}>
-                  <img src="/assets/guest_room/btn_ready.png" alt="Sẵn Sàng" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                </button>
+                myReady ? (
+                  <button type="button" onClick={handleUnready} style={{
+                    flex: 1, border: 'none', background: 'none', padding: 0, cursor: 'pointer',
+                  }}>
+                    <img src="/assets/guest_room/btn_cancel.png" alt="Hủy" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  </button>
+                ) : (
+                  <button onClick={handleReady} style={{
+                    flex: 1, border: 'none', background: 'none', padding: 0, cursor: 'pointer',
+                  }}>
+                    <img src="/assets/guest_room/btn_ready.png" alt="Sẵn Sàng" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  </button>
+                )
               )}
 
               {/* Leave */}
