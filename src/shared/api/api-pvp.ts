@@ -352,10 +352,10 @@ export const pvpApi = {
       { method: 'POST' },
     ),
 
-  createOpenRoom: () =>
+  createOpenRoom: (isPublic = true) =>
     pvpFetch<{ ok: boolean; roomCode: string; roomId: string }>(
       '/create-open-room',
-      { method: 'POST', body: '{}' },
+      { method: 'POST', body: JSON.stringify({ isPublic, is_public: isPublic }) },
     ),
 
   closeOpenRoom: (roomCode: string) =>

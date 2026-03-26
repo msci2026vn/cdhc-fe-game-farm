@@ -1051,7 +1051,7 @@ export default function PvpTestScreen() {
       const token = await fetchPvpToken();
       addLog('Đang tạo phòng...');
       // Use REST API to create room (registers pvp:open_room in Redis for invite links)
-      const openRoom = await pvpApi.createOpenRoom();
+      const openRoom = await pvpApi.createOpenRoom(false);
       if (!openRoom.ok) throw new Error('Failed to create room');
       addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
       const r = await clientRef.current.joinById(openRoom.roomId, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
@@ -1345,78 +1345,121 @@ export default function PvpTestScreen() {
         </div>
       )}
 
-      {/* Friend Picker Modal */}
+      {/* Friend Picker Full Page Overlay */}
       {showFriendPicker && (
         <div
           style={{
-            position: 'fixed', inset: 0, zIndex: 250,
-            background: 'rgba(0,0,0,0.65)',
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+            position: 'absolute', inset: 0, zIndex: 1000,
+            background: "url('/assets/pvp/bg_pvp.png') no-repeat center center / 100% 100%",
+            fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+            padding: '40px 16px 20px',
           }}
-          onClick={() => setShowFriendPicker(false)}
         >
-          <div
-            style={{
-              background: 'linear-gradient(180deg,#1a1a2e,#0f1624)',
-              border: '1px solid #1e4d78',
-              borderRadius: '16px 16px 0 0',
-              width: '100%', maxWidth: 480,
-              maxHeight: '70vh', overflow: 'hidden',
-              display: 'flex', flexDirection: 'column',
-              paddingBottom: 'env(safe-area-inset-bottom)',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
+          <div style={{ maxWidth: 335, margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
+            {/* Header */}
             <div style={{
-              padding: '16px 20px', borderBottom: '1px solid #1e3a5a',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative', marginBottom: 60, marginTop: 0, minHeight: 32,
             }}>
-              <span style={{ fontWeight: 700, color: '#fff', fontSize: 16 }}>👥 Mời Bạn Bè</span>
-              <button onClick={() => setShowFriendPicker(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button
+                onClick={() => setShowFriendPicker(false)}
+                style={{
+                  position: 'absolute', left: 0, top: 60,
+                  background: "url('/assets/pvp_1vs1_arena/btn_back.png') no-repeat center center / contain",
+                  border: 'none', width: 86, height: 38, cursor: 'pointer',
+                  color: 'transparent', padding: 0, transition: 'transform 0.1s',
+                }}
+                onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.95)')}
+                onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+              >
+                Back
+              </button>
+              <h1 style={{
+                margin: 0, fontSize: 24, fontWeight: 900, color: '#FFFEA3',
+                textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1,
+                fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+                textShadow: '2px 2px 0 #1a0a00, -2px 2px 0 #1a0a00, 2px -2px 0 #1a0a00, -2px -2px 0 #1a0a00, 3px 0 0 #1a0a00, -3px 0 0 #1a0a00, 0 3px 0 #1a0a00, 0 -3px 0 #1a0a00',
+              }}>
+                Mời Bạn Bè
+              </h1>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-              {friendsLoading ? (
-                <div style={{ textAlign: 'center', color: '#64748b', padding: 40, fontSize: 14 }}>Đang tải...</div>
-              ) : friendList.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-                  <div style={{ fontSize: 40, marginBottom: 8 }}>😔</div>
-                  <div style={{ color: '#64748b', fontSize: 14 }}>Chưa có bạn bè nào</div>
-                </div>
-              ) : (
-                friendList.map(f => (
-                  <div
-                    key={f.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '10px 20px', borderBottom: '1px solid #0f1e30',
-                    }}
-                  >
-                    <div style={{
-                      width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                      background: '#1e4d78', overflow: 'hidden',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
-                    }}>
-                      {f.avatar ? <img src={f.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" /> : '👤'}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: 14 }}>{f.name}</div>
-                      <div style={{ color: '#64748b', fontSize: 11 }}>Lv.{f.level}</div>
-                    </div>
-                    <button
-                      onClick={() => void handleSendInviteToFriend(f.id)}
-                      disabled={sendingInviteTo === f.id}
-                      style={{
-                        padding: '8px 16px', borderRadius: 8, border: 'none',
-                        background: sendingInviteTo === f.id ? '#333' : '#e94560',
-                        color: '#fff', fontSize: 12, fontWeight: 700,
-                        cursor: sendingInviteTo === f.id ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      {sendingInviteTo === f.id ? '⏳' : '⚔️ Mời'}
-                    </button>
+
+            {/* List Area */}
+            <style>{`
+              .pvp-invite-scroll::-webkit-scrollbar { display: none; }
+              .pvp-invite-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+            <div className="pvp-invite-scroll" style={{ flex: 1, overflowY: 'auto', padding: '0 16px 20px' }}>
+              <div style={{
+                background: "url('/assets/guest_room/frame_wood_3.png') no-repeat center center / 100% 100%",
+                minHeight: '80vh', padding: '30px 20px',
+                display: 'flex', flexDirection: 'column',
+              }}>
+                {friendsLoading ? (
+                  <div style={{ textAlign: 'center', color: '#FFFEA3', padding: 40, fontSize: 16, fontWeight: 700, textShadow: '1px 1px 0 #3b1e0a' }}>
+                    Đang tải...
                   </div>
-                ))
-              )}
+                ) : friendList.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '60px 16px' }}>
+                    <div style={{ fontSize: 60, marginBottom: 12 }}>😔</div>
+                    <div style={{ color: '#FFFEA3', fontSize: 16, fontWeight: 700, textShadow: '1px 1px 0 #3b1e0a' }}>
+                      Chưa có bạn bè nào
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {friendList.map(f => (
+                      <div
+                        key={f.id}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '12px 16px',
+                          background: 'rgba(0,0,0,0.3)', borderRadius: 12,
+                          border: '1px solid rgba(255, 254, 163, 0.2)',
+                        }}
+                      >
+                        <div style={{
+                          width: 48, height: 48, flexShrink: 0,
+                          backgroundImage: "url('/assets/guest_room/frame_ava.png')",
+                          backgroundSize: '100% 100%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          {f.avatar ? (
+                            <img src={f.avatar} style={{ width: '86%', height: '86%', objectFit: 'cover', borderRadius: 6 }} alt="" />
+                          ) : (
+                            <div style={{ width: '86%', height: '86%', borderRadius: 6, background: '#1e4d78', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                              👤
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ color: '#fff', fontWeight: 800, fontSize: 15, fontFamily: "'Fredoka One', 'Nunito', sans-serif", letterSpacing: 0.5 }}>{f.name}</div>
+                          <div style={{ color: '#FFFEA3', fontSize: 12, fontWeight: 700 }}>Lv.{f.level}</div>
+                        </div>
+                        <button
+                          onClick={() => void handleSendInviteToFriend(f.id)}
+                          disabled={sendingInviteTo === f.id}
+                          style={{
+                            padding: '8px 20px', borderRadius: 12, border: '2px solid #5a1414',
+                            background: sendingInviteTo === f.id ? '#64748b' : 'linear-gradient(180deg, #ef4444, #991b1b)',
+                            color: '#fff', fontSize: 14, fontWeight: 900, fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+                            cursor: sendingInviteTo === f.id ? 'not-allowed' : 'pointer',
+                            boxShadow: sendingInviteTo === f.id ? 'none' : '0 4px 0 #5a1414',
+                            textShadow: '1px 1px 0 #000',
+                            transition: 'transform 0.1s',
+                          }}
+                          onPointerDown={e => sendingInviteTo !== f.id && (e.currentTarget.style.transform = 'translateY(4px)', e.currentTarget.style.boxShadow = '0 0px 0 #5a1414')}
+                          onPointerUp={e => sendingInviteTo !== f.id && (e.currentTarget.style.transform = 'translateY(0)', e.currentTarget.style.boxShadow = '0 4px 0 #5a1414')}
+                          onPointerLeave={e => sendingInviteTo !== f.id && (e.currentTarget.style.transform = 'translateY(0)', e.currentTarget.style.boxShadow = '0 4px 0 #5a1414')}
+                        >
+                          {sendingInviteTo === f.id ? '...' : 'MỜI'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1537,8 +1580,50 @@ export default function PvpTestScreen() {
 
       <div style={{ maxWidth: 335, margin: '0 auto' }}>
 
-        <div style={{ textAlign: 'center', marginBottom: 80 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#FFFEA3', margin: 0, fontFamily: "'Fredoka One', 'Nunito', sans-serif", textShadow: '2px 2px 0 #000' }}>1 vs 1 ARENA</h1>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          marginBottom: 60,
+          marginTop: 0,
+          minHeight: 32,
+        }}>
+          <button
+            onClick={() => { handleLeave(); navigate('/pvp/arena'); }}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 60,
+              background: "url('/assets/pvp_1vs1_arena/btn_back.png') no-repeat center center / contain",
+              border: 'none',
+              width: 86,
+              height: 38,
+              cursor: 'pointer',
+              color: 'transparent',
+              padding: 0,
+              transition: 'transform 0.1s',
+            }}
+            onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.95)')}
+            onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            Back
+          </button>
+          <h1 style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 900,
+            color: '#FFFEA3',
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+            textShadow: '2px 2px 0 #1a0a00, -2px 2px 0 #1a0a00, 2px -2px 0 #1a0a00, -2px -2px 0 #1a0a00, 3px 0 0 #1a0a00, -3px 0 0 #1a0a00, 0 3px 0 #1a0a00, 0 -3px 0 #1a0a00',
+          }}>
+            1 vs 1 ARENA
+          </h1>
         </div>
 
         {/* Status bar */}
@@ -1894,10 +1979,10 @@ export default function PvpTestScreen() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {(hostP as (PlayerInfo & { avatar?: string }) | undefined)?.avatar ? (
-                          <img src={(hostP as PlayerInfo & { avatar?: string }).avatar} alt="" style={{ width: '72%', height: '72%', objectFit: 'cover', borderRadius: '50%' }} />
+                          <img src={(hostP as PlayerInfo & { avatar?: string }).avatar} alt="" style={{ width: '86%', height: '86%', objectFit: 'cover', borderRadius: 6 }} />
                         ) : (
                           <div style={{
-                            width: '72%', height: '72%', borderRadius: '50%',
+                            width: '86%', height: '86%', borderRadius: 6,
                             background: 'linear-gradient(135deg,#e94560,#a01030)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 26, fontWeight: 900, color: '#fff', textShadow: '1px 1px 2px #000',
@@ -1954,10 +2039,10 @@ export default function PvpTestScreen() {
                       }}>
                         {guestP ? (
                           (guestP as PlayerInfo & { avatar?: string }).avatar ? (
-                            <img src={(guestP as PlayerInfo & { avatar?: string }).avatar} alt="" style={{ width: '72%', height: '72%', objectFit: 'cover', borderRadius: '50%' }} />
+                            <img src={(guestP as PlayerInfo & { avatar?: string }).avatar} alt="" style={{ width: '86%', height: '86%', objectFit: 'cover', borderRadius: 6 }} />
                           ) : (
                             <div style={{
-                              width: '72%', height: '72%', borderRadius: '50%',
+                              width: '86%', height: '86%', borderRadius: 6,
                               background: 'linear-gradient(135deg,#1e88e5,#0d4080)',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               fontSize: 26, fontWeight: 900, color: '#fff', textShadow: '1px 1px 2px #000',
@@ -2062,37 +2147,52 @@ export default function PvpTestScreen() {
                   }}
                   disabled={challengeSearching}
                   style={{
-                    flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
-                    background: challengeSearching ? '#333' : 'linear-gradient(135deg,#7c3aed,#4f46e5)',
-                    color: '#fff', border: 'none', cursor: challengeSearching ? 'not-allowed' : 'pointer',
-                    opacity: challengeSearching ? 0.6 : 1,
+                    flex: 1, border: 'none', background: 'none', padding: 0,
+                    cursor: challengeSearching ? 'not-allowed' : 'pointer',
+                    opacity: challengeSearching ? 0.6 : 1, transition: 'transform 0.1s'
                   }}
+                  onPointerDown={e => !challengeSearching && (e.currentTarget.style.transform = 'scale(0.95)')}
+                  onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  {challengeSearching ? '🔍 Đang tìm...' : '⚔️ Thách Đấu'}
+                  {challengeSearching ? (
+                    <div style={{
+                      width: '100%', height: '100%', minHeight: 40,
+                      background: '#333', borderRadius: 8, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', color: '#fff',
+                      fontSize: 13, fontWeight: 700
+                    }}>🔍 Đang tìm...</div>
+                  ) : (
+                    <img src="/assets/guest_room/btn_challenge.png" alt="Thách Đấu" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  )}
                 </button>
                 <button
                   onClick={() => void handleInviteFriend()}
                   disabled={inviteLoading}
                   style={{
-                    flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
-                    background: inviteLoading ? '#333' : '#1e88e5',
-                    color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
-                    opacity: inviteLoading ? 0.7 : 1,
+                    flex: 1, border: 'none', background: 'none', padding: 0,
+                    cursor: inviteLoading ? 'not-allowed' : 'pointer',
+                    opacity: inviteLoading ? 0.7 : 1, transition: 'transform 0.1s'
                   }}
+                  onPointerDown={e => !inviteLoading && (e.currentTarget.style.transform = 'scale(0.95)')}
+                  onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  {inviteLoading ? '⏳' : '👥'} Mời Bạn Bè
+                  <img src="/assets/guest_room/btn_invite_friends.png" alt="Mời Bạn Bè" style={{ width: '100%', height: 'auto', display: 'block' }} />
                 </button>
                 <button
                   onClick={() => void handleShare()}
                   disabled={inviteLoading}
                   style={{
-                    flex: 1, padding: '10px 0', borderRadius: 6, fontSize: 13, fontWeight: 700,
-                    background: inviteLoading ? '#333' : '#27ae60',
-                    color: '#fff', border: 'none', cursor: inviteLoading ? 'not-allowed' : 'pointer',
-                    opacity: inviteLoading ? 0.7 : 1,
+                    flex: 1, border: 'none', background: 'none', padding: 0,
+                    cursor: inviteLoading ? 'not-allowed' : 'pointer',
+                    opacity: inviteLoading ? 0.7 : 1, transition: 'transform 0.1s'
                   }}
+                  onPointerDown={e => !inviteLoading && (e.currentTarget.style.transform = 'scale(0.95)')}
+                  onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  📤 Chia Sẻ
+                  <img src="/assets/guest_room/btn_share.png" alt="Chia Sẻ" style={{ width: '100%', height: 'auto', display: 'block' }} />
                 </button>
               </div>
             )}

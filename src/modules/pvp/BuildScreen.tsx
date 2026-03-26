@@ -145,7 +145,7 @@ export default function BuildScreen() {
       }}>
         {/* Back Button */}
         <button
-          onClick={() => navigate('/pvp')}
+          onClick={() => navigate('/pvp/arena')}
           style={{
             width: 40, height: 40, border: 'none', cursor: 'pointer', flexShrink: 0,
             background: "url('/assets/stats/btn_back_arrow.png') no-repeat center center / contain",
@@ -281,7 +281,7 @@ export default function BuildScreen() {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 12 }}>
           <button
-            onClick={() => navigate('/pvp')}
+            onClick={() => navigate('/pvp/arena')}
             style={{
               width: 120, height: 40, border: 'none',
               background: "url('/assets/build/btn_cancel.png') no-repeat center center / contain",

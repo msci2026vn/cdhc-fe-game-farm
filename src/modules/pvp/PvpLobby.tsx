@@ -39,7 +39,7 @@ export default function PvpLobby() {
   const [showChallengePopup, setShowChallengePopup] = useState(false);
   const [openRoomLoading, setOpenRoomLoading] = useState(false);
   const [challengeSearching, setChallengeSearching] = useState(false);
-  const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [isPublic, setIsPublic] = useState<boolean>(false);
   const [showBotPicker, setShowBotPicker] = useState(false);
   const [botLoading, setBotLoading] = useState(false);
 
@@ -210,16 +210,8 @@ export default function PvpLobby() {
   const handleCreateOpenRoom = async () => {
     setOpenRoomLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/pvp/create-open-room`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublic }),
-      });
-      const data = (await res.json()) as { ok: boolean; roomCode: string; roomId: string };
+      const data = await pvpApi.createOpenRoom(isPublic);
       if (data.ok && data.roomCode) {
-        setChallengeSearching(true);
-        pvpApi.startChallenge(data.roomCode).catch(() => { });
         navigate(`/pvp-test?roomId=${data.roomId}`);
       }
     } catch (e) {
@@ -442,7 +434,6 @@ export default function PvpLobby() {
         {[
           { icon: 'btn_home.png', label: 'Home', path: '/' },
           { icon: 'btn_pvp.png', label: 'Bot' },
-          { icon: 'btn_friend.png', label: 'Invite' },
           { icon: 'btn_build.png', label: 'Build', path: '/pvp/build' }
         ].map((btn, index) => (
           <button
