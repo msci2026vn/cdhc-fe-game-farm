@@ -12,6 +12,9 @@ import { useLevelUpDetector } from '@/shared/hooks/useLevelUpDetector';
 import { LevelUpOverlay } from '@/shared/components/LevelUpOverlay';
 import { useGlobalCoopInvite } from '@/modules/coop/hooks/useGlobalCoopInvite';
 import { CoopInvitePopup } from '@/modules/coop/components/CoopInvitePopup';
+import { useGlobalPvpInvite } from '@/modules/pvp/hooks/useGlobalPvpInvite';
+import { InvitePopup as PvpInvitePopup } from '@/modules/pvp/PvpInvitePopup';
+import { InviteNotification } from '@/modules/pvp-team/InviteNotification';
 import { useAuth } from '@/shared/hooks/useAuth';
 import Toast from '@/shared/components/Toast';
 import ConnectionLostOverlay from '@/shared/components/ConnectionLostOverlay';
@@ -111,6 +114,7 @@ const AuthenticatedApp = () => {
   useLevelUpDetector();
   const { data: authData } = useAuth();
   const { invitePayload, acceptInvite, declineInvite } = useGlobalCoopInvite(!!authData?.user);
+  const { invite: pvpInvite, acceptInvite: acceptPvp, declineInvite: declinePvp } = useGlobalPvpInvite(!!authData?.user);
 
   // Initialize audio on first user interaction + preload UI sounds
   useEffect(() => {
@@ -137,6 +141,14 @@ const AuthenticatedApp = () => {
           onDecline={declineInvite}
         />
       )}
+      {pvpInvite && (
+        <PvpInvitePopup
+          invite={pvpInvite}
+          onAccept={acceptPvp}
+          onReject={declinePvp}
+        />
+      )}
+      <InviteNotification />
       <Routes>
         <Route path="/" element={<MainMenuScreen />} />
         <Route path="/farm" element={<FarmingScreen />} />

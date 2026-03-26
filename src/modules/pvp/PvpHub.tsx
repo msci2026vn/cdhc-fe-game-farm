@@ -287,31 +287,6 @@ export default function PvpHub() {
           {toast}
         </div>
       )}
-
-      {/* Bot Difficulty Picker */}
-      {showBotPicker && (
-        <PvpBotDifficultyPicker
-          onClose={() => setShowBotPicker(false)}
-          onSelect={handlePlayBot}
-        />
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div style={{
-          position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
-          background: '#1e3a5a', border: '1px solid #3b82f6',
-          borderRadius: 10, padding: '10px 20px',
-          color: '#e2e8f0', fontSize: 14, fontWeight: 600,
-          zIndex: 400, whiteSpace: 'nowrap',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-        }}>
-          {toast}
-        </div>
-      )}
-
-      {/* Invite notification popup */}
-      <InviteNotification />
     </div>
   );
 }

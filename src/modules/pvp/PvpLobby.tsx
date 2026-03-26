@@ -7,7 +7,6 @@ import type { PvpEvent } from '@/shared/api/api-pvp';
 import { usePvpSSE } from './hooks/usePvpSSE';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { RoomListModal } from './PvpRoomListModal';
-import { InvitePopup } from './PvpInvitePopup';
 import { FriendPickerModal } from './PvpFriendPickerModal';
 import { QuickMatchModal } from './PvpQuickMatchModal';
 import { ChallengePopup } from './PvpChallengePopup';
@@ -31,7 +30,6 @@ export default function PvpLobby() {
   const [showRoomList, setShowRoomList] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [waitSeconds, setWaitSeconds] = useState(0);
-  const [pendingInvite, setPendingInvite] = useState<(PvpEvent & { type: 'pvp_invite' }) | null>(null);
   const [toast, setToast] = useState('');
   const [showBossPopup, setShowBossPopup] = useState(false);
   const [bossData, setBossData] = useState<{ name: string; avatar: string; greeting: string } | null>(null);
@@ -104,9 +102,7 @@ export default function PvpLobby() {
 
   // SSE handler
   const handleSSEEvent = useCallback((event: PvpEvent) => {
-    if (event.type === 'pvp_invite') {
-      setPendingInvite(event);
-    } else if (event.type === 'pvp_invite_response') {
+    if (event.type === 'pvp_invite_response') {
       if (event.action === 'accept' && (event.roomId || event.roomCode)) {
         showToast(t('toast.friendAccepted'));
         const target = event.roomId
@@ -160,13 +156,11 @@ export default function PvpLobby() {
     mutationFn: ({ inviteId, action }: { inviteId: string; action: 'accept' | 'reject' }) =>
       pvpApi.respondInvite(inviteId, action),
     onSuccess: (data: any) => {
-      setPendingInvite(null);
       const rid = data.roomId || data.room_id;
       const rcode = data.roomCode || data.room_code;
       if (rid) navigate(`/pvp-test?roomId=${rid}`);
       else if (rcode) navigate(`/pvp-test?room=${rcode}`);
     },
-    onError: () => setPendingInvite(null),
   });
 
   const challengeRespondMut = useMutation({
@@ -247,20 +241,6 @@ export default function PvpLobby() {
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
       padding: '20px 16px 80px',
     }}>
-      {/* Pending invite popup */}
-      {pendingInvite && (
-        <InvitePopup
-          invite={pendingInvite}
-          onAccept={() =>
-            respondInviteMut.mutate({ inviteId: pendingInvite.inviteId, action: 'accept' })
-          }
-          onReject={() => {
-            respondInviteMut.mutate({ inviteId: pendingInvite.inviteId, action: 'reject' });
-            setPendingInvite(null);
-          }}
-        />
-      )}
-
       {/* Quick match modal */}
       {inQueue && (
         <QuickMatchModal
