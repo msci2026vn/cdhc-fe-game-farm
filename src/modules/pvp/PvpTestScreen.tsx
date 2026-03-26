@@ -1315,7 +1315,7 @@ export default function PvpTestScreen() {
   const isPlaying = phase === 'playing' || phase === 'sudden_death';
   const showBoard = isPlaying && myBoard.length === 64;
   const showCountdown = phase === 'playing' && countdown > 0;
-  const showResult = phase === 'finished' && winnerId !== '';
+  const showResult = phase === 'finished' && winnerId !== '' && playersArr.length > 1;
   const isWinner = winnerSessionId === mySessionId;
   const isDraw = winnerId === 'draw';
 
@@ -2153,7 +2153,7 @@ export default function PvpTestScreen() {
             </div>
 
             {/* Host-only: Challenge + Invite row */}
-            {isHost && phase === 'waiting' && (
+            {isHost && (phase === 'waiting' || playersArr.length === 1) && (
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   onClick={async () => {
