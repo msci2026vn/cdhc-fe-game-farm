@@ -373,7 +373,7 @@ export const pvpApi = {
   startChallenge: (roomCode: string) =>
     pvpFetch<{ ok: boolean; error?: string }>('/start-challenge', {
       method: 'POST',
-      body: JSON.stringify({ roomCode }),
+      body: JSON.stringify({ roomCode, room_code: roomCode }),
     }),
 
   getRooms: () =>

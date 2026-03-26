@@ -1053,6 +1053,7 @@ export default function PvpTestScreen() {
       // Use REST API to create room (registers pvp:open_room in Redis for invite links)
       const openRoom = await pvpApi.createOpenRoom(false);
       if (!openRoom.ok) throw new Error('Failed to create room');
+      setRoomCode(openRoom.roomCode);
       addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
       const r = await clientRef.current.joinById(openRoom.roomId, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
       attachHandlers(r);
@@ -2142,7 +2143,12 @@ export default function PvpTestScreen() {
                   onClick={async () => {
                     if (challengeSearching || !roomCode) return;
                     setChallengeSearching(true);
-                    try { await pvpApi.startChallenge(roomCode); } catch { /* silent */ }
+                    try {
+                      await pvpApi.startChallenge(roomCode);
+                      showInviteToast('✅ Đã gửi lời thách đấu!');
+                    } catch (e) {
+                      showInviteToast(`❌ Lỗi: ${e instanceof Error ? e.message : 'Không thể thách đấu'}`);
+                    }
                     finally { setTimeout(() => setChallengeSearching(false), 10000); }
                   }}
                   disabled={challengeSearching}
