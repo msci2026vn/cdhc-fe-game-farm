@@ -124,8 +124,11 @@ export default function PvpLobby() {
         : `/pvp-test?room=${event.roomCode}&fromQueue=1`;
       setTimeout(() => navigate(target), 800);
     } else if (event.type === 'pvp_challenge') {
-      setChallengeData({ roomCode: event.roomCode, hostId: event.hostId, hostName: event.hostName, hostRating: event.hostRating, timeoutMs: event.timeoutMs || 30000 });
-      setShowChallengePopup(true);
+      const isManual = event.timeoutMs === 29999 || (event as any).isManual;
+      if (isManual) {
+        setChallengeData({ roomCode: event.roomCode, hostId: event.hostId, hostName: event.hostName, hostRating: event.hostRating, timeoutMs: event.timeoutMs || 30000 });
+        setShowChallengePopup(true);
+      }
     } else if (event.type === 'challenge_accepted') {
       setChallengeSearching(false);
       showToast(t('challenge.accepted'));

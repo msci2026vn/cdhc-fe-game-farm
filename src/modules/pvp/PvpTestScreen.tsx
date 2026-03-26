@@ -1051,7 +1051,7 @@ export default function PvpTestScreen() {
       const token = await fetchPvpToken();
       addLog('Đang tạo phòng...');
       // Use REST API to create room (registers pvp:open_room in Redis for invite links)
-      const openRoom = await pvpApi.createOpenRoom(false);
+      const openRoom = await pvpApi.createOpenRoom(true);
       if (!openRoom.ok) throw new Error('Failed to create room');
       setRoomCode(openRoom.roomCode);
       addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
