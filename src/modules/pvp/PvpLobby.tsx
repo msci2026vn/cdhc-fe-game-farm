@@ -159,10 +159,12 @@ export default function PvpLobby() {
   const respondInviteMut = useMutation({
     mutationFn: ({ inviteId, action }: { inviteId: string; action: 'accept' | 'reject' }) =>
       pvpApi.respondInvite(inviteId, action),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setPendingInvite(null);
-      if (data.roomId) navigate(`/pvp-test?roomId=${data.roomId}`);
-      else if (data.roomCode) navigate(`/pvp-test?room=${data.roomCode}`);
+      const rid = data.roomId || data.room_id;
+      const rcode = data.roomCode || data.room_code;
+      if (rid) navigate(`/pvp-test?roomId=${rid}`);
+      else if (rcode) navigate(`/pvp-test?room=${rcode}`);
     },
     onError: () => setPendingInvite(null),
   });

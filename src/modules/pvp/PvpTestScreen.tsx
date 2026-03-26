@@ -1075,7 +1075,23 @@ export default function PvpTestScreen() {
     try {
       const token = await fetchPvpToken();
       addLog(`Join: ${code}...`);
-      const r = await clientRef.current.joinById(code, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
+      
+      let targetId = code;
+      // If code looks like a Room Code (short, no dashes), try to resolve it from the public rooms list
+      if (!code.includes('-') && code.length <= 10) {
+        try {
+          const { rooms } = await pvpApi.getRooms();
+          const match = rooms.find(r => r.roomCode === code);
+          if (match) {
+            targetId = match.roomId;
+            addLog(`Mã ${code} → RoomId: ${targetId}`);
+          }
+        } catch (e) {
+          console.warn('[handleJoin] Failed to fetch rooms for resolution:', e);
+        }
+      }
+
+      const r = await clientRef.current.joinById(targetId, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
       attachHandlers(r);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -1427,9 +1443,9 @@ export default function PvpTestScreen() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                           {f.avatar ? (
-                            <img src={f.avatar} style={{ width: '86%', height: '86%', objectFit: 'cover', borderRadius: 6 }} alt="" />
+                            <img src={f.avatar} style={{ width: '86%', height: '86%', objectFit: 'cover', borderRadius: 2 }} alt="" />
                           ) : (
-                            <div style={{ width: '86%', height: '86%', borderRadius: 6, background: '#1e4d78', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                            <div style={{ width: '86%', height: '86%', borderRadius: 2, background: '#1e4d78', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
                               👤
                             </div>
                           )}
