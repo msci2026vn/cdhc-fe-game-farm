@@ -487,6 +487,12 @@ export default function PvpTestScreen() {
       setOpponentSkillFlash(null);
       setOpponentSkillNotif(null);
       addLog('↩️ Quay về phòng chờ — Bấm Sẵn Sàng để chơi lại!');
+
+      // Re-register room visibility for host after game ends
+      if (roomRef.current && isHost && roomCode) {
+        addLog('📡 Đang làm mới trạng thái phòng công khai...');
+        void pvpApi.startChallenge(roomCode).catch(() => {});
+      }
     });
 
     r.onMessage('host_changed', (data: { newHostId: string; newHostName: string }) => {
@@ -529,7 +535,7 @@ export default function PvpTestScreen() {
 
     r.onMessage('lobby_timeout', () => {
       addLog('⚠️ Phòng đã đóng do chờ quá lâu');
-      navigate('/pvp');
+      navigate('/pvp/arena');
     });
 
     r.onMessage('game_start', (data: {
@@ -1599,7 +1605,7 @@ export default function PvpTestScreen() {
           h2hData={h2hData}
           countdown={postGameCountdown}
           onSkip={handleSkipPostGame}
-          onLeave={() => { handleLeave(); navigate('/pvp'); }}
+          onLeave={() => { handleLeave(); navigate('/pvp/arena'); }}
           proofMerkleRoot={proofData.merkleRoot}
           proofTxHash={proofData.txHash}
           proofIpfsHash={proofData.ipfsHash}
