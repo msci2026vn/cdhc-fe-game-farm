@@ -32,7 +32,11 @@ export function RoomListModal({
     }
   };
 
-  useEffect(() => { void fetchRooms(); }, []);
+  useEffect(() => {
+    void fetchRooms();
+    const interval = setInterval(() => { void fetchRooms(); }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div

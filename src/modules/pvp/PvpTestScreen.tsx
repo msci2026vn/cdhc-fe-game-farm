@@ -1022,18 +1022,14 @@ export default function PvpTestScreen() {
       setIsDangerZone(false);
       setComboBlast(null);
       if (code === 4001) {
-        setOpponentLeft(false);
-        setError(t('game.kicked'));
         addLog('⚠️ Bị kick khỏi phòng');
-        const fromQueue = new URLSearchParams(window.location.search).get('fromQueue') === '1';
-        if (fromQueue) {
-          setTimeout(() => navigate('/pvp?requeue=1'), 1500);
-        }
+        navigate('/pvp/arena');
       } else if (code !== 1000) {
-        setOpponentLeft(true);
         addLog(`Đối thủ rời phòng (code: ${code})`);
+        navigate('/pvp/arena');
       } else {
         addLog('Đã rời phòng');
+        navigate('/pvp/arena');
       }
     });
 

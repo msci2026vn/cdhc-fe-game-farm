@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { pvpApi } from '@/shared/api/api-pvp';
@@ -22,7 +22,6 @@ const API_BASE = import.meta.env.VITE_API_URL || 'https://sta.cdhc.vn';
 // ─── Main PvpLobby ────────────────────────────────────────────────────────────
 export default function PvpLobby() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { t } = useTranslation('pvp');
   const { data: auth } = useAuth();
 
@@ -195,14 +194,8 @@ export default function PvpLobby() {
     onSuccess: () => setInQueue(false),
   });
 
-  // Auto re-queue khi bị kick từ Quick Match (code 4001)
-  useEffect(() => {
-    if (searchParams.get('requeue') === '1') {
-      showToast(t('matchmaking.kickedRequeue'));
-      joinQueueMut.mutate();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+
 
 
 
