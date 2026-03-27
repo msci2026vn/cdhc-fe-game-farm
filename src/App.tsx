@@ -184,6 +184,16 @@ const AuthenticatedApp = () => {
         <Route path="/farmverse/topup" element={<TopupPage />} />
         <Route path="/farmverse/topup/success" element={<TopupSuccessPage />} />
         <Route path="/farmverse/topup/cancel" element={<TopupCancelPage />} />
+        
+        {/* PvP Routes — Moved inside AuthenticatedApp for global invite support */}
+        <Route path="/pvp-test" element={<PvpTestScreen />} />
+        <Route path="/pvp" element={<PvpHub />} />
+        <Route path="/pvp/arena" element={<PvpLobby />} />
+        <Route path="/pvp/build" element={<BuildScreen />} />
+        <Route path="/pvp/history" element={<PvpHistory />} />
+        <Route path="/pvp/rank" element={<RankInfoScreen />} />
+        <Route path="/pvp-team" element={<TeamPvpPage />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
@@ -219,13 +229,6 @@ const App = () => {
                 {/* Public — NO AuthGuard, NO game hooks */}
                 <Route path="/login" element={<LoginScreen />} />
                 <Route path="/dev-login" element={<DevLoginScreen />} />
-                <Route path="/pvp-test" element={<PvpTestScreen />} />
-                <Route path="/pvp" element={<PvpHub />} />
-                <Route path="/pvp/arena" element={<PvpLobby />} />
-                <Route path="/pvp/build" element={<BuildScreen />} />
-                <Route path="/pvp/history" element={<PvpHistory />} />
-                <Route path="/pvp/rank" element={<RankInfoScreen />} />
-                <Route path="/pvp-team" element={<TeamPvpPage />} />
 
                 {/* Protected — AuthGuard first, then game hooks */}
                 <Route path="/*" element={
