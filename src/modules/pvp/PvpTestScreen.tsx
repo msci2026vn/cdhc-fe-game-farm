@@ -178,6 +178,7 @@ export default function PvpTestScreen() {
   const navigate = useNavigate();
   const { t } = useTranslation('pvp');
   const [searchParams] = useSearchParams();
+  const fromQueue = searchParams.get('fromQueue') === '1';
   const urlRoomCode = searchParams.get('roomId') || searchParams.get('room') || '';
   const clientRef = useRef<Client | null>(null);
   const roomRef = useRef<Room | null>(null);
@@ -1039,11 +1040,18 @@ export default function PvpTestScreen() {
     setInRoom(true);
     setOpponentLeft(false);
     setMyReady(false);
+
+    if (fromQueue) {
+      r.send('ready');
+      setMyReady(true);
+      addLog('Đã tự động Sẵn sàng (Matchmaking)');
+    }
+
     // Strip ?roomId= from URL only if it exists to avoid re-triggering auto-join useEffect
     if (urlRoomCode) {
       navigate('/pvp-test', { replace: true });
     }
-  }, [addLog, navigate, urlRoomCode]);
+  }, [addLog, navigate, urlRoomCode, fromQueue]);
 
   const handleCreate = async () => {
     if (!clientRef.current) return;

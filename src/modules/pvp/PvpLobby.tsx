@@ -131,8 +131,8 @@ export default function PvpLobby() {
     } else if (event.type === 'quick_match_joined') {
       showToast(t('toast.matchFound'));
       const qmTarget = event.roomId
-        ? `/pvp-test?roomId=${event.roomId}`
-        : `/pvp-test?room=${event.roomCode}`;
+        ? `/pvp-test?roomId=${event.roomId}&fromQueue=1`
+        : `/pvp-test?room=${event.roomCode}&fromQueue=1`;
       setTimeout(() => navigate(qmTarget), 800);
     } else if (event.type === 'challenge_failed') {
       setChallengeSearching(false);
