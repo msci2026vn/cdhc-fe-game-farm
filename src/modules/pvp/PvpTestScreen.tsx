@@ -489,9 +489,13 @@ export default function PvpTestScreen() {
       addLog('↩️ Quay về phòng chờ — Bấm Sẵn Sàng để chơi lại!');
 
       // Re-register room visibility for host after game ends
-      if (roomRef.current && isHost && roomCode) {
+      if (roomRef.current && isHost && roomCode && roomId) {
         addLog('📡 Đang làm mới trạng thái phòng công khai...');
-        void pvpApi.startChallenge(roomCode).catch(() => {});
+        void pvpApi.reOpenRoom(roomCode, roomId).catch((e) => {
+          console.error('[room_reset] Re-open failed:', e);
+          // Fallback to startChallenge if reOpenRoom is not yet implemented on BE
+          void pvpApi.startChallenge(roomCode).catch(() => {});
+        });
       }
     });
 
@@ -1093,10 +1097,12 @@ export default function PvpTestScreen() {
       if (!code.includes('-') && code.length <= 10) {
         try {
           const { rooms } = await pvpApi.getRooms();
-          const match = rooms.find(r => r.roomCode === code);
+          const match = rooms.find(r => r.roomCode.toUpperCase() === code.toUpperCase());
           if (match) {
             targetId = match.roomId;
             addLog(`Mã ${code} → RoomId: ${targetId}`);
+          } else {
+            addLog(`⚠️ Không tìm thấy metadata cho mã ${code}, thử join trực tiếp...`);
           }
         } catch (e) {
           console.warn('[handleJoin] Failed to fetch rooms for resolution:', e);

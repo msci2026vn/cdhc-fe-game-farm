@@ -364,6 +364,12 @@ export const pvpApi = {
       body: JSON.stringify({ roomCode }),
     }),
 
+  reOpenRoom: (roomCode: string, roomId: string) =>
+    pvpFetch<{ ok: boolean }>('/re-open-room', {
+      method: 'POST',
+      body: JSON.stringify({ roomCode, roomId }),
+    }),
+
   challengeRespond: (accept: boolean) =>
     pvpFetch<{ ok: boolean; roomCode?: string; roomId?: string; error?: string }>('/challenge-respond', {
       method: 'POST',

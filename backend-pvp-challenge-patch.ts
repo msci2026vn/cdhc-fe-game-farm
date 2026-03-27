@@ -62,6 +62,21 @@
     return c.json({ ok: true });
   });
 
+  // ── POST /api/pvp/re-open-room (MỚI) ──────────────────────────
+  // Host gọi sau khi trận đấu kết thúc (room_reset) để hiện lại phòng
+  app.post('/re-open-room', authMiddleware, async (c) => {
+    const userId = c.get('userId');
+    const userName = c.get('userName') || 'Unknown';
+    const { roomCode, roomId } = await c.req.json<{ roomCode: string; roomId: string }>();
+    
+    if (!roomCode || !roomId) return c.json({ error: 'missing params' }, 400);
+
+    const hostRating = await pvpService.getPlayerRating(userId);
+    await pvpService.registerOpenRoom(roomCode, roomId, userId, userName, hostRating?.rating ?? 1000);
+
+    return c.json({ ok: true });
+  });
+
   // ── POST /api/pvp/challenge-respond (SỬA LẠI) ──────────────────
   // Target chấp nhận hoặc từ chối challenge
   app.post('/challenge-respond', authMiddleware, async (c) => {
@@ -90,9 +105,16 @@
   // pvp:open_room:{code}    KEY  — metadata of open room (TTL 900s)
 
   // ── Feature 1: Register open room for Quick Match ──────────────────
-  // Gọi trong createOpenRoom():
-  async function registerOpenRoom(roomCode: string, hostId: string, hostName: string, hostRating: number) {
-    const data = JSON.stringify({ roomCode, hostId, hostName, hostRating, createdAt: Date.now() });
+  // Gọi trong createOpenRoom() hoặc reOpenRoom():
+  async function registerOpenRoom(roomCode: string, roomId: string, hostId: string, hostName: string, hostRating: number) {
+    const data = JSON.stringify({ 
+      roomCode, 
+      roomId, // THÊM roomId vào metadata để join chính xác
+      hostId, 
+      hostName, 
+      hostRating, 
+      createdAt: Date.now() 
+    });
     await redis.setex(`pvp:open_room:${roomCode}`, 900, data);
     await redis.sadd('pvp:open_rooms', roomCode);
   }
