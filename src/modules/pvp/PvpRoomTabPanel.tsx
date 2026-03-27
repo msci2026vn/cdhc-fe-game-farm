@@ -49,6 +49,8 @@ export function PvpRoomTabPanel() {
       return () => clearInterval(interval);
     } else {
       void fetchWaitingRooms();
+      const interval = setInterval(() => { void fetchWaitingRooms(); }, 5000);
+      return () => clearInterval(interval);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
