@@ -1191,6 +1191,23 @@ export default function PvpTestScreen() {
     addLog(`Gửi: Kick ${sessionId.slice(0, 6)}...`);
   };
 
+  const [reopenLoading, setReopenLoading] = useState(false);
+  const handleReOpenRoom = async () => {
+    setReopenLoading(true);
+    try {
+      const data = await pvpApi.createOpenRoom(true);
+      if (data.ok && data.roomId) {
+        // Navigate to the new public room, re-triggering the join logic
+        navigate(`/pvp-test?roomId=${data.roomId}`, { replace: true });
+        addLog('Đã mở lại phòng công khai mới');
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error');
+    } finally {
+      setReopenLoading(false);
+    }
+  };
+
   const showInviteToast = (msg: string) => {
     setInviteToast(msg);
     setTimeout(() => setInviteToast(''), 3000);
@@ -2134,18 +2151,31 @@ export default function PvpTestScreen() {
 
             {/* ── SECTION 3: Action buttons side-by-side ── */}
             <div style={{ display: 'flex', gap: 10 }}>
-              {/* Ready / Start / Cancel */}
+              {/* Ready / Start / Cancel / Re-open */}
               {isHost ? (
-                <button onClick={handleStart} disabled={!canStart} style={{
-                  flex: 1, border: 'none', background: 'none', padding: 0,
-                  cursor: canStart ? 'pointer' : 'not-allowed', opacity: canStart ? 1 : 0.5,
-                }}>
-                  <img
-                    src={canStart ? '/assets/guest_room/btn_enter.png' : '/assets/guest_room/btn_ready.png'}
-                    alt={canStart ? 'Vào' : 'Bắt đầu'}
-                    style={{ width: '100%', height: 'auto', display: 'block' }}
-                  />
-                </button>
+                playersArr.length === 1 ? (
+                  <button onClick={handleReOpenRoom} disabled={reopenLoading} style={{
+                    flex: 1, border: 'none', background: 'none', padding: 0,
+                    cursor: reopenLoading ? 'not-allowed' : 'pointer', opacity: reopenLoading ? 0.6 : 1,
+                  }}>
+                    <img
+                      src="/assets/pvp_1vs1_arena/btn_create_room.png"
+                      alt="Công khai"
+                      style={{ width: '100%', height: 'auto', display: 'block' }}
+                    />
+                  </button>
+                ) : (
+                  <button onClick={handleStart} disabled={!canStart} style={{
+                    flex: 1, border: 'none', background: 'none', padding: 0,
+                    cursor: canStart ? 'pointer' : 'not-allowed', opacity: canStart ? 1 : 0.5,
+                  }}>
+                    <img
+                      src={canStart ? '/assets/guest_room/btn_enter.png' : '/assets/guest_room/btn_ready.png'}
+                      alt={canStart ? 'Vào' : 'Bắt đầu'}
+                      style={{ width: '100%', height: 'auto', display: 'block' }}
+                    />
+                  </button>
+                )
               ) : (
                 myReady ? (
                   <button type="button" onClick={handleUnready} style={{
