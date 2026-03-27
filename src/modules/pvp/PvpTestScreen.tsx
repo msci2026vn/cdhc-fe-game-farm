@@ -1039,9 +1039,11 @@ export default function PvpTestScreen() {
     setInRoom(true);
     setOpponentLeft(false);
     setMyReady(false);
-    // Strip ?roomId= from URL to prevent "Đang vào phòng..." spinner after game ends
-    navigate('/pvp-test', { replace: true });
-  }, [addLog, navigate]);
+    // Strip ?roomId= from URL only if it exists to avoid re-triggering auto-join useEffect
+    if (urlRoomCode) {
+      navigate('/pvp-test', { replace: true });
+    }
+  }, [addLog, navigate, urlRoomCode]);
 
   const handleCreate = async () => {
     if (!clientRef.current) return;
@@ -1247,15 +1249,23 @@ export default function PvpTestScreen() {
 
   // ── Auto-join khi có roomId trên URL ──
   useEffect(() => {
-    if (urlRoomCode && !inRoom && !autoJoinedRef.current) {
-      autoJoinedRef.current = true;
+    // Nếu có roomId trên URL và khác với phòng hiện tại
+    if (urlRoomCode && urlRoomCode !== roomId) {
+      // Nếu đang kết nối thì đợi
+      if (connecting) return;
+
+      addLog(`Phát hiện yêu cầu vào phòng mới: ${urlRoomCode}`);
+      // Nếu đang ở trong phòng cũ thì rời đi trước
+      if (roomRef.current) {
+        roomRef.current.leave();
+      }
+      
       const timer = setTimeout(() => {
         handleJoin(urlRoomCode);
       }, 500);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlRoomCode]);
+  }, [urlRoomCode, roomId, connecting]);
 
   // ── Auto-join khi có invite token trên URL ──
   useEffect(() => {
