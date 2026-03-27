@@ -39,7 +39,7 @@ export function CoopInvitePopup({ payload, onAccept, onDecline }: Props) {
     <div style={{
       position:       'fixed',
       inset:          0,
-      zIndex:         300,
+      zIndex:         99999,
       background:     'rgba(0,0,0,0.75)',
       display:        'flex',
       alignItems:     'center',

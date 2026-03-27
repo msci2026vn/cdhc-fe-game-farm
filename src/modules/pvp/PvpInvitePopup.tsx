@@ -29,7 +29,7 @@ export function InvitePopup({
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 300,
+      position: 'fixed', inset: 0, zIndex: 99999,
       background: 'rgba(0,0,0,0.75)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
