@@ -517,7 +517,11 @@ export default function PvpTestScreen() {
       // Re-open room when becoming host
       if (imHost && roomCodeRef.current && roomIdRef.current) {
         addLog('📡 Phòng chuyển sang bạn, đang làm mới trạng thái công khai...');
-        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+        setTimeout(() => {
+          if (roomRef.current && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
+            void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+          }
+        }, 800);
       }
     });
 
@@ -535,7 +539,11 @@ export default function PvpTestScreen() {
       // If we are host and someone left, the room might have been full/closed, so re-open it
       if (isHostRef.current && roomCodeRef.current && roomIdRef.current) {
         addLog('📡 Đang đăng ký lại phòng công khai...');
-        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+        setTimeout(() => {
+          if (roomRef.current && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
+            void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+          }
+        }, 800);
       }
     });
 
@@ -548,6 +556,11 @@ export default function PvpTestScreen() {
       
       const prevPhase = phaseRef.current;
       phaseRef.current = data.phase;
+      
+      if (data.roomCode) {
+        roomCodeRef.current = data.roomCode;
+        setRoomCode(data.roomCode);
+      }
       
       // Auto-start for Host from Queue (or when both are ready and from queue)
       const urlFromQueue = searchParams.get('fromQueue') === '1';
@@ -581,7 +594,12 @@ export default function PvpTestScreen() {
       // 2. If we are alone in 'waiting' phase, ensure we are in public lobby
       if (isSolo && data.phase === 'waiting' && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
         // Force re-open to ensure lobby visibility for re-entry
-        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(() => {});
+        // Using a delay to avoid race condition with server-side onLeave cleanup
+        setTimeout(() => {
+          if (roomRef.current && phaseRef.current === 'waiting' && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
+            void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(() => {});
+          }
+        }, 1000);
       }
     });
 
@@ -1156,6 +1174,8 @@ export default function PvpTestScreen() {
       const openRoom = await pvpApi.createOpenRoom(true);
       if (!openRoom.ok) throw new Error('Failed to create room');
       setRoomCode(openRoom.roomCode);
+      roomCodeRef.current = openRoom.roomCode;
+      roomIdRef.current = openRoom.roomId;
       addLog(`Phòng ${openRoom.roomCode} đã tạo, đang kết nối...`);
       const r = await clientRef.current.joinById(openRoom.roomId, { token, picture: auth?.user?.picture || '', role: isSpectator ? 'spectator' : 'player' });
       attachHandlers(r);
