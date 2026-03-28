@@ -581,25 +581,27 @@ export default function PvpTestScreen() {
       const isSolo = playersArr.length === 1;
       
       // 1. If we are alone in 'finished' phase, auto-skip result to make room "Joinable" again
-      // We check prevPhase to only trigger this on the transition to solo OR if we stay solo
+      // Reduce delay to 500ms for faster re-entry (matches "người rời đi có thể vào lại")
       if (isSolo && data.phase === 'finished') {
         setTimeout(() => {
           if (roomRef.current && phaseRef.current === 'finished') {
             roomRef.current.send('skip_post_game');
             addLog('📡 Bạn đang một mình, tự động về sảnh chờ của phòng...');
           }
-        }, 1500);
+        }, 500);
       }
 
       // 2. If we are alone in 'waiting' phase, ensure we are in public lobby
       if (isSolo && data.phase === 'waiting' && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
-        // Force re-open to ensure lobby visibility for re-entry
-        // Using a delay to avoid race condition with server-side onLeave cleanup
+        // Force re-open IMMEDIATELY to ensure lobby visibility
+        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(() => {});
+        
+        // Also add a safety retry after 3 seconds in case of server-side race conditions
         setTimeout(() => {
           if (roomRef.current && phaseRef.current === 'waiting' && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
             void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(() => {});
           }
-        }, 1000);
+        }, 3000);
       }
     });
 
@@ -630,7 +632,7 @@ export default function PvpTestScreen() {
 
     r.onMessage('lobby_timeout', () => {
       addLog('⚠️ Phòng đã đóng do chờ quá lâu');
-      navigate('/pvp/arena');
+      window.location.href = '/pvp/arena';
     });
 
     r.onMessage('game_start', (data: {
@@ -1113,6 +1115,23 @@ export default function PvpTestScreen() {
     });
 
     r.onLeave((code) => {
+      // 1000 = Normal closure (user clicked leave)
+      if (code === 1000) {
+        addLog('Đã rời phòng');
+        window.location.href = '/pvp/arena';
+      } else if (code === 4001) {
+        addLog('⚠️ Bị mời khỏi phòng');
+        window.location.href = '/pvp/arena';
+      } else {
+        // Other codes (1001, 1006 etc) are usually network errors or "going away"
+        addLog(`⚠️ Kết nối phòng bị ngắt (code: ${code})`);
+        setTimeout(() => {
+          if (!roomRef.current || !roomRef.current.connection.isOpen) {
+            window.location.href = '/pvp/arena';
+          }
+        }, 2000);
+      }
+
       setInRoom(false);
       setRoomState(null);
       setRoomId('');
@@ -1135,16 +1154,6 @@ export default function PvpTestScreen() {
       setScoreAlert(null);
       setIsDangerZone(false);
       setComboBlast(null);
-      if (code === 4001) {
-        addLog('⚠️ Bị kick khỏi phòng');
-        navigate('/pvp/arena');
-      } else if (code !== 1000) {
-        addLog(`Đối thủ rời phòng (code: ${code})`);
-        navigate('/pvp/arena');
-      } else {
-        addLog('Đã rời phòng');
-        navigate('/pvp/arena');
-      }
     });
 
     setInRoom(true);
@@ -1272,35 +1281,8 @@ export default function PvpTestScreen() {
 
   const handleLeave = () => {
     roomRef.current?.leave();
-    setInRoom(false);
-    navigate('/pvp/arena');
-    setRoomState(null);
-    setRoomId('');
-    setIsHost(false);
-    setMySessionId('');
-    setMyReady(false);
-    setMyBoard([]);
-    setOpponentBoard([]);
-    setMyScore(0);
-    setOpponentScore(0);
-    setComboText('');
-    setTimeLeft(60);
-    setIsSuddenDeath(false);
-    setWinnerId('');
-    setWinnerSessionId('');
-    setGameOverPlayers([]);
-    setJunkAlert('');
-    setMyHp(1000);
-    setFloatingEmojis([]);
-    setActiveDebuff(null);
-    setScoreAlert(null);
-    setIsDangerZone(false);
-    setComboBlast(null);
-    setMyArmor(0);
-    setMyMana(0);
-    setOpponentHp(1000);
-    setOpponentArmor(0);
     addLog('Đã rời phòng');
+    window.location.href = '/pvp/arena';
   };
 
   const handleRematch = () => {
