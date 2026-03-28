@@ -187,6 +187,7 @@ export default function PvpTestScreen() {
   const roomIdRef = useRef('');
   const roomCodeRef = useRef('');
   const isHostRef = useRef(false);
+  const phaseRef = useRef<'waiting' | 'ready' | 'playing' | 'sudden_death' | 'finished'>('waiting');
 
   const [inRoom, setInRoom] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -545,6 +546,9 @@ export default function PvpTestScreen() {
       if (data.lobbyTimeLeft !== undefined) setLobbyTimeLeft(data.lobbyTimeLeft);
       if (data.spectatorCount !== undefined) setSpectatorCount(data.spectatorCount);
       
+      const prevPhase = phaseRef.current;
+      phaseRef.current = data.phase;
+      
       // Auto-start for Host from Queue (or when both are ready and from queue)
       const urlFromQueue = searchParams.get('fromQueue') === '1';
       const playersArr = Object.entries(data.players);
@@ -558,6 +562,26 @@ export default function PvpTestScreen() {
             addLog('🚀 Tự động bắt đầu trận đấu');
           }
         }, 800);
+      }
+
+      // ── PERSISTENCE: Handle solo player in room ──
+      const isSolo = playersArr.length === 1;
+      
+      // 1. If we are alone in 'finished' phase, auto-skip result to make room "Joinable" again
+      // We check prevPhase to only trigger this on the transition to solo OR if we stay solo
+      if (isSolo && data.phase === 'finished') {
+        setTimeout(() => {
+          if (roomRef.current && phaseRef.current === 'finished') {
+            roomRef.current.send('skip_post_game');
+            addLog('📡 Bạn đang một mình, tự động về sảnh chờ của phòng...');
+          }
+        }, 1500);
+      }
+
+      // 2. If we are alone in 'waiting' phase, ensure we are in public lobby
+      if (isSolo && data.phase === 'waiting' && isHostRef.current && roomCodeRef.current && roomIdRef.current) {
+        // Force re-open to ensure lobby visibility for re-entry
+        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(() => {});
       }
     });
 
