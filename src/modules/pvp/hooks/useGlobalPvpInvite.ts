@@ -22,8 +22,42 @@ export function useGlobalPvpInvite(isLoggedIn: boolean) {
       const data = await pvpApi.respondInvite(inviteId, 'accept');
       const rid = (data as any).roomId || (data as any).room_id;
       const rcode = (data as any).roomCode || (data as any).room_code;
-      if (rid) navigate(`/pvp-test?roomId=${rid}`);
-      else if (rcode) navigate(`/pvp-test?room=${rcode}`);
+
+      if (rid) {
+        // Best case: server returns roomId directly
+        navigate(`/pvp-test?roomId=${rid}`);
+        return;
+      }
+
+      if (rcode) {
+        // Server returned roomCode only — try to resolve to roomId first
+        // Step 1: check public rooms list
+        try {
+          const { rooms } = await pvpApi.getRooms();
+          const match = rooms.find(r => r.roomCode.toUpperCase() === rcode.toUpperCase());
+          if (match?.roomId) {
+            navigate(`/pvp-test?roomId=${match.roomId}`);
+            return;
+          }
+        } catch {
+          // ignore
+        }
+
+        // Step 2: try dedicated join-by-code endpoint
+        try {
+          const resolved = await pvpApi.joinByCode(rcode);
+          const resolvedId = resolved.roomId || resolved.room_id;
+          if (resolvedId) {
+            navigate(`/pvp-test?roomId=${resolvedId}`);
+            return;
+          }
+        } catch {
+          // ignore
+        }
+
+        // Step 3: fallback — pass roomCode, let PvpTestScreen handle resolution
+        navigate(`/pvp-test?room=${rcode}`);
+      }
     } catch (err) {
       console.error('[GlobalPvpInvite] Accept failed:', err);
     }

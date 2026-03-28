@@ -184,6 +184,9 @@ export default function PvpTestScreen() {
   const roomRef = useRef<Room | null>(null);
   const autoJoinedRef = useRef(false);
   const myUserIdRef = useRef('');
+  const roomIdRef = useRef('');
+  const roomCodeRef = useRef('');
+  const isHostRef = useRef(false);
 
   const [inRoom, setInRoom] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -449,8 +452,11 @@ export default function PvpTestScreen() {
       roomId: string; roomCode: string; isHost: boolean; mySessionId: string; myOrder: 1 | 2;
     }) => {
       setRoomId(data.roomId);
+      roomIdRef.current = data.roomId;
       setRoomCode(data.roomCode || data.roomId);
+      roomCodeRef.current = data.roomCode || data.roomId;
       setIsHost(data.isHost);
+      isHostRef.current = data.isHost;
       setMySessionId(data.mySessionId);
       addLog(`Vào phòng | id: ${data.roomId} | host: ${data.isHost}`);
     });
@@ -489,23 +495,28 @@ export default function PvpTestScreen() {
       addLog('↩️ Quay về phòng chờ — Bấm Sẵn Sàng để chơi lại!');
 
       // Re-register room visibility for host after game ends
-      if (roomRef.current && isHost && roomCode && roomId) {
+      const resetRoomCode = roomCodeRef.current;
+      const resetRoomId = roomIdRef.current;
+      if (roomRef.current && isHostRef.current && resetRoomCode && resetRoomId) {
         addLog('📡 Đang làm mới trạng thái phòng công khai...');
-        void pvpApi.reOpenRoom(roomCode, roomId).catch((e) => {
+        void pvpApi.reOpenRoom(resetRoomCode, resetRoomId).catch((e) => {
           console.error('[room_reset] Re-open failed:', e);
           // Fallback to startChallenge if reOpenRoom is not yet implemented on BE
-          void pvpApi.startChallenge(roomCode).catch(() => {});
+          void pvpApi.startChallenge(resetRoomCode).catch(() => {});
         });
       }
     });
 
     r.onMessage('host_changed', (data: { newHostId: string; newHostName: string }) => {
-      setIsHost(data.newHostId === r.sessionId);
+      const imHost = data.newHostId === r.sessionId;
+      setIsHost(imHost);
+      isHostRef.current = imHost;
       addLog(`👑 Host mới: ${data.newHostName}`);
     });
 
     r.onMessage('you_are_host', () => {
       setIsHost(true);
+      isHostRef.current = true;
       addLog('👑 Bạn là Host mới');
     });
 
@@ -753,6 +764,7 @@ export default function PvpTestScreen() {
         totalSwaps: number; validSwaps: number;
         debuffSent: number; debuffReceived: number; tauntsTotal: number;
       }>;
+      roomId?: string; roomCode?: string;
     }) => {
       setWinnerId(data.winnerId);
       setWinnerSessionId(data.winnerSessionId);
@@ -824,6 +836,18 @@ export default function PvpTestScreen() {
         }).catch(() => { });
       } else {
         pvpApi.getRating().then(r => setRatingAfter(r)).catch(() => { });
+      }
+
+      // Re-register room in public lobby immediately after game ends
+      // This ensures the room is visible when the opponent tries to join back
+      // Use roomId/roomCode from game_over payload, or fall back to current state via ref
+      const postGameRoomId = data.roomId || roomIdRef.current;
+      const postGameRoomCode = data.roomCode || roomCodeRef.current;
+      if (isHostRef.current && postGameRoomId && postGameRoomCode) {
+        addLog('📡 Đăng ký lại phòng vào lobby sau game...');
+        void pvpApi.reOpenRoom(postGameRoomCode, postGameRoomId).catch((e) => {
+          console.error('[game_over] Re-open room failed:', e);
+        });
       }
     });
 
@@ -1093,19 +1117,53 @@ export default function PvpTestScreen() {
       addLog(`Join: ${code}...`);
 
       let targetId = code;
-      // If code looks like a Room Code (short, no dashes), try to resolve it from the public rooms list
+      // If code looks like a Room Code (short, no dashes), try to resolve it to a roomId
       if (!code.includes('-') && code.length <= 10) {
+        // Step 1: Try public rooms list first
         try {
           const { rooms } = await pvpApi.getRooms();
           const match = rooms.find(r => r.roomCode.toUpperCase() === code.toUpperCase());
           if (match) {
             targetId = match.roomId;
-            addLog(`Mã ${code} → RoomId: ${targetId}`);
-          } else {
-            addLog(`⚠️ Không tìm thấy metadata cho mã ${code}, thử join trực tiếp...`);
+            addLog(`Mã ${code} → RoomId: ${targetId} (từ public list)`);
           }
         } catch (e) {
-          console.warn('[handleJoin] Failed to fetch rooms for resolution:', e);
+          console.warn('[handleJoin] Failed to fetch public rooms:', e);
+        }
+
+        // Step 2: If still using code (not found in public list), call dedicated join-by-code API
+        if (targetId === code) {
+          try {
+            const data = await pvpApi.joinByCode(code);
+            const resolvedId = data.roomId || data.room_id;
+            if (resolvedId) {
+              targetId = resolvedId;
+              addLog(`Mã ${code} → RoomId: ${targetId} (qua join-by-code API)`);
+            }
+          } catch (e) {
+            console.warn('[handleJoin] join-by-code API failed:', e);
+          }
+        }
+
+        // Step 3: Last resort — use Colyseus SDK getAvailableRooms to find by roomCode in metadata
+        if (targetId === code && clientRef.current) {
+          try {
+            const colyseusRooms = await (clientRef.current as any).getAvailableRooms('pvp_room');
+            const colyseusMatch = colyseusRooms.find(
+              (r: { metadata?: { roomCode?: string }; roomId: string }) =>
+                r.metadata?.roomCode?.toUpperCase() === code.toUpperCase()
+            );
+            if (colyseusMatch?.roomId) {
+              targetId = colyseusMatch.roomId;
+              addLog(`Mã ${code} → RoomId: ${targetId} (qua Colyseus listing)`);
+            }
+          } catch (e) {
+            console.warn('[handleJoin] Colyseus getAvailableRooms failed:', e);
+          }
+        }
+
+        if (targetId === code) {
+          addLog(`⚠️ Không resolve được mã ${code}, thử join trực tiếp...`);
         }
       }
 

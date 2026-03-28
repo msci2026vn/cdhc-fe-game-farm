@@ -390,6 +390,12 @@ export const pvpApi = {
   getRooms: () =>
     pvpFetch<{ rooms: { roomId: string; roomCode: string; hostName: string; clients: number; maxClients: number; createdAt: string | null }[] }>('/rooms'),
 
+  joinByCode: (roomCode: string) =>
+    pvpFetch<{ ok: boolean; roomId?: string; room_id?: string; error?: string }>('/join-by-code', {
+      method: 'POST',
+      body: JSON.stringify({ roomCode }),
+    }),
+
   createInviteLink: (roomCode: string) =>
     pvpFetch<{ inviteUrl: string; token: string; expiresAt: number }>('/create-invite-link', {
       method: 'POST',
