@@ -512,16 +512,30 @@ export default function PvpTestScreen() {
       setIsHost(imHost);
       isHostRef.current = imHost;
       addLog(`👑 Host mới: ${data.newHostName}`);
+      
+      // Re-open room when becoming host
+      if (imHost && roomCodeRef.current && roomIdRef.current) {
+        addLog('📡 Phòng chuyển sang bạn, đang làm mới trạng thái công khai...');
+        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+      }
     });
 
     r.onMessage('you_are_host', () => {
       setIsHost(true);
       isHostRef.current = true;
       addLog('👑 Bạn là Host mới');
+      if (roomCodeRef.current && roomIdRef.current) {
+        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+      }
     });
 
     r.onMessage('player_left', (data: { sessionId: string; name: string }) => {
       addLog(`🚪 ${data.name} đã rời phòng`);
+      // If we are host and someone left, the room might have been full/closed, so re-open it
+      if (isHostRef.current && roomCodeRef.current && roomIdRef.current) {
+        addLog('📡 Đang đăng ký lại phòng công khai...');
+        void pvpApi.reOpenRoom(roomCodeRef.current, roomIdRef.current).catch(e => console.error(e));
+      }
     });
 
     r.onMessage('state_update', (data: RoomStateBroadcast) => {
