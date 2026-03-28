@@ -544,12 +544,36 @@ export default function PvpTestScreen() {
       if (data.timeLeft !== undefined) setTimeLeft(data.timeLeft);
       if (data.lobbyTimeLeft !== undefined) setLobbyTimeLeft(data.lobbyTimeLeft);
       if (data.spectatorCount !== undefined) setSpectatorCount(data.spectatorCount);
-      const names = Object.values(data.players).map(p => p.name).join(', ');
-      addLog(`State: [${data.phase}] cd:${data.countdown} t:${data.timeLeft ?? '-'}s | ${names || '(trống)'}`);
+      
+      // Auto-start for Host from Queue (or when both are ready and from queue)
+      const urlFromQueue = searchParams.get('fromQueue') === '1';
+      const playersArr = Object.entries(data.players);
+      const isFull = playersArr.length === 2;
+      const allReady = playersArr.every(([sid, p]) => sid === data.hostId || p.ready);
+      
+      if (urlFromQueue && isHostRef.current && isFull && allReady && data.phase === 'waiting') {
+        setTimeout(() => {
+          if (roomRef.current && isHostRef.current) {
+            roomRef.current.send('start_game');
+            addLog('🚀 Tự động bắt đầu trận đấu');
+          }
+        }, 800);
+      }
     });
 
     r.onMessage('role_assigned', (data: { role: string }) => {
       console.log('[PvpTestScreen] role assigned:', data.role);
+      
+      // Auto-ready for Guest from Queue
+      const urlFromQueue = searchParams.get('fromQueue') === '1';
+      if (urlFromQueue && data.role === 'guest') {
+        setTimeout(() => {
+          if (roomRef.current) {
+            roomRef.current.send('ready');
+            addLog('✨ Tự động sẵn sàng (từ queue)');
+          }
+        }, 1000);
+      }
     });
 
     r.onMessage('spectator_update', (data: { spectatorCount: number }) => {
@@ -1205,6 +1229,7 @@ export default function PvpTestScreen() {
   const handleLeave = () => {
     roomRef.current?.leave();
     setInRoom(false);
+    navigate('/pvp/arena');
     setRoomState(null);
     setRoomId('');
     setIsHost(false);
@@ -1391,10 +1416,18 @@ export default function PvpTestScreen() {
       return;
     }
     const interval = setInterval(() => {
-      setPostGameCountdown(prev => Math.max(0, prev - 1));
+      setPostGameCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          // Auto redirect to lobby when results end (matches "chơi xong ... về lobby")
+          handleLeave();
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, handleLeave]);
 
   const countdown = roomState?.countdown ?? -1;
   const lobbyMins = Math.floor(lobbyTimeLeft / 60).toString().padStart(2, '0');
@@ -1683,7 +1716,7 @@ export default function PvpTestScreen() {
           h2hData={h2hData}
           countdown={postGameCountdown}
           onSkip={handleSkipPostGame}
-          onLeave={() => { handleLeave(); navigate('/pvp/arena'); }}
+          onLeave={handleLeave}
           proofMerkleRoot={proofData.merkleRoot}
           proofTxHash={proofData.txHash}
           proofIpfsHash={proofData.ipfsHash}
@@ -1706,7 +1739,7 @@ export default function PvpTestScreen() {
           minHeight: 32,
         }}>
           <button
-            onClick={() => { handleLeave(); navigate('/pvp/arena'); }}
+            onClick={handleLeave}
             style={{
               position: 'absolute',
               left: 0,
