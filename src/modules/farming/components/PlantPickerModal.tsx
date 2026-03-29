@@ -50,15 +50,15 @@ export default function PlantPickerModal({ onSelect, onClose, isPlanting }: Plan
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={handleClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-gray-900 rounded-t-3xl p-5 pb-8 animate-slide-up">
+      {/* Modal Container */}
+      <div className="farm-picker-modal animate-fade-in scale-up">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-white">🌱 {t('farming.seed_modal.title')}</h3>

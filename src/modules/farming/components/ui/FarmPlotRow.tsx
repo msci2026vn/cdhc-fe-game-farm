@@ -45,8 +45,7 @@ export default function FarmPlotRow({
               className={`farm-plot farm-plot--locked ${posClass}`}
               onClick={() => onLocked(slot.index)}
             >
-              <span className="farm-plot-lock">🔒</span>
-              <span className="farm-plot-lock-label">VIP</span>
+              {/* Frame asset already contains lock UI */}
             </div>
           );
         }
@@ -94,12 +93,18 @@ export default function FarmPlotRow({
         // READY TO HARVEST
         if (isReady) {
           return (
-            <div key={slot.index} className={`farm-plot farm-plot--ready ${posClass}`}>
+            <div
+              key={slot.index}
+              className={`farm-plot farm-plot--ready ${posClass}`}
+              onClick={() => onHarvest(slot.index)}
+            >
               <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
-              <span className="plot-timer" style={{ color: '#fde047' }}>{t('farming.plot.harvest_ready')}</span>
               <button
                 className="plot-harvest-btn ready-glow"
-                onClick={(e) => { e.stopPropagation(); onHarvest(i); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onHarvest(slot.index);
+                }}
               >
                 ✅ {t('farming.plot.harvest_short')}
               </button>
@@ -144,10 +149,16 @@ export default function FarmPlotRow({
             {/* Status badges — bottom, only when growing */}
             <div className="plot-status-badges">
               {isHealthy && (
-                <span className="plot-badge plot-badge--healthy">✅ {t('farming.plot.healthy')}</span>
+                <span className="plot-badge plot-badge--healthy">
+                  <i>✅</i>
+                  <em>{t('farming.plot.healthy')}</em>
+                </span>
               )}
               {!needsWater && (
-                <span className="plot-badge plot-badge--water">💧 {t('farming.plot.watered')}</span>
+                <span className="plot-badge plot-badge--water">
+                  <i>💧</i>
+                  <em>{t('farming.plot.watered')}</em>
+                </span>
               )}
             </div>
 

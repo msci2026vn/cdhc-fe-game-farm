@@ -13,10 +13,10 @@ export default function FarmActionBar({ onHome, onDuGia, onShop, onKhoDo }: Prop
   const handlers = [onHome, onDuGia, onShop, onKhoDo];
 
   const BUTTONS = [
-    { key: 'home', icon: '🏠', label: t('farming.action_bar.home'), cls: 'farm-action-btn--home' },
-    { key: 'dugia', icon: '📈', label: t('farming.action_bar.forecast'), cls: 'farm-action-btn--dugia' },
-    { key: 'shop', icon: '🛒', label: t('farming.action_bar.shop'), cls: 'farm-action-btn--shop' },
-    { key: 'kho', icon: '🎒', label: t('farming.action_bar.inventory'), cls: 'farm-action-btn--kho' },
+    { key: 'home', image: '/assets/farm/btn_home_page.png', label: t('farming.action_bar.home'), cls: 'farm-action-btn--home' },
+    { key: 'dugia', image: '/assets/farm/btn_estimated_price.png', label: t('farming.action_bar.forecast'), cls: 'farm-action-btn--dugia' },
+    { key: 'shop', image: '/assets/farm/btn_shop.png', label: t('farming.action_bar.shop'), cls: 'farm-action-btn--shop' },
+    { key: 'kho', image: '/assets/farm/btn_storage.png', label: t('farming.action_bar.inventory'), cls: 'farm-action-btn--kho' },
   ] as const;
 
   return (
@@ -27,7 +27,7 @@ export default function FarmActionBar({ onHome, onDuGia, onShop, onKhoDo }: Prop
           className={`farm-action-btn ${btn.cls}`}
           onClick={handlers[i]}
         >
-          <span className="farm-action-icon">{btn.icon}</span>
+          <img src={btn.image} alt={btn.key} className="farm-action-btn-img" />
           <span className="farm-action-label">{btn.label}</span>
         </div>
       ))}
