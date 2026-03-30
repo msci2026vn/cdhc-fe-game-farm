@@ -98,7 +98,7 @@ export default function FarmPlotRow({
               className={`farm-plot farm-plot--ready ${posClass}`}
               onClick={() => onHarvest(slot.index)}
             >
-              <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
+              <img src={slot.plot.plantType.icon} alt={slot.plot.plantType.name} className="farm-plot-emoji" />
               <button
                 className="plot-harvest-btn ready-glow"
                 onClick={(e) => {
@@ -131,7 +131,7 @@ export default function FarmPlotRow({
               </button>
             )}
 
-            <span className="farm-plot-emoji">{slot.plot.plantType.emoji}</span>
+            <img src={slot.plot.plantType.icon} alt={slot.plot.plantType.name} className="farm-plot-emoji" />
 
             {/* Timer countdown */}
             <span className="plot-timer">{growth?.remainingText || '...'}</span>

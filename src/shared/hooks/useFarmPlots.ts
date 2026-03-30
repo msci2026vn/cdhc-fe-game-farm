@@ -10,11 +10,11 @@ import { useQuery } from '@tanstack/react-query';
 import { gameApi } from '../api/game-api';
 
 // Plant type lookup table (matches BE plant_types DB — updated 2026-02-15)
-const PLANT_TYPES: Record<string, { id: string; name: string; emoji: string; growthDurationMs: number; rewardOGN: number; rewardXP: number; shopPrice: number }> = {
-  wheat: { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', growthDurationMs: 900000, rewardOGN: 100, rewardXP: 5, shopPrice: 50 },
-  tomato: { id: 'tomato', name: 'Cà Chua', emoji: '🍅', growthDurationMs: 3600000, rewardOGN: 400, rewardXP: 15, shopPrice: 200 },
-  carrot: { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', growthDurationMs: 10800000, rewardOGN: 800, rewardXP: 30, shopPrice: 400 },
-  chili: { id: 'chili', name: 'Ớt', emoji: '🌶️', growthDurationMs: 21600000, rewardOGN: 1600, rewardXP: 50, shopPrice: 800 },
+const PLANT_TYPES: Record<string, { id: string; name: string; emoji: string; icon: string; growthDurationMs: number; rewardOGN: number; rewardXP: number; shopPrice: number }> = {
+  wheat: { id: 'wheat', name: 'Lúa Mì', emoji: '🌾', icon: '/assets/farm/icon_wheat.png', growthDurationMs: 900000, rewardOGN: 100, rewardXP: 5, shopPrice: 50 },
+  tomato: { id: 'tomato', name: 'Cà Chua', emoji: '🍅', icon: '/assets/farm/icon_tomato.png', growthDurationMs: 3600000, rewardOGN: 400, rewardXP: 15, shopPrice: 200 },
+  carrot: { id: 'carrot', name: 'Cà Rốt', emoji: '🥕', icon: '/assets/farm/icon_carot.png', growthDurationMs: 10800000, rewardOGN: 800, rewardXP: 30, shopPrice: 400 },
+  chili: { id: 'chili', name: 'Ớt', emoji: '🌶️', icon: '/assets/farm/icon_chili.png', growthDurationMs: 21600000, rewardOGN: 1600, rewardXP: 50, shopPrice: 800 },
 };
 
 // BE response format
@@ -45,6 +45,7 @@ export interface FarmPlot {
     id: string;
     name: string;
     emoji: string;
+    icon: string;
     growthDurationMs: number;
     rewardOGN: number;
     rewardXP: number;

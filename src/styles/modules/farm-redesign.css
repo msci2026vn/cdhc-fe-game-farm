@@ -413,9 +413,12 @@
 }
 
 .farm-plot-emoji {
-  font-size: 40px;
-  line-height: 1;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  margin-top: 42px;
+  /* Lowered to center better in the wooden panel */
   margin-left: 4px;
   /* Shift right to visually center on frame */
 }
@@ -513,55 +516,86 @@
     opacity: 0;
   }
 }
+
 /* === PLANT PICKER MODAL (CENTERED) === */
 .farm-picker-modal {
   position: relative;
   width: 94%;
   max-width: 400px;
-  min-height: 420px; /* Reduced to fix tall appearance */
-  padding: 50px 35px 30px; /* Tighter padding */
+  min-height: 420px;
+  /* Reduced to fix tall appearance */
+  padding: 50px 35px 30px;
+  /* Tighter padding */
   background-image: url('/assets/farm/frame_plant-a-tree.png');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  background-color: transparent !important; /* Ensure no background color shows behind asset */
+  background-color: transparent !important;
+  /* Ensure no background color shows behind asset */
   display: flex;
   flex-direction: column;
-  box-shadow: none !important; /* Remove shadow that looks like a blurry frame */
+  box-shadow: none !important;
+  /* Remove shadow that looks like a blurry frame */
   z-index: 51;
 }
 
 .farm-picker-modal h3 {
-  color: #5d4037 !important; /* Darker wood-matching title color */
-  font-size: 18px;
+  color: #f5f5dc !important; /* Beige color for title */
+  font-size: 20px;
   font-weight: 900;
-  text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Darker shadow for beige text */
+  font-family: 'Fredoka', 'Outfit', 'Nunito', sans-serif;
 }
 
 .farm-picker-modal .grid {
   padding-top: 10px;
   max-height: 320px;
-  scrollbar-width: thin;
-  scrollbar-color: #8b5a2b transparent;
+  /* Hide scrollbar but keep scrolling functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.farm-picker-modal .grid::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* Specific button styling for within the wooden frame */
-.farm-picker-modal button.flex-col {
-  background: rgba(139, 90, 43, 0.1) !important;
-  border-color: rgba(139, 90, 43, 0.2) !important;
+.farm-picker-modal button.flex-col,
+.farm-picker-modal button.flex-col:hover,
+.farm-picker-modal button.flex-col:active,
+.farm-picker-modal button.flex-col:focus {
+  background-image: url('/assets/farm/frame_wood_8.png') !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 12px 10px !important; /* Reduced vertical padding to make frame shorter */
+}
+
+.farm-picker-modal button.flex-col > img {
+  margin-bottom: -4px; /* Move image slightly closer to text */
 }
 
 .farm-picker-modal button.flex-col:hover {
-  background: rgba(139, 90, 43, 0.2) !important;
-  border-color: #4ade80 !important;
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.farm-picker-modal button.flex-col:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
 }
 
 .farm-picker-modal .text-white {
-  color: #5d4037 !important; /* Darker text for readability on light wood */
+  color: #f5f5dc !important; /* Beige color for item text */
+  font-family: 'Fredoka', 'Outfit', 'Nunito', sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .farm-picker-modal .text-white\/50,
 .farm-picker-modal .text-white\/40 {
-  color: rgba(93, 64, 55, 0.6) !important;
+  color: rgba(245, 245, 220, 0.7) !important; /* Beige at lower opacity */
 }
 
 .farm-picker-modal .hover\:bg-white\/10:hover {
