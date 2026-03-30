@@ -30,11 +30,20 @@ import { useServiceWorker } from '@/hooks/useServiceWorker';
 const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
   lazy(async () => {
     try {
-      return await componentImport();
+      const component = await componentImport();
+      sessionStorage.removeItem('chunk-reload'); // Clear flag on success
+      return component;
     } catch (error) {
-      console.error('[FARM-DEBUG] Chunk load failed, reloading...', error);
-      window.location.reload();
-      return { default: () => null };
+      console.error('[FARM-DEBUG] Chunk load failed:', error);
+      const hasReloaded = sessionStorage.getItem('chunk-reload');
+      if (!hasReloaded) {
+        sessionStorage.setItem('chunk-reload', 'true');
+        window.location.reload();
+        return { default: () => null };
+      }
+      // If we already reloaded and it still fails, throw to ErrorBoundary
+      sessionStorage.removeItem('chunk-reload');
+      throw error;
     }
   });
 
