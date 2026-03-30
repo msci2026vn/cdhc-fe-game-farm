@@ -85,7 +85,7 @@ export default function CampaignMapScreen() {
   const zonesReversed = [...zones].sort((a, b) => b.zoneNumber - a.zoneNumber);
 
   return (
-    <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col">
+    <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col campaign-map-gradient">
       {/* Header */}
       <CampaignHeader
         title={t('campaign.map.title')}
@@ -94,30 +94,24 @@ export default function CampaignMapScreen() {
         backTo="/"
       />
 
-      {/* Scrollable map area */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto overflow-x-hidden pt-20 pb-28"
-        style={{ scrollBehavior: 'smooth' }}
-      >
-        <MapBackground className="campaign-map-gradient">
+      {/* Static Map Area */}
+      <div className="flex-1 relative overflow-hidden">
+        <MapBackground className="">
           {/* Zone nodes */}
-          <div
-            className="relative z-10 flex flex-col items-stretch gap-8 px-6 py-12"
-            style={{ minHeight: `${zonesReversed.length * 140 + 100}px` }}
-          >
-            {zonesReversed.map((zone) => {
-              const posClass = ZONE_POSITIONS[zone.zoneNumber] || 'self-center';
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            {zones.map((zone) => {
+              const pos = ZONE_POSITIONS[zone.zoneNumber] || { top: '50%', left: '50%' };
               const isCurrentZone = zone.zoneNumber === currentZoneNumber;
 
               return (
                 <div
                   key={zone.zoneNumber}
-                  ref={isCurrentZone ? currentZoneRef : undefined}
-                  className={`flex ${posClass}`}
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+                  style={{ top: pos.top, left: pos.left }}
                 >
                   <ZoneNode
                     zone={zone}
+                    isCurrentZone={isCurrentZone}
                     onClick={() => {
                       if (zone.isUnlocked) {
                         playSound('ui_click');

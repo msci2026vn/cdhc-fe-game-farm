@@ -109,10 +109,7 @@
 
     /* Campaign map gradient (full map background) */
     .campaign-map-gradient {
-        background: linear-gradient(180deg,
-                #0d0d1a 0%, #BF360C 15%, #004D40 30%, #1B5E20 42%,
-                #F9A825 52%, #4E342E 62%, #E65100 72%, #C62828 80%,
-                #388E3C 90%, #2E7D32 100%);
+        background: url('/assets/campaign/background_campaign.png') center/cover no-repeat;
     }
 }
 

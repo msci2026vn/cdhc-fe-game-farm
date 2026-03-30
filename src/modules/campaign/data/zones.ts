@@ -23,16 +23,16 @@ export const ZONE_META: Record<number, ZoneMeta> = {
   10: { icon: '🕳️', name: 'Thế Giới Ngầm', levelRange: '80-100', bgClass: 'zone-bg-10', bossEmoji: { 1: '🍄', 2: '🐜', 3: '🦗', 4: '💀' } },
 };
 
-/** Zigzag positions for zone nodes on the map */
-export const ZONE_POSITIONS: Record<number, string> = {
-  1: 'self-center',
-  2: 'self-end mr-8',
-  3: 'self-start ml-8',
-  4: 'self-end mr-8',
-  5: 'self-start ml-8',
-  6: 'self-end mr-8',
-  7: 'self-start ml-8',
-  8: 'self-end mr-8',
-  9: 'self-start ml-8',
-  10: 'self-center',
+/** Absolute coordinates (top/left) for nodes on the newly mapped campaign map */
+export const ZONE_POSITIONS: Record<number, { top: string; left: string }> = {
+  1: { top: '30%', left: '26%' },
+  2: { top: '22%', left: '60%' },
+  3: { top: '28%', left: '80%' },
+  4: { top: '38%', left: '86%' },
+  5: { top: '48%', left: '65%' },
+  6: { top: '56%', left: '80%' },
+  7: { top: '65%', left: '45%' },
+  8: { top: '72%', left: '75%' },
+  9: { top: '84%', left: '42%' },
+  10: { top: '90%', left: '80%' },
 };
