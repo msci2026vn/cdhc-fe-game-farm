@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RANK_TIERS, SUB_TIER_NAMES, getRankFromPoints } from '@/shared/api/api-pvp';
-import type { RankTier } from '@/shared/api/api-pvp';
 import { pvpApi } from '@/shared/api/api-pvp';
+
+// Use a more robust font stack
+const FONT = "'Fredoka One', 'Nunito', 'Segoe UI', Tahoma, sans-serif";
 
 export default function RankInfoScreen() {
   const navigate = useNavigate();
@@ -10,102 +12,279 @@ export default function RankInfoScreen() {
 
   useEffect(() => {
     pvpApi.getRating()
-      .then(data => setMyRankPoints(data.rankPoints ?? 0))
-      .catch(() => {});
+      .then(data => {
+        setMyRankPoints(data.rankPoints ?? 0);
+      })
+      .catch(() => {
+        setMyRankPoints(0); // Fallback to 0 if API fails
+      });
   }, []);
 
-  const myRank = myRankPoints !== null ? getRankFromPoints(myRankPoints) : null;
+  const myRank = getRankFromPoints(myRankPoints ?? 0);
 
   return (
     <div style={{
+      display: 'flex',
+      justifyContent: 'center',
       minHeight: '100dvh',
-      overflowY: 'auto',
-      background: 'linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f3460 100%)',
-      color: '#e0e0e0',
-      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      paddingBottom: 40,
+      background: '#0a1208',
     }}>
-      {/* Header */}
+      {/* Mobile container */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'rgba(15,15,26,0.95)', backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid #1e3a5a',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: 12,
+        position: 'relative',
+        width: '100%',
+        maxWidth: 430,
+        height: '100dvh',
+        overflow: 'hidden',
       }}>
-        <button
-          onClick={() => navigate('/pvp')}
-          style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer', padding: 4 }}
-        >
-          ←
-        </button>
-        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff' }}>🏔️ Thang Cảnh Giới</h1>
-      </div>
+        {/* Layer 0: Background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/assets/rank/background_rank.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: 0,
+        }} />
 
-      {/* Intro quote */}
-      <div style={{ padding: '16px 16px 8px', textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
-          "Một hạt giống giữ — ngàn đời còn ăn. Một hạt giống mất — vạn năm khó tìm."
-        </p>
-        <p style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>— Mẫu Kinh, trang cuối</p>
-      </div>
+        {/* Layer 1.5: Banner header */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '24%',
+          zIndex: 40,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingTop: '0%',
+          paddingLeft: '11%',
+          paddingRight: '11%',
+          boxSizing: 'border-box',
+          pointerEvents: 'none',
+        }}>
+          {/* Back button */}
+          <button
+            onClick={() => navigate('/pvp')}
+            style={{
+              position: 'absolute',
+              top: 15, left: 15,
+              width: 32, height: 32,
+              borderRadius: '50%',
+              border: '2px solid rgba(139,94,42,0.4)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#4A2D12',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              pointerEvents: 'auto',
+            }}
+          >←</button>
 
-      <div style={{ maxWidth: 480, margin: '0 auto' }}>
-        {/* Player current rank */}
+          <h2 style={{
+            margin: '0 0 2px',
+            position: 'relative',
+            top: -12,
+            fontFamily: FONT,
+            fontSize: 18,
+            color: '#348126',
+            textTransform: 'uppercase',
+            WebkitTextStroke: '1px #734F26',
+            whiteSpace: 'nowrap',
+          }}>🏔️ Thang Cảnh Giới</h2>
+
+          <div style={{ textAlign: 'center', maxWidth: '85%' }}>
+            <p style={{
+              margin: 0, fontSize: 9, fontStyle: 'italic', fontWeight: 800, color: '#4A2D12', lineHeight: 1.3
+            }}>
+              "Một hạt giống giữ — ngàn đời còn ăn.<br />
+              Một hạt giống mất — vạn năm khó tìm."
+            </p>
+            <p style={{ margin: '2px 0 0', fontSize: 8, color: '#7C5233', fontWeight: 800 }}>
+              — Mẫu Kinh, trang cuối
+            </p>
+          </div>
+        </div>
+
+        {/* ── Layer 2: Frame Rank Overlay ── */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/assets/rank/frame_rank.png)',
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
+          zIndex: 30,
+        }} />
+
+        {/* ── Layer 1.8: FIXED Current Rank Info (Split to match background frames) ── */}
         {myRank && (
           <div style={{
-            margin: '0 16px 16px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid #1e4d78',
-            borderRadius: 12, padding: 12,
+            position: 'absolute',
+            top: '18%', left: '11%', right: '11%',
+            height: '11%',
+            zIndex: 35,
+            display: 'flex', alignItems: 'stretch',
+            boxSizing: 'border-box',
           }}>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>Cảnh giới hiện tại của bạn</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 28 }}>{myRank.tier.icon}</span>
-              <div>
-                <span style={{ fontWeight: 700, color: myRank.tier.color, fontSize: 15 }}>
-                  {myRank.tier.name}
-                </span>
-                <span style={{ color: '#94a3b8', fontSize: 12, marginLeft: 6 }}>{myRank.subTierName}</span>
+            {/* LEFT SECTION (Large frame in background) */}
+            <div style={{
+              flex: '7.3 1 0',
+              display: 'flex', flexDirection: 'column',
+              justifyContent: 'center',
+              paddingLeft: 40,
+              position: 'relative',
+            }}>
+              {/* Label centered over the content area */}
+              <div style={{
+                position: 'absolute', top: 20, left: 27, right: 0,
+                fontSize: 7, fontWeight: 950, color: '#FEF08A',
+                textTransform: 'uppercase', letterSpacing: 0.8,
+                textAlign: 'center',
+                textShadow: '0 1.5px 3px #000',
+                opacity: 0.95
+              }}>Cảnh giới của bạn</div>
+
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: 10 }}>
+                {/* Icon with glow */}
+                <div style={{
+                  width: 36, height: 36,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'radial-gradient(circle, rgba(253,224,71,0.4) 0%, transparent 70%)',
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                  position: 'relative',
+                  top: -7,
+                  left: -10,
+                }}>
+                  <span style={{ fontSize: 24, filter: 'drop-shadow(0 2px 4px #000)' }}>{myRank.tier.icon}</span>
+                </div>
+
+                {/* Names */}
+                <div style={{
+                  flex: 1, paddingLeft: 12, marginTop: 10,
+                  display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                  position: 'relative',
+                }}>
+                  <div style={{
+                    fontFamily: "'Nunito', sans-serif", fontSize: 13,
+                    fontWeight: 900,
+                    color: '#FFF',
+                    WebkitTextStroke: '0.5px #2D1A0A',
+                    filter: 'drop-shadow(0 1px 2px #000)',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1,
+                  }}>{myRank.tier.name}</div>
+                  <div style={{
+                    fontFamily: "'Nunito', sans-serif", fontSize: 9.5, fontWeight: 900,
+                    color: '#FFF',
+                    WebkitTextStroke: '0.3px #2D1A0A',
+                    filter: 'drop-shadow(0 1px 2px #000)',
+                    marginTop: 1,
+                    whiteSpace: 'nowrap',
+                  }}>{myRank.subTierName}</div>
+                </div>
               </div>
-              <span style={{ marginLeft: 'auto', fontWeight: 700, color: '#fff', fontSize: 16 }}>
-                {myRankPoints} điểm
-              </span>
+            </div>
+
+            {/* RIGHT SECTION (Small frame in background) */}
+            <div style={{
+              flex: '2.7 1 0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              paddingTop: 10,
+            }}>
+              <div style={{
+                fontFamily: "'Nunito', sans-serif", fontSize: 14.5,
+                fontWeight: 900,
+                color: '#FFF',
+                WebkitTextStroke: '0.6px #2D1A0A',
+                filter: 'drop-shadow(0 2px 4px #000)',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                position: 'relative',
+                top: -5,
+                left: -20,
+              }}>
+                {myRankPoints ?? 0} <span style={{ fontSize: 9, fontWeight: 900 }}>điểm</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Tier list — top to bottom */}
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[...RANK_TIERS].reverse().map(tier => {
-            const isMyTier = myRank?.tier.id === tier.id;
-            const isLegendary = tier.id === 'nong_thanh_ky';
-
-            return (
-              <RankTierCard
-                key={tier.id}
-                tier={tier}
-                isMyTier={isMyTier}
-                isLegendary={isLegendary}
-                myProgress={isMyTier ? myRank?.progress ?? 0 : undefined}
-              />
-            );
-          })}
+        {/* ── Layer 1: Content Area (SCROLLABLE & CLIPPED) ── */}
+        <div style={{
+          position: 'absolute',
+          top: '30.6%',
+          bottom: '27.4%',
+          left: '5.5%',
+          right: '5.5%',
+          overflowY: 'auto',
+          paddingLeft: '4%',
+          paddingRight: '5%',
+          paddingTop: 8,
+          paddingBottom: 15,
+          boxSizing: 'border-box',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          zIndex: 25,
+        }}>
+          <style>{`
+            div::-webkit-scrollbar { display: none; }
+          `}</style>
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            width: '100%',
+          }}>
+            {[...RANK_TIERS].reverse().map(tier => {
+              const isMyTier = myRank?.tier.id === tier.id;
+              return (
+                <RankTierCard
+                  key={tier.id}
+                  tier={tier}
+                  isMyTier={isMyTier}
+                  isLegendary={tier.id === 'nong_thanh_ky'}
+                  myProgress={isMyTier ? myRank?.progress ?? 0 : undefined}
+                  myRankPoints={myRankPoints}
+                />
+              );
+            })}
+          </div>
         </div>
 
-        {/* Rules section */}
-        <div style={{ padding: '24px 16px 0' }}>
-          <h2 style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 12, margin: '0 0 12px' }}>
-            📜 Quy Tắc
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <RuleItem icon="⚔️" text="Thắng: cộng điểm theo cảnh giới (18–35 điểm)" />
-            <RuleItem icon="💔" text="Thua: trừ điểm theo cảnh giới (15–35 điểm)" />
-            <RuleItem icon="🤝" text="Hoà (Sudden Death): ±0 điểm" />
-            <RuleItem icon="🚪" text="Bỏ trận giữa chừng: trừ gấp đôi" />
-            <RuleItem icon="🏔️" text="Mỗi cảnh giới có 3 giai đoạn: Sơ / Trung / Hậu Kỳ" />
-            <RuleItem icon="📉" text="Rank cao không chơi 7–14 ngày: decay điểm/ngày" />
-            <RuleItem icon="🔄" text="Season: 3 tháng/lần, soft reset (60% + 400 điểm)" />
+        {/* ── Layer 1.9: FIXED Rules Scroll (Pinned at the bottom) ── */}
+        <div style={{
+          position: 'absolute',
+          bottom: '1.2%', left: '11%', right: '11%',
+          height: '24%',
+          zIndex: 35,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+        }}>
+          <h3 style={{
+            fontFamily: FONT, fontSize: 14,
+            textAlign: 'center', margin: '0 0 4px',
+            textTransform: 'uppercase', letterSpacing: 1.5,
+            color: '#4A2D12',
+            opacity: 0.95,
+          }}>📜 Quy Tắc</h3>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0.5,
+            width: '98%',
+            paddingLeft: '6%',
+          }}>
+            <RuleItem icon="⚔️" text="Thắng: cộng điểm theo cảnh giới (18–35 điểm)" isFixed />
+            <RuleItem icon="💔" text="Thua: trừ điểm theo cảnh giới (15–35 điểm)" isFixed />
+            <RuleItem icon="🤝" text="Hoà (Sudden Death): ±0 điểm" isFixed />
+            <RuleItem icon="🚪" text="Bỏ trận giữa chừng: trừ gấp đôi" isFixed />
+            <RuleItem icon="🏔️" text="Mỗi cảnh giới có 3 giai đoạn: Sơ / Trung / Hậu Kỳ" isFixed />
+            <RuleItem icon="📉" text="Rank cao không chơi 7–14 ngày: decay điểm/ngày" isFixed />
+            <RuleItem icon="🔄" text="Season: 3 tháng/lần, soft reset (60% + 400 điểm)" isFixed />
           </div>
         </div>
       </div>
@@ -113,137 +292,137 @@ export default function RankInfoScreen() {
   );
 }
 
-// ── Sub-components ──
-
-function RankTierCard({
-  tier,
-  isMyTier,
-  isLegendary,
-  myProgress,
-}: {
-  tier: RankTier;
-  isMyTier: boolean;
-  isLegendary: boolean;
-  myProgress?: number;
-}) {
+function RankTierCard({ tier, isMyTier, isLegendary, myProgress, myRankPoints }: any) {
   const [expanded, setExpanded] = useState(isMyTier);
-
   return (
     <div style={{
-      borderRadius: 12,
-      border: isMyTier
-        ? '1px solid rgba(245,158,11,0.5)'
-        : isLegendary
-          ? '1px solid rgba(255,215,0,0.3)'
-          : '1px solid rgba(255,255,255,0.07)',
-      background: isMyTier
-        ? 'rgba(255,255,255,0.06)'
-        : isLegendary
-          ? 'linear-gradient(135deg,rgba(30,30,50,0.6),rgba(100,80,0,0.15))'
-          : 'rgba(255,255,255,0.03)',
-      overflow: 'hidden',
+      display: 'flex', flexDirection: 'column',
+      filter: isMyTier ? 'drop-shadow(0 4px 10px rgba(253,224,71,0.3))' : undefined,
     }}>
-      {/* Header */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        style={{
-          width: '100%', padding: '12px 14px',
-          display: 'flex', alignItems: 'center', gap: 10,
-          textAlign: 'left', background: 'none', border: 'none',
-          color: '#e0e0e0', cursor: 'pointer',
-        }}
-      >
-        <span style={{ fontSize: 24 }}>{tier.icon}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, color: tier.color, fontSize: 14 }}>
-            {tier.name}
-            {isMyTier && <span style={{ fontSize: 11, marginLeft: 6, color: '#f59e0b' }}>← Bạn</span>}
+      <div style={{ display: 'flex', alignItems: 'stretch', gap: 6, height: 38 }}>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            flex: '6.5 1 0',
+            backgroundImage: 'url(/assets/rank/frame_wood_5.png)',
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'no-repeat',
+            border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center',
+            gap: 5, paddingLeft: 6, paddingRight: 3,
+            position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div style={{
+            width: 26, height: 26,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 18, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>{tier.icon}</span>
           </div>
-          <div style={{ fontSize: 11, color: '#64748b' }}>
-            {tier.minPoints} – {isLegendary ? '∞' : tier.maxPoints} điểm
+          <div style={{ flex: 1, textAlign: 'left', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{
+              fontFamily: FONT,
+              fontSize: 10,
+              color: isMyTier ? '#FFF' : '#FFE4C4',
+              WebkitTextStroke: isMyTier ? '0.5px #3B2412' : '0.3px #3B2412',
+              filter: 'drop-shadow(0 1px 1.2px #000)',
+              lineHeight: 1,
+            }}>{tier.name}</div>
+            <div style={{ fontSize: 6.5, fontWeight: 900, color: '#FEF9C3', opacity: 0.8, textShadow: '0 0.8px 1px #000' }}>
+              {tier.minPoints} - {isLegendary ? '∞' : tier.maxPoints}
+            </div>
           </div>
-        </div>
+        </button>
 
-        {/* Win/Lose badge */}
-        <div style={{ textAlign: 'right', fontSize: 12 }}>
-          <span style={{ color: '#22c55e' }}>+{tier.winPoints}</span>
-          <span style={{ color: '#475569', margin: '0 3px' }}>/</span>
-          <span style={{ color: '#ef4444' }}>-{tier.losePoints}</span>
-        </div>
-
-        <span style={{
-          color: '#64748b', fontSize: 10,
-          transition: 'transform 0.2s',
-          transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+        <div style={{
+          flex: 'auto',
+          minWidth: 42,
+          backgroundImage: 'url(/assets/rank/frame_index.png)',
+          backgroundSize: '100% 100%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 1, padding: '0 3px',
         }}>
-          ▼
-        </span>
-      </button>
+          <span style={{ fontSize: 9, fontWeight: 900, color: '#4ADE80', textShadow: '0 0.8px 1px #000' }}>+{tier.winPoints}</span>
+          <span style={{ fontSize: 8, fontWeight: 900, color: '#999', opacity: 0.6 }}>/</span>
+          <span style={{ fontSize: 9, fontWeight: 900, color: '#F87171', textShadow: '0 0.8px 1px #000' }}>-{tier.losePoints}</span>
+        </div>
 
-      {/* Expanded content */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            width: 38,
+            backgroundImage: 'url(/assets/rank/btn_scroll.png)',
+            backgroundSize: '100% 100%',
+            border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'transform 0.4s',
+            transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+            padding: 0,
+          }}
+        />
+      </div>
+
       {expanded && (
         <div style={{
-          padding: '0 14px 12px',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
+          marginTop: 4,
+          padding: '8px 12px',
+          background: 'rgba(0,0,0,0.25)',
+          borderRadius: 8,
+          border: '1px solid rgba(139,94,42,0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
         }}>
-          {/* Sub-tiers */}
           {!isLegendary && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginTop: 10, marginBottom: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
               {SUB_TIER_NAMES.map((sub, idx) => {
                 const subSize = (tier.maxPoints - tier.minPoints + 1) / 3;
                 const subMin = Math.round(tier.minPoints + idx * subSize);
                 const subMax = Math.round(tier.minPoints + (idx + 1) * subSize - 1);
-
+                const isActiveSub = isMyTier && myRankPoints !== null && myRankPoints >= subMin && myRankPoints <= subMax;
                 return (
-                  <div
-                    key={sub}
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      borderRadius: 8, padding: '6px 4px',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#d1d5db' }}>{sub}</div>
-                    <div style={{ fontSize: 10, color: '#64748b' }}>{subMin}–{subMax}</div>
+                  <div key={sub} style={{
+                    borderRadius: 10, padding: '6px 2px', textAlign: 'center',
+                    border: `1.5px solid ${isActiveSub ? '#FEF08A' : 'rgba(255,255,255,0.06)'}`,
+                    background: isActiveSub ? 'linear-gradient(to bottom, #B45309, #451A03)' : 'rgba(0,0,0,0.45)',
+                  }}>
+                    <div style={{ fontFamily: FONT, fontSize: 11, color: isActiveSub ? '#FEF08A' : '#9CA3AF' }}>{sub}</div>
+                    <div style={{ fontSize: 9, marginTop: 2, fontWeight: 700, color: isActiveSub ? '#fff' : '#6B7280' }}>{subMin}–{subMax}</div>
                   </div>
                 );
               })}
             </div>
           )}
-
-          {isLegendary && (
-            <div style={{ marginTop: 10, fontSize: 12, color: 'rgba(255,215,0,0.7)', textAlign: 'center' }}>
-              Top 500 server — Không có Sơ/Trung/Hậu Kỳ
-            </div>
-          )}
-
-          {/* Progress bar (my tier) */}
           {isMyTier && myProgress !== undefined && (
-            <div style={{ marginTop: 8 }}>
-              <div style={{
-                height: 5, background: '#374151', borderRadius: 3, overflow: 'hidden',
-              }}>
-                <div style={{
-                  height: '100%', borderRadius: 3,
-                  width: `${myProgress}%`,
-                  backgroundColor: tier.color,
-                  transition: 'width 0.5s',
-                }} />
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 9, fontWeight: 950, color: '#FDE68A' }}>TIẾN ĐỘ TU LUYỆN</span>
+                <span style={{ fontFamily: FONT, fontSize: 13, color: '#FEF08A' }}>{myProgress}%</span>
               </div>
-              <div style={{ fontSize: 10, color: '#64748b', marginTop: 2, textAlign: 'right' }}>{myProgress}%</div>
+              <div style={{ height: 12, background: 'rgba(0,0,0,0.75)', borderRadius: 6, padding: 2, border: '1.5px solid rgba(139,94,42,0.5)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 4, width: `${myProgress}%`, background: `linear-gradient(to right, #451A03, #B45309, #FDE68A)` }} />
+              </div>
             </div>
           )}
 
-          {/* Mẫu Kinh quote */}
+          {/* Mau Kinh (Quote) Section */}
           <div style={{
-            marginTop: 8,
-            background: 'rgba(255,255,255,0.03)',
-            borderRadius: 8, padding: '8px 10px',
+            background: 'rgba(0,0,0,0.3)',
+            borderRadius: 10,
+            padding: '10px 12px',
+            border: '1px solid rgba(139,94,42,0.1)',
+            marginTop: 2,
           }}>
-            <p style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
-              "{tier.mauKinh}"
-            </p>
-            <p style={{ fontSize: 10, color: '#475569', marginTop: 2, margin: '2px 0 0' }}>— Mẫu Kinh</p>
+            <p style={{
+              margin: 0,
+              fontSize: 10.5,
+              fontStyle: 'italic',
+              color: '#D1D5DB',
+              textAlign: 'center',
+              lineHeight: 1.4,
+              fontWeight: 500,
+            }}>"{tier.mauKinh}"</p>
           </div>
         </div>
       )}
@@ -251,11 +430,30 @@ function RankTierCard({
   );
 }
 
-function RuleItem({ icon, text }: { icon: string; text: string }) {
+function RuleItem({ icon, text, isFixed }: any) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: '#94a3b8' }}>
-      <span>{icon}</span>
-      <span>{text}</span>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: isFixed ? 6 : 12,
+      justifyContent: 'flex-start'
+    }}>
+      <div style={{
+        width: isFixed ? 14 : 22,
+        height: isFixed ? 14 : 22,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: isFixed ? 'transparent' : 'rgba(109,66,35,0.15)',
+        borderRadius: '50%',
+        fontSize: isFixed ? 9 : 14
+      }}>{icon}</div>
+      <span style={{
+        fontSize: isFixed ? 8 : 13,
+        fontWeight: 950,
+        color: '#4A2D12',
+        whiteSpace: 'nowrap'
+      }}>{text}</span>
     </div>
   );
 }
