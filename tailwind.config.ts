@@ -15,6 +15,7 @@ export default {
         heading: ["Fredoka", "sans-serif"],
         body: ["Nunito", "sans-serif"],
         handwriting: ["Dancing Script", "cursive"],
+        game: ["Itim", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",

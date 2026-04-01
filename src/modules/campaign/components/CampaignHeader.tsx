@@ -35,14 +35,14 @@ export default function CampaignHeader({ title, stars, maxStars, backTo = '/farm
           </button>
 
           {/* Title */}
-          <h1 className="font-heading font-black text-[#5D4037] text-lg tracking-tight text-center flex-1 mx-2 truncate">
+          <h1 className="font-game text-[#3E1E0F] text-xl tracking-tight text-center flex-1 mx-2 truncate drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]">
             {title}
           </h1>
 
           {/* Star counter */}
           <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20 flex items-center gap-1.5 flex-shrink-0 mr-7">
             <img src="/assets/map/campaign_region_1/flower_icon.png" alt="flower" className="w-5 h-5 object-contain" />
-            <span className="text-white font-heading font-bold text-sm">{stars}/{maxStars}</span>
+            <span className="text-white font-game font-bold text-sm">{stars}/{maxStars}</span>
           </div>
         </div>
       </div>

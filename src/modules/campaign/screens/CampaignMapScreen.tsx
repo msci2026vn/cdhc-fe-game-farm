@@ -88,7 +88,7 @@ export default function CampaignMapScreen() {
     <div className="h-[100dvh] max-w-[430px] mx-auto relative overflow-hidden flex flex-col campaign-map-gradient">
       {/* Header */}
       <CampaignHeader
-        title={t('campaign.map.title')}
+        title="CHIẾN DỊCH"
         stars={totalStars}
         maxStars={maxStars}
         backTo="/"
@@ -153,27 +153,30 @@ function getZoneX(zoneNumber: number): number {
 /** Simple bottom nav for campaign screens */
 function CampaignBottomNav() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
   const tabs = [
-    { icon: 'home', label: t('campaign.map.tabs.menu'), to: '/', active: false },
-    { icon: 'map', label: t('campaign.map.tabs.map'), to: '/campaign', active: true },
-    { icon: 'bolt', label: t('campaign.map.tabs.skills'), to: '/campaign/skills', active: false },
-    { icon: 'spa', label: t('campaign.map.tabs.farm'), to: '/farm', active: false },
+    { img: '/assets/campaign/btn_home.png', label: 'MENU', to: '/', active: false },
+    { img: '/assets/campaign/btn_map.png', label: 'MAP', to: '/campaign', active: true },
+    { img: '/assets/campaign/btn_skill.png', label: 'SKILL', to: '/campaign/skills', active: false },
+    { img: '/assets/campaign/btn_farm.png', label: 'FARM', to: '/farm', active: false },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[80%] max-w-md z-50 pb-[max(4px,env(safe-area-inset-bottom))]">
-      <div className="relative flex justify-evenly items-center px-4 py-2">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[430px] z-50 pb-[max(4px,env(safe-area-inset-bottom))] pointer-events-none">
+      <div className="relative flex justify-evenly items-center px-2 py-4 pointer-events-auto">
         {tabs.map((tab) => (
           <button
             key={tab.to}
             onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
-            className={`relative flex items-center justify-center w-16 group ${tab.active ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}
+            className={`relative flex items-center justify-center group transition-all duration-200 ${tab.active ? 'scale-110' : 'opacity-85 hover:opacity-100 grayscale-[20%]'}`}
           >
-            <div className="relative w-14 h-14 rounded-full bg-[#8B4513] border-2 border-[#DEB887] flex items-center justify-center shadow-inner transform -translate-y-2 transition-all duration-200 scale-105">
-              <span className="material-symbols-outlined text-[#90EE90] text-3xl">{tab.icon}</span>
-              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] font-bold text-white uppercase tracking-tighter whitespace-nowrap">
+            <div className="relative w-20 h-20 flex flex-col items-center justify-center translate-y-[-4px]">
+              <img 
+                src={tab.img} 
+                alt={tab.label} 
+                className={`w-full h-full object-contain ${tab.active ? 'drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]' : 'drop-shadow-md'}`}
+              />
+              <span className={`absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] font-game uppercase tracking-tight whitespace-nowrap drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] ${tab.active ? 'text-yellow-300' : 'text-white/90'}`}>
                 {tab.label}
               </span>
             </div>
@@ -183,3 +186,5 @@ function CampaignBottomNav() {
     </nav>
   );
 }
+
+
