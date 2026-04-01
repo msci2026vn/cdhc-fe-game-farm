@@ -29,11 +29,23 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
     2: '/assets/map/campaign_region_1/soldier_aphids.png',
     3: '/assets/map/campaign_region_1/winged_aphids.png',
   };
+  const LOCKED_ICON_BY_STAGE: Record<number, string> = {
+    1: '/assets/map/campaign_region_1/baby_bedbugs_lock.png',
+    2: '/assets/map/campaign_region_1/soldier_aphids_lock.png',
+    3: '/assets/map/campaign_region_1/winged_aphids_lock.png',
+  };
   const completedIcon = stageIndex ? COMPLETED_ICON_BY_STAGE[stageIndex] : undefined;
+  const lockedIcon = stageIndex ? LOCKED_ICON_BY_STAGE[stageIndex] : undefined;
 
-  // Make stage 3 (winged aphid) bigger
+  const isStage1 = stageIndex === 1;
   const isStage3 = stageIndex === 3;
-  const nodeSize = isStage3 ? { container: 'w-32 h-32', image: 'w-28 h-28' } : { container: 'w-24 h-24', image: 'w-20 h-20' };
+
+  // Rệp Con (1) is smallest, Rệp Cánh (3) is biggest
+  const nodeSize = isStage3
+    ? { container: 'w-28 h-28', image: 'w-24 h-24' }
+    : isStage1
+      ? { container: 'w-16 h-16', image: 'w-13 h-13' }
+      : { container: 'w-24 h-24', image: 'w-20 h-20' };
 
   return (
     <button
@@ -41,23 +53,23 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
       disabled={isLocked}
       className={cn(
         'relative flex flex-col items-center gap-0.5 transition-transform',
-        isLocked ? 'opacity-70 cursor-not-allowed' : 'active:scale-95 cursor-pointer',
+        isLocked ? 'active:scale-90 cursor-not-allowed' : 'active:scale-95 cursor-pointer',
       )}
     >
       {isCompleted ? (
         // ✅ COMPLETED (show map icon only)
         <div className="relative">
-          <div className={`relative ${nodeSize.container} flex items-center justify-center overflow-hidden`}>
+          <div className={`relative ${nodeSize.container} flex items-center justify-center`}>
             {completedIcon ? (
               <img src={completedIcon} alt={boss.name} className={`${nodeSize.image} object-contain`} />
             ) : (
-              <span className="material-symbols-outlined text-white text-4xl transform translate-y-3" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <span className="material-symbols-outlined text-white text-3xl transform translate-y-3" style={{ fontVariationSettings: "'FILL' 1" }}>
                 check
               </span>
             )}
             {completedIcon && (
               <span className="absolute inset-0 flex items-center justify-center translate-y-2">
-                <span className="material-symbols-outlined text-white text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                   check
                 </span>
               </span>
@@ -78,37 +90,65 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
         // ⚔️ CURRENT — FIGHT!
         <div className="relative">
           {/* Ping animation */}
-          <div className={`absolute inset-0 ${nodeSize.container} rounded-2xl bg-yellow-400/40 campaign-ping`} />
-          <div className={`rounded-2xl bg-gradient-to-b from-blue-400 to-blue-600 border-4 border-white shadow-[0_6px_0_#0D47A1] flex items-center justify-center ${nodeSize.container}`}>
+          <div className={`absolute inset-0 ${nodeSize.container} rounded-full bg-blue-400/40 campaign-ping`} />
+          <div className={`flex items-center justify-center ${nodeSize.container}`}>
             {globalBossNumber ? (
-              <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className={`${nodeSize.image} object-contain drop-shadow-md`} />
+              <img
+                src={completedIcon || getBossImageSrc(globalBossNumber)}
+                alt={boss.name}
+                className={cn(
+                  nodeSize.image,
+                  "object-contain drop-shadow-2xl z-10"
+                )}
+              />
             ) : (
-              <span className="text-3xl drop-shadow-lg">{boss.emoji}</span>
+              <span className="text-3xl drop-shadow-lg z-10">{boss.emoji}</span>
             )}
           </div>
-          {/* FIGHT! badge */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border-2 border-white shadow-md animate-bounce">
-            {t('campaign.ui.fight')}
+          {/* GO! badge */}
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 animate-bounce z-20">
+            <img
+              src="/assets/map/GO!.png"
+              alt="GO!"
+              className="w-full h-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            />
           </div>
         </div>
       ) : (
         // 🔒 LOCKED
-        <div className="w-14 h-14 rounded-full bg-gray-400 border-4 border-gray-300 shadow-[0_4px_0_#616161] flex items-center justify-center grayscale opacity-80">
-          <span className="material-symbols-outlined text-white text-xl">lock</span>
+        <div className="relative">
+          <div className={`relative ${nodeSize.container} flex items-center justify-center grayscale opacity-80 contrast-75 brightness-75`}>
+            {lockedIcon ? (
+              <img src={lockedIcon} alt="Locked" className={`${nodeSize.image} object-contain`} />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-400 border-4 border-gray-300 shadow-[0_4px_0_#616161] flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-xl">lock</span>
+              </div>
+            )}
+
+            {/* Lock reason or padlock overlay */}
+            <div className="absolute inset-0 flex items-center justify-center translate-y-1">
+              <span className="material-symbols-outlined text-white/90 text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">lock</span>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Boss name */}
       <p className={cn(
-        'font-heading font-bold text-[11px] text-center leading-tight mt-0.5 max-w-[80px]',
-        isCompleted ? 'text-green-200' : isCurrent ? 'text-white' : 'text-white/40',
+        'font-game font-black text-[11px] text-center leading-tight mt-0.5 max-w-[90px] drop-shadow-md',
+        isCompleted ? 'text-green-300' : isCurrent ? 'text-white' : 'text-white/40',
       )}>
         {boss.name}
       </p>
 
-      {/* Lock reason */}
-      {isLocked && boss.lockReason && (
-        <p className="text-[9px] text-yellow-400/60 text-center max-w-[90px] leading-tight mt-0.5">
+      {/* Recommended level or Lock reason */}
+      {isCurrent ? (
+        <p className="text-[9px] text-[#ffc300] font-black text-center mt-0.5 drop-shadow">
+          Lv. {boss.unlockLevel}
+        </p>
+      ) : isLocked && boss.lockReason && (
+        <p className="text-[9px] text-white/50 font-medium text-center max-w-[90px] leading-tight mt-0.5">
           {boss.lockReason}
         </p>
       )}

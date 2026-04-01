@@ -29,7 +29,11 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
     3: '/assets/map/campaign_region_1/winged_aphids.png',
     4: '/assets/map/campaign_region_1/Queen_aphid.png',
   };
+  const LOCKED_ICON_BY_STAGE: Record<number, string> = {
+    4: '/assets/map/campaign_region_1/Queen_aphid_lock.png',
+  };
   const completedIcon = stageIndex ? COMPLETED_ICON_BY_STAGE[stageIndex] : undefined;
+  const lockedIcon = stageIndex ? LOCKED_ICON_BY_STAGE[stageIndex] : undefined;
 
   return (
     <button
@@ -37,7 +41,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       disabled={isLocked}
       className={cn(
         'relative flex flex-col items-center transition-transform',
-        isLocked ? 'opacity-60 cursor-not-allowed' : 'active:scale-95 cursor-pointer',
+        isLocked ? 'active:scale-95 cursor-not-allowed' : 'active:scale-95 cursor-pointer',
       )}
     >
       {/* Crown icon on top */}
@@ -49,28 +53,23 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       <div className="relative">
         {/* Ping for current */}
         {isCurrent && (
-          <div className="absolute inset-0 w-36 h-36 rounded-3xl bg-red-400/40 campaign-ping" />
+          <div className="absolute inset-0 w-[150px] h-[150px] rounded-full bg-red-400/30 campaign-ping" />
         )}
 
         <div className={cn(
-          'w-36 h-36 flex items-center justify-center',
-          isCompleted
-            ? ''
-            : isCurrent
-              ? 'rounded-3xl border-4 bg-gradient-to-b from-red-500 to-red-700 border-yellow-400 shadow-[0_8px_0_#B71C1C]'
-              : 'rounded-3xl border-4 bg-gradient-to-b from-gray-500 to-gray-700 border-gray-400 shadow-[0_8px_0_#424242] grayscale',
+          'w-[150px] h-[150px] flex items-center justify-center',
         )}>
-          {isCompleted ? (
+          {(isCompleted || isCurrent) ? (
             <div className="relative">
               {completedIcon ? (
-                <img src={completedIcon} alt={boss.name} className="w-32 h-32 object-contain drop-shadow-lg" />
+                <img src={completedIcon} alt={boss.name} className="w-[150px] h-[150px] object-contain drop-shadow-2xl z-10" />
               ) : (
                 <span className="material-symbols-outlined text-white text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                   check
                 </span>
               )}
-              {completedIcon && (
-                <span className="absolute inset-0 flex items-center justify-center translate-y-1">
+              {isCompleted && completedIcon && (
+                <span className="absolute inset-0 flex items-center justify-center translate-y-1 z-20">
                   <span className="material-symbols-outlined text-white text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                     check
                   </span>
@@ -79,35 +78,49 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
             </div>
           ) : isLocked ? (
             <div className="relative flex items-center justify-center">
-              <span className="text-4xl opacity-30">{boss.emoji || '🔒'}</span>
-              <span className="material-symbols-outlined text-white/80 text-lg absolute -bottom-1 -right-1 drop-shadow">lock</span>
+              {lockedIcon ? (
+                <img src={lockedIcon} alt="Locked Boss" className="w-[150px] h-[150px] object-contain" />
+              ) : (
+                <span className="text-4xl opacity-30">{boss.emoji || '🔒'}</span>
+              )}
+              <span className="material-symbols-outlined text-white/90 text-3xl absolute inset-0 flex items-center justify-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">lock</span>
             </div>
           ) : globalBossNumber ? (
-            <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-32 h-32 object-contain drop-shadow-lg" />
+            <img src={getBossImageSrc(globalBossNumber)} alt={boss.name} className="w-[135px] h-[135px] object-contain drop-shadow-lg" />
           ) : (
             <span className="text-5xl drop-shadow-lg">{boss.emoji}</span>
           )}
         </div>
 
+        {/* GO! badge for current boss */}
+        {isCurrent && (
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 animate-bounce z-20">
+            <img 
+              src="/assets/map/GO!.png" 
+              alt="GO!" 
+              className="w-full h-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            />
+          </div>
+        )}
       </div>
 
       {/* Boss name + stars */}
       <p className={cn(
-        'font-heading font-bold text-xs text-center mt-1 max-w-[90px]',
-        isCompleted ? 'text-green-200' : isCurrent ? 'text-white' : 'text-white/40',
+        'font-game font-black text-sm text-center mt-1 max-w-[120px] drop-shadow-md',
+        isCompleted ? 'text-green-300' : isCurrent ? 'text-white' : 'text-white/40',
       )}>
         {boss.name}
       </p>
 
       {/* Lock reason */}
       {isLocked && boss.lockReason && (
-        <p className="text-[9px] text-yellow-400/60 text-center max-w-[100px] leading-tight mt-0.5">
+        <p className="text-[9px] text-white/50 font-medium text-center max-w-[100px] leading-tight mt-0.5">
           {boss.lockReason}
         </p>
       )}
 
       {isCompleted && boss.bestStars > 0 && (
-        <div className="flex justify-center gap-0.5 mt-0.25">
+        <div className="flex justify-center gap-0.5 mt-0.5">
           {Array.from({ length: 3 }).map((_, i) => (
             <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400' : 'text-white/20')}>
               ⭐
@@ -117,7 +130,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       )}
 
       {isCurrent && (
-        <p className="text-[10px] text-yellow-300 font-bold mt-0.5">
+        <p className="text-[10px] text-[#ffc300] font-black mt-0.5 drop-shadow">
           {t('campaign.ui.recommended_level', { level: boss.unlockLevel })}
         </p>
       )}

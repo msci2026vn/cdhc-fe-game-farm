@@ -157,7 +157,7 @@ export default function CampaignZoneScreen() {
 
         {/* Boss: center top */}
         {zoneBoss && (
-          <div className="absolute z-10" style={{ left: '50%', top: '70px', transform: 'translateX(-50%)' }}>
+          <div className="absolute z-10" style={{ left: '50%', top: '120px', transform: 'translateX(-50%)' }}>
             <BossNode
               boss={zoneBoss}
               state={getStageState(zoneBoss)}
@@ -205,8 +205,8 @@ function ZoneBottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[80%] max-w-md z-50 pb-[max(4px,env(safe-area-inset-bottom))]">
-      <div className="relative flex justify-evenly items-center px-4 py-2">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[430px] z-50 pb-[max(8px,env(safe-area-inset-bottom))] px-2">
+      <div className="relative flex justify-around items-center py-2">
         {tabs.map((tab) => {
           const isActive = tab.to === '/campaign';
           const src = iconSrc[tab.icon] || '';
@@ -214,15 +214,15 @@ function ZoneBottomNav() {
             <button
               key={tab.to}
               onClick={() => { playSound('ui_tab'); navigate(tab.to); }}
-              className={`relative flex items-center justify-center w-16 group ${isActive ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}
+              className={`relative flex flex-col items-center justify-center w-1/5 group ${isActive ? '' : 'opacity-80 hover:opacity-100 transition-opacity'}`}
             >
-              <div className={`relative w-20 h-20 flex items-center justify-center transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
+              <div className={`relative w-16 h-16 flex items-center justify-center transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
                 {src ? (
-                  <img src={src} alt={tab.label} className="w-full h-full object-contain" />
+                  <img src={src} alt={tab.label} className="w-full h-full object-contain drop-shadow-md" />
                 ) : (
-                  <span className="material-symbols-outlined text-[#8B4513] text-4xl">{tab.icon}</span>
+                  <span className="material-symbols-outlined text-[#8B4513] text-3xl">{tab.icon}</span>
                 )}
-                <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] font-bold text-white uppercase tracking-tighter whitespace-nowrap">
+                <span className="absolute bottom-[6px] left-1/2 -translate-x-1/2 text-[9px] font-bold text-white uppercase tracking-tighter whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {tab.label}
                 </span>
               </div>
