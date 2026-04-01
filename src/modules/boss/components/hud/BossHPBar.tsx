@@ -55,17 +55,9 @@ export default function BossHPBar({
   return (
     <div className="z-10 mb-0.5">
       {/* Boss name row — compact */}
-      <div className="flex items-center justify-between mb-0.5">
-        <h2 className="font-heading text-xs font-bold text-white flex items-center gap-1 truncate">
-          <span className="text-sm">{emoji}</span> {name}
-        </h2>
+      <div className="flex items-center justify-end mb-0.5">
         <div className="flex items-center gap-1 flex-shrink-0">
-          {archetype && archetype !== 'none' && (
-            <span className="text-[8px] font-bold px-1 py-0.5 rounded"
-              style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
-              {archetypeIcon || '❓'} {archetype}
-            </span>
-          )}
+
           {hasPhases && (
             <span className="text-[8px] font-bold px-1 py-0.5 rounded"
               style={{ background: 'rgba(108,92,231,0.2)', color: '#a29bfe' }}>

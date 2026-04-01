@@ -59,18 +59,34 @@ interface EnrageAlertBannerProps {
 
 export function EnrageAlertBanner({ enrageAlert, enrageLevel }: EnrageAlertBannerProps) {
   if (!enrageAlert) return null;
+
+  const percent = enrageLevel * 10;
+  let noticeImg = '/assets/battle/notice_3.png';
+  let percentColor = 'text-yellow-400';
+  
+  if (enrageLevel >= 9) {
+    noticeImg = '/assets/battle/notice_5.png';
+    percentColor = 'text-red-500';
+  } else if (enrageLevel >= 5) {
+    noticeImg = '/assets/battle/notice_4.png';
+    percentColor = 'text-orange-500';
+  }
+
   return (
-    <div className={`absolute top-20 left-4 right-4 z-40 text-center py-2 px-4 rounded-lg pointer-events-none animate-fade-in font-heading font-bold ${enrageLevel >= 4 ? 'text-red-300 text-lg animate-pulse' :
-      enrageLevel >= 3 ? 'text-red-400' :
-        enrageLevel >= 2 ? 'text-orange-300' :
-          'text-yellow-300 text-sm'
-      }`} style={{
-        background: enrageLevel >= 3 ? 'rgba(139,0,0,0.85)' :
-          enrageLevel >= 2 ? 'rgba(180,90,0,0.8)' :
-            'rgba(120,100,0,0.75)',
-        boxShadow: enrageLevel >= 3 ? '0 0 20px rgba(231,76,60,0.4)' : 'none',
-      }}>
-      {enrageAlert}
+    <div className="absolute top-[28%] left-0 right-0 z-40 flex flex-col items-center pointer-events-none animate-fade-in-up">
+      <div className="relative flex items-center justify-center">
+        <img 
+          src={noticeImg} 
+          alt="Enrage Alert" 
+          className={`w-[260px] object-contain ${enrageLevel >= 9 ? 'animate-pulse' : ''}`} 
+        />
+        {/* Only show the percentage number below the image */}
+        <div className="absolute -bottom-1 left-0 right-0 flex justify-center translate-y-full">
+          <span className={`font-heading font-black text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${percentColor}`}>
+            +{percent}%
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

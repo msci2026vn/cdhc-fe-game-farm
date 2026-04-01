@@ -20,6 +20,7 @@ import { useAutoPlayLevel } from '@/shared/hooks/useAutoPlayLevel';
 import { useSkillLevels } from '@/shared/hooks/usePlayerSkills';
 import { OT_HIEM_CONFIG, ROM_BOC_CONFIG } from '@/shared/match3/combat.config';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 
 // Shared match-3 components & hooks
 import { useGemPointer, useComboParticles } from '@/shared/match3';
@@ -27,6 +28,7 @@ import UltimateFlash from '@/shared/match3/UltimateFlash';
 import BossAttackFlash from '@/shared/match3/BossAttackFlash';
 import ComboParticles from '@/shared/match3/ComboParticles';
 import FpsCounter from '@/shared/components/FpsCounter';
+import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 
 // Local extracted hooks
 import { useDeathAnimation } from './hooks/useDeathAnimation';
@@ -329,13 +331,20 @@ export default function BossFightCampaign({
   }
 
   return (
-    <div className={`h-[100dvh] max-w-[430px] mx-auto relative campaign-battle-gradient flex flex-col overflow-hidden ${screenShake ? 'animate-screen-shake' : ''} ${result === 'victory' && deathPhase === 'dying' ? 'animate-screen-shake-violent' : ''}`}>
+    <div 
+      className={cn(
+        "h-[100dvh] max-w-[430px] mx-auto relative flex flex-col overflow-hidden",
+        screenShake && "animate-screen-shake"
+      )}
+      style={{
+        backgroundImage: "url('/assets/battle/background_battle.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
 
       {/* FPS Counter — test độ mượt */}
       <FpsCounter />
-
-      {/* ── Forest decorative layers (simplified for performance) ── */}
-      <div className="campaign-trees-layer z-[1]" />
 
       {/* Victory Boss Death Flash */}
       {result === 'victory' && deathPhase === 'dying' && (
@@ -362,11 +371,7 @@ export default function BossFightCampaign({
       {/* Red vignette flash when player takes damage */}
       <DamageVignette screenShake={screenShake} ultActive={ultActive} />
 
-      {/* Enrage alert popup */}
-      <EnrageAlertBanner enrageAlert={enrageAlert} enrageLevel={enrageLevel} />
-
-      {/* Boss rage overlay */}
-      <BossRageOverlay bossHpPct={bossHpPct} bossEmoji={bossData.emoji} />
+      {/* Boss rage overlay - removed per user request */}
 
       {/* Top half: Boss arena UI component */}
       <CampaignArenaTop
@@ -379,11 +384,24 @@ export default function BossFightCampaign({
         spriteSrc={spriteSrc} spriteState={spriteState} hasSprites={hasSprites}
         enrageMultiplier={enrageMultiplier} skillWarning={!!skillWarning}
         egg={egg} popups={popups} combo={combo} showCombo={showCombo} comboInfo={comboInfo}
+        activeDebuffs={activeDebuffs} shieldMax={shieldMax} lastPlayerDamage={lastPlayerDamage}
+        manaDodgeCost={manaDodgeCost} manaUltCost={manaUltCost}
       />
 
+      {/* Auto AI compact relocated to an absolute overlay to avoid pushing the board down */}
+      <div className="absolute bottom-[70%] left-1/2 -translate-x-1/2 z-20">
+        <AutoPlayToggle
+          isActive={autoPlay.isActive}
+          onToggle={autoPlay.toggle}
+          vipLevel={autoPlay.vipLevel}
+          dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+          currentSituation={autoPlay.currentSituation}
+          compact
+        />
+      </div>
+
       {/* Bottom half: Match-3 + Skills */}
-      <div className="flex-[1_1_70%] rounded-t-2xl px-3 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col"
-        style={{ background: 'rgba(0,0,0,0.3)' }}>
+      <div className="flex-[1_1_70%] rounded-t-2xl px-3 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col">
 
         {/* Match-3 Board */}
         <CampaignMatch3Board

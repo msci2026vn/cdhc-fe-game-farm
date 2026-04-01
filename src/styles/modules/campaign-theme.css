@@ -149,39 +149,19 @@
 /* Cần thêm className="campaign-skill-btn" vào mỗi CircleSkillBtn
    (xem APPLY_GUIDE.md bước 3)                                   */
 .campaign-skill-btn {
-  box-shadow:
-    0 5px 16px rgba(0,0,0,0.65),
-    inset 0 2px 5px rgba(255,255,255,0.15),
-    inset 0 -3px 6px rgba(0,0,0,0.35) !important;
   transition: transform 0.14s ease, box-shadow 0.14s ease !important;
-}
-.campaign-skill-btn:hover {
-  transform: translateY(-5px) scale(1.06) !important;
 }
 .campaign-skill-btn:active {
   transform: scale(0.94) !important;
 }
 
-/* NÉ / Skill green buttons */
-.campaign-skill-btn-green {
-  background: radial-gradient(circle at 38% 30%, #6ab828, #2a6e0c) !important;
-  border: 3px solid #80cc30 !important;
-}
-/* ULT purple button */
-.campaign-skill-btn-ult {
-  background: radial-gradient(circle at 38% 30%, #9955ff, #3a18cc) !important;
-  border: 3px solid #aa77ff !important;
-  box-shadow:
-    0 0 26px var(--c-purple-glow),
-    0 5px 16px rgba(0,0,0,0.65),
-    inset 0 2px 5px rgba(255,255,255,0.18),
-    inset 0 -3px 6px rgba(0,0,0,0.4) !important;
-  /* Removed infinite animation campaign-ult-pulse — constant GPU box-shadow repaint */
-}
+/* Removed campaign-skill-btn-green as buttons now use imageSrc */
+/* Removed campaign-skill-btn-ult as it was creating a rectangular frame */
 
 /* NÉ dodge window — nổi bật khi boss ra đòn */
 .campaign-skill-btn-dodge-active {
   border-color: #ffff44 !important;
+  border-radius: 50% !important;
   box-shadow:
     0 0 0 3px rgba(255,255,80,0.6),
     0 0 20px rgba(255,255,80,0.8),

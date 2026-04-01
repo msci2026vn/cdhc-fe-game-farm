@@ -16,12 +16,18 @@ export function useEnrageAlert(enrageMultiplier: number, result: FightResult) {
     if (result !== 'fighting') return;
     if (enrageLevel > prevEnrageLevelRef.current && enrageLevel > 0) {
       prevEnrageLevelRef.current = enrageLevel;
-      const alerts: Record<number, string> = {
-        1: t('campaign.ui.enrage_alert.1'),
-        2: t('campaign.ui.enrage_alert.2'),
-        3: t('campaign.ui.enrage_alert.3'),
-      };
-      setEnrageAlert(alerts[enrageLevel] || `☠️ RẤT NGUY HIỂM! +${enrageLevel * 10}%`);
+      let alertText = '';
+      const percent = enrageLevel * 10;
+      
+      if (enrageLevel >= 9) {
+        alertText = `🔥 CỰC KÌ NGUY HIỂM! +${percent}%`;
+      } else if (enrageLevel >= 5) {
+        alertText = `💀 RẤT NGUY HIỂM! +${percent}%`;
+      } else {
+        alertText = `⚠️ NGUY HIỂM! +${percent}%`;
+      }
+      
+      setEnrageAlert(alertText);
       const timer = setTimeout(() => setEnrageAlert(null), 3000);
       return () => clearTimeout(timer);
     }

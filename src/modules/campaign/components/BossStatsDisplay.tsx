@@ -15,7 +15,7 @@ export function BossStatsBadges({ def, freq, enrageLevel }: StatsProps) {
   const { t } = useTranslation();
   if (def <= 0 && freq <= 1 && enrageLevel <= 0) return null;
   return (
-    <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
+    <div className="z-10 flex justify-center gap-1.5 mt-1 flex-wrap">
       {def > 0 && (
         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
           style={{ background: 'rgba(116,185,255,0.2)', color: '#74b9ff', border: '1px solid rgba(116,185,255,0.3)' }}>
@@ -49,7 +49,7 @@ interface BossBuffsProps {
 export function BossBuffsBadges({ activeBossBuffs }: BossBuffsProps) {
   if (activeBossBuffs.length === 0) return null;
   return (
-    <div className="z-10 flex gap-1.5 mt-1 flex-wrap">
+    <div className="z-10 flex justify-center gap-1.5 mt-1 flex-wrap">
       {activeBossBuffs.map((b, i) => (
         <span key={`${b.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
           style={{

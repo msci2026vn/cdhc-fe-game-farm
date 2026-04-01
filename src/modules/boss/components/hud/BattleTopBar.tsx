@@ -77,40 +77,34 @@ export default function BattleTopBar({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-1 z-10">
-        {/* Left: TurnCounter (weekly) or Timer + Sound (campaign) */}
-        {isCampaign ? (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg" style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <span className="text-sm">⏱️</span>
-            <span className={`font-mono font-heading text-sm font-bold ${timerColor}`}>
-              {formatTime(elapsedSeconds ?? 0)}
-            </span>
-            <span className="text-white/20 text-xs mx-0.5">|</span>
-            <SoundToggle />
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <TurnCounter current={turn} max={maxTurns} />
-            <SoundToggle />
-          </div>
-        )}
+      <div className="flex justify-between items-start z-10 relative pointer-events-none min-h-[30px] mb-1">
+        {/* Left spacer instead of Level */}
+        <div className="flex items-start mt-1 z-20 pointer-events-auto">
+        </div>
 
-        {/* Right: stats + retreat */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-            style={{ color: '#ff6b6b', background: 'rgba(255,107,107,0.15)' }}>
-            ⚔️{atk}
-          </span>
-          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-            style={{ color: '#74b9ff', background: 'rgba(116,185,255,0.15)' }}>
-            🛡️{def}
-          </span>
-          <div className="px-2.5 py-1 rounded-lg font-heading text-xs font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}>
-            Lv.{level}
-          </div>
+        {/* Absolute Right: Timer, Sound */}
+        <div className="absolute top-[85px] right-0 flex items-center gap-1.5 z-20 pointer-events-auto">
+          {isCampaign ? (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg shadow-sm" style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <span className="text-sm">⏱️</span>
+              <span className={`font-mono font-heading text-sm font-bold ${timerColor}`}>
+                {formatTime(elapsedSeconds ?? 0)}
+              </span>
+              <span className="text-white/20 text-xs mx-0.5">|</span>
+              <SoundToggle />
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <TurnCounter current={turn} max={maxTurns} />
+              <SoundToggle />
+            </div>
+          )}
+        </div>
+
+        {/* Absolute Top Right: X Button */}
+        <div className="absolute -top-1 -right-2 z-[100] pointer-events-auto">
           <button onClick={handleRetreatClick}
-            className="text-white/40 text-sm font-bold active:scale-95 px-1.5 py-1 rounded hover:text-white/60 transition-colors"
+            className="text-white/60 text-2xl font-bold active:scale-95 p-1 rounded-lg hover:bg-white/10 hover:text-white transition-all flex items-center justify-center w-8 h-8"
             title={isCampaign ? t('exit') : t('retreat')}>
             {isCampaign ? '✕' : '🏃'}
           </button>

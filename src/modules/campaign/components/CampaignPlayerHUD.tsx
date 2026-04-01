@@ -34,7 +34,8 @@ interface Props {
 
 // ── Circular skill button matching the mockup wood style ──
 export interface CircleSkillBtnProps {
-    icon: string;
+    icon?: string;
+    imageSrc?: string;
     label: string;
     sublabel?: string;
     className?: string;
@@ -52,7 +53,7 @@ export interface CircleSkillBtnProps {
 }
 
 export const CircleSkillBtn = memo(function CircleSkillBtn({
-    icon, label, sublabel,
+    icon, imageSrc, label, sublabel,
     className,
     variant = 'green',
     isActive = false,
@@ -123,18 +124,27 @@ export const CircleSkillBtn = memo(function CircleSkillBtn({
     return (
         <div className={`flex flex-col items-center gap-1.5 cursor-pointer ${className ?? ''}`} onClick={() => { if (canClick) { playSound('ui_click'); onClick(); } }}>
             <div
-                className="relative flex items-center justify-center active:scale-95"
+                className={`relative flex items-center justify-center active:scale-95 ${isDodgeWindow && !onCooldown ? 'campaign-skill-btn-dodge-active' : ''}`}
                 style={{
                     width: dim,
                     height: dim,
                     borderRadius: '50%',
-                    border: `3px solid ${borderColor}`,
-                    background: bgStyle,
-                    boxShadow: shadowStyle,
+                    border: (imageSrc && !isDodgeWindow) ? 'none' : `3px solid ${borderColor}`,
+                    background: imageSrc ? 'transparent' : bgStyle,
+                    boxShadow: imageSrc && !isDodgeWindow ? 'none' : shadowStyle,
                     opacity: isLocked ? 0.5 : onCooldown && !isActive ? 0.65 : 1,
-                    // Removed infinite animations ult-glow-pulse + dodge-danger-pulse — constant GPU box-shadow repaints
                 }}
             >
+                {/* Image Icon */}
+                {imageSrc ? (
+                    <img src={imageSrc} alt={label} className="w-full h-full object-contain relative z-10"
+                        style={{ filter: isLocked ? 'grayscale(1) brightness(0.6)' : (onCooldown && !isActive) ? 'brightness(0.7)' : 'none' }} />
+                ) : (
+                    <span className="text-2xl relative z-10 select-none">
+                        {icon}
+                    </span>
+                )}
+
                 {/* ULT charge indicator — simple border opacity instead of conic-gradient */}
                 {isUlt && (ultChargePct ?? 0) < 100 && (ultChargePct ?? 0) > 0 && (
                     <div className="absolute inset-[-4px] rounded-full pointer-events-none"
@@ -143,53 +153,39 @@ export const CircleSkillBtn = memo(function CircleSkillBtn({
 
                 {/* Cooldown overlay */}
                 {onCooldown && (
-                    <div className="absolute inset-0 rounded-full flex items-center justify-center z-10"
-                        style={{ background: 'rgba(0,0,0,0.78)' }}>
+                    <div className="absolute inset-0 rounded-full flex items-center justify-center z-20"
+                        style={{ background: 'rgba(0,0,0,0.68)', borderRadius: '50%' }}>
                         <span className="text-white font-bold text-sm">{cooldownSec}s</span>
                     </div>
                 )}
 
                 {/* Locked */}
-                {isLocked && (
+                {isLocked && !imageSrc && (
                     <div className="absolute inset-0 rounded-full flex items-center justify-center z-10"
                         style={{ background: 'rgba(0,0,0,0.6)' }}>
                         <span className="text-lg">🔒</span>
                     </div>
                 )}
 
-                {/* Icon */}
-                <span className="text-2xl relative z-10 select-none"
-                    style={{ opacity: isLocked || (onCooldown && !isActive) ? 0.4 : 1 }}>
-                    {icon}
-                </span>
-
                 {/* Active duration bar (bottom arc) */}
-                {isActive && (
+                {isActive && !imageSrc && (
                     <div className="absolute inset-0 rounded-full pointer-events-none"
                         style={{ border: `2px solid rgba(255,255,255,0.4)` }} />
                 )}
 
                 {/* "top shine" gloss */}
-                <div className="absolute pointer-events-none rounded-full"
-                    style={{ top: 6, left: '20%', right: '20%', height: '28%', background: 'rgba(255,255,255,0.18)', borderRadius: '50%' }} />
+                {!imageSrc && (
+                    <div className="absolute pointer-events-none rounded-full"
+                        style={{ top: 6, left: '20%', right: '20%', height: '28%', background: 'rgba(255,255,255,0.18)', borderRadius: '50%' }} />
+                )}
             </div>
-
-            {/* Wood log base */}
-            <div style={{
-                width: dim * 0.72,
-                height: 9,
-                marginTop: -6,
-                background: 'linear-gradient(180deg,#5c2e0f,#2a1206)',
-                border: '1px solid #8a5018',
-                borderRadius: '0 0 8px 8px',
-            }} />
 
             {/* Label */}
             <span className="text-[10px] font-black text-center leading-tight"
                 style={{
                     color: isUlt && ultReady ? '#cc99ff' : isLocked ? '#666' : '#e0d8b0',
                     textShadow: isUlt && ultReady ? '0 0 10px rgba(180,80,255,0.8),1px 1px 3px #000' : '1px 1px 3px #000',
-                    marginTop: -2,
+                    marginTop: 0,
                     maxWidth: dim,
                 }}>
                 {label}
@@ -216,11 +212,21 @@ export default function CampaignPlayerHUD({
     const hasDodgeMana = boss.mana >= manaDodgeCost;
     const hasUltMana = boss.mana >= manaUltCost;
     const ultOnCooldown = (boss.ultCooldown ?? 0) > 0;
-    // Pre-compute burn check once instead of 2x .some() in JSX
     const isBurning = activeDebuffs.length > 0 && activeDebuffs.some(d => d.type === 'burn');
 
     return (
-        <>
+        <div className="relative flex flex-col items-stretch w-full">
+            {/* Skill warning - absolute image to avoid pushing HUD down */}
+            {skillWarning && (
+                <div className="absolute left-0 right-0 -top-80 flex justify-center pointer-events-none z-[60]">
+                    <img
+                        src="/assets/battle/notice_1.png"
+                        alt="Notice"
+                        className="w-[340px] object-contain animate-pulse"
+                    />
+                </div>
+            )}
+
             {/* Debuff bar */}
             {activeDebuffs.length > 0 && (
                 <div className="flex gap-1.5 mb-1 flex-wrap">
@@ -243,50 +249,23 @@ export default function CampaignPlayerHUD({
                 </div>
             )}
 
-            {/* Player HP bar */}
-            <div className={`relative ${isBurning ? 'ring-1 ring-orange-500/50' : ''}`}>
-                <PlayerHPBar
-                    hp={boss.playerHp}
-                    maxHp={boss.playerMaxHp}
-                    shield={boss.shield}
-                    maxShield={shieldMax}
-                    def={combatStats.def}
-                    isHit={!!lastPlayerDamage}
-                />
-                {lastPlayerDamage > 0 && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-damage-float">
-                        <span className="font-heading text-xl font-bold text-red-500"
-                            style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
-                            -{lastPlayerDamage}
-                        </span>
-                    </div>
-                )}
-            </div>
 
-            <ManaBar
-                mana={boss.mana}
-                maxMana={boss.maxMana}
-                dodgeCost={manaDodgeCost}
-                ultCost={manaUltCost}
-                ultCharge={boss.ultCharge ?? 0}
-            />
 
-            {/* Skill warning inline */}
-            {skillWarning && (
-                <div className="text-center py-1 pointer-events-none">
-                    <span className="bg-red-900/80 text-red-300 px-4 py-1 rounded-full text-sm font-bold">
-                        {t('campaign.ui.strong_attack_warning')}
-                    </span>
-                </div>
-            )}
-
-            {/* Boss skill alert */}
+            {/* Boss skill alert - absolute image with text overlay */}
             {skillAlert && (
-                <div className="text-center py-1 animate-fade-in">
-                    <span className="px-4 py-1.5 rounded-full text-xs font-bold text-purple-200"
-                        style={{ background: 'rgba(108,92,231,0.85)', boxShadow: '0 0 15px rgba(108,92,231,0.3)' }}>
-                        {skillAlert.icon} {skillAlert.text}
-                    </span>
+                <div className="absolute left-0 right-0 -top-56 flex justify-center pointer-events-none z-[55] animate-fade-in-up">
+                    <div className="relative flex items-center justify-center">
+                        <img 
+                            src="/assets/battle/notice_2.png" 
+                            alt="Boss Skill" 
+                            className="w-[360px] object-contain" 
+                        />
+                        <div className="absolute inset-x-0 bottom-[18%] flex items-center justify-center px-4">
+                            <span className="text-white font-bold text-xs uppercase tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                {skillAlert.text}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -294,15 +273,22 @@ export default function CampaignPlayerHUD({
                 <ExpiryBanner daysLeft={daysUntilExpiry} />
             )}
 
-            <div className="flex-1" />
+            <div className="flex-1 min-h-[4px]" />
 
-            {/* ═══ Mockup-style circular skill row ═══ */}
-            <div className="flex items-end justify-around px-1 pb-1 pt-2">
+            {/* ═══ Mockup-style circular skill row with wooden frame ═══ */}
+            <div
+                className="flex items-end justify-around px-2 pb-2 pt-6 -mx-3 mb-[-6px]"
+                style={{
+                    backgroundImage: "url('/assets/battle/frame_skill_bar.png')",
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                }}
+            >
                 {/* Ớt Hiểm */}
                 <CircleSkillBtn
                     className="campaign-skill-btn"
-                    icon="🌶️"
-                    label={`${t('campaign.skills.ot_hiem.short_name')}${skillLevels.ot_hiem > 0 ? ` Lv${skillLevels.ot_hiem}` : ''}`}
+                    imageSrc="/assets/battle/btn_skill1.png"
+                    label="Skill 1"
                     sublabel={otHiemCooldown > 0 ? undefined : otHiemActive ? 'active' : undefined}
                     variant="red"
                     isActive={otHiemActive}
@@ -317,9 +303,9 @@ export default function CampaignPlayerHUD({
 
                 {/* Rơm Bọc */}
                 <CircleSkillBtn
-                    className="campaign-skill-btn campaign-skill-btn-green"
-                    icon="🪹"
-                    label={`${t('campaign.skills.rom_boc.short_name')}${skillLevels.rom_boc > 0 ? ` Lv${skillLevels.rom_boc}` : ''}`}
+                    className="campaign-skill-btn"
+                    imageSrc="/assets/battle/btn_skill2.png"
+                    label="Skill 2"
                     variant="green"
                     isActive={romBocActive}
                     onCooldown={romBocCooldown > 0}
@@ -333,9 +319,9 @@ export default function CampaignPlayerHUD({
 
                 {/* NÉ */}
                 <CircleSkillBtn
-                    className={`campaign-skill-btn campaign-skill-btn-green${skillWarning && hasDodgeMana ? ' campaign-skill-btn-dodge-active' : ''}`}
-                    icon="🏃"
-                    label={`${t('campaign.combat.dodge')} (${manaDodgeCost})`}
+                    className="campaign-skill-btn"
+                    imageSrc="/assets/battle/btn_dodge.png"
+                    label="Né"
                     variant="run"
                     isReady={hasDodgeMana}
                     isDodgeWindow={skillWarning && hasDodgeMana}
@@ -346,7 +332,7 @@ export default function CampaignPlayerHUD({
                 {/* ULT */}
                 <CircleSkillBtn
                     className="campaign-skill-btn campaign-skill-btn-ult"
-                    icon="⚡"
+                    imageSrc="/assets/battle/btn_ult.png"
                     label={ultReady ? 'ULT ⚡' : `ULT, ${boss.ultCharge ?? 0}%`}
                     variant="ult"
                     isReady={ultReady && hasUltMana && !ultOnCooldown}
@@ -354,19 +340,9 @@ export default function CampaignPlayerHUD({
                     cooldownSec={boss.ultCooldown ?? 0}
                     ultChargePct={boss.ultCharge ?? 0}
                     onClick={fireUltimate}
-                    size="lg"
-                />
-
-                {/* Auto AI compact */}
-                <AutoPlayToggle
-                    isActive={autoPlay.isActive}
-                    onToggle={autoPlay.toggle}
-                    vipLevel={autoPlay.vipLevel}
-                    dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-                    currentSituation={autoPlay.currentSituation}
-                    compact
+                    size="md"
                 />
             </div>
-        </>
+        </div>
     );
 }

@@ -50,7 +50,7 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
   }, [hpPct]);
 
   return (
-    <div className={`flex gap-1.5 mb-0.5 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''} ${isHealing ? 'animate-heal-pulse' : ''}`}>
+    <div className={`flex flex-col gap-1 mb-0.5 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''} ${isHealing ? 'animate-heal-pulse' : ''}`}>
       {/* HP */}
       <div className="flex-1 min-w-0">
         <div className={`flex justify-between text-[8px] font-bold mb-px`}>
