@@ -52,7 +52,8 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
       onClick={() => { if (!isLocked) playSound('ui_click'); onClick(); }}
       disabled={isLocked}
       className={cn(
-        'relative flex flex-col items-center gap-0.5 transition-transform',
+        'relative flex flex-col items-center transition-transform',
+        isStage1 ? 'gap-1' : isStage3 ? 'gap-0' : 'gap-0.5',
         isLocked ? 'active:scale-90 cursor-not-allowed' : 'active:scale-95 cursor-pointer',
       )}
     >
@@ -77,7 +78,7 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
           </div>
           {/* Stars below */}
           {boss.bestStars > 0 && (
-            <div className="flex justify-center gap-0.5 mt-0.5">
+            <div className={cn("flex justify-center gap-0.5", isStage1 ? "mt-4" : isStage3 ? "-mt-4" : "mt-0.5")}>
               {Array.from({ length: 3 }).map((_, i) => (
                 <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400' : 'text-white/20')}>
                   ⭐
@@ -136,7 +137,8 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
 
       {/* Boss name */}
       <p className={cn(
-        'font-game font-black text-[11px] text-center leading-tight mt-0.5 max-w-[90px] drop-shadow-md',
+        'font-game font-black text-[11px] text-center leading-tight max-w-[90px] drop-shadow-md',
+        isStage1 ? 'mt-0' : isStage3 ? 'mt-0' : 'mt-0.5',
         isCompleted ? 'text-green-300' : isCurrent ? 'text-white' : 'text-white/40',
       )}>
         {boss.name}
