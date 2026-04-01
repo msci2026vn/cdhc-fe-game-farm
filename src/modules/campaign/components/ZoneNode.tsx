@@ -57,14 +57,14 @@ export default function ZoneNode({ zone, isCurrentZone, onClick }: ZoneNodeProps
             )}
 
             {/* Zone Name - Positioned inside the wooden banner part */}
-            <div className="absolute w-full text-center bottom-[25px] left-0 px-2 z-30">
+            <div className="absolute w-full text-center bottom-[15px] left-0 px-2 z-30">
               <span className="font-game text-[#3E1E0F] text-[8px] uppercase leading-none drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]">
                 V{zone.zoneNumber} {meta?.name || zone.name}
               </span>
             </div>
 
             {/* Stars Count - Positioned inside the lower dark wood area */}
-            <div className="absolute w-full text-center bottom-[14px] left-0 flex items-center justify-center gap-1 z-30">
+            <div className="absolute w-full text-center bottom-[8px] left-0 flex items-center justify-center gap-1 z-30">
               <span className="text-yellow-400 text-[8px] drop-shadow-md">⭐</span>
               <span className="font-game text-[#FFE4B5] text-[10px] leading-none drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)]">
                 {starsFilled}/{starsMax}
