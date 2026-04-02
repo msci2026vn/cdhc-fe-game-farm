@@ -38,7 +38,15 @@ const lazyWithRetry = (componentImport: () => Promise<{ default: any }>) =>
       const hasReloaded = sessionStorage.getItem('chunk-reload');
       if (!hasReloaded) {
         sessionStorage.setItem('chunk-reload', 'true');
-        window.location.reload();
+        // Unregister service workers to break the PWA caching loop which causes old index.html to request missing chunks
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            for (const reg of regs) reg.unregister();
+            window.location.reload();
+          }).catch(() => window.location.reload());
+        } else {
+          window.location.reload();
+        }
         return { default: () => null };
       }
       // If we already reloaded and it still fails, throw to ErrorBoundary

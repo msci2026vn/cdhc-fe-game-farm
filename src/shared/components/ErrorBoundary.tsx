@@ -40,7 +40,16 @@ export default class ErrorBoundary extends Component<Props, State> {
 
           <div className="text-center mt-4">
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then((regs) => {
+                    for (const reg of regs) reg.unregister();
+                    window.location.reload();
+                  }).catch(() => window.location.reload());
+                } else {
+                  window.location.reload();
+                }
+              }}
               className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all w-full"
             >
               {i18n.t('reload_page')}
