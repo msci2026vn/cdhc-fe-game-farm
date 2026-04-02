@@ -122,7 +122,7 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
       {isCompleted && boss.bestStars > 0 && (
         <div className="flex justify-center gap-0.5 mt-0.5">
           {Array.from({ length: 3 }).map((_, i) => (
-            <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400' : 'text-white/20')}>
+            <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400 drop-shadow-md' : 'opacity-40 grayscale')}>
               ⭐
             </span>
           ))}

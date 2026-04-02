@@ -80,7 +80,7 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
           {boss.bestStars > 0 && (
             <div className={cn("flex justify-center gap-0.5", isStage1 ? "mt-4" : isStage3 ? "-mt-4" : "mt-0.5")}>
               {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400' : 'text-white/20')}>
+                <span key={i} className={cn('text-sm', i < boss.bestStars ? 'text-yellow-400 drop-shadow-md' : 'opacity-40 grayscale')}>
                   ⭐
                 </span>
               ))}
