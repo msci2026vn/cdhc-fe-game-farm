@@ -3,7 +3,6 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { queryClient } from '../lib/queryClient';
-import { useUIStore } from '../stores/uiStore';
 
 export { API_BASE_URL } from '../utils/constants';
 import { API_BASE_URL } from '../utils/constants';
@@ -19,7 +18,7 @@ let refreshPromise: Promise<boolean> | null = null;
  * Deduplicates concurrent calls — if a refresh is already in progress, all callers
  * wait on the same promise.
  */
-async function tryRefreshToken(retryCount = 0): Promise<boolean> {
+async function tryRefreshToken(): Promise<boolean> {
   if (isRefreshing && refreshPromise) {
     return refreshPromise;
   }
@@ -41,21 +40,9 @@ async function tryRefreshToken(retryCount = 0): Promise<boolean> {
       }
 
       console.warn('[Auth] Refresh failed:', response.status);
-      
-      // Retry once if it was a technical error (not 401/403)
-      if (retryCount < 1 && response.status >= 500) {
-        console.log('[Auth] Retrying refresh...');
-        isRefreshing = false; // Reset for retry
-        return tryRefreshToken(retryCount + 1);
-      }
-
       return false;
     } catch (error) {
       console.error('[Auth] Refresh error:', error);
-      if (retryCount < 1) {
-          isRefreshing = false;
-          return tryRefreshToken(retryCount + 1);
-      }
       return false;
     } finally {
       isRefreshing = false;
@@ -121,8 +108,6 @@ export function resetRedirectLock() {
 export async function handleUnauthorized(context: string = 'API') {
   if (isRedirecting) return;
 
-  console.log(`[GameAPI] 401 in ${context} — attempting silent refresh...`);
-
   // Try refresh first before giving up
   const refreshed = await tryRefreshToken();
   if (refreshed) {
@@ -130,11 +115,11 @@ export async function handleUnauthorized(context: string = 'API') {
     return;
   }
 
-  // Refresh failed — truly expired, proceed with logout overlay
+  // Refresh failed — truly expired, proceed with logout redirect
   if (isRedirecting) return; // Re-check after async refresh
   isRedirecting = true;
 
-  console.warn(`[GameAPI] 401 Unauthorized in ${context} — refresh failed, showing session expired overlay`);
+  console.warn(`[GameAPI] 401 Unauthorized in ${context} — refresh failed, redirecting to login`);
 
   // Cancel active queries to stop background refetches,
   // then invalidate auth so components know session is gone.
@@ -145,27 +130,24 @@ export async function handleUnauthorized(context: string = 'API') {
     });
   } catch (_) { /* ignore */ }
 
-  // Set global session expired state in UI store
-  // This will trigger the SessionExpiredOverlay instead of immediate window.location change
-  try {
-    useUIStore.getState().setSessionExpired(true);
-  } catch (_) { /* ignore */ }
-
-  // We still provide a safety redirect after a VERY long time (5 mins) 
-  // if the user doesn't interact with the overlay
-  redirectTimeout = setTimeout(() => {
-    if (useUIStore.getState().isSessionExpired) {
-        window.location.href = '/login';
-    }
-  }, 300000); 
-
-  // Dispatch event for any local listeners
+  // Show toast notification
   try {
     const toastEvent = new CustomEvent('session-expired', {
       detail: { message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.' }
     });
     window.dispatchEvent(toastEvent);
   } catch (_) { /* ignore */ }
+
+  // Redirect to login after a short delay to show toast
+  redirectTimeout = setTimeout(() => {
+    window.location.href = '/login';
+  }, 800);
+
+  // Safety: auto-reset lock after 5s in case redirect doesn't happen
+  // (e.g. network issue, browser blocks navigation)
+  setTimeout(() => {
+    resetRedirectLock();
+  }, 5000);
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -18,16 +18,12 @@ interface UIState {
   clearFlyUp: () => void;
   isApiDisconnected: boolean;
   setApiDisconnected: (status: boolean) => void;
-  isSessionExpired: boolean;
-  setSessionExpired: (status: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   toasts: [],
   isApiDisconnected: false,
   setApiDisconnected: (status) => set({ isApiDisconnected: status }),
-  isSessionExpired: false,
-  setSessionExpired: (status) => set({ isSessionExpired: status }),
   addToast: (message, type = 'info', icon, duration) => {
     const id = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     const toastDuration = duration ?? (type === 'error' ? 4000 : type === 'warning' ? 3500 : 3000);
