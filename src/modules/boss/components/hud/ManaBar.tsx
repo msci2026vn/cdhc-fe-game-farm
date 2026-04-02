@@ -28,22 +28,8 @@ export default function ManaBar({ mana, maxMana, dodgeCost, ultCost, ultCharge =
           <span style={{ color: canUlt ? '#a29bfe' : '#ff6b6b' }} className="text-[8px]">
             ULT:{ultCost}
           </span>
-          {/* ULT ready badge — replaces mana count when charged */}
-          {ultReady ? (
-            <span
-              className="text-[9px] font-black px-1.5 py-0.5 rounded-full animate-pulse"
-              style={{
-                background: 'linear-gradient(90deg,#6c5ce7,#a29bfe,#fd79a8)',
-                color: '#fff',
-                boxShadow: '0 0 10px rgba(162,155,254,0.6)',
-                letterSpacing: '0.3px',
-              }}
-            >
-              ⚡ SẴN SÀNG!
-            </span>
-          ) : (
-            <span style={{ color: '#a29bfe' }}>{mana}/{maxMana}</span>
-          )}
+          {/* ULT ready badge removed entirely per request */}
+          <span style={{ color: '#a29bfe' }}>{mana}/{maxMana}</span>
         </div>
       </div>
       <div className="h-1.5 rounded-md overflow-hidden relative"

@@ -145,10 +145,18 @@ export const CircleSkillBtn = memo(function CircleSkillBtn({
                     </span>
                 )}
 
-                {/* ULT charge indicator — simple border opacity instead of conic-gradient */}
-                {isUlt && (ultChargePct ?? 0) < 100 && (ultChargePct ?? 0) > 0 && (
+                {/* ULT charge indicator or Ready Glow */}
+                {isUlt && !ultReady && (ultChargePct ?? 0) > 0 && (
                     <div className="absolute inset-[-4px] rounded-full pointer-events-none"
                         style={{ border: '3px solid rgba(180,120,255,0.5)', opacity: (ultChargePct ?? 0) / 100 }} />
+                )}
+                {isUlt && ultReady && !onCooldown && (
+                    <div className="absolute inset-[-4px] rounded-full pointer-events-none animate-pulse"
+                        style={{ 
+                            border: '3px solid #cc99ff', 
+                            boxShadow: '0 0 15px 3px rgba(160,80,255,0.8), inset 0 0 10px rgba(160,80,255,0.5)' 
+                        }} 
+                    />
                 )}
 
                 {/* Cooldown overlay */}

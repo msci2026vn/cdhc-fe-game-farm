@@ -23,6 +23,7 @@ import ErrorBoundary from '@/shared/components/ErrorBoundary';
 import { AppDisplayPrompt } from '@/components/AppDisplayPrompt';
 import { UpdatePopup } from '@/components/UpdatePopup';
 import { useServiceWorker } from '@/hooks/useServiceWorker';
+import { SessionExpiredOverlay } from '@/shared/components/SessionExpiredOverlay';
 
 /**
  * Helper to handle "Failed to fetch dynamically imported module"
@@ -239,6 +240,7 @@ const App = () => {
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
+            <SessionExpiredOverlay />
             <ConnectionLostOverlay />
             <NavigateSetup />
             <Suspense fallback={<Fallback />}>

@@ -79,6 +79,7 @@ export default function BossFightM3({
     milestones, manaDodgeCost, manaUltCost,
     combatStatsTracker, combatNotifs,
     skillWarning, enrageMultiplier, stars, maxCombo,
+    landedGems,
   } = useMatch3(bossInfo, combatStats, turnLimit);
 
   const auraType = getDominantAura(combatStats);
@@ -419,6 +420,7 @@ export default function BossFightM3({
               const meta = GEM_META[gem.type];
               const isSelected = selected === i;
               const isMatched = matchedCells.has(i);
+              const isLanded = landedGems.has(gem.id);
               return (
                 <div key={gem.id}
                   onPointerDown={(e) => handlePointerDown(i, e)}
@@ -426,6 +428,7 @@ export default function BossFightM3({
                   className={`aspect-square rounded-md flex items-center justify-center text-[19px] cursor-pointer relative ${meta.css}
                     ${isSelected ? 'ring-2 ring-white scale-110 z-10 animate-gem-swap' : 'active:scale-[0.88]'}
                     ${isMatched ? 'animate-gem-pop gem-match-burst' : ''}
+                    ${isLanded ? 'gem-landed' : ''}
                     ${animating && !isMatched ? 'pointer-events-none' : ''}
                     ${highlightedGem === i ? 'ring-2 ring-yellow-300 z-10' : ''}
                   `}>

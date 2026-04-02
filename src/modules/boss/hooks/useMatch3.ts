@@ -96,6 +96,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
   const [skillWarning, setSkillWarning] = useState<SkillWarning | null>(null);
   const [attackWarning, setAttackWarning] = useState<BossAttackWarning | null>(null);
   const dodgedRef = useRef(false);
+  const [landedGems, setLandedGems] = useState<Set<number>>(new Set());
   const [ultActive, setUltActive] = useState(false);
 
   // Simple callbacks — use expiresAt + GC instead of per-item setTimeout
@@ -170,6 +171,7 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
       setAnimating, setGrid, setTotalDmgDealt, setCombatStatsTracker,
       addPopup, addCombatNotif,
       dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones,
+      setLandedGems,
     }, currentGrid, currentCombo, processMatches);
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif]);
 
@@ -222,5 +224,6 @@ export function useMatch3(bossInfo: BossInfo, playerStats: PlayerCombatStats, tu
     enrageMultiplier,
     stars,
     maxCombo: maxComboRef.current,
+    landedGems,
   };
 }

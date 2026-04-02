@@ -28,6 +28,7 @@ export interface MatchProcessorDeps {
   shieldGainPerGem: number;
   manaRegen: number;
   milestones: ActiveMilestones;
+  setLandedGems: Dispatch<SetStateAction<Set<number>>>;
 }
 
 export function processMatchesImpl(
@@ -41,6 +42,7 @@ export function processMatchesImpl(
     setAnimating, setGrid, setTotalDmgDealt, setCombatStatsTracker,
     addPopup, addCombatNotif,
     dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones,
+    setLandedGems,
   } = deps;
 
   const matched = findMatches(currentGrid);
@@ -136,6 +138,18 @@ export function processMatchesImpl(
 
     const cleared = currentGrid.map((g, i) => matched.has(i) ? null : g) as (Gem | null)[];
     const fallen = applyGravity(cleared as Gem[]);
+    
+    // Track which gems landed/fell to trigger animation
+    const landed = new Set<number>();
+    fallen.forEach((g, i) => {
+      if (g && currentGrid[i]?.id !== g.id) {
+        landed.add(g.id);
+      }
+    });
+    setLandedGems(landed);
+    // Clear landed gems after animation
+    setTimeout(() => setLandedGems(new Set()), 400);
+
     setGrid(fallen);
     setMatchedCells(new Set());
     setTimeout(() => recurse(fallen, newCombo), 300);

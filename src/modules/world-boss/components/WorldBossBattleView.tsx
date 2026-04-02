@@ -178,7 +178,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     floatingTexts,
     chainLightnings,
     activeBossStats,
-    currentPhase, totalPhases,
+    currentPhase, totalPhases, landedGems,
   } = engine;
 
   // ═══ Auto-play: wire refs for controller ═══
@@ -506,6 +506,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
           combo={combo} showCombo={showCombo} otHiemActive={otHiemActive} romBocActive={romBocActive}
           GEM_META={GEM_META}
           blastVfxs={blastVfxs} hintedGems={hintedGems} particleBursts={particleBursts} floatingTexts={floatingTexts} chainLightnings={chainLightnings}
+          landedGems={landedGems}
         />
         {/* Darkness overlay */}
         {!boardVisible && (

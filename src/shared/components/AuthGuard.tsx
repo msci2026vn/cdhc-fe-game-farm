@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gameApi } from '@/shared/api/game-api';
 import { handleUnauthorized } from '@/shared/api/api-utils';
+import { useUIStore } from '@/shared/stores/uiStore';
 import { useTranslation } from 'react-i18next';
 
 type AuthState = 'loading' | 'authenticated' | 'unauthenticated';
@@ -51,7 +52,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
           setAuthState('unauthenticated');
 
           if (location.pathname !== '/login') {
-            navigate('/login', { replace: true });
+            // If the global overlay is already active, don't double-navigate
+            if (!useUIStore.getState().isSessionExpired) {
+              navigate('/login', { replace: true });
+            }
           }
         }
       } catch (error) {
@@ -61,7 +65,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
         setAuthState('unauthenticated');
 
         if (location.pathname !== '/login') {
-          navigate('/login', { replace: true });
+          if (!useUIStore.getState().isSessionExpired) {
+            navigate('/login', { replace: true });
+          }
         }
       }
     };

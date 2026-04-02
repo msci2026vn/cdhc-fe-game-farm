@@ -247,7 +247,7 @@ export function processCampaignMatchesImpl(
       tally[g.type] = (tally[g.type] || 0) + 1;
 
       // Trigger Candy Blast VFX if a striped/bomb gem explodes (individual, not combo)
-      if (deps.addBlastVfx && !isSpecialComboFlag) {
+      if (deps.addBlastVfx && (!isSpecialComboFlag || isPostTransform)) {
         if (g.special === 'striped_h') deps.addBlastVfx('row', Math.floor(idx / 8));
         else if (g.special === 'striped_v') deps.addBlastVfx('col', idx % 8);
         else if (g.special === 'bomb') deps.addBlastVfx('bomb', idx); // radial burst from center
