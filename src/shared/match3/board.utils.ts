@@ -9,7 +9,7 @@ export type GemType = (typeof GEM_TYPES)[number];
 
 export type SpecialGemType = 'striped_h' | 'striped_v' | 'bomb' | 'rainbow';
 
-export interface Gem { type: GemType; id: number; special?: SpecialGemType | null; }
+export interface Gem { type: GemType; id: number; special?: SpecialGemType | null; isTransforming?: boolean; }
 
 export type MatchPattern = 'match3' | 'match4h' | 'match4v' | 'match5' | 'L' | 'T';
 
@@ -208,11 +208,104 @@ export function triggerRainbow(grid: Gem[], targetType: GemType): number[] {
   return cells;
 }
 
+export function isSpecialCombo(grid: Gem[], posA: number, posB: number): boolean {
+  const specialA = grid[posA]?.special;
+  const specialB = grid[posB]?.special;
+  
+  // Rainbow + Anything is a special combo
+  if (specialA === 'rainbow' || specialB === 'rainbow') return true;
+  
+  if (!specialA || !specialB) return false;
+  // Based on the user's request, we support combos involving: striped_h, striped_v, bomb
+  const valid = ['striped_h', 'striped_v', 'bomb'];
+  return valid.includes(specialA) && valid.includes(specialB);
+}
+
+export function getSpecialComboCells(grid: Gem[], posA: number, posB: number): number[] {
+  const cells: number[] = [];
+  const specialA = grid[posA]?.special;
+  const specialB = grid[posB]?.special;
+  
+  const isStripedA = specialA === 'striped_h' || specialA === 'striped_v';
+  const isStripedB = specialB === 'striped_h' || specialB === 'striped_v';
+
+  // 1. Rainbow + Rainbow => Entire Board
+  if (specialA === 'rainbow' && specialB === 'rainbow') {
+    for (let i = 0; i < ROWS * COLS; i++) cells.push(i);
+    return cells;
+  }
+
+  // 2. Rainbow + Gem/Special => All gems of target color
+  if (specialA === 'rainbow' || specialB === 'rainbow') {
+    const rainbowPos = specialA === 'rainbow' ? posA : posB;
+    const otherPos = specialA === 'rainbow' ? posB : posA;
+    const otherGem = grid[otherPos];
+    if (otherGem) {
+      const targetType = otherGem.type;
+      for (let i = 0; i < grid.length; i++) {
+        if (grid[i] && grid[i].type === targetType) cells.push(i);
+      }
+      cells.push(rainbowPos);
+    } else {
+      cells.push(rainbowPos);
+    }
+    return cells;
+  }
+
+  // 3. Bomb + Bomb => 5x5 area
+  if (specialA === 'bomb' && specialB === 'bomb') {
+    const center = posB;
+    const row = Math.floor(center / COLS);
+    const col = center % COLS;
+    for (let r = row - 2; r <= row + 2; r++) {
+      for (let c = col - 2; c <= col + 2; c++) {
+        if (r >= 0 && r < ROWS && c >= 0 && c < COLS) cells.push(r * COLS + c);
+      }
+    }
+    return cells;
+  }
+
+  // 4. Striped + Striped => Cross blast
+  if (isStripedA && isStripedB) {
+    const row = Math.floor(posB / COLS);
+    const col = posB % COLS;
+    // Full row
+    for (let c = 0; c < COLS; c++) cells.push(row * COLS + c);
+    // Full col
+    for (let r = 0; r < ROWS; r++) cells.push(r * COLS + col);
+    return Array.from(new Set(cells));
+  }
+
+  // 5. Striped + Bomb => 3 rows or 3 cols
+  if ((isStripedA && specialB === 'bomb') || (specialA === 'bomb' && isStripedB)) {
+    const stripedSpecial = isStripedA ? specialA : specialB;
+    const centerRow = Math.floor(posB / COLS);
+    const centerCol = posB % COLS;
+
+    if (stripedSpecial === 'striped_h') {
+      for (let r = centerRow - 1; r <= centerRow + 1; r++) {
+        if (r >= 0 && r < ROWS) {
+          for (let c = 0; c < COLS; c++) cells.push(r * COLS + c);
+        }
+      }
+    } else {
+      for (let c = centerCol - 1; c <= centerCol + 1; c++) {
+        if (c >= 0 && c < COLS) {
+          for (let r = 0; r < ROWS; r++) cells.push(r * COLS + c);
+        }
+      }
+    }
+    return cells;
+  }
+
+  return cells;
+}
+
 /** Collect all cells to remove including chain reactions from special gems */
 export function collectTriggeredCells(
   grid: Gem[],
   initialRemove: Set<number>,
-  swapContext?: { pos: number; targetType: GemType },
+  swapContext?: { pos: number; targetType: GemType; specialComboPair?: [number, number] },
 ): Set<number> {
   const allRemove = new Set(initialRemove);
   const queue = [...initialRemove].filter(i => grid[i]?.special);
@@ -225,24 +318,24 @@ export function collectTriggeredCells(
     const gem = grid[idx];
     if (!gem?.special) continue;
 
+    // If this gem is part of an active special combo swap, its individual effect is subsumed by the combo blast
+    if (swapContext?.specialComboPair?.includes(idx)) continue;
+
     let triggered: number[] = [];
     if (gem.special === 'striped_h') triggered = triggerStriped(idx, 'h');
     else if (gem.special === 'striped_v') triggered = triggerStriped(idx, 'v');
     else if (gem.special === 'bomb') triggered = triggerBomb(idx);
     else if (gem.special === 'rainbow') {
-      // Rainbow: use swapped gem's type if available, otherwise most common type
-      let targetType: GemType;
-      if (swapContext && idx === swapContext.pos) {
-        targetType = swapContext.targetType;
-      } else {
-        const typeCounts: Partial<Record<GemType, number>> = {};
-        for (let i = 0; i < grid.length; i++) {
-          if (grid[i] && !allRemove.has(i)) { typeCounts[grid[i].type] = (typeCounts[grid[i].type] || 0) + 1; }
-        }
-        targetType = (Object.entries(typeCounts) as [GemType, number][])
-          .sort((a, b) => b[1] - a[1])[0]?.[0] || 'atk';
-      }
+      // Rainbow triggered by external explosion: pick a random color and explode all gems of that type
+      const activeTypes = new Set<GemType>();
+      for (let i = 0; i < grid.length; i++) if (grid[i]) activeTypes.add(grid[i].type);
+      const types = Array.from(activeTypes);
+      const targetType = types[Math.floor(Math.random() * types.length)] || 'atk';
       triggered = triggerRainbow(grid, targetType);
+    }
+    else if (gem.special === 'rainbow' && swapContext && idx === swapContext.pos) {
+      // Handled by special combo logic if swapped, but here for safety
+      triggered = triggerRainbow(grid, swapContext.targetType);
     }
 
     for (const t of triggered) {

@@ -84,33 +84,31 @@
 }
 
 /* ── 7. GRID WOODEN FRAME ────────────────────────────────── */
-/* Cần thêm className="campaign-grid-frame" vào div wooden frame
-   trong CampaignMatch3Board.tsx (xem APPLY_GUIDE.md bước 2)    */
 .campaign-grid-frame {
-  border: 4px solid var(--c-wood-border) !important;
-  background: linear-gradient(180deg, #1a0e00 0%, #0a0604 100%) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 0 0 2px var(--c-wood-dark), 0 8px 24px rgba(0,0,0,0.6) !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   position: relative;
+  z-index: 1; /* create stacking context */
 }
 
-/* Vine corner decorations — removed drop-shadow filters */
+/* 🌿 Root Frame Graphic Layer */
 .campaign-grid-frame::before {
-  content: '🌿';
+  content: '';
   position: absolute;
-  top: -13px; left: -9px;
-  font-size: 19px;
-  transform: rotate(-22deg);
-  z-index: 3;
+  inset: 0;
+  background-image: url('/assets/battle/frame_gem_board.png') !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  z-index: 15;
   pointer-events: none;
 }
+
+/* Removed old vine decorations */
 .campaign-grid-frame::after {
-  content: '🍀';
-  position: absolute;
-  bottom: -11px; right: -9px;
-  font-size: 17px;
-  z-index: 3;
-  pointer-events: none;
+  display: none !important;
 }
 
 /* Grid cells — maximum flat, NO border (saves 64 GPU border paints per frame) */

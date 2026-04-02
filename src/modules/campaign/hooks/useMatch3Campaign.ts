@@ -154,6 +154,8 @@ export function useMatch3Campaign(
   const floatingTextId = useRef(0);
   const [chainLightnings, setChainLightnings] = useState<ChainLightningData[]>([]);
   const chainLightningId = useRef(0);
+  const [landedGems, setLandedGems] = useState<Set<number>>(new Set());
+  const [showDimensionShatter, setShowDimensionShatter] = useState(false);
   const fightStartTime = useRef(Date.now());
   const maxComboRef = useRef(0);
   const [stars, setStars] = useState(0);
@@ -213,9 +215,10 @@ export function useMatch3Campaign(
     setPopups(prev => [...prev, { id, text, color, x, y, expiresAt: Date.now() + 1400 }]);
   }, []);
 
-  const addBlastVfx = useCallback((type: 'row' | 'col', index: number) => {
+  const addBlastVfx = useCallback((type: 'row' | 'col' | 'row-wide' | 'col-wide' | 'bomb' | 'bomb-mega', index: number) => {
     const id = blastId.current++;
-    setBlastVfxs(prev => [...prev, { id, type, index, expiresAt: Date.now() + 400 }]);
+    const duration = type === 'bomb-mega' ? 750 : type === 'bomb' ? 600 : type.includes('wide') ? 650 : 500;
+    setBlastVfxs(prev => [...prev, { id, type, index, expiresAt: Date.now() + duration }]);
   }, []);
 
   const addParticleBurst = useCallback((index: number, color: string, type: 'burst' | 'fire' | 'heal' = 'burst') => {
@@ -578,7 +581,7 @@ export function useMatch3Campaign(
   }, [boss.ultCharge, result, addPopup, milestones, manaUltCost, playerStats]);
 
   // ═══ Wire: processMatches ═══
-  const processMatches = useCallback((currentGrid: Gem[], currentCombo: number, swapPair?: [number, number], cascadeDepth: number = 0) => {
+  const processMatches = useCallback((currentGrid: Gem[], currentCombo: number, swapPair?: [number, number], cascadeDepth: number = 0, isPostTransform: boolean = false) => {
     processCampaignMatchesImpl({
       setBoss, setMatchedCells, setCombo, setShowCombo, comboRef, maxComboRef,
       setAnimating, setGrid, setTotalDmgDealt, setCombatStatsTracker,
@@ -592,9 +595,14 @@ export function useMatch3Campaign(
       addParticleBurst,
       addFloatingText,
       addChainLightning,
+      setLandedGems,
+      addDimensionShatter: () => {
+        setShowDimensionShatter(true);
+        setTimeout(() => setShowDimensionShatter(false), 2000);
+      }
     }, currentGrid, currentCombo,
-      (grid, combo, depth) => processMatches(grid, combo, undefined, depth),
-      swapPair, cascadeDepth);
+      (grid, combo, swap, depth, isPost) => processMatches(grid, combo, swap, depth, isPost),
+      swapPair, cascadeDepth, isPostTransform);
   }, [addPopup, dmgPerGem, hpHealPerGem, shieldGainPerGem, manaRegen, milestones, addCombatNotif, addBlastVfx, addParticleBurst, addFloatingText, addChainLightning]);
 
   const handleTap = useCallback((idx: number) => {
@@ -662,5 +670,7 @@ export function useMatch3Campaign(
     particleBursts,
     floatingTexts,
     chainLightnings,
+    landedGems,
+    showDimensionShatter,
   };
 }

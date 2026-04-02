@@ -5,7 +5,7 @@
 
 import type { Dispatch, SetStateAction, MutableRefObject } from 'react';
 import type { GemType, Gem } from '@/shared/match3/board.utils';
-import { findMatches, findMatchGroups, applyGravity, collectTriggeredCells } from '@/shared/match3/board.utils';
+import { findMatches, findMatchGroups, applyGravity, collectTriggeredCells, isSpecialCombo, getSpecialComboCells } from '@/shared/match3/board.utils';
 import { getComboInfo, getComboTier, bossDEFReduction, ANIM_TIMING } from '@/shared/match3/combat.config';
 import type { BossState, CombatStats, CombatNotifType, ActiveDebuff, ActiveBossBuff, EggState } from '@/shared/match3/combat.types';
 import type { ActiveMilestones } from '@/shared/utils/combat-formulas';
@@ -45,19 +45,22 @@ export interface CampaignProcessorDeps {
   setSpawningGems?: Dispatch<SetStateAction<Set<number>>>;
   setScreenShake?: Dispatch<SetStateAction<boolean>>;
   mountedRef: MutableRefObject<boolean>;
-  addBlastVfx?: (type: 'row' | 'col', index: number) => void;
+  addBlastVfx?: (type: 'row' | 'col' | 'row-wide' | 'col-wide' | 'bomb' | 'bomb-mega', index: number) => void;
   addParticleBurst?: (index: number, color: string, type?: 'burst' | 'fire' | 'heal') => void;
   addFloatingText?: (text: string, x: number, y: number, color: string) => void;
   addChainLightning?: (path: number[], color?: string) => void;
+  setLandedGems?: Dispatch<SetStateAction<Set<number>>>;
+  addDimensionShatter?: () => void;
 }
 
 export function processCampaignMatchesImpl(
   deps: CampaignProcessorDeps,
   currentGrid: Gem[],
   currentCombo: number,
-  recurse: (grid: Gem[], combo: number, cascadeDepth: number) => void,
+  recurse: (grid: Gem[], combo: number, swapPair: [number, number] | undefined, cascadeDepth: number, isPostTransform?: boolean) => void,
   swapPair?: [number, number],
   cascadeDepth: number = 0,
+  isPostTransform: boolean = false,
 ): void {
   const {
     setBoss, setMatchedCells, setCombo, setShowCombo, comboRef, maxComboRef,
@@ -74,9 +77,43 @@ export function processCampaignMatchesImpl(
     return;
   }
 
-  // Use basic findMatches for quick empty check
+  // Detect special combo swaps
+  let isSpecialComboFlag = false;
+  let specialComboTriggered = new Set<number>();
+
+  if (swapPair && isSpecialCombo(currentGrid, swapPair[0], swapPair[1])) {
+    isSpecialComboFlag = true;
+    const cells = getSpecialComboCells(currentGrid, swapPair[0], swapPair[1]);
+    cells.forEach(c => specialComboTriggered.add(c));
+  }
+
+  // Pre-compute special combo VFX type for later
+  let specialComboVfxType: 'row-wide' | 'col-wide' | 'cross' | null = null;
+  let specialComboVfxCenter = -1;
+  if (isSpecialComboFlag && swapPair && deps.addBlastVfx) {
+    const [pa, pb] = swapPair;
+    const spA = currentGrid[pa]?.special;
+    const spB = currentGrid[pb]?.special;
+    const isStripedA = spA === 'striped_h' || spA === 'striped_v';
+    const isStripedB = spB === 'striped_h' || spB === 'striped_v';
+    if (isStripedA && spB === 'bomb') {
+      specialComboVfxType = spA === 'striped_h' ? 'row-wide' : 'col-wide';
+      specialComboVfxCenter = pb;
+    } else if (isStripedB && spA === 'bomb') {
+      specialComboVfxType = spB === 'striped_h' ? 'row-wide' : 'col-wide';
+      specialComboVfxCenter = pb;
+    } else if (isStripedA && isStripedB) {
+      specialComboVfxType = 'cross';
+      specialComboVfxCenter = pb;
+    } else if (spA === 'rainbow' && spB === 'rainbow') {
+      if (deps.addDimensionShatter) deps.addDimensionShatter();
+      specialComboVfxCenter = pb;
+    }
+  }
+
+  // Use basic findMatches for quick empty check, unless it's a special combo
   const basicMatched = findMatches(currentGrid);
-  if (basicMatched.size === 0) {
+  if (basicMatched.size === 0 && !isSpecialComboFlag) {
     if (currentCombo > 1) setTimeout(() => { if (!deps.mountedRef.current) return; setShowCombo(false); }, 1500);
     else setShowCombo(false);
     comboRef.current = 0;
@@ -111,6 +148,9 @@ export function processCampaignMatchesImpl(
 
   // Collect all matched positions from groups
   const matchedPositions = new Set<number>();
+  if (isSpecialComboFlag) {
+    specialComboTriggered.forEach(p => matchedPositions.add(p));
+  }
   for (const g of groups) {
     for (const p of g.positions) matchedPositions.add(p);
 
@@ -121,17 +161,73 @@ export function processCampaignMatchesImpl(
   }
 
   // Compute swap context for rainbow targeting (clear swapped gem's type, not most common)
-  let swapContext: { pos: number; targetType: GemType } | undefined;
+  let swapContext: { pos: number; targetType: GemType; specialComboPair?: [number, number] } | undefined;
   if (swapPair) {
     const [posA, posB] = swapPair;
     if (currentGrid[posA]?.special === 'rainbow' && currentGrid[posB])
       swapContext = { pos: posA, targetType: currentGrid[posB].type };
     else if (currentGrid[posB]?.special === 'rainbow' && currentGrid[posA])
       swapContext = { pos: posB, targetType: currentGrid[posA].type };
+    
+    if (isSpecialComboFlag) {
+      if (!swapContext) swapContext = { pos: -1, targetType: 'atk', specialComboPair: [posA, posB] };
+      else swapContext.specialComboPair = [posA, posB];
+    }
   }
 
   // Collect triggered cells from special gems (chain reactions)
-  const allRemove = collectTriggeredCells(currentGrid, matchedPositions, swapContext);
+  // ── Advanced Rainbow Transform Logic ──
+  let gridForAnalysis = currentGrid;
+  const [pa, pb] = swapPair || [-1, -1];
+  const spA = pa !== -1 ? currentGrid[pa]?.special : null;
+  const spB = pb !== -1 ? currentGrid[pb]?.special : null;
+  
+  const isRainbowCombo = isSpecialComboFlag && (spA === 'rainbow' || spB === 'rainbow');
+  
+  if (isRainbowCombo && spA !== spB) {
+    // Rainbow + Special (Striped/Bomb) transformation
+    const rainbowPos = spA === 'rainbow' ? pa : pb;
+    const specialPos = spA === 'rainbow' ? pb : pa;
+    const specialGem = currentGrid[specialPos];
+    
+    if (specialGem && specialGem.special) {
+      const targetType = specialGem.type;
+      const transformTo = specialGem.special;
+      gridForAnalysis = currentGrid.map(g => {
+        if (g && g.type === targetType && !g.special) {
+          return { ...g, special: transformTo, isTransforming: true };
+        }
+        return g;
+      });
+
+      // Stage 1: Show the transformation icons first
+      if (!isPostTransform) {
+        setGrid(gridForAnalysis);
+        setAnimating(true);
+        // Play transformation sound
+        playSound('gem_match'); 
+        
+        setTimeout(() => {
+          if (!deps.mountedRef.current) return;
+          recurse(gridForAnalysis, currentCombo, swapPair, cascadeDepth, true);
+        }, 500);
+        return;
+      }
+
+      // Stage 2: (isPostTransform is true) -> Now trigger the mass explosions
+      // Sound: Rapid fire explosions
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => playSound('gem_match'), i * 80);
+      }
+    }
+  }
+
+  // Clear isTransforming flag for final logic
+  if (isPostTransform) {
+    gridForAnalysis = gridForAnalysis.map(g => g ? { ...g, isTransforming: false } : g);
+  }
+
+  const allRemove = collectTriggeredCells(gridForAnalysis, matchedPositions, swapContext);
 
   // Determine spawn positions (special gems to CREATE — excluded from removal)
   const spawnEntries: { pos: number; special: NonNullable<Gem['special']>; type: GemType }[] = [];
@@ -150,10 +246,11 @@ export function processCampaignMatchesImpl(
     if (g) {
       tally[g.type] = (tally[g.type] || 0) + 1;
 
-      // Trigger Candy Blast VFX if a striped gem explodes
-      if (deps.addBlastVfx) {
+      // Trigger Candy Blast VFX if a striped/bomb gem explodes (individual, not combo)
+      if (deps.addBlastVfx && !isSpecialComboFlag) {
         if (g.special === 'striped_h') deps.addBlastVfx('row', Math.floor(idx / 8));
         else if (g.special === 'striped_v') deps.addBlastVfx('col', idx % 8);
+        else if (g.special === 'bomb') deps.addBlastVfx('bomb', idx); // radial burst from center
       }
 
       // Particle Burst disabled — canvas rAF loop quá nặng trên mobile
@@ -166,6 +263,37 @@ export function processCampaignMatchesImpl(
   if (triggeredCount > 0) {
     addPopup(`+${triggeredCount} ${i18n.t('campaign.ui.triggered', { defaultValue: 'triggered!' })}`, '#e056fd');
     playSound('gem_match');
+  }
+
+  // Fire wide/cross VFX for special combos — AFTER tally to avoid duplicate blasts
+  if (isSpecialComboFlag && deps.addBlastVfx && specialComboVfxCenter >= 0) {
+    const { ROWS: R, COLS: C } = { ROWS: 8, COLS: 8 };
+    const centerRow = Math.floor(specialComboVfxCenter / C);
+    const centerCol = specialComboVfxCenter % C;
+
+    if (specialComboVfxType === 'row-wide') {
+      // 3 consecutive rows
+      for (let r = centerRow - 1; r <= centerRow + 1; r++) {
+        if (r >= 0 && r < R) deps.addBlastVfx('row-wide', r);
+      }
+    } else if (specialComboVfxType === 'col-wide') {
+      // 3 consecutive cols
+      for (let c = centerCol - 1; c <= centerCol + 1; c++) {
+        if (c >= 0 && c < C) deps.addBlastVfx('col-wide', c);
+      }
+    } else if (specialComboVfxType === 'cross') {
+      // Full row + full col
+      deps.addBlastVfx('row', centerRow);
+      deps.addBlastVfx('col', centerCol);
+    }
+  }
+
+  // Bomb+Bomb combo: radial mega burst
+  if (isSpecialComboFlag && swapPair && deps.addBlastVfx) {
+    const [pa, pb] = swapPair;
+    if (currentGrid[pa]?.special === 'bomb' && currentGrid[pb]?.special === 'bomb') {
+      deps.addBlastVfx('bomb-mega', pb);
+    }
   }
 
   // Show all removed cells as matched (for animation)
@@ -338,6 +466,20 @@ export function processCampaignMatchesImpl(
     }) as (Gem | null)[];
 
     const fallen = applyGravity(newGrid as Gem[]);
+
+    // ── Smooth Gravity: identify gems that moved for landing bounce ──
+    if (deps.setLandedGems) {
+      const movedIds = new Set<number>();
+      for (let i = 0; i < fallen.length; i++) {
+        if (fallen[i] && (allRemove.has(i) || currentGrid[i]?.id !== fallen[i]?.id)) {
+          movedIds.add(fallen[i].id);
+        }
+      }
+      deps.setLandedGems(movedIds);
+      // Clear after bounce duration
+      setTimeout(() => { if (deps.mountedRef.current) deps.setLandedGems!(new Set()); }, 300);
+    }
+
     setGrid(fallen);
     setMatchedCells(new Set());
 
@@ -361,6 +503,6 @@ export function processCampaignMatchesImpl(
     // Dynamic cascade acceleration: each step gets 10% faster (floor 150ms)
     const cascadeDelay = Math.max(ANIM_TIMING.CASCADE_MIN_MS,
       Math.round(ANIM_TIMING.CASCADE_BASE_MS * Math.pow(ANIM_TIMING.CASCADE_DECAY, cascadeDepth)));
-    setTimeout(() => { if (!deps.mountedRef.current) return; recurse(fallen, newCombo, cascadeDepth + 1); }, cascadeDelay);
+    setTimeout(() => { if (!deps.mountedRef.current) return; recurse(fallen, newCombo, undefined, cascadeDepth + 1, false); }, cascadeDelay);
   }, ANIM_TIMING.MATCH_RESOLVE_MS);
 }

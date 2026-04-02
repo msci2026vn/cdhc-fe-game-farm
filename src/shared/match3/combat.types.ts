@@ -14,7 +14,7 @@ export interface BossState {
 }
 
 export interface DamagePopup { id: number; text: string; color: string; x: number; y: number; expiresAt?: number; }
-export interface BlastVfx { id: number; type: 'row' | 'col'; index: number; expiresAt: number; }
+export interface BlastVfx { id: number; type: 'row' | 'col' | 'row-wide' | 'col-wide' | 'bomb' | 'bomb-mega'; index: number; expiresAt: number; }
 export interface BurstData { id: number; index: number; color: string; expiresAt: number; type: 'burst' | 'fire' | 'heal'; }
 export interface ChainLightningData { id: number; path: number[]; expiresAt: number; color?: string; }
 

@@ -5,7 +5,7 @@
 
 import type { Dispatch, SetStateAction, MutableRefObject } from 'react';
 import type { Gem } from '@/shared/match3/board.utils';
-import { areAdjacent, findMatches, COLS, ROWS } from '@/shared/match3/board.utils';
+import { areAdjacent, findMatches, isSpecialCombo, COLS, ROWS } from '@/shared/match3/board.utils';
 import type { FightResult } from '@/shared/match3/combat.types';
 import { playSound } from '@/shared/audio';
 
@@ -44,7 +44,9 @@ export function handleCampaignTapImpl(deps: CampaignInputDeps, idx: number): voi
   [newGrid[selected], newGrid[idx]] = [newGrid[idx], newGrid[selected]];
 
   const matched = findMatches(newGrid);
-  if (matched.size === 0) {
+  const isSpecialSwap = isSpecialCombo(grid, selected, idx);
+
+  if (matched.size === 0 && !isSpecialSwap) {
     setGrid(newGrid);
     setTimeout(() => {
       playSound('gem_no_match');
@@ -92,7 +94,9 @@ export function handleCampaignSwipeImpl(
   [newGrid[idx], newGrid[targetIdx]] = [newGrid[targetIdx], newGrid[idx]];
 
   const matched = findMatches(newGrid);
-  if (matched.size === 0) {
+  const isSpecialSwap = isSpecialCombo(grid, idx, targetIdx);
+
+  if (matched.size === 0 && !isSpecialSwap) {
     setGrid(newGrid);
     setTimeout(() => {
       playSound('gem_no_match');

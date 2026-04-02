@@ -125,12 +125,12 @@ export const BOARD_8X8_BOSS_HP_MULT = 1.25;
 
 // Animation timing — centralised constants for match3 cascade loop
 export const ANIM_TIMING = {
-  MATCH_RESOLVE_MS: 350,    // time to show matched cells before removing
-  CASCADE_BASE_MS: 300,     // base delay between cascade steps
+  MATCH_RESOLVE_MS: 240,    // time to show matched cells before removing
+  CASCADE_BASE_MS: 140,     // base delay between cascade steps
   CASCADE_DECAY: 0.90,      // each step 10% faster
-  CASCADE_MIN_MS: 150,      // floor delay
+  CASCADE_MIN_MS: 100,      // floor delay
   MAX_CASCADE: 50,          // safety cap to prevent infinite loops
-  SPAWN_ANIM_MS: 400,       // spawn animation duration for special gems
-  SHAKE_BOMB_MS: 350,       // screen shake duration for bomb trigger
-  SHAKE_RAINBOW_MS: 500,    // screen shake duration for rainbow trigger
+  SPAWN_ANIM_MS: 280,       // spawn animation duration for special gems
+  SHAKE_BOMB_MS: 500,       // screen shake duration for bomb trigger
+  SHAKE_RAINBOW_MS: 700,    // screen shake duration for rainbow trigger
 } as const;
