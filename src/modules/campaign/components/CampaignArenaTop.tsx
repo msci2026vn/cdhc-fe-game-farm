@@ -129,6 +129,7 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                     phase={currentPhase}
                     totalPhases={totalPhases}
                     healPerTurn={activeBossStats.healPercent}
+                    showName={false}
                 />
 
                 {/* Boss stats badges */}

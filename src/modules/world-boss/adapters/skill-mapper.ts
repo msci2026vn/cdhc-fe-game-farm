@@ -33,6 +33,7 @@ function triggerToCooldown(trigger: string): number {
  * Returns null for types handled natively by boss AI loop (single_hit, multi_strike, aoe_blast)
  */
 function mapSkill(skill: WorldBossSkill): CampaignBossSkill | null {
+  if (!skill || !skill.type) return null;
   const cooldown = triggerToCooldown(skill.trigger);
 
   switch (skill.type) {

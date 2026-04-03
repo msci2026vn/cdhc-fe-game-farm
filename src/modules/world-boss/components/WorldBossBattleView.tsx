@@ -356,6 +356,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
             phase={currentPhase}
             totalPhases={totalPhases}
             healPerTurn={activeBossStats.healPercent}
+            centerName={true}
           />
           <BossBuffsBadges activeBossBuffs={activeBossBuffs} />
         </div>

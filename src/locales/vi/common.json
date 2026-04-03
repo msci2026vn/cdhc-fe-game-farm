@@ -1050,7 +1050,9 @@
     },
     "campaign": {
         "ui": {
-            "hits": "Nhịp x{{count}}"
+            "hits": "Nhịp x{{count}}",
+            "multi_hit": "Đòn {{current}}/{{total}}!",
+            "boss_attacks": "Boss tấn công!"
         },
         "archetypes": {
             "glass_cannon": {

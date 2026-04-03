@@ -14,6 +14,8 @@ interface BossHPBarProps {
   phase?: number;
   totalPhases?: number;
   healPerTurn?: number;
+  showName?: boolean;
+  centerName?: boolean;
 }
 
 function hpGradient(pct: number): string {
@@ -33,6 +35,8 @@ export default function BossHPBar({
   archetype, archetypeIcon,
   phase, totalPhases,
   healPerTurn,
+  showName = true,
+  centerName = false
 }: BossHPBarProps) {
   const pct = maxHp > 0 ? Math.max(0, Math.min(100, Math.round((hp / maxHp) * 100))) : 0;
   const hasPhases = totalPhases && totalPhases > 1;
@@ -55,27 +59,28 @@ export default function BossHPBar({
   return (
     <div className="z-10 mb-0.5 w-full">
       {/* Boss name row — compact */}
-      <div className="flex items-center justify-between mb-0.5 px-1">
-        <span className="font-heading font-black text-[13px] text-white tracking-wider drop-shadow-md"
-          style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,107,107,0.6)' }}>
-          {emoji} {name}
-        </span>
-        <div className="flex items-center gap-1 flex-shrink-0">
-
-          {hasPhases && (
-            <span className="text-[8px] font-bold px-1 py-0.5 rounded"
-              style={{ background: 'rgba(108,92,231,0.2)', color: '#a29bfe' }}>
-              P{phase}/{totalPhases}
-            </span>
-          )}
-          {healPerTurn !== undefined && healPerTurn > 0 && (
-            <span className="text-[8px] font-bold px-1 py-0.5 rounded"
-              style={{ background: 'rgba(85,239,196,0.15)', color: '#55efc4' }}>
-              +{healPerTurn}%
-            </span>
-          )}
+      {showName && (
+        <div className={`flex items-center ${centerName ? 'justify-center gap-1.5' : 'justify-between'} mb-0.5 px-1`}>
+          <span className="font-heading font-black text-[13px] text-white tracking-wider drop-shadow-md"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,107,107,0.6)' }}>
+            {emoji} {name}
+          </span>
+          <div className={`flex items-center gap-1 flex-shrink-0 ${centerName ? 'absolute right-1 top-[-2px]' : ''}`}>
+            {hasPhases && (
+              <span className="text-[8px] font-bold px-1 py-0.5 rounded"
+                style={{ background: 'rgba(108,92,231,0.2)', color: '#a29bfe' }}>
+                P{phase}/{totalPhases}
+              </span>
+            )}
+            {healPerTurn !== undefined && healPerTurn > 0 && (
+              <span className="text-[8px] font-bold px-1 py-0.5 rounded"
+                style={{ background: 'rgba(85,239,196,0.15)', color: '#55efc4' }}>
+                +{healPerTurn}%
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* HP bar Container */}
       <div className="w-full h-4 rounded-full overflow-hidden relative bg-black/40 border border-white/10 shadow-inner">

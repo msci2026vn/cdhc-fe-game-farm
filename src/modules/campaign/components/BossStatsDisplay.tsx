@@ -15,7 +15,7 @@ export function BossStatsBadges({ def, freq, enrageLevel }: StatsProps) {
   const { t } = useTranslation();
   if (def <= 0 && freq <= 1 && enrageLevel <= 0) return null;
   return (
-    <div className="z-10 flex justify-center gap-1.5 mt-1 flex-wrap">
+    <div className="z-10 flex justify-center gap-1.5 mt-[-14px] flex-wrap">
       {def > 0 && (
         <div className="relative px-4 py-2 h-[36px] min-w-[90px] flex items-center justify-center">
           <img src="/assets/battle/frame_orange_leaves.png" alt="Frame" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
@@ -51,7 +51,7 @@ interface BossBuffsProps {
 export function BossBuffsBadges({ activeBossBuffs }: BossBuffsProps) {
   if (activeBossBuffs.length === 0) return null;
   return (
-    <div className="z-10 flex justify-center gap-1.5 mt-1 flex-wrap">
+    <div className="z-10 flex justify-center gap-1.5 mt-[-12px] flex-wrap">
       {activeBossBuffs.map((b, i) => (
         <div key={`${b.type}-${i}`} className="relative px-5 py-2 h-[36px] min-w-[105px] flex items-center justify-center animate-pulse">
           <img src="/assets/battle/frame_green_leaves.png" alt="Frame" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
