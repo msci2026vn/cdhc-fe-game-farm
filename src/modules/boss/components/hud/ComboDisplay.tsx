@@ -55,7 +55,7 @@ export default function ComboDisplay({ combo, show, label, mult, color }: ComboD
   // For low combos (2) without a tier label — simple display
   if (!label) {
     return (
-      <div className="absolute top-[150px] left-1/2 -translate-x-1/2 animate-combo-burst pointer-events-none z-[70]">
+      <div className="relative animate-combo-burst pointer-events-none z-[70]">
         <div className="relative px-4 py-1.5 rounded-full font-heading font-bold text-white text-center"
           style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 0 15px rgba(108,92,231,0.5)' }}>
           <span className="text-base">x{combo}</span>
@@ -69,7 +69,7 @@ export default function ComboDisplay({ combo, show, label, mult, color }: ComboD
   const bonusPct = mult > 1 ? `+${Math.round((mult - 1) * 100)}%` : '';
 
   return (
-    <div className={`absolute top-[150px] left-1/2 -translate-x-1/2 pointer-events-none z-[70] ${tierAnim}`}
+    <div className={`relative pointer-events-none z-[70] ${tierAnim}`}
       key={`combo-${combo}-${label}`}>
       {/* Expanding ring behind badge (high tiers) */}
       {isHighTier && (

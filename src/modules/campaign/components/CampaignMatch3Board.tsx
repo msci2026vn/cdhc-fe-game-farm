@@ -41,6 +41,7 @@ interface Props {
     lockedGems: Set<number>;
     highlightedGem: number | null;
     isStunned: boolean;
+    isDarkness?: boolean;
     animating: boolean;
     handlePointerDown: (index: number, e: any) => void;
     handlePointerMove: (e: any) => void;
@@ -61,7 +62,7 @@ interface Props {
 
 const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
     grid, selected, matchedCells, spawningGems, lockedGems, highlightedGem,
-    isStunned, animating, handlePointerDown, handlePointerMove, handlePointerUp,
+    isStunned, isDarkness = false, animating, handlePointerDown, handlePointerMove, handlePointerUp,
     combo, showCombo, otHiemActive, romBocActive, GEM_META,
     blastVfxs = [], hintedGems = [], particleBursts = [], floatingTexts = [], chainLightnings = [],
     landedGems = new Set(),
@@ -93,7 +94,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                 {showCombo && combo >= 3 && (
                     <div key={`flash-${combo}`} className={`combo-flash-overlay z-20 combo-flash-${combo >= 20 ? 6 : combo >= 8 ? 5 : combo >= 5 ? 4 : combo >= 3 ? 3 : 2}`} />
                 )}
-                <div className={`grid grid-cols-8 grid-rows-8 gap-[1px] w-full aspect-square rounded-lg relative z-10 ${isStunned ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''}`}
+                <div className={`grid grid-cols-8 grid-rows-8 gap-[1px] w-full aspect-square rounded-lg relative z-10 ${(isStunned || isDarkness) ? 'pointer-events-none' : ''} ${combo >= 5 && showCombo ? 'grid-combo-shake' : ''}`}
                     onPointerMove={handlePointerMove}
                     style={otHiemActive ? GRID_STYLES.otHiem : romBocActive ? GRID_STYLES.romBoc : GRID_STYLES.normal}>
                     {grid.map((gem, i) => {
@@ -168,16 +169,46 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
                     })}
                 </div>
 
-                {/* Stun overlay */}
+                {/* Stun overlay — covers only the gem board area */}
                 {isStunned && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg"
-                        style={{ background: 'rgba(0,0,0,0.6)' }}>
+                    <div className="absolute z-[30] flex items-center justify-center rounded-lg"
+                        style={{ 
+                            top: 32, bottom: 14, left: 16, right: 14,
+                            background: 'rgba(0,0,0,0.85)',
+                            backdropFilter: 'blur(2px)'
+                        }}>
                         <div className="text-center animate-scale-in">
-                            <span className="text-5xl block">💫</span>
-                            <span className="text-white font-heading font-bold text-xl block mt-2"
-                                style={{ textShadow: '0 0 20px rgba(253,203,110,0.8)' }}>
-                                {t('campaign.combat.stunned')}
-                            </span>
+                            <img 
+                                src="/assets/battle/stunning_action.png" 
+                                alt="Stunned" 
+                                className="w-[180px] object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" 
+                            />
+                            <div className="text-white font-heading font-black text-xl mt-[-10px] drop-shadow-lg uppercase tracking-wider"
+                                style={{ textShadow: '0 0 10px rgba(255,255,255,0.5)' }}>
+                                BẠN ĐÃ BỊ CHOÁNG
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Darkness overlay — covers only the gem board area */}
+                {isDarkness && (
+                    <div className="absolute z-[30] flex items-center justify-center rounded-lg"
+                        style={{ 
+                            top: 32, bottom: 14, left: 16, right: 14,
+                            background: 'rgba(0,0,0,0.95)',
+                            backdropFilter: 'blur(4px)'
+                        }}>
+                        <div className="text-center animate-pulse">
+                            <img 
+                                src="/assets/battle/bewildered_actions.png" 
+                                alt="Darkness" 
+                                className="w-[180px] object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] mb-2" 
+                            />
+                            <div className="text-white text-base font-heading font-black uppercase tracking-[0.2em]"
+                                style={{ textShadow: '0 0 12px rgba(255,255,255,0.4)' }}>
+                                🌑 Màn Đêm
+                            </div>
                         </div>
                     </div>
                 )}

@@ -1049,6 +1049,9 @@
         }
     },
     "campaign": {
+        "ui": {
+            "hits": "Nhịp x{{count}}"
+        },
         "archetypes": {
             "glass_cannon": {
                 "label": "Glass Cannon",

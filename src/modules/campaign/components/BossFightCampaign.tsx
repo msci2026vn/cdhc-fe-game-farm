@@ -38,7 +38,7 @@ import { useBattleEnd } from './hooks/useBattleEnd';
 // Local extracted components
 import DeathOverlay from './DeathOverlay';
 import { SkillWarningGlow, PhaseTransitionOverlay, DamageVignette, EnrageAlertBanner } from './SkillWarningOverlay';
-import { BossRageOverlay, PlayerHPBar, ManaBar } from '@/modules/boss/components/hud';
+import { BossRageOverlay, PlayerHPBar, ManaBar, ComboDisplay } from '@/modules/boss/components/hud';
 
 // Refactored sub-components
 import CampaignBattleResultHandler from './CampaignBattleResultHandler';
@@ -367,8 +367,8 @@ export default function BossFightCampaign({
       {/* Phase transition overlay */}
       <PhaseTransitionOverlay phase={showPhaseTransition} />
 
-      {/* Combat notifications — memoized slice to avoid new array every render */}
-      <CombatNotifList notifs={combatNotifs} />
+      {/* Combat notifications moved to shared absolute position block above */}
+
 
       {/* Red vignette flash when player takes damage */}
       <DamageVignette screenShake={screenShake} ultActive={ultActive} />
@@ -390,6 +390,20 @@ export default function BossFightCampaign({
         manaDodgeCost={manaDodgeCost} manaUltCost={manaUltCost}
         autoPlay={autoPlay}
       />
+
+      {/* Combo Display & Combat Notifications — Fixed shared position above board */}
+      <div className="absolute bottom-[72%] left-1/2 -translate-x-1/2 z-[60] pointer-events-none w-full flex flex-col items-center">
+        <ComboDisplay
+          combo={combo}
+          show={showCombo}
+          label={comboInfo.label}
+          mult={comboInfo.mult}
+          color={comboInfo.color}
+        />
+        <div className="relative w-full flex justify-center mt-[-10px]">
+           <CombatNotifList notifs={combatNotifs} />
+        </div>
+      </div>
 
       {/* Player Stats Block (HP, Shield, Mana) -> Positioned near the board */}
       <div className="absolute bottom-[69%] left-3 z-[50] w-[100px] pointer-events-auto flex flex-col gap-1.5">
@@ -455,15 +469,14 @@ export default function BossFightCampaign({
 // Extracted to avoid .slice(-3) creating new array on every parent render
 const CombatNotifList = React.memo(function CombatNotifList({ notifs }: { notifs: any[] }) {
   if (notifs.length === 0) return null;
-  const visible = notifs.length <= 3 ? notifs : notifs.slice(-3);
+  // Only show the most recent notification to avoid overlapping clutter in the fixed spot
+  const latest = notifs[notifs.length - 1];
   return (
-    <div className="absolute bottom-[65%] left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1.5 pointer-events-none w-full max-w-[220px]">
-      {visible.map((n: any) => (
-        <div key={n.id} className="px-4 py-1.5 rounded-full text-[11px] font-black text-white animate-fade-in text-center whitespace-nowrap"
-          style={{ background: `${n.color}dd`, boxShadow: `0 0 12px ${n.color}80`, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
-          {n.text}
-        </div>
-      ))}
+    <div className="absolute inset-x-0 top-0 flex flex-col items-center pointer-events-none">
+      <div key={latest.id} className="px-4 py-1.5 rounded-full text-[11px] font-black text-white animate-combo-burst text-center whitespace-nowrap scale-90"
+        style={{ background: `${latest.color}dd`, boxShadow: `0 0 12px ${latest.color}80`, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+        {latest.text}
+      </div>
     </div>
   );
 });

@@ -53,9 +53,13 @@ export default function BossHPBar({
   }, [pct]);
 
   return (
-    <div className="z-10 mb-0.5">
+    <div className="z-10 mb-0.5 w-full">
       {/* Boss name row — compact */}
-      <div className="flex items-center justify-end mb-0.5">
+      <div className="flex items-center justify-between mb-0.5 px-1">
+        <span className="font-heading font-black text-[13px] text-white tracking-wider drop-shadow-md"
+          style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,107,107,0.6)' }}>
+          {emoji} {name}
+        </span>
         <div className="flex items-center gap-1 flex-shrink-0">
 
           {hasPhases && (

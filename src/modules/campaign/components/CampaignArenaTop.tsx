@@ -158,13 +158,6 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
 
             <DamagePopupLayer popups={popups} />
 
-            <ComboDisplay
-                combo={combo}
-                show={showCombo}
-                label={comboInfo.label}
-                mult={comboInfo.mult}
-                color={comboInfo.color}
-            />
         </div>
     );
 });

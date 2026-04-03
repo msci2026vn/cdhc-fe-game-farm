@@ -269,9 +269,11 @@ export default function CampaignPlayerHUD({
                             className="w-[360px] object-contain" 
                         />
                         <div className="absolute inset-x-0 bottom-[18%] flex items-center justify-center px-4">
-                            <span className="text-white font-bold text-xs uppercase tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                {skillAlert.text}
-                            </span>
+                            {!skillAlert.text.includes('Choáng') && !skillAlert.text.includes('Stun') && (
+                                <span className="text-white font-bold text-xs uppercase tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                    {skillAlert.text}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
