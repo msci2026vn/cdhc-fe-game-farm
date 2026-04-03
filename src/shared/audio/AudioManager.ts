@@ -167,7 +167,6 @@ export class AudioManager {
     if (this.masterGain) {
       this.masterGain.gain.value = m ? 0 : this.settings.masterVolume;
     }
-    if (m) this.stopBgm();
     saveSettings(this.settings);
   }
 
@@ -422,8 +421,6 @@ export class AudioManager {
 
   /** Play a looping ambient sound (e.g., rain, birds). Returns stop function. */
   playAmbientLoop(name: SoundName, volume = 0.15): () => void {
-    if (this.settings.muted) return () => {};
-
     const entry = SOUND_REGISTRY[name];
     if (!entry) return () => {};
 
@@ -501,7 +498,6 @@ export class AudioManager {
   // ═══════════════════════════════════════════════════════════
 
   startBgm(preset: BgmPreset = 'campaign') {
-    if (this.settings.muted) return;
     if (this.bgmPlaying && this.currentBgm === preset) return;
 
     const ctx = this.ensureContext();

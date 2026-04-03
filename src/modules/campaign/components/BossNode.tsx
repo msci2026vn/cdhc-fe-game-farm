@@ -51,11 +51,6 @@ export default function BossNode({ boss, state, globalBossNumber, onClick }: Bos
 
       {/* Boss main node */}
       <div className="relative">
-        {/* Ping for current */}
-        {isCurrent && (
-          <div className="absolute inset-0 w-[150px] h-[150px] rounded-full bg-red-400/30 campaign-ping" />
-        )}
-
         <div className={cn(
           'w-[150px] h-[150px] flex items-center justify-center',
         )}>

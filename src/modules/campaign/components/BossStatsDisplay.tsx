@@ -17,26 +17,28 @@ export function BossStatsBadges({ def, freq, enrageLevel }: StatsProps) {
   return (
     <div className="z-10 flex justify-center gap-1.5 mt-1 flex-wrap">
       {def > 0 && (
-        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-          style={{ background: 'rgba(116,185,255,0.2)', color: '#74b9ff', border: '1px solid rgba(116,185,255,0.3)' }}>
-          🛡️ DEF {def}
-        </span>
+        <div className="relative px-4 py-2 h-[36px] min-w-[90px] flex items-center justify-center">
+          <img src="/assets/battle/frame_orange_leaves.png" alt="Frame" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
+          <span className="relative z-10 text-[10px] font-black uppercase text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            🛡️ DEF {def}
+          </span>
+        </div>
       )}
       {freq > 1 && (
-        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-          style={{ background: 'rgba(253,121,168,0.2)', color: '#fd79a8', border: '1px solid rgba(253,121,168,0.3)' }}>
-          ⚡ {t('campaign.ui.hits', { count: freq })}
-        </span>
+        <div className="relative px-4 py-2 h-[36px] min-w-[90px] flex items-center justify-center">
+          <img src="/assets/battle/frame_orange_leaves.png" alt="Frame" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
+          <span className="relative z-10 text-[10px] font-black uppercase text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            ⚡ {t('campaign.ui.hits', { count: freq })}
+          </span>
+        </div>
       )}
       {enrageLevel > 0 && (
-        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${enrageLevel >= 3 ? 'animate-pulse' : ''}`}
-          style={{
-            background: enrageLevel >= 3 ? 'rgba(231,76,60,0.3)' : enrageLevel >= 2 ? 'rgba(243,156,18,0.2)' : 'rgba(253,203,110,0.2)',
-            color: enrageLevel >= 3 ? '#ff6b6b' : enrageLevel >= 2 ? '#f39c12' : '#fdcb6e',
-            border: `1px solid ${enrageLevel >= 3 ? 'rgba(231,76,60,0.4)' : enrageLevel >= 2 ? 'rgba(243,156,18,0.3)' : 'rgba(253,203,110,0.3)'}`,
-          }}>
-          {enrageLevel >= 3 ? '💀' : enrageLevel >= 2 ? '🔥' : '⚡'} +{enrageLevel * 10}% ATK
-        </span>
+        <div className={`relative px-5 py-2 h-[36px] min-w-[110px] flex items-center justify-center ${enrageLevel >= 3 ? 'animate-pulse' : ''}`}>
+          <img src="/assets/battle/frame_yellow_leaves.png" alt="Frame" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
+          <span className="relative z-10 text-[10px] font-black uppercase text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            {enrageLevel >= 3 ? '💀' : enrageLevel >= 2 ? '🔥' : '⚡'} +{enrageLevel * 10}% ATK
+          </span>
+        </div>
       )}
     </div>
   );
@@ -51,14 +53,12 @@ export function BossBuffsBadges({ activeBossBuffs }: BossBuffsProps) {
   return (
     <div className="z-10 flex justify-center gap-1.5 mt-1 flex-wrap">
       {activeBossBuffs.map((b, i) => (
-        <span key={`${b.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
-          style={{
-            background: b.type === 'shield' ? 'rgba(116,185,255,0.3)' : 'rgba(108,92,231,0.3)',
-            color: b.type === 'shield' ? '#74b9ff' : '#a29bfe',
-            border: `1px solid ${b.type === 'shield' ? 'rgba(116,185,255,0.4)' : 'rgba(108,92,231,0.4)'}`,
-          }}>
-          {b.icon} {b.label} {b.remainingSec}s
-        </span>
+        <div key={`${b.type}-${i}`} className="relative px-5 py-2 h-[36px] min-w-[105px] flex items-center justify-center animate-pulse">
+          <img src="/assets/battle/frame_green_leaves.png" alt="Frame" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
+          <span className="relative z-10 text-[10px] font-black uppercase text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            {b.icon} {b.label} {b.remainingSec}s
+          </span>
+        </div>
       ))}
     </div>
   );

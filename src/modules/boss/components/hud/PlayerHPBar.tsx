@@ -50,57 +50,93 @@ export default function PlayerHPBar({ hp, maxHp, shield, maxShield, def, isHit }
   }, [hpPct]);
 
   return (
-    <div className={`flex flex-col gap-1 mb-0.5 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''} ${isHealing ? 'animate-heal-pulse' : ''}`}>
+    <div className={`flex flex-col gap-3 transition-all duration-200 ${isHit ? 'hp-bar-hit' : ''} ${isHealing ? 'animate-heal-pulse' : ''}`}>
       {/* HP */}
-      <div className="flex-1 min-w-0">
-        <div className={`flex justify-between text-[8px] font-bold mb-px`}>
-          <span style={{ color: '#55efc4' }}>❤️ HP</span>
-          <span style={{ color: isFlashingDamage ? '#ff6b6b' : '#55efc4' }}>{hp.toLocaleString()}/{maxHp.toLocaleString()}</span>
-        </div>
-        <div className={`h-2.5 rounded-md overflow-hidden relative ${isCritical ? 'hp-bar-critical' : ''} ${isFlashingDamage ? 'animate-hp-damage-flash' : ''}`}
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="flex-1 min-w-0 relative">
+        <span className="absolute -top-2.5 left-1 text-[7px] font-black text-white/90 uppercase tracking-tighter" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.8)' }}>HP</span>
+        <div className={`h-[18px] w-full rounded-md relative ${isCritical ? 'hp-bar-critical' : ''} ${isFlashingDamage ? 'animate-hp-damage-flash' : ''} drop-shadow-md`}>
+          {/* Background slot (Tucked inside the frame) */}
+          <div className="absolute inset-[2.5px] bg-[#1a0f0a]/80 rounded-[2px]" />
 
-          {/* Ghost bar (damage drain effect — red, fades behind real HP) */}
-          <div className="absolute inset-y-0 left-0 w-full rounded-md hp-ghost-bar"
-            style={{
-              transform: `scaleX(${ghostHp / 100})`,
-              background: 'linear-gradient(90deg, #e74c3c, #ff6b6b)',
-              opacity: ghostHp > hpPct ? 0.6 : 0,
-            }} />
+          {/* Fill Track (handles 3px insets for ultra-compact scale) */}
+          <div className="absolute inset-y-[3.5px] left-[3.5px] right-[3.5px] z-[1]">
+            {/* Ghost bar */}
+            <div className="absolute inset-y-0 left-0 transition-all duration-500 bg-white/30 rounded-sm"
+              style={{ width: `${ghostHp}%`, opacity: ghostHp > hpPct ? 1 : 0 }} />
+            
+            {/* Real Fill */}
+            <div className="h-full transition-all duration-300 rounded-sm overflow-hidden"
+              style={{ 
+                width: `${hpPct}%`, 
+                background: 'linear-gradient(180deg, #ff4d4d, #b30000)',
+                boxShadow: isCritical ? '0 0 6px rgba(255,77,77,0.7)' : '0 0 3px rgba(255,0,0,0.2)',
+              }}>
+              <div className="w-full h-1/2 bg-white/20" />
+            </div>
+          </div>
 
-          {/* Real HP fill */}
-          <div className="h-full w-full rounded-md relative z-[1] hp-bar-fill"
-            style={{
-              transform: `scaleX(${hpPct / 100})`,
-              background: hpPct > 60
-                ? 'linear-gradient(90deg, #00b894, #55efc4)'
-                : hpPct > 30
-                  ? 'linear-gradient(90deg, #f39c12, #fdcb6e)'
-                  : 'linear-gradient(90deg, #e74c3c, #ff6b6b)',
-              boxShadow: isCritical ? '0 0 8px rgba(231,76,60,0.6)' : 'none',
-            }} />
+          {/* Frame Overlay */}
+          <img 
+            src="/assets/battle/frame_bar.png" 
+            alt="Frame" 
+            className="absolute inset-0 w-full h-full object-fill z-[3] pointer-events-none" 
+          />
 
-          {/* Glass shine */}
-          <div className="absolute inset-x-0 top-0 h-1/2 z-[2]"
-            style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2), transparent)' }} />
+          {/* Status Icon (Slightly larger for impact) */}
+          <img 
+            src="/assets/battle/icon_hp.png" 
+            alt="HP Icon" 
+            className="absolute left-[-6px] top-1/2 -translate-y-1/2 h-[22px] w-auto z-[5] drop-shadow-md pointer-events-none" 
+          />
+          
+          {/* HP Text Overlay (Compact) */}
+          <div className="absolute inset-0 flex items-center justify-center pl-2 z-[4] pointer-events-none">
+            <span className="text-[8px] font-black text-white tracking-tighter" style={{ textShadow: '1px 1px 1px rgba(0,0,0,1)' }}>
+              {hp}/{maxHp}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Shield */}
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between text-[8px] font-bold mb-px" style={{ color: '#74b9ff' }}>
-          <span>🛡️ DEF {def}</span>
-          <span>{shield}</span>
-        </div>
-        <div className="h-2.5 rounded-md overflow-hidden relative"
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="h-full w-full rounded-md hp-bar-fill"
-            style={{
-              transform: `scaleX(${shieldPct / 100})`,
-              background: 'linear-gradient(90deg, #0984e3, #74b9ff)',
-            }} />
-          <div className="absolute inset-x-0 top-0 h-1/2"
-            style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2), transparent)' }} />
+      <div className="flex-1 min-w-0 relative">
+        <span className="absolute -top-2.5 left-1 text-[7px] font-black text-white/90 uppercase tracking-tighter" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.8)' }}>DEF</span>
+        <div className="h-[18px] w-full rounded-md relative drop-shadow-md">
+          {/* Background slot (Tucked inside) */}
+          <div className="absolute inset-[2.5px] bg-[#1a0f0a]/80 rounded-[2px]" />
+
+          {/* Fill Track */}
+          <div className="absolute inset-y-[3.5px] left-[3.5px] right-[3.5px] z-[1]">
+            <div className="h-full transition-all duration-300 rounded-sm overflow-hidden"
+              style={{ 
+                width: `${shieldPct}%`, 
+                background: 'linear-gradient(180deg, #3399ff, #004d99)',
+                boxShadow: '0 0 4px rgba(51,153,255,0.3)',
+              }}>
+              <div className="w-full h-1/2 bg-white/20" />
+            </div>
+          </div>
+
+          {/* Frame Overlay */}
+          <img 
+            src="/assets/battle/frame_bar.png" 
+            alt="Def Frame" 
+            className="absolute inset-0 w-full h-full object-fill z-[3] pointer-events-none" 
+          />
+
+          {/* Status Icon */}
+          <img 
+            src="/assets/battle/icon_def.png" 
+            alt="DEF Icon" 
+            className="absolute left-[-6px] top-1/2 -translate-y-1/2 h-[22px] w-auto z-[5] drop-shadow-md pointer-events-none" 
+          />
+
+          {/* Def Text Overlay (Compact) */}
+          <div className="absolute inset-0 flex items-center justify-center pl-2 z-[4] pointer-events-none">
+            <span className="text-[8px] font-black text-white tracking-tighter" style={{ textShadow: '1px 1px 1px rgba(0,0,0,1)' }}>
+              {shield}
+            </span>
+          </div>
         </div>
       </div>
     </div>

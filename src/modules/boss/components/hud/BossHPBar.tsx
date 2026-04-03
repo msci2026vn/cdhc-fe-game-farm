@@ -73,45 +73,40 @@ export default function BossHPBar({
         </div>
       </div>
 
-      {/* HP bar */}
-      <div className="w-full h-3 rounded-md overflow-hidden relative"
-        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.08)' }}>
-
+      {/* HP bar Container */}
+      <div className="w-full h-4 rounded-full overflow-hidden relative bg-black/40 border border-white/10 shadow-inner">
+        
         {/* Ghost bar (damage drain) */}
-        <div className="absolute inset-y-0 left-0 rounded-md hp-ghost-bar"
+        <div className="absolute inset-y-0 left-0 rounded-full hp-ghost-bar transition-all duration-500"
           style={{
             width: `${ghostPct}%`,
-            background: 'rgba(255,255,255,0.25)',
+            background: 'rgba(255,255,255,0.2)',
             opacity: ghostPct > pct ? 1 : 0,
           }} />
 
         {/* Real fill */}
-        <div className="h-full rounded-md relative z-[1] hp-bar-fill"
+        <div className="h-full rounded-full relative z-[1] hp-bar-fill transition-all duration-300 ease-out"
           style={{
             width: `${pct}%`,
             background: hpGradient(pct),
             boxShadow: hpGlow(pct),
           }}>
-          {/* Glass shine */}
-          <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-md"
-            style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25), transparent)' }} />
+          {/* Subtle glass shine */}
+          <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
         </div>
 
         {/* Phase markers */}
         {hasPhases && Array.from({ length: totalPhases - 1 }).map((_, i) => {
           const markerPct = ((totalPhases - 1 - i) / totalPhases) * 100;
           return (
-            <div key={i} className="absolute top-0 bottom-0 w-0.5 z-[2]"
-              style={{
-                left: `${markerPct}%`,
-                background: pct <= markerPct ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)',
-              }} />
+            <div key={i} className="absolute top-0 bottom-0 w-0.5 z-[2] bg-white/20"
+              style={{ left: `${markerPct}%` }} />
           );
         })}
 
         {/* HP text */}
-        <span className="absolute inset-0 flex items-center justify-center font-heading text-[10px] font-bold text-white z-[3]"
-          style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+        <span className="absolute inset-0 flex items-center justify-center font-heading text-[11px] font-bold text-white z-[3] tracking-wider"
+          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
           {hp.toLocaleString()} / {maxHp.toLocaleString()}
         </span>
       </div>

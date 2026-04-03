@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import TurnCounter from './TurnCounter';
 import { SoundToggle, playSound } from '@/shared/audio';
 import { useTranslation } from 'react-i18next';
+import AutoPlayToggle from '@/shared/components/AutoPlayToggle';
 
 interface BattleTopBarProps {
   turn: number;
@@ -25,6 +26,14 @@ interface BattleTopBarProps {
   onPause?: () => void;
   /** Campaign only — called when retreat confirm closes (resumes combat) */
   onResume?: () => void;
+  /** Auto-play state for campaign */
+  autoPlay?: {
+    isActive: boolean;
+    toggle: () => void;
+    vipLevel: number;
+    dodgeFreeRemaining: number;
+    currentSituation?: string;
+  };
 }
 
 function formatTime(seconds: number): string {
@@ -37,7 +46,7 @@ export default function BattleTopBar({
   turn, maxTurns, level, atk, def,
   onRetreat, isCampaign,
   elapsedSeconds, enrageLevel,
-  onPause, onResume,
+  onPause, onResume, autoPlay,
 }: BattleTopBarProps) {
   const { t } = useTranslation();
   const [showRetreatConfirm, setShowRetreatConfirm] = useState(false);
@@ -78,20 +87,45 @@ export default function BattleTopBar({
   return (
     <>
       <div className="flex justify-between items-start z-10 relative pointer-events-none min-h-[30px] mb-1">
-        {/* Left spacer instead of Level */}
-        <div className="flex items-start mt-1 z-20 pointer-events-auto">
+        {/* Left: Sound Toggle (Top Left) */}
+        <div className="absolute top-[-38px] left-[-4px] z-[100] pointer-events-auto">
+          <SoundToggle size={40} />
         </div>
 
-        {/* Absolute Right: Timer, Sound */}
-        <div className="absolute top-[85px] right-0 flex items-center gap-1.5 z-20 pointer-events-auto">
+        {/* Absolute Right: AI Toggle + Timer */}
+        <div className="absolute top-[35px] right-0 flex flex-col items-end gap-2 z-20 pointer-events-auto">
+          {isCampaign && autoPlay && (
+            <div className="mr-0.5">
+              <AutoPlayToggle
+                isActive={autoPlay.isActive}
+                onToggle={autoPlay.toggle}
+                vipLevel={autoPlay.vipLevel}
+                dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
+                currentSituation={autoPlay.currentSituation}
+                compact
+              />
+            </div>
+          )}
+
           {isCampaign ? (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg shadow-sm" style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <span className="text-sm">⏱️</span>
-              <span className={`font-mono font-heading text-sm font-bold ${timerColor}`}>
-                {formatTime(elapsedSeconds ?? 0)}
-              </span>
-              <span className="text-white/20 text-xs mx-0.5">|</span>
-              <SoundToggle />
+            <div className="relative flex items-center h-[34px] min-w-[85px] px-2.5 z-20">
+              {/* Timer Frame Background */}
+              <img
+                src="/assets/battle/frame_time.png"
+                alt="Timer frame"
+                className="absolute inset-0 w-full h-full object-fill z-[-1] pointer-events-none"
+              />
+
+              <div className="flex items-center gap-1.5 w-full">
+                <img
+                  src="/assets/battle/icon_time.png"
+                  alt="Clock"
+                  className="w-4 h-4 object-contain brightness-110"
+                />
+                <span className={`font-mono font-heading text-sm font-bold min-w-[36px] ${timerColor}`}>
+                  {formatTime(elapsedSeconds ?? 0)}
+                </span>
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
@@ -101,12 +135,15 @@ export default function BattleTopBar({
           )}
         </div>
 
-        {/* Absolute Top Right: X Button */}
-        <div className="absolute -top-1 -right-2 z-[100] pointer-events-auto">
+        <div className="absolute top-[-40px] right-[-8px] z-[100] pointer-events-auto">
           <button onClick={handleRetreatClick}
-            className="text-white/60 text-2xl font-bold active:scale-95 p-1 rounded-lg hover:bg-white/10 hover:text-white transition-all flex items-center justify-center w-8 h-8"
+            className="relative active:scale-95 transition-transform flex items-center justify-center p-0 overflow-visible"
             title={isCampaign ? t('exit') : t('retreat')}>
-            {isCampaign ? '✕' : '🏃'}
+            <img
+              src="/assets/battle/btn_close.png"
+              alt="Close"
+              className="w-10 h-10 object-contain drop-shadow-md hover:brightness-110"
+            />
           </button>
         </div>
       </div>

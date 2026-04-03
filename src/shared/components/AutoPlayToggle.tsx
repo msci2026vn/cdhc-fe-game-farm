@@ -115,17 +115,10 @@ export default function AutoPlayToggle({
     return (
       <button
         onClick={onToggle}
-        className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95"
-        style={{
-          width: 52,
-          minHeight: 42,
-          background: cfg.bg,
-          border: `1.5px dashed ${cfg.border}60`,
-          padding: '4px 6px',
-        }}
+        className="flex-shrink-0 flex items-center justify-center transition-transform active:scale-95 grayscale brightness-75"
+        style={{ width: 42, height: 42 }}
       >
-        <span className="text-base" style={{ color: cfg.border }}>{cfg.icon}</span>
-        <span className="text-[9px] font-bold mt-0.5" style={{ color: `${cfg.border}CC` }}>AI</span>
+        <img src="/assets/battle/btn_ai.png" alt="AI Auto Off" className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
       </button>
     );
   }
@@ -135,20 +128,11 @@ export default function AutoPlayToggle({
     return (
       <button
         onClick={onToggle}
-        className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 relative overflow-hidden"
-        style={{
-          width: 52,
-          minHeight: 42,
-          background: cfg.bgActive,
-          border: `2px solid ${cfg.borderActive}`,
-          boxShadow: cfg.glow,
-          padding: '4px 6px',
-          color: 'white',
-          ...(cfg.pulseSpeed ? { animation: `auto-pulse ${cfg.pulseSpeed} ease-in-out infinite` } : {}),
-        }}
+        className="flex-shrink-0 flex items-center justify-center transition-transform active:scale-95 relative"
+        style={{ width: 42, height: 42 }}
       >
-        <span className="text-base relative z-10">{cfg.iconActive}</span>
-        <span className="text-[9px] font-black relative z-10">AI</span>
+        <span className="absolute inset-0 rounded-full animate-ping pointer-events-none" style={{ background: 'rgba(255,255,255,0.2)' }} />
+        <img src="/assets/battle/btn_ai.png" alt="AI Auto On" className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(100,200,255,0.7)] z-10 relative" />
       </button>
     );
   }

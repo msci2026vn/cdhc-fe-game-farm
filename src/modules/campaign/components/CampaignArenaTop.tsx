@@ -36,6 +36,7 @@ interface Props {
     lastPlayerDamage: number;
     manaDodgeCost: number;
     manaUltCost: number;
+    autoPlay: any;
 }
 
 const CampaignArenaTop = React.memo(function CampaignArenaTop({
@@ -44,7 +45,8 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
     currentPhase, totalPhases, activeBossStats, activeBossBuffs,
     spriteSrc, spriteState, hasSprites, enrageMultiplier, skillWarning,
     egg, popups, combo, showCombo, comboInfo,
-    activeDebuffs = [], shieldMax, lastPlayerDamage, manaDodgeCost, manaUltCost
+    activeDebuffs = [], shieldMax, lastPlayerDamage, manaDodgeCost, manaUltCost,
+    autoPlay
 }: Props) {
     const { t } = useTranslation();
     // Memoize .some() calls — avoid O(n) scan on every render
@@ -54,10 +56,8 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
     const isPlayerBurning = useMemo(() => activeDebuffs.some(d => d.type === 'burn'), [activeDebuffs]);
 
     return (
-        <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-hidden z-[5]">
-            <div className="absolute inset-0" style={{
-                background: 'radial-gradient(circle at 50% 60%, rgba(30,100,15,0.2) 0%, transparent 55%), radial-gradient(circle at 20% 20%, rgba(20,80,10,0.12) 0%, transparent 40%)'
-            }} />
+        <div className="flex-[0_0_30%] pt-safe px-3 pb-0 flex flex-col relative overflow-visible z-[5]">
+
 
             {/* Top Center Frame for Boss Name */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center pointer-events-none w-full">
@@ -67,7 +67,7 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                         alt="Stage name"
                         className="w-[260px] max-w-none object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)]"
                     />
-                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center pt-1.5">
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center pt-2.5">
                         <span
                             className="font-heading font-black uppercase tracking-widest leading-none"
                             style={{
@@ -95,39 +95,13 @@ const CampaignArenaTop = React.memo(function CampaignArenaTop({
                 enrageLevel={enrageLevel}
                 onPause={pauseBattle}
                 onResume={resumeBattle}
+                autoPlay={autoPlay}
             />
 
-            {/* Player Stats Block (HP, Shield, Mana) -> Top Left */}
-            <div className="absolute bottom-2 left-1 z-20 w-[140px] pointer-events-auto">
-                <div className={`relative ${isPlayerBurning ? 'ring-1 ring-orange-500/50' : ''}`}>
-                    <PlayerHPBar
-                        hp={boss.playerHp}
-                        maxHp={boss.playerMaxHp}
-                        shield={boss.shield}
-                        maxShield={shieldMax}
-                        def={combatStats.def}
-                        isHit={!!lastPlayerDamage}
-                    />
-                    {lastPlayerDamage > 0 && (
-                        <div className="absolute top-1/2 right-[-40px] -translate-y-1/2 pointer-events-none z-30 animate-damage-float">
-                            <span className="font-heading text-xl font-bold text-red-500"
-                                style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
-                                -{lastPlayerDamage}
-                            </span>
-                        </div>
-                    )}
-                </div>
-                <ManaBar
-                    mana={boss.mana}
-                    maxMana={boss.maxMana}
-                    dodgeCost={manaDodgeCost}
-                    ultCost={manaUltCost}
-                    ultCharge={boss.ultCharge ?? 0}
-                />
-            </div>
+            {/* Player Stats Block (HP, Shield, Mana) -> Moved to BossFightCampaign for better positioning */}
 
-            {/* Boss sprite — absolute top-right */}
-            <div className="absolute right-1 top-[150px] w-[20%] aspect-square z-10">
+            {/* Boss sprite — absolute top-right, anchored to bottom to sit on board */}
+            <div className="absolute right-1 bottom-[-30px] w-[20%] aspect-square z-10">
                 <BossSprite
                     src={spriteSrc}
                     state={spriteState}

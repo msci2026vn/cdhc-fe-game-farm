@@ -90,8 +90,6 @@ export default function StageNode({ boss, state, globalBossNumber, onClick }: St
       ) : isCurrent ? (
         // ⚔️ CURRENT — FIGHT!
         <div className="relative">
-          {/* Ping animation */}
-          <div className={`absolute inset-0 ${nodeSize.container} rounded-full bg-blue-400/40 campaign-ping`} />
           <div className={`flex items-center justify-center ${nodeSize.container}`}>
             {globalBossNumber ? (
               <img

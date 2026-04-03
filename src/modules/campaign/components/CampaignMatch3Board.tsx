@@ -72,7 +72,7 @@ const CampaignMatch3Board = React.memo(function CampaignMatch3Board({
     const { t } = useTranslation();
 
     return (
-        <div className="relative flex-1 flex items-center justify-center p-2">
+        <div className="relative flex-1 flex items-center justify-center px-0 py-1 w-full max-w-full">
             <ChainLightningContainer strikes={chainLightnings} />
             <ParticleOverlay bursts={particleBursts} />
             <FloatingCombatText data={floatingTexts} />

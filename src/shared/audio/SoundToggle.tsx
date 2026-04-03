@@ -11,9 +11,10 @@ import { AudioSettingsPanel } from './AudioSettings';
 interface SoundToggleProps {
   className?: string;
   showSettings?: boolean;
+  size?: number;
 }
 
-export function SoundToggle({ className = '', showSettings = false }: SoundToggleProps) {
+export function SoundToggle({ className = '', showSettings = false, size = 32 }: SoundToggleProps) {
   const [muted, setMuted] = useState(audioManager.muted);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout>>(null);
@@ -47,13 +48,15 @@ export function SoundToggle({ className = '', showSettings = false }: SoundToggl
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${muted ? 'opacity-50' : 'opacity-100'} ${className}`}
-        style={{ background: 'rgba(255,255,255,0.15)' }}
+        className={`flex items-center justify-center transition-transform active:scale-90 ${className}`}
+        style={{ width: size, height: size }}
         title={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
       >
-        <span className="material-symbols-outlined text-[18px] text-white">
-          {muted ? 'volume_off' : 'volume_up'}
-        </span>
+        <img 
+            src={muted ? '/assets/battle/btn_muted.png' : '/assets/battle/btn_sound_on.png'} 
+            alt={muted ? 'muted' : 'sound on'} 
+            className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
+        />
       </button>
 
       {showSettings && (

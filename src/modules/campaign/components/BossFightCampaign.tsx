@@ -38,7 +38,7 @@ import { useBattleEnd } from './hooks/useBattleEnd';
 // Local extracted components
 import DeathOverlay from './DeathOverlay';
 import { SkillWarningGlow, PhaseTransitionOverlay, DamageVignette, EnrageAlertBanner } from './SkillWarningOverlay';
-import { BossRageOverlay } from '@/modules/boss/components/hud';
+import { BossRageOverlay, PlayerHPBar, ManaBar } from '@/modules/boss/components/hud';
 
 // Refactored sub-components
 import CampaignBattleResultHandler from './CampaignBattleResultHandler';
@@ -333,7 +333,7 @@ export default function BossFightCampaign({
   }
 
   return (
-    <div 
+    <div
       className={cn(
         "h-[100dvh] max-w-[430px] mx-auto relative flex flex-col overflow-hidden",
         screenShake && "animate-screen-shake"
@@ -388,22 +388,40 @@ export default function BossFightCampaign({
         egg={egg} popups={popups} combo={combo} showCombo={showCombo} comboInfo={comboInfo}
         activeDebuffs={activeDebuffs} shieldMax={shieldMax} lastPlayerDamage={lastPlayerDamage}
         manaDodgeCost={manaDodgeCost} manaUltCost={manaUltCost}
+        autoPlay={autoPlay}
       />
 
-      {/* Auto AI compact relocated to an absolute overlay to avoid pushing the board down */}
-      <div className="absolute bottom-[70%] left-1/2 -translate-x-1/2 z-20">
-        <AutoPlayToggle
-          isActive={autoPlay.isActive}
-          onToggle={autoPlay.toggle}
-          vipLevel={autoPlay.vipLevel}
-          dodgeFreeRemaining={autoPlay.dodgeFreeRemaining}
-          currentSituation={autoPlay.currentSituation}
-          compact
+      {/* Player Stats Block (HP, Shield, Mana) -> Positioned near the board */}
+      <div className="absolute bottom-[69%] left-3 z-[50] w-[100px] pointer-events-auto flex flex-col gap-1.5">
+        <div className={`relative ${activeDebuffs.some((d: any) => d.type === 'burn') ? 'ring-1 ring-orange-500/50' : ''}`}>
+          <PlayerHPBar
+            hp={boss.playerHp}
+            maxHp={boss.playerMaxHp}
+            shield={boss.shield}
+            maxShield={shieldMax}
+            def={combatStats.def}
+            isHit={!!lastPlayerDamage}
+          />
+          {lastPlayerDamage > 0 && (
+            <div className="absolute top-1/2 right-[-40px] -translate-y-1/2 pointer-events-none z-30 animate-damage-float">
+              <span className="font-heading text-xl font-bold text-red-500"
+                style={{ textShadow: '0 0 8px rgba(231,76,60,0.6), 0 2px 4px rgba(0,0,0,0.5)' }}>
+                -{lastPlayerDamage}
+              </span>
+            </div>
+          )}
+        </div>
+        <ManaBar
+          mana={boss.mana}
+          maxMana={boss.maxMana}
+          dodgeCost={manaDodgeCost}
+          ultCost={manaUltCost}
+          ultCharge={boss.ultCharge ?? 0}
         />
       </div>
 
       {/* Bottom half: Match-3 + Skills */}
-      <div className="flex-[1_1_70%] rounded-t-2xl px-3 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col">
+      <div className="flex-[1_1_70%] rounded-t-2xl px-0 pt-1.5 pb-[max(env(safe-area-inset-bottom,6px),6px)] flex flex-col">
 
         {/* Match-3 Board */}
         <CampaignMatch3Board
@@ -439,10 +457,10 @@ const CombatNotifList = React.memo(function CombatNotifList({ notifs }: { notifs
   if (notifs.length === 0) return null;
   const visible = notifs.length <= 3 ? notifs : notifs.slice(-3);
   return (
-    <div className="absolute top-24 right-3 z-40 flex flex-col gap-1 pointer-events-none">
+    <div className="absolute bottom-[65%] left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1.5 pointer-events-none w-full max-w-[220px]">
       {visible.map((n: any) => (
-        <div key={n.id} className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white animate-fade-in"
-          style={{ background: `${n.color}cc`, boxShadow: `0 0 8px ${n.color}60` }}>
+        <div key={n.id} className="px-4 py-1.5 rounded-full text-[11px] font-black text-white animate-fade-in text-center whitespace-nowrap"
+          style={{ background: `${n.color}dd`, boxShadow: `0 0 12px ${n.color}80`, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
           {n.text}
         </div>
       ))}

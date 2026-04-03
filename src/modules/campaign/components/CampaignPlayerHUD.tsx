@@ -237,7 +237,7 @@ export default function CampaignPlayerHUD({
 
             {/* Debuff bar */}
             {activeDebuffs.length > 0 && (
-                <div className="flex gap-1.5 mb-1 flex-wrap">
+                <div className="flex gap-1.5 mb-1 flex-wrap px-3">
                     {activeDebuffs.map((d, i) => (
                         <span key={`${d.type}-${i}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                             style={{
@@ -285,7 +285,7 @@ export default function CampaignPlayerHUD({
 
             {/* ═══ Mockup-style circular skill row with wooden frame ═══ */}
             <div
-                className="flex items-end justify-around px-2 pb-2 pt-6 -mx-3 mb-[-6px]"
+                className="flex items-end justify-around px-2 pb-2 pt-6 mb-[-6px]"
                 style={{
                     backgroundImage: "url('/assets/battle/frame_skill_bar.png')",
                     backgroundSize: '100% 100%',

@@ -16,7 +16,7 @@ export default function DamagePopupLayer({ popups }: DamagePopupLayerProps) {
     <>
       {popups.map(p => (
         <span key={p.id}
-          className="absolute font-heading text-2xl font-bold animate-damage-float text-shadow-sm pointer-events-none z-30"
+          className="absolute font-heading text-2xl font-bold animate-damage-float text-shadow-sm pointer-events-none z-[101]"
           style={{ color: p.color, left: `${p.x}%`, top: `${p.y}%` }}>
           {p.text}
         </span>
