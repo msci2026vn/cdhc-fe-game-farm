@@ -297,7 +297,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
         screenShake && "animate-screen-shake"
       )}
       style={{
-        backgroundImage: "url('/assets/battle/background_battle.png')",
+        backgroundImage: "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/assets/world_boss/background_world_boss.png')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

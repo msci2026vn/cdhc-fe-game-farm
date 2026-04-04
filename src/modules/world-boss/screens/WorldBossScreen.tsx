@@ -48,7 +48,7 @@ export function WorldBossScreen() {
 
   // === Battle state ===
   const [showBattle, setShowBattle] = useState(false);
-  const [showCoop,   setShowCoop]   = useState(false);  // Co-op mode
+  const [showCoop, setShowCoop] = useState(false);  // Co-op mode
   const [popup, setPopup] = useState<'leaderboard' | 'feed' | null>(null);
   const [showRoomList, setShowRoomList] = useState(false);
 
@@ -64,10 +64,10 @@ export function WorldBossScreen() {
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
-  const [showJoinInput,   setShowJoinInput]   = useState(false);
-  const [joinCode,        setJoinCode]        = useState('');
-  const [joiningByCode,   setJoiningByCode]   = useState(false);
-  const [joinError,       setJoinError]       = useState('');
+  const [showJoinInput, setShowJoinInput] = useState(false);
+  const [joinCode, setJoinCode] = useState('');
+  const [joiningByCode, setJoiningByCode] = useState(false);
+  const [joinError, setJoinError] = useState('');
 
   // === Boss End Detection ===
   const [showEndScreen, setShowEndScreen] = useState(false);
@@ -228,15 +228,15 @@ export function WorldBossScreen() {
             <button
               onClick={() => { setCoopInitialRoomId(undefined); setShowCoop(true); }}
               style={{
-                padding:      '0 16px',
-                background:   'linear-gradient(135deg, #1d4ed8, #7c3aed)',
-                color:        'white',
-                fontWeight:   700,
-                fontSize:     13,
-                border:       'none',
+                padding: '0 16px',
+                background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: 13,
+                border: 'none',
                 borderRadius: 10,
-                cursor:       'pointer',
-                whiteSpace:   'nowrap',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               👥 Co-op
@@ -245,15 +245,15 @@ export function WorldBossScreen() {
             <button
               onClick={() => setShowRoomList(true)}
               style={{
-                padding:      '0 12px',
-                background:   'rgba(255,255,255,0.08)',
-                color:        '#d1d5db',
-                fontWeight:   600,
-                fontSize:     12,
-                border:       '1px solid #374151',
+                padding: '0 12px',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#d1d5db',
+                fontWeight: 600,
+                fontSize: 12,
+                border: '1px solid #374151',
                 borderRadius: 10,
-                cursor:       'pointer',
-                whiteSpace:   'nowrap',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               📋 Phòng
@@ -262,15 +262,15 @@ export function WorldBossScreen() {
             <button
               onClick={() => { setJoinCode(''); setJoinError(''); setShowJoinInput(true); }}
               style={{
-                padding:      '0 12px',
-                background:   'rgba(255,255,255,0.08)',
-                color:        '#d1d5db',
-                fontWeight:   600,
-                fontSize:     12,
-                border:       '1px solid #374151',
+                padding: '0 12px',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#d1d5db',
+                fontWeight: 600,
+                fontSize: 12,
+                border: '1px solid #374151',
                 borderRadius: 10,
-                cursor:       'pointer',
-                whiteSpace:   'nowrap',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               {t('pvp:coop.joinByCode.button')}
@@ -392,19 +392,19 @@ export function WorldBossScreen() {
               maxLength={20}
               autoFocus
               style={{
-                width:        '100%',
-                padding:      '12px 14px',
-                background:   '#111827',
-                border:       `1px solid ${joinError ? '#ef4444' : '#374151'}`,
+                width: '100%',
+                padding: '12px 14px',
+                background: '#111827',
+                border: `1px solid ${joinError ? '#ef4444' : '#374151'}`,
                 borderRadius: 10,
-                color:        'white',
-                fontSize:     22,
-                fontWeight:   700,
+                color: 'white',
+                fontSize: 22,
+                fontWeight: 700,
                 letterSpacing: 6,
-                textAlign:    'center',
-                fontFamily:   'monospace',
-                outline:      'none',
-                boxSizing:    'border-box',
+                textAlign: 'center',
+                fontFamily: 'monospace',
+                outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
             {joinError && (
@@ -416,16 +416,16 @@ export function WorldBossScreen() {
               onClick={handleJoinByCode}
               disabled={joiningByCode}
               style={{
-                marginTop:    14,
-                width:        '100%',
-                padding:      '12px 0',
-                background:   joiningByCode ? '#374151' : 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
-                color:        'white',
-                fontWeight:   700,
-                fontSize:     15,
-                border:       'none',
+                marginTop: 14,
+                width: '100%',
+                padding: '12px 0',
+                background: joiningByCode ? '#374151' : 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: 15,
+                border: 'none',
                 borderRadius: 10,
-                cursor:       joiningByCode ? 'not-allowed' : 'pointer',
+                cursor: joiningByCode ? 'not-allowed' : 'pointer',
               }}
             >
               {joiningByCode ? t('pvp:coop.joinByCode.joining') : t('pvp:coop.joinByCode.submit')}
