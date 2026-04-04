@@ -169,7 +169,7 @@ export default function QuizScreen() {
             </p>
             <div className="flex flex-col gap-3 mt-4">
               <div className="flex items-center justify-center gap-2 bg-amber-50 py-2 px-4 rounded-xl border-2 border-amber-100">
-                <span className="text-2xl">🪙</span>
+                <img src="/icons/ogn_coin.png" alt="coin" className="w-6 h-6 object-contain" />
                 <span className="font-black text-xl text-amber-700">+{totalOgn} OGN</span>
               </div>
               <div className="flex items-center justify-center gap-2 bg-indigo-50 py-2 px-4 rounded-xl border-2 border-indigo-100">
@@ -226,7 +226,7 @@ export default function QuizScreen() {
           </div>
 
           <div className="w-full bg-[#FFF9C4] rounded-xl border-2 border-[#FBC02D] p-3 flex items-center justify-center gap-2 shadow-sm animate-[wiggle_1s_ease-in-out_infinite]">
-            <span className="text-2xl">🪙</span>
+            <img src="/icons/ogn_coin.png" alt="coin" className="w-6 h-6 object-contain" />
             <span className="text-[#F57F17] font-black text-lg">+2 OGN/câu đúng</span>
           </div>
 

@@ -47,7 +47,7 @@ export function usePrayerOffer() {
 
       // FlyUp
       if (data.ognReward > 0) {
-        useUIStore.getState().showFlyUp(`+${data.ognReward} OGN 🪙`);
+        useUIStore.getState().showFlyUp(`+${data.ognReward} OGN`);
       }
 
       // Invalidate queries

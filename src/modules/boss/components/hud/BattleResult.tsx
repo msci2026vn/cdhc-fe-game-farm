@@ -216,10 +216,10 @@ export default function BattleResult({
         {/* Reward cards */}
         {serverData?.won && (
           <div className="flex gap-3 mb-4">
-            <div className="flex-1 px-4 py-3 rounded-xl animate-fade-in"
+            <div className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl animate-fade-in"
               style={{ background: 'rgba(240,180,41,0.15)', border: '1px solid rgba(240,180,41,0.3)' }}>
-              <span className="text-xl">🪙</span>
-              <span className="font-heading text-lg font-bold ml-1" style={{ color: '#d49a1a' }}>+{serverData.ognReward}</span>
+              <img src="/icons/ogn_coin.png" alt="coin" className="w-5 h-5 object-contain" />
+              <span className="font-heading text-lg font-bold" style={{ color: '#d49a1a' }}>+{serverData.ognReward}</span>
             </div>
             <div className="flex-1 px-4 py-3 rounded-xl animate-fade-in"
               style={{ background: 'rgba(108,92,231,0.15)', border: '1px solid rgba(108,92,231,0.3)' }}>

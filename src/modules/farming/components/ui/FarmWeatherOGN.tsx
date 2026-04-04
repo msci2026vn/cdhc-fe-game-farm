@@ -29,7 +29,7 @@ export default function FarmWeatherOGN({ temperature, humidity, weatherIcon, ogn
         role="button"
         aria-label="Lịch sử OGN"
       >
-        <span>🌿</span>
+        <img src="/icons/ogn_coin.png" alt="coin" className="w-4 h-4 object-contain shadow-sm" />
         <span>{formatted}</span>
       </div>
     </>

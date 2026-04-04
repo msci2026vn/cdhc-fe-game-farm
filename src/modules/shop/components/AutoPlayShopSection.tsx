@@ -298,7 +298,8 @@ export default function AutoPlayShopSection() {
           ))}
         </ul>
         {tab === 'rent' && (
-          <div className="text-center text-[9px] text-gray-400 mb-1.5">
+          <div className="flex items-center justify-center gap-1 text-[9px] text-gray-400 mb-1.5 leading-none">
+            <img src="/icons/ogn_coin.png" alt="coin" className="w-[11px] h-[11px] object-contain" />
             {t('rent_price_per_week', { price: prices?.rent[pkg.level]?.toLocaleString() ?? '—' })}
           </div>
         )}
@@ -373,7 +374,12 @@ export default function AutoPlayShopSection() {
               boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
             } : { color: '#9ca3af' }}
           >
-            {tabKey === 'rent' ? t('rent_ogn_tab') : t('buy_avax_tab')}
+            {tabKey === 'rent' ? (
+              <span className="flex items-center justify-center gap-1.5">
+                <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" />
+                {t('rent_ogn_tab')}
+              </span>
+            ) : t('buy_avax_tab')}
           </button>
         ))}
       </div>
@@ -381,7 +387,8 @@ export default function AutoPlayShopSection() {
       {/* OGN balance (rent tab) */}
       {tab === 'rent' && (
         <div className="flex items-center justify-end gap-1 text-[10px] font-bold text-gray-500">
-          {t('current_ogn_balance', { balance: ogn.toLocaleString() })}
+          <img src="/icons/ogn_coin.png" alt="coin" className="w-3 h-3 object-contain" />
+          {t('current_ogn_balance', { balance: (ogn || 0).toLocaleString() })}
         </div>
       )}
 
@@ -422,7 +429,7 @@ export default function AutoPlayShopSection() {
               <div className="flex justify-between">
                 <span className="text-gray-500">{t('deduct_label')}</span>
                 <span className="font-bold text-orange-600">
-                  🪙 {(prices?.rent[confirmRent.level] ?? 0).toLocaleString()} OGN
+                  <img src="/icons/ogn_coin.png" alt="coin" className="inline-block w-3.5 h-3.5 object-contain mr-1" /> {(prices?.rent[confirmRent.level] ?? 0).toLocaleString()} OGN
                 </span>
               </div>
               <div className="flex justify-between">
@@ -432,7 +439,7 @@ export default function AutoPlayShopSection() {
               <div className="flex justify-between border-t border-gray-200 pt-1.5">
                 <span className="text-gray-500">{t('remaining_ogn_label')}</span>
                 <span className="font-bold">
-                  🪙 {(ogn - (prices?.rent[confirmRent.level] ?? 0)).toLocaleString()}
+                  <img src="/icons/ogn_coin.png" alt="coin" className="inline-block w-3.5 h-3.5 object-contain mr-1" /> {(ogn - (prices?.rent[confirmRent.level] ?? 0)).toLocaleString()}
                 </span>
               </div>
             </div>

@@ -84,7 +84,7 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
           <h3 className="font-heading text-lg font-bold text-white drop-shadow">🏆 Bảng xếp hạng</h3>
           <div className="flex gap-2 mt-3 justify-center flex-wrap">
             {([
-              { key: 'ogn' as Tab, label: '🪙 OGN' },
+              { key: 'ogn' as Tab, label: 'OGN', icon: <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain inline-block mr-1" /> },
               { key: 'xp' as Tab, label: '⭐ XP' },
               { key: 'level' as Tab, label: '🏆 Cấp' },
               { key: 'harvests' as Tab, label: '🌾 Thu hoạch' },
@@ -234,7 +234,12 @@ export default function Leaderboard({ open, onClose }: LeaderboardProps) {
                     </div>
                     <span className={`font-heading text-sm font-bold ${isMe ? 'text-orange-600' : ''}`}
                       style={{ color: isMe ? '#e67e22' : '#d49a1a' }}>
-                      {tab === 'ogn' && `🪙 ${value.toLocaleString('vi-VN')}`}
+                      {tab === 'ogn' && (
+                        <span className="flex items-center gap-1">
+                          <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" />
+                          {value.toLocaleString('vi-VN')}
+                        </span>
+                      )}
                       {tab === 'xp' && `⭐ ${value.toLocaleString('vi-VN')}`}
                       {tab === 'level' && `🏆 Lv.${value}`}
                       {tab === 'harvests' && `🌾 ${value}`}

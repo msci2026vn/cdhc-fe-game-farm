@@ -295,7 +295,8 @@ export default function MainMenuScreen() {
             className="font-black text-yellow-300 leading-tight whitespace-nowrap"
             style={{ fontSize: '11px', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
           >
-            💰 {ogn.toLocaleString()}
+            <img src="/icons/ogn_coin.png" alt="OGN" className="w-3.5 h-3.5 object-contain mr-1" />
+            {ogn.toLocaleString()}
           </span>
         </div>
       </div>

@@ -106,7 +106,7 @@ export default function BugCatchGame({ open, onClose }: BugCatchGameProps) {
   const handleDone = () => {
     if (caught > 0) {
       const reward = caught * OGN_PER_BUG;
-      showFlyUp(`+${reward} OGN 🪙`);
+      showFlyUp(`+${reward} OGN`);
       addToast(`Bắt được ${caught} con sâu! +${reward} OGN 🎉`, 'success');
     } else {
       addToast('Không bắt được con nào, thử lại nhé! 😅', 'info');
@@ -209,7 +209,7 @@ export default function BugCatchGame({ open, onClose }: BugCatchGameProps) {
               </div>
               <div className="flex items-center gap-2 mt-2 px-5 py-2.5 rounded-xl"
                 style={{ background: 'rgba(240,180,41,0.15)', border: '1px solid rgba(240,180,41,0.3)' }}>
-                <span className="text-xl">🪙</span>
+                <img src="/icons/ogn_coin.png" alt="coin" className="w-5 h-5 object-contain" />
                 <span className="font-heading text-lg font-bold" style={{ color: '#d49a1a' }}>
                   +{caught * OGN_PER_BUG} OGN
                 </span>

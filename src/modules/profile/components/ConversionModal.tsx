@@ -199,7 +199,9 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                   <span className="text-[9px] font-semibold text-gray-400">{t('seed_label')}</span>
                 </div>
                 <div className="bg-white rounded-xl p-3 border border-[#E8D5C4] text-center">
-                  <span className="text-lg block">🪙</span>
+                <div className="flex justify-center mb-1">
+                  <img src="/icons/ogn_coin.png" alt="coin" className="w-6 h-6 object-contain" />
+                </div>
                   <span className="font-heading text-sm font-bold text-[#5D4037] block">{ognBalance.toFixed(2)}</span>
                   <span className="text-[9px] font-semibold text-gray-400">OGN</span>
                 </div>
@@ -291,8 +293,8 @@ export function ConversionModal({ isOpen, onClose }: ConversionModalProps) {
                   <div className="space-y-1">
                     {history.conversions.slice(0, 5).map((c) => (
                       <div key={c.id} className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-2 border border-gray-100">
-                        <span className="text-sm">
-                          {c.direction === 'seed_to_ogn' ? '🌱→🪙' : '🪙→🌱'}
+                        <span className="text-sm flex items-center">
+                          🌱→<img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain ml-0.5" />
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-bold text-[#5D4037]">

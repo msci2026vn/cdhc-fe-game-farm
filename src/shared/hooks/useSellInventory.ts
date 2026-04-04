@@ -35,8 +35,7 @@ export function useSellInventory() {
       // Toast thông báo
       useUIStore.getState().addToast(
         data.message || `${data.sold.plantEmoji} Bán được ${data.sold.sellPrice} OGN!`,
-        'success',
-        '💰'
+        'success'
       );
     },
     onError: (error) => {
@@ -67,8 +66,7 @@ export function useSellAllInventory() {
 
       useUIStore.getState().addToast(
         data.message || `Đã bán ${data.soldItems.length} nông sản, thu ${data.totalOgn} OGN!`,
-        'success',
-        '💰'
+        'success'
       );
     },
     onError: (error) => {

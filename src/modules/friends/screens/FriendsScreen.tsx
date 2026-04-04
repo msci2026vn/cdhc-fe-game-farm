@@ -164,8 +164,9 @@ export default function FriendsScreen() {
                           </span>
                         </div>
                         <p className="text-[10px] text-gray-500 font-medium truncate">{friend.title || 'Nông dân tập sự'}</p>
-                        <p className="font-heading font-bold text-amber-600 text-[10px]">
-                          🪙 {friend.ogn.toLocaleString('vi-VN')}
+                        <p className="font-heading font-bold text-amber-600 text-[10px] flex items-center gap-1">
+                          <img src="/icons/ogn_coin.png" alt="coin" className="w-3 h-3 object-contain" />
+                          {friend.ogn.toLocaleString('vi-VN')}
                         </p>
                       </div>
                     </button>

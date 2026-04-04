@@ -28,7 +28,7 @@ export default function FarmHarvestOverlay({ harvestResult, onClose }: Props) {
                 </div>
                 <div className="flex justify-center gap-2 mt-4 relative z-10">
                     <div className="bg-yellow-50 text-yellow-800 font-bold px-3 py-1.5 rounded-xl border border-yellow-300 whitespace-nowrap shadow-sm flex items-center gap-1">
-                        +{harvestResult.ognEarned} <span className="text-[14px]">🪙</span> OGN
+                        +{harvestResult.ognEarned} <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" /> OGN
                     </div>
                     <div className="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-xl border border-blue-300 whitespace-nowrap shadow-sm flex items-center gap-1">
                         +{harvestResult.xp} <span className="text-[14px]">⚡</span> XP

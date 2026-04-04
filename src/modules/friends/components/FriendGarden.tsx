@@ -101,12 +101,12 @@ export default function FriendGarden({ friend, onBack }: FriendGardenProps) {
       {/* Stats bar */}
       <div className="relative z-10 flex gap-2 px-5 mb-3">
         {[
-          { icon: '🪙', val: (friendInfo?.ogn ?? friend.ogn).toLocaleString('vi-VN'), label: 'OGN' },
+          { icon: <img src="/icons/ogn_coin.png" alt="coin" className="w-5 h-5 object-contain" />, val: (friendInfo?.ogn ?? friend.ogn).toLocaleString('vi-VN'), label: 'OGN' },
           { icon: '🌱', val: `${farmData?.plots.length ?? 0}/${totalSlots}`, label: 'Ô trồng' },
           { icon: '🌾', val: (friend.totalHarvest ?? 0).toString(), label: 'Thu hoạch' },
         ].map((s) => (
           <div key={s.label} className="flex-1 stat-chip rounded-xl px-2.5 py-2 flex items-center gap-2">
-            <span className="text-base">{s.icon}</span>
+            <span className="flex items-center justify-center text-base">{s.icon}</span>
             <div>
               <p className="font-heading text-sm font-bold leading-tight">{s.val}</p>
               <p className="text-[9px] font-semibold text-muted-foreground">{s.label}</p>

@@ -100,7 +100,7 @@ export default function ShopScreen() {
         </button>
         <h1 className="font-heading text-[22px] font-bold">{t('shop_title')}</h1>
         <div className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] glass-card">
-          <span>🪙</span>
+          <img src="/icons/ogn_coin.png" alt="coin" className="w-4 h-4 object-contain" />
           <span className="font-heading text-base font-bold" style={{ color: '#d49a1a' }}>
             {(ogn || 0).toLocaleString('vi-VN')}
           </span>
@@ -243,11 +243,9 @@ export default function ShopScreen() {
             <h3 className="font-heading text-lg font-bold">{confirmItem.name}</h3>
             <p className="text-xs text-muted-foreground mt-1">{confirmItem.desc}</p>
 
-            <div className="flex items-center justify-center gap-1.5 mt-3 mb-4">
-              <span className="font-heading text-xl font-bold" style={{ color: '#d49a1a' }}>
-                🪙 {confirmItem.price} OGN
+              <span className="font-heading text-xl font-bold flex items-center justify-center gap-1.5" style={{ color: '#d49a1a' }}>
+                <img src="/icons/ogn_coin.png" alt="coin" className="w-6 h-6 object-contain" /> {confirmItem.price} OGN
               </span>
-            </div>
 
             <p className="text-[11px] text-muted-foreground mb-4">
               {t('balance_after_purchase', { amount: ((ogn || 0) - (confirmItem.price || 0)).toLocaleString('vi-VN') })}

@@ -42,8 +42,8 @@ export default function PlantSeedModal({ open, onClose, onSelect }: PlantSeedMod
               <span className="text-[10px] text-muted-foreground">
                 ⏱️ {formatGrowthTime(pt.growthDurationMs)}
               </span>
-              <span className="text-xs font-bold text-secondary-foreground">
-                🪙 {pt.rewardOGN} OGN
+              <span className="text-xs font-bold text-secondary-foreground flex items-center justify-center gap-1">
+                <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" /> {pt.rewardOGN} OGN
               </span>
             </button>
           ))}

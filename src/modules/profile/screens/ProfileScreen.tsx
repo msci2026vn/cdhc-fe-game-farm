@@ -210,7 +210,7 @@ export default function ProfileScreen() {
                 </div>
 
                 <div className="flex justify-between items-center text-[10px] font-bold text-farm-brown-dark/80">
-                  <span className="flex items-center gap-1"><span className="text-[13px]">🪙</span> {formatOGN(profile.ogn || 0)}</span>
+                  <span className="flex items-center gap-1"><img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" /> {formatOGN(profile.ogn || 0)}</span>
                   <span className="flex items-center gap-1"><span className="text-[13px]">📅</span> {profile.totalHarvests || 0}</span>
                 </div>
               </div>
@@ -340,7 +340,7 @@ export default function ProfileScreen() {
                       className="bg-farm-straw text-farm-brown-dark text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 active:scale-95 transition-transform flex items-center gap-1 disabled:opacity-50"
                     >
                       <span className="material-symbols-outlined text-sm">restart_alt</span>
-                      Reset ({formatOGN(statInfo.resetInfo.nextCost)} OGN)
+                      Reset (<img src="/icons/ogn_coin.png" alt="coin" className="w-3 h-3 object-contain inline-block mr-0.5" />{formatOGN(statInfo.resetInfo.nextCost)} OGN)
                     </button>
                   )}
                 </div>
@@ -502,7 +502,10 @@ export default function ProfileScreen() {
 
               <div className="bg-white/60 border border-[#d4c5a3] rounded-xl p-3 mb-4 shadow-sm">
                 <p className="text-xs text-farm-brown-dark font-bold mb-1 uppercase tracking-wide">{t('reset_cost')}</p>
-                <p className="font-heading text-2xl font-black text-farm-carrot">{formatOGN(statInfo.resetInfo.nextCost)} OGN</p>
+                <p className="font-heading text-2xl font-black text-farm-carrot flex items-center justify-center gap-2">
+                  <img src="/icons/ogn_coin.png" alt="coin" className="w-6 h-6 object-contain" />
+                  {formatOGN(statInfo.resetInfo.nextCost)} OGN
+                </p>
                 <p className="text-[10px] text-orange-600 mt-1 font-bold">
                   {t('reset_count_this_week', { count: statInfo.resetInfo.weeklyCount + 1, max: 3 })}
                 </p>

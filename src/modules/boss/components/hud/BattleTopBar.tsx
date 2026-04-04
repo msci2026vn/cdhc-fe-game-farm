@@ -152,10 +152,17 @@ export default function BattleTopBar({
       {showRetreatConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-8"
           style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <div className="w-full max-w-[320px] rounded-2xl p-6 text-center animate-scale-in"
-            style={{ background: 'linear-gradient(180deg, #2d1b4e, #1a0a2e)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <span className="text-4xl block mb-3">{isCampaign ? '⚔️' : '🏃'}</span>
-            <h3 className="font-heading text-lg font-bold text-white mb-1">
+          <div className="w-full max-w-[340px] px-8 pb-10 pt-12 text-center animate-scale-in relative border-0"
+            style={{ 
+              backgroundImage: "url('/assets/world_boss/frame_close_boss.png')", 
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+              backgroundColor: 'transparent'
+            }}>
+            <div className="flex justify-center mb-0 mt-[-10px]">
+              <img src="/assets/world_boss/player_close.png" alt="Exit Icon" className="w-[110px] h-[110px] object-contain" />
+            </div>
+            <h3 className="font-heading text-xl font-black text-white mb-1 uppercase tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
               {isCampaign ? t('exit_battle_q') : t('retreat_q')}
             </h3>
             <p className="text-white/60 text-sm mb-5">
@@ -163,16 +170,14 @@ export default function BattleTopBar({
                 ? t('exit_battle_desc')
                 : t('retreat_desc')}
             </p>
-            <div className="flex gap-3">
+            <div className="flex justify-center gap-4 mt-6">
               <button onClick={dismissRetreat}
-                className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-95 transition-transform"
-                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                {isCampaign ? t('continue') : t('stay')}
+                className="relative active:scale-95 transition-transform">
+                <img src="/assets/world_boss/btn_continue.png" alt="Continue" className="w-32 object-contain" />
               </button>
               <button onClick={confirmRetreat}
-                className="flex-1 py-3 rounded-xl font-heading text-sm font-bold text-white active:scale-95 transition-transform"
-                style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)' }}>
-                {isCampaign ? t('exit') : t('retreat')}
+                className="relative active:scale-95 transition-transform">
+                <img src="/assets/world_boss/btn_close_1.png" alt="Exit" className="w-32 object-contain" />
               </button>
             </div>
           </div>

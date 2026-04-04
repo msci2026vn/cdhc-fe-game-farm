@@ -148,7 +148,7 @@ export default function FarmHeader() {
           <div className="stat-chip flex-1">
             <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base"
               style={{ background: 'linear-gradient(135deg, #fff8dc, #ffe066)' }}>
-              🪙
+              <img src="/icons/ogn_coin.png" alt="coin" className="w-5 h-5 object-contain" />
             </div>
             <div>
               <div className="font-heading text-base font-bold">

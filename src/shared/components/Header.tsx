@@ -20,7 +20,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-1.5 bg-primary-foreground/15 rounded-full px-3 py-1.5">
-          <span className="text-base">🪙</span>
+          <img src="/icons/ogn_coin.png" alt="coin" className="w-4 h-4 object-contain" />
           <span className="font-heading font-bold text-sm">
             <AnimatedNumber value={ogn} />
           </span>

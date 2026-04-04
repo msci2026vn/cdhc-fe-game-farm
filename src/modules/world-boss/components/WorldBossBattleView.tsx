@@ -479,7 +479,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
           }}
         >
           <CircleSkillBtn
-            imageSrc="/assets/battle/btn_skill1.png"
+            imageSrc="/assets/world_boss/btn_chili.png"
             label="Skill 1"
             sublabel={otHiemCooldown > 0 ? undefined : otHiemActive ? 'active' : undefined}
             variant="red"
@@ -493,7 +493,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
             size="md"
           />
           <CircleSkillBtn
-            imageSrc="/assets/battle/btn_skill2.png"
+            imageSrc="/assets/world_boss/btn_straw.png"
             label="Skill 2"
             variant="green"
             isActive={romBocActive}
@@ -506,7 +506,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
             size="md"
           />
           <CircleSkillBtn
-            imageSrc="/assets/battle/btn_dodge.png"
+            imageSrc="/assets/world_boss/btn_dodge_1.png"
             label="Né"
             variant="run"
             isReady={hasDodgeMana}
@@ -515,7 +515,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
             size="md"
           />
           <CircleSkillBtn
-            imageSrc="/assets/battle/btn_ult.png"
+            imageSrc="/assets/world_boss/btn_rice.png"
             label={ultReady ? 'ULT ⚡' : `ULT, ${boss.ultCharge ?? 0}%`}
             variant="ult"
             isReady={ultReady && hasUltMana && !ultOnCooldown}

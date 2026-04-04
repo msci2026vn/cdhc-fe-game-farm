@@ -93,7 +93,9 @@ export default function PlayerCard({ compact }: PlayerCardProps) {
 
         {/* OGN */}
         <div className="shrink-0 bg-[#fff8dc] border border-[#e9c46a] rounded-xl px-2.5 py-1.5 text-center shadow-sm">
-          <div className="text-[10px]">🪙</div>
+          <div className="flex justify-center mb-1">
+            <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" />
+          </div>
           <div className="font-heading font-bold text-xs text-[#5D4037] leading-tight">
             <AnimatedNumber value={ogn} />
           </div>

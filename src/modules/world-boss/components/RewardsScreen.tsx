@@ -57,7 +57,7 @@ function RewardNumbers({ xpAmount, ognAmount }: { xpAmount: number; ognAmount: n
         <span className="text-green-400 font-bold text-base">+{xpDisplay.toLocaleString()}</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
-        <span>🪙</span>
+        <img src="/icons/ogn_coin.png" alt="coin" className="w-4 h-4 object-contain" />
         <span className="text-gray-400">OGN:</span>
         <span className="text-yellow-400 font-bold text-base">+{ognDisplay.toLocaleString()}</span>
       </div>

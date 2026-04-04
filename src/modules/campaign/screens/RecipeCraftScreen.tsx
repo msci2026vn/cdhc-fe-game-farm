@@ -125,7 +125,7 @@ export default function RecipeCraftScreen() {
           <h1 className="font-heading font-bold text-lg text-white">{t('campaign.recipes.title')}</h1>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
             style={{ background: 'rgba(253,203,110,0.15)', border: '1px solid rgba(253,203,110,0.2)' }}>
-            <span className="text-sm">💰</span>
+            <img src="/icons/ogn_coin.png" alt="coin" className="w-4 h-4 object-contain" />
             <span className="text-xs font-bold text-yellow-300">
               <AnimatedNumber value={ogn} />
             </span>

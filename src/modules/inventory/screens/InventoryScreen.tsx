@@ -138,7 +138,14 @@ export default function InventoryScreen() {
                         : 'bg-amber-500 hover:bg-amber-600 active:scale-95'
                       }`}
                   >
-                    {isSelling ? '⏳ Đang bán...' : '💰 Bán'}
+                    <span className="flex items-center justify-center gap-1.5">
+                      {isSelling ? '⏳ Đang bán...' : (
+                        <>
+                          <img src="/icons/ogn_coin.png" alt="coin" className="w-4 h-4 object-contain brightness-0 invert" />
+                          Bán
+                        </>
+                      )}
+                    </span>
                   </button>
                 </div>
               );
@@ -157,7 +164,12 @@ export default function InventoryScreen() {
           >
             {sellAllMutation.isPending
               ? '⏳ Đang bán hết...'
-              : `💰 Bán hết (≈${totalSellPrice} OGN)`
+              : (
+                <span className="flex items-center justify-center gap-2">
+                  <img src="/icons/ogn_coin.png" alt="coin" className="w-5 h-5 object-contain brightness-0 invert" />
+                  Bán hết (≈{totalSellPrice} OGN)
+                </span>
+              )
             }
           </button>
         </div>

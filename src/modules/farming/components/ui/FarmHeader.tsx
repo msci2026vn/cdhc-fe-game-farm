@@ -92,7 +92,7 @@ export default function FarmHeader({
 
                 {/* OGN Balance */}
                 <div onClick={() => navigate('/ogn-history')} className="snap-start shrink-0 wood-sign-v2 rounded-xl px-3 py-1.5 flex items-center gap-1.5 active:scale-95 transition-transform shadow-sm cursor-pointer border border-[#8B4513]/30">
-                    <span className="text-[14px] drop-shadow-sm">🪙</span>
+                    <img src="/icons/ogn_coin.png" alt="coin" className="w-[14px] h-[14px] object-contain drop-shadow-sm" />
                     <span className="font-black text-[#5D4037] text-xs"><AnimatedNumber value={profile?.ogn ?? 0} /></span>
                 </div>
 

@@ -59,7 +59,7 @@ export default function AppHeader({
         <div className="flex items-center gap-2 justify-end">
           {showCurrency && (
             <div className="flex items-center gap-1 bg-[#fff8dc] border border-[#e9c46a] rounded-full px-2.5 py-1 shadow-sm">
-              <span className="text-xs">🪙</span>
+              <img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" />
               <span className="font-heading font-bold text-[10px] text-[#5D4037]">
                 <AnimatedNumber value={ogn} />
               </span>

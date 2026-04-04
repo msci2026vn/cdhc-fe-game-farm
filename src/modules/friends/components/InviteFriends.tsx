@@ -71,7 +71,7 @@ function ReferredUsersList({ users }: { users: ReferredUser[] }) {
 
           {/* OGN + Level */}
           <div className="text-right flex-shrink-0">
-            <div className="text-sm font-bold text-green-600">💰 {user.ogn}</div>
+            <div className="text-sm font-bold text-green-600 flex items-center justify-end gap-1"><img src="/icons/ogn_coin.png" alt="coin" className="w-3.5 h-3.5 object-contain" /> {user.ogn}</div>
             <div className="text-xs text-gray-400">Lv.{user.level}</div>
           </div>
         </div>
@@ -90,7 +90,7 @@ function CommissionSummary({
   return (
     <div className="mt-3">
       <div className="text-center p-4 bg-green-50 rounded-xl mb-3 border border-green-100">
-        <div className="text-3xl font-bold text-green-600">💰 {total.toLocaleString('vi-VN')}</div>
+        <div className="text-3xl font-bold text-green-600 flex items-center justify-center gap-1.5"><img src="/icons/ogn_coin.png" alt="coin" className="w-6 h-6 object-contain" /> {total.toLocaleString('vi-VN')}</div>
         <div className="text-sm text-gray-600">Tổng hoa hồng đã nhận</div>
       </div>
 
@@ -396,7 +396,7 @@ export default function InviteFriends({ open, onClose }: InviteFriendsProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span>💰 Hoa hồng khi bạn bè mua item:</span>
+                <span className="flex items-center gap-1"><img src="/icons/ogn_coin.png" alt="coin" className="w-3 h-3 object-contain" /> Hoa hồng khi bạn bè mua item:</span>
                 <span className="font-bold" style={{ color: '#d49a1a' }}>
                   5%
                 </span>
