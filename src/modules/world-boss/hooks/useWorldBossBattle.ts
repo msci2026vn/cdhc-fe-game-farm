@@ -11,6 +11,8 @@ export interface WorldBossSessionResult {
   maxCombo: number;
   rank: number | null;
   duration: number;
+  isSyncing?: boolean;
+  syncError?: boolean;
 }
 
 type BattleState = 'idle' | 'fighting' | 'ended';
@@ -48,6 +50,7 @@ export function useWorldBossBattle(
     rank: null as number | null,
     hpPercent: worldBoss.hpPercent ?? 1,
   });
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Refs for delta tracking
   const lastSentDamageRef = useRef(0);
@@ -126,7 +129,6 @@ export function useWorldBossBattle(
     }
   }, [eventId, engine.totalDmgDealt, engine.maxCombo]);
 
-  // Start battle
   const startBattle = useCallback(() => {
     if (battleState !== 'idle') return;
     setBattleState('fighting');
@@ -135,6 +137,22 @@ export function useWorldBossBattle(
     prevTotalDmgRef.current = 0;
     battleStartRef.current = Date.now();
   }, [battleState]);
+
+  const sendFinalBatchWithRetry = useCallback(async (retriesLeft = 3): Promise<WorldBossAttackResult | null> => {
+    setIsSyncing(true);
+    const res = await sendBatch(true);
+    if (res?.ok) {
+      setIsSyncing(false);
+      return res;
+    }
+    if (retriesLeft > 0) {
+      // Exponential backoff or simple delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return sendFinalBatchWithRetry(retriesLeft - 1);
+    }
+    setIsSyncing(false);
+    return res;
+  }, [sendBatch]);
 
   // Batch interval — send every 3s (2s when boss HP < 10%)
   useEffect(() => {
@@ -161,19 +179,21 @@ export function useWorldBossBattle(
     const duration = Math.floor((Date.now() - battleStartRef.current) / 1000);
 
     const flush = async () => {
-      const res = await sendBatch(true);
+      const res = await sendFinalBatchWithRetry(3);
       const sessionResult: WorldBossSessionResult = {
-        totalDamage: res?.totalDamage ?? (engine.totalDmgDealt ?? 0),
+        totalDamage: (res?.ok && 'totalDamage' in res) ? (res.totalDamage as number) : (engine.totalDmgDealt ?? 0),
         maxCombo: engine.maxCombo ?? 0,
-        rank: res?.rank ?? null,
+        rank: (res?.ok && 'rank' in res) ? (res.rank as number) : null,
         duration,
+        isSyncing: false,
+        syncError: !res?.ok,
       };
       setBattleState('ended');
       onSessionEnd?.(sessionResult);
     };
 
     flush();
-  }, [engine.result]);
+  }, [engine.result, sendFinalBatchWithRetry, onSessionEnd, engine.totalDmgDealt, engine.maxCombo]);
 
   // Cleanup: flush pending on unmount
   useEffect(() => {
@@ -204,24 +224,27 @@ export function useWorldBossBattle(
     const duration = Math.floor((Date.now() - battleStartRef.current) / 1000);
 
     const flush = async () => {
-      const res = await sendBatch(true);
+      const res = await sendFinalBatchWithRetry(3);
       const sessionResult: WorldBossSessionResult = {
-        totalDamage: res?.totalDamage ?? (engine.totalDmgDealt ?? 0),
+        totalDamage: (res?.ok && 'totalDamage' in res) ? (res.totalDamage as number) : (engine.totalDmgDealt ?? 0),
         maxCombo: engine.maxCombo ?? 0,
-        rank: res?.rank ?? null,
+        rank: (res?.ok && 'rank' in res) ? (res.rank as number) : null,
         duration,
+        isSyncing: false,
+        syncError: !res?.ok,
       };
       setBattleState('ended');
       onSessionEnd?.(sessionResult);
     };
 
     flush();
-  }, [sendBatch, engine.totalDmgDealt, engine.maxCombo, onSessionEnd]);
+  }, [sendFinalBatchWithRetry, engine.totalDmgDealt, engine.maxCombo, onSessionEnd]);
 
   return {
     engine,
     battleState,
     sessionStats,
+    isSyncing,
     startBattle,
     notifyBossDeadFromServer,
   };

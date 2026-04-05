@@ -5,6 +5,7 @@
 
 import type { WorldBossInfo } from '../types/world-boss.types';
 import { adaptWorldBossSkills } from './skill-mapper';
+import type { BossPhase } from '@/modules/campaign/data/deVuongPhases';
 
 // Mirror CampaignBossData từ useMatch3Campaign.ts
 export interface CampaignBossData {
@@ -25,7 +26,7 @@ export interface CampaignBossData {
   freq: number;
   healPercent: number;
   turnLimit: number;
-  phases?: unknown[];
+  phases?: BossPhase[];
   skills?: ReturnType<typeof adaptWorldBossSkills>;
 }
 

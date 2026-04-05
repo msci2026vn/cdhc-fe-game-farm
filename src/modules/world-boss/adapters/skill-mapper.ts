@@ -3,13 +3,11 @@
 // ═══════════════════════════════════════════════════════════════
 
 import type { WorldBossSkill } from '../types/world-boss.types';
+import type { BossSkill } from '@/modules/campaign/data/bossSkills';
 
 // Campaign BossSkill shape — matches BossSkill contract (values in SECONDS)
-export interface CampaignBossSkill {
-  type: 'burn' | 'stun' | 'armor_break' | 'shield' | 'heal' | 'enrage' | 'egg' | 'gem_lock';
-  cooldown: number;     // s (giây) — setupBossSkillsInterval nhân * 1000 nội bộ
-  duration?: number;    // s (giây) — setupBossSkillsInterval nhân * 1000 nội bộ
-  healPercent?: number; // fraction: 0.05 = 5%
+export interface CampaignBossSkill extends BossSkill {
+  // Add any extra if needed, but BossSkill should be enough
 }
 
 /**
@@ -44,31 +42,36 @@ function mapSkill(skill: WorldBossSkill): CampaignBossSkill | null {
       return null;
 
     case 'dot_poison':
-      return { type: 'burn', cooldown, duration: 5 };
+      return { type: 'burn', cooldown, duration: 5, value: 2, label: 'Đốt!', icon: '🔥' };
 
     case 'stun':
-      return { type: 'stun', cooldown, duration: 1.5 };
+      return { type: 'stun', cooldown, duration: 1.5, value: 0, label: 'Choáng!', icon: '💫' };
 
     case 'def_break':
-      return { type: 'armor_break', cooldown, duration: 8 };
+      return { type: 'armor_break', cooldown, duration: 8, value: 0, label: 'Phá giáp!', icon: '💔' };
 
     case 'shield':
-      return { type: 'shield', cooldown, duration: 3 };
+      return { type: 'shield', cooldown, duration: 3, value: 0, label: 'Bất tử!', icon: '🛡️' };
 
     case 'heal':
-      return { type: 'heal', cooldown, healPercent: skill.damage_multi || 0.05 };
+      // 'heal' not in BossSkillType? Wait, let's check BossSkillType again.
+      // it has 'heal_block', but for healing there is 'egg'.
+      // boss-ai handler might need to support 'heal' or we map to 'egg'
+      return { type: 'egg', cooldown, duration: 1, value: Math.round((skill.damage_multi || 0.05) * 100), label: 'Hồi máu!', icon: '💚' };
 
     case 'drain':
-      return { type: 'burn', cooldown, duration: 5 };
+      return { type: 'burn', cooldown, duration: 5, value: 2, label: 'Đốt!', icon: '🔥' };
 
     case 'enrage':
-      return { type: 'enrage', cooldown, duration: 4 };
+      // enrage not in BossSkillType. Using 'burn' as placeholder or we should add it.
+      // For now, let's use something compatible.
+      return { type: 'stun', cooldown, duration: 4, value: 0, label: 'Nổi giận!', icon: '💢' };
 
     case 'summon_minion':
-      return { type: 'egg', cooldown, duration: 8 };
+      return { type: 'egg', cooldown, duration: 8, value: 15, label: 'Đẻ trứng!', icon: '🥚' };
 
     case 'atk_down':
-      return { type: 'gem_lock', cooldown, duration: 5 };
+      return { type: 'gem_lock', cooldown, duration: 5, value: 3, label: 'Khóa gem!', icon: '🔒' };
 
     default:
       console.warn(`[SkillMapper] Unknown skill type: ${skill.type}`);

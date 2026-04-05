@@ -148,7 +148,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     setSessionResult(result);
   };
 
-  const { engine, battleState, sessionStats, startBattle, notifyBossDeadFromServer } = useWorldBossBattle(
+  const { engine, battleState, sessionStats, startBattle, notifyBossDeadFromServer, isSyncing } = useWorldBossBattle(
     worldBoss,
     combatStats,
     worldBoss.id,
@@ -281,6 +281,7 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     return (
       <WorldBossCampaignResult
         result={sessionResult}
+        isSyncing={isSyncing}
         onFightAgain={() => {
           setSessionResult(null);
           onExit();
