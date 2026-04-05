@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useWorldBossHistory, useWorldBossHistoryLeaderboard } from '../hooks/useWorldBossHistory';
-import { BottomDrawer } from './BottomDrawer';
 import type { WorldBossHistoryEntry } from '../types/world-boss.types';
 import { useTranslation } from 'react-i18next';
 
@@ -106,30 +105,46 @@ function HistoryCard({
   return (
     <button
       onClick={() => onSelect(boss)}
-      className="w-full text-left bg-gray-800 hover:bg-gray-750 active:bg-gray-700 rounded-xl p-3 border border-gray-700 transition-colors"
+      className="w-full text-left active:scale-[0.98] transition-transform"
+      style={{
+        backgroundImage: "url('/assets/lobby_world_boss/frame_wood_history.png')",
+        backgroundSize: '100% 100%',
+        backgroundRepeat: 'no-repeat',
+        padding: '16px 20px',
+        minHeight: '110px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        border: 'none',
+        backgroundColor: 'transparent',
+      }}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-lg flex-shrink-0">{elementIcon}</span>
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-2xl flex-shrink-0 drop-shadow-sm">{elementIcon}</span>
           <div className="min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{boss.bossName}</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-gray-500 bg-gray-700 px-1.5 py-0.5 rounded">
+            <p className="text-white text-base font-black truncate drop-shadow-md">{boss.bossName}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-bold text-gray-300 bg-black/30 px-1.5 py-0.5 rounded border border-white/10 uppercase tracking-wider">
                 {diffLabel}
               </span>
-              <span className={`text-xs ${isDefeated ? 'text-red-400' : 'text-gray-500'}`}>
-                {isDefeated ? t('world_boss.history.defeated') : t('world_boss.history.escaped')}
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/20 ${isDefeated ? 'text-red-400 border border-red-500/30' : 'text-gray-400 border border-gray-500/30'}`}>
+                {isDefeated ? t('world_boss.history.defeated').toUpperCase() : t('world_boss.history.escaped').toUpperCase()}
               </span>
             </div>
           </div>
         </div>
-        <div className="text-right flex-shrink-0 text-xs text-gray-500">
+        <div className="text-right flex-shrink-0 text-[10px] font-bold text-gray-400 uppercase tracking-tighter opacity-80">
           {boss.endedAt ? timeAgo(boss.endedAt, t) : ''}
         </div>
       </div>
-      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-        <span>👥 {boss.totalParticipants}</span>
-        <span>⚔️ {(boss.totalDamageDealt / 1_000_000).toFixed(1)}M dmg</span>
+      <div className="flex items-center gap-4 mt-3 text-[11px] font-bold text-gray-300">
+        <span className="flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded">
+          <span className="opacity-70">👥</span> {boss.totalParticipants}
+        </span>
+        <span className="flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded">
+          <span className="opacity-70">⚔️</span> {(boss.totalDamageDealt / 1_000_000).toFixed(1)}M dmg
+        </span>
       </div>
     </button>
   );
@@ -161,13 +176,81 @@ export function HistoryList() {
         )}
       </div>
 
-      <BottomDrawer
-        isOpen={!!selected}
-        onClose={() => setSelected(null)}
-        title={selected ? `🏆 ${selected.bossName}` : '🏆'}
-      >
-        {selected && <HistoryLeaderboardContent eventId={selected.id} t={t} />}
-      </BottomDrawer>
+      {/* Centered Modal: Xếp hạng chi tiết */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+          onClick={() => setSelected(null)}
+        >
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
+          {/* Content Box with Wood Frame */}
+          <div
+            className="relative w-full max-w-[800px] h-[85vh] animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center p-2"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Background Frame Image (Non-stretched) */}
+            <img
+              src="/assets/lobby_world_boss/frame_historical_details.png"
+              alt="frame"
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+            />
+
+            {/* Modal Content - Absolute Positioned to fit inside the frame */}
+            <div className="relative z-10 w-[85%] h-[70%] flex flex-col mt-16">
+              {/* Nút đóng - Đặt bên trong lòng khung gỗ cùng với nội dung */}
+              <button
+                onClick={() => setSelected(null)}
+                className="absolute top-[50px] right-[-23px] active:scale-95 transition-transform z-30"
+              >
+                <img
+                  src="/assets/lobby_world_boss/btn_close.png"
+                  alt="Close"
+                  className="w-10 h-10 object-contain"
+                />
+              </button>
+
+              {/* Header with Title Frame */}
+              <div
+                className="flex items-center justify-center mb-0 relative"
+                style={{ transform: 'translateY(-55px)' }}
+              >
+                <div
+                  style={{
+                    backgroundImage: "url('/assets/lobby_world_boss/frame_title_history.png')",
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                    width: '320px',
+                    height: '64px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 20px',
+                  }}
+                >
+                  <h3 className="text-sm font-black text-[#5d4037] drop-shadow-sm uppercase tracking-wider text-center pt-1">
+                    {selected ? `🏆 ${selected.bossName}` : '🏆'}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Spacer để giữ vị trí cho các mục bên dưới */}
+              <div className="h-10" />
+
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto px-6 custom-scrollbar pb-4">
+                <HistoryLeaderboardContent eventId={selected.id} t={t} />
+              </div>
+
+              {/* Footer / Info */}
+              <div className="text-[14px] font-black text-yellow-500/90 text-center italic mt-4 uppercase tracking-wider">
+                Top 20 {t('world_boss.history.ranking_info', 'bảng xếp hạng')}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

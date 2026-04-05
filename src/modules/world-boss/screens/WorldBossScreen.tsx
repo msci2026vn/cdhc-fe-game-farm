@@ -155,45 +155,76 @@ export function WorldBossScreen() {
         inset: 0,
         display: 'flex',
         flexDirection: 'column',
-        background: '#111827',
+        backgroundImage: "url('/assets/lobby_world_boss/background_lobby_world_boss.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         color: 'white',
         zIndex: 10,
       }}
     >
       {/* Header */}
-      <div style={{ flexShrink: 0, borderBottom: '1px solid #1f2937', background: '#111827' }}>
-        <div className="flex items-center gap-3 px-4 py-3">
-          <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white text-xl p-1">
-            ←
+      <div style={{ flexShrink: 0, borderBottom: 'none', background: 'transparent' }}>
+        <div className="flex items-center gap-3 px-4 py-3 relative">
+          <button onClick={() => navigate(-1)} className="hover:scale-110 active:scale-95 transition-transform z-20">
+            <img src="/assets/lobby_world_boss/btn_back_arrow.png" alt="Back" className="w-8 h-8 object-contain" />
           </button>
-          <h1 className="text-lg font-bold flex-1">World Boss</h1>
-          {data?.active && (
-            <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full animate-pulse">
-              LIVE
-            </span>
-          )}
+          <div className="flex-1 flex justify-center mr-8">
+            <div
+              style={{
+                backgroundImage: "url('/assets/lobby_world_boss/frame_title_bobby_world_boss.png')",
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+                minWidth: '220px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                fontWeight: 900,
+                color: '#fff',
+                textTransform: 'uppercase',
+                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                fontFamily: 'Outfit, sans-serif',
+              }}
+            >
+              World Boss
+            </div>
+          </div>
         </div>
 
         {/* Main tabs */}
-        <div className="flex border-t border-gray-800">
+        <div className="flex px-4 items-end gap-4 h-[72px] pb-1">
           <button
             onClick={() => setMainTab('arena')}
-            className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'arena'
-              ? 'border-b-2 border-yellow-400 text-yellow-400'
-              : 'text-gray-400'
-              }`}
-          >
-            {t('world_boss.screen.arena')}
-          </button>
+            style={{
+              flex: 1,
+              height: '64px',
+              backgroundImage: "url('/assets/lobby_world_boss/frame_arena.png')",
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+              filter: mainTab === 'arena' ? 'brightness(1.1) drop-shadow(0 0 8px rgba(234,179,8,0.5))' : 'grayscale(0.6) opacity(0.6)',
+              transition: 'all 0.2s',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+            }}
+          />
           <button
             onClick={() => setMainTab('history')}
-            className={`flex-1 py-2 text-sm font-medium transition-colors ${mainTab === 'history'
-              ? 'border-b-2 border-blue-400 text-blue-400'
-              : 'text-gray-400'
-              }`}
-          >
-            {t('world_boss.screen.history')}
-          </button>
+            style={{
+              flex: 1,
+              height: '48px',
+              backgroundImage: "url('/assets/lobby_world_boss/frame_history.png')",
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+              filter: mainTab === 'history' ? 'brightness(1.1) drop-shadow(0 0 8px rgba(59,130,246,0.5))' : 'grayscale(0.6) opacity(0.6)',
+              transition: 'all 0.2s',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              transform: 'translateY(-16px)',
+            }}
+          />
         </div>
       </div>
 
@@ -216,69 +247,81 @@ export function WorldBossScreen() {
             durationMinutes={boss.durationMinutes}
           />
 
-          {/* Attack button + Co-op button — ngay dưới đếm ngược */}
-          <div style={{ padding: '10px 16px', display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <AttackButton
-                battleState="idle"
-                onAttack={() => setShowBattle(true)}
-              />
-            </div>
-            {/* Nút Co-op — optional path, không thay đổi solo flow */}
-            <button
-              onClick={() => { setCoopInitialRoomId(undefined); setShowCoop(true); }}
-              style={{
-                padding: '0 16px',
-                background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: 13,
-                border: 'none',
-                borderRadius: 10,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              👥 Co-op
-            </button>
-            {/* Nút Danh Sách Phòng */}
-            <button
-              onClick={() => setShowRoomList(true)}
-              style={{
-                padding: '0 12px',
-                background: 'rgba(255,255,255,0.08)',
-                color: '#d1d5db',
-                fontWeight: 600,
-                fontSize: 12,
-                border: '1px solid #374151',
-                borderRadius: 10,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              📋 Phòng
-            </button>
-            {/* Nút Nhập mã phòng */}
-            <button
-              onClick={() => { setJoinCode(''); setJoinError(''); setShowJoinInput(true); }}
-              style={{
-                padding: '0 12px',
-                background: 'rgba(255,255,255,0.08)',
-                color: '#d1d5db',
-                fontWeight: 600,
-                fontSize: 12,
-                border: '1px solid #374151',
-                borderRadius: 10,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {t('pvp:coop.joinByCode.button')}
-            </button>
-          </div>
+          <div className="flex flex-col items-center w-full pb-4 px-2 mt-4 scale-105 origin-bottom">
+            <div className="flex items-center justify-between gap-1 w-full scale-100">
+              {/* Nút Vào Đánh */}
+              <button
+                onClick={() => setShowBattle(true)}
+                className="relative flex-1 hover:scale-110 active:scale-95 transition-transform"
+              >
+                <img 
+                  src="/assets/lobby_world_boss/btn_fight.png" 
+                  alt="Fight" 
+                  className="w-full h-auto object-contain"
+                />
+                <div className="absolute inset-0 flex items-center justify-center pb-1">
+                  <span className="text-white font-black text-[16px] uppercase drop-shadow-lg tracking-tighter">
+                    Vào Đánh
+                  </span>
+                </div>
+              </button>
 
-          <div className="flex items-center justify-between px-4 pb-1 text-xs text-gray-400">
-            <span>{t('world_boss.screen.participants_count', { count: boss.participantCount })}</span>
+              {/* Nút Tạo Phòng (Co-op) */}
+              <button
+                onClick={() => { setCoopInitialRoomId(undefined); setShowCoop(true); }}
+                className="relative flex-1 hover:scale-110 active:scale-95 transition-transform"
+              >
+                <img 
+                  src="/assets/lobby_world_boss/btn_create_room.png" 
+                  alt="Co-op" 
+                  className="w-full h-auto object-contain"
+                />
+                <div className="absolute inset-0 flex items-center justify-center pb-1">
+                  <span className="text-white font-black text-[15px] uppercase drop-shadow-lg tracking-tighter">
+                    Co-op
+                  </span>
+                </div>
+              </button>
+
+              {/* Nút Danh Sách Phòng */}
+              <button
+                onClick={() => setShowRoomList(true)}
+                className="relative flex-1 hover:scale-110 active:scale-95 transition-transform"
+              >
+                <img 
+                  src="/assets/lobby_world_boss/btn_room.png" 
+                  alt="Rooms" 
+                  className="w-full h-auto object-contain"
+                />
+                <div className="absolute inset-0 flex items-center justify-center pb-1">
+                  <span className="text-white font-black text-[14px] uppercase drop-shadow-lg tracking-tighter">
+                    Phòng
+                  </span>
+                </div>
+              </button>
+
+              {/* Nút Nhập Mã Phòng */}
+              <button
+                onClick={() => { setJoinCode(''); setJoinError(''); setShowJoinInput(true); }}
+                className="relative flex-1 hover:scale-110 active:scale-95 transition-transform"
+              >
+                <img 
+                  src="/assets/lobby_world_boss/btn_enter_code.png" 
+                  alt="Join" 
+                  className="w-full h-auto object-contain"
+                />
+                <div className="absolute inset-0 flex items-center justify-center pb-1">
+                  <span className="text-white font-black text-[13px] uppercase drop-shadow-lg tracking-tighter">
+                    {t('pvp:coop.joinByCode.button', 'Nhập mã')}
+                  </span>
+                </div>
+              </button>
+            </div>
+            
+            {/* Participant count - centered below buttons */}
+            <div className="mt-2 text-[11px] font-bold text-white/70 drop-shadow-sm">
+              <span>{t('world_boss.screen.participants_count', { count: boss.participantCount })}</span>
+            </div>
           </div>
         </div>
       )}

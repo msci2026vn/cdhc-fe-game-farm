@@ -63,7 +63,7 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
   const spriteSrc = SPRITE_MAP[boss.baseSprite];
 
   return (
-    <div className="flex flex-col items-center px-4 pt-4 pb-2 gap-2">
+    <div className="flex flex-col items-center px-4 pt-0 pb-2 gap-1 -mt-4">
       {/* Element + weakness */}
       <div className="flex gap-3">
         <span className={`text-sm font-bold ${element.color}`}>
@@ -81,11 +81,13 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
         {onRanking && (
           <button
             onClick={onRanking}
-            className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl active:scale-95 transition-transform"
-            style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)', minWidth: 64 }}
+            className="active:scale-95 transition-transform"
           >
-            <span className="text-xl">🏆</span>
-            <span className="text-[10px] font-bold text-yellow-400 leading-tight text-center whitespace-pre-line">{t('world_boss.display.ranking')}</span>
+            <img
+              src="/assets/lobby_world_boss/btn_rank.png"
+              alt={t('world_boss.display.ranking')}
+              className="w-24 h-24 object-contain"
+            />
           </button>
         )}
 
@@ -114,45 +116,92 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
             </div>
           )}
           {/* Info hint */}
-          <span className="absolute bottom-1 right-1 text-xs bg-black/50 rounded-full px-1.5 py-0.5 text-gray-300">
-            ℹ️
-          </span>
+          <div className="absolute bottom-1 right-1 z-10 hover:scale-110 transition-transform">
+            <img
+              src="/assets/lobby_world_boss/btn_detail.png"
+              alt="Detail"
+              className="w-6 h-6 object-contain"
+            />
+          </div>
         </button>
 
         {/* Nút Trận chiến bên phải */}
         {onBattle && (
           <button
             onClick={onBattle}
-            className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl active:scale-95 transition-transform"
-            style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', minWidth: 64 }}
+            className="active:scale-95 transition-transform"
           >
-            <span className="text-xl">⚔️</span>
-            <span className="text-[10px] font-bold text-blue-400 leading-tight text-center whitespace-pre-line">{t('world_boss.display.battle')}</span>
+            <img
+              src="/assets/lobby_world_boss/btn_battle.png"
+              alt={t('world_boss.display.battle')}
+              className="w-24 h-24 object-contain"
+            />
           </button>
         )}
       </div>
 
-      {/* Name + title */}
-      <div className="text-center">
-        <h2 className="text-xl font-bold text-white">{boss.bossName}</h2>
-        <p className="text-sm text-gray-400 italic">{boss.bossTitle}</p>
+      {/* Name + title in frame */}
+      <div
+        style={{
+          backgroundImage: "url('/assets/lobby_world_boss/frame_name_boss.png')",
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat',
+          width: '280px',
+          height: '70px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 20px',
+          marginTop: '-22px',
+        }}
+      >
+        <h2 className="text-lg font-bold text-white leading-tight drop-shadow-md">
+          {boss.bossName}
+        </h2>
+        <p className="text-[10px] text-yellow-300 italic opacity-90 drop-shadow-sm">
+          {boss.bossTitle}
+        </p>
       </div>
 
-      {/* Difficulty badge */}
-      <span className={`text-xs font-bold px-3 py-1 rounded-full text-white ${difficulty.bg}`}>
-        ⭐ {difficulty.label}
-      </span>
+      {/* Difficulty badge - Fixed height container to prevent pushing other elements down */}
+      <div className="relative h-[16px] flex items-center justify-center mt-2 mb-4">
+        <div className="relative group scale-95">
+          <img 
+            src="/assets/lobby_world_boss/frame_level.png" 
+            alt="level frame" 
+            className="w-[100px] h-auto object-contain pointer-events-none"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[10px] font-black text-white drop-shadow-md uppercase tracking-wide leading-none flex items-center gap-1">
+              <span>⭐</span>
+              <span className="mb-[1px]">{difficulty.label}</span>
+            </span>
+          </div>
+        </div>
+      </div>
 
-      {/* Story preview — tap to read full */}
+      {/* Story preview in themed frame - Further height reduction */}
       {boss.storyPreview && (
         <button
           onClick={() => setShowStory(true)}
-          className="text-center max-w-xs"
+          className="relative w-[440px] h-[115px] flex flex-col items-center pt-6 pb-2 px-20 -mt-6 active:scale-[0.98] transition-transform"
         >
-          <p className="text-xs text-gray-400 leading-relaxed italic">
-            "{boss.storyPreview}"
-          </p>
-          <span className="text-xs text-blue-400 mt-1 block">📖 {t('world_boss.display.read_more')}</span>
+          <img 
+            src="/assets/lobby_world_boss/frame_information.png" 
+            alt="story frame" 
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+          />
+          <div className="relative z-10 text-center flex flex-col items-center h-full">
+            <p className="text-[9.5px] text-[#5d4037] leading-tight italic font-bold px-14 line-clamp-4 overflow-hidden mb-1">
+              "{boss.storyPreview}"
+            </p>
+            <img 
+              src="/assets/lobby_world_boss/btn_read_more.png" 
+              alt="Read more" 
+              className="w-20 h-auto object-contain mt-auto pointer-events-none"
+            />
+          </div>
         </button>
       )}
 
