@@ -260,8 +260,8 @@ export function WorldBossScreen() {
                   className="w-full h-auto object-contain"
                 />
                 <div className="absolute inset-0 flex items-center justify-center pb-1">
-                  <span className="text-white font-black text-[16px] uppercase drop-shadow-lg tracking-tighter">
-                    Vào Đánh
+                  <span className="text-white font-black text-[14px] uppercase drop-shadow-lg tracking-tighter">
+                    Đánh
                   </span>
                 </div>
               </button>
@@ -276,9 +276,12 @@ export function WorldBossScreen() {
                   alt="Co-op" 
                   className="w-full h-auto object-contain"
                 />
-                <div className="absolute inset-0 flex items-center justify-center pb-1">
-                  <span className="text-white font-black text-[15px] uppercase drop-shadow-lg tracking-tighter">
-                    Co-op
+                <div className="absolute inset-0 flex flex-col items-center justify-center pb-1 leading-none">
+                  <span className="text-white font-black text-[13px] uppercase drop-shadow-lg tracking-tighter">
+                    Tạo
+                  </span>
+                  <span className="text-white font-black text-[13px] uppercase drop-shadow-lg tracking-tighter">
+                    Phòng
                   </span>
                 </div>
               </button>
@@ -293,8 +296,14 @@ export function WorldBossScreen() {
                   alt="Rooms" 
                   className="w-full h-auto object-contain"
                 />
-                <div className="absolute inset-0 flex items-center justify-center pb-1">
-                  <span className="text-white font-black text-[14px] uppercase drop-shadow-lg tracking-tighter">
+                <div className="absolute inset-0 flex flex-col items-center justify-center pb-1 gap-0 leading-[0.85]">
+                  <span className="text-white font-black text-[12px] uppercase drop-shadow-lg tracking-tighter text-center">
+                    Danh
+                  </span>
+                  <span className="text-white font-black text-[12px] uppercase drop-shadow-lg tracking-tighter text-center">
+                    Sách
+                  </span>
+                  <span className="text-white font-black text-[12px] uppercase drop-shadow-lg tracking-tighter text-center">
                     Phòng
                   </span>
                 </div>
@@ -310,16 +319,22 @@ export function WorldBossScreen() {
                   alt="Join" 
                   className="w-full h-auto object-contain"
                 />
-                <div className="absolute inset-0 flex items-center justify-center pb-1">
+                <div className="absolute inset-0 flex flex-col items-center justify-center pb-1 leading-none">
                   <span className="text-white font-black text-[13px] uppercase drop-shadow-lg tracking-tighter">
-                    {t('pvp:coop.joinByCode.button', 'Nhập mã')}
+                    Tìm
+                  </span>
+                  <span className="text-white font-black text-[13px] uppercase drop-shadow-lg tracking-tighter">
+                    Phòng
                   </span>
                 </div>
               </button>
             </div>
             
             {/* Participant count - centered below buttons */}
-            <div className="mt-2 text-[11px] font-bold text-white/70 drop-shadow-sm">
+            <div 
+              className="mt-2 text-[11px] font-black text-[#fdead1] uppercase tracking-tight"
+              style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5)' }}
+            >
               <span>{t('world_boss.screen.participants_count', { count: boss.participantCount })}</span>
             </div>
           </div>

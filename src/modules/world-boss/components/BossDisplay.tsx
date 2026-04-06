@@ -65,13 +65,28 @@ export function BossDisplay({ boss, onRanking, onBattle }: BossDisplayProps) {
   return (
     <div className="flex flex-col items-center px-4 pt-0 pb-2 gap-1 -mt-4">
       {/* Element + weakness */}
-      <div className="flex gap-3">
-        <span className={`text-sm font-bold ${element.color}`}>
-          {element.icon} {element.label}
-        </span>
-        <span className="text-sm text-gray-400">
-          💧 {t('world_boss.display.weakness')}: {boss.weakness}
-        </span>
+      {/* Element + weakness - Using frame_wood.png asset (compact version) */}
+      <div 
+        className="relative flex gap-3 px-6 py-1.5 mb-1 items-center justify-center"
+        style={{
+          backgroundImage: "url('/assets/lobby_world_boss/frame_wood.png')",
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat',
+          minWidth: '200px',
+          height: '30px',
+        }}
+      >
+        <div className={`flex items-center gap-1.5 text-[11px] font-black ${element.color} drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]`}>
+          <span className="text-sm">{element.icon}</span>
+          <span className="uppercase tracking-tighter">{element.label}</span>
+        </div>
+        <div className="w-[1px] h-3 bg-black/20 self-center" />
+        <div className="flex items-center gap-1.5 text-[11px] font-black text-blue-100 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+          <span className="text-sm">💧</span>
+          <span className="uppercase tracking-tighter">
+            {t('world_boss.display.weakness')}: <span className="text-white">{boss.weakness}</span>
+          </span>
+        </div>
       </div>
 
       {/* Avatar row: [Xep hang] [Boss sprite] [Tran chien] */}

@@ -214,8 +214,13 @@
     50% { transform: scale(1.03); }
   }
 
-  @keyframes ping {
-    75%, 100% { transform: scale(1.5); opacity: 0; }
+  @keyframes shimmer-slow {
+    0% { transform: translateX(-150%) skewX(-20deg); }
+    50% { transform: translateX(150%) skewX(-20deg); }
+    100% { transform: translateX(150%) skewX(-20deg); }
   }
 
+  .animate-shimmer-slow {
+    animation: shimmer-slow 4s infinite linear;
+  }
 }
