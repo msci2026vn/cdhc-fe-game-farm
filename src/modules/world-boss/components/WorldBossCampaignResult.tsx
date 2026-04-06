@@ -32,31 +32,20 @@ export function WorldBossCampaignResult({ result, isSyncing, onFightAgain, onExi
   return (
     <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 text-center border border-gray-600 relative overflow-hidden">
-        {/* Syncing Overlay / Indicator */}
-        {currentSyncing && (
-          <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500/20">
-            <div className="h-full bg-blue-500 animate-progress-buffer w-full origin-left" />
-          </div>
-        )}
+
 
         <h2 className="text-xl font-bold text-red-400 mb-1">
-          {currentSyncing ? 'Đang đồng bộ...' : t('world_boss.result.session_ended')}
+          {t('world_boss.result.session_ended')}
         </h2>
         <p className="text-gray-400 text-xs mb-5">
-          {currentSyncing ? 'Vui lòng chờ giây lát để ghi nhận điểm...' : t('world_boss.result.defeated')}
+          {t('world_boss.result.defeated')}
         </p>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className={`bg-gray-700/60 rounded-xl p-3 border transition-colors ${currentSyncing ? 'border-blue-500/30' : currentError ? 'border-red-500/30' : 'border-transparent'}`}>
+          <div className={`bg-gray-700/60 rounded-xl p-3 border ${currentError ? 'border-red-500/30' : 'border-transparent'}`}>
             <div className="text-yellow-400 text-xl font-bold flex items-center justify-center gap-1">
               {result.totalDamage.toLocaleString()}
-              {currentSyncing ? (
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              ) : currentError ? (
-                <span className="text-[10px] text-red-500">⚠️</span>
-              ) : (
-                <span className="text-[10px] text-green-500">✓</span>
-              )}
+              {currentError && <span className="text-[10px] text-red-500">⚠️</span>}
             </div>
             <div className="text-gray-400 text-[10px] mt-0.5 uppercase tracking-wider font-bold">Damage</div>
           </div>
