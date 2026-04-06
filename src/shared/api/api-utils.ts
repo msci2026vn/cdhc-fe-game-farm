@@ -197,21 +197,26 @@ export async function handleApiError(response: Response): Promise<never> {
     throw new Error('Session expired');
   }
 
+  const isServerError = response.status >= 500 && response.status <= 599;
   const errorData = await response.json().catch(() => ({}));
+  
   const errMsg = typeof errorData?.error === 'string'
     ? errorData.error
     : errorData?.error?.message || errorData?.message || `API Error: ${response.status}`;
-  const err = new Error(errMsg);
+    
+  const err = new Error(isServerError ? 'Server is currently undergoing maintenance. Please try again later.' : errMsg);
   (err as any).status = response.status;
-  (err as any).code = typeof errorData?.error === 'object' ? errorData?.error?.code : 'UNKNOWN';
+  (err as any).isServerError = isServerError;
+  (err as any).code = typeof errorData?.error === 'object' ? errorData?.error?.code : (isServerError ? 'SERVER_ERROR' : 'UNKNOWN');
   (err as any).cooldownRemaining = typeof errorData?.error === 'object' ? errorData?.error?.cooldownRemaining : undefined;
 
-  console.log('[FARM-DEBUG] handleApiError()', JSON.stringify({
-    status: response.status,
-    code: (err as any).code,
-    message: err.message,
-    cooldownRemaining: (err as any).cooldownRemaining,
-  }));
+  if (!isServerError) {
+    console.log('[GameAPI] handleApiError()', JSON.stringify({
+      status: response.status,
+      code: (err as any).code,
+      message: err.message,
+    }));
+  }
 
   throw err;
 }

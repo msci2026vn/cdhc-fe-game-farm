@@ -84,78 +84,101 @@ export function useWorldBossSSE(
     if (skillId === 'stun') setIsBossStunned(false);
   }, []);
 
+  const sseRetryCountRef = useRef(0);
+  const sseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!eventId) return;
 
-    const es = new EventSource(`${API_BASE_URL}/api/world-boss/${eventId}/events`, {
-      withCredentials: true,
-    });
+    const connect = () => {
+      if (!eventId) return;
 
-    // hp_update: cập nhật HP bar + thêm damage feed nếu là người khác đánh
-    es.addEventListener('hp_update', (e) => {
-      try {
-        const data = JSON.parse(e.data) as {
-          hpPercent?: number;
-          damage?: number;
-          attackerId?: string;
-          attackerName?: string;
-        };
+      const es = new EventSource(`${API_BASE_URL}/api/world-boss/${eventId}/events`, {
+        withCredentials: true,
+      });
 
-        if (data.hpPercent !== undefined) {
-          setSseHpPercent(data.hpPercent);
-        }
+      es.onopen = () => {
+        sseRetryCountRef.current = 0;
+      };
 
-        // Chỉ thêm feed nếu là người khác đánh — mình đánh đã có feedback từ POST response
-        if (data.damage && data.attackerId && data.attackerId !== myUserIdRef.current) {
-          const entry: DamageFeedEntry = {
-            id: `${data.attackerId}-${Date.now()}`,
-            damage: data.damage,
-            attackerName: data.attackerName ?? 'Player',
-            attackerId: data.attackerId,
-            timestamp: Date.now(),
+      // hp_update: cập nhật HP bar + thêm damage feed nếu là người khác đánh
+      es.addEventListener('hp_update', (e) => {
+        try {
+          const data = JSON.parse(e.data) as {
+            hpPercent?: number;
+            damage?: number;
+            attackerId?: string;
+            attackerName?: string;
           };
-          setDamageFeed((prev) => [...prev.slice(-4), entry]); // max 5 entries
+
+          if (data.hpPercent !== undefined) {
+            setSseHpPercent(data.hpPercent);
+          }
+
+          // Chỉ thêm feed nếu là người khác đánh — mình đánh đã có feedback từ POST response
+          if (data.damage && data.attackerId && data.attackerId !== myUserIdRef.current) {
+            const entry: DamageFeedEntry = {
+              id: `${data.attackerId}-${Date.now()}`,
+              damage: data.damage,
+              attackerName: data.attackerName ?? 'Player',
+              attackerId: data.attackerId,
+              timestamp: Date.now(),
+            };
+            setDamageFeed((prev) => [...prev.slice(-4), entry]); // max 5 entries
+          }
+        } catch {
+          // ignore malformed
         }
-      } catch {
-        // ignore malformed
-      }
-    });
+      });
 
-    // boss_dead: HP về 0 ngay lập tức (không cần chờ poll)
-    es.addEventListener('boss_dead', (e) => {
-      try {
-        const data = JSON.parse(e.data) as { hpPercent?: number };
-        setSseHpPercent(data.hpPercent ?? 0);
-      } catch {
-        setSseHpPercent(0);
-      }
-    });
+      // boss_dead: HP về 0 ngay lập tức (không cần chờ poll)
+      es.addEventListener('boss_dead', (e) => {
+        try {
+          const data = JSON.parse(e.data) as { hpPercent?: number };
+          setSseHpPercent(data.hpPercent ?? 0);
+        } catch {
+          setSseHpPercent(0);
+        }
+      });
 
-    // boss_skill: boss dùng skill → apply hiệu ứng
-    es.addEventListener('boss_skill', (e) => {
-      try {
-        const data = JSON.parse(e.data) as BossSkillEvent;
-        handleBossSkill(data);
-      } catch {
-        // ignore malformed
-      }
-    });
+      // boss_skill: boss dùng skill → apply hiệu ứng
+      es.addEventListener('boss_skill', (e) => {
+        try {
+          const data = JSON.parse(e.data) as BossSkillEvent;
+          handleBossSkill(data);
+        } catch {
+          // ignore malformed
+        }
+      });
 
-    // boss_skill_end: skill hết hạn → xoá hiệu ứng
-    es.addEventListener('boss_skill_end', (e) => {
-      try {
-        const data = JSON.parse(e.data) as BossSkillEndEvent;
-        handleBossSkillEnd(data);
-      } catch {
-        // ignore malformed
-      }
-    });
+      // boss_skill_end: skill hết hạn → xoá hiệu ứng
+      es.addEventListener('boss_skill_end', (e) => {
+        try {
+          const data = JSON.parse(e.data) as BossSkillEndEvent;
+          handleBossSkillEnd(data);
+        } catch {
+          // ignore malformed
+        }
+      });
 
-    es.onerror = () => {
-      // EventSource tự reconnect sau lỗi — không cần xử lý thêm
+      es.onerror = () => {
+        es.close();
+        const delay = Math.min(30000, Math.pow(2, sseRetryCountRef.current) * 2000);
+        sseRetryCountRef.current += 1;
+
+        if (sseTimeoutRef.current) clearTimeout(sseTimeoutRef.current);
+        sseTimeoutRef.current = setTimeout(connect, delay);
+      };
+
+      return es;
     };
 
-    return () => es.close();
+    const es = connect();
+
+    return () => {
+      if (es) es.close();
+      if (sseTimeoutRef.current) clearTimeout(sseTimeoutRef.current);
+    };
   }, [eventId, handleBossSkill, handleBossSkillEnd]);
 
   // Auto-cleanup damage feed entries sau 3s để không bị stale

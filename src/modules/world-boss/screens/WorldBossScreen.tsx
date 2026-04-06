@@ -340,7 +340,7 @@ export function WorldBossScreen() {
           <HistoryList />
         ) : isLoading ? (
           <LoadingSkeleton />
-        ) : isError ? (
+        ) : (!data && isError) ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 gap-4 text-center">
             <div className="text-5xl">!</div>
             <h2 className="text-lg font-bold text-red-400">{t('world_boss.screen.error_connect_title')}</h2>

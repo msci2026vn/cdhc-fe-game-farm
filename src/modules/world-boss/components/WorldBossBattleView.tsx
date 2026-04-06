@@ -153,7 +153,8 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
     combatStats,
     worldBoss.id,
     handleSessionEnd,
-    authData?.user?.name ?? undefined,
+    authData?.user?.name || authData?.user?.id || 'Unknown Player',
+    authData?.user?.id,
   );
 
   // SSE realtime HP + boss skill events

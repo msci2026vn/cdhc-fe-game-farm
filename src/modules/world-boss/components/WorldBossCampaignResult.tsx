@@ -6,6 +6,7 @@ interface WorldBossCampaignResultProps {
     duration: number;
     isSyncing?: boolean;
     syncError?: boolean;
+    isServerError?: boolean;
   };
   isSyncing?: boolean;
   onFightAgain: () => void;
@@ -26,6 +27,7 @@ export function WorldBossCampaignResult({ result, isSyncing, onFightAgain, onExi
   // Realtime syncing status
   const currentSyncing = isSyncing || result.isSyncing;
   const currentError = !currentSyncing && result.syncError;
+  const isServerDown = result.isServerError;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4">
@@ -76,7 +78,9 @@ export function WorldBossCampaignResult({ result, isSyncing, onFightAgain, onExi
 
         {currentError && (
           <div className="mb-4 p-2 bg-red-900/20 border border-red-900/40 rounded-lg text-[10px] text-red-400">
-            Mạng yếu: Một số điểm chưa được xác nhận.
+            {isServerDown 
+              ? 'Máy chủ hiện đang bảo trì hoặc quá tải. Vui lòng quay lại sau.' 
+              : 'Mạng yếu: Một số điểm chưa được xác nhận.'}
           </div>
         )}
 

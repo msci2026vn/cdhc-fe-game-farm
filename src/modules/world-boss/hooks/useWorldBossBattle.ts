@@ -13,15 +13,16 @@ export interface WorldBossSessionResult {
   duration: number;
   isSyncing?: boolean;
   syncError?: boolean;
+  isServerError?: boolean;
 }
 
 type BattleState = 'idle' | 'fighting' | 'ended';
 
 const DEFAULT_SKILL_LEVELS: PlayerSkillLevels = { sam_dong: 1, ot_hiem: 0, rom_boc: 0 };
-// BATCH_INTERVAL_MS phải > BE rate limit 2500ms — thêm 200ms buffer tránh 429
-const BATCH_INTERVAL_MS = 2700;
+// BATCH_INTERVAL_MS phải > BE rate limit 2500ms — dùng 3000ms cho an toàn
+const BATCH_INTERVAL_MS = 3000;
 // BATCH_INTERVAL_URGENT_MS khi boss ≤ 10% HP — phải > BE endgame limit 800ms
-const BATCH_INTERVAL_URGENT_MS = 1000;
+const BATCH_INTERVAL_URGENT_MS = 1200;
 const HP_URGENT_THRESHOLD = 0.1;
 
 /**
@@ -42,6 +43,7 @@ export function useWorldBossBattle(
   eventId: string,
   onSessionEnd?: (result: WorldBossSessionResult) => void,
   username?: string,
+  userId?: string,
 ) {
   const [battleState, setBattleState] = useState<BattleState>('idle');
   const [sessionStats, setSessionStats] = useState({
@@ -84,32 +86,63 @@ export function useWorldBossBattle(
     prevTotalDmgRef.current = current;
   }, [engine.totalDmgDealt]);
 
+  const lastSendTimeRef = useRef(0);
+  const engineTotalDmgRef = useRef(0);
+  const engineMaxComboRef = useRef(0);
+
+  useEffect(() => {
+    engineTotalDmgRef.current = engine.totalDmgDealt ?? 0;
+    engineMaxComboRef.current = engine.maxCombo ?? 0;
+  }, [engine.totalDmgDealt, engine.maxCombo]);
+
   // Send a batch to the server
   const sendBatch = useCallback(async (isFinal: boolean) => {
     if (sendingRef.current) return;
 
-    const currentDamage = engine.totalDmgDealt ?? 0;
+    // Explicitly enforce a minimum gap between requests (2500ms) to avoid 429
+    const now = Date.now();
+    const timeSinceLastSend = now - lastSendTimeRef.current;
+    if (timeSinceLastSend < 2500 && !isFinal) {
+      return;
+    }
+
+    const currentDamage = Math.floor(engineTotalDmgRef.current);
     const damageDelta = currentDamage - lastSentDamageRef.current;
-    if (damageDelta <= 0 && !isFinal) return;
+    
+    // Skip if no actual damage and no hits to report
+    if (damageDelta <= 0 && hitCountRef.current <= 0 && !isFinal) return;
+
+    // Safety: ensure hits/damage consistent
+    let hits = Math.floor(hitCountRef.current);
+    if (damageDelta > 0 && hits <= 0) hits = 1;
+    if (damageDelta <= 0 && hits > 0 && !isFinal) {
+      // If no damage, but we have hits, but not final... better wait for more damage to group them
+      return; 
+    }
+    
+    // If it's final but still no damage and no hits... skip totally
+    if (isFinal && damageDelta <= 0 && hits <= 0) return;
 
     sendingRef.current = true;
+    lastSendTimeRef.current = now;
+
     try {
       const res: WorldBossAttackResult = await worldBossApi.attack({
         eventId,
-        damageDelta: Math.max(0, damageDelta),
-        hits: hitCountRef.current,
-        maxCombo: engine.maxCombo ?? 0,
+        damageDelta: Math.floor(Math.max(0, damageDelta)),
+        hits: Math.floor(hits),
+        maxCombo: Math.floor(engineMaxComboRef.current),
         final: isFinal,
         username: usernameRef.current,
       });
 
-      lastSentDamageRef.current = currentDamage;
-      hitCountRef.current = 0;
+      if (res && 'ok' in res && res.ok) {
+        lastSentDamageRef.current = currentDamage;
+        hitCountRef.current = 0;
 
-      if (res.ok) {
         setSessionStats(prev => ({
           totalDamage: res.totalDamage ?? prev.totalDamage,
-          maxCombo: engine.maxCombo ?? prev.maxCombo,
+          maxCombo: engineMaxComboRef.current,
           hpPercent: res.hpPercent,
           rank: res.rank,
         }));
@@ -118,16 +151,21 @@ export function useWorldBossBattle(
         if (res.hpPercent <= 0 && battleStateRef.current === 'fighting') {
           setBattleState('ended');
         }
+      } else {
+        const errorMsg = (res && !res.ok && 'error' in res) ? res.error : 'Unknown error';
+        if (errorMsg !== 'on_cooldown') {
+          console.warn(`[WorldBossBattle] attack rejected: ${errorMsg}`, { damageDelta, hits, res });
+        }
       }
 
       return res;
-    } catch (err) {
-      console.error('[WorldBossBattle] batch failed:', err);
-      return null;
+    } catch (err: any) {
+      console.warn('[WorldBossBattle] batch failed:', err);
+      return { ok: false as const, error: err.message, isServerError: err.isServerError === true };
     } finally {
       sendingRef.current = false;
     }
-  }, [eventId, engine.totalDmgDealt, engine.maxCombo]);
+  }, [eventId]);
 
   const startBattle = useCallback(() => {
     if (battleState !== 'idle') return;
@@ -180,41 +218,38 @@ export function useWorldBossBattle(
 
     const flush = async () => {
       const res = await sendFinalBatchWithRetry(3);
+      const hasUnsentDamage = engineTotalDmgRef.current > lastSentDamageRef.current;
+      const userIdx = userId ? worldBoss.leaderboard.findIndex(e => e.userId === userId) : -1;
+      const fallbackRank = userIdx >= 0 ? userIdx + 1 : null;
       const sessionResult: WorldBossSessionResult = {
-        totalDamage: (res?.ok && 'totalDamage' in res) ? (res.totalDamage as number) : (engine.totalDmgDealt ?? 0),
-        maxCombo: engine.maxCombo ?? 0,
-        rank: (res?.ok && 'rank' in res) ? (res.rank as number) : null,
+        totalDamage: (res && res.ok && 'totalDamage' in res) ? (res.totalDamage as number) : (engineTotalDmgRef.current),
+        maxCombo: engineMaxComboRef.current,
+        rank: (res && res.ok && 'rank' in res) ? (res.rank as number) : fallbackRank,
         duration,
         isSyncing: false,
-        syncError: !res?.ok,
+        syncError: !res?.ok && hasUnsentDamage,
+        isServerError: (res && !res.ok && (res as any).isServerError && hasUnsentDamage),
       };
       setBattleState('ended');
       onSessionEnd?.(sessionResult);
     };
 
     flush();
-  }, [engine.result, sendFinalBatchWithRetry, onSessionEnd, engine.totalDmgDealt, engine.maxCombo]);
+  }, [engine.result, sendFinalBatchWithRetry, onSessionEnd]);
 
   // Cleanup: flush pending on unmount
   useEffect(() => {
     return () => {
       if (battleStateRef.current === 'fighting') {
-        const currentDamage = engine.totalDmgDealt ?? 0;
+        const currentDamage = engineTotalDmgRef.current;
         const delta = currentDamage - lastSentDamageRef.current;
-        if (delta > 0) {
-          // Fire-and-forget flush
-          worldBossApi.attack({
-            eventId,
-            damageDelta: delta,
-            hits: hitCountRef.current,
-            maxCombo: engine.maxCombo ?? 0,
-            final: true,
-            username: usernameRef.current,
-          }).catch(() => {});
+        if (delta > 0 || hitCountRef.current > 0) {
+          // Fire-and-forget flush (final)
+          sendBatch(true).catch(() => {});
         }
       }
     };
-  }, [eventId]);
+  }, [eventId, sendBatch]);
 
   // External signal: boss died/expired from lite polling
   const notifyBossDeadFromServer = useCallback(() => {
@@ -225,20 +260,24 @@ export function useWorldBossBattle(
 
     const flush = async () => {
       const res = await sendFinalBatchWithRetry(3);
+      const hasUnsentDamage = engineTotalDmgRef.current > lastSentDamageRef.current;
+      const userIdx = userId ? worldBoss.leaderboard.findIndex(e => e.userId === userId) : -1;
+      const fallbackRank = userIdx >= 0 ? userIdx + 1 : null;
       const sessionResult: WorldBossSessionResult = {
-        totalDamage: (res?.ok && 'totalDamage' in res) ? (res.totalDamage as number) : (engine.totalDmgDealt ?? 0),
-        maxCombo: engine.maxCombo ?? 0,
-        rank: (res?.ok && 'rank' in res) ? (res.rank as number) : null,
+        totalDamage: (res && res.ok && 'totalDamage' in res) ? (res.totalDamage as number) : (engineTotalDmgRef.current),
+        maxCombo: engineMaxComboRef.current,
+        rank: (res && res.ok && 'rank' in res) ? (res.rank as number) : fallbackRank,
         duration,
         isSyncing: false,
-        syncError: !res?.ok,
+        syncError: !res?.ok && hasUnsentDamage,
+        isServerError: (res && !res.ok && (res as any).isServerError && hasUnsentDamage),
       };
       setBattleState('ended');
       onSessionEnd?.(sessionResult);
     };
 
     flush();
-  }, [sendFinalBatchWithRetry, engine.totalDmgDealt, engine.maxCombo, onSessionEnd]);
+  }, [sendFinalBatchWithRetry, onSessionEnd]);
 
   return {
     engine,

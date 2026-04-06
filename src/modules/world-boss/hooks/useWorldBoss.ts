@@ -10,9 +10,14 @@ export function useWorldBoss() {
   return useQuery<WorldBossData>({
     queryKey: WORLD_BOSS_KEY,
     queryFn: worldBossApi.getCurrent,
-    refetchInterval: 3_000,
+    refetchInterval: (query) => {
+      // If server error (5xx), slow down significantly to 60s
+      if ((query.state.error as any)?.isServerError) return 60_000;
+      if (query.state.error) return 10_000; // General error: 10s
+      return 15_000;
+    },
     refetchIntervalInBackground: false,
-    staleTime: 2_000,
+    staleTime: 5_000,
   });
 }
 
@@ -22,13 +27,20 @@ export function useWorldBossLite(enabled: boolean) {
     queryKey: WORLD_BOSS_LITE_KEY,
     queryFn: worldBossApi.getLite,
     refetchInterval: (query) => {
+      // If server error (5xx), stop polling to avoid clutter
+      if ((query.state.error as any)?.isServerError) return false;
+      
       const hp = query.state.data?.hpPercent;
-      if (hp !== undefined && hp < 0.1) return 1_000; // endgame: sync với BATCH_INTERVAL_URGENT_MS
+      if (hp !== undefined && hp < 0.1) return 1_000;
       return 2_000;
     },
     refetchIntervalInBackground: false,
     staleTime: 1_000,
     enabled,
+    retry: (failureCount, error: any) => {
+      if (error?.isServerError && failureCount >= 2) return false;
+      return failureCount < 3;
+    },
   });
   return query;
 }

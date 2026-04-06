@@ -193,7 +193,16 @@
             "immune_hint": "Boss đang miễn nhiễm sát thương",
             "damage_reduction_hint": "Sát thương từ người chơi sẽ bị giảm",
             "no_skills": "Chưa có thông tin kỹ năng.",
-            "time_left": "Thời gian còn lại"
+            "time_left": "Thời gian còn lại",
+            "left": "còn lại"
+        },
+        "campaign": {
+            "ui": {
+                "dodge_success": "NÉ THÀNH CÔNG! 🏃",
+                "triggered": "Kích hoạt!",
+                "regen": "Hồi +{{amount}} HP",
+                "regen_notif": "Hồi phục +{{amount}} HP"
+            }
         },
         "attack": {
             "attacking": "ĐANG ĐÁNH...",

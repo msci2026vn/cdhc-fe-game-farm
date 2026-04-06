@@ -126,12 +126,22 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
             <div className="animate-spin w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full" />
             <span>{t('world_boss.rewards.loading_results')}</span>
           </div>
-        ) : !participation ? (
-          /* No participation */
+        ) : (rewardsData === undefined && !isLoading) || !participation ? (
+          /* No participation or Error */
           <div className="bg-gray-800 rounded-2xl p-6 text-center w-full max-w-sm">
-            <div className="text-3xl mb-3">😶</div>
-            <p className="text-gray-300 font-medium">{t('world_boss.rewards.not_participated_title')}</p>
-            <p className="text-gray-500 text-sm mt-1">{t('world_boss.rewards.not_participated_desc')}</p>
+            <div className="text-3xl mb-3">
+              {(rewardsData as any)?.isServerError ? '⚠️' : '😶'}
+            </div>
+            <p className="text-gray-300 font-medium">
+              {(rewardsData as any)?.isServerError 
+                ? 'Máy chủ hiện đang bảo trì' 
+                : t('world_boss.rewards.not_participated_title')}
+            </p>
+            <p className="text-gray-500 text-sm mt-1">
+              {(rewardsData as any)?.isServerError 
+                ? 'Thông tin phần thưởng sẽ được cập nhật sau khi server ổn định.' 
+                : t('world_boss.rewards.not_participated_desc')}
+            </p>
           </div>
         ) : (
           <>
