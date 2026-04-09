@@ -87,7 +87,7 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
         const card = await nftApi.getCard(eventId);
         if (card) setShowNftNotification(true);
       } catch { /* no NFT for this user */ }
-    }, 2000);
+    }, 800);
     return () => clearTimeout(timer);
   }, [eventId, status, authData?.user?.id]);
 

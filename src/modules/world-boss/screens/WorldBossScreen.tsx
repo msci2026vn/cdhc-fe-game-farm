@@ -23,6 +23,7 @@ interface EndedBossInfo {
   element?: string;
   difficulty?: string;
   status?: string;
+  hpPercent?: number;
 }
 
 function LoadingSkeleton() {
@@ -83,6 +84,7 @@ export function WorldBossScreen() {
         bossName: data.boss.bossName,
         element: data.boss.element,
         difficulty: data.boss.difficulty,
+        hpPercent: data.boss.hpPercent,
       };
     }
   }, [data?.active, data?.boss]);
@@ -92,7 +94,11 @@ export function WorldBossScreen() {
     const wasActive = prevActiveRef.current;
     const isActive = data?.active ?? false;
     if (wasActive && !isActive && currentBossRef.current) {
-      setEndedBossInfo({ ...currentBossRef.current, status: 'expired' });
+      const isDefeated = (currentBossRef.current.hpPercent ?? 1) <= 0;
+      setEndedBossInfo({
+        ...currentBossRef.current,
+        status: isDefeated ? 'defeated' : 'expired'
+      });
       setShowEndScreen(true);
       setShowBattle(false);
     }
