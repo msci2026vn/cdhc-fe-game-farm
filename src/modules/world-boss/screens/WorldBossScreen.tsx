@@ -94,7 +94,8 @@ export function WorldBossScreen() {
     const wasActive = prevActiveRef.current;
     const isActive = data?.active ?? false;
     if (wasActive && !isActive && currentBossRef.current) {
-      const isDefeated = (currentBossRef.current.hpPercent ?? 1) <= 0;
+      // Robust detection: if hp was low, it's very likely a defeat even if we missed the exactly 0 poll
+      const isDefeated = (currentBossRef.current.hpPercent ?? 1) <= 0.05;
       setEndedBossInfo({
         ...currentBossRef.current,
         status: isDefeated ? 'defeated' : 'expired'

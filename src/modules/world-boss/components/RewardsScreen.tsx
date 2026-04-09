@@ -75,23 +75,48 @@ export function RewardsScreen({ eventId, bossName, difficulty, status, onClose }
   const { data: authData } = useAuth();
   const [showNftNotification, setShowNftNotification] = useState(false);
   const [showNftReveal, setShowNftReveal] = useState(false);
+  const [forceDefeated, setForceDefeated] = useState(false);
   const nftCheckedRef = useRef(false);
 
   useEffect(() => {
-    if (!eventId || status !== 'defeated' || nftCheckedRef.current) return;
+    if (!eventId || nftCheckedRef.current) return;
     if (!authData?.user?.id) return;
     nftCheckedRef.current = true;
 
-    const timer = setTimeout(async () => {
+    let retryCount = 0;
+    const maxRetries = 8; // Total 24s polling
+
+    const checkCard = async () => {
       try {
         const card = await nftApi.getCard(eventId);
-        if (card) setShowNftNotification(true);
-      } catch { /* no NFT for this user */ }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [eventId, status, authData?.user?.id]);
+        if (card) {
+          setShowNftNotification(true);
+          setForceDefeated(true);
+          return true; // Found!
+        }
+      } catch { /* no NFT yet */ }
+      return false;
+    };
 
-  const isDefeated = status === 'defeated';
+    // First check after a short delay
+    const initialTimer = setTimeout(async () => {
+      const found = await checkCard();
+      if (found) return;
+
+      // Start polling if not found immediately
+      const interval = setInterval(async () => {
+        retryCount++;
+        const foundNow = await checkCard();
+        if (foundNow || retryCount >= maxRetries) {
+          clearInterval(interval);
+        }
+      }, 3000);
+    }, 1000);
+
+    return () => clearTimeout(initialTimer);
+  }, [eventId, authData?.user?.id]);
+
+  const isDefeated = status === 'defeated' || forceDefeated;
   const reward = rewardsData?.rewards?.[0];
   const participation = rewardsData?.participation;
   const tier = reward?.rewardTier ?? 'D';
