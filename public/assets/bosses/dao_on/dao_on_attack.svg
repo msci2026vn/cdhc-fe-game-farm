@@ -1,0 +1,118 @@
+<svg height="200" width="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient r="60%" cy="40%" cx="50%" id="coreGrad">
+      <stop stop-color="#7cb518" offset="0%"></stop>
+      <stop stop-color="#3d7500" offset="100%"></stop>
+    </radialGradient>
+    <radialGradient r="50%" cy="50%" cx="50%" id="spotGrad">
+      <stop stop-color="#4a0080" offset="0%"></stop>
+      <stop stop-color="#1a0030" offset="100%"></stop>
+    </radialGradient>
+
+    
+    <style>
+      @keyframes floatBody {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(0, -4px); }
+      }
+      
+      @keyframes tentacleSway {
+        0%, 100% { transform: rotate(-8deg); }
+        50% { transform: rotate(8deg); }
+      }
+      
+      @keyframes attackWhip {
+        0%   { transform: rotate(-12deg) translate(0, 0); }
+        15%  { transform: rotate(45deg) translate(8px, -12px); }
+        25%  { transform: rotate(-35deg) translate(-6px, 10px); }
+        40%  { transform: rotate(25deg) translate(10px, -8px); }
+        60%  { transform: rotate(-15deg) translate(-4px, 6px); }
+        80%  { transform: rotate(8deg) translate(3px, -3px); }
+        100% { transform: rotate(-12deg) translate(0, 0); }
+      }
+
+      .body {
+        animation: floatBody 4s ease-in-out infinite;
+      }
+
+      .tentacle {
+        animation: tentacleSway 6s ease-in-out infinite;
+        transform-origin: 100px 100px;
+      }
+
+      .tentacle-attack {
+        animation: attackWhip 2.8s ease-in-out infinite;
+        transform-origin: 100px 100px;
+      }
+
+      /* Leaf damage subtle movement */
+      .leaf {
+        animation: floatBody 5s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+
+  
+  
+  <path stroke-linecap="round" fill="none" stroke-width="4" stroke="#3d7500" d="M100,100 Q60,50 30,40" class="tentacle" id="t1"></path>
+  
+  <path style="animation-delay: 0.8s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#3d7500" d="M100,100 Q80,40 90,15" class="tentacle" id="t2"></path>
+  
+  
+  <path style="animation-delay: 1.2s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#3d7500" d="M100,100 Q140,50 170,40" class="tentacle-attack" id="t3"></path>
+  
+  <path style="animation-delay: 2.1s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#3d7500" d="M100,100 Q120,40 110,15" class="tentacle" id="t4"></path>
+
+  
+  <path style="animation-delay: 1.6s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#3d7500" d="M100,100 Q50,110 20,130" class="tentacle" id="t5"></path>
+  
+  <path style="animation-delay: 0.4s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#3d7500" d="M100,100 Q150,110 180,130" class="tentacle-attack" id="t6"></path>
+
+  
+  <ellipse style="animation-delay: 0.5s;" class="leaf" transform="rotate(-30,30,38)" fill="#7cb518" ry="10" rx="18" cy="38" cx="30"></ellipse>
+  <ellipse class="leaf" transform="rotate(-30,30,38)" opacity="0.7" fill="#4a0080" ry="5" rx="8" cy="38" cx="30"></ellipse>
+
+  <ellipse style="animation-delay: 1.8s;" class="leaf" transform="rotate(30,170,38)" fill="#7cb518" ry="10" rx="18" cy="38" cx="170"></ellipse>
+  <ellipse class="leaf" transform="rotate(30,170,38)" opacity="0.7" fill="#4a0080" ry="5" rx="8" cy="38" cx="170"></ellipse>
+
+  <ellipse style="animation-delay: 2.4s;" class="leaf" transform="rotate(-10,90,15)" fill="#7cb518" ry="9" rx="15" cy="13" cx="90"></ellipse>
+  <ellipse class="leaf" opacity="0.7" fill="#4a0080" ry="4" rx="7" cy="13" cx="90"></ellipse>
+
+  
+  <circle class="body" fill="url(#coreGrad)" r="42" cy="105" cx="100"></circle>
+
+  
+  <circle opacity="0.85" fill="url(#spotGrad)" r="12" cy="95" cx="85"></circle>
+  <circle opacity="0.85" fill="url(#spotGrad)" r="9" cy="110" cx="112"></circle>
+  <circle opacity="0.7" fill="url(#spotGrad)" r="7" cy="120" cx="90"></circle>
+
+  
+  <circle fill="#ffe066" r="6" cy="98" cx="90"></circle>
+  <circle fill="#ffe066" r="6" cy="98" cx="112"></circle>
+  <circle fill="#000" r="3" cy="98" cx="90"></circle>
+  <circle fill="#000" r="3" cy="98" cx="112"></circle>
+
+  
+  <path stroke-linecap="round" fill="none" stroke-width="2.5" stroke="#1a5000" d="M83,115 Q100,128 118,115">
+    
+  </path>
+
+  
+  <circle opacity="0.8" fill="#a8e063" r="4" cy="70" cx="60">
+    
+    
+  </circle>
+  <circle opacity="0.8" fill="#a8e063" r="4" cy="70" cx="140">
+    
+    
+  </circle>
+  <circle opacity="0.6" fill="#a8e063" r="3" cy="55" cx="75">
+    
+  </circle>
+  <circle opacity="0.6" fill="#a8e063" r="3" cy="55" cx="125">
+    
+  </circle>
+  <circle opacity="0.6" fill="#a8e063" r="3" cy="50" cx="100">
+    
+  </circle>
+</svg>

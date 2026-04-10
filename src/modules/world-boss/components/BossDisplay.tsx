@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 
 const SPRITE_MAP: Record<string, string> = {
   ray_nau: '/assets/bosses/ray-nau.svg',
-  nhen_do: '/assets/bosses/nhen-do.svg',
-  dao_on: '/assets/bosses/dao-on.svg',
+  nhen_do: '/assets/bosses/nhen_do/nhen_do_idle.svg',
+  dao_on: '/assets/bosses/dao_on/dao_on_idle.svg',
   oc_buou: '/assets/bosses/oc-buou.svg',
   oc_sen: '/assets/bosses/oc-sen.svg',
   nam_re: '/assets/bosses/nam-re.svg',

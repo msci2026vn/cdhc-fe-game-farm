@@ -1,0 +1,88 @@
+<svg height="200" width="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient r="60%" cy="40%" cx="50%" id="coreGrad">
+      <stop stop-color="#7cb518" offset="0%"></stop>
+      <stop stop-color="#2a5a00" offset="100%"></stop>
+    </radialGradient>
+    <radialGradient r="50%" cy="50%" cx="50%" id="spotGrad">
+      <stop stop-color="#4a0080" offset="0%"></stop>
+      <stop stop-color="#1a0030" offset="100%"></stop>
+    </radialGradient>
+
+    <style>
+      @keyframes dieFloat {
+        0%   { transform: translate(0, 0) rotate(0deg); }
+        100% { transform: translate(0, 12px) rotate(3deg); }
+      }
+
+      @keyframes fadeToDead {
+        0%   { opacity: 1; }
+        100% { opacity: 0.65; }
+      }
+
+      .body-die {
+        animation: dieFloat 6s ease-in-out forwards;
+      }
+
+      .tentacle-die {
+        animation: dieFloat 7s ease-in-out forwards;
+        transform-origin: 100px 105px;
+      }
+
+      .leaf-die {
+        animation: dieFloat 8s ease-in-out forwards;
+      }
+
+      .face-die {
+        animation: fadeToDead 5s ease-in-out forwards;
+      }
+    </style>
+  </defs>
+
+  
+  <path style="animation-delay: 0.2s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#2e5f00" d="M100,100 Q58,62 32,78" class="tentacle-die"></path>
+  <path style="animation-delay: 0.6s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#2e5f00" d="M100,100 Q78,48 85,22" class="tentacle-die"></path>
+  <path style="animation-delay: 1.1s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#2e5f00" d="M100,100 Q135,55 165,72" class="tentacle-die"></path>
+  <path style="animation-delay: 1.7s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#2e5f00" d="M100,100 Q122,52 115,28" class="tentacle-die"></path>
+  <path style="animation-delay: 0.9s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#2e5f00" d="M100,100 Q52,118 25,145" class="tentacle-die"></path>
+  <path style="animation-delay: 1.4s;" stroke-linecap="round" fill="none" stroke-width="4" stroke="#2e5f00" d="M100,100 Q148,115 175,148" class="tentacle-die"></path>
+
+  
+  <ellipse style="animation-delay: 0.4s;" class="leaf-die" transform="rotate(-45,32,75)" fill="#5e9c10" ry="9" rx="18" cy="75" cx="32"></ellipse>
+  <ellipse transform="rotate(-45,32,75)" opacity="0.7" fill="#2a0030" ry="5" rx="8" cy="75" cx="32"></ellipse>
+
+  <ellipse style="animation-delay: 1.3s;" class="leaf-die" transform="rotate(40,165,70)" fill="#5e9c10" ry="9" rx="17" cy="70" cx="165"></ellipse>
+  <ellipse transform="rotate(40,165,70)" opacity="0.7" fill="#2a0030" ry="5" rx="8" cy="70" cx="165"></ellipse>
+
+  <ellipse style="animation-delay: 2s;" class="leaf-die" transform="rotate(-15,88,25)" fill="#5e9c10" ry="8" rx="14" cy="25" cx="88"></ellipse>
+  <ellipse opacity="0.7" fill="#2a0030" ry="4" rx="7" cy="25" cx="88"></ellipse>
+
+  
+  <circle opacity="0.95" class="body-die" fill="url(#coreGrad)" r="42" cy="108" cx="100"></circle>
+
+  
+  <circle opacity="0.9" fill="#2a0030" r="12" cy="98" cx="85"></circle>
+  <circle opacity="0.85" fill="#2a0030" r="9" cy="113" cx="115"></circle>
+  <circle opacity="0.75" fill="#2a0030" r="7" cy="123" cx="92"></circle>
+
+  
+  <g class="face-die">
+    
+    <path stroke-linecap="round" stroke-width="2.5" stroke="#1a1a1a" d="M82,95 L88,102 M82,102 L88,95"></path>
+    
+    <path stroke-linecap="round" stroke-width="2.5" stroke="#1a1a1a" d="M112,95 L118,102 M112,102 L118,95"></path>
+
+    
+    <path stroke-linecap="round" fill="none" stroke-width="2.8" stroke="#1a4000" d="M80,122 Q100,130 120,119"></path>
+  </g>
+
+  
+  <circle opacity="0.5" fill="#a8e063" r="3.5" cy="72" cx="65">
+    
+    
+  </circle>
+  <circle opacity="0.45" fill="#a8e063" r="3" cy="68" cx="135">
+    
+    
+  </circle>
+</svg>

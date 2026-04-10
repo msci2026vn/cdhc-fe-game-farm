@@ -1,0 +1,106 @@
+<svg width="540" height="500" viewBox="0 0 540 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes bodyBob {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%      { transform: translateY(-4px) rotate(0.8deg); }
+      }
+      
+      @keyframes legsFold {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%      { transform: translateY(3px) rotate(2deg); }
+      }
+
+      .spider-body { animation: bodyBob 2.2s infinite ease-in-out; }
+      .legs-group { animation: legsFold 2.8s infinite ease-in-out; }
+    </style>
+  </defs>
+
+  
+  <ellipse cx="270" cy="445" rx="120" ry="28" fill="#1A0000" opacity="0.75"></ellipse>
+
+  
+  <g class="legs-group">
+
+    
+    <g>
+      <path d="M235 290 Q195 255 178 305" fill="none" stroke="#9B0000" stroke-width="18" stroke-linecap="round"></path>
+      <path d="M178 305 Q155 320 167 355" fill="none" stroke="#B30000" stroke-width="14" stroke-linecap="round"></path>
+      <path d="M167 355 Q150 375 162 400" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+    <g style="animation-delay: 0.2s;">
+      <path d="M235 295 Q192 260 175 310" fill="none" stroke="#9B0000" stroke-width="18" stroke-linecap="round"></path>
+      <path d="M175 310 Q152 330 165 365" fill="none" stroke="#B30000" stroke-width="14" stroke-linecap="round"></path>
+      <path d="M165 365 Q148 385 160 415" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+    <g style="animation-delay: 0.4s;">
+      <path d="M235 300 Q200 270 188 320" fill="none" stroke="#9B0000" stroke-width="17" stroke-linecap="round"></path>
+      <path d="M188 320 Q165 340 177 370" fill="none" stroke="#B30000" stroke-width="13" stroke-linecap="round"></path>
+      <path d="M177 370 Q160 390 172 420" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+    <g style="animation-delay: 0.6s;">
+      <path d="M235 305 Q210 280 200 330" fill="none" stroke="#9B0000" stroke-width="17" stroke-linecap="round"></path>
+      <path d="M200 330 Q180 355 190 385" fill="none" stroke="#B30000" stroke-width="13" stroke-linecap="round"></path>
+      <path d="M190 385 Q175 405 185 435" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+
+    
+    <g>
+      <path d="M305 290 Q345 255 362 305" fill="none" stroke="#9B0000" stroke-width="18" stroke-linecap="round"></path>
+      <path d="M362 305 Q385 320 373 355" fill="none" stroke="#B30000" stroke-width="14" stroke-linecap="round"></path>
+      <path d="M373 355 Q390 375 378 400" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+    <g style="animation-delay: 0.2s;">
+      <path d="M305 295 Q348 260 365 310" fill="none" stroke="#9B0000" stroke-width="18" stroke-linecap="round"></path>
+      <path d="M365 310 Q388 330 375 365" fill="none" stroke="#B30000" stroke-width="14" stroke-linecap="round"></path>
+      <path d="M375 365 Q392 385 380 415" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+    <g style="animation-delay: 0.4s;">
+      <path d="M305 300 Q340 270 352 320" fill="none" stroke="#9B0000" stroke-width="17" stroke-linecap="round"></path>
+      <path d="M352 320 Q375 340 363 370" fill="none" stroke="#B30000" stroke-width="13" stroke-linecap="round"></path>
+      <path d="M363 370 Q380 390 368 420" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+    <g style="animation-delay: 0.6s;">
+      <path d="M305 305 Q330 280 340 330" fill="none" stroke="#9B0000" stroke-width="17" stroke-linecap="round"></path>
+      <path d="M340 330 Q360 355 350 385" fill="none" stroke="#B30000" stroke-width="13" stroke-linecap="round"></path>
+      <path d="M350 385 Q365 405 355 435" fill="none" stroke="#B30000" stroke-width="12" stroke-linecap="round"></path>
+    </g>
+  </g>
+
+  
+  <ellipse cx="270" cy="190" rx="92" ry="74" fill="#C8102E" class="spider-body"></ellipse>
+  <ellipse cx="270" cy="190" rx="70" ry="55" fill="#E0223A"></ellipse>
+
+  
+  <ellipse cx="270" cy="285" rx="68" ry="58" fill="#C8102E" class="spider-body"></ellipse>
+
+  
+  <path d="M190 160 Q270 125 350 160" fill="none" stroke="#FF6600" stroke-width="20" stroke-linecap="round"></path>
+  <path d="M200 180 Q270 150 340 180" fill="none" stroke="#FFAA33" stroke-width="14" stroke-linecap="round"></path>
+
+  
+  
+  <g transform="translate(225 265)">
+    <line stroke-linecap="round" stroke-width="7.5" stroke="#1A1A1A" y2="16" x2="16" y1="-16" x1="-16"></line>
+    <line stroke-linecap="round" stroke-width="7.5" stroke="#1A1A1A" y2="16" x2="-16" y1="-16" x1="16"></line>
+  </g>
+
+  
+  <g transform="translate(315 265)">
+    <line stroke-linecap="round" stroke-width="7.5" stroke="#1A1A1A" y2="16" x2="16" y1="-16" x1="-16"></line>
+    <line stroke-linecap="round" stroke-width="7.5" stroke="#1A1A1A" y2="16" x2="-16" y1="-16" x1="16"></line>
+  </g>
+
+  
+  <circle cy="258" cx="230" r="2.5" fill="#FFFFFF"></circle>
+  <circle cy="258" cx="320" r="2.5" fill="#FFFFFF"></circle>
+
+  
+  <ellipse cx="255" cy="250" rx="7" ry="8" fill="#FFCC33"></ellipse>
+  <ellipse cx="255" cy="275" rx="6.5" ry="7.5" fill="#FFCC33"></ellipse>
+  <ellipse cx="285" cy="250" rx="7" ry="8" fill="#FFCC33"></ellipse>
+  <ellipse cx="285" cy="275" rx="6.5" ry="7.5" fill="#FFCC33"></ellipse>
+
+  
+  <path d="M245 305 Q270 322 295 305" fill="none" stroke="#9B0000" stroke-width="12" stroke-linecap="round"></path>
+</svg>

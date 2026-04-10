@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 500" height="500" width="540">
+  <defs>
+    <style>
+      @keyframes legWaveA {
+        0%, 100% { transform: rotate(-28deg); }
+        35%      { transform: rotate(22deg); }
+        65%      { transform: rotate(38deg); }
+        90%      { transform: rotate(-12deg); }
+      }
+      @keyframes legWaveB {
+        0%, 100% { transform: rotate(38deg); }
+        35%      { transform: rotate(-28deg); }
+        65%      { transform: rotate(-20deg); }
+        90%      { transform: rotate(15deg); }
+      }
+      @keyframes bodyBob {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%      { transform: translateY(-5px) rotate(1deg); }
+      }
+      .spider-body { animation: bodyBob 1.4s infinite ease-in-out; }
+      .leg-left  { animation: legWaveA 1.2s infinite ease-in-out; transform-origin: 235px 295px; }
+      .leg-right { animation: legWaveB 1.2s infinite ease-in-out; transform-origin: 305px 295px; }
+    </style>
+  </defs>
+
+  
+  <ellipse opacity="0.75" fill="#1A0000" ry="28" rx="120" cy="445" cx="270"></ellipse>
+
+  
+  <ellipse class="spider-body" fill="#C8102E" ry="74" rx="92" cy="190" cx="270"></ellipse>
+  <ellipse fill="#E0223A" ry="55" rx="70" cy="190" cx="270"></ellipse>
+  
+  <path stroke-linecap="round" stroke-width="20" stroke="#FF6600" fill="none" d="M190 160 Q270 125 350 160"></path>
+  <path stroke-linecap="round" stroke-width="14" stroke="#FFAA33" fill="none" d="M200 180 Q270 150 340 180"></path>
+
+  
+  
+  <g class="leg-left">
+    <path stroke-linecap="round" stroke-width="18" stroke="#9B0000" fill="none" d="M235 290 Q170 220 145 255"></path>
+    <path stroke-linecap="round" stroke-width="14" stroke="#B30000" fill="none" d="M145 255 Q115 225 120 275"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M120 275 Q95 280 105 325"></path>
+    <path stroke-linecap="round" stroke-width="10" stroke="#9B0000" fill="none" d="M105 325 Q80 340 95 385"></path>
+  </g>
+  <g style="animation-delay: 0.15s;" class="leg-left">
+    <path stroke-linecap="round" stroke-width="18" stroke="#9B0000" fill="none" d="M235 295 Q165 235 150 275"></path>
+    <path stroke-linecap="round" stroke-width="14" stroke="#B30000" fill="none" d="M150 275 Q120 245 125 295"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M125 295 Q100 300 110 345"></path>
+    <path stroke-linecap="round" stroke-width="10" stroke="#9B0000" fill="none" d="M110 345 Q85 355 100 400"></path>
+  </g>
+  <g style="animation-delay: 0.3s;" class="leg-left">
+    <path stroke-linecap="round" stroke-width="17" stroke="#9B0000" fill="none" d="M235 300 Q175 260 155 305"></path>
+    <path stroke-linecap="round" stroke-width="13" stroke="#B30000" fill="none" d="M155 305 Q125 275 130 330"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M130 330 Q105 335 115 375"></path>
+    <path stroke-linecap="round" stroke-width="9" stroke="#9B0000" fill="none" d="M115 375 Q90 385 105 425"></path>
+  </g>
+  <g style="animation-delay: 0.45s;" class="leg-left">
+    <path stroke-linecap="round" stroke-width="17" stroke="#9B0000" fill="none" d="M235 305 Q185 280 170 325"></path>
+    <path stroke-linecap="round" stroke-width="13" stroke="#B30000" fill="none" d="M170 325 Q145 305 150 355"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M150 355 Q125 360 135 395"></path>
+    <path stroke-linecap="round" stroke-width="9" stroke="#9B0000" fill="none" d="M135 395 Q110 405 125 445"></path>
+  </g>
+
+  
+  <g class="leg-right">
+    <path stroke-linecap="round" stroke-width="18" stroke="#9B0000" fill="none" d="M305 290 Q370 220 395 255"></path>
+    <path stroke-linecap="round" stroke-width="14" stroke="#B30000" fill="none" d="M395 255 Q425 225 420 275"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M420 275 Q445 280 435 325"></path>
+    <path stroke-linecap="round" stroke-width="10" stroke="#9B0000" fill="none" d="M435 325 Q460 340 445 385"></path>
+  </g>
+  <g style="animation-delay: 0.15s;" class="leg-right">
+    <path stroke-linecap="round" stroke-width="18" stroke="#9B0000" fill="none" d="M305 295 Q375 235 390 275"></path>
+    <path stroke-linecap="round" stroke-width="14" stroke="#B30000" fill="none" d="M390 275 Q420 245 415 295"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M415 295 Q440 300 430 345"></path>
+    <path stroke-linecap="round" stroke-width="10" stroke="#9B0000" fill="none" d="M430 345 Q455 355 440 400"></path>
+  </g>
+  <g style="animation-delay: 0.3s;" class="leg-right">
+    <path stroke-linecap="round" stroke-width="17" stroke="#9B0000" fill="none" d="M305 300 Q365 260 385 305"></path>
+    <path stroke-linecap="round" stroke-width="13" stroke="#B30000" fill="none" d="M385 305 Q415 275 410 330"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M410 330 Q435 335 425 375"></path>
+    <path stroke-linecap="round" stroke-width="9" stroke="#9B0000" fill="none" d="M425 375 Q450 385 435 425"></path>
+  </g>
+  <g style="animation-delay: 0.45s;" class="leg-right">
+    <path stroke-linecap="round" stroke-width="17" stroke="#9B0000" fill="none" d="M305 305 Q355 280 370 325"></path>
+    <path stroke-linecap="round" stroke-width="13" stroke="#B30000" fill="none" d="M370 325 Q395 305 400 355"></path>
+    <path stroke-linecap="round" stroke-width="12" stroke="#B30000" fill="none" d="M400 355 Q425 360 415 395"></path>
+    <path stroke-linecap="round" stroke-width="9" stroke="#9B0000" fill="none" d="M415 395 Q440 405 425 445"></path>
+  </g>
+
+  
+  <ellipse class="spider-body" fill="#C8102E" ry="58" rx="68" cy="285" cx="270"></ellipse>
+
+  
+  
+  <ellipse fill="#FFEE99" ry="29" rx="24" cy="265" cx="225"></ellipse>
+  <ellipse fill="#1A1A1A" ry="19" rx="14.5" cy="265" cx="225"></ellipse>
+  <circle fill="#FFFFFF" r="7.5" cy="260" cx="232"></circle>
+
+  <ellipse fill="#FFEE99" ry="29" rx="24" cy="265" cx="315"></ellipse>
+  <ellipse fill="#1A1A1A" ry="19" rx="14.5" cy="265" cx="315"></ellipse>
+  <circle fill="#FFFFFF" r="7.5" cy="260" cx="322"></circle>
+
+  
+  
+  <ellipse fill="#FFCC33" ry="8" rx="7" cy="250" cx="255"></ellipse>
+  
+  <ellipse fill="#FFCC33" ry="7.5" rx="6.5" cy="275" cx="255"></ellipse>
+
+  
+  <ellipse fill="#FFCC33" ry="8" rx="7" cy="250" cx="285"></ellipse>
+  
+  <ellipse fill="#FFCC33" ry="7.5" rx="6.5" cy="275" cx="285"></ellipse>
+
+  
+  
+  <path stroke-linecap="round" stroke-width="13" stroke="#9B0000" fill="none" d="M245 305 Q225 315 220 330"></path>
+  <path stroke-linecap="round" stroke-width="10" stroke="#B30000" fill="none" d="M220 330 Q215 345 220 358"></path>
+  <circle fill="#FFCC33" r="8" cy="358" cx="220"></circle>
+
+  
+  <path stroke-linecap="round" stroke-width="13" stroke="#9B0000" fill="none" d="M295 305 Q315 315 320 330"></path>
+  <path stroke-linecap="round" stroke-width="10" stroke="#B30000" fill="none" d="M320 330 Q325 345 320 358"></path>
+  <circle fill="#FFCC33" r="8" cy="358" cx="320"></circle>
+</svg>

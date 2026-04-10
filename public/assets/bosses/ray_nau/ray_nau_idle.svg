@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 190" height="190" width="200">
+  <defs>
+    <style>
+      @keyframes idleBody { 0%,100%{transform:translateY(0);} 50%{transform:translateY(4px);} }
+      @keyframes wingFlap { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(12deg);} }
+      @keyframes legShake { 0%,100%{transform:rotate(-6deg);} 50%{transform:rotate(6deg);} }
+      
+      .body { animation: idleBody 2.2s infinite ease-in-out; }
+      .wingL { animation: wingFlap 1.6s infinite ease-in-out; transform-origin: 92px 82px; }
+      .wingR { animation: wingFlap 1.6s infinite ease-in-out reverse; transform-origin: 108px 82px; }
+      .leg { animation: legShake 0.7s infinite ease-in-out; transform-origin: 100px 125px; }
+    </style>
+  </defs>
+
+  
+  <g class="body">
+    
+    <ellipse fill="#8B5F2F" ry="47" rx="29" cy="98" cx="100"></ellipse>
+    <ellipse fill="#A67C52" ry="19" rx="23" cy="83" cx="100"></ellipse>
+
+    
+    <ellipse fill="#6D4625" ry="21" rx="19" cy="53" cx="100"></ellipse>
+    
+    <circle fill="#E04E2F" r="6" cy="50" cx="91"></circle>
+    <circle fill="#E04E2F" r="6" cy="50" cx="109"></circle>
+
+    
+    <path stroke-linecap="round" stroke-width="3.5" stroke="#3F2A1A" fill="none" d="M82 48 Q68 28 63 22"></path>
+    <path stroke-linecap="round" stroke-width="3.5" stroke="#3F2A1A" fill="none" d="M118 48 Q132 28 137 22"></path>
+
+    
+    <path stroke-width="3.5" stroke="#5C3F24" fill-opacity="0.78" fill="#EDE4C9" d="M73 68 Q46 38 38 78 Q52 108 80 93 Z" class="wingL"></path>
+    <path stroke-width="3.5" stroke="#5C3F24" fill-opacity="0.78" fill="#EDE4C9" d="M127 68 Q154 38 162 78 Q148 108 120 93 Z" class="wingR"></path>
+
+    
+    <path opacity="0.65" stroke-width="2" stroke="#5C3F24" fill="none" d="M73 68 Q53 52 47 80"></path>
+    <path opacity="0.65" stroke-width="2" stroke="#5C3F24" fill="none" d="M127 68 Q147 52 153 80"></path>
+
+    
+    
+    <path stroke-linecap="round" stroke-width="7" stroke="#3F2A1A" fill="none" d="M76 130 Q62 155 52 168" class="leg"></path>
+    <path stroke-linecap="round" stroke-width="5.5" stroke="#3F2A1A" fill="none" d="M74 122 Q57 142 49 153" class="leg"></path>
+    
+    <path stroke-linecap="round" stroke-width="7" stroke="#3F2A1A" fill="none" d="M124 130 Q138 155 148 168" class="leg"></path>
+    <path stroke-linecap="round" stroke-width="5.5" stroke="#3F2A1A" fill="none" d="M126 122 Q143 142 151 153" class="leg"></path>
+  </g>
+</svg>

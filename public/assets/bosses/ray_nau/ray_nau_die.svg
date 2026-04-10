@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 380" height="380" width="300">
+  <defs>
+    <style>
+      @keyframes fallDown {
+        0%   { transform: translateY(0); }
+        45%  { transform: translateY(48px); }
+        80%  { transform: translateY(112px); }
+        100% { transform: translateY(138px); }
+      }
+
+      @keyframes wingDropLeft {
+        0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(-28px, 68px) rotate(-68deg); opacity: 0.75; }
+      }
+
+      @keyframes wingDropRight {
+        0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(32px, 70px) rotate(75deg); opacity: 0.75; }
+      }
+
+      @keyframes xEyeBlink {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.25; }
+      }
+
+      @keyframes spinStar {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+
+      .body-fall { animation: fallDown 1.45s cubic-bezier(0.25, 0.1, 0.4, 1) forwards; }
+      
+      .wing-left  { animation: wingDropLeft 1.45s 0.1s ease-out forwards; transform-origin: 78px 78px; }
+      .wing-right { animation: wingDropRight 1.45s 0.15s ease-out forwards; transform-origin: 122px 78px; }
+
+      .star {
+        opacity: 0;
+        animation: spinStar 2.2s linear infinite;
+      }
+      .body-fall .star {
+        animation: showStar 0s 1.45s forwards, spinStar 2.2s linear infinite;
+      }
+      @keyframes showStar {
+        to { opacity: 1; }
+      }
+    </style>
+  </defs>
+
+  
+  <g class="body-fall">
+
+    
+    <ellipse fill="#8B5F2F" ry="47" rx="29" cy="110" cx="145"></ellipse>
+    <ellipse fill="#A67C52" ry="19" rx="23" cy="95" cx="145"></ellipse>
+
+    
+    <ellipse fill="#6D4625" ry="21" rx="19" cy="65" cx="145"></ellipse>
+
+    
+    <circle fill="#E04E2F" r="6" cy="62" cx="136">
+      
+    </circle>
+    <circle fill="#E04E2F" r="6" cy="62" cx="154">
+      
+    </circle>
+
+    
+    <path stroke-linecap="round" stroke-width="4" stroke="#1C1C1C" fill="none" d="M120 58 L132 69 M120 69 L132 58">
+      
+      
+    </path>
+    <path stroke-linecap="round" stroke-width="4" stroke="#1C1C1C" fill="none" d="M158 58 L170 69 M158 69 L170 58">
+      
+      
+    </path>
+
+    
+    <path stroke-linecap="round" stroke-width="3.5" stroke="#3F2A1A" fill="none" d="M127 60 Q113 40 108 34"></path>
+    <path stroke-linecap="round" stroke-width="3.5" stroke="#3F2A1A" fill="none" d="M163 60 Q177 40 182 34"></path>
+
+    
+    <path stroke-width="3.5" stroke="#5C3F24" fill-opacity="0.72" fill="#EDE4C9" d="M118 78 Q91 52 86 89 Q100 122 124 104 Z" class="wing-left"></path>
+
+    
+    <path stroke-width="3.5" stroke="#5C3F24" fill-opacity="0.72" fill="#EDE4C9" d="M172 78 Q199 52 204 89 Q190 122 166 104 Z" class="wing-right"></path>
+
+    
+    <path stroke-linecap="round" stroke-width="7" stroke="#3F2A1A" fill="none" d="M121 145 Q110 175 99 188"></path>
+    <path stroke-linecap="round" stroke-width="7" stroke="#3F2A1A" fill="none" d="M169 145 Q180 175 191 188"></path>
+
+    
+
+    
+    <g style="transform-origin: 145px 60px;" class="star">
+      <path stroke-width="1.7" stroke="#FFBB00" fill="#FFFD6B" d="M 72 22 L 80 31 L 93 31 L 83 39 L 85 50 L 72 45 L 59 50 L 61 39 L 52 31 L 65 31 Z"></path>
+    </g>
+
+    
+    <g style="transform-origin: 145px 60px;" class="star">
+      <path stroke-width="1.7" stroke="#FFBB00" fill="#FFFD6B" d="M 218 22 L 226 31 L 239 31 L 229 39 L 231 50 L 218 45 L 205 50 L 207 39 L 198 31 L 211 31 Z"></path>
+    </g>
+
+    
+    <g style="transform-origin: 145px 60px;" class="star">
+      <path stroke-width="1.7" stroke="#FFBB00" fill="#FFFD6B" d="M 145 95 L 153 104 L 166 104 L 156 112 L 158 123 L 145 118 L 132 123 L 134 112 L 125 104 L 138 104 Z"></path>
+    </g>
+
+  </g>
+</svg>

@@ -99,8 +99,8 @@ function StatusBadge({ icon, label, initialRemaining, type, compact }: { icon: s
 // Boss sprite assets — mirrors BossDisplay.tsx SPRITE_MAP
 const SPRITE_MAP: Record<string, string> = {
   ray_nau: '/assets/bosses/ray-nau.svg',
-  nhen_do: '/assets/bosses/nhen-do.svg',
-  dao_on: '/assets/bosses/dao-on.svg',
+  nhen_do: '/assets/bosses/nhen_do/nhen_do_idle.svg',
+  dao_on: '/assets/bosses/dao_on/dao_on_idle.svg',
   oc_buou: '/assets/bosses/oc-buou.svg',
   oc_sen: '/assets/bosses/oc-sen.svg',
   nam_re: '/assets/bosses/nam-re.svg',
@@ -269,7 +269,21 @@ export function WorldBossBattleView({ worldBoss, onExit }: Props) {
   const comboInfo = getComboInfo(combo);
 
   // Derived state
-  const bossSpriteSrc = SPRITE_MAP[worldBoss.baseSprite] ?? '';
+  // Dynamic boss sprite based on state (idle/attack/die)
+  const getBossSprite = () => {
+    const base = worldBoss.baseSprite;
+    const hasAnimations = base === 'nhen_do' || base === 'dao_on';
+    
+    if (hasAnimations) {
+      if (serverHpPct <= 0) return `/assets/bosses/${base}/${base}_die.svg`;
+      if (skillWarning || bossAttackMsg) return `/assets/bosses/${base}/${base}_attack.svg`;
+      return `/assets/bosses/${base}/${base}_idle.svg`;
+    }
+    
+    return SPRITE_MAP[base] ?? '';
+  };
+
+  const bossSpriteSrc = getBossSprite();
   const playerAvatarUrl = authData?.user?.avatarUrl ?? '';
   const ultReady = (boss.ultCharge ?? 0) >= 100;
   const hasDodgeMana = boss.mana >= manaDodgeCost;
